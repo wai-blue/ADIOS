@@ -13,6 +13,7 @@ namespace ADIOS\Core;
 class Exception extends \Exception { }
 class NotEnoughPermissionsException extends \Exception { }
 class DBException extends \Exception { }
+class DBDuplicateEntryException extends \Exception { }
 class ActionException extends \Exception { }
 class ModelInstallationException extends \Exception { }
 class InvalidUidException extends \Exception { }
@@ -1131,7 +1132,7 @@ class Loader {
         $passwordMatch = FALSE;
 
         if (!empty($password) && $data['password'] == $password) {
-          // plain text
+          // plain text, deprecated
           $passwordMatch = TRUE;
         } else if (!empty($password) && password_verify($password, $data['password'])) {
           // plain text

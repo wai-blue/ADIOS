@@ -436,18 +436,23 @@ class Model extends \Illuminate\Database\Eloquent\Model {
   //////////////////////////////////////////////////////////////////
   // CRUD methods
 
-  public function getById(int $id) {
-    return reset($this->where('id', $id)->get()->toArray());
+  public function getExtendedData($item) {
+    return $item; // to be overriden
   }
 
-  public function getAll(string $keyBy = "") {
-    $all = $this->get();
-    
-    if (!empty($keyBy)) {
-      $all = $all->keyBy($keyBy);
+  public function getById(int $id) {
+    $item = reset($this->where('id', $id)->get()->toArray());
+    return $this->getExtendedData($item);
+  }
+
+  public function getAll(string $keyBy = "id") {
+    $items = $this->getWithLookups(NULL, $keyBy);
+
+    foreach ($items as $key => $item) {
+      $items[$key] = $this->getExtendedData($item);
     }
-    
-    return $all->toArray();
+
+    return $items;
   }
 
   public function getQueryWithLookups($callback = NULL) {
@@ -461,11 +466,10 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     return $query;
   }
 
-  public function getWithLookups($callback = NULL) {
+  public function getWithLookups($callback = NULL, $keyBy = 'id') {
     $query = $this->getQueryWithLookups($callback);
-
     return $this->processLookupsInQueryResult(
-      $this->fetchQueryAsArray($query, 'id', FALSE),
+      $this->fetchQueryAsArray($query, $keyBy, FALSE),
       TRUE
     );
   }
