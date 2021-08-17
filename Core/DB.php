@@ -87,7 +87,8 @@ class DB
         // unknown database
         $this->query("
           create database if not exists `{$this->db_name}`
-          character set utf8 collate utf8_general_ci
+          default charset = utf8mb4
+          default collate = utf8mb4_unicode_ci
         ");
 
         echo "Created database `{$this->db_name}`";
