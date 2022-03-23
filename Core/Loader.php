@@ -10,18 +10,7 @@
 
 namespace ADIOS\Core;
 
-class Exception extends \Exception { }
-class NotEnoughPermissionsException extends \Exception { }
-class DBException extends \Exception { }
-class DBDuplicateEntryException extends \Exception { }
-class ActionException extends \Exception { }
-class ModelInstallationException extends \Exception { }
-class InvalidUidException extends \Exception { }
-class FormSaveException extends \Exception { }
-class InvalidToken extends \Exception { }
-
 // ADIOS Loader class
-
 class Loader {
   public $gtp = "";
   public $requestedURI = "";
@@ -35,6 +24,7 @@ class Loader {
   public $routing = [];
   public $widgets = [];
 
+  public $pluginFolders = [];
   public $pluginObjects = [];
   public $plugins = [];
 
@@ -57,6 +47,9 @@ class Loader {
   public $actionNestingLevel = 0;
   public $actionStack = [];
 
+  public $dictionaryFilename = "Core-Loader";
+
+  public $factories = [];
 
   public function __construct($config = NULL, $mode = NULL) {
 
@@ -76,6 +69,14 @@ class Loader {
     
     if (empty($this->config['system_table_prefix'])) {
       $this->config['system_table_prefix'] = "adios";
+    }
+
+    // load available languages
+    $this->config['available_languages'] = ["en"];
+    foreach (scandir("{$this->config["dir"]}/Lang") as $tmpLang) {
+      if (!in_array($tmpLang, [".", ".."]) && is_dir("{$this->config["dir"]}/Lang/{$tmpLang}")) {
+        $this->config['available_languages'][] = $tmpLang;
+      }
     }
 
     // pouziva sa ako vseobecny prefix niektorych session premennych,
@@ -98,24 +99,48 @@ class Loader {
     $this->assetsUrlMap["adios/assets/js/"] = __DIR__."/../Assets/Js/";
     $this->assetsUrlMap["adios/assets/images/"] = __DIR__."/../Assets/Images/";
     $this->assetsUrlMap["adios/assets/webfonts/"] = __DIR__."/../Assets/Webfonts/";
+    $this->assetsUrlMap["adios/assets/widgets/"] = function($adios, $url) { 
+      $url = str_replace("adios/assets/widgets/", "", $url);
+      preg_match('/(.*?)\/(.+)/', $url, $m);
 
-    $this->renderAssets();
+      $widget = $m[1];
+      $asset = $m[2];
+
+      return ADIOS_WIDGETS_DIR."/{$widget}/Assets/{$asset}";
+    };
+    $this->assetsUrlMap["adios/assets/plugins/"] = function($adios, $url) { 
+      $url = str_replace("adios/assets/plugins/", "", $url);
+      preg_match('/(.+?)\/~\/(.+)/', $url, $m);
+
+      $plugin = $m[1];
+      $asset = $m[2];
+
+      foreach ($adios->pluginFolders as $pluginFolder) {
+        $file = "{$pluginFolder}/{$plugin}/Assets/{$asset}";
+        if (is_file($file)) {
+          return $file;
+        }
+      }
+    };
 
     //////////////////////////////////////////////////
     // inicializacia
 
     try {
 
-      global $gtp;
+      // inicializacia debug konzoly
+      $consoleFactoryClass = $this->factories['console'] ?? \ADIOS\Core\Console::class;
+      $this->console = new $consoleFactoryClass($this);
+      $this->console->clearLog("timestamps", "info");
+
+      $this->console->logTimestamp("__construct() start");
+
+      // global $gtp;
 
       $gtp = $this->config['global_table_prefix'];
 
-      // if (!ini_get('short_open_tag')) {
-      //   throw new \Exception('FATAL ERROR: short_open_tag is disabled. Enable it in php.ini.');
-      // }
-
       // nacitanie zakladnych ADIOS lib suborov
-      include(dirname(__FILE__)."/Lib/basic_functions.php");
+      require_once dirname(__FILE__)."/Lib/basic_functions.php";
 
       if ($mode == ADIOS_MODE_FULL) {
 
@@ -159,18 +184,25 @@ class Loader {
 
       // inicializacia core modelov
 
-      $this->models[] = "Core/Models/Config";
-      $this->models[] = "Core/Models/Translate";
-      $this->models[] = "Core/Models/User";
-      $this->models[] = "Core/Models/UserRole";
-      $this->models[] = "Core/Models/Token";
+      $this->registerModel("Core/Models/Config");
+      $this->registerModel("Core/Models/Translate");
+      $this->registerModel("Core/Models/User");
+      $this->registerModel("Core/Models/UserRole");
+      $this->registerModel("Core/Models/Token");
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
 
-      $this->loadAllPlugins();
-
-      $this->onPluginsLoaded();
+      $this->onBeforePluginsLoaded();
     
+      foreach ($this->pluginFolders as $pluginFolder) {
+        $this->loadAllPlugins($pluginFolder);
+      }
+
+      $this->onAfterPluginsLoaded();
+
+      $this->renderAssets();
+
+
       if ($mode == ADIOS_MODE_FULL) {
 
         // start session
@@ -192,21 +224,21 @@ class Loader {
       }
 
       // inicializacia locale objektu
-      $this->locale = new \ADIOS\Core\Locale($this);
+      $localeFactoryClass = $this->factories['locale'] ?? \ADIOS\Core\Locale::class;
+      $this->locale = new $localeFactoryClass($this);
 
       // inicializacia objektu notifikacii
-      $this->userNotifications = new \ADIOS\Core\UserNotifications($this);
-
-      // inicializacia debug konzoly
-      $this->console = new \ADIOS\Core\Console($this);
+      $userNotificationsFactoryClass = $this->factories['userNotifications'] ?? \ADIOS\Core\UserNotifications::class;
+      $this->userNotifications = new $userNotificationsFactoryClass($this);
 
       // inicializacia mailera
-      // 2021-07-05 deprecated
-      // $this->email = new \ADIOS\Core\Email($this);
+      $emailFactoryClass = $this->factories['userNotifications'] ?? \ADIOS\Core\Email::class;
+      $this->email = new $emailFactoryClass($this);
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
-      $this->db = new DB($this, [
+      $dbFactoryClass = $this->factories['db'] ?? DB::class;
+      $this->db = new $dbFactoryClass($this, [
         'db_host' => $this->getConfig('db_host', ''),
         'db_port' => $this->getConfig('db_port', ''),
         'db_login' => $this->getConfig('db_login', ''),
@@ -215,29 +247,25 @@ class Loader {
         'db_codepage' => $this->getConfig('db_codepage', 'utf8mb4'),
       ]);
 
+      $this->onBeforeConfigLoaded();
+
       $this->loadConfigFromDB();
 
       if ($mode == ADIOS_MODE_FULL) {
 
-        // timezone
-        date_default_timezone_set($this->config['timezone']);
-
         // set language
-
         if (!empty($_SESSION[_ADIOS_ID]['language'])) {
           $this->config['language'] = $_SESSION[_ADIOS_ID]['language'];
         }
 
-        if (!empty($_REQUEST['language'])) {
-          $this->config['language'] = $_REQUEST['language'];
-          $_SESSION[_ADIOS_ID]['language'] = $_REQUEST['language'];
-          setcookie(_ADIOS_ID.'-language', $_REQUEST['language'], time() + (3600 * 365));
-        } else if (
-          $_SESSION[_ADIOS_ID]['userProfile']['id'] ?? 0 <= 0
-          && !empty($_COOKIE[_ADIOS_ID.'-language'])
-        ) {
-          $this->config['language'] = $_COOKIE[_ADIOS_ID.'-language'];
-          $_SESSION[_ADIOS_ID]['language'] = $_COOKIE[_ADIOS_ID.'-language'];
+        if (is_array($this->adios->config['available_languages'])) {
+          if (!in_array($this->params['language'], $this->adios->config['available_languages'])) {
+            $this->config['language'] = reset($this->adios->config['available_languages']);
+          }
+        }
+
+        if (empty($this->config['language'])) {
+          $this->config['language'] = "en";
         }
 
         // user authentication
@@ -258,6 +286,8 @@ class Loader {
           $this->userLogged = FALSE;
         }
 
+        $this->onUserAuthorised();
+
         // user specific config
         // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
         // if (is_array($this->config['user'][$this->userProfile['id']])) {
@@ -269,18 +299,22 @@ class Loader {
       // finalizacia konfiguracie - aj pre FULL aj pre LITE mode
       $this->finalizeConfig();
 
-      // callback na konci konfiguracneho procesu - aj pre FULL aj pre LITE mode
-      $this->onConfigLoaded();
+      $this->onAfterConfigLoaded();
+
+      // timezone
+      date_default_timezone_set($this->config['timezone']);
 
       if ($mode == ADIOS_MODE_FULL) {
 
         // inicializacia widgetov
 
+        $this->onBeforeWidgetsLoaded();
+
         foreach ($this->config['widgets'] as $w_name => $w_config) {
           $this->addWidget($w_name);
         }
 
-        $this->onWidgetsLoaded();
+        $this->onAfterWidgetsLoaded();
 
         // vytvorim definiciu tables podla nacitanych modelov
 
@@ -290,36 +324,39 @@ class Loader {
 
         // inicializacia twigu
 
-        $twigLoader = new \Twig\Loader\ADIOSTwigLoader($this);
+        $twigLoaderFactoryClass = $this->factories['twigLoader'] ?? \ADIOS\Core\Lib\TwigLoader::class;
+        $twigLoader = new $twigLoaderFactoryClass($this);
         $this->twig = new \Twig\Environment($twigLoader, array(
           'cache' => FALSE,
           'debug' => TRUE,
         ));
         $this->twig->addExtension(new \Twig\Extension\StringLoaderExtension());
         $this->twig->addExtension(new \Twig\Extension\DebugExtension());
-        $this->twig->addFunction(new \Twig\TwigFunction('l', function ($str) {
-          return l($str);
-        }));
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'translate',
+          function($string) {
+            return $this->translate($string, $this->actionObject);
+          }
+        ));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosUI', function ($uid, $componentName, $componentParams) {
-          global $___ADIOSObject;
-
           if (!is_array($componentParams)) {
             $componentParams = array();
           }
-          return $___ADIOSObject->ui->create("{$componentName}#{$uid}", $componentParams)->render();
+          return $this->ui->create("{$componentName}#{$uid}", $componentParams)->render();
         }));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
-          global $___ADIOSObject;
-          return $___ADIOSObject->renderAction($action, $params);
+          return $this->renderAction($action, $params);
         }));
 
         // inicializacia UI wrappera
-
-        $this->ui = new UI($this, []);
+        $uiFactoryClass = $this->factories['uid'] ?? \ADIOS\Core\UI::class;
+        $this->ui = new $uiFactoryClass($this, []);
       }
 
       $this->dispatchEventToPlugins("onADIOSAfterInit", ["adios" => $this]);
 
+
+      $this->console->logTimestamp("__construct() end");
     } catch (\Exception $e) {
       exit("ADIOS INIT failed. ".$e->getMessage());
     }
@@ -339,6 +376,9 @@ class Loader {
     return isset($_REQUEST['__IS_WINDOW__']) && $_REQUEST['__IS_WINDOW__'] == "1";
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // ROUTING
+
   public function setRouting($routing) {
     if (is_array($routing)) {
       $this->routing = $routing;
@@ -351,6 +391,9 @@ class Loader {
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // WIDGETS
+
   public function addWidget($widgetName) {
     if (!isset($this->widgets[$widgetName])) {
       try {
@@ -362,29 +405,47 @@ class Loader {
     }
   }
 
+  //////////////////////////////////////////////////////////////////////////////
+  // MODELS
+
+  public function registerModel($modelName) {
+    if (!in_array($modelName, $this->models)) {
+      $this->models[] = $modelName;
+    }
+  }
+
   public function getModelClassName($modelName) {
     return "\\ADIOS\\".str_replace("/", "\\", $modelName);
   }
-
-  public function getModel($modelName) {
+  
+  /**
+   * Returns the object of the model referenced by $modelName.
+   * The returned object is cached into modelObjects property.
+   *
+   * @param  string $modelName Reference of the model. E.g. 'Core/Models/User'.
+   * @throws \ADIOS\Core\Exception If $modelName is not available.
+   * @return object Instantiated object of the model.
+   */
+  public function getModel(string $modelName) {
     if (!isset($this->modelObjects[$modelName])) {
       try {
         $modelClassName = $this->getModelClassName($modelName);
-
         $this->modelObjects[$modelName] = new $modelClassName($this);
-
-        // $this->db->addTable(
-        //   $this->modelObjects[$modelName]->getFullTableSQLName(),
-        //   $this->modelObjects[$modelName]->columns()
-        // );
-        // $this->addRouting($this->modelObjects[$modelName]->routing());
-
       } catch (\Exception $e) {
-        throw new \ADIOS\Core\Exception("Can't find model '{$modelName}'. ".$e->getMessage());
+        throw new \ADIOS\Core\Exceptions\GeneralException("Can't find model '{$modelName}'. ".$e->getMessage());
       }
     }
 
     return $this->modelObjects[$modelName];
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // PLUGINS
+
+  public function registerPluginFolder($folder) {
+    if (is_dir($folder) && !in_array($folder, $this->pluginFolders)) {
+      $this->pluginFolders[] = $folder;
+    }
   }
 
   public function getPluginClassName($pluginName) {
@@ -399,22 +460,20 @@ class Loader {
     return $this->pluginObjects;
   }
 
-  public function loadAllPlugins($subdir = "") {
-    if (!defined('ADIOS_PLUGINS_DIR')) return;
+  public function loadAllPlugins($pluginFolder, $subFolder = "") {
+    $folder = $pluginFolder.(empty($subFolder) ? "" : "/{$subFolder}");
 
-    $dir = ADIOS_PLUGINS_DIR.(empty($subdir) ? "" : "/{$subdir}");
+    foreach (scandir($folder) as $file) {
+      if (strpos($file, ".") !== FALSE) continue;
 
-    foreach (scandir($dir) as $file) {
-      if (in_array($file, [".", ".."])) continue;
-
-      $fullPath = (empty($subdir) ? "" : "{$subdir}/").$file;
+      $fullPath = (empty($subFolder) ? "" : "{$subFolder}/").$file;
 
       if (
-        is_dir("{$dir}/{$file}")
-        && !is_file("{$dir}/{$file}/Main.php")
+        is_dir("{$folder}/{$file}")
+        && !is_file("{$folder}/{$file}/Main.php")
       ) {
-        $this->loadAllPlugins($fullPath);
-      } else {
+        $this->loadAllPlugins($pluginFolder, $fullPath);
+      } else if (is_file("{$folder}/{$file}/Main.php")) {
         try {
           $tmpPluginClassName = $this->getPluginClassName($fullPath);
 
@@ -429,28 +488,72 @@ class Loader {
     }
   }
 
-  public function translate($string, $context = "", $toLanguage = "", $dictionary = []) {
-    if ($toLanguage == "") {
-      $toLanguage = $this->adios->config['language'] ?? "en";
+  //////////////////////////////////////////////////////////////////////////////
+  // TRANSLATIONS
+
+  public function loadDictionary($object, $toLanguage = "") {
+    $dictionary = [];
+    $dictionaryFolder = $object->dictionaryFolder ?? "";
+
+    if (empty($toLanguage)) {
+      $toLanguage = $this->config['language'] ?? "";
     }
 
-    if (
-      !empty($context)
-      && isset($dictionary["CONTEXT:{$context}"])
-    ) {
-      if (!isset($dictionary["CONTEXT:{$context}"][$toLanguage][$string])) {
-        return $string;
+    if (empty($dictionaryFolder)) {
+      $dictionaryFolder = "{$this->config['dir']}/Lang";
+    }
+
+    if (strlen($toLanguage) == 2) {
+      if (empty($object->dictionaryFilename)) {
+        $dictionaryFilename = strtr(get_class($object), "./\\", "---");
+        $dictionaryFilename = str_replace("ADIOS-", "", $dictionaryFilename);
       } else {
-        return $dictionary["CONTEXT:{$context}"][$toLanguage][$string];
+        $dictionaryFilename = $object->dictionaryFilename;
       }
-    } else {
-      if (!isset($dictionary[$toLanguage][$string])) {
-        return $string;
+
+      $dictionaryFile = "{$dictionaryFolder}/{$toLanguage}/{$dictionaryFilename}.php";
+
+      if (file_exists($dictionaryFile)) {
+        include($dictionaryFile);
       } else {
-        return $dictionary[$toLanguage][$string];
+        // echo("{$dictionaryFile} does not exist ({$object->name})\n");
       }
     }
+
+    return $dictionary;
   }
+
+  public function translate($string, $object, $toLanguage = "") {
+    if (empty($toLanguage)) {
+      $toLanguage = $this->config['language'] ?? "en";
+    }
+
+    if ($toLanguage == "en") {
+      return $string;
+    }
+
+    $dictionary = [];
+    
+    if (empty($object->dictionary[$toLanguage])) {
+      $dictionary[$toLanguage] = $this->loadDictionary($object, $toLanguage);
+    }
+
+    // // $dictionary[$toLanguage] = $object->dictionary[$toLanguage] ?? [];
+    // if (get_class($object) == "ADIOS\\Widgets\\Orders\\Models\\Order") {
+    //   var_dump($string);
+    //   var_dump(get_class($object));
+    //   print_r($dictionary);exit;
+    //   }
+
+    if (!isset($dictionary[$toLanguage][$string])) {
+      return $string;
+    } else {
+      return $dictionary[$toLanguage][$string];
+    }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+  // MISCELANEOUS
 
   public function renderAssets() {
     $cachingTime = 3600;
@@ -486,52 +589,57 @@ class Loader {
     } else {
       foreach ($this->assetsUrlMap as $urlPart => $mapping) {
         if (preg_match('/^'.str_replace("/", "\\/", $urlPart).'/', $this->requestedURI, $m)) {
+          
           if ($mapping instanceof \Closure) {
-            $mapping($this, $this->requestedURI);
+            $sourceFile = $mapping($this, $this->requestedURI);
           } else {
-            $ext = strtolower(pathinfo($this->requestedURI, PATHINFO_EXTENSION));
-
-            switch ($ext) {
-              case "css":
-              case "js":
-                header("Content-type: text/{$ext}");
-                header($headerExpires);
-                header("Pragma: cache");
-                header($headerCacheControl);
-                echo file_get_contents($mapping.str_replace($urlPart, "", $this->requestedURI));
-              break;
-              case "eot":
-              case "ttf":
-              case "woff":
-              case "woff2":
-                header("Content-type: application/x-font-{$ext}");
-                header($headerExpires);
-                header("Pragma: cache");
-                header($headerCacheControl);
-                echo file_get_contents($mapping.str_replace($urlPart, "", $this->requestedURI));
-              break;
-              case "bmp":
-              case "gif":
-              case "jpg":
-              case "jpeg":
-              case "png":
-              case "tiff":
-              case "webp":
-              case "svg":
-              case "eot":
-              case "ttf":
-              case "woff":
-              case "woff2":
-                header("Content-type: image/{$ext}");
-                header($headerExpires);
-                header("Pragma: cache");
-                header($headerCacheControl);
-                echo file_get_contents($mapping.str_replace($urlPart, "", $this->requestedURI));
-              break;
-            }
-
-            exit();
+            $sourceFile = $mapping.str_replace($urlPart, "", $this->requestedURI);
           }
+
+          $ext = strtolower(pathinfo($this->requestedURI, PATHINFO_EXTENSION));
+
+          switch ($ext) {
+            case "css":
+            case "js":
+              header("Content-type: text/{$ext}");
+              header($headerExpires);
+              header("Pragma: cache");
+              header($headerCacheControl);
+              echo file_get_contents($sourceFile);
+            break;
+            case "eot":
+            case "ttf":
+            case "woff":
+            case "woff2":
+              header("Content-type: font/{$ext}");
+              header($headerExpires);
+              header("Pragma: cache");
+              header($headerCacheControl);
+              echo file_get_contents($sourceFile);
+            break;
+            case "bmp":
+            case "gif":
+            case "jpg":
+            case "jpeg":
+            case "png":
+            case "tiff":
+            case "webp":
+            case "svg":
+              if ($ext == "svg") {
+                $contentType = "svg+xml";
+              } else {
+                $contentType = $ext;
+              }
+
+              header("Content-type: image/{$contentType}");
+              header($headerExpires);
+              header("Pragma: cache");
+              header($headerCacheControl);
+              echo file_get_contents($sourceFile);
+            break;
+          }
+
+          exit();
         }
       }
     }
@@ -542,9 +650,16 @@ class Loader {
 
     $installationStart = microtime(TRUE);
 
-    $this->db->start_transaction();
+    $this->console->info("Dropping existing tables.");
 
-    echo "<h2>Installing models</h2>";
+    foreach ($this->models as $modelName) {
+      $model = $this->getModel($modelName);
+      $model->dropTableIfExists();
+    }
+
+    $this->console->info("Database is empty, installing models.");
+
+    $this->db->startTransaction();
 
     foreach ($this->models as $modelName) {
       try {
@@ -552,59 +667,51 @@ class Loader {
 
         $start = microtime(TRUE);
 
-        echo "<b>{$modelName}</b>";
-
         $model->install();
-        echo " [".round((microtime(true) - $start) * 1000, 2)." msec]. ";
-      } catch (\ADIOS\Core\ModelInstallationException $e) {
-        echo ", <span style='color:orange'>Skipped. Reason: {$e->getMessage()}</span> ";
+        $this->console->info("Model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
+
+      } catch (\ADIOS\Core\Exceptions\ModelInstallationException $e) {
+        $this->console->warning("Model {$modelName} installation skipped.", ["exception" => $e->getMessage()]);
       } catch (\Exception $e) {
-        echo ", <span style='color:red'>Failed. Reason: {$e->getMessage()}.</span> ";
+        $this->console->error("Model {$modelName} installation failed.", ["exception" => $e->getMessage()]);
       } catch (\Illuminate\Database\QueryException $e) {
         //
-      } catch (\ADIOS\Core\DBException $e) {
+      } catch (\ADIOS\Core\Exceptions\DBException $e) {
         // Moze sa stat, ze vytvorenie tabulky zlyha napr. kvoli
         // "Cannot add or update a child row: a foreign key constraint fails".
         // V takom pripade budem instalaciu opakovat v dalsom kole
       }
     }
 
-    echo "<h2>Creating indexes</h2>";
-
     foreach ($this->models as $modelName) {
       try {
         $model = $this->getModel($modelName);
 
         $start = microtime(TRUE);
 
-        echo "<b>{$modelName}</b>";
-
         $model->installForeignKeys();
-        echo " [".round((microtime(true) - $start) * 1000, 2)." msec]. ";
+        $this->console->info("Indexes for model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
+
       } catch (\Exception $e) {
-        echo ", <span style='color:red'>Failed. Reason: {$e->getMessage()}.</span> ";
+        $this->console->error("Indexes installation for model {$modelName} failed.", ["exception" => $e->getMessage()]);
       } catch (\Illuminate\Database\QueryException $e) {
         //
-      } catch (\ADIOS\Core\DBException $e) {
+      } catch (\ADIOS\Core\Exceptions\DBException $e) {
         //
       }
     }
 
-    echo "<h2>Installing widgets</h2>";
-
     foreach ($this->widgets as $widget) {
       try {
-        echo "<b>{$widget->name}</b>";
-
         if ($widget->install()) {
           $this->widgetsInstalled[$widget->name] = TRUE;
-          echo ". ";
+          $this->console->info("Widget {$widget->name} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
         } else {
-          echo ", <span style='color:orange'>skipped.</span> ";
+          $this->console->warning("Model {$modelName} installation skipped.");
         }
       } catch (\Exception $e) {
-        echo ", <span style='color:red'>failed.</span> ";
-      } catch (\ADIOS\Core\DBException $e) {
+        $this->console->error("Model {$modelName} installation failed.");
+      } catch (\ADIOS\Core\Exceptions\DBException $e) {
         // Moze sa stat, ze vytvorenie tabulky zlyha napr. kvoli
         // "Cannot add or update a child row: a foreign key constraint fails".
         // V takom pripade budem instalaciu opakovat v dalsom kole
@@ -617,13 +724,8 @@ class Loader {
 
     $this->db->commit();
 
-    echo "<h2>Done</h2>";
-    echo "Installation time: ".round((microtime(true) - $installationStart), 2)." s";
+    $this->console->info("Core installation done in ".round((microtime(true) - $installationStart), 2)." seconds.");
 
-    if (count($this->console->getLogs()) > 0) {
-      echo "<h2>Errors</h2>";
-      echo "<div style='color:red'>".nl2br($this->console->getContents())."</div>";
-    }
   }
 
 
@@ -633,7 +735,18 @@ class Loader {
   //   - kontrolu requestu podla $_REQUEST['c']
   //   - vygenerovanie UID
   //   - renderovanie naroutovanej akcie
-
+  
+  /**
+   * Renders the requested content. It can be the (1) whole desktop with complete <html>
+   * content; (2) the HTML of an action requested dynamically using AJAX; or (3) a JSON
+   * string requested dynamically using AJAX and further processed in Javascript.
+   *
+   * @param  mixed $params Parameters (a.k.a. arguments) of the requested action.
+   * @throws \ADIOS\Core\Exception When no action is specified or requested action is unknown.
+   * @throws \ADIOS\Core\Exception When running in CLI and requested action is blocked for the CLI.
+   * @throws \ADIOS\Core\Exception When running in SAPI and requested action is blocked for the SAPI.
+   * @return string Rendered content.
+   */
   public function render($params = []) {
     if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedURI, $m)) {
       $cronClassName = str_replace("/", "\\", "/ADIOS/Widgets/{$m[0]}");
@@ -693,22 +806,22 @@ class Loader {
       $this->dispatchEventToPlugins("onADIOSBeforeActionRender", ["adios" => $this]);
 
       if (empty($this->action)) {
-        throw new \ADIOS\Core\Exception("No action specified.");
+        throw new \ADIOS\Core\Exceptions\GeneralException("No action specified.");
       }
 
       $actionClassName = "ADIOS\\Actions\\".str_replace("/", "\\", $this->action);
 
       if (!class_exists($actionClassName)) {
-        throw new \ADIOS\Core\Exception("Unknown action '{$this->action}'.");
+        throw new \ADIOS\Core\Exceptions\GeneralException("Unknown action '{$this->action}'.");
       }
 
       if (php_sapi_name() === 'cli') {
         if (!$actionClassName::$cliSAPIEnabled) {
-          throw new \ADIOS\Core\Exception("Action is not available for CLI interface.");
+          throw new \ADIOS\Core\Exceptions\GeneralException("Action is not available for CLI interface.");
         }
       } else {
         if (!$actionClassName::$webSAPIEnabled) {
-          throw new \ADIOS\Core\Exception("Action is not available for WEB interface.");
+          throw new \ADIOS\Core\Exceptions\GeneralException("Action is not available for WEB interface.");
         }
       }
 
@@ -737,20 +850,20 @@ class Loader {
 
       // kontrola vstupov podla kontrolneho kodu "_"
       // vypnute, lebo JS btoa() pri niektorych znakoch nefunguje
-      if (FALSE && $params['__IS_RENDERED_ON_DESKTOP__'] && count($params) > 0) {
-        $tmp_params = $params;
-        unset($tmp_params['__C__']);
-        unset($tmp_params['action']);
+      // if (FALSE && $params['__IS_RENDERED_ON_DESKTOP__'] && count($params) > 0) {
+      //   $tmpParams = $params;
+      //   unset($tmpParams['__C__']);
+      //   unset($tmpParams['action']);
 
-        if (empty($params['__C__'])) {
-          return "INPUT_VALIDATION_CODE_EMPTY";
-        } else {
-          $check_code = base64_encode(json_encode($tmp_params));
-          if ($check_code != $params['__C__']) {
-            return "INPUT_VALIDATION_FAILED";
-          }
-        }
-      }
+      //   if (empty($params['__C__'])) {
+      //     return "INPUT_VALIDATION_CODE_EMPTY";
+      //   } else {
+      //     $checkCode = base64_encode(json_encode($tmpParams));
+      //     if ($checkCCode != $params['__C__']) {
+      //       return "INPUT_VALIDATION_FAILED";
+      //     }
+      //   }
+      // }
 
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
@@ -763,7 +876,7 @@ class Loader {
 
       return $this->renderAction($this->action, $params);
 
-    } catch (\ADIOS\Core\Exception $e) {
+    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: ".$e->getMessage();
       if ($this->config['debug']) {
@@ -807,10 +920,13 @@ class Loader {
     $actionClassName = $this->getActionClassName($action);
 
     try {
-      $this->checkPermissionsForAction($action, $params);
+      if ($actionClassName::$requiresUserAuthentication) {
+        $this->checkPermissionsForAction($action, $params);
+      }
 
       if ($this->actionExists($action)) {
-        $actionReturn = (new $actionClassName($this, $params))->render($params);
+        $this->actionObject = new $actionClassName($this, $params);
+        $actionReturn = $this->actionObject->render($params);
 
         if ($actionReturn === NULL) {
           // akcia nic nereturnovala, iba robila echo
@@ -827,63 +943,35 @@ class Loader {
         $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
         $tmpTemplateName = str_replace("/Actions/", "/Templates/", $tmpTemplateName);
 
-        $tmp = new \ADIOS\Core\Action($this);
+        $actionFactoryClass = $this->factories['action'] ?? \ADIOS\Core\Action::class;
+        $tmp = new $actionFactoryClass($this);
         $tmp->twigTemplate = $tmpTemplateName;
         $actionHtml = $tmp->render($params);
       }
 
-    } catch (
-      \Illuminate\Database\QueryException
-      | \ADIOS\Core\DBException
-      $e
-    ) {
-      $errorMessage = $e->getMessage();
-      $errorHash = md5(date("YmdHis").$errorMessage);
-      $this->console->log($errorHash, "{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
-      $actionHtml = $this->renderHtmlWarning("
-        <div style='text-align:center;font-size:5em;color:red'>
-          🥴
-        </div>
-        <div style='margin-top:1em;margin-bottom:1em;'>
-          Oops! Something went wrong with the database.
-          See logs for more information or contact the support.<br/>
-        </div>
-        <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>{$errorMessage}</div>
-        <div style='color:gray'>
-          {$errorHash}
-        </div>
-      ");
-    } catch (\ADIOS\Core\NotEnoughPermissionsException $e) {
-      $actionHtml = $this->renderWarning($e->getMessage());
+    } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
+      $actionHtml = $this->renderFatal($e->getMessage());
     } catch (\Exception $e) {
-      $actionHtml = $this->renderHtmlWarning("
-        <div style='text-align:center;font-size:5em;color:red'>
-          🥴
-        </div>
-        <div style='margin-top:1em;margin-bottom:1em;'>
-          Oops! Something went wrong.
-          See logs for more information or contact the support.<br/>
-        </div>
-        <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>".$e->getMessage()."</div>
-        <div style='color:gray'>
-          ".get_class($e)."
-        </div>
-      ");
+      $actionHtml = $this->renderExceptionWarningHtml($e);
     }
 
     return $actionHtml;
   }
 
   /**
-   * This method is used to check permissions before rendering
-   * an action. The method should be overriden.
+   * Checks user permissions before rendering requested action.
+   * Original implementation does nothing. Must be overriden
+   * the application's main class.
+   *
+   * Does not return anything, only throws exceptions.
    * 
+   * @abstract
    * @param string $action Name of the action to be rendered.
-   * @param array $params Parameters of the action.
-   * 
-   * throws \ADIOS\Core\NotEnoughPermissionsException
+   * @param array $params Parameters (a.k.a. arguments) of the action.
+   * @throws \ADIOS\Core\NotEnoughPermissionsException When the signed user does not have enough permissions.
+   * @return void
    */
-  public function checkPermissionsForAction($action, $params) {
+  public function checkPermissionsForAction($action, $params = NULL) {
     // to be overriden
   }
 
@@ -898,31 +986,170 @@ class Loader {
     }
   }
 
-  public function renderWarning($warning, $isHtml = TRUE) {
+  public function renderWarning($message, $isHtml = TRUE) {
     if ($this->isAjax()) {
       return json_encode([
         "result" => "WARNING",
-        "content" => $warning,
+        "content" => $message,
       ]);
     } else {
       return "
-        <div class='adios_warning shadow-lg p-3 mb-5' onclick='$(this).remove();'>
-          ".($isHtml ? $warning : hsc($warning))."
+        <div class='alert alert-warning' role='alert'>
+          ".($isHtml ? $message : hsc($message))."
         </div>
       ";
     }
   }
 
+  public function renderFatal($message, $isHtml = TRUE) {
+    if ($this->isAjax()) {
+      return json_encode([
+        "result" => "FATAL",
+        "content" => $message,
+      ]);
+    } else {
+      return "
+        <div class='alert alert-danger' role='alert'>
+          ".($isHtml ? $message : hsc($message))."
+        </div>
+      ";
+    }
+  }
+
+  public function renderExceptionWarningHtml($exception) {
+    
+    $traceLog = "";
+    foreach ($exception->getTrace() as $item) {
+      $traceLog .= "{$item['file']}:{$item['line']}\n";
+    }
+
+    switch (get_class($exception)) {
+      case 'ADIOS\Core\Exceptions\DBException':
+        $errorMessage = $exception->getMessage();
+        $errorHash = md5(date("YmdHis").$errorMessage);
+        // $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
+        $html = "
+          <div style='text-align:center;font-size:5em;color:red'>
+            🥴
+          </div>
+          <div style='margin-top:1em;margin-bottom:1em;'>
+            Oops! Something went wrong with the database.
+            See logs for more information or contact the support.<br/>
+          </div>
+          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>{$errorMessage}</div>
+          <div style='color:gray;font-size:0.8em;'>
+            {$errorHash}<br/>
+            ".get_class($exception)."<br/>
+            <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
+            <div class='trace-log' style='display:none'>{$traceLog}</div>
+          </div>
+        ";
+      break;
+      case 'Illuminate\Database\QueryException':
+      case 'ADIOS\Core\Exceptions\DBDuplicateEntryException':
+
+        if (get_class($exception) == 'Illuminate\Database\QueryException') {
+          $dbQuery = $exception->getSql();
+          $dbError = $exception->errorInfo[2];
+          $errorNo = $exception->errorInfo[1];
+        } else {
+          list($dbError, $dbQuery, $initiatingModelName, $errorNo) = json_decode($exception->getMessage(), TRUE);
+        }
+
+        $invalidColumns = [];
+
+        if (!empty($initiatingModelName)) {
+          $initiatingModel = $this->getModel($initiatingModelName);
+          $columns = $initiatingModel->columns();
+          $indexes = $initiatingModel->indexes();
+
+          preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $dbError, $m);
+          $invalidIndex = $m[2];
+          $invalidColumns = [];
+          foreach ($indexes[$invalidIndex]['columns'] as $columnName) {
+            $invalidColumns[] = $columns[$columnName]["title"];
+          }
+        }
+
+        switch ($errorNo) {
+          case 1216:
+          case 1451:
+            $errorMessage = "You are trying to delete a record that is linked with another record(s).";
+          break;
+          case 1062:
+          case 1217:
+          case 1452:
+            $errorMessage = "You are trying to save a record that is already existing.";
+          break;
+        }
+
+        $html = "
+          <div style='text-align:center;font-size:5em;color:red'>
+            <i class='fas fa-copy'></i>
+          </div>
+          <div style='margin-top:1em;margin-bottom:3em;text-align:center;color:red;'>
+            ".$this->translate($errorMessage, $this)."<br/>
+            <br/>
+            <b>".join(", ", $invalidColumns)."</b>
+          </div>
+          <a href='javascript:void(0);' onclick='$(this).next(\"div\").slideDown();'>
+          ".$this->translate("Show more information", $this)."
+          </a>
+          <div style='display:none'>
+            <div style='color:red;margin-bottom:1em;font-family:courier;font-size:8pt;max-height:10em;overflow:auto;'>
+              {$dbError}<br/>
+              {$dbQuery}<br/>
+              {$initiatingModelName}
+            </div>
+            <div style='color:gray;font-size:0.8em;'>
+              Error # {$errorNo}<br/>
+              ".get_class($exception)."<br/>
+              <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
+              <div class='trace-log' style='display:none'>{$traceLog}</div>
+            </div>
+          </div>
+        ";
+      break;
+      default:
+        $html = "
+          <div style='text-align:center;font-size:5em;color:red'>
+            🥴
+          </div>
+          <div style='margin-top:1em;margin-bottom:1em;'>
+            Oops! Something went wrong.
+            See logs for more information or contact the support.<br/>
+          </div>
+          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>".$exception->getMessage()."</div>
+          <div style='color:gray'>
+            ".get_class($exception)."
+          </div>
+        ";
+      break;
+    }
+
+    return $this->renderHtmlWarning($html);
+  }
+
   public function renderHtmlWarning($warning) {
     return $this->renderWarning($warning, TRUE);
   }
-
+  
+  /**
+   * Propagates an event to all plugins of the application. Each plugin can
+   * implement hook for the event. The hook must return either modified event
+   * data of FALSE. Returning FALSE in the hook terminates the event propagation.
+   *
+   * @param  string $event Name of the event to propagate.
+   * @param  array $eventData Data of the event. Each event has its own specific structure of the data.
+   * @throws \ADIOS\Core\Exception When plugin's hook returns invalid value.
+   * @return array<string, mixed> Event data modified by plugins which implement the hook.
+   */
   public function dispatchEventToPlugins($event, $eventData = []) {
     foreach ($this->pluginObjects as $plugin) {
       if (method_exists($plugin, $event)) {
         $eventData = $plugin->$event($eventData);
         if (!is_array($eventData) && $eventData !== FALSE) {
-          throw new \ADIOS\Core\Exception("Plugin {$plugin->name}, event {$event}: No value returned. Either forward \$event or return FALSE.");
+          throw new \ADIOS\Core\Exceptions\GeneralException("Plugin {$plugin->name}, event {$event}: No value returned. Either forward \$event or return FALSE.");
         }
 
         if ($eventData === FALSE) {
@@ -1048,10 +1275,6 @@ class Loader {
     $this->config['widgets'] = $this->config['widgets'] ?? [];
     $this->config['protocol'] = (strtoupper($_SERVER['HTTPS'] ?? "") == "ON" ? "https" : "http");
     $this->config['timezone'] = $this->config['timezone'] ?? 'Europe/Bratislava';
-    $this->config['language'] = $this->config['language'] ?? (is_array($this->config['available_languages'])
-      ? reset($this->config['available_languages'])
-      : "sk"
-    );
 
     $this->config['files_dir'] = $this->config['files_dir'] ?? "{$this->config['dir']}/upload";
     $this->config['files_url'] = $this->config['files_url'] ?? "{$this->config['url']}/upload";
@@ -1063,15 +1286,31 @@ class Loader {
 
   }
 
-  public function onConfigLoaded() {
+  public function onUserAuthorised() {
     // to be overriden
   }
 
-  public function onWidgetsLoaded() {
+  public function onBeforeConfigLoaded() {
     // to be overriden
   }
 
-  public function onPluginsLoaded() {
+  public function onAfterConfigLoaded() {
+    // to be overriden
+  }
+
+  public function onBeforeWidgetsLoaded() {
+    // to be overriden
+  }
+
+  public function onAfterWidgetsLoaded() {
+    // to be overriden
+  }
+
+  public function onBeforePluginsLoaded() {
+    // to be overriden
+  }
+
+  public function onAfterPluginsLoaded() {
     // to be overriden
   }
 
@@ -1105,16 +1344,22 @@ class Loader {
 
     return $uid;
   }
-
+  
+  /**
+   * Checks the argument whether it is a valid ADIOS UID string.
+   *
+   * @param  string $uid The string to validate.
+   * @throws \ADIOS\Core\Exceptions\InvalidUidException If the provided string is not a valid ADIOS UID string.
+   * @return void
+   */
   public function checkUid($uid) {
-    return !preg_match('/[^A-Za-z0-9\-_]/', $uid);
+    if (preg_match('/[^A-Za-z0-9\-_]/', $uid)) {
+      throw new \ADIOS\Core\Exceptions\InvalidUidException();
+    }
   }
 
   public function setUid($uid) {
-    if (!$this->checkUid($uid)) {
-      exit('Invalid UID');
-    }
-
+    $this->checkUid($uid);
     $this->uid = $uid;
   }
 
@@ -1151,10 +1396,7 @@ class Loader {
       while ($data = $this->db->fetch_array()) {
         $passwordMatch = FALSE;
 
-        if (!empty($password) && $data['password'] == $password) {
-          // plain text, deprecated
-          $passwordMatch = TRUE;
-        } else if (!empty($password) && password_verify($password, $data['password'])) {
+        if (!empty($password) && password_verify($password, $data['password'])) {
           // plain text
           $passwordMatch = TRUE;
         } else if ($_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($data['login'], $data['password'])) {
@@ -1202,13 +1444,16 @@ class Loader {
       dirname(__FILE__)."/../Assets/Css/responsive.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",
       dirname(__FILE__)."/../Assets/Css/desktop.css",
-      dirname(__FILE__)."/../Assets/Css/jquery-ui.css",
+      /*dirname(__FILE__)."/../Assets/Css/jquery-ui.css",*/
       dirname(__FILE__)."/../Assets/Css/jquery-ui.structure.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui-fontawesome.css",
       dirname(__FILE__)."/../Assets/Css/jquery.window.css",
       dirname(__FILE__)."/../Assets/Css/adios_classes.css",
       dirname(__FILE__)."/../Assets/Css/quill-1.3.6.core.css",
       dirname(__FILE__)."/../Assets/Css/quill-1.3.6.snow.css",
+      dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
+      dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
+      dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {
@@ -1236,7 +1481,6 @@ class Loader {
 
     $jsFiles = [
       "jquery-3.5.1.js",
-      "jquery-ui.1.11.4.min.js",
       "jquery.scrollTo.min.js",
       "jquery.window.js",
       "jquery-ui-touch-punch.js",
@@ -1255,6 +1499,9 @@ class Loader {
       "jquery.easing.js",
       "sb-admin-2.js",
       "jsoneditor.js",
+      "jquery.tag-editor.js",
+      "jquery.caret.min.js",
+      "jquery-ui.min.js",
     ];
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
       if ('.js' == substr($file, -3)) {
@@ -1264,6 +1511,21 @@ class Loader {
 
     foreach ($jsFiles as $file) {
       $js .= @file_get_contents(dirname(__FILE__)."/../Assets/Js/{$file}")."\n";
+    }
+
+    $js .= "
+      var adios_language_translations = {};
+    ";
+
+    foreach ($this->config['available_languages'] as $language) {
+      $js .= "
+        adios_language_translations['{$language}'] = {
+          'Confirmation': '".ads($this->translate("Confirmation", $this, $language))."',
+          'OK, I understand': '".ads($this->translate("OK, I understand", $this, $language))."',
+          'Cancel': '".ads($this->translate("Cancel", $this, $language))."',
+          'Warning': '".ads($this->translate("Warning", $this, $language))."',
+        };
+      ";
     }
 
     return $js;

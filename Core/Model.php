@@ -36,7 +36,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
    *
    * @var array
    */
-  public $languageDictionary = [];
+  // public $languageDictionary = [];
   
   /**
    * Full name of the model. Useful for getModel() function
@@ -111,9 +111,18 @@ class Model extends \Illuminate\Database\Eloquent\Model {
    */
   var $lookupSqlValue = "";
 
+  /**
+   * If set to TRUE, the SQL table will not contain the ID autoincrement column
+   *
+   * @var mixed
+   */
+  var $isCrossTable = FALSE;
+
   var $pdo;
   var $eloquentQuery;
   var $searchAction;
+
+  private static $allItemsCache = NULL;
   
   /**
    * Creates instance of model's object.
@@ -132,8 +141,9 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     } else {
       $this->name = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
       $this->shortName = end(explode("/", $this->name));
-
       $this->adios = &$adiosOrAttributes;
+
+      $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 
       if ($eloquentQuery === NULL) {
         $this->eloquentQuery = $this->select('id');
@@ -145,28 +155,42 @@ class Model extends \Illuminate\Database\Eloquent\Model {
 
       $this->pdo = $this->getConnection()->getPdo();
 
-      $this->init();
+      // During the installation no SQL tables exist. If child's init() 
+      // method uses data from DB, $this->init() call would fail.
+      try {
+        $this->init();
+      } catch (\Exception $e) {
+        //
+      }
 
-      $this->adios->db->addTable($this->table, $this->columns());
+      $this->adios->db->addTable($this->table, $this->columns(), $this->isCrossTable);
       $this->adios->addRouting($this->routing());
 
     }
 
-    if (!$this->isInstalled()) {
-      $this->adios->userNotifications->addHtml("
-        Model <b>{$this->name}</b> is not installed.
-        <a
-          href='javascript:void(0)'
-          onclick='desktop_update(\"Desktop/InstallUpgrades\");'
-        >Install model</a>
-      ");
-    } else if ($this->hasAvailableUpgrades()) {
+    if ($this->hasAvailableUpgrades()) {
       $this->adios->userNotifications->addHtml("
         Model <b>{$this->name}</b> has new upgrades available.
         <a
           href='javascript:void(0)'
           onclick='desktop_update(\"Desktop/InstallUpgrades\");'
         >Install upgrades</a>
+      ");
+    } else if (!$this->hasSqlTable()) {
+      $this->adios->userNotifications->addHtml("
+        Model <b>{$this->name}</b> has no SQL table.
+        <a
+          href='javascript:void(0)'
+          onclick='desktop_update(\"Desktop/InstallUpgrades\");'
+        >Create table</a>
+      ");
+    } else if (!$this->isInstalled()) {
+      $this->adios->userNotifications->addHtml("
+        Model <b>{$this->name}</b> is not installed.
+        <a
+          href='javascript:void(0)'
+          onclick='desktop_update(\"Desktop/InstallUpgrades\");'
+        >Install model</a>
       ");
     }
 
@@ -220,8 +244,12 @@ class Model extends \Illuminate\Database\Eloquent\Model {
    * @param  string $toLanguage Output language
    * @return string Translated string.
    */
-  public function translate($string, $context = "", $toLanguage = "") {
-    return $this->adios->translate($string, $context, $toLanguage, $this->languageDictionary);
+  public function translate($string) {
+    return $this->adios->translate($string, $this);
+  }
+
+  public function hasSqlTable() {
+    return in_array($this->table, $this->adios->db->existingSqlTables);
   }
   
   /**
@@ -266,7 +294,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
 
       foreach ($this->indexes() as $indexOrConstraintName => $indexDef) {
         if (empty($indexOrConstraintName) || is_numeric($indexOrConstraintName)) {
-          $indexOrConstraintName = md5(json_encode($indexDef));
+          $indexOrConstraintName = md5(json_encode($indexDef).uniqid());
         }
 
         switch ($indexDef["type"]) {
@@ -311,8 +339,10 @@ class Model extends \Illuminate\Database\Eloquent\Model {
   }
 
   /**
-   * Installs all upgrades of the model. Internaly stores current version and compares it to list of available upgrades.
+   * Installs all upgrades of the model. Internaly stores current version and
+   * compares it to list of available upgrades.
    *
+   * @throws \ADIOS\Core\Exceptions\DBException When an error occured during the upgrade.
    * @return void
    */
   public function installUpgrades() : void {
@@ -321,7 +351,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
       $lastVersion = max(array_keys($this->upgrades()));
 
       try {
-        $this->adios->db->start_transaction();
+        $this->adios->db->startTransaction();
 
         $upgrades = $this->upgrades();
 
@@ -336,11 +366,17 @@ class Model extends \Illuminate\Database\Eloquent\Model {
         $this->adios->db->commit();
         $this->saveConfig('installed-version', $lastVersion);
 
-      } catch(\ADIOS\Core\DBException $e) {
+      } catch(\ADIOS\Core\Exceptions\DBException $e) {
         $this->adios->db->rollback();
-        throw new \ADIOS\Core\DBException($e->getMessage());
+        throw new \ADIOS\Core\Exceptions\DBException($e->getMessage());
       }
     }
+  }
+
+  public function dropTableIfExists() {
+    $this->adios->db->query("set foreign_key_checks = 0");
+    $this->adios->db->query("drop table if exists `".$this->getFullTableSQLName()."`");
+    $this->adios->db->query("set foreign_key_checks = 1");
   }
 
   /**
@@ -404,7 +440,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     $tmp = $this
       ->selectRaw("{$this->table}.id")
       ->selectRaw("(".str_replace("{%TABLE%}", $this->table, $this->lookupSqlValue()).") as ___lookupSqlValue")
-      ->orderByRaw("(".str_replace("{%TABLE%}", $this->table, $this->lookupSqlValue()).")", "asc")
+      ->orderBy("___lookupSqlValue", "asc")
       ->get()
       ->toArray()
     ;
@@ -484,7 +520,37 @@ class Model extends \Illuminate\Database\Eloquent\Model {
         "action" => "UI/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->name,
-          "searchGroup" => $urlBase,
+          "searchGroup" => $this->tableTitle ?? $urlBase,
+        ])
+      ],
+      '/^'.$urlBase.'\/Export\/CSV$/' => [
+        "action" => "UI/Table/Export/CSV",
+        "params" => array_merge($urlParams, [
+          "model" => $this->name,
+        ])
+      ],
+      '/^'.$urlBase.'\/Import\/CSV$/' => [
+        "action" => "UI/Table/Import/CSV",
+        "params" => array_merge($urlParams, [
+          "model" => $this->name,
+        ])
+      ],
+      '/^'.$urlBase.'\/Import\/CSV\/Import$/' => [
+        "action" => "UI/Table/Import/CSV/Import",
+        "params" => array_merge($urlParams, [
+          "model" => $this->name,
+        ])
+      ],
+      '/^'.$urlBase.'\/Import\/CSV\/DownloadTemplate$/' => [
+        "action" => "UI/Table/Import/CSV/DownloadTemplate",
+        "params" => array_merge($urlParams, [
+          "model" => $this->name,
+        ])
+      ],
+      '/^'.$urlBase.'\/Import\/CSV\/Preview$/' => [
+        "action" => "UI/Table/Import/CSV/Preview",
+        "params" => array_merge($urlParams, [
+          "model" => $this->name,
         ])
       ],
     ]);
@@ -499,7 +565,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     // default column settings
     foreach ($columns as $colName => $colDefinition) {
       if ($colDefinition["type"] == "char") {
-        $this->adios->console->log("Model", "{$this->name}, {$colName}: char type is deprecated");
+        $this->adios->console->info("{$this->name}, {$colName}: char type is deprecated");
       }
 
       switch ($colDefinition["type"]) {
@@ -514,20 +580,6 @@ class Model extends \Illuminate\Database\Eloquent\Model {
         case "password":
           $columns[$colName]["byte_size"] = $columns[$colName]["byte_size"] ?? 255;
         break;
-        // case "lookup":
-        //   try {
-        //     $tmpModelClassName = $this->adios->getModelClassName($columns[$colName]["model"]);
-        //     $tmpModel = new $tmpModelClassName($this->adios);
-        //   } catch (Exception $e) {
-        //     throw new \Exception("Model {$this->name}: Failed to initialize lookup column {$colName}.");
-        //   }
-
-        //   $columns[$colName]["key"] = $columns[$colName]["key"] ?? "id";
-        //   $columns[$colName]["table"] = $columns[$colName]["table"] ?? $tmpModel->getFullTableSQLName();
-        //   $columns[$colName]["sql"] = $columns[$colName]["sql"] ?? $tmpModel->lookupSqlValue();
-
-        //   unset($tmpModel);
-        // break;
       }
     }
 
@@ -559,23 +611,62 @@ class Model extends \Illuminate\Database\Eloquent\Model {
   //////////////////////////////////////////////////////////////////
   // CRUD methods
 
+  public function getRelationships() {
+    return $this; // to be overriden, should return chained Eloquent's ->with() method calls
+  }
+
   public function getExtendedData($item) {
-    return $item; // to be overriden
+    return NULL; // to be overriden, should return $item with extended information
+    // the NULL return is for optimization in getAll() method
   }
 
   public function getById(int $id) {
-    $item = reset($this->where('id', $id)->get()->toArray());
-    return $this->getExtendedData($item);
-  }
+    $item = reset($this->getRelationships()->where('id', $id)->get()->toArray());
 
-  public function getAll(string $keyBy = "id") {
-    $items = $this->getWithLookups(NULL, $keyBy);
-
-    foreach ($items as $key => $item) {
-      $items[$key] = $this->getExtendedData($item);
+    if ($this->getExtendedData([]) !== NULL) {
+      $item = $this->getExtendedData($item);
     }
 
+    $item = $this->adios->dispatchEventToPlugins("onModelAfterGetExtendedData", [
+      "model" => $this,
+      "item" => $item,
+    ])["item"];
+
+    return $item;
+  }
+
+  public function getByLookupSqlValue(string $lookupSqlValue) {
+    return reset($this->adios->db->get_all_rows_query("
+      select
+        id,
+        ".$this->lookupSqlValue("t")." as `input_lookup_value`
+      from `{$this->table}` t
+      having `input_lookup_value` = '".$this->adios->db->escape($lookupSqlValue)."'
+    "));
+  }
+
+  public function getAll(string $keyBy = "id", $withLookups = FALSE, $processLookups = FALSE) {
+    if ($withLookups) {
+      $items = $this->getWithLookups(NULL, $keyBy, $processLookups);
+    } else {
+      $items = $this->pdoPrepareExecuteAndFetch("select * from :table", [], $keyBy);
+    }
+
+    if ($this->getExtendedData([]) !== NULL) {
+      foreach ($items as $key => $item) {
+        $items[$key] = $this->getExtendedData($item);
+      }
+    }
+    
     return $items;
+  }
+
+  public function getAllCached() {
+    if (static::$allItemsCache === NULL) {
+      static::$allItemsCache = $this->getAll();
+    }
+
+    return static::$allItemsCache;
   }
 
   public function getQueryWithLookups($callback = NULL) {
@@ -589,24 +680,28 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     return $query;
   }
 
-  public function getWithLookups($callback = NULL, $keyBy = 'id') {
+  public function getWithLookups($callback = NULL, $keyBy = 'id', $processLookups = FALSE) {
     $query = $this->getQueryWithLookups($callback);
     return $this->processLookupsInQueryResult(
-      $this->fetchQueryAsArray($query, $keyBy, FALSE),
-      TRUE
+      $this->fetchRows($query, $keyBy, FALSE),
+      $processLookups
     );
   }
 
   public function insertRow($data) {
-    return $this->adios->db->insert_row($this->table, $data);
+    return $this->adios->db->insert_row($this->table, $data, FALSE, FALSE, $this);
+  }
+
+  public function insertOrUpdateRow($data) {
+    return $this->adios->db->insert_or_update_row($this->table, $data, FALSE, FALSE, $this);
   }
 
   public function insertRandomRow($data = [], $dictionary = []) {
-    return $this->adios->db->insert_random_row($this->table, $data ,$dictionary);
+    return $this->adios->db->insert_random_row($this->table, $data, $dictionary, $this);
   }
 
   public function updateRow($data, $id) {
-    return $this->adios->db->update_row_part($this->table, $data, $id);
+    return $this->adios->db->update_row_part($this->table, $data, $id, FALSE, $this);
   }
 
   public function deleteRow($id) {
@@ -624,10 +719,20 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     return $q->execute($variables);
   }
 
-  public function pdoPrepareExecuteAndFetch(string $query, array $variables) {
+  public function pdoPrepareExecuteAndFetch(string $query, array $variables, string $keyBy = "") {
     $q = $this->pdo->prepare(str_replace(":table", $this->getFullTableSQLName(), $query));
     $q->execute($variables);
-    return $q->fetchAll(\PDO::FETCH_ASSOC);
+
+    $rows = [];
+    while ($row = $q->fetch(\PDO::FETCH_ASSOC)) {
+      if (empty($keyBy)) {
+        $rows[] = $row;
+      } else {
+        $rows[$row[$keyBy]] = $row;
+      }
+    }
+
+    return $rows;
   }
 
   //////////////////////////////////////////////////////////////////
@@ -645,7 +750,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     return str_replace('{%TABLE%}', $this->table, "
       select
         id,
-        ".$this->lookupSqlValue()." as input_lookup_value
+        ".$this->lookupSqlValue()." as `input_lookup_value`
       from `{$this->table}`
       where
         ".$this->lookupSqlWhere($initiatingModel, $initiatingColumn, $formData, $params)."
@@ -693,13 +798,15 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     ])["data"]["html"];
   }
 
-  public function tableCellCSVExportFormatter($data) {
-    return $this->adios->dispatchEventToPlugins("onTableCellCSVExportFormatter", [
+  public function tableCellCSVFormatter($data) {
+    return $this->adios->dispatchEventToPlugins("onTableCellCSVFormatter", [
       "model" => $this,
       "data" => $data,
     ])["data"]["csv"];
   }
 
+  public function onTableBeforeInit($tableObject) { }
+  public function onTableAfterInit($tableObject) { }
   public function onTableAfterDataLoaded($tableObject) { }
 
   public function tableFilterColumnSqlWhere($columnName, $filterValue, $column = NULL) {
@@ -709,256 +816,265 @@ class Model extends \Illuminate\Database\Eloquent\Model {
 
     $type = $column['type'];
     $s = explode(',', $filterValue);
-    if (('int' == $type && _count($column['enum_values'])) || 'varchar' == $type || 'text' == $type || 'color' == $type || 'file' == $type || 'image' == $type || 'enum' == $type || 'password' == $type || 'lookup' == $type) {
-        $w = explode(' ', $filterValue);
+    if (
+      ($type == 'int' && _count($column['enum_values']))
+      || in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password', 'lookup'])
+    ) {
+      $w = explode(' ', $filterValue);
     } else {
-        $w = $filterValue;
+      $w = $filterValue;
     }
 
-    if ('' != trim($column['sql']) && 'lookup' != $type) {
-        if (!('int' == $type && _count($column['enum_values']))) {
-            $columnName = '('.$column['sql'].')';
-        }
+    if ($column['virtual']) {
+      if ($type == 'int' && _count($column['enum_values'])) {
+        //
+      } else {
+        $columnName = '('.$column['sql'].')';
+      }
     }
 
     $return = 'false';
 
     // trochu komplikovanejsia kontrola, ale znamena, ze vyhladavany retazec sa pouzije len ak uz nie je delitelny podla ciarok, alebo medzier
-    // pripadne tato kontrola eplati ak je na zaciatku =
+    // pripadne tato kontrola neplati ak je na zaciatku =
 
     if (
-        '=' == $filterValue[0]
+      '=' == $filterValue[0]
       || (is_array($s) && 1 == count($s) && is_array($w) && 1 == count($w))
       || (is_array($s) && 1 == count($s) && !is_array($w) && '' != $w)
     ) {
-        $s = reset($s);
+      $s = reset($s);
 
-        if ('=' == $filterValue[0]) {
-            $s = substr($filterValue, 1);
+      if ('=' == $filterValue[0]) {
+        $s = substr($filterValue, 1);
+      }
+
+      if ('!=' == substr($s, 0, 2)) {
+        $not = true;
+        $s = substr($s, 2);
+      }
+
+      // queryies pre typy
+
+      if ('bool' == $type) {
+        if ('Y' == $s) {
+          $return = "`{$columnName}` = '".$this->adios->db->escape(trim($s))."' ";
+        } else {
+          $return = "(`{$columnName}` != 'Y' OR `{$columnName}` is null) ";
+        }
+      }
+
+      if ('boolean' == $type) {
+        if ('0' == $s) {
+          $return = "(`{$columnName}` = '".$this->adios->db->escape(trim($s))."' or `{$columnName}` is null) ";
+        } else {
+          $return = "`{$columnName}` != '0'";
+        }
+      }
+
+      if ($type == 'int' && _count($column['enum_values'])) {
+        $return = " `{$columnName}_enum_value` like '%".$this->adios->db->escape(trim($s))."%'";
+      } else if (in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password'])) {
+        $return = " `{$columnName}` like '%".$this->adios->db->escape(trim($s))."%'";
+      } else if ($type == 'lookup') {
+        if (is_numeric($s)) {
+          $return = " `{$columnName}` = ".$this->adios->db->escape($s)."";
+        } else {
+          $return = " `{$columnName}_lookup_sql_value` like '%".$this->adios->db->escape(trim($s))."%'";
+        }
+      }
+
+      if ('float' == $type || ('int' == $type && !_count($column['enum_values']))) {
+        $s = trim(str_replace(',', '.', $s));
+        $s = str_replace(' ', '', $s);
+
+        if (is_numeric($s)) {
+          $return = "({$columnName}=$s)";
+        } elseif ('-' != $s[0] && strpos($s, '-')) {
+          list($from, $to) = explode('-', $s);
+          $return = "({$columnName}>=".(trim($from) + 0)." and {$columnName}<=".(trim($to) + 0).')';
+        } elseif (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
+          $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? trim($m[1]) : '=');
+          $operand = trim($m[2]) + 0;
+          $return = "{$columnName} {$operator} {$operand}";
+        } else {
+          $return = 'FALSE';
+        }
+      }
+
+      if ('date' == $type) {
+        $s = str_replace(' ', '', $s);
+        $s = str_replace(',', '.', $s);
+
+        $return = 'false';
+
+        // ak je do filtru zadany znak '-', vyfiltruje nezadane datumy
+        if ($s === '-') {
+          $return = "({$columnName} IS NULL OR {$columnName} = '0000-00-00' OR {$columnName} = '')";
         }
 
-        if ('!=' == substr($s, 0, 2)) {
-            $not = true;
-            $s = substr($s, 2);
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
+          $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          if (strtotime($m[2]) > 0) {
+            $to = date('Y-m-d', strtotime($m[2]));
+            $return = "{$columnName} {$operator} '{$to}'";
+          } else {
+            //
+          }
+        }
+        if (preg_match('/^([\>\<=\!]{1,2})([0-9\.\-]+)([\>\<=\!]{1,2})([0-9\.\-]+)$/', $s, $m)) {
+          $operator_1 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          $date_1 = date('Y-m-d', strtotime($m[2]));
+          $operator_2 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[3] : '=');
+          $date_2 = date('Y-m-d', strtotime($m[4]));
+          if (strtotime($m[2]) > 0 && strtotime($m[4]) > 0) {
+            $return = "({$columnName} {$operator_1} '{$date_1}') and ({$columnName} {$operator_2} '{$date_2}')";
+          } else {
+            //
+          }
+        }
+        if (preg_match('/^([0-9\.\-]+)-([0-9\.\-]+)$/', $s, $m)) {
+          $date_1 = date('Y-m-d', strtotime($m[1]));
+          $date_2 = date('Y-m-d', strtotime($m[2]));
+          if (strtotime($m[1]) > 0 && strtotime($m[2]) > 0) {
+            $return = "({$columnName} >= '{$date_1}') and ({$columnName} <= '{$date_2}')";
+          } else {
+            //
+          }
+        }
+        if (preg_match('/^([0-9]+)\.([0-9]+)$/', $s, $m)) {
+          $month = $m[1];
+          $year = $m[2];
+          $return = "(month({$columnName}) = '{$month}') and (year({$columnName}) = '{$year}')";
+        }
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9]+)$/', $s, $m)) {
+          $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          $year = $m[2];
+          $return = "(year({$columnName}) {$operator} '{$year}')";
+        }
+      }
+
+      if ('datetime' == $type || 'timestamp' == $type) {
+        $s = str_replace(' ', '', $s);
+        $s = str_replace(',', '.', $s);
+
+        $return = 'false';
+
+        // ak je do filtru zadany znak '-', vyfiltruje nezadane datumy
+        if ($s === '-') {
+          $return = "({$columnName} IS NULL OR {$columnName} = '0000-00-00 00:00:00' OR {$columnName} = '')";
         }
 
-        // queryies pre typy
-
-        if ('bool' == $type) {
-            if ('Y' == $s) {
-                $return = "{$columnName} = '".$this->adios->db->escape(trim($s))."' ";
-            } else {
-                $return = "({$columnName} != 'Y' OR {$columnName} is null) ";
-            }
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
+          $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          if (strtotime($m[2]) > 0) {
+            $to = date('Y-m-d', strtotime($m[2]));
+            $return = "date({$columnName}) {$operator} '{$to}'";
+          } else {
+            //
+          }
         }
-
-        if ('boolean' == $type) {
-            if ('0' == $s) {
-                $return = "({$columnName} = '".$this->adios->db->escape(trim($s))."'  or {$columnName} is null) ";
-            } else {
-                $return = "{$columnName} != '0'";
-            }
+        if (preg_match('/^([\>\<=\!]{1,2})([0-9\.\-]+)([\>\<=\!]{1,2})([0-9\.\-]+)$/', $s, $m)) {
+          $operator_1 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          $date_1 = date('Y-m-d', strtotime($m[2]));
+          $operator_2 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[3] : '=');
+          $date_2 = date('Y-m-d', strtotime($m[4]));
+          if (strtotime($m[2]) > 0 && strtotime($m[4]) > 0) {
+            $return = "(date({$columnName}) {$operator_1} '{$date_1}') and (date({$columnName}) {$operator_2} '{$date_2}')";
+          } else {
+            //
+          }
         }
-
-        if (('int' == $type && _count($column['enum_values'])) || 'varchar' == $type || 'text' == $type || 'color' == $type || 'file' == $type || 'image' == $type || 'enum' == $type || 'password' == $type) {
-            $return = " {$columnName} like '%".$this->adios->db->escape(trim($s))."%'";
+        if (preg_match('/^([0-9\.\-]+)-([0-9\.\-]+)$/', $s, $m)) {
+          $date_1 = date('Y-m-d', strtotime($m[1]));
+          $date_2 = date('Y-m-d', strtotime($m[2]));
+          if (strtotime($m[1]) > 0 && strtotime($m[2]) > 0) {
+            $return = "(date({$columnName}) >= '{$date_1}') and (date({$columnName}) <= '{$date_2}')";
+          } else {
+            //
+          }
         }
-
-        if ('lookup' == $type) {
-            $return = " {$columnName}_lookup_sql_value like '%".$this->adios->db->escape(trim($s))."%'";
+        if (preg_match('/^([0-9]+)\.([0-9]+)$/', $s, $m)) {
+          $month = $m[1];
+          $year = $m[2];
+          $return = "(month({$columnName}) = '{$month}') and (year({$columnName}) = '{$year}')";
         }
-
-        if ('float' == $type || ('int' == $type && !_count($column['enum_values']))) {
-            $s = trim(str_replace(',', '.', $s));
-            $s = str_replace(' ', '', $s);
-
-            if (is_numeric($s)) {
-                $return = "({$columnName}=$s)";
-            } elseif ('-' != $s[0] && strpos($s, '-')) {
-                list($from, $to) = explode('-', $s);
-                $return = "({$columnName}>=".(trim($from) + 0)." and {$columnName}<=".(trim($to) + 0).')';
-            } elseif (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
-                $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? trim($m[1]) : '=');
-                $operand = trim($m[2]) + 0;
-                $return = "{$columnName} {$operator} {$operand}";
-            } else {
-                $return = 'FALSE';
-            }
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9]+)$/', $s, $m)) {
+          $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          $year = $m[2];
+          $return = "(year({$columnName}) {$operator} '{$year}')";
         }
+      }
 
-        if ('date' == $type) {
-            $s = str_replace(' ', '', $s);
-            $s = str_replace(',', '.', $s);
+      if ('time' == $type) {
+          $return = 'false';
+          $s = str_replace(' ', '', $s);
 
-            $return = 'false';
+          // ak je do filtru zadany znak '-', vyfiltruje nezadane datumy
+          if ($s === '-') {
+              $return = "({$columnName} IS NULL OR {$columnName} = '00:00:00' OR {$columnName} = '')";
+          }
 
-            // ak je do filtru zadany znak '-', vyfiltruje nezadane datumy
-            if ($s === '-') {
-                $return = "({$columnName} IS NULL OR {$columnName} = '0000-00-00' OR {$columnName} = '')";
-            }
+          if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\:]+)$/', $s, $m)) {
+              $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+              if (strtotime('01.01.2000 '.$m[2]) > 0) {
+                  $to = date('H:i:s', strtotime('01.01.2000 '.$m[2]));
+                  $return = "{$columnName} {$operator} '{$to}'";
+              } else {
+                //
+              }
+          }
+          if (preg_match('/^([0-9\:]+)-([0-9\:]+)$/', $s, $m)) {
+              $date_1 = date('H:i:s', strtotime('01.01.2000 '.$m[1]));
+              $date_2 = date('H:i:s', strtotime('01.01.2000 '.$m[2]));
+              if (strtotime('01.01.2000 '.$m[1]) > 0 && strtotime('01.01.2000 '.$m[2]) > 0) {
+                  $return = "({$columnName} >= '{$date_1}') and ({$columnName} <= '{$date_2}')";
+              } else {
+                //
+              }
+          }
+          if (preg_match('/^([0-9]+)$/', $s, $m)) {
+              $hour = $m[1];
+              $return = "(hour({$columnName}) = '{$hour}')";
+          }
+      }
 
-            if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
-                $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                if (strtotime($m[2]) > 0) {
-                    $to = date('Y-m-d', strtotime($m[2]));
-                    $return = "{$columnName} {$operator} '{$to}'";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([\>\<=\!]{1,2})([0-9\.\-]+)([\>\<=\!]{1,2})([0-9\.\-]+)$/', $s, $m)) {
-                $operator_1 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                $date_1 = date('Y-m-d', strtotime($m[2]));
-                $operator_2 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[3] : '=');
-                $date_2 = date('Y-m-d', strtotime($m[4]));
-                if (strtotime($m[2]) > 0 && strtotime($m[4]) > 0) {
-                    $return = "({$columnName} {$operator_1} '{$date_1}') and ({$columnName} {$operator_2} '{$date_2}')";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9\.\-]+)-([0-9\.\-]+)$/', $s, $m)) {
-                $date_1 = date('Y-m-d', strtotime($m[1]));
-                $date_2 = date('Y-m-d', strtotime($m[2]));
-                if (strtotime($m[1]) > 0 && strtotime($m[2]) > 0) {
-                    $return = "({$columnName} >= '{$date_1}') and ({$columnName} <= '{$date_2}')";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9]+)\.([0-9]+)$/', $s, $m)) {
-                $month = $m[1];
-                $year = $m[2];
-                $return = "(month({$columnName}) = '{$month}') and (year({$columnName}) = '{$year}')";
-            }
-            if (preg_match('/^([\>\<=\!]{1,2})?([0-9]+)$/', $s, $m)) {
-                $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                $year = $m[2];
-                $return = "(year({$columnName}) {$operator} '{$year}')";
-            }
+      if ('year' == $type) {
+        $return = 'false';
+
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9]+)$/', $s, $m)) {
+          $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          if (is_numeric($m[2])) {
+            $return = "{$columnName} {$operator} '$m[2]'";
+          } else {
+            //
+          }
         }
-
-        if ('datetime' == $type || 'timestamp' == $type) {
-            $s = str_replace(' ', '', $s);
-            $s = str_replace(',', '.', $s);
-
-            $return = 'false';
-
-            // ak je do filtru zadany znak '-', vyfiltruje nezadane datumy
-            if ($s === '-') {
-                $return = "({$columnName} IS NULL OR {$columnName} = '0000-00-00 00:00:00' OR {$columnName} = '')";
-            }
-
-            if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
-                $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                if (strtotime($m[2]) > 0) {
-                    $to = date('Y-m-d', strtotime($m[2]));
-                    $return = "date({$columnName}) {$operator} '{$to}'";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([\>\<=\!]{1,2})([0-9\.\-]+)([\>\<=\!]{1,2})([0-9\.\-]+)$/', $s, $m)) {
-                $operator_1 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                $date_1 = date('Y-m-d', strtotime($m[2]));
-                $operator_2 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[3] : '=');
-                $date_2 = date('Y-m-d', strtotime($m[4]));
-                if (strtotime($m[2]) > 0 && strtotime($m[4]) > 0) {
-                    $return = "(date({$columnName}) {$operator_1} '{$date_1}') and (date({$columnName}) {$operator_2} '{$date_2}')";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9\.\-]+)-([0-9\.\-]+)$/', $s, $m)) {
-                $date_1 = date('Y-m-d', strtotime($m[1]));
-                $date_2 = date('Y-m-d', strtotime($m[2]));
-                if (strtotime($m[1]) > 0 && strtotime($m[2]) > 0) {
-                    $return = "(date({$columnName}) >= '{$date_1}') and (date({$columnName}) <= '{$date_2}')";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9]+)\.([0-9]+)$/', $s, $m)) {
-                $month = $m[1];
-                $year = $m[2];
-                $return = "(month({$columnName}) = '{$month}') and (year({$columnName}) = '{$year}')";
-            }
-            if (preg_match('/^([\>\<=\!]{1,2})?([0-9]+)$/', $s, $m)) {
-                $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                $year = $m[2];
-                $return = "(year({$columnName}) {$operator} '{$year}')";
-            }
+        if (preg_match('/^([0-9\:]+)-([0-9\:]+)$/', $s, $m)) {
+          if (is_numeric($m[1]) && is_numeric($m[2])) {
+            $return = "({$columnName} >= '{$m[1]}') and ({$columnName} <= '{$m[2]}')";
+          } else {
+            //
+          }
         }
-
-        if ('time' == $type) {
-            $return = 'false';
-            $s = str_replace(' ', '', $s);
-
-            // ak je do filtru zadany znak '-', vyfiltruje nezadane datumy
-            if ($s === '-') {
-                $return = "({$columnName} IS NULL OR {$columnName} = '00:00:00' OR {$columnName} = '')";
-            }
-
-            if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\:]+)$/', $s, $m)) {
-                $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                if (strtotime('01.01.2000 '.$m[2]) > 0) {
-                    $to = date('H:i:s', strtotime('01.01.2000 '.$m[2]));
-                    $return = "{$columnName} {$operator} '{$to}'";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9\:]+)-([0-9\:]+)$/', $s, $m)) {
-                $date_1 = date('H:i:s', strtotime('01.01.2000 '.$m[1]));
-                $date_2 = date('H:i:s', strtotime('01.01.2000 '.$m[2]));
-                if (strtotime('01.01.2000 '.$m[1]) > 0 && strtotime('01.01.2000 '.$m[2]) > 0) {
-                    $return = "({$columnName} >= '{$date_1}') and ({$columnName} <= '{$date_2}')";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9]+)$/', $s, $m)) {
-                $hour = $m[1];
-                $return = "(hour({$columnName}) = '{$hour}')";
-            }
+        if (preg_match('/^([0-9]+)$/', $s, $m)) {
+          $return = "({$columnName} = '{$m[1]}')";
         }
+      }
 
-        if ('year' == $type) {
-            $return = 'false';
-
-            if (preg_match('/^([\>\<=\!]{1,2})?([0-9]+)$/', $s, $m)) {
-                $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
-                if (is_numeric($m[2])) {
-                    $return = "{$columnName} {$operator} '$m[2]'";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9\:]+)-([0-9\:]+)$/', $s, $m)) {
-                if (is_numeric($m[1]) && is_numeric($m[2])) {
-                    $return = "({$columnName} >= '{$m[1]}') and ({$columnName} <= '{$m[2]}')";
-                } else {
-                  //
-                }
-            }
-            if (preg_match('/^([0-9]+)$/', $s, $m)) {
-                $return = "({$columnName} = '{$m[1]}')";
-            }
-        }
-
-        if ($not) {
-            $return = " not( {$return} ) ";
-        }
+      if ($not) {
+          $return = " not( {$return} ) ";
+      }
     } elseif (is_array($s) && count($s) > 1) {
-        foreach ($s as $val) {
-            $wheres[] = $this->tableFilterColumnSqlWhere($columnName, $val, $column);
-        }
-        $return = implode(' or ', $wheres);
+      foreach ($s as $val) {
+        $wheres[] = $this->tableFilterColumnSqlWhere($columnName, $val, $column);
+      }
+      $return = implode(' or ', $wheres);
     } elseif (is_array($w) && count($w) > 1) {
-        foreach ($w as $val) {
-            $wheres[] = $this->tableFilterColumnSqlWhere($columnName, $val, $column);
-        }
-        $return = implode(' and ', $wheres);
+      foreach ($w as $val) {
+        $wheres[] = $this->tableFilterColumnSqlWhere($columnName, $val, $column);
+      }
+      $return = implode(' and ', $wheres);
     }
 
     return $return;
@@ -1000,6 +1116,9 @@ class Model extends \Illuminate\Database\Eloquent\Model {
   //////////////////////////////////////////////////////////////////
   // UI/Form methods
 
+  public function onFormBeforeInit($formObject) { }
+  public function onFormAfterInit($formObject) { }
+
   public function formParams($data, $params) {
     return $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
       "model" => $this,
@@ -1025,6 +1144,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
 
       if ($id <= 0) {
         $returnValue = $this->insertRow($data);
+        $data['id'] = (int) $returnValue;
       } else {
         $returnValue = $this->updateRow($data, $id);
       }
@@ -1042,7 +1162,28 @@ class Model extends \Illuminate\Database\Eloquent\Model {
       $returnValue = $this->onAfterSave($data, $returnValue);
 
       return $returnValue;
-    } catch (\ADIOS\Core\FormSaveException $e) {
+    } catch (\ADIOS\Core\Exceptions\FormSaveException $e) {
+      return $this->adios->renderHtmlWarning($e->getMessage());
+    }
+  }
+
+  public function formDelete(int $id) {
+    $id = (int) $id;
+
+    try {
+      $data = $this->onBeforeDelete($id);
+
+      $returnValue = $this->deleteRow($id);
+
+      $returnValue = $this->adios->dispatchEventToPlugins("onModelAfterDelete", [
+        "model" => $this,
+        "data" => $data,
+        "returnValue" => $returnValue,
+      ])["returnValue"];
+
+      $returnValue = $this->onAfterDelete($id);
+      return $returnValue;
+    } catch (\ADIOS\Core\Exceptions\FormDeleteException $e) {
       return $this->adios->renderHtmlWarning($e->getMessage());
     }
   }
@@ -1057,11 +1198,12 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     ])["params"];
   }
 
-  public function cardsCardHtmlFormatter($data) {
+  public function cardsCardHtmlFormatter($cardsObject, $data) {
     return $this->adios->dispatchEventToPlugins("onModelAfterCardsCardHtmlFormatter", [
       "model" => $this,
+      "cardsObject" => $cardsObject,
       "data" => $data,
-    ])["data"];
+    ])["html"];
   }
 
   //////////////////////////////////////////////////////////////////
@@ -1093,18 +1235,18 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     ])["returnValue"];
   }
 
-  public function onBeforeDelete($data) {
+  public function onBeforeDelete(int $id) {
     return $this->adios->dispatchEventToPlugins("onModelBeforeDelete", [
       "model" => $this,
-      "data" => $data,
-    ])["data"];
+      "id" => $id,
+    ])["id"];
   }
 
-  public function onAfterDelete($data) {
+  public function onAfterDelete(int $id) {
     return $this->adios->dispatchEventToPlugins("onModelAfterDelete", [
       "model" => $this,
-      "data" => $data,
-    ])["data"];
+      "id" => $id,
+    ])["id"];
   }
 
 
@@ -1145,8 +1287,12 @@ class Model extends \Illuminate\Database\Eloquent\Model {
 
       $selects[] = $lookupedModel->getFullTableSQLName().".id as {$lookupName}___LOOKUP___id";
 
+      $lookupedModelColumns = $lookupedModel->columns();
+
       foreach ($lookupedModel->columnNames() as $lookupedColName) {
-        $selects[] = $lookupedModel->getFullTableSQLName().".{$lookupedColName} as {$lookupName}___LOOKUP___{$lookupedColName}";
+        if (!$lookupedModelColumns[$lookupedColName]['virtual'] ?? FALSE) {
+          $selects[] = $lookupedModel->getFullTableSQLName().".{$lookupedColName} as {$lookupName}___LOOKUP___{$lookupedColName}";
+        }
       }
 
       $joins[] = [
@@ -1200,9 +1346,10 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     $processedRows = [];
     foreach ($rows as $rowKey => $row) {
       foreach ($row as $colName => $colValue) {
-        if (strpos($colName, "___LOOKUP___") !== FALSE) {
-          list($tmp1, $tmp2) = explode("___LOOKUP___", $colName);
-          $tmp1 = strtoupper($tmp1); // TODO: UPPERCASE LOOKUP
+        $strpos = strpos($colName, "___LOOKUP___");
+        if ($strpos !== FALSE) {
+          $tmp1 = strtoupper(substr($colName, 0, $strpos));
+          $tmp2 = substr($colName, $strpos + strlen("___LOOKUP___"));
           $row[$tmp1][$tmp2] = $colValue;
           unset($row[$colName]);
         }
@@ -1212,28 +1359,14 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     return $processedRows;
   }
 
-  // extractLookupFromQueryResult
-  public function extractLookupFromQueryResult($rows, $lookup) {
-    $processedRows = [];
-    foreach ($rows as $rowKey => $row) {
-      $processedRows[$rowKey] = [];
-      foreach ($row as $colName => $colValue) {
-        if (strpos($colName, "{$lookup}___LOOKUP___") === 0) {
-          $processedRows[$rowKey][str_replace("{$lookup}___LOOKUP___", "", $colName)] = $colValue;
-        }
-      }
-    }
-    return $processedRows;
-  }
-  
-  // fetchQueryAsArray
-  public function fetchQueryAsArray($eloquentQuery, $keyBy = 'id', $processOutput = TRUE) {
+  // fetchRows
+  public function fetchRows($eloquentQuery, $keyBy = 'id', $processLookups = TRUE) {
     $query = $this->pdo->prepare($eloquentQuery->toSql());
     $query->execute($eloquentQuery->getBindings());
 
     $rows = $this->associateKey($query->fetchAll(\PDO::FETCH_ASSOC), 'id');
 
-    if ($processOutput) {
+    if ($processLookups) {
       $rows = $this->processLookupsInQueryResult($rows);
     }
 
@@ -1245,7 +1378,7 @@ class Model extends \Illuminate\Database\Eloquent\Model {
         $tmpCrossTableModel->addLookupsToQuery($tmpCrossQuery);
         $tmpCrossQuery->whereIn($tmpForeignKey, array_keys($rows));
 
-        $tmpCrossTableValues = $this->fetchQueryAsArray($tmpCrossQuery, 'id', FALSE);
+        $tmpCrossTableValues = $this->fetchRows($tmpCrossQuery, 'id', FALSE);
 
         foreach ($tmpCrossTableValues as $tmpCrossTableValue) {
           $rows
@@ -1265,4 +1398,13 @@ class Model extends \Illuminate\Database\Eloquent\Model {
 
   }
 
+  // countRowsInQuery
+  public function countRowsInQuery($eloquentQuery) {
+    $query = $this->pdo->prepare($eloquentQuery->toSql());
+    $query->execute($eloquentQuery->getBindings());
+
+    $rows = $query->fetchAll(\PDO::FETCH_COLUMN, 0);
+
+    return count($rows);
+  }
 }

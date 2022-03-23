@@ -38,6 +38,10 @@ class Window extends \ADIOS\Core\UI\View {
 
   }
 
+  public function setContent($content) {
+    $this->params['content'] = $content;
+  }
+
   public function render(string $panel = '') {
     $this->add($this->params['header'], 'header');
     $this->add($this->params['content'], 'content');
@@ -48,7 +52,7 @@ class Window extends \ADIOS\Core\UI\View {
 
     $html = "
       <span
-        class='adios_window'
+        class='adios ui Window adios_window'
         id='{$this->params['uid']}'
       >
         <div class='header'>

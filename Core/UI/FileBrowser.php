@@ -14,7 +14,6 @@ namespace ADIOS\Core\UI;
 /* pouziva \ADIOS\Core\UI\Input\FileBrowser */
 class FileBrowser extends \ADIOS\Core\UI\View {
   public function render(string $panel = "") {
-    $this->params['onchange'] = "{$this->uid}_close($(this).val());";
 
     $inputHtml = (new \ADIOS\Core\UI\Input\FileBrowser(
       $this->adios,
@@ -23,6 +22,10 @@ class FileBrowser extends \ADIOS\Core\UI\View {
     ))->render();
     
     if ($this->params['__IS_WINDOW__']) {
+      if (empty($this->params['onchange'])) {
+        $this->params['onchange'] = "{$this->uid}_close($(this).val());";
+      }
+
       $html = $this->adios->ui->Window(
         [
           'uid' => "{$this->uid}_window",
@@ -37,15 +40,23 @@ class FileBrowser extends \ADIOS\Core\UI\View {
             </script>
           ",
           'header' => [
-            $this->adios->ui->Button(["text" => "Close", "type" => "close", "onclick" => "{$this->uid}_close();"]),
+            $this->adios->ui->Button([
+              "text" => $this->translate("Close"),
+              "type" => "close",
+              "onclick" => "{$this->uid}_close();",
+            ]),
           ],
           'title' => htmlspecialchars($this->params['title']),
         ]
       )->render();
     } else {
-      $html = $this->adios->ui->Title([
-        'center' => $this->params['title'] ?? "File browser",
-      ])->render();
+      $html = "";
+
+      if (!empty($this->params['title'])) {
+        $html .= $this->adios->ui->Title([
+          'center' => $this->translate($this->params['title']),
+        ])->render();
+      }
 
       $html .= $inputHtml;
     }

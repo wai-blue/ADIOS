@@ -132,20 +132,20 @@ function _ajax_check_json_format(res){
   if (first_bracket > 0){
     before_json = res.substring(0,first_bracket);
     res = res.substring(first_bracket);
-    _adios_console_log('AJAX_LOAD JSON ERROR (before json)', before_json);
+    console.log('AJAX_LOAD JSON ERROR (before json)', before_json);
   }
   var last_bracket = res.lastIndexOf('}');
   if ((last_bracket + 1) < res.length){
     after_json = res.substring(last_bracket + 1);
     res = res.substring(0, last_bracket + 1);
-    _adios_console_log('AJAX_LOAD JSON ERROR (after json)', after_json);
+    console.log('AJAX_LOAD JSON ERROR (after json)', after_json);
   }
 
   try {
     res = JSON.parse(res);
   } catch ( err ) {
     if (_DEVEL_MODE){
-      if (before_json == "" && after_json == "") _adios_console_log("AJAX JSON PARSE ERROR", res);
+      if (before_json == "" && after_json == "") console.log("AJAX JSON PARSE ERROR", res);
     }
     res = {};
     res.result = '';
@@ -198,9 +198,9 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
         }
       }
 
-      if (action != 'Desktop/Ajax/GetConsoleAndNotificationsContent') {
-        desktop_console_update();
-      }
+      // if (action != 'Desktop/Ajax/GetConsoleAndNotificationsContent') {
+      //   desktop_console_update();
+      // }
     },
     'xhr': function() {
       var newxhr = $.ajaxSettings.xhr();
@@ -216,21 +216,41 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
         onresult(null);
       }
 
-      if (action != 'Desktop/Ajax/GetConsoleAndNotificationsContent'){
-        if (e.status == 0) _alert('Failed to connect to server.');
-        else _alert('Server error: ' + e.status);
-        desktop_console_update();
-      };
+      // if (action != 'Desktop/Ajax/GetConsoleAndNotificationsContent'){
+      //   if (e.status == 0) _alert('Failed to connect to server.');
+      //   else _alert('Server error: ' + e.status);
+      //   desktop_console_update();
+      // };
     }
   });
 };
 
-function _ajax_read_json(action, params, onsuccess) {
+function _ajax_read_json(action, params, onsuccess, onwarning, onfatal) {
   $.ajax({
     'type': 'GET',
     'url': _APP_URL + '/' + _ajax_action_url(action, params),
     'dataType': 'json',
-    'success': onsuccess,
+    'success': function(res) {
+      if (res.result == 'SUCCESS') {
+        if (typeof onsuccess == 'function') {
+          onsuccess(res.content);
+        } else {
+          _alert('SUCCESS\n\n' + JSON.stringify(res.content));
+        }
+      } else if (res.result == 'WARNING') {
+        if (typeof onwarning == 'function') {
+          onwarning(res.content);
+        } else {
+          _alert('WARNING\n\n' + JSON.stringify(res.content));
+        }
+      } else if (res.result == 'FATAL') {
+        if (typeof onfatal == 'function') {
+          onfatal(res.content);
+        } else {
+          _alert('FATAL\n\n' + JSON.stringify(res.content));
+        }
+      }
+    },
     'complete': function() { desktop_console_update(); }
   });
 };
@@ -309,7 +329,7 @@ function _ajax_supdate(action, params, selector, options) {
     var tmp_min_height = $(selector).css('minHeight');
 
     var sel_opacity = $(selector).css('opacity');
-    // $(selector).animate({'opacity': 0.3}, 100);
+    $(selector).animate({'opacity': 0.3}, 100);
     adios_loading_start();
 
     setTimeout(function() {
@@ -324,7 +344,7 @@ function _ajax_supdate(action, params, selector, options) {
                 var tmp = $.parseHTML(data);
   //              $('#adios_console_content').append(tmp);
                 if (typeof tmp[0] == 'object'){
-                  adios_console_log('AJAX WINDOW', $('<div></div>').append(tmp).html());
+                  console.log('AJAX WINDOW', $('<div></div>').append(tmp).html());
                 };
               }else{
                 $(selector).append($.parseHTML(data));
@@ -398,7 +418,6 @@ function _ajax_multiupload(options){
   if (typeof options.type == 'undefined') options.type = 'image';
   if (typeof options.subdir == 'undefined') options.subdir = 'multi_upload';
   if (typeof options.rename_file == 'undefined') options.rename_file = 1;
-  if (typeof options.allowed_extensions == 'undefined') options.allowed_extensions = '';
 
   if (! $('#adios_common_file_upload_input').length > 0){
     var file_input = "<div style='height:0px;overflow:hidden;'><input type='file' id='adios_common_file_upload_input' multiple='multiple' /></div>";
@@ -431,7 +450,7 @@ function _ajax_multiupload(options){
             formData.append('upload', files[item]);
 
             $.ajax({
-              url: _APP_URL + '/UI/FileBrowser/Upload?__IS_AJAX__=1&output=json&type=' + options.type + '&rename_file=' + options.rename_file + '&allowed_extensions=' + options.allowed_extensions + '&subdir=' + options.subdir,
+              url: _APP_URL + '/UI/FileBrowser/Upload?__IS_AJAX__=1&output=json&type=' + options.type + '&rename_file=' + options.rename_file + '&subdir=' + options.subdir,
               type: 'post',
               data: formData,
               enctype: 'multipart/form-data',

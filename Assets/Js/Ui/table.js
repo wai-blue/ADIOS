@@ -1,3 +1,5 @@
+  var ui_table_params = {};
+ 
 
   function ui_table_settings_click(uid){
 
@@ -51,21 +53,23 @@
       // params.table = $('#' + uid).attr('data-table');
 
       $('.' + uid + '_column_filter').each(function () {
-        params['column_filter_' + $(this).attr('data-col-name')] = $(this).val();
+        if ($(this).val() != '') {
+          params['column_filter_' + $(this).attr('data-col-name')] = $(this).val();
+        }
       });
 
       $('.' + uid + '_table_custom_filter_select').each(function () {
-        var tmp = 'set_custom_filter_' + $(this).attr('data-filter-name');
-        params[tmp] = $(this).val();
+        if ($(this).val() != '') {
+          var tmp = 'set_custom_filter_' + $(this).attr('data-filter-name');
+          params[tmp] = $(this).val();
+        }
       });
 
       params.refresh = 1;
 
-      // if (is_ajax) {
-        _ajax_update(action, params, uid);
-      // } else {
-      //   desktop_render(action, params);
-      // }
+      ui_table_params[uid] = params;
+
+      _ajax_update(action, params, uid);
     }
   };
 
@@ -79,15 +83,11 @@
     _file_download(action, params);
   };
 
-  function ui_table_refresh_by_tag(tag, params){
+  function ui_table_refresh_by_model(model, params) {
     if (typeof params == 'undefined') params = {};
 
-    $('.ui_table_tag_'+tag).each(function(){
-      uid = $(this).attr('id');
-      // action = $('#'+uid).attr('data-refresh-action');
-      // params.uid = uid;
-      // _ajax_update(action, params, uid);
-      ui_table_refresh(uid, params);
+    $('.adios.ui.Table[data-model="' + model + '"]').each(function(){
+      ui_table_refresh($(this).attr('id'), params);
     });
   };
 
@@ -173,25 +173,6 @@
       res = _ajax_sread(action, params);
       if (isNaN(res)) _alert(res);
       ui_table_refresh(uid);
-    }else{
-      _alert('table missing');
-    };
-  };
-
-  function ui_table_save_order(uid, column){
-    var order = '';
-    table = $('#'+uid).attr('data-table');
-    if (table != ''){
-
-      $('#'+uid+' .table_tr.data_tr').each(function(){
-        if ($(this).attr('data-id') > 0) order += $(this).attr('data-id')+',';
-      });
-
-      action = 'UI/Table/sortable';
-      res = _ajax_sread(action, {order: order, table: table, column: column});
-      if (isNaN(res)) _alert(res);
-      else ui_table_refresh(uid);
-
     }else{
       _alert('table missing');
     };

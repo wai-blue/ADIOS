@@ -148,6 +148,7 @@ function ui_input_upload_file(uid) {
   let fileInput = $('#' + uid + '_file_input');
   let formData = new FormData();
   formData.append('upload', fileInput[0].files[0]);
+  formData.append('folderPath', $('#' + uid).data('subdir'));
 
   if ($('#' + uid + '_file_input').val() != '') {
     $('#' + uid + '_info_div').css('display', 'inline-block');
@@ -279,7 +280,8 @@ function ui_input_lookup_onkeydown(event, uid) {
           ui_input_lookup_show_results(uid);
 
           let params = '';
-          let form_data = ui_form_get_values($('#' + uid).attr('data-form-uid'));
+          let form_uid = $('#' + uid).attr('data-form-uid');
+          let form_data = (form_uid == '' ? {} : ui_form_get_values(form_uid));
 
           params += '&model=' + encodeURIComponent($('#' + uid).attr('data-model'));
           params += '&initiating_model=' + encodeURIComponent($('#' + uid).attr('data-initiating-model'))
@@ -516,7 +518,6 @@ function ui_input_lookup_detail(id, uid) {
 
 function ui_input_lookup_search(inputUid) {
   let form_data = ui_form_get_values($('#' + inputUid).attr('data-form-uid'));
-  console.log(form_data);
 
   window_render(
     'UI/Input/LookupSearch',
@@ -567,7 +568,11 @@ function ui_input_table_remove_item(uid, id) {
 };
 
 function ui_input_ftp_browser(uid, type) {
-  window_render('UI/Input/ftp_browser', $('#' + uid).attr('data-upload-params') + '&type=' + type + '&input_uid=' + uid, function (res) { });
+  window_render(
+    'UI/Input/ftp_browser',
+    $('#' + uid).attr('data-upload-params') + '&type=' + type + '&input_uid=' + uid,
+    function (res) { }
+  );
 };
 
 function ui_input_table_add_value(uid, text) {

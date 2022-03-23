@@ -27,8 +27,13 @@ class Plugin {
 
   public function __construct($adios) {
     $this->name = str_replace("\\", "/", str_replace("ADIOS\\Plugins\\", "", get_class($this)));
+    $this->shortName = end(explode("/", $this->name));
     $this->adios = &$adios;
+    $this->params = [];
     $this->gtp = $this->adios->gtp;
+
+    $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
+    $this->dictionaryFolder = $this->myRootFolder."/Lang";
 
     // inicializacia pluginu
     $this->init();
@@ -53,18 +58,33 @@ class Plugin {
     // desktop shortcuts, routing, ...
   }
 
-  public function install() {
+  public function manifest() {
+    return [
+      // "faIcon" => "fas fa-puzzle-piece",
+      "logo" => "",
+      "title" => $this->niceName ?? $this->name,
+      "description" => "",
+    ];
+  }
+
+  public function install(object $installer) {
+    return TRUE;
+  }
+
+  public function installOnce(object $installer) {
     return TRUE;
   }
 
   public function loadModels() {
-    $dir = ADIOS_PLUGINS_DIR."/{$this->name}/Models";
+    foreach ($this->adios->pluginFolders as $pluginFolder) {
+      $folder = $pluginFolder."/{$this->name}/Models";
 
-    if (is_dir($dir)) {
-      foreach (scandir($dir) as $file) {
-        if (is_file("{$dir}/{$file}")) {
-          $tmpModelName = str_replace(".php", "", $file);
-          $this->adios->models[] = "Plugins/{$this->name}/Models/{$tmpModelName}";
+      if (is_dir($folder)) {
+        foreach (scandir($folder) as $file) {
+          if (is_file("{$folder}/{$file}")) {
+            $tmpModelName = str_replace(".php", "", $file);
+            $this->adios->registerModel("Plugins/{$this->name}/Models/{$tmpModelName}");
+          }
         }
       }
     }

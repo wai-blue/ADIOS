@@ -15,99 +15,7 @@ $width = (int) ($_GET['width'] ?? 0);
 $cfg_name = $_GET['cfg'] ?? "";
 $f = $_GET['f'] ?? "";
 
-class SimpleImage
-{
-    public $image;
-    public $image_type;
 
-    public function load($filename)
-    {
-        $image_info = getimagesize($filename);
-        $this->image_type = $image_info[2];
-        if (IMAGETYPE_JPEG == $this->image_type) {
-            $this->image = imagecreatefromjpeg($filename);
-        } elseif (IMAGETYPE_GIF == $this->image_type) {
-            $this->image = imagecreatefromgif($filename);
-        } elseif (IMAGETYPE_PNG == $this->image_type) {
-            $this->image = imagecreatefrompng($filename);
-        }
-    }
-
-    public function save($filename, $image_type = IMAGETYPE_JPEG, $compression = 70, $permissions = null)
-    {
-        if (IMAGETYPE_JPEG == $image_type) {
-            imagejpeg($this->image, $filename, $compression);
-        } elseif (IMAGETYPE_GIF == $image_type) {
-            imagegif($this->image, $filename);
-        } elseif (IMAGETYPE_PNG == $image_type) {
-            imagepng($this->image, $filename, (100 - $compression) * 0.1);
-        }
-
-        if (null != $permissions) {
-            chmod($filename, $permissions);
-        }
-    }
-
-    public function output($image_type = IMAGETYPE_JPEG)
-    {
-        if (IMAGETYPE_JPEG == $image_type) {
-            imagejpeg($this->image);
-        } elseif (IMAGETYPE_GIF == $image_type) {
-            imagecolortransparent($this->image, imagecolorallocatealpha($this->image, 0, 0, 0, 127));
-            imagealphablending($this->image, false);
-            imagesavealpha($this->image, true);
-            imagegif($this->image);
-        } elseif (IMAGETYPE_PNG == $image_type) {
-            imagecolortransparent($this->image, imagecolorallocatealpha($this->image, 0, 0, 0, 127));
-            imagealphablending($this->image, false);
-            imagesavealpha($this->image, true);
-            imagepng($this->image);
-        }
-    }
-
-    public function getWidth()
-    {
-        return imagesx($this->image);
-    }
-
-    public function getHeight()
-    {
-        return imagesy($this->image);
-    }
-
-    public function resizeToHeight($height)
-    {
-        $ratio = $height / $this->getHeight();
-        $width = $this->getWidth() * $ratio;
-        $this->resize($width, $height);
-    }
-
-    public function resizeToWidth($width)
-    {
-        $ratio = $width / $this->getWidth();
-        $height = $this->getheight() * $ratio;
-        $this->resize($width, $height);
-    }
-
-    public function zoom($scale)
-    {
-        if (1 != $scale) {
-            $this->resize($this->getWidth() * $scale, $this->getheight() * $scale);
-        }
-    }
-
-    public function resize($width, $height)
-    {
-        $img = imagecreatetruecolor($width, $height);
-        imagecolortransparent($img, imagecolorallocatealpha($img, 0, 0, 0, 127));
-        imagealphablending($img, false);
-        imagesavealpha($img, true);
-        $result = imagecopyresampled($img, $this->image, 0, 0, 0, 0, $width, $height, $this->getWidth(), $this->getHeight());
-        $this->image = $img;
-
-        return $result;
-    }
-}
 
 if (!isset($this->adios->config['image']['configurations']['main_datapub_image'])) {
     $this->config['image']['configurations']['main_datapub_image'] = ['width' => 48, 'height' => 48, 'background' => 'transparent', 'use_cache' => false];
@@ -119,10 +27,15 @@ $this->config['image']['configurations']['pdw_thumb_large'] = ['width' => 97, 'h
 $this->config['image']['configurations']['pdw_thumb_small'] = ['width' => 48, 'height' => 48];
 
 if (!isset($this->config['image']['configurations']['wa_list'])) {
-    $this->config['image']['configurations']['wa_list'] = ['height' => 50, 'background' => 'transparent', 'use_cache' => false, 'constrain_proportions' => true];
+  $this->config['image']['configurations']['wa_list'] = ['height' => 50, 'background' => 'transparent', 'use_cache' => false, 'constrain_proportions' => true];
 }
 if (!isset($this->config['image']['configurations']['input'])) {
-    $this->config['image']['configurations']['input'] = ['width' => 120, 'height' => 84, 'background' => 'transparent', 'use_cache' => false, 'constrain_proportions' => true, 'fill_empty_area' => true];
+  $this->config['image']['configurations']['input'] = [
+    'width' => 400,
+    'height' => 400,
+    'use_cache' => false,
+    'constrain_proportions' => true,
+  ];
 }
 
 $configurations = $this->config['image']['configurations'];
@@ -190,7 +103,7 @@ if (!isset($configurations[$cfg_name])) { // ak nie je zadana konfiguracia, vrat
         }
     }
 
-    $img = new SimpleImage();
+    $img = new \ADIOS\Core\Lib\SimpleImage();
     if ($no_image_render) {
         $img->load("{$orig_filename}");
     } else {
@@ -279,7 +192,7 @@ if (is_file("{$img_cache_dir}/{$new_filename}") && !$debug && !$this->config['de
 } else { // ak neexistuje tak ho musim spracovat a ulozit do cache
     $result = null;
 
-    $img = new SimpleImage();
+    $img = new \ADIOS\Core\Lib\SimpleImage();
 
     if ($no_image_render) {
         $img->load("{$orig_filename}");

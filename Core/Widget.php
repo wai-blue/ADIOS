@@ -18,20 +18,26 @@ namespace ADIOS\Core;
 class Widget {
   public $adios;
   public $gtp;
-  public $languageDictionary = [];
+  // public $languageDictionary = [];
 
   public $params = [];
   public $models = [];
 
   function __construct($adios, $params = []) {
     $this->name = str_replace("ADIOS\\Widgets\\", "", get_class($this));
+    $this->shortName = end(explode("/", $this->name));
     $this->adios = &$adios;
     $this->params = $params;
     $this->gtp = $this->adios->gtp;
 
+    $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
+
     if (!is_array($this->params)) {
       $this->params = [];
     }
+
+    // preklady
+    // $this->languageDictionary = $this->adios->loadLanguageDictionary($this);
 
     // inicializacia widgetu
     $this->init();
@@ -46,6 +52,7 @@ class Widget {
     $this->adios->dispatchEventToPlugins("onWidgetModelsLoaded", [
       "widget" => $this,
     ]);
+
   }
 
   public function init() {
@@ -53,8 +60,8 @@ class Widget {
     // desktop shortcuts, routing, ...
   }
 
-  public function translate($string, $context = "", $toLanguage = "") {
-    return $this->adios->translate($string, $context, $toLanguage, $this->languageDictionary);
+  public function translate($string) {
+    return $this->adios->translate($string, $this);
   }
 
   public function install() {
@@ -68,7 +75,7 @@ class Widget {
       foreach (scandir($dir) as $file) {
         if (is_file("{$dir}/{$file}")) {
           $tmpModelName = str_replace(".php", "", $file);
-          $this->adios->models[] = "Widgets/{$this->name}/Models/{$tmpModelName}";
+          $this->adios->registerModel("Widgets/{$this->name}/Models/{$tmpModelName}");
         }
       }
     }

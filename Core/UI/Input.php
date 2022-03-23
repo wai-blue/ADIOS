@@ -10,6 +10,29 @@
 
 namespace ADIOS\Core\UI;
 
+/**
+ * Renders input element (or elements) for a specific data type.
+ *
+ * Supported data types are:
+ *   * Char, Varchar, Int or Float (renders either *input* or *select* if enumValues are not empty)
+ *   * Text (renders *textarea*)
+ *   * Password (renders *input type='password'*)
+ *   * Date or DateTime (renders *input* with date/datetime picker)
+ *   * Lookup (renders either *select* or an autocomplete)
+ *   * Image or File (renders a complex input for uploading and selecting the image or file)
+ *   * Color (renders the complex input for color selection)
+ *
+ * Example code to render the input for *char* data type:
+ *
+ * ```php
+ *   $adios->ui->Input([
+ *     "type" => "char",
+ *     "value" => "Hello World",
+ *   ]);
+ * ```
+ *
+ * @package UI\Elements
+ */
 class Input extends \ADIOS\Core\UI\View {
     /*             */
     /* __construct */
@@ -61,7 +84,6 @@ class Input extends \ADIOS\Core\UI\View {
             'show_download_url_button' => true,
             'show_open_button' => true,
             'show_delete_button' => true,
-            'allowed_extensions' => '',
             'where' => '',
             'follow_lookups' => true,
             'order' => '',
@@ -199,10 +221,6 @@ class Input extends \ADIOS\Core\UI\View {
               {$this->params['html_attributes']}
               ".($this->params['readonly'] ? "disabled='disabled'" : '')."
             >
-              ".($this->params['type'] == 'int' && empty($this->params['enum_values'][0])
-                ? "<option value=''>".('' == $this->params['not_selected_text'] ? l('unselected') : $this->params['not_selected_text']).'</option>'
-                : ""
-              )."
           ";
 
           foreach ($this->params['enum_values'] as $enum_key => $enum_value) {
@@ -412,36 +430,35 @@ class Input extends \ADIOS\Core\UI\View {
 
             /* datetime, timestamp */
             if ('datetime' == $this->params['type'] || 'timestamp' == $this->params['type']) {
-                if ('' == $this->params['placeholder']) {
-                    $this->params['placeholder'] = 'dd.mm.yyyy hh:mm';
-                }
-                if ('' == $this->params['value']) {
-                    $this->params['value'] = ('' != $this->params['default_date_value'] ? $this->params['default_date_value'] : '');
-                }
-                $this->params['value'] = (false !== strtotime($this->params['value']) ? date('d.m.Y H:i:s', strtotime($this->params['value'])) : '');
+              if ('' == $this->params['placeholder']) {
+                $this->params['placeholder'] = 'dd.mm.yyyy hh:mm';
+              }
+              if ('' == $this->params['value']) {
+                $this->params['value'] = ('' != $this->params['default_date_value'] ? $this->params['default_date_value'] : '');
+              }
+              $this->params['value'] = (false !== strtotime($this->params['value']) ? date('d.m.Y H:i:s', strtotime($this->params['value'])) : '');
             }
 
             /* float */
             if ('float' == $this->params['type']) {
-                if (!($this->params['decimals'] > 0)) {
-                    $this->params['decimals'] = 2;
-                }
-                // $this->params['onchange'] = " ui_input_check_float_number($(this), {$this->params['decimals']}, '".l('Zadajte číselnú hodnotu')."'); ".$this->params['onchange'];
+              if (!($this->params['decimals'] > 0)) {
+                $this->params['decimals'] = 2;
+              }
             }
 
             /* int - slider */
             if ('int' == $this->params['type'] && 'slider' == $this->params['input_style']) {
-                $input_type = 'hidden';
+              $input_type = 'hidden';
             }
 
             /* time */
             if ('time' == $this->params['type']) {
-                if ('' == $this->params['placeholder']) {
-                    $this->params['placeholder'] = 'hh:mm:ss';
-                }
-                // medzera s x je tam naschval kvoli parsovaniu do inputov. nemazat
-                $this->params['onkeyup'] = "ui_input_parse_time('{$this->params['uid']}', 'x '+this.value); ".$this->params['onchange'];
-                $this->params['onkeydown'] = ' if (event.which > 31 && (event.which < 48 || event.which > 57) && event.which != 186) return false; '.$this->params['onchange'];
+              if ('' == $this->params['placeholder']) {
+                $this->params['placeholder'] = 'hh:mm:ss';
+              }
+              // medzera s x je tam naschval kvoli parsovaniu do inputov. nemazat
+              $this->params['onkeyup'] = "ui_input_parse_time('{$this->params['uid']}', 'x '+this.value); ".$this->params['onchange'];
+              $this->params['onkeydown'] = ' if (event.which > 31 && (event.which < 48 || event.which > 57) && event.which != 186) return false; '.$this->params['onchange'];
             }
 
             $this->params['onkeyup'] .= "
@@ -531,13 +548,8 @@ class Input extends \ADIOS\Core\UI\View {
                         $('#{$this->params['uid']}').datepicker({
                           changeYear: true,
                           dateFormat: 'dd.mm.yy".('datetime' == $this->params['type'] ? ' H:i:s' : '')."',
-                          'buttonImage': '', //{$this->adios->config['adios_images_url']}/black/app/calendar-3.png',
                           'showOn': 'both',
-                          'buttonImageOnly': true,
                           'constrainInput': true,
-                          'dayNames': [ '".l('Nedeľa')."', '".l('Pondelok')."', '".l('Utorok')."', '".l('Streda')."', '".l('Štvrtok')."', '".l('Piatok')."', '".l('Sobota')."' ],
-                          'dayNamesMin': [ '".l('Ne', '', ['context' => 'days'])."', '".l('Po', '', ['context' => 'days'])."', '".l('Ut', '', ['context' => 'days'])."', '".l('St', '', ['context' => 'days'])."', '".l('Št', '', ['context' => 'days'])."', '".l('Pi', '', ['context' => 'days'])."', '".l('So', '', ['context' => 'days'])."' ],
-                          'monthNames' : [ '".l('Január')."', '".l('Február')."', '".l('Marec')."', '".l('Apríl')."', '".l('Máj')."', '".l('Jún')."', '".l('Júl')."', '".l('August')."', '".l('September')."', '".l('Október')."', '".l('November')."', '".l('December')."' ],
                           'nextText': '',
                           'prevText': '',
                           'defaultDate': '{$this->params['default_date_value']}',
@@ -600,27 +612,21 @@ class Input extends \ADIOS\Core\UI\View {
           $img_src_base = "{$this->adios->config['url']}/Image?cfg=input&f=";
 
           if ('' != $this->params['value']) {
-              $img_src = "{$this->adios->config['url']}/Image?cfg=input&f=".urlencode($this->params['value']);
+            $img_src = "{$this->adios->config['url']}/Image?cfg=input&f=".urlencode($this->params['value']);
           } else {
-              $img_src = "{$this->adios->config['url']}/adios/assets/images/empty.png";
+            $img_src = "{$this->adios->config['url']}/adios/assets/images/empty.png";
           }
 
           $html = "
-            <img
-              src='{$img_src}'
-              id='{$this->params['uid']}_image'
-              class='adios ui Input image_input_img'
-              onclick='$(\"#{$this->params['uid']}_browser\").show(100);'
-            />
-
-            <!-- ".$this->adios->ui->Button([
-              "fa_icon" => "fas fa-file-upload",
-              "class" => "btn btn-light btn-icon-split ml-1",
-              "text" => "Browse or Upload",
-              "onclick" => "
-                $('#{$this->params['uid']}_browser').show(100);
-              ",
-            ])->render()." -->
+            <div class='adios ui Input ui_input_type_image'>
+              <img
+                src='{$img_src}'
+                id='{$this->params['uid']}_image'
+                class='adios ui Input'
+                onclick='$(\"#{$this->params['uid']}_browser\").show(100);'
+              />
+              <div class='image_path'>".hsc($this->params['value'])."</div>
+            </div>
 
             <div
               id='{$this->params['uid']}_browser'
@@ -650,7 +656,7 @@ class Input extends \ADIOS\Core\UI\View {
                 <div>
                   ".$this->adios->ui->Button([
                     "fa_icon" => "fas fa-times",
-                    "text" => "Close files and media browser",
+                    "text" => $this->translate("Close files and media browser"),
                     "class" => "btn btn-secondary btn-icon-split",
                     "onclick" => "
                       $('#{$this->params['uid']}_browser').hide();
@@ -681,8 +687,8 @@ class Input extends \ADIOS\Core\UI\View {
         if ('file' == $this->params['type']) {
             $default_src = $this->translate("No file uploaded");
             $file_src_base = "{$this->adios->config['url']}/File?f=";
-            $upload_params = "type=file&table_column={$this->params['table_column']}&rename_file={$this->params['rename_file']}&allowed_extensions={$this->params['allowed_extensions']}&subdir={$this->params['subdir']}";
-            $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
+            // $upload_params = "type=file&table_column={$this->params['table_column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
+            // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
 
             if ('' != $this->params['value']) {
               $file_short_name = end(explode('/', $this->params['value']));
@@ -705,12 +711,12 @@ class Input extends \ADIOS\Core\UI\View {
                   data-is-adios-input='1'
                   ".$this->main_params().'
                   '.$this->generate_input_events().'
-                  value="'.htmlspecialchars($this->params['value'])."\"
+                  value="'.ads($this->params['value'])."\"
                   {$this->params['html_attributes']}
-                  data-src-real-base=\"".htmlspecialchars($this->adios->config['files_url']).'"
-                  data-src-base="'.htmlspecialchars($file_src_base).'"
-                  data-default-txt="'.htmlspecialchars($default_src).'"
-                  data-upload-params="'.htmlspecialchars($upload_params).'"
+                  data-src-real-base=\"".ads($this->adios->config['files_url']).'"
+                  data-src-base="'.ads($file_src_base).'"
+                  data-default-txt="'.ads($default_src).'"
+                  data-subdir="'.ads($this->params['subdir']).'"
                   '.($this->params['readonly'] ? "disabled='disabled'" : '')."
                 />
                 
@@ -718,10 +724,13 @@ class Input extends \ADIOS\Core\UI\View {
                   <form id='{$this->params['uid']}_file_form' enctype='multipart/form-data'>
                     <input
                       ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-                      type='file' style='display:none;'
+                      type='file'
+                      style='display:none;'
                       name='{$this->params['uid']}_file_input'
                       id='{$this->params['uid']}_file_input'
-                      onchange='ui_input_upload_file(\"{$this->params['uid']}\");'
+                      onchange='
+                        ui_input_upload_file(\"{$this->params['uid']}\");
+                      '
                     />
                     <label for='{$this->params['uid']}_file_input'>
                       <span
@@ -732,7 +741,7 @@ class Input extends \ADIOS\Core\UI\View {
                             ui_input_file_open('{$this->params['uid']}');
                           \"
                         " : '')."
-                        title='".($this->params['readonly'] ? '' : l('Presuňte sem súbor, alebo kliknite pre nahratie súboru'))."'
+                        title='".($this->params['readonly'] ? '' : $this->translate("Drag and drop file here or click to find it on a computer."))."'
                       >
                         {$file_short_name}
                       </span>
@@ -756,16 +765,16 @@ class Input extends \ADIOS\Core\UI\View {
                           'uid' => $this->params['uid'].'_file_input_browser_button',
                           'onclick' => "ui_input_ftp_browser('{$this->params['uid']}', 'file');",
                           'fa_icon' => 'fas fa-search',
-                          'text' => l('Použiť už nahratý (Nájsť na serveri)'),
+                          'text' => $this->translate("Browse in uploaded files"),
                           'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
                         ])->render()
                       : '').
                       (FALSE && $this->params['show_download_url_button'] ?
                         $this->adios->ui->button([
                           'uid' => $this->params['uid'].'_file_input_download_button',
-                          'onclick' => "ui_input_file_download('{$this->params['uid']}', '".l('Zadajte URL adresu')."');",
+                          'onclick' => "ui_input_file_download('{$this->params['uid']}', '".$this->translate("Enter URL address")."');",
                           'fa_icon' => 'fas fa-download',
-                          'title' => l('Stiahnuť'),
+                          'title' => $this->translate('Download'),
                           'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
                         ])->render()
                       : '').
@@ -774,7 +783,7 @@ class Input extends \ADIOS\Core\UI\View {
                           'uid' => $this->params['uid'].'_file_input_open_button',
                           'onclick' => "ui_input_file_open('{$this->params['uid']}');",
                           'fa_icon' => 'fas fa-eye',
-                          'title' => l('Náhľad'),
+                          'title' => $this->translate('Preview'),
                           'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
                           'style' => (empty($this->params['value']) ? 'display:none;' : '')
                         ])->render()
@@ -784,7 +793,7 @@ class Input extends \ADIOS\Core\UI\View {
                           'uid' => $this->params['uid'].'_file_input_delete_button',
                           'onclick' => "ui_input_file_remove('{$this->params['uid']}');",
                           'fa_icon' => 'fas fa-trash-alt',
-                          'title' => l('Vyčistiť'),
+                          'title' => $this->translate('Clear'),
                           'class' => "float-left mr-1 btn-danger btn-sm btn-icon-split",
                           'style' => (empty($this->params['value']) ? 'display:none;' : '')
                         ])->render()
@@ -847,7 +856,7 @@ class Input extends \ADIOS\Core\UI\View {
                   {$this->params['html_attributes']}
                   ".($this->params['readonly'] ? "disabled='disabled'" : '')."
                 >
-                  ".($this->params['show_lookup_not_selected_option']
+                  ".(!$this->params['required']
                     ? "<option value='0'>".($this->params['not_selected_text'] ?? "[Not selected]")."</option>"
                     : ""
                   )."
@@ -977,7 +986,7 @@ class Input extends \ADIOS\Core\UI\View {
                           id='{$this->params['uid']}_detail_button'
                           style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;')."'
                           class='icon fas fa-id-card'
-                          title='".l('Zobraziť detail záznamu')."' 
+                          title='".$this->translate("Show details")."' 
                         ></i>
                       </span>
                     " : "")."
@@ -988,7 +997,7 @@ class Input extends \ADIOS\Core\UI\View {
                           id='{$this->params['uid']}_clear_button'
                           style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;').";'
                           class='icon fas fa-times'
-                          title='".l('Zrušiť výber')."' 
+                          title='".$this->translate("Clear selection")."' 
                         ></i>
                       </span>
                     " : '')."

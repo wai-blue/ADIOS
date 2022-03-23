@@ -1,16 +1,15 @@
 <?php
 
-/*
-  This file is part of ADIOS Framework.
-
-  This file is published under the terms of the license described
-  in the license.md file which is located in the root folder of
-  ADIOS Framework package.
-*/
-
 namespace ADIOS\Core\UI;
 
+/**
+ * Renders Card-based list of elements.
+ *
+ * @package UI\Elements
+ */
 class Cards extends \ADIOS\Core\UI\View {
+  var $useSession = TRUE;
+  
   public function render(string $panel = "") {
     $model = $this->adios->getModel($this->params['model']);
 
@@ -32,22 +31,42 @@ class Cards extends \ADIOS\Core\UI\View {
       return $query;
     });
 
-    // $html = _print_r($cards, TRUE);
-    $html = "
-      <div class='row'>
-    ";
-    foreach ($cards as $card) {
+    $html = "<div id='{$this->uid}'>";
+
+    if ($params['show_add_button'] ?? FALSE) {
       $html .= "
-        <div class='col-lg-{$bootstrapColumnSize} col-md-12'>
-          ".$model->cardsCardHtmlFormatter($card)."
+        <div class='row mb-3'>
+          ".$this->adios->ui->Button([
+            "type" => "add",
+            "onclick" => "
+              window_render(
+                '".$model->getFullUrlBase($this->params)."/Add',
+                {},
+                function(res) {
+                  ui_cards_refresh('{$this->uid}')
+                }
+              );
+
+            "
+          ])->render()."
         </div>
       ";
     }
-    $html .= "
-      </div>
-    ";
 
-    if ($this->adios->isWindow()) {
+    $html .= "<div class='row'>";
+    foreach ($cards as $card) {
+      $html .= "
+        <div class='col-lg-{$bootstrapColumnSize} col-md-12'>
+          ".$model->cardsCardHtmlFormatter($this, $card)."
+        </div>
+      ";
+    }
+    $html .= "</div>"; // class='row'
+
+    $html .= "</div>"; // id='{$this->uid}_wrapper_div'
+
+
+    if ($this->params['__IS_WINDOW__']) {
       $html = $this->adios->ui->Window([
         'content' => $html,
         'titleRaw' => $params['window']['titleRaw'],
