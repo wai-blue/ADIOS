@@ -154,10 +154,12 @@ class Loader {
     }
 
     // load available languages
-    $this->config['available_languages'] = ["en"];
-    foreach (scandir("{$this->config["dir"]}/Lang") as $tmpLang) {
-      if (!in_array($tmpLang, [".", ".."]) && is_dir("{$this->config["dir"]}/Lang/{$tmpLang}")) {
-        $this->config['available_languages'][] = $tmpLang;
+    if (!is_array($this->config['available_languages'])) {
+      $this->config['available_languages'] = ["en"];
+      foreach (scandir("{$this->config["dir"]}/Lang") as $tmpLang) {
+        if (!in_array($tmpLang, [".", ".."]) && is_dir("{$this->config["dir"]}/Lang/{$tmpLang}")) {
+          $this->config['available_languages'][] = $tmpLang;
+        }
       }
     }
 
