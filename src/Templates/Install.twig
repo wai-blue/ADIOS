@@ -11,6 +11,9 @@
   <title>{{ config.brand.title }}</title>
   <script src='{{ config.url }}/adios/cache.js'></script>
   <link rel=stylesheet type='text/css' href='{{ config.url }}/adios/cache.css' rel="stylesheet">
+  {% if config.skin != '' %}
+    <link rel=stylesheet type='text/css' href='{{ config.url }}/adios/assets/css/Skins/{{ config.skin }}.css' rel="stylesheet">
+  {% endif %}
 </head>
 
 <body id="page-top">

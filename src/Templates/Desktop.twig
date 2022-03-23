@@ -23,6 +23,9 @@
     var _TRANSLATIONS = adios_language_translations[_LANG];
 
   </script>
+  {% if config.skin != '' %}
+    <link rel=stylesheet type='text/css' href='{{ config.url }}/adios/assets/css/Skins/{{ config.skin }}.css' rel="stylesheet">
+  {% endif %}
 </head>
 
 <body id="page-top">
