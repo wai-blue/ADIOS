@@ -1,6 +1,6 @@
 {
     "name": "wai-blue/adios",
-    "description": "PHP8 Framework for rich web applications",
+    "description": "Light-weight rapid application development framework for PHP8",
     "type": "library",
     "license": "MIT",
     "autoload": {
