@@ -10,6 +10,85 @@
 
 namespace ADIOS\Core;
 
+// Autoloader function
+
+spl_autoload_register(function($class) {
+  global $___ADIOSObject;
+
+  $class = str_replace("\\", "/", $class);
+  $class = trim($class, "/");
+
+  if (strpos($class, "ADIOS/") === FALSE) return;
+
+  $loaded = @include(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
+
+  if (!$loaded) {
+
+    if (strpos($class, "ADIOS/Actions") === 0) {
+
+      $class = str_replace("ADIOS/Actions/", "", $class);
+
+      // najprv skusim hladat core akciu
+      $tmp = dirname(__FILE__)."/Actions/{$class}.php";
+      if (!@include($tmp)) {
+        // ak sa nepodari, hladam widgetovsku akciu
+
+        if (preg_match('/([\w]+)\/([\w\/]+)/', $class, $m)) {
+          if (!@include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Actions/{$m[2]}.php")) {
+            // ak ani widgetovska, skusim plugin
+            $class = str_replace("Plugins/", "", $class);
+            $pathLeft = "";
+            $pathRight = "";
+            foreach (explode("/", $class) as $pathPart) {
+              $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
+              $pathRight = str_replace("{$pathLeft}/", "", $class);
+
+              $included = FALSE;
+
+              foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
+                $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
+                if (is_file($file)) {
+                  include($file);
+                  $included = TRUE;
+                  break;
+                }
+              }
+
+              if ($included) {
+                break;
+              }
+            }
+          }
+        }
+      }
+
+    } else if (preg_match('/ADIOS\/Widgets\/([\w\/]+)/', $class, $m)) {
+
+      if (!isset($___ADIOSObject)) {
+        throw new Exception("ADIOS is not loaded.");
+      }
+
+      if (!@include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
+        include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
+      }
+
+    } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
+      foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
+        if (include("{$pluginFolder}/{$m[1]}/Main.php")) {
+          break;
+        } else if (include("{$pluginFolder}/{$m[1]}.php")) {
+          break;
+        }
+      }
+
+    } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
+      include($___ADIOSObject->config['dir']."/{$m[1]}.php");
+    }
+
+  }
+});
+
+
 // ADIOS Loader class
 class Loader {
   public $gtp = "";
