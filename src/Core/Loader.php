@@ -91,6 +91,9 @@ spl_autoload_register(function($class) {
 
 // ADIOS Loader class
 class Loader {
+  const ADIOS_MODE_FULL = 1;
+  const ADIOS_MODE_LITE = 2;
+
   public $gtp = "";
   public $requestedURI = "";
   public $requestedAction = "";
@@ -136,7 +139,7 @@ class Loader {
     $___ADIOSObject = $this;
 
     if ($mode === NULL) {
-      $mode = ADIOS_MODE_FULL;
+      $mode = self::ADIOS_MODE_FULL;
     }
 
     if (is_array($config)) {
@@ -221,7 +224,7 @@ class Loader {
       // nacitanie zakladnych ADIOS lib suborov
       require_once dirname(__FILE__)."/Lib/basic_functions.php";
 
-      if ($mode == ADIOS_MODE_FULL) {
+      if ($mode == self::ADIOS_MODE_FULL) {
 
         // inicializacia Twigu
         include(dirname(__FILE__)."/Lib/Twig.php");
@@ -282,7 +285,7 @@ class Loader {
       $this->renderAssets();
 
 
-      if ($mode == ADIOS_MODE_FULL) {
+      if ($mode == self::ADIOS_MODE_FULL) {
 
         // start session
 
@@ -330,7 +333,7 @@ class Loader {
 
       $this->loadConfigFromDB();
 
-      if ($mode == ADIOS_MODE_FULL) {
+      if ($mode == self::ADIOS_MODE_FULL) {
 
         // set language
         if (!empty($_SESSION[_ADIOS_ID]['language'])) {
@@ -383,7 +386,7 @@ class Loader {
       // timezone
       date_default_timezone_set($this->config['timezone']);
 
-      if ($mode == ADIOS_MODE_FULL) {
+      if ($mode == self::ADIOS_MODE_FULL) {
 
         // inicializacia widgetov
 
