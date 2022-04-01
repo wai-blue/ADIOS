@@ -62,7 +62,7 @@ class Input extends \ADIOS\Core\UI\View {
             'onselect',
         ];
 
-        $this->params = [
+        $this->default_params = [
             'table_column' => '',
             'type' => '',
             'width' => '',
@@ -110,6 +110,13 @@ class Input extends \ADIOS\Core\UI\View {
             'show_lookup_not_selected_option' => true,
             'disabled' => false,
         ];
+
+        foreach ($this->default_params as $param_name => $param_value) {
+          if (!isset($params[$param_name])) {
+            $params[$param_name] = $param_value;
+          }
+        }
+
 
         // nacita parametre z tables a zmerguje s obdrzanymi
         if ('' != $params['table_column']) {
@@ -914,14 +921,14 @@ class Input extends \ADIOS\Core\UI\View {
               $this->params['onkeydown'] = " ui_input_lookup_onkeydown(event, '{$this->params['uid']}'); ".$this->params['onkeydown'];
               $this->params['onchange'] = " ui_input_lookup_set_value('{$this->params['uid']}', $('#{$this->params['uid']}').val(), '', function(){ ".$this->params['onchange'].' }); ';
 
-              if (!$this->adios->db_perms($this->params['table'].'/select')) {
-                if ('' == $this->params['lookup_detail_onclick']) {
-                  $this->params['lookup_detail_enabled'] = false;
-                }
-                if ('' == $this->params['lookup_search_onclick']) {
-                  $this->params['lookup_search_enabled'] = false;
-                }
-              }
+              // if (!$this->adios->db_perms($this->params['table'].'/select')) {
+              //   if ('' == $this->params['lookup_detail_onclick']) {
+              //     $this->params['lookup_detail_enabled'] = false;
+              //   }
+              //   if ('' == $this->params['lookup_search_onclick']) {
+              //     $this->params['lookup_search_enabled'] = false;
+              //   }
+              // }
 
               $detail_onclick = ('' != $this->params['lookup_detail_onclick'] ? $this->params['lookup_detail_onclick'] : 'ui_input_lookup_detail');
               $search_onclick = ('' != $this->params['lookup_search_onclick'] ? $this->params['lookup_search_onclick'] : 'ui_input_lookup_search');
