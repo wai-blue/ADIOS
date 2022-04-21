@@ -20,9 +20,9 @@ class User extends \ADIOS\Core\Model {
   var $urlBase = "Users";
   var $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
 
-  public function __construct($adiosOrAttributes) {
+  public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "{$adiosOrAttributes->config['system_table_prefix']}_users";
-    parent::__construct($adiosOrAttributes);
+    parent::__construct($adiosOrAttributes, $eloquentQuery);
 
     if (is_object($adiosOrAttributes)) {
       $this->tableTitle = $this->translate("Users");
