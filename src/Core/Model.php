@@ -122,6 +122,13 @@ class Model extends \Illuminate\Database\Eloquent\Model {
   var $eloquentQuery;
   var $searchAction;
 
+  /**
+   * Property used to store original data when formSave() method is called
+   *
+   * @var mixed
+   */
+  var $formSaveOriginalData = NULL;
+
   private static $allItemsCache = NULL;
   
   /**
@@ -1136,6 +1143,8 @@ class Model extends \Illuminate\Database\Eloquent\Model {
 
   public function formSave($data) {
     try {
+      $this->formSaveOriginalData = $data;
+
       $this->formValidate($data);
 
       $data = $this->onBeforeSave($data);
