@@ -137,7 +137,12 @@ class Preview extends \ADIOS\Core\Action {
 
     if (($handle = fopen("{$this->adios->config['files_dir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
       while (($data = fgetcsv($handle, 1000, $separator)) !== FALSE) {
-        $csvRows[] = $data;
+        $csvRows[] = array_map(
+          function($str) {
+            return iconv("Windows-1250", "UTF-8", $str);
+          },
+          $data
+        );
 
         if ($row == 10) break;
       }

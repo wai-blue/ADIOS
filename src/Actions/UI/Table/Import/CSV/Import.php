@@ -35,16 +35,17 @@ class Import extends \ADIOS\Core\Action {
 
         $data = [];
         foreach ($csvRow as $colIndex => $colValue) {
+          $colValue = iconv("Windows-1250", "UTF-8", $colValue);
           $tmpColName = $this->params["column_{$colIndex}"] ?? "";
           if (!empty($tmpColName)) {
             $data[$tmpColName] = $colValue;
           }
         }
 
-        // foreach ($data as $colName => $colValue) {
-        //   $log .= "{$colName} = {$colValue}, ";
-        // }
-        // $log .= "\n";
+        foreach ($data as $colName => $colValue) {
+          $log .= "{$colName} = {$colValue}, ";
+        }
+        $log .= "\n";
 
         $modelObject->insertOrUpdateRow($data);
         $importedRows ++;
