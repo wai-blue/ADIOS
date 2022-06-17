@@ -131,11 +131,12 @@ class Table extends \ADIOS\Core\UI\View {
 
 
 
-    $this->columns = $this->model->columns();
-
     $this->model->onTableBeforeInit($this);
 
+    $this->params["columns"] = $this->model->columns();
     $this->params = $this->model->tableParams($this->params, $this);
+
+    $this->columns = $this->params["columns"];
 
     foreach ($this->userParams as $key => $value) {
       $this->params[$key] = $value;

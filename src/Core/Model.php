@@ -777,10 +777,11 @@ class Model extends \Illuminate\Database\Eloquent\Model {
     );
   }
 
-  public function tableParams($params) {
+  public function tableParams($params, $table) {
     return $this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
       "model" => $this,
       "params" => $params,
+      "table" => $table,
     ])["params"];
   }
 
