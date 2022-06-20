@@ -354,6 +354,12 @@ class Loader {
 
         // user authentication
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
+          // REVIEW: tu by mala pribudnut kontrola is_active alebo ci user existuje
+          // REVIEW: tiez kontrola last_access_time - ak je vyprsane (alebo is_active = 0), tak:
+          //  unset($_SESSION[_ADIOS_ID]['userProfile']);
+          //  $this->userProfile = [];
+          //  $this->userLogged = FALSE;
+
           $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
           $this->userLogged = TRUE;
         } else if ($this->authUser(
@@ -364,13 +370,22 @@ class Loader {
           // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
           // nevyzadoval form resubmission
           header("Location: {$this->config['url']}");
-          exit();//"a {$this->config['url']} .");
+          exit();
         } else {
           $this->userProfile = [];
           $this->userLogged = FALSE;
         }
 
+        // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
         $this->onUserAuthorised();
+
+        $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days');
+        $lastAccess = 0; // zistit z DB
+        $daysFromLastAccess = 0; // vypocitat
+
+        if ($this->userLogged && $maxSessionLoginDurationDays < $daysFromLastAccess) {
+          // update last_access_time a last_access_ip
+        }
 
         // user specific config
         // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
@@ -1490,6 +1505,8 @@ class Loader {
         if ($passwordMatch) {
           $this->userProfile = $data;
           $this->userLogged = TRUE;
+
+          // update last_login_time a last_login_ip
 
           $_SESSION[_ADIOS_ID]['userProfile'] = $this->userProfile;
 

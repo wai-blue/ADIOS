@@ -39,6 +39,9 @@ class User extends \ADIOS\Core\Model {
       'id_role' => ['type' => 'lookup', 'title' => $this->translate('Role'), 'model' => "Core/Models/UserRole", 'show_column' => true, 'input_style' => 'select'],
       'photo' => ['type' => 'image', 'title' => $this->translate('Photo'), 'only_upload' => 'yes', 'subdir' => 'users/', "description" => $this->translate("Supported image extensions: jpg, gif, png, jpeg"),],
       'active' => ['type' => 'boolean', 'title' => $this->translate('Active'), 'show_column' => true],
+
+      // last_login_time, last_login_ip
+      // last_access_time, last_access_ip
     ]);
   }
 
