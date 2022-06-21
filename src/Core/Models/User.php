@@ -31,18 +31,106 @@ class User extends \ADIOS\Core\Model {
 
   public function columns(array $columns = []) {
     return parent::columns([
-      'name' => ['type' => 'varchar', 'title' => $this->translate('Given name'), 'show_column' => true],
-      'surname' => ['type' => 'varchar', 'title' => $this->translate('Family name'), 'show_column' => true],
-      'login' => ['type' => 'varchar', 'title' => $this->translate('Login')],
-      'password' => ['type' => 'password', 'title' => $this->translate('Password')],
-      'email' => ['type' => 'varchar', 'title' => $this->translate('Email')],
-      'id_role' => ['type' => 'lookup', 'title' => $this->translate('Role'), 'model' => "Core/Models/UserRole", 'show_column' => true, 'input_style' => 'select'],
-      'photo' => ['type' => 'image', 'title' => $this->translate('Photo'), 'only_upload' => 'yes', 'subdir' => 'users/', "description" => $this->translate("Supported image extensions: jpg, gif, png, jpeg"),],
-      'active' => ['type' => 'boolean', 'title' => $this->translate('Active'), 'show_column' => true],
-
-      // last_login_time, last_login_ip
-      // last_access_time, last_access_ip
+      'name' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Given name'),
+        'show_column' => true
+      ],
+      'surname' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Family name'),
+        'show_column' => true
+      ],
+      'login' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Login')
+      ],
+      'password' => [
+        'type' => 'password',
+        'title' => $this->translate('Password')
+      ],
+      'email' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Email')
+      ],
+      'phone_number' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Phone number')
+      ],
+      'id_role' => [
+        'type' => 'lookup',
+        'title' => $this->translate('Role'),
+        'model' => "Core/Models/UserRole",
+        'show_column' => true,
+        'input_style' => 'select'
+      ],
+      'photo' => [
+        'type' => 'image',
+        'title' => $this->translate('Photo'),
+        'only_upload' => 'yes',
+        'subdir' => 'users/',
+        "description" => $this->translate("Supported image extensions: jpg, gif, png, jpeg"),
+      ],
+      'is_active' => [
+        'type' => 'boolean',
+        'title' => $this->translate('Active'),
+        'show_column' => true
+      ],
+      'last_login_time' => [
+        'type' => 'datetime',
+        'title' => $this->translate('Time of last login'),
+        'show_column' => FALSE,
+        'readonly' => TRUE,
+      ],
+      'last_login_ip' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Last login IP'),
+        'show_column' => FALSE,
+        'readonly' => TRUE,
+      ],
+      'last_access_time' => [
+        'type' => 'datetime',
+        'title' => $this->translate('Time of last access'),
+        'show_column' => FALSE,
+        'readonly' => TRUE,
+      ],
+      'last_access_ip' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Last access IP'),
+        'show_column' => FALSE,
+        'readonly' => TRUE,
+      ],
     ]);
+  }
+
+  public function upgrades() : array {
+    return [
+      0 => [], // upgrade to version 0 is the same as installation
+      1 => [
+        "ALTER TABLE {$this->gtp}_adios_users RENAME COLUMN active TO is_active;",
+        "ALTER TABLE {$this->gtp}_adios_users RENAME COLUMN active TO is_active;",
+        "
+          alter table `{$this->gtp}_adios_users`
+          add column `last_login_time` varchar(255) DEFAULT '' after `is_active`
+        ",
+        "
+          alter table `{$this->gtp}_adios_users`
+          add column `last_login_time` varchar(255) DEFAULT '' after `is_active`
+        ",
+        "
+          alter table `{$this->gtp}_adios_users`
+          add column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
+        ",
+        "
+          alter table `{$this->gtp}_adios_users`
+          add column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
+        ",
+        "
+          alter table `{$this->gtp}_adios_users`
+          add column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
+        ",
+      ],
+    ];
   }
 
   public function routing(array $routing = []) {

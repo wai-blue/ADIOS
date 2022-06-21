@@ -354,14 +354,33 @@ class Loader {
 
         // user authentication
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
-          // REVIEW: tu by mala pribudnut kontrola is_active alebo ci user existuje
-          // REVIEW: tiez kontrola last_access_time - ak je vyprsane (alebo is_active = 0), tak:
-          //  unset($_SESSION[_ADIOS_ID]['userProfile']);
-          //  $this->userProfile = [];
-          //  $this->userLogged = FALSE;
-
-          $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
-          $this->userLogged = TRUE;
+          $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
+          $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
+          $user = reset($this->db->get_all_rows_query("
+            SELECT *
+            FROM {$this->gtp}_{$this->config['system_table_prefix']}_users
+            WHERE id = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
+            LIMIT 1
+          "));
+          if (
+            $user['is_active'] != 1 ||
+            $maxSessionLoginDurationTime + $user['last_access_time'] < time()
+          ) {
+            unset($_SESSION[_ADIOS_ID]['userProfile']);
+            $this->userProfile = [];
+            $this->userLogged = FALSE;
+          } else {
+            $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
+            $this->userLogged = TRUE;
+            $clientIp = $this->getClientIpAddress();
+            $this->db->query("
+              UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
+              SET
+                last_access_time = '".time()."',
+                last_access_ip = '{$clientIp}'
+              WHERE id = ".(int)$this->userProfile['id'].";
+            ");
+          }
         } else if ($this->authUser(
           $_POST['login'],
           $_POST['password'],
@@ -379,13 +398,6 @@ class Loader {
         // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
         $this->onUserAuthorised();
 
-        $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days');
-        $lastAccess = 0; // zistit z DB
-        $daysFromLastAccess = 0; // vypocitat
-
-        if ($this->userLogged && $maxSessionLoginDurationDays < $daysFromLastAccess) {
-          // update last_access_time a last_access_ip
-        }
 
         // user specific config
         // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
@@ -1462,6 +1474,17 @@ class Loader {
     $this->uid = $uid;
   }
 
+  public function getClientIpAddress() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+      $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+      $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+  }
+
   public function authCookieSerialize($login, $password) {
     return md5($login.".".$password).",".$login;
   }
@@ -1489,7 +1512,7 @@ class Loader {
             `login`= '".$this->db->escape($login)."'
             or `email`= '".$this->db->escape($login)."'
           )
-          and `active` <> 0
+          and `is_active` <> 0
       ");
 
       while ($data = $this->db->fetch_array()) {
@@ -1507,6 +1530,16 @@ class Loader {
           $this->userLogged = TRUE;
 
           // update last_login_time a last_login_ip
+          $clientIp = $this->getClientIpAddress();
+          $this->db->query("
+            UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
+            SET
+              last_login_time = '".time()."',
+              last_login_ip = '{$clientIp}',
+              last_access_time = '".time()."',
+              last_access_ip = '{$clientIp}'
+            WHERE id = ".(int)$this->userProfile['id'].";
+          ");
 
           $_SESSION[_ADIOS_ID]['userProfile'] = $this->userProfile;
 
