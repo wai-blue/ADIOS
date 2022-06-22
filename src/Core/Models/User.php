@@ -108,26 +108,25 @@ class User extends \ADIOS\Core\Model {
       0 => [], // upgrade to version 0 is the same as installation
       1 => [
         "ALTER TABLE {$this->gtp}_adios_users RENAME COLUMN active TO is_active;",
-        "ALTER TABLE {$this->gtp}_adios_users RENAME COLUMN active TO is_active;",
         "
-          alter table `{$this->gtp}_adios_users`
-          add column `last_login_time` varchar(255) DEFAULT '' after `is_active`
+          ALTER TABLE `{$this->gtp}_adios_users`
+          ADD column `phone_number` varchar(255) DEFAULT '' after `email`
         ",
         "
-          alter table `{$this->gtp}_adios_users`
-          add column `last_login_time` varchar(255) DEFAULT '' after `is_active`
+          ALTER TABLE `{$this->gtp}_adios_users`
+          ADD column `last_login_time` varchar(255) DEFAULT '' after `is_active`
         ",
         "
-          alter table `{$this->gtp}_adios_users`
-          add column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
+          ALTER TABLE `{$this->gtp}_adios_users`
+          ADD column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
         ",
         "
-          alter table `{$this->gtp}_adios_users`
-          add column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
+          ALTER TABLE `{$this->gtp}_adios_users`
+          ADD column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
         ",
         "
-          alter table `{$this->gtp}_adios_users`
-          add column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
+          ALTER TABLE `{$this->gtp}_adios_users`
+          ADD column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
         ",
       ],
     ];
@@ -163,6 +162,7 @@ class User extends \ADIOS\Core\Model {
               "surname",
               "password",
               "email",
+              "phone_number",
             ],
           ],
         ],
