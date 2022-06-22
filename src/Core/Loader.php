@@ -364,7 +364,7 @@ class Loader {
           "));
           if (
             $user['is_active'] != 1 ||
-            $maxSessionLoginDurationTime + $user['last_access_time'] < time()
+            $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
           ) {
             unset($_SESSION[_ADIOS_ID]['userProfile']);
             $this->userProfile = [];
@@ -376,7 +376,7 @@ class Loader {
             $this->db->query("
               UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
               SET
-                last_access_time = '".time()."',
+                last_access_time = '".date('Y-m-d H:i:s')."',
                 last_access_ip = '{$clientIp}'
               WHERE id = ".(int)$this->userProfile['id'].";
             ");
@@ -1534,9 +1534,9 @@ class Loader {
           $this->db->query("
             UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
             SET
-              last_login_time = '".time()."',
+              last_login_time = '".date('Y-m-d H:i:s')."',
               last_login_ip = '{$clientIp}',
-              last_access_time = '".time()."',
+              last_access_time = '".date('Y-m-d H:i:s')."',
               last_access_ip = '{$clientIp}'
             WHERE id = ".(int)$this->userProfile['id'].";
           ");
