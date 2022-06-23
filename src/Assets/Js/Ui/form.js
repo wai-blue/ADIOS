@@ -42,6 +42,7 @@
         allowed = false;
       }
     });
+
     $('#' + uid + ' .subrow.required').each(function() {
       let tmp_input = $(this).find('.form_input input[data-is-adios-input="1"]');
       let tmp_select = $(this).find('.form_input select[data-is-adios-input="1"]');
@@ -49,7 +50,7 @@
 
       if (
         (tmp_input.length != 0 && tmp_input.val() == '')
-        || (tmp_select.length != 0 && (tmp_select.val() == '' || tmp_select.val() == 0))
+        || (tmp_select.val() == '' || tmp_select.val() == 0 || tmp_select.val() === null)
         || (tmp_textarea.length != 0 && tmp_textarea.val() == '')
       ) {
         $('#' + uid + ' .save_error_info').fadeIn();
