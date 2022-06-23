@@ -104,6 +104,9 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function upgrades() : array {
+    // REVIEW: Vyskusaj prosim pouzit $this->getFullSqlTableName().
+    // Uprav kod, spusti instalaciu a ak to pojde, ponechaj to. Daj mi vediet.
+    // Vsade pouzi ` - vid review komentar na inom mieste.
     return [
       0 => [], // upgrade to version 0 is the same as installation
       1 => [

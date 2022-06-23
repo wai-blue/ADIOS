@@ -353,6 +353,10 @@ class Loader {
         }
 
         // user authentication
+        // REVIEW: Logiku tohoto IFu nebudem kontrolova, spolieham sa na teba
+        // Vidim, ze si do neho presunul aj $maxSessionLoginDurationDays a pod.
+        // Je to teda inac, ako som navrhoval, ale neskumam spravnost riesenia.
+        // Ak si s tym ty OK, tak iba vymaz komentar.
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
@@ -373,6 +377,11 @@ class Loader {
             $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
             $this->userLogged = TRUE;
             $clientIp = $this->getClientIpAddress();
+
+            // Nazov tabulky zisti cez model Core/User -> getFullTableSQLName()
+            // Pouzivaj co najviac (idealne vsade) backtick - `. Na oddelenie nazvov
+            // tabuliek a stlpcov. Nepouzivali sme to dosledne, musime sa to naucit.
+            // Prejdi si vsetky tvoje SQL dotazy v tomto zmysle.
             $this->db->query("
               UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
               SET
