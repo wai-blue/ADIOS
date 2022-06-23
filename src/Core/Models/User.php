@@ -106,29 +106,33 @@ class User extends \ADIOS\Core\Model {
   public function upgrades() : array {
     // REVIEW: Vyskusaj prosim pouzit $this->getFullSqlTableName().
     // Uprav kod, spusti instalaciu a ak to pojde, ponechaj to. Daj mi vediet.
-    // Vsade pouzi ` - vid review komentar na inom mieste.
+
+    // Dusan, takto ako to je spravene by to aj islo ale je tu problem. Aby si spravil tento upgrade, musis byt prihlaseny v adiose.
+    // Lenze ked si tuto branchu stiahnes z develu, v tom momente ta to odhlasi z adiosu, lebo uz nesplnas podmienku is_active == 1
+    // (kedze stlpec sa este vola active) a tiez nesplnas podmienku last_access_time.
+    // Takze v realnom projekte ty tento upgrade nevies spustit. Ako toto riesit?
     return [
       0 => [], // upgrade to version 0 is the same as installation
       1 => [
-        "ALTER TABLE {$this->gtp}_adios_users RENAME COLUMN active TO is_active;",
+        "ALTER TABLE `{$this->getFullTableSQLName()}` RENAME COLUMN `active` TO `is_active`;",
         "
-          ALTER TABLE `{$this->gtp}_adios_users`
+          ALTER TABLE `{$this->getFullTableSQLName()}`
           ADD column `phone_number` varchar(255) DEFAULT '' after `email`
         ",
         "
-          ALTER TABLE `{$this->gtp}_adios_users`
+          ALTER TABLE `{$this->getFullTableSQLName()}`
           ADD column `last_login_time` varchar(255) DEFAULT '' after `is_active`
         ",
         "
-          ALTER TABLE `{$this->gtp}_adios_users`
+          ALTER TABLE `{$this->getFullTableSQLName()}`
           ADD column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
         ",
         "
-          ALTER TABLE `{$this->gtp}_adios_users`
+          ALTER TABLE `{$this->getFullTableSQLName()}`
           ADD column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
         ",
         "
-          ALTER TABLE `{$this->gtp}_adios_users`
+          ALTER TABLE `{$this->getFullTableSQLName()}`
           ADD column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
         ",
       ],

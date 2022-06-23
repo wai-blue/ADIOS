@@ -353,17 +353,15 @@ class Loader {
         }
 
         // user authentication
-        // REVIEW: Logiku tohoto IFu nebudem kontrolova, spolieham sa na teba
-        // Vidim, ze si do neho presunul aj $maxSessionLoginDurationDays a pod.
-        // Je to teda inac, ako som navrhoval, ale neskumam spravnost riesenia.
-        // Ak si s tym ty OK, tak iba vymaz komentar.
+        // REVIEW: Logika je OK. Ale na riadku 381 pouzivam funkciu date(). Time zone ale nastavujem az na riadku 418. Je to ok?
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
+          $adiosUsersModel = $this->getModel("Core/Models/User");
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
           $user = reset($this->db->get_all_rows_query("
             SELECT *
-            FROM {$this->gtp}_{$this->config['system_table_prefix']}_users
-            WHERE id = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
+            FROM `{$adiosUsersModel->getFullTableSQLName()}`
+            WHERE `id` = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
             LIMIT 1
           "));
           if (
@@ -377,17 +375,12 @@ class Loader {
             $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
             $this->userLogged = TRUE;
             $clientIp = $this->getClientIpAddress();
-
-            // Nazov tabulky zisti cez model Core/User -> getFullTableSQLName()
-            // Pouzivaj co najviac (idealne vsade) backtick - `. Na oddelenie nazvov
-            // tabuliek a stlpcov. Nepouzivali sme to dosledne, musime sa to naucit.
-            // Prejdi si vsetky tvoje SQL dotazy v tomto zmysle.
             $this->db->query("
-              UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
+              UPDATE `{$adiosUsersModel->getFullTableSQLName()}`
               SET
-                last_access_time = '".date('Y-m-d H:i:s')."',
-                last_access_ip = '{$clientIp}'
-              WHERE id = ".(int)$this->userProfile['id'].";
+                `last_access_time` = '".date('Y-m-d H:i:s')."',
+                `last_access_ip` = '{$clientIp}'
+              WHERE `id` = ".(int)$this->userProfile['id'].";
             ");
           }
         } else if ($this->authUser(
@@ -1512,10 +1505,11 @@ class Loader {
     }
 
     if (!empty($login)) {
+      $adiosUsersModel = $this->getModel("Core/Models/User");
       $this->db->query("
         select
           *
-        from {$this->gtp}_{$this->config['system_table_prefix']}_users
+        from `{$adiosUsersModel->getFullTableSQLName()}`
         where
           (
             `login`= '".$this->db->escape($login)."'
