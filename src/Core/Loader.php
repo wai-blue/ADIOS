@@ -351,19 +351,40 @@ class Loader {
         if (empty($this->config['language'])) {
           $this->config['language'] = "en";
         }
+      }
 
+
+      // finalizacia konfiguracie - aj pre FULL aj pre LITE mode
+      $this->finalizeConfig();
+
+      $this->onAfterConfigLoaded();
+
+      // timezone
+      date_default_timezone_set($this->config['timezone']);
+
+      if ($mode == self::ADIOS_MODE_FULL) {
         // user authentication
-        // REVIEW: Logika je OK. Ale na riadku 381 pouzivam funkciu date(). Time zone ale nastavujem az na riadku 418. Je to ok?
+
+        // REVIEW:
+        // PB: Logika je OK. Ale na riadku 381 pouzivam funkciu
+        //     date(). Time zone ale nastavujem az na riadku 418.
+        //     Je to ok?
+        // DD: Zaujimavy postreh, presunul som timezone_set pred
+        //     tento kod, ale neviem, ci to nesposobi nejake ine
+        //     problemy. Budeme testovat pocas vyvoja Miomedu.
+
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
-          $adiosUsersModel = $this->getModel("Core/Models/User");
+          $adiosUserModel = new \ADIOS\Core\Models\User($this);
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
+
           $user = reset($this->db->get_all_rows_query("
             SELECT *
-            FROM `{$adiosUsersModel->getFullTableSQLName()}`
+            FROM `{$adiosUserModel->getFullTableSQLName()}`
             WHERE `id` = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
             LIMIT 1
           "));
+
           if (
             $user['is_active'] != 1 ||
             $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
@@ -376,7 +397,7 @@ class Loader {
             $this->userLogged = TRUE;
             $clientIp = $this->getClientIpAddress();
             $this->db->query("
-              UPDATE `{$adiosUsersModel->getFullTableSQLName()}`
+              UPDATE `{$adiosUserModel->getFullTableSQLName()}`
               SET
                 `last_access_time` = '".date('Y-m-d H:i:s')."',
                 `last_access_ip` = '{$clientIp}'
@@ -408,14 +429,6 @@ class Loader {
         //   $this->mergeConfig($this->config['user'][$this->userProfile['id']]);
         // }
       }
-
-      // finalizacia konfiguracie - aj pre FULL aj pre LITE mode
-      $this->finalizeConfig();
-
-      $this->onAfterConfigLoaded();
-
-      // timezone
-      date_default_timezone_set($this->config['timezone']);
 
       if ($mode == self::ADIOS_MODE_FULL) {
 
@@ -1505,11 +1518,11 @@ class Loader {
     }
 
     if (!empty($login)) {
-      $adiosUsersModel = $this->getModel("Core/Models/User");
+      $adiosUserModel = new \ADIOS\Core\Models\User($this);
       $this->db->query("
         select
           *
-        from `{$adiosUsersModel->getFullTableSQLName()}`
+        from `{$adiosUserModel->getFullTableSQLName()}`
         where
           (
             `login`= '".$this->db->escape($login)."'
