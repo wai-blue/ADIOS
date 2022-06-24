@@ -364,15 +364,6 @@ class Loader {
 
       if ($mode == self::ADIOS_MODE_FULL) {
         // user authentication
-
-        // REVIEW:
-        // PB: Logika je OK. Ale na riadku 381 pouzivam funkciu
-        //     date(). Time zone ale nastavujem az na riadku 418.
-        //     Je to ok?
-        // DD: Zaujimavy postreh, presunul som timezone_set pred
-        //     tento kod, ale neviem, ci to nesposobi nejake ine
-        //     problemy. Budeme testovat pocas vyvoja Miomedu.
-
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
           $adiosUserModel = new \ADIOS\Core\Models\User($this);
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;

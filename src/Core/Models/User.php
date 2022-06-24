@@ -104,17 +104,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function upgrades() : array {
-    // REVIEW: Vyskusaj prosim pouzit $this->getFullSqlTableName().
-    // Uprav kod, spusti instalaciu a ak to pojde, ponechaj to. Daj mi vediet.
-
-    // PB: Dusan, takto ako to je spravene by to aj islo ale je tu problem. Aby si spravil tento upgrade, musis byt prihlaseny v adiose.
-    // Lenze ked si tuto branchu stiahnes z develu, v tom momente ta to odhlasi z adiosu, lebo uz nesplnas podmienku is_active == 1
-    // (kedze stlpec sa este vola active) a tiez nesplnas podmienku last_access_time.
-    // Takze v realnom projekte ty tento upgrade nevies spustit. Ako toto riesit?
-
-    // DD: Neviem, asi iba rucne prepisanim DB. "ADIOS Reinstalacia" v tomto pripade asi nebude fungovat.
-
-    // REVIEW 2: chybaju tu indexy
+    // Upgrade nebude fungovať pretože sa mení logika prihlásenia a upgrade sa vykoná až po prihlásení.
     return [
       0 => [], // upgrade to version 0 is the same as installation
       1 => [
