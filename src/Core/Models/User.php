@@ -167,9 +167,11 @@ class User extends \ADIOS\Core\Model {
             "rows" => [
               "name",
               "surname",
+              "login",
               "password",
               "email",
               "phone_number",
+              "photo",
             ],
           ],
         ],
