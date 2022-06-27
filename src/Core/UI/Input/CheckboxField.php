@@ -48,17 +48,17 @@ class CheckboxField extends \ADIOS\Core\Input {
     ";
     $i = 0;
 
-    var_dump($this->params['values']);
-    foreach ($this->params['values'] as $key => $displayValue) {
+    // var_dump($this->params['values']);
+    foreach ($this->params['values'] as $assignedItemRowId => $displayValue) {
       $html .= "
         <div class='col-lg-{$bootstrapColumnSize} col-md-12'>
           <input
             type='checkbox'
-            data-key='".ads($key)."'
+            data-key='".ads($assignedItemRowId)."'
             adios-do-not-serialize='1'
             id='{$this->uid}_checkbox_{$i}'
             onchange='{$this->uid}_serialize();'
-            ".(in_array($key, $values) ? "checked" : "")."
+            ".(in_array($assignedItemRowId, $values) ? "checked" : "")."
           >
           <label for='{$this->uid}_checkbox_{$i}'>
             ".hsc($displayValue)."
