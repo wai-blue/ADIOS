@@ -46,46 +46,56 @@ class CrossTableSelectField extends \ADIOS\Core\Input {
     
     $html = "
       <div class='adios ui Input input-field'>
-        <input type='hidden' id='{$this->uid}' data-is-adios-input='1'>
+        <input type='text' id='{$this->uid}' data-is-adios-input='1'>
         <div class='row'>
         
     ";
     $i = 0;
     //var_dump($this->params['list_values']);
 
-    foreach ($this->params['list_values'] as $value) {
-      $defaultOption = $savedValues[$value['id']];
-      $optionsHtml = "";
-      foreach ($this->params['select_options'] as $key => $optionValue) {
-        $isDefaultOption = $defaultOption == $key ? TRUE : FALSE;
-        $optionsHtml .= "<option ".($isDefaultOption ? "selected='selected'" : "")." value='{$key}'>{$optionValue}</option>";
-      }
+    foreach ($this->params['values'] as $assignedItemRowId => $displayValue) {
+      // $defaultOption = $savedValues[$value['id']];
+      // $optionsHtml = "";
+      // foreach ($this->params['select_options'] as $key => $optionValue) {
+      //   $isDefaultOption = $defaultOption == $key ? TRUE : FALSE;
+      //   $optionsHtml .= "<option ".($isDefaultOption ? "selected='selected'" : "")." value='{$key}'>{$optionValue}</option>";
+      // }
+
+      $inputElementId = "{$this->uid}_input_{$i}";
+      $inputCallback = $this->params['input_callback'];
+      $inputHtml = $inputCallback($this, $inputElementId, $savedValues[$assignedItemRowId]);
+
       $html .= "
         <div class='col-lg-{$bootstrapColumnSize} col-md-12'>
-          <label for='{$this->uid}_text_{$i}'>
-            ".hsc($value['name'])."
+          <label for='{$inputElementId}'>
+            ".hsc($displayValue)."
           </label>
-          <select
-            id='{$this->uid}_text_{$i}'
-            data-key='".ads($value['id'])."'
+          {$inputHtml}
+          <!-- <select
+            id='{$inputElementId}}'
+            data-key='".ads($assignedItemRowId)."'
             adios-do-not-serialize='1'
-            onchange='{$this->uid}_serialize_x(); console.log(\"a\");'
+            onchange='{$this->uid}_serialize(); console.log(\"a\");'
           >
             {$optionsHtml}
-          </select>
+          </select> -->
         </div>
       ";
+
       $i++;
     }
     $html .= "
         </div>
       </div>
       <script>
-        function {$this->uid}_serialize_x() {
+        function {$this->uid}_serialize() {
           let data = [];
           console.log('b');
-          $('#{$this->uid}').closest('.input-field').find('select').each(function() {
-            data.push($(this).data('key'));
+          $('#{$this->uid}').closest('.input-field').find('input,select,textarea').each(function() {
+            data.push([
+              $(this).data('key'),
+              $(this).val()
+            ]);
           });
           console.log(data);
           $('#{$this->uid}').val(JSON.stringify(data));
