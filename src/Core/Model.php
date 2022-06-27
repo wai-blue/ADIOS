@@ -1136,6 +1136,14 @@ class Model extends \Illuminate\Database\Eloquent\Model {
   }
 
   public function formValidate($data) {
+    foreach ($this->columns() as $colName => $colDefinition) {
+      if ($colDefinition['required']) {
+        if (empty($data[$colName])) {
+          throw new \ADIOS\Core\Exceptions\FormSaveException($this->translate("Invalid data."));
+        }
+      }
+    }
+
     return $this->adios->dispatchEventToPlugins("onModelAfterFormValidate", [
       "model" => $this,
       "data" => $data,

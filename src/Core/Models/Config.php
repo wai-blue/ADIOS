@@ -17,6 +17,7 @@ namespace ADIOS\Core\Models;
  */
 class Config extends \ADIOS\Core\Model {
   var $sqlName = "";
+  var $urlBase = "Core/Config";
   
   public function __construct($adios) {
     $this->sqlName = "{$adios->config['system_table_prefix']}_config";

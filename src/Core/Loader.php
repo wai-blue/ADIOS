@@ -351,34 +351,8 @@ class Loader {
         if (empty($this->config['language'])) {
           $this->config['language'] = "en";
         }
-
-        // user authentication
-        if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
-          $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
-          $this->userLogged = TRUE;
-        } else if ($this->authUser(
-          $_POST['login'],
-          $_POST['password'],
-          ((int) $_POST['keep_logged_in']) == 1
-        )) {
-          // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
-          // nevyzadoval form resubmission
-          header("Location: {$this->config['url']}");
-          exit();//"a {$this->config['url']} .");
-        } else {
-          $this->userProfile = [];
-          $this->userLogged = FALSE;
-        }
-
-        $this->onUserAuthorised();
-
-        // user specific config
-        // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
-        // if (is_array($this->config['user'][$this->userProfile['id']])) {
-        //   unset($this->config['user'][$this->userProfile['id']]['language']);
-        //   $this->mergeConfig($this->config['user'][$this->userProfile['id']]);
-        // }
       }
+
 
       // finalizacia konfiguracie - aj pre FULL aj pre LITE mode
       $this->finalizeConfig();
@@ -387,6 +361,65 @@ class Loader {
 
       // timezone
       date_default_timezone_set($this->config['timezone']);
+
+      if ($mode == self::ADIOS_MODE_FULL) {
+        // user authentication
+        if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
+          $adiosUserModel = new \ADIOS\Core\Models\User($this);
+          $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
+          $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
+
+          $user = reset($this->db->get_all_rows_query("
+            SELECT *
+            FROM `{$adiosUserModel->getFullTableSQLName()}`
+            WHERE `id` = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
+            LIMIT 1
+          "));
+
+          if (
+            $user['is_active'] != 1 ||
+            $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
+          ) {
+            unset($_SESSION[_ADIOS_ID]['userProfile']);
+            $this->userProfile = [];
+            $this->userLogged = FALSE;
+          } else {
+            $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
+            $this->userLogged = TRUE;
+            $clientIp = $this->getClientIpAddress();
+            $this->db->query("
+              UPDATE `{$adiosUserModel->getFullTableSQLName()}`
+              SET
+                `last_access_time` = '".date('Y-m-d H:i:s')."',
+                `last_access_ip` = '{$clientIp}'
+              WHERE `id` = ".(int)$this->userProfile['id'].";
+            ");
+          }
+        } else if ($this->authUser(
+          $_POST['login'],
+          $_POST['password'],
+          ((int) $_POST['keep_logged_in']) == 1
+        )) {
+          // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
+          // nevyzadoval form resubmission
+          header("Location: {$this->config['url']}");
+          exit();
+        } else {
+          $this->userProfile = [];
+          $this->userLogged = FALSE;
+        }
+
+        // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
+        $this->onUserAuthorised();
+
+
+        // user specific config
+        // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
+        // if (is_array($this->config['user'][$this->userProfile['id']])) {
+        //   unset($this->config['user'][$this->userProfile['id']]['language']);
+        //   $this->mergeConfig($this->config['user'][$this->userProfile['id']]);
+        // }
+      }
 
       if ($mode == self::ADIOS_MODE_FULL) {
 
@@ -1447,6 +1480,17 @@ class Loader {
     $this->uid = $uid;
   }
 
+  public function getClientIpAddress() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+      $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+      $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+  }
+
   public function authCookieSerialize($login, $password) {
     return md5($login.".".$password).",".$login;
   }
@@ -1465,16 +1509,17 @@ class Loader {
     }
 
     if (!empty($login)) {
+      $adiosUserModel = new \ADIOS\Core\Models\User($this);
       $this->db->query("
         select
           *
-        from {$this->gtp}_{$this->config['system_table_prefix']}_users
+        from `{$adiosUserModel->getFullTableSQLName()}`
         where
           (
             `login`= '".$this->db->escape($login)."'
             or `email`= '".$this->db->escape($login)."'
           )
-          and `active` <> 0
+          and `is_active` <> 0
       ");
 
       while ($data = $this->db->fetch_array()) {
@@ -1490,6 +1535,18 @@ class Loader {
         if ($passwordMatch) {
           $this->userProfile = $data;
           $this->userLogged = TRUE;
+
+          // update last_login_time a last_login_ip
+          $clientIp = $this->getClientIpAddress();
+          $this->db->query("
+            UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
+            SET
+              last_login_time = '".date('Y-m-d H:i:s')."',
+              last_login_ip = '{$clientIp}',
+              last_access_time = '".date('Y-m-d H:i:s')."',
+              last_access_ip = '{$clientIp}'
+            WHERE id = ".(int)$this->userProfile['id'].";
+          ");
 
           $_SESSION[_ADIOS_ID]['userProfile'] = $this->userProfile;
 
