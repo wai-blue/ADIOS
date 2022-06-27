@@ -47,6 +47,8 @@ class CheckboxField extends \ADIOS\Core\Input {
         <div class='row'>
     ";
     $i = 0;
+
+    var_dump($this->params['values']);
     foreach ($this->params['values'] as $key => $displayValue) {
       $html .= "
         <div class='col-lg-{$bootstrapColumnSize} col-md-12'>
