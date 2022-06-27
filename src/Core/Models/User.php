@@ -104,11 +104,9 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function upgrades() : array {
-    // REVIEW: Tento komentar (nizsie "Upgrade...") je taky volajaky bezzuby. Popisuje nefunkcnost,
-    // ale nenavrhuje riesenie. Resp. co ma s takymto komentarom robit iny programator, ked to
-    // po tebe prevezme?
-
     // Upgrade nebude fungovať pretože sa mení logika prihlásenia a upgrade sa vykoná až po prihlásení.
+    // Upgrade je možné realizovať nanovo vytvorením tabuľky users napríklad pomocou funkcie $model->install()
+    // Pri tomto riešení je potrebné manuálne zálohovať používateľov a následne ich importovať.
     return [
       0 => [], // upgrade to version 0 is the same as installation
       1 => [
