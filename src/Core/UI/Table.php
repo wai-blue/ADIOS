@@ -162,14 +162,16 @@ class Table extends \ADIOS\Core\UI\View
     }
 
     // nastavenie poradia
-    $orderBy = [];
-    foreach (explode(',', $this->params['order_by']) as $item) {
-      $item = trim($item);
-      $tmp = explode(' ', $item);
-      $tmp[0] = '`' . implode('`.`', explode(".", $tmp[0])) . '`';
-      $orderBy[] = "{$tmp[0]} {$tmp[1]}";
+    if ($this->params['order_by'] != "") {
+      $orderBy = [];
+      foreach (explode(',', $this->params['order_by']) as $item) {
+        $item = trim($item);
+        $tmp = explode(' ', $item);
+        $tmp[0] = '`' . implode('`.`', explode(".", $tmp[0])) . '`';
+        $orderBy[] = "{$tmp[0]} {$tmp[1]}";
+      }
+      $this->params['order_by'] = implode(', ', $orderBy);
     }
-    $this->params['order_by'] = implode(', ', $orderBy);
 
     //
     $this->columnsFilter = [];
