@@ -14,8 +14,6 @@ class CrossTableInputField extends \ADIOS\Core\Input {
   public function render() {
     $crossModel = $this->adios->getModel($this->params['cross_model']);
 
-    //var_dump($this->params);
-
     switch ($this->params['columns'] ?? 3) {
       case 1: default: $bootstrapColumnSize = 12; break;
       case 2: $bootstrapColumnSize = 6; break;
