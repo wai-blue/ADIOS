@@ -51,6 +51,10 @@ class Form extends \ADIOS\Core\UI\View
       'delete_action' => 'UI/Table/Delete',
       'copy_action' => 'UI/Table/Copy',
       'do_not_close' => false,
+      'reopen_after_save' => $this->adios->getConfig(
+        "ui/form/reopen_after_save",
+        ((int)$params['id'] > 0 ? TRUE : FALSE)
+      ),
       'onbeforesave' => '',
       'onaftersave' => '',
       'onbeforeclose' => '',
@@ -461,6 +465,7 @@ class Form extends \ADIOS\Core\UI\View
           data-model='{$this->params['model']}'
           data-model-url-base='".ads($this->model->getFullUrlBase($this->params))."'
           data-table='{$this->params['table']}'
+          data-reopen-after-save='{$this->params['reopen_after_save']}'
           data-do-not-close='{$this->params['do_not_close']}'
           data-window-uid='{$this->params['window_uid']}'
           data-form-type='{$this->params['form_type']}'

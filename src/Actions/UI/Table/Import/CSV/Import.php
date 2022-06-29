@@ -20,6 +20,7 @@ class Import extends \ADIOS\Core\Action {
     $separator = $this->params['separator'];
     $model = $this->params['model'];
     $modelObject = $this->adios->getModel($model);
+    $trimCellValues = (bool) $this->params['trim_cell_values'];
 
     if ($separator == "TAB") $separator = "\t";
 
@@ -35,6 +36,9 @@ class Import extends \ADIOS\Core\Action {
 
         $data = [];
         foreach ($csvRow as $colIndex => $colValue) {
+          if($trimCellValues) {
+            $colValue = trim($colValue);
+          }
           $colValue = iconv("Windows-1250", "UTF-8", $colValue);
           $tmpColName = $this->params["column_{$colIndex}"] ?? "";
           if (!empty($tmpColName)) {
