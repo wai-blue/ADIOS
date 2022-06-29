@@ -10,7 +10,8 @@
 
 namespace ADIOS\Core\UI;
 
-class Table extends \ADIOS\Core\UI\View {
+class Table extends \ADIOS\Core\UI\View
+{
 
   var $model = NULL;
 
@@ -18,7 +19,7 @@ class Table extends \ADIOS\Core\UI\View {
   var $columnsFilter = [];
 
   var $data = [];
-  
+
   /**
    * __construct
    *
@@ -26,7 +27,8 @@ class Table extends \ADIOS\Core\UI\View {
    * @param  mixed $params
    * @return void
    */
-  public function __construct(&$adios, $params = null) {
+  public function __construct(&$adios, $params = null)
+  {
 
     $this->adios = &$adios;
     $this->userParams = $params;
@@ -101,7 +103,7 @@ class Table extends \ADIOS\Core\UI\View {
 
     if (empty($params['add_button_params']['onclick'])) {
       $params['add_button_params']['onclick'] = "
-        window_render('".$this->model->getFullUrlBase($params)."/Add')
+        window_render('" . $this->model->getFullUrlBase($params) . "/Add')
       ";
     }
 
@@ -160,18 +162,22 @@ class Table extends \ADIOS\Core\UI\View {
     }
 
     // nastavenie poradia
-    $tmp = explode(' ', $this->params['order_by']);
-    if (empty($this->columns[$tmp[0]])) {
-      $this->params['order_by'] = '';
+    $orderBy = [];
+    foreach (explode(',', $this->params['order_by']) as $item) {
+      $item = trim($item);
+      $tmp = explode(' ', $item);
+      $tmp[0] = '`' . implode('`.`', explode(".", $tmp[0])) . '`';
+      $orderBy[] = "{$tmp[0]} {$tmp[1]}";
     }
+    $this->params['order_by'] = implode(', ', $orderBy);
 
     //
     $this->columnsFilter = [];
 
     foreach ($this->columns as $col_name => $col_def) {
-      if (isset($this->params['column_filter_'.$col_name])) {
-        $this->columnsFilter[$col_name] = $this->params['column_filter_'.$col_name];
-        unset($this->params['column_filter_'.$col_name]);
+      if (isset($this->params['column_filter_' . $col_name])) {
+        $this->columnsFilter[$col_name] = $this->params['column_filter_' . $col_name];
+        unset($this->params['column_filter_' . $col_name]);
       }
     }
 
@@ -201,11 +207,13 @@ class Table extends \ADIOS\Core\UI\View {
 
     if ($this->params['show_paging']) {
       $this->add(
-        $this->adios->ui->button([
-          'fa_icon' => 'fas fa-angle-double-left',
-          'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '1'); ",
-          'disabled' => (1 == $this->params['page'] ? true : false)]
+        $this->adios->ui->button(
+          [
+            'fa_icon' => 'fas fa-angle-double-left',
+            'class' => 'btn-light btn-circle btn-sm',
+            'onclick' => "ui_table_show_page('{$this->params['uid']}', '1'); ",
+            'disabled' => (1 == $this->params['page'] ? true : false)
+          ]
         ),
         'paging'
       );
@@ -213,7 +221,7 @@ class Table extends \ADIOS\Core\UI\View {
         $this->adios->ui->button([
           'fa_icon' => 'fas fa-angle-left',
           'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '".($this->params['page'] - 1)."'); ",
+          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] - 1) . "'); ",
           'disabled' => (1 == $this->params['page'] ? true : false)
         ]),
         'paging'
@@ -231,7 +239,7 @@ class Table extends \ADIOS\Core\UI\View {
         $this->adios->ui->button([
           'fa_icon' => 'fas fa-angle-right',
           'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '".($this->params['page'] + 1)."'); ",
+          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] + 1) . "'); ",
           'disabled' => ($this->params['page'] == $page_count || 0 == $this->table_item_count ? true : false)
         ]),
         'paging'
@@ -240,7 +248,7 @@ class Table extends \ADIOS\Core\UI\View {
         $this->adios->ui->button([
           'fa_icon' => 'fas fa-angle-double-right',
           'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '".($page_count)."'); ",
+          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($page_count) . "'); ",
           'disabled' => ($this->params['page'] == $page_count || 0 == $this->table_item_count ? true : false)
         ]),
         'paging'
@@ -257,16 +265,16 @@ class Table extends \ADIOS\Core\UI\View {
     if (!empty($this->model->addButtonText)) {
       $this->params['add_button_params']['text'] = $this->model->addButtonText;
     }
-
   }
 
-  
+
   /**
    * loadData
    *
    * @return void
    */
-  public function loadData() {
+  public function loadData()
+  {
 
     // where
     $where = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
@@ -274,10 +282,10 @@ class Table extends \ADIOS\Core\UI\View {
     // having
     $having = (empty($this->params['having']) ? 'TRUE' : $this->params['having']);
     if (_count($this->columnsFilter)) {
-      $having .= " and ".$this->model->tableFilterSqlWhere($this->columnsFilter);
+      $having .= " and " . $this->model->tableFilterSqlWhere($this->columnsFilter);
     }
     if (_count($this->search)) {
-      $having .= " and ".$this->model->tableFilterSqlWhere($this->search);
+      $having .= " and " . $this->model->tableFilterSqlWhere($this->search);
     }
 
     $orderBy = $this->params['order_by'];
@@ -336,7 +344,7 @@ class Table extends \ADIOS\Core\UI\View {
 
     $this->model->onTableAfterDataLoaded($this);
   }
-  
+
   /**
    * getCellHtml
    *
@@ -345,9 +353,10 @@ class Table extends \ADIOS\Core\UI\View {
    * @param  mixed $rowValues
    * @return void
    */
-  public function getCellHtml($columnName, $columnDefinition, $rowValues) {
+  public function getCellHtml($columnName, $columnDefinition, $rowValues)
+  {
     if (!empty($col_def['input']) && is_string($col_def['input'])) {
-      $inputClassName = "\\ADIOS\\".str_replace("/", "\\", $col_def['input']);
+      $inputClassName = "\\ADIOS\\" . str_replace("/", "\\", $col_def['input']);
       $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
       $cellHtml = $tmpInput->formatValueToHtml();
     } else if ($this->adios->db->is_registered_column_type($columnDefinition['type'])) {
@@ -365,7 +374,7 @@ class Table extends \ADIOS\Core\UI\View {
 
     return $cellHtml;
   }
-  
+
   /**
    * getCellCsv
    *
@@ -374,9 +383,10 @@ class Table extends \ADIOS\Core\UI\View {
    * @param  mixed $rowValues
    * @return void
    */
-  public function getCellCsv($columnName, $columnDefinition, $rowValues) {
+  public function getCellCsv($columnName, $columnDefinition, $rowValues)
+  {
     if (!empty($col_def['input']) && is_string($col_def['input'])) {
-      $inputClassName = "\\ADIOS\\".str_replace("/", "\\", $col_def['input']);
+      $inputClassName = "\\ADIOS\\" . str_replace("/", "\\", $col_def['input']);
       $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
       $cellCsv = $tmpInput->formatValueToCsv();
     } else if ($this->adios->db->is_registered_column_type($columnDefinition['type'])) {
@@ -394,14 +404,15 @@ class Table extends \ADIOS\Core\UI\View {
 
     return $cellCsv;
   }
-  
+
   /**
    * render
    *
    * @param  mixed $panel
    * @return void
    */
-  public function render(string $panel = '') {
+  public function render(string $panel = '')
+  {
     $params = $this->params;
 
     $html = "";
@@ -418,7 +429,7 @@ class Table extends \ADIOS\Core\UI\View {
     if (!$this->params['refresh']) {
       $html .= "
         <script>
-          ui_table_params['{$this->uid}'] = JSON.parse(Base64.decode('".base64_encode(json_encode($this->params))."'));
+          ui_table_params['{$this->uid}'] = JSON.parse(Base64.decode('" . base64_encode(json_encode($this->params)) . "'));
         </script>
       ";
 
@@ -427,7 +438,7 @@ class Table extends \ADIOS\Core\UI\View {
         $moreActionsButtonItems = [];
 
         if ($this->params['show_search_button']) {
-          $searchAction = $this->model->searchAction ?? $this->model->getFullUrlBase($params)."/Search";
+          $searchAction = $this->model->searchAction ?? $this->model->getFullUrlBase($params) . "/Search";
 
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-search",
@@ -437,7 +448,7 @@ class Table extends \ADIOS\Core\UI\View {
         }
 
         if ($this->params['show_export_csv_button']) {
-          $exportCsvAction = $this->model->exportCsvAction ?? $this->model->getFullUrlBase($params)."/Export/CSV";
+          $exportCsvAction = $this->model->exportCsvAction ?? $this->model->getFullUrlBase($params) . "/Export/CSV";
 
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-file-export",
@@ -453,7 +464,7 @@ class Table extends \ADIOS\Core\UI\View {
         }
 
         if ($this->params['show_import_csv_button']) {
-          $importCsvAction = $this->model->importCsvAction ?? $this->model->getFullUrlBase($params)."/Import/CSV";
+          $importCsvAction = $this->model->importCsvAction ?? $this->model->getFullUrlBase($params) . "/Import/CSV";
 
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-file-import",
@@ -462,7 +473,7 @@ class Table extends \ADIOS\Core\UI\View {
               let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
               window_render(
                 '{$importCsvAction}',
-                { model: '".ads($this->params['model'])."' }
+                { model: '" . ads($this->params['model']) . "' }
               );
             ",
           ];
@@ -503,7 +514,7 @@ class Table extends \ADIOS\Core\UI\View {
               $tmpSrcColumn = $tmpColumns[$tmpSrcColName];
               $tmpLookupModel = $this->adios->getModel($tmpSrcColumn["model"]);
               $tmpColumn = $tmpLookupModel->columns()[$tmpLookupColName];
-              $tmpTitle = $tmpLookupModel->tableTitle." / ".$tmpColumn["title"];
+              $tmpTitle = $tmpLookupModel->tableTitle . " / " . $tmpColumn["title"];
             } else if ($tmpColumn["type"] == "lookup" && is_numeric($searchValue)) {
               $tmpLookupModel = $this->adios->getModel($tmpColumn["model"]);
 
@@ -524,8 +535,8 @@ class Table extends \ADIOS\Core\UI\View {
             }
 
             $tmpSearchHtml .= "
-              ".hsc($tmpTitle)."
-              = ".hsc($searchValue)."
+              " . hsc($tmpTitle) . "
+              = " . hsc($searchValue) . "
             ";
           }
         }
@@ -535,7 +546,7 @@ class Table extends \ADIOS\Core\UI\View {
             <a class='card-header py-3'>
               <h6 class='m-0 font-weight-bold text-primary'>
                 <i class='fas fa-filter mr-2'></i>
-                ".$this->translate("Records are filtered")."
+                " . $this->translate("Records are filtered") . "
               </h6>
             </a>
             <div>
@@ -543,11 +554,11 @@ class Table extends \ADIOS\Core\UI\View {
                 <div class='mb-2'>
                   {$tmpSearchHtml}
                 </div>
-                ".$this->adios->ui->Button([
-                  "type" => "close",
-                  "text" => $this->translate("Clear filter"),
-                  "onclick" => "desktop_update('{$this->adios->requestedAction}');",
-                ])->render()."
+                " . $this->adios->ui->Button([
+          "type" => "close",
+          "text" => $this->translate("Clear filter"),
+          "onclick" => "desktop_update('{$this->adios->requestedAction}');",
+        ])->render() . "
               </div>
             </div>
           </div>
@@ -564,18 +575,18 @@ class Table extends \ADIOS\Core\UI\View {
 
       $html .= "
         <div
-          ".$this->main_params()."
-          data-model='".ads($this->params['model'])."'
-          data-refresh-action='".ads($this->params['refresh_action'])."'
-          data-refresh-params='".(empty($this->params['uid'])
-            ? json_encode($this->params['_REQUEST'])
-            : json_encode(['uid' => $this->params['uid']])
-          )."'
-          data-action='".ads($this->adios->action)."'
-          data-page='".(int) $this->params['page']."'
-          data-items-per-page='".(int) $this->params['items-per-page']."'
-          data-is-ajax='".($this->adios->isAjax() ? "1" : "0")."'
-          data-is-in-form='".(in_array("UI/Form", $this->adios->actionStack) ? "1" : "0")."'
+          " . $this->main_params() . "
+          data-model='" . ads($this->params['model']) . "'
+          data-refresh-action='" . ads($this->params['refresh_action']) . "'
+          data-refresh-params='" . (empty($this->params['uid'])
+        ? json_encode($this->params['_REQUEST'])
+        : json_encode(['uid' => $this->params['uid']])
+      ) . "'
+          data-action='" . ads($this->adios->action) . "'
+          data-page='" . (int) $this->params['page'] . "'
+          data-items-per-page='" . (int) $this->params['items-per-page'] . "'
+          data-is-ajax='" . ($this->adios->isAjax() ? "1" : "0") . "'
+          data-is-in-form='" . (in_array("UI/Form", $this->adios->actionStack) ? "1" : "0") . "'
         >
       ";
     }
@@ -601,12 +612,14 @@ class Table extends \ADIOS\Core\UI\View {
             $new_ordering = "$col_name asc";
             $order_class = 'unordered';
 
-            if ($ordering[0] == $col_name || $params['table'].'.'.$col_name == $ordering[0]) {
+            if ($ordering[0] == $col_name || $params['table'] . '.' . $col_name == $ordering[0]) {
               switch ($ordering[1]) {
-                case 'asc': $new_ordering = "$col_name desc";
+                case 'asc':
+                  $new_ordering = "$col_name desc";
                   $order_class = 'asc_ordered';
                   break;
-                case 'desc': $new_ordering = 'none';
+                case 'desc':
+                  $new_ordering = 'none';
                   $order_class = 'desc_ordered';
                   break;
               }
@@ -616,14 +629,14 @@ class Table extends \ADIOS\Core\UI\View {
           $html .= "
             <div
               class='Column {$col_def['css_class']} {$order_class}'
-              ".($params['allow_order_modification'] ? "
+              " . ($params['allow_order_modification'] ? "
                 onclick='
                   ui_table_refresh(\"{$params['uid']}\", {order_by: \"{$new_ordering}\"});
                 '
-              " : "")."
+              " : "") . "
             >
-              ".nl2br(hsc($col_def['title']))."
-              ".('' == $col_def['unit'] ? '' : '['.hsc($col_def['unit']).']')."
+              " . nl2br(hsc($col_def['title'])) . "
+              " . ('' == $col_def['unit'] ? '' : '[' . hsc($col_def['unit']) . ']') . "
               <i class='fas fa-chevron-down order_desc'></i>
               <i class='fas fa-chevron-up order_asc'></i>
             </div>
@@ -640,53 +653,53 @@ class Table extends \ADIOS\Core\UI\View {
         $html .= "<div class='Row ColumnFilters'>";
 
         foreach ($this->columns as $col_name => $col_def) {
-            $filter_input = "";
-            
-            switch ($col_def['type']) {
-              case 'varchar':
-              case 'text':
-              case 'password':
-              case 'lookup':
-              case 'color':
-              case 'date':
-              case 'datetime':
-              case 'timestamp':
-              case 'time':
-              case 'year':
-                $input_type = 'text';
-              break;
-              case 'float':
-              case 'int':
-                if (_count($col_def['enum_values'])) {
-                  $input_type = 'select';
-                  $input_values = $col_def['enum_values'];
-                } else {
-                  $input_type = 'text';
-                }
-              break;
-              case 'enum':
-                $input_type = 'select';
-                $input_values = explode(',', $col_def['enum_values']);
-              break;
-              case 'boolean':
-                $input_type = 'bool';
-                $true_value = 1;
-                $false_value = 0;
-              break;
-              default:
-                $input_type = '';
-                $filter_input = '';
-            }
+          $filter_input = "";
 
-            if ('text' == $input_type) {
-                $filter_input = "
+          switch ($col_def['type']) {
+            case 'varchar':
+            case 'text':
+            case 'password':
+            case 'lookup':
+            case 'color':
+            case 'date':
+            case 'datetime':
+            case 'timestamp':
+            case 'time':
+            case 'year':
+              $input_type = 'text';
+              break;
+            case 'float':
+            case 'int':
+              if (_count($col_def['enum_values'])) {
+                $input_type = 'select';
+                $input_values = $col_def['enum_values'];
+              } else {
+                $input_type = 'text';
+              }
+              break;
+            case 'enum':
+              $input_type = 'select';
+              $input_values = explode(',', $col_def['enum_values']);
+              break;
+            case 'boolean':
+              $input_type = 'bool';
+              $true_value = 1;
+              $false_value = 0;
+              break;
+            default:
+              $input_type = '';
+              $filter_input = '';
+          }
+
+          if ('text' == $input_type) {
+            $filter_input = "
                   <input
                     type='text'
                     class='{$params['uid']}_column_filter'
                     data-col-name='{$col_name}'
                     id='{$params['uid']}_column_filter_{$col_name}'
                     required='required'
-                    value=\"".htmlspecialchars($this->columnsFilter[$col_name])."\"
+                    value=\"" . htmlspecialchars($this->columnsFilter[$col_name]) . "\"
                     title=' '
                     onkeydown='if (event.keyCode == 13) { event.cancelBubble = true; }'
                     onkeypress='if (event.keyCode == 13) { event.cancelBubble = true; ui_table_set_column_filter(\"{$params['uid']}\", {}); }'
@@ -694,10 +707,10 @@ class Table extends \ADIOS\Core\UI\View {
                     placeholder='🔍'
                   >
                 ";
-            }
+          }
 
-            if ('select' == $input_type) {
-                $filter_input = "<select
+          if ('select' == $input_type) {
+            $filter_input = "<select
                     class='{$params['uid']}_column_filter'
                     data-col-name='{$col_name}'
                     id='{$params['uid']}_column_filter_{$col_name}'
@@ -705,30 +718,30 @@ class Table extends \ADIOS\Core\UI\View {
                     required='required'
                     onchange=' ui_table_set_column_filter(\"{$params['uid']}\", {}); '><option></option>";
 
-                if (_count($input_values)) {
-                    foreach ($input_values as $enum_val) {
-                        $filter_input .= "<option value='{$enum_val}' ".($this->columnsFilter[$col_name] == $enum_val ? "selected='selected'" : '').'>'.l($enum_val).'</option>';
-                    }
-                }
-
-                $filter_input .= '</select>';
+            if (_count($input_values)) {
+              foreach ($input_values as $enum_val) {
+                $filter_input .= "<option value='{$enum_val}' " . ($this->columnsFilter[$col_name] == $enum_val ? "selected='selected'" : '') . '>' . l($enum_val) . '</option>';
+              }
             }
 
-            if ('bool' == $input_type) {
-                $filter_input = "
+            $filter_input .= '</select>';
+          }
+
+          if ('bool' == $input_type) {
+            $filter_input = "
                   <div
-                    class='bool_controls ".(is_numeric($this->columnsFilter[$col_name]) ? "filter_active" : "")."'
+                    class='bool_controls " . (is_numeric($this->columnsFilter[$col_name]) ? "filter_active" : "") . "'
                   >
                     <input type='hidden'
                       class='{$params['uid']}_column_filter'
                       data-col-name='{$col_name}'
                       id='{$params['uid']}_column_filter_{$col_name}'
                       required='required'
-                      value='".ads($this->columnsFilter[$col_name])."'
+                      value='" . ads($this->columnsFilter[$col_name]) . "'
                     />
 
                     <i
-                      class='fas fa-check-circle ".($this->columnsFilter[$col_name] == 1 ? "active" : "")."'
+                      class='fas fa-check-circle " . ($this->columnsFilter[$col_name] == 1 ? "active" : "") . "'
                       style='color:#4caf50'
                       onclick='
                         if ($(\"#{$params['uid']}_column_filter_{$col_name}\").val() == \"$true_value\") $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"\"); else $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$true_value}\");
@@ -736,7 +749,7 @@ class Table extends \ADIOS\Core\UI\View {
                       '
                     ></i>
                     <i
-                      class='fas fa-times-circle ".($this->columnsFilter[$col_name] == 0 ? "active" : "")."'
+                      class='fas fa-times-circle " . ($this->columnsFilter[$col_name] == 0 ? "active" : "") . "'
                       style='color:#ff5722'
                       onclick='
                         if ($(\"#{$params['uid']}_column_filter_{$col_name}\").val() == \"{$false_value}\") $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"\"); else $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$false_value}\");
@@ -745,9 +758,9 @@ class Table extends \ADIOS\Core\UI\View {
                     ></i>
                   </div>
                 ";
-            }
+          }
 
-            $html .= "
+          $html .= "
               <div class='Column {$col_def['css_class']} {$input_type}'>
                 {$filter_input}
               </div>
@@ -759,7 +772,7 @@ class Table extends \ADIOS\Core\UI\View {
       }
 
       $html .= "</div>"; // adios ui Table Header
-      $html .= "<div class='adios ui Table Content ".(_count($this->data) == 0 ? "empty" : "")."'>";
+      $html .= "<div class='adios ui Table Content " . (_count($this->data) == 0 ? "empty" : "") . "'>";
 
       // zaznamy tabulky
       if (_count($this->data)) {
@@ -795,13 +808,13 @@ class Table extends \ADIOS\Core\UI\View {
             'row' => $val,
           ]);
 
-          $onclick = $params['onclick'] ?: "window_render('".$this->model->getFullUrlBase(array_merge($params, $val))."/' + id + '/Edit')";
+          $onclick = $params['onclick'] ?: "window_render('" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/Edit')";
 
           $html .= "
-            <div 
+            <div
               class='Row'
               data-id='{$val['id']}'
-              data-row-values-base64='".base64_encode(json_encode($val))."'
+              data-row-values-base64='" . base64_encode(json_encode($val)) . "'
               style='{$rowCss}'
               onclick=\"
                 let _this = $(this);
@@ -809,11 +822,11 @@ class Table extends \ADIOS\Core\UI\View {
                 setTimeout(function() {
                   _this.closest('.data_tr').css('opacity', 1);
                 }, 300);
-                let id = ".(int) $val['id'].";
+                let id = " . (int) $val['id'] . ";
 
                 let base64 = $(this).data('row-values-base64');
                 let rowValues = JSON.parse(Base64.decode(base64));
-                
+
                 {$onclick}
               \"
             >
@@ -859,31 +872,31 @@ class Table extends \ADIOS\Core\UI\View {
           <div class='adios ui Table Footer'>
             <div class='Row'>
               <div class='Column count'>
-                {$this->table_item_count} ".$this->translate("items total")."
+                {$this->table_item_count} " . $this->translate("items total") . "
               </div>
               <div class='Column paging'>
-                ".parent::render('paging')."
+                " . parent::render('paging') . "
               </div>
               <div class='Column settings'>
                 <select
                   id='{$this->params['uid']}_table_count'
                   onchange='ui_table_change_items_per_page(\"{$this->params['uid']}\", this.value);'
                 >
-                  <option value='10' ".($this->params['items_per_page'] == 10 ? "selected" : "").">10</option>
-                  <option value='25' ".($this->params['items_per_page'] == 25 ? "selected" : "").">25</option>
-                  <option value='100' ".($this->params['items_per_page'] == 100 ? "selected" : "").">100</option>
-                  <option value='500' ".($this->params['items_per_page'] == 500 ? "selected" : "").">500</option>
-                  <option value='1000' ".($this->params['items_per_page'] == 1000 ? "selected" : "").">1000</option>
+                  <option value='10' " . ($this->params['items_per_page'] == 10 ? "selected" : "") . ">10</option>
+                  <option value='25' " . ($this->params['items_per_page'] == 25 ? "selected" : "") . ">25</option>
+                  <option value='100' " . ($this->params['items_per_page'] == 100 ? "selected" : "") . ">100</option>
+                  <option value='500' " . ($this->params['items_per_page'] == 500 ? "selected" : "") . ">500</option>
+                  <option value='1000' " . ($this->params['items_per_page'] == 1000 ? "selected" : "") . ">1000</option>
                 </select>
 
-                ".($this->params['show_refresh'] ?
-                    $this->adios->ui->button([
-                      'fa_icon' => 'fas fa-sync-alt',
-                      'class' => 'btn-light btn-circle btn-sm',
-                      'title' => "Refresh",
-                      'onclick' => "ui_table_refresh('{$this->params['uid']}');",
-                    ])->render()
-                : "")."
+                " . ($this->params['show_refresh'] ?
+          $this->adios->ui->button([
+            'fa_icon' => 'fas fa-sync-alt',
+            'class' => 'btn-light btn-circle btn-sm',
+            'title' => "Refresh",
+            'onclick' => "ui_table_refresh('{$this->params['uid']}');",
+          ])->render()
+          : "") . "
               </div>
             </div>
           </div>
