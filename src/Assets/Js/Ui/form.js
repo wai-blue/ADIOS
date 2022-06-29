@@ -64,6 +64,7 @@
 
     if (allowed) {
       var action = $('#'+uid).attr('data-save-action');
+      var reopen_after_save = $('#'+uid).attr('data-reopen-after-save');
 
       _ajax_read(action, data, function(saved_id) {
 
@@ -81,7 +82,10 @@
           }
 
           ui_form_close(uid);
-          window_render(data.modelUrlBase + '/' + data.id + '/Edit');
+
+          if (reopen_after_save) {
+            window_render(data.modelUrlBase + '/' + data.id + '/Edit');
+          }
 
           if (typeof params.aftersave_callback === 'function') {
             params.aftersave_callback(uid, data);
