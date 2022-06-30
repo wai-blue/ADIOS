@@ -36,7 +36,7 @@ class Import extends \ADIOS\Core\Action {
 
         $data = [];
         foreach ($csvRow as $colIndex => $colValue) {
-          if($trimCellValues) {
+          if ($trimCellValues) {
             $colValue = trim($colValue);
           }
           $colValue = iconv("Windows-1250", "UTF-8", $colValue);

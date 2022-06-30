@@ -53,7 +53,7 @@ class Form extends \ADIOS\Core\UI\View
       'do_not_close' => false,
       'reopen_after_save' => $this->adios->getConfig(
         "ui/form/reopen_after_save",
-        ((int)$params['id'] > 0 ? TRUE : FALSE)
+        ((int) $params['id'] > 0 ? TRUE : FALSE)
       ),
       'onbeforesave' => '',
       'onaftersave' => '',
