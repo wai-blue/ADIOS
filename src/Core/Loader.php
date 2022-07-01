@@ -943,12 +943,15 @@ class Loader {
       }
 
       // mam moznost upravit config (napr. na skrytie desktopu)
-      $this->config = $actionClassName::overrideConfig($this->config);
+      $this->config = $actionClassName::overrideConfig($this->config, $params);
 
       if ($params['__IS_AJAX__']) {
         // tak nic
-      } else if (!$actionClassName::$hideDefaultDesktop) {
-        // treba nacitat cely desktop, ak to nie je zakazane v akcii
+      } else if (
+        !$this->getConfig("hide_default_desktop", FALSE)
+        && !$actionClassName::$hideDefaultDesktop
+      ) {
+        // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
         $this->desktopContentAction = $this->action;
         $this->desktopContentActionParams = $params;
         $this->action = "Desktop";
