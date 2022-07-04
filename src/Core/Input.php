@@ -26,6 +26,7 @@ class Input {
     $this->adios = &$adios;
     $this->gtp = $this->adios->gtp;
     $this->uid = (empty($uid) ? $this->adios->getUid() : $uid);
+    $this->cssUid = (empty($params['css_uid']) ? $this->uid : $params['css_uid']);
     $this->params = $params;
     $this->value = $this->params['value'];
 

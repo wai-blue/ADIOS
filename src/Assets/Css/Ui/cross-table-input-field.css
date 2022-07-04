@@ -1,0 +1,19 @@
+.adios.ui.Input.cross-table-input-field > .row > .wrap-flex {
+  display: inline-flex;
+  flex-wrap: nowrap;
+}
+
+.adios.ui.Input.cross-table-input-field > .row > .wrap-flex:hover {
+  background: #EEEEEE;
+}
+
+.adios.ui.Input.cross-table-input-field > .row > .wrap-flex > label {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
+  padding-right: 5px;
+}
+
+.adios.ui.Input.cross-table-input-field > .row > .wrap-flex input,
+.adios.ui.Input.cross-table-input-field > .row > .wrap-flex select {
+  align-self: center;
+}

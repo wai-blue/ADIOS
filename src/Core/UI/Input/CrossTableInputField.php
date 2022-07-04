@@ -21,8 +21,6 @@ class CrossTableInputField extends \ADIOS\Core\Input {
       case 4: $bootstrapColumnSize = 3; break;
       case 6: $bootstrapColumnSize = 2; break;
     }
-    
-    $columns = $crossModel->columns();
 
     if (empty($this->params['cross_model'])) {
       throw new \ADIOS\Core\Exceptions\GeneralException("CrossTableInputField Input: Error #1");
@@ -41,10 +39,9 @@ class CrossTableInputField extends \ADIOS\Core\Input {
     );
     
     $html = "
-      <div class='adios ui Input input-field'>
+      <div class='adios ui Input cross-table-input-field' data-uid='{$this->cssUid}'>
         <input type='hidden' id='{$this->uid}' data-is-adios-input='1'>
         <div class='row'>
-        
     ";
     $i = 0;
 
@@ -55,7 +52,7 @@ class CrossTableInputField extends \ADIOS\Core\Input {
       $inputHtml = $inputCallback($this, $inputElementId, $itemUID, $itemValues);
 
       $html .= "
-        <div class='col-lg-{$bootstrapColumnSize} col-md-12'>
+        <div class='col-lg-{$bootstrapColumnSize} col-md-12 wrap-flex'>
           <label for='{$inputElementId}'>
             ".hsc($itemParams['title'])."
           </label>
