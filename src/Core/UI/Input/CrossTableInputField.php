@@ -33,9 +33,9 @@ class CrossTableInputField extends \ADIOS\Core\Input {
           *
         from `".$crossModel->getFullTableSQLName()."`
         where
-          `{$this->params['cross_key_column']}` = '".$this->adios->db->escape($this->params['cross_key_value'])."'
+          `".$this->adios->db->escape($this->params['cross_key_column'])."` = '".$this->adios->db->escape($this->params['cross_key_value'])."'
       ",
-      "id_branch_risk"
+      $this->adios->db->escape($this->params['key_by'])
     );
     
     $html = "
@@ -68,7 +68,7 @@ class CrossTableInputField extends \ADIOS\Core\Input {
       <script>
         function {$this->uid}_serialize() {
           let data = [];
-          $('#{$this->uid}').closest('.input-field').find('input[type!=hidden],select,textarea').each(function() {
+          $('#{$this->uid}').closest('.cross-table-input-field').find('input[type!=hidden],select,textarea').each(function() {
             if ($(this).attr('type') == 'checkbox') {
               data.push([
                 $(this).data('item-uid'),
