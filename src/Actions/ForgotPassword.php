@@ -15,10 +15,10 @@ namespace ADIOS\Actions;
  *
  * @package UI\Actions
  */
-class PasswordReset extends \ADIOS\Core\Action {
+class ForgotPassword extends \ADIOS\Core\Action {
   public function preRender() {
     return [
-      "userPasswordReset" => $this->adios->userPasswordReset
+      "userForgotPassword" => $this->adios->userForgotPassword
     ];
   }
 }

@@ -212,8 +212,6 @@ class User extends \ADIOS\Core\Model {
     $tokenModel = $this->adios->getModel("Core/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
-    //$customerTokenInfo = $this->getCustomerTokenInfo($token);
-
     if ($deleteAfterValidation) {
       $this->where('id_token', $tokenData['id'])->delete();
       $tokenModel->deleteToken($tokenData['id']);
@@ -223,7 +221,9 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function getByEmail(string $email) {
-    return (array)self::where("email", $email)->first()->toArray();
+    $user = self::where("email", $email)->first();
+
+    return !empty($user) ? $user->toArray() : [];
   }
 
 }

@@ -115,7 +115,7 @@ class Loader {
 
   public $userLogged = FALSE;
   public $userProfile = NULL;
-  public $userPasswordReset = [];
+  public $userForgotPassword = [];
 
   public $db = NULL;
   public $twig = NULL;
@@ -365,7 +365,7 @@ class Loader {
 
       if ($mode == self::ADIOS_MODE_FULL) {
 
-        if (isset($_POST['passwordReset'])) {
+        if (isset($_POST['forgotPassword'])) {
           $email = isset($_POST["email"]) ? $_POST["email"] : "";
 
           if ($email != "") {
@@ -375,14 +375,14 @@ class Loader {
             if (!empty($user)) {
               // TODO: MAIL
               $userModel->generateForgotPasswordToken($user["id"], $email);
-              $this->userPasswordReset["success"] = TRUE;
+              $this->userForgotPassword["success"] = TRUE;
             } else {
-              $this->userPasswordReset["error"] = TRUE;
-              $this->userPasswordReset["errorMessage"] = $this->translate("Inserted email address doesnt exists.", $this);
+              $this->userForgotPassword["error"] = TRUE;
+              $this->userForgotPassword["errorMessage"] = $this->translate("Inserted email address doesnt exists.", $this);
             }
           } else {
-            $this->userPasswordReset["error"] = TRUE;
-            $this->userPasswordReset["errorMessage"] = $this->translate("Email cannot be empty. Fill the email field.", $this);
+            $this->userForgotPassword["error"] = TRUE;
+            $this->userForgotPassword["errorMessage"] = $this->translate("Email cannot be empty. Fill the email field.", $this);
           }
         }
 
@@ -988,7 +988,7 @@ class Loader {
       }
 
       // password reset
-      if ($params["action"] == "PasswordReset") $this->action = "PasswordReset"; 
+      if ($params["action"] == "ForgotPassword") $this->action = "ForgotPassword"; 
 
       if (empty($this->action)) {
         $this->action = "Desktop";
