@@ -115,6 +115,7 @@ class Loader {
 
   public $userLogged = FALSE;
   public $userProfile = NULL;
+  public $userPasswordReset = [];
 
   public $db = NULL;
   public $twig = NULL;
@@ -363,6 +364,28 @@ class Loader {
       date_default_timezone_set($this->config['timezone']);
 
       if ($mode == self::ADIOS_MODE_FULL) {
+
+        if (isset($_POST['passwordReset'])) {
+          $email = isset($_POST["email"]) ? $_POST["email"] : "";
+
+          if ($email != "") {
+            $userModel = $this->getModel("Core/Models/User");
+            $user = $userModel->getByEmail($email);
+
+            if (!empty($user)) {
+              // TODO: MAIL
+              $userModel->generateForgotPasswordToken($user["id"], $email);
+              $this->userPasswordReset["success"] = TRUE;
+            } else {
+              $this->userPasswordReset["error"] = TRUE;
+              $this->userPasswordReset["errorMessage"] = $this->translate("Inserted email address doesnt exists.", $this);
+            }
+          } else {
+            $this->userPasswordReset["error"] = TRUE;
+            $this->userPasswordReset["errorMessage"] = $this->translate("Email cannot be empty. Fill the email field.", $this);
+          }
+        }
+
         // user authentication
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
           $adiosUserModel = new \ADIOS\Core\Models\User($this);
@@ -963,6 +986,9 @@ class Loader {
       ) {
         $this->action = "Login";
       }
+
+      // password reset
+      if ($params["action"] == "PasswordReset") $this->action = "PasswordReset"; 
 
       if (empty($this->action)) {
         $this->action = "Desktop";
@@ -1598,6 +1624,7 @@ class Loader {
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
+      dirname(__FILE__)."/../Assets/Css/login.css",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {

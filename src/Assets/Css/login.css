@@ -38,6 +38,19 @@
 .languages .lang .title {display:block;width:24px;height:24px;margin-top:6px;}
 .languages .lang:hover .title {display:none;}
 
+.no-space {
+  margin-bottom: 0;
+}
+.forgotten-password a {
+  font-size: 0.8em;
+  color: var(--cl-main);
+}
+.reset-password-notification {
+  text-align: center;
+  color: var(--cl-main);
+  font-size: 1.5em;
+}
+
 @media screen and (max-height: 640px) {
   .header {margin-top: 10vh}
   .logo {display:none;}

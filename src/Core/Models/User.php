@@ -16,6 +16,8 @@ namespace ADIOS\Core\Models;
  * @package DefaultModels
  */
 class User extends \ADIOS\Core\Model {
+  const TOKEN_TYPE_USER_FORGOT_PASSWORD = 551155;
+
   var $sqlName = "";
   var $urlBase = "Users";
   var $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
@@ -26,6 +28,9 @@ class User extends \ADIOS\Core\Model {
 
     if (is_object($adiosOrAttributes)) {
       $this->tableTitle = $this->translate("Users");
+      
+      $tokenModel = $adiosOrAttributes->getModel("Core/Models/Token");
+      $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
     }
   }
 
@@ -100,6 +105,13 @@ class User extends \ADIOS\Core\Model {
         'show_column' => FALSE,
         'readonly' => TRUE,
       ],
+      'id_token_reset_password' => [
+        'type' => 'lookup',
+        'model' => "Core/Models/Token",
+        'title' => $this->translate('Reset password token'),
+        'show_column' => FALSE,
+        'readonly' => TRUE,
+      ]
     ]);
   }
 
@@ -175,6 +187,43 @@ class User extends \ADIOS\Core\Model {
     }
     
     return $params;
+  }
+
+  public function generateToken($idUser, $tokenSalt, $tokenType) {
+    $tokenModel = $this->adios->getModel("Core/Models/Token");
+    $token = $tokenModel->generateToken($tokenSalt, $tokenType);
+
+    $this->updateRow([
+      "id_token_reset_password" => $token['id'],
+    ], $idUser);
+
+    return $token['token'];
+  }
+
+  public function generateForgotPasswordToken($idUser, $tokenSalt) {
+    $this->generateToken(
+      $idUser, 
+      $tokenSalt,
+      self::TOKEN_TYPE_USER_FORGOT_PASSWORD
+    );
+  }
+
+  public function validateToken($token, $deleteAfterValidation = TRUE) {
+    $tokenModel = $this->adios->getModel("Core/Models/Token");
+    $tokenData = $tokenModel->validateToken($token);
+
+    //$customerTokenInfo = $this->getCustomerTokenInfo($token);
+
+    if ($deleteAfterValidation) {
+      $this->where('id_token', $tokenData['id'])->delete();
+      $tokenModel->deleteToken($tokenData['id']);
+    }
+   
+    return $customerTokenInfo;
+  }
+
+  public function getByEmail(string $email) {
+    return (array)self::where("email", $email)->first()->toArray();
   }
 
 }
