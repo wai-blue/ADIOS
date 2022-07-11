@@ -51,7 +51,7 @@
                         id='login'
                         value='{{ login }}'
                         class='form-control form-control-user'
-                        placeholder='User name or email'
+                        placeholder="{{ translate('User name or email') }}"
                         autofocus
                         onkeypress='
                           if (event.keyCode == 13) {
@@ -67,7 +67,7 @@
                         id='password'
                         value=''
                         class='form-control form-control-user'
-                        placeholder='Password'
+                        placeholder="{{ translate('Password') }}"
                         onkeypress='
                           if (event.keyCode == 13) {
                             document.getElementById("login_form").submit();
@@ -78,7 +78,9 @@
                     <div class="form-group ml-2 mt-2">
                       <div class="custom-control custom-checkbox small">
                         <input type='checkbox' id='keep_logged_in' class='custom-control-input' name='keep_logged_in' value=1 checked>
-                        <label class="custom-control-label" for="keep_logged_in">Keep me logged in</label>
+                        <label class="custom-control-label" for="keep_logged_in">
+                          {{ translate("Keep me logged in") }}
+                        </label>
                       </div>
                     </div>
                     <a
@@ -86,19 +88,23 @@
                       onclick='document.getElementById("login_form").submit();'
                       class="btn btn-primary btn-user btn-block"
                     >
-                      Login
+                      {{ translate("Login") }}
                     </a>
                     <div class="mt-4 text-center">
                       {{ config.build.version }}
                     </div>
                   </form>
                   {% if login != '' and not userLogged %}
-                    <div class='small mt-4 text-danger'>Invalid user name or password. Try again please.</div>
+                    <div class='small mt-4 text-danger'>
+                      {{ translate("Invalid user name or password. Try again please.") }}
+                    </div>
                   {% endif %}
 
                   <hr>
                   <div class="text-center">
-                    <a class="small" href="PasswordReset">Forgot Password?</a>
+                    <a class="small" href="PasswordReset">
+                      {{ translate("Forgot Password?") }}
+                    </a>
                   </div>
                 </div>
               </div>
