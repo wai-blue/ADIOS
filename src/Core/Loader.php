@@ -370,10 +370,15 @@ class Loader {
 
           if ($email != "") {
             $userModel = $this->getModel("Core/Models/User");
-            $user = $userModel->getByEmail($email);
-            $resetPasswordToken = $userModel->generatePasswordResetToken($user["id"], $email);
+            $userData = $userModel->getByEmail($email);
 
-            if (!empty($user)) {
+            if (!empty($userData)) {
+              $passwordResetToken = 
+                $userModel->generatePasswordResetToken(
+                  $userData["id"], $email
+                )
+              ;
+
               try {
                 $this->email = new \ADIOS\Core\Lib\Email(
                   $config["smtp_host"],
@@ -392,29 +397,46 @@ class Loader {
                 if ($config["smtp_protocol"] == 'tls') {
                   $this->email->setProtocol(\ADIOS\Core\Lib\Email::TLS);
                 }
-          
+
                 $this->email->addTo($email);
-                $this->email->setSubject("xxx");
-                $this->email->setTextMessage("
-                  {$config['url']}/PasswordReset?token={$resetPasswordToken}
+                $this->email->setSubject(
+                  $config["application_name"].
+                  " - " . $this->translate("password reset", $this)
+                );
+                $this->email->setHtmlMessage("
+                  <h4>
+                    {$config['application_name']}
+                    - ". $this->translate("password reset", $this)."
+                  </h4>
+                  <p>"
+                    .$this->translate("To recover a forgotten password, click on the link below.", $this).
+                  "</p>
+                  <a href='{$config['url']}/PasswordReset?token={$passwordResetToken}'>
+                    {$config['url']}/PasswordReset?token={$passwordResetToken}
+                  </a>
                 ");
                 $this->email->send();
               } catch (\Exception $e) {
-                echo $e->getMessage();
+                var_dump($e->getMessage()); exit();
               }
+
               $this->userPasswordReset["success"] = TRUE;
             } else {
               $this->userPasswordReset["error"] = TRUE;
-              $this->userPasswordReset["errorMessage"] = $this->translate("The entered e-mail address does not exist.", $this);
+              $this->userPasswordReset["errorMessage"] = 
+                $this->translate("The entered e-mail address does not exist.", $this)
+              ;
             }
           } else {
             $this->userPasswordReset["error"] = TRUE;
-            $this->userPasswordReset["errorMessage"] = $this->translate("Email cannot be empty. Fill the email field.", $this);
+            $this->userPasswordReset["errorMessage"] = 
+              $this->translate("Email cannot be empty. Fill the email field.", $this)
+            ;
           }
         }
 
         if (isset($_POST['passwordResetNewPassword'])) {
-          $newPassword = isset($_POST["password_1"]) ? $_POST["password_1"] : "";
+          $newPassword = isset($_POST["new_password"]) ? $_POST["new_password"] : "";
 
           if ($newPassword != "") {
             $userModel = $this->getModel("Core/Models/User");
@@ -433,7 +455,9 @@ class Loader {
             }
           } else {
             $this->userPasswordReset["error"] = TRUE;
-            $this->userPasswordReset["errorMessage"] = $this->translate("New password cannot be empty.", $this);
+            $this->userPasswordReset["errorMessage"] = 
+              $this->translate("New password cannot be empty.", $this)
+            ;
           }
         }
 
@@ -1037,9 +1061,6 @@ class Loader {
       ) {
         $this->action = "Login";
       }
-
-      // password reset
-      // if ($params["action"] == "PasswordReset") $this->action = "PasswordReset"; 
 
       if (empty($this->action)) {
         $this->action = "Desktop";
