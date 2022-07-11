@@ -374,7 +374,7 @@ class Loader {
 
             if (!empty($user)) {
               // TODO: MAIL
-              $userModel->generateForgotPasswordToken($user["id"], $email);
+              var_dump($userModel->generateForgotPasswordToken($user["id"], $email)); exit();
               $this->userForgotPassword["success"] = TRUE;
             } else {
               $this->userForgotPassword["error"] = TRUE;
@@ -915,7 +915,7 @@ class Loader {
 
       if (!empty($params['action'])) {
         // prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params
-        
+
         foreach ($this->routing as $routePattern => $routeParams) {
           if (preg_match($routePattern, $params['action'], $m)) {
             $params['action'] = $routeParams['action'];
@@ -987,7 +987,7 @@ class Loader {
         $this->action = "Login";
       }
 
-      // password reset
+      // password forgot
       if ($params["action"] == "ForgotPassword") $this->action = "ForgotPassword"; 
 
       if (empty($this->action)) {

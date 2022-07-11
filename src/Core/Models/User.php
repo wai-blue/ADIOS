@@ -208,16 +208,23 @@ class User extends \ADIOS\Core\Model {
     );
   }
 
-  public function validateToken($token, $deleteAfterValidation = TRUE) {
+  public function validateToken($token) {
     $tokenModel = $this->adios->getModel("Core/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
-    if ($deleteAfterValidation) {
-      $this->where('id_token', $tokenData['id'])->delete();
-      $tokenModel->deleteToken($tokenData['id']);
+    $user = $this->where('id_token_reset_password', $tokenData['id'])->first();
+
+    if (!empty($user)) {
+      $user = $user->toArray();
+
+      $this->updateRow([
+        "id_token_reset_password" => NULL,
+      ], $user["id"]);
     }
+
+    $tokenModel->deleteToken($tokenData['id']);
    
-    return $customerTokenInfo;
+    return TRUE;
   }
 
   public function getByEmail(string $email) {

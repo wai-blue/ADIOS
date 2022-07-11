@@ -11,7 +11,7 @@
 namespace ADIOS\Actions;
 
 /**
- * 'Password-reset' action. Renders the password reset screen of the ADIOS application.
+ * 'Forgot-password' action. Renders the password reset screen of the ADIOS application.
  *
  * @package UI\Actions
  */
