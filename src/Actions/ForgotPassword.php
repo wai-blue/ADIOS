@@ -16,6 +16,8 @@ namespace ADIOS\Actions;
  * @package UI\Actions
  */
 class ForgotPassword extends \ADIOS\Core\Action {
+  public static $requiresUserAuthentication = FALSE;
+
   public function preRender() {
     return [
       "userForgotPassword" => $this->adios->userForgotPassword

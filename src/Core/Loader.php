@@ -987,8 +987,8 @@ class Loader {
         $this->action = "Login";
       }
 
-      // password forgot
-      if ($params["action"] == "ForgotPassword") $this->action = "ForgotPassword"; 
+      // password reset
+      // if ($params["action"] == "ForgotPassword") $this->action = "ForgotPassword"; 
 
       if (empty($this->action)) {
         $this->action = "Desktop";
