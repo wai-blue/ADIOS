@@ -405,7 +405,7 @@ class Loader {
               $this->userPasswordReset["success"] = TRUE;
             } else {
               $this->userPasswordReset["error"] = TRUE;
-              $this->userPasswordReset["errorMessage"] = $this->translate("Inserted email address doesnt exists.", $this);
+              $this->userPasswordReset["errorMessage"] = $this->translate("The entered e-mail address does not exist.", $this);
             }
           } else {
             $this->userPasswordReset["error"] = TRUE;
@@ -414,24 +414,32 @@ class Loader {
         }
 
         if (isset($_POST['passwordResetNewPassword'])) {
-          $newPassword1 = isset($_POST["password_1"]) ? $_POST["password_1"] : "";
+          $newPassword = isset($_POST["password_1"]) ? $_POST["password_1"] : "";
 
-          if ($newPassword1 != "") {
+          if ($newPassword != "") {
             $userModel = $this->getModel("Core/Models/User");
-            $userData = $userModel->validateToken($params['token'], TRUE);
+            $userData = $userModel->validateToken($_GET["token"], true);
 
             if ($userData) {
-              $userModel->updatePassword($userData["id"], $password);
+              $userModel->updatePassword($userData["id"], $newPassword);
+
+              $this->authUser(
+                $userData['login'],
+                $newPassword
+              );
+
+              header("Location: {$this->config['url']}");
+              exit();
             }
           } else {
-            //$this->userPasswordReset["error"] = TRUE;
-            //$this->userPasswordReset["errorMessage"] = $this->translate("Email cannot be empty. Fill the email field.", $this);
+            $this->userPasswordReset["error"] = TRUE;
+            $this->userPasswordReset["errorMessage"] = $this->translate("New password cannot be empty.", $this);
           }
         }
 
         // user authentication
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
-          $adiosUserModel = new \ADIOS\Core\Models\User($this);
+          $adiosUserModel = $this->getModel("Core/Models/User");
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
@@ -1581,7 +1589,7 @@ class Loader {
     }
 
     if (!empty($login)) {
-      $adiosUserModel = new \ADIOS\Core\Models\User($this);
+      $adiosUserModel = $this->getModel("Core/Models/User");
       $this->db->query("
         select
           *

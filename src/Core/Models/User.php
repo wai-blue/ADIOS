@@ -28,7 +28,6 @@ class User extends \ADIOS\Core\Model {
 
     if (is_object($adiosOrAttributes)) {
       $this->tableTitle = $this->translate("Users");
-      
       $tokenModel = $adiosOrAttributes->getModel("Core/Models/Token");
       $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
     }
@@ -208,23 +207,25 @@ class User extends \ADIOS\Core\Model {
     );
   }
 
-  public function validateToken($token) {
+  public function validateToken($token, $deleteAfterValidation = TRUE) {
     $tokenModel = $this->adios->getModel("Core/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
-    $user = $this->where('id_token_reset_password', $tokenData['id'])->first();
+    $userData = $this->where('id_token_reset_password', $tokenData['id'])->first();
 
-    /*if (!empty($user)) {
-      $user = $user->toArray();
+    if (!empty($userData)) {
+      $userData = $userData->toArray();
+    }
 
+    if ($deleteAfterValidation) {
       $this->updateRow([
         "id_token_reset_password" => NULL,
-      ], $user["id"]);
-    }*/
+      ], $userData["id"]);
 
-    //$tokenModel->deleteToken($tokenData['id']);
-   
-    return TRUE;
+      $tokenModel->deleteToken($tokenData['id']);
+    }
+
+    return $userData;
   }
 
   public function getByEmail(string $email) {
@@ -234,9 +235,12 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function updatePassword(int $idUser, string $password) {
-    return $this->updateRow([
-      "password" => password_hash($password, PASSWORD_DEFAULT),
-    ], $idUser);
+    return 
+      self::where('id', $idUser)
+      ->update(
+        ["password" => password_hash($password, PASSWORD_DEFAULT)]
+      )
+    ;
   }
 
 }
