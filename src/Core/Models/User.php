@@ -211,8 +211,11 @@ class User extends \ADIOS\Core\Model {
     $tokenModel = $this->adios->getModel("Core/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
-    $userData = $this->where('id_token_reset_password', $tokenData['id'])->first();
-
+    $userData = $this->where(
+      'id_token_reset_password', $tokenData['id']
+      )->first()
+    ;
+    
     if (!empty($userData)) {
       $userData = $userData->toArray();
     }
