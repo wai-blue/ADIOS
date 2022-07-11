@@ -200,8 +200,8 @@ class User extends \ADIOS\Core\Model {
     return $token['token'];
   }
 
-  public function generateForgotPasswordToken($idUser, $tokenSalt) {
-    $this->generateToken(
+  public function generatePasswordResetToken($idUser, $tokenSalt) {
+    return $this->generateToken(
       $idUser, 
       $tokenSalt,
       self::TOKEN_TYPE_USER_FORGOT_PASSWORD
@@ -214,15 +214,15 @@ class User extends \ADIOS\Core\Model {
 
     $user = $this->where('id_token_reset_password', $tokenData['id'])->first();
 
-    if (!empty($user)) {
+    /*if (!empty($user)) {
       $user = $user->toArray();
 
       $this->updateRow([
         "id_token_reset_password" => NULL,
       ], $user["id"]);
-    }
+    }*/
 
-    $tokenModel->deleteToken($tokenData['id']);
+    //$tokenModel->deleteToken($tokenData['id']);
    
     return TRUE;
   }
@@ -231,6 +231,12 @@ class User extends \ADIOS\Core\Model {
     $user = self::where("email", $email)->first();
 
     return !empty($user) ? $user->toArray() : [];
+  }
+
+  public function updatePassword(int $idUser, string $password) {
+    return $this->updateRow([
+      "password" => password_hash($password, PASSWORD_DEFAULT),
+    ], $idUser);
   }
 
 }
