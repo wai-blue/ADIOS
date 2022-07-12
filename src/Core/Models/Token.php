@@ -52,6 +52,10 @@ class Token extends \ADIOS\Core\Model {
     ]);
   }
 
+  public function isTokenTypeRegistered($type) {
+    return in_array($type, $this->tokenTypes);
+  }
+
   public function registerTokenType($type) {
     if (!in_array($type, $this->tokenTypes)) {
       $this->tokenTypes[] = $type;

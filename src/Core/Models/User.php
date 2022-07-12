@@ -29,7 +29,10 @@ class User extends \ADIOS\Core\Model {
     if (is_object($adiosOrAttributes)) {
       $this->tableTitle = $this->translate("Users");
       $tokenModel = $adiosOrAttributes->getModel("Core/Models/Token");
-      $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
+
+      if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
+        $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
+      }
     }
   }
 
@@ -147,16 +150,20 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function routing(array $routing = []) {
-    return parent::routing([
-      '/^MyProfile$/' => [
-        "action" => "UI/Form",
-        "params" => [
-          "model" => "Core/Models/User",
-          "myProfileView" => TRUE,
-          "id" => $this->adios->userProfile['id'],
-        ]
-      ],
-    ]);
+    if ($this->adios->userLogged) {
+      return parent::routing([
+        '/^MyProfile$/' => [
+          "action" => "UI/Form",
+          "params" => [
+            "model" => "Core/Models/User",
+            "myProfileView" => TRUE,
+            "id" => $this->adios->userProfile['id'],
+          ]
+        ],
+      ]);
+    } else {
+      return parent::routing();
+    }
   }
 
   public function getById($id) {
