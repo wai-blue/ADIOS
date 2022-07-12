@@ -1607,6 +1607,7 @@ class Loader {
     }
 
     foreach (scandir(ADIOS_WIDGETS_DIR) as $widget) {
+      //TO DO: if is dir ADIOS_WIDGETS_DIR/$widget/Assets/Css tak scandir - iterovat subormi a davat do $cssfiles
       if (!in_array($widget, [".", ".."]) && is_file(ADIOS_WIDGETS_DIR."/{$widget}/Main.css")) {
         $cssFiles[] = ADIOS_WIDGETS_DIR."/{$widget}/Main.css";
       }
@@ -1656,6 +1657,13 @@ class Loader {
     foreach ($jsFiles as $file) {
       $js .= @file_get_contents(dirname(__FILE__)."/../Assets/Js/{$file}")."\n";
     }
+    
+    foreach (scandir(ADIOS_WIDGETS_DIR) as $widget) {
+      if (!in_array($widget, [".", ".."]) && is_file(ADIOS_WIDGETS_DIR."/{$widget}/Main.js")) {
+        $js .= @file_get_contents(ADIOS_WIDGETS_DIR."/{$widget}/Main.js")."\n";
+      }
+    }
+    //To do: Spravit podla css (do definicie cesty k suborom dat /../Assets/Js/Ui)
 
     $js .= "
       var adios_language_translations = {};
