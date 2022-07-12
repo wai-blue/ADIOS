@@ -50,7 +50,7 @@ class Form extends \ADIOS\Core\UI\View
       'save_action' => 'UI/Form/Save',
       'delete_action' => 'UI/Table/Delete',
       'copy_action' => 'UI/Table/Copy',
-      'do_not_close' => false,
+      'do_not_close' => false, // DEPRECATED, je nahradeny parametrom reopen_after_save
       'reopen_after_save' => $this->adios->getConfig(
         "ui/form/reopen_after_save",
         ((int) $params['id'] > 0 ? TRUE : FALSE)
