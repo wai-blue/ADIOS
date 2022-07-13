@@ -250,8 +250,8 @@ function _ajax_read_json(action, params, onsuccess, onwarning, onfatal) {
           _alert('FATAL\n\n' + JSON.stringify(res.content));
         }
       }
-    },
-    'complete': function() { desktop_console_update(); }
+    }
+    //'complete': function() { desktop_console_update(); }
   });
 };
 
