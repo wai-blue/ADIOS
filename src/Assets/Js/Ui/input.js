@@ -169,7 +169,7 @@ function ui_input_upload_file(uid) {
       var res = jQuery.parseJSON(data);
 
       if (res.uploaded == 1) {
-        $('#' + uid).val(res.fileName);
+        $('#' + uid).val((res.folderPath == '.' ? '' : res.folderPath + '/') + res.fileName);
         $('#' + uid + '_file').html((res.fileName.length > 75 ? res.fileName.substr(0, 75) + '...' : res.fileName));
         $('#' + uid + '_info_div').hide();
         $('#' + uid + '_operations').show();
