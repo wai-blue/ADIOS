@@ -1607,9 +1607,14 @@ class Loader {
     }
 
     foreach (scandir(ADIOS_WIDGETS_DIR) as $widget) {
-      //TO DO: if is dir ADIOS_WIDGETS_DIR/$widget/Assets/Css tak scandir - iterovat subormi a davat do $cssfiles
       if (!in_array($widget, [".", ".."]) && is_file(ADIOS_WIDGETS_DIR."/{$widget}/Main.css")) {
         $cssFiles[] = ADIOS_WIDGETS_DIR."/{$widget}/Main.css";
+      }
+
+      if (is_dir(ADIOS_WIDGETS_DIR."/{$widget}/Assets/Css")) {
+        foreach (scandir(ADIOS_WIDGETS_DIR."/{$widget}/Assets/Css") as $widgetCssFile) {
+          $cssFiles[] = ADIOS_WIDGETS_DIR."/{$widget}/Assets/Css/{$widgetCssFile}";
+        }
       }
     }
 
@@ -1625,45 +1630,51 @@ class Loader {
     $js = "";
 
     $jsFiles = [
-      "jquery-3.5.1.js",
-      "jquery.scrollTo.min.js",
-      "jquery.window.js",
-      "jquery-ui-touch-punch.js",
-      "md5.js",
-      "base64.js",
-      "cookie.js",
-      "keyboard_shortcuts.js",
-      "json.js",
-      "moment.min.js",
-      "chart.min.js",
-      "desktop.js",
-      "ajax_functions.js",
-      "adios.js",
-      "quill-1.3.6.min.js",
-      "bootstrap.bundle.js",
-      "jquery.easing.js",
-      "sb-admin-2.js",
-      "jsoneditor.js",
-      "jquery.tag-editor.js",
-      "jquery.caret.min.js",
-      "jquery-ui.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery-3.5.1.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.scrollTo.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.window.js",
+      dirname(__FILE__)."/../Assets/Js/jquery-ui-touch-punch.js",
+      dirname(__FILE__)."/../Assets/Js/md5.js",
+      dirname(__FILE__)."/../Assets/Js/base64.js",
+      dirname(__FILE__)."/../Assets/Js/cookie.js",
+      dirname(__FILE__)."/../Assets/Js/keyboard_shortcuts.js",
+      dirname(__FILE__)."/../Assets/Js/json.js",
+      dirname(__FILE__)."/../Assets/Js/moment.min.js",
+      dirname(__FILE__)."/../Assets/Js/chart.min.js",
+      dirname(__FILE__)."/../Assets/Js/desktop.js",
+      dirname(__FILE__)."/../Assets/Js/ajax_functions.js",
+      dirname(__FILE__)."/../Assets/Js/adios.js",
+      dirname(__FILE__)."/../Assets/Js/quill-1.3.6.min.js",
+      dirname(__FILE__)."/../Assets/Js/bootstrap.bundle.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.easing.js",
+      dirname(__FILE__)."/../Assets/Js/sb-admin-2.js",
+      dirname(__FILE__)."/../Assets/Js/jsoneditor.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.tag-editor.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.caret.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery-ui.min.js",
     ];
+
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
       if ('.js' == substr($file, -3)) {
-        $jsFiles[] = "Ui/{$file}";
+        $jsFiles[] = dirname(__FILE__)."/../Assets/Js/Ui/{$file}";
+      }
+    }
+
+    foreach (scandir(ADIOS_WIDGETS_DIR) as $widget) {
+      if (!in_array($widget, [".", ".."]) && is_file(ADIOS_WIDGETS_DIR."/{$widget}/Main.js")) {
+        $jsFiles[] = ADIOS_WIDGETS_DIR."/{$widget}/Main.js";
+      }
+
+      if (is_dir(ADIOS_WIDGETS_DIR."/{$widget}/Assets/Js")) {
+        foreach (scandir(ADIOS_WIDGETS_DIR."/{$widget}/Assets/Js") as $widgetJsFile) {
+          $jsFiles[] = ADIOS_WIDGETS_DIR."/{$widget}/Assets/Js/{$widgetJsFile}";
+        }
       }
     }
 
     foreach ($jsFiles as $file) {
-      $js .= @file_get_contents(dirname(__FILE__)."/../Assets/Js/{$file}")."\n";
+      $js .= @file_get_contents($file)."\n";
     }
-    
-    foreach (scandir(ADIOS_WIDGETS_DIR) as $widget) {
-      if (!in_array($widget, [".", ".."]) && is_file(ADIOS_WIDGETS_DIR."/{$widget}/Main.js")) {
-        $js .= @file_get_contents(ADIOS_WIDGETS_DIR."/{$widget}/Main.js")."\n";
-      }
-    }
-    //To do: Spravit podla css (do definicie cesty k suborom dat /../Assets/Js/Ui)
 
     $js .= "
       var adios_language_translations = {};
