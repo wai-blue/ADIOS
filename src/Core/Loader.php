@@ -437,8 +437,30 @@ class Loader {
 
         if (isset($_POST['passwordResetNewPassword'])) {
           $newPassword = isset($_POST["new_password"]) ? $_POST["new_password"] : "";
+          $newPassword2 = isset($_POST["new_password_2"]) ? $_POST["new_password_2"] : "";
 
-          if ($newPassword != "") {
+          // set error to true
+          $this->userPasswordReset["error"] = TRUE;
+
+          if ($newPassword == "") {
+            $this->userPasswordReset["errorMessage"] = 
+              $this->translate("New password cannot be empty.", $this)
+            ;
+          } else if ($newPassword2 == "") {
+            $this->userPasswordReset["errorMessage"] = 
+              $this->translate("Repeated new password cannot be empty.", $this)
+            ;
+          } else if ($newPassword != $newPassword2) {
+            $this->userPasswordReset["errorMessage"] = 
+              $this->translate("Entered passwords do not match.", $this)
+            ;
+          } else if (strlen($newPassword) < 8) {
+            $this->userPasswordReset["errorMessage"] = 
+              $this->translate("Minimum password length is 8 characters.", $this)
+            ;
+          } else {
+            $this->userPasswordReset["error"] = FALSE;
+            
             $userModel = $this->getModel("Core/Models/User");
             $userData = $userModel->validateToken($_GET["token"], true);
 
@@ -453,11 +475,6 @@ class Loader {
               header("Location: {$this->config['url']}");
               exit();
             }
-          } else {
-            $this->userPasswordReset["error"] = TRUE;
-            $this->userPasswordReset["errorMessage"] = 
-              $this->translate("New password cannot be empty.", $this)
-            ;
           }
         }
 
