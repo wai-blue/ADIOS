@@ -39,7 +39,7 @@ class Upload extends \ADIOS\Core\Action {
       $uploadedFileExtension = strtolower(pathinfo($_FILES['upload']['name'], PATHINFO_EXTENSION));
 
       $error = "";
-      if (in_array($uploadedFileExtension, ['php', 'sh', 'exe', 'bat', 'htm', 'html'])) {
+      if (in_array($uploadedFileExtension, ['php', 'sh', 'exe', 'bat', 'htm', 'html', 'htaccess'])) {
         $error = "This file type cannot be uploaded";
       } elseif (!empty($_FILES['upload']['error'])) {
         $error = "File is too large. Maximum size of file to upload is ".round(ini_get('upload_max_filesize'), 2)." MB.";
