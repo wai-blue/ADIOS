@@ -30,7 +30,7 @@ class Upload extends \ADIOS\Core\Action {
       if (empty($folderPath)) $folderPath = ".";
 
       if (!is_dir("{$this->adios->config['files_dir']}/{$folderPath}")) {
-        @mkdir("{$this->adios->config['files_dir']}/{$folderPath}", 0775);
+        mkdir("{$this->adios->config['files_dir']}/{$folderPath}", 0775, TRUE);
       }
 
       $sourceFile = $_FILES['upload']['tmp_name'];
@@ -39,7 +39,7 @@ class Upload extends \ADIOS\Core\Action {
       $uploadedFileExtension = strtolower(pathinfo($_FILES['upload']['name'], PATHINFO_EXTENSION));
 
       $error = "";
-      if (in_array($uploadedFileExtension, ['php', 'sh', 'exe', 'bat', 'htm', 'html'])) {
+      if (in_array($uploadedFileExtension, ['php', 'sh', 'exe', 'bat', 'htm', 'html', 'htaccess'])) {
         $error = "This file type cannot be uploaded";
       } elseif (!empty($_FILES['upload']['error'])) {
         $error = "File is too large. Maximum size of file to upload is ".round(ini_get('upload_max_filesize'), 2)." MB.";
@@ -54,6 +54,7 @@ class Upload extends \ADIOS\Core\Action {
 
         echo json_encode([
           'uploaded' => 1,
+          'folderPath' => $folderPath,
           'fileName' => $uploadedFilename,
           'fileSize' => filesize($destinationFile),
           'url' => "{$this->adios->config['files_url']}/{$folderPath}/{$uploadedFilename}",
