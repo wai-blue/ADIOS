@@ -25,7 +25,26 @@ class Upload extends \ADIOS\Core\Action {
         $folderPath = "";
       }
 
-      $uploadedFilename = $_FILES['upload']['name'];
+      $uploadedFilename = \ADIOS\Core\HelperFunctions::str2url($_FILES['upload']['name']);
+
+      if ($_REQUEST['renamePattern'] != "") {
+        $tmpParts = pathinfo($uploadedFilename['name']);
+
+        $uploadedFilename = $_REQUEST['renamePattern'];
+        $uploadedFilename = str_replace("{%Y%}", date("Y"), $uploadedFilename);
+        $uploadedFilename = str_replace("{%M%}", date("m"), $uploadedFilename);
+        $uploadedFilename = str_replace("{%D%}", date("d"), $uploadedFilename);
+        $uploadedFilename = str_replace("{%H%}", date("H"), $uploadedFilename);
+        $uploadedFilename = str_replace("{%I%}", date("i"), $uploadedFilename);
+        $uploadedFilename = str_replace("{%S%}", date("s"), $uploadedFilename);
+        $uploadedFilename = str_replace("{%TS%}", strtotime("now"), $uploadedFilename);
+        $uploadedFilename = str_replace("{%RAND%}", rand(1000, 9999), $uploadedFilename);
+        $uploadedFilename = str_replace("{%BASENAME%}", $tmpParts['basename'], $uploadedFilename);
+        $uploadedFilename = str_replace("{%BASENAME_ASCII%}", \ADIOS\Core\HelperFunctions::str2url($tmpParts['basename']), $uploadedFilename);
+        $uploadedFilename = str_replace("{%FILENAME%}", $tmpParts['filename'], $uploadedFilename);
+        $uploadedFilename = str_replace("{%FILENAME_ASCII%}", \ADIOS\Core\HelperFunctions::str2url($tmpParts['filename']), $uploadedFilename);
+        $uploadedFilename = str_replace("{%EXT%}", $tmpParts['extension'], $uploadedFilename);
+      }
 
       if (empty($folderPath)) $folderPath = ".";
 

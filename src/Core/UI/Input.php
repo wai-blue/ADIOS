@@ -724,6 +724,7 @@ class Input extends \ADIOS\Core\UI\View {
                   data-src-base="'.ads($file_src_base).'"
                   data-default-txt="'.ads($default_src).'"
                   data-subdir="'.ads($this->params['subdir']).'"
+                  data-rename-pattern="'.ads($this->params['rename_pattern']).'"
                   '.($this->params['readonly'] ? "disabled='disabled'" : '')."
                 />
                 
