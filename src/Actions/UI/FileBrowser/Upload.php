@@ -25,10 +25,9 @@ class Upload extends \ADIOS\Core\Action {
         $folderPath = "";
       }
 
-      $uploadedFilename = \ADIOS\Core\HelperFunctions::str2url($_FILES['upload']['name']);
-
+      $uploadedFilename = $_FILES['upload']['name'];
       if ($_REQUEST['renamePattern'] != "") {
-        $tmpParts = pathinfo($uploadedFilename['name']);
+        $tmpParts = pathinfo($uploadedFilename);
 
         $uploadedFilename = $_REQUEST['renamePattern'];
         $uploadedFilename = str_replace("{%Y%}", date("Y"), $uploadedFilename);

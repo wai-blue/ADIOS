@@ -137,6 +137,22 @@ function ui_input_file_open(uid) {
 };
 
 function ui_input_file_remove(uid) {
+  let fileInput = $('#' + uid + '_file_input');
+  let formData = new FormData();
+  console.log(uid);
+  console.log($('#' + uid + '_file').text());
+  formData.append('upload', fileInput[0].files[0]);
+  formData.append('folderPath', $('#' + uid).data('subdir'));
+  formData.append('renamePattern', $('#' + uid).data('rename-pattern'));
+  formData.append('fileName', $('#' + uid + '_file').text());
+  $.ajax({
+    url: _APP_URL + '/UI/FileBrowser/DeleteFile',
+    type: 'post',
+    data: formData,
+    processData: false,
+    contentType: false
+  })
+
   $('#' + uid).val('');
   $('#' + uid + '_file').html($('#' + uid).attr('data-default-txt'));
   $('#' + uid + '_file_input_delete_button').hide();
