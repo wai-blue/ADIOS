@@ -123,6 +123,13 @@ class Table extends \ADIOS\Core\UI\View
     unset($params['__IS_WINDOW__']);
     unset($params['_REQUEST']);
     unset($params['_COOKIE']);
+
+    foreach ($params as $key => $value) {
+      if (strpos($key, 'column_filter_') === 0) {
+        unset($params[$key]);
+      }
+    }
+
     $_SESSION[_ADIOS_ID]['table'][$params['uid']] = $paramsToSession;
 
     parent::__construct($adios, $params);
