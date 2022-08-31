@@ -1756,7 +1756,6 @@ class Loader
       dirname(__FILE__) . "/../Assets/Css/responsive.css",
       dirname(__FILE__) . "/../Assets/Css/colors.css",
       dirname(__FILE__) . "/../Assets/Css/desktop.css",
-      /*dirname(__FILE__)."/../Assets/Css/jquery-ui.css",*/
       dirname(__FILE__)."/../Assets/Css/jquery-ui.structure.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui-fontawesome.css",
       dirname(__FILE__)."/../Assets/Css/jquery.window.css",
@@ -1766,7 +1765,6 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
-      dirname(__FILE__)."/../Assets/Css/login.css",
     ];
 
     foreach (scandir(dirname(__FILE__) . '/../Assets/Css/Ui') as $file) {
