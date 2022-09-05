@@ -174,7 +174,7 @@ class Table extends \ADIOS\Core\UI\View
       foreach (explode(',', $this->params['order_by']) as $item) {
         $item = trim($item);
         $tmp = explode(' ', $item);
-        $tmp[0] = '`' . implode('`.`', explode(".", trim($tmp[0], '`'))) . '`';
+        $tmp[0] = '`' . implode('`.`', explode(".", str_replace('`', '', $tmp[0]))) . '`';
         $orderBy[] = "{$tmp[0]} {$tmp[1]}";
       }
       $this->params['order_by'] = implode(', ', $orderBy);
