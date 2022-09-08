@@ -9,11 +9,14 @@
 */
 
 namespace ADIOS\Actions\UI\Table;
+
 /**
  * @package UI\Actions\Table
  */
-class Search extends \ADIOS\Core\Action {
-  public function render() {
+class Search extends \ADIOS\Core\Action
+{
+  public function render()
+  {
     $model = $this->adios->getModel($this->params['model']);
     $searchGroup = $this->params['searchGroup'];
 
@@ -70,21 +73,21 @@ class Search extends \ADIOS\Core\Action {
     $content = "
       <div class='row'>
         <div class='col-12 col-lg-8'>
-          ".(new \ADIOS\Core\UI\Input\SettingsPanel(
-            $this->adios,
-            $this->uid."_settings_panel",
-            [
-              "settings_group" => "tableSearch",
-              "template" => [
-                "tabs" => $tabs,
-              ],
-            ]
-          ))->render()."
+          " . (new \ADIOS\Core\UI\Input\SettingsPanel(
+      $this->adios,
+      $this->uid . "_settings_panel",
+      [
+        "settings_group" => "tableSearch",
+        "template" => [
+          "tabs" => $tabs,
+        ],
+      ]
+    ))->render() . "
         </div>
         <div class='col-12 col-lg-4'>
           <div class='card shadow mb-4'>
             <a class='d-block card-header py-3'>
-              <h6 class='m-0 font-weight-bold text-primary'>".$this->translate("Saved searches")."</h6>
+              <h6 class='m-0 font-weight-bold text-primary'>" . $this->translate("Saved searches") . "</h6>
             </a>
             <div>
               <div class='card-body'>
@@ -108,9 +111,9 @@ class Search extends \ADIOS\Core\Action {
           }
 
           desktop_update(
-            '{$model->urlBase}',
+            '{$model->getFullUrlBase($this->params)}',
             {
-              'searchGroup': '".ads($searchGroup)."',
+              'searchGroup': '" . ads($searchGroup) . "',
               'search': searchString,
             },
             {
@@ -126,8 +129,8 @@ class Search extends \ADIOS\Core\Action {
             _ajax_read(
               'UI/Table/Search/Save',
               {
-                'model': '".ads($model)."',
-                'searchGroup': '".ads($searchGroup)."',
+                'model': '" . ads($model) . "',
+                'searchGroup': '" . ads($searchGroup) . "',
                 'searchName': searchName,
                 'search': {$this->uid}_get_search_string(),
               },
@@ -143,7 +146,7 @@ class Search extends \ADIOS\Core\Action {
             'UI/Table/Search/SavedSearchesOverview',
             {
               'parentUid': '{$this->uid}',
-              'searchGroup': '".ads($searchGroup)."'
+              'searchGroup': '" . ads($searchGroup) . "'
             },
             '{$this->uid}_saved_searches_div'
           );
@@ -154,7 +157,7 @@ class Search extends \ADIOS\Core\Action {
             _ajax_read(
               'UI/Table/Search/Delete',
               {
-                'searchGroup': '".ads($searchGroup)."',
+                'searchGroup': '" . ads($searchGroup) . "',
                 'searchName': searchName,
               },
               function(res) {
@@ -168,7 +171,7 @@ class Search extends \ADIOS\Core\Action {
           _ajax_read(
             'UI/Table/Search/Load',
             {
-              'searchGroup': '".ads($searchGroup)."',
+              'searchGroup': '" . ads($searchGroup) . "',
               'searchName': searchName,
             },
             function(res) {
@@ -191,7 +194,7 @@ class Search extends \ADIOS\Core\Action {
 
     $window = $this->adios->ui->Window([
       'uid' => "{$this->uid}_window",
-      'title' => $this->translate("Search in").": ".hsc($searchGroup),
+      'title' => $this->translate("Search in") . ": " . hsc($searchGroup),
       'content' => $content,
     ]);
 
@@ -212,7 +215,7 @@ class Search extends \ADIOS\Core\Action {
         'fa_icon' => 'fas fa-save',
       ]),
     ];
-    
+
     return $window->render();
   }
 }
