@@ -126,9 +126,13 @@ class Form extends \ADIOS\Core\UI\View
     // default button params
     
     if ($this->params['id'] <= 0) {
-      $this->params['show_delete_button'] = false;
-      $this->params['show_copy_button'] = false;
-
+      $this->params['show_delete_button'] = FALSE;
+      $this->params['show_copy_button'] = FALSE;
+    }
+    
+    if ($this->params['readonly']) {
+      $this->params['show_save_button'] = FALSE;
+      $this->params['show_delete_button'] = FALSE;
     }
 
     if ($this->params['show_save_button']) {
