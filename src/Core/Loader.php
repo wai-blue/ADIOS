@@ -1006,6 +1006,9 @@ class Loader
 
       if (php_sapi_name() === 'cli') {
         $params = @json_decode($_SERVER['argv'][2] ?? "", TRUE);
+        if (!is_array($params)) { // toto nastane v pripade, ked $_SERVER['argv'] nie je JSON string
+          $params = $_SERVER['argv'];
+        }
         $params['action'] = $_SERVER['argv'][1] ?? "";
       } else {
         $params = $_REQUEST;
