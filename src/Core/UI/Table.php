@@ -399,14 +399,18 @@ class Table extends \ADIOS\Core\UI\View
       $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
       $cellCsv = $tmpInput->formatValueToCsv();
     } else if ($this->adios->db->is_registered_column_type($columnDefinition['type'])) {
-      $cellCsv = $this->adios->db->registered_columns[$columnDefinition['type']]->get_csv(
-        $rowValues[$columnName],
-        [
-          'col_name' => $columnName,
-          'col_definition' => $columnDefinition,
-          'row' => $rowValues,
-        ]
-      );
+      if (!empty($columnDefinition['enum_values'])) {
+        $cellCsv = $columnDefinition['enum_values'][$rowValues[$columnName]];
+      } else {
+        $cellCsv = $this->adios->db->registered_columns[$columnDefinition['type']]->get_csv(
+          $rowValues[$columnName],
+          [
+            'col_name' => $columnName,
+            'col_definition' => $columnDefinition,
+            'row' => $rowValues,
+          ]
+        );
+      }
     } else {
       $cellCsv = $rowValues[$columnName];
     }
