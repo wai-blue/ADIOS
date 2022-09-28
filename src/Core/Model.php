@@ -980,7 +980,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
         // ak je do filtru zadany znak '-', vyfiltruje nezadane datumy
         if ($s === '-') {
-          $return = "({$columnName} IS NULL OR {$columnName} = '0000-00-00' OR {$columnName} = '')";
+          # V novej verzii MySQL nie je pripustna hodnota '' alebo '0000-00-00'
+          # $return = "({$columnName} IS NULL OR {$columnName} = '0000-00-00' OR {$columnName} = '')";
+          $return = "{$columnName} IS NULL";
         }
 
         if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
