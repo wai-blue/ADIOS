@@ -890,7 +890,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ($type == 'int' && _count($column['enum_values']))
       || in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password', 'lookup'])
     ) {
-      $w = explode(' ', $filterValue);
+      if (_count($column['enum_values'])) {
+        $w = [];
+        $s = [];
+        foreach ($column['enum_values'] as $evk => $evv) {
+          if (stripos($evv, $filterValue) !== FALSE) {
+            $w[] = (string)$evk;
+            $s[] = (string)$evk;
+          }
+        }
+      } else {
+        $w = explode(' ', $filterValue);
+      }
     } else {
       $w = $filterValue;
     }
@@ -912,14 +923,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
       '=' == $filterValue[0]
       || (is_array($s) && 1 == count($s) && is_array($w) && 1 == count($w))
       || (is_array($s) && 1 == count($s) && !is_array($w) && '' != $w)
+      || !empty($column['enum_values'])
     ) {
-      $s = reset($s);
+
+      if (!_count($column['enum_values'])) {
+        $s = reset($s);
+      }
 
       if ('=' == $filterValue[0]) {
         $s = substr($filterValue, 1);
       }
 
-      if ('!=' == substr($s, 0, 2)) {
+      if (!_count($column['enum_values']) and '!=' == substr($s, 0, 2)) {
         $not = true;
         $s = substr($s, 2);
       }
@@ -944,6 +959,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       if ($type == 'int' && _count($column['enum_values'])) {
         $return = " `{$columnName}_enum_value` like '%" . $this->adios->db->escape(trim($s)) . "%'";
+      } else if ($type == 'varchar' && _count($column['enum_values'])) {
+        $return = " `{$columnName}` IN (\"" . implode('","', $w) . "\")";
       } else if (in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password'])) {
         $return = " `{$columnName}` like '%" . $this->adios->db->escape(trim($s)) . "%'";
       } else if ($type == 'lookup') {
