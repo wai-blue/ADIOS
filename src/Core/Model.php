@@ -1002,15 +1002,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
           $return = "{$columnName} IS NULL";
         }
 
-        if (preg_match('/^([\>\<=\!]{1,2})?([0-9\.\-]+)$/', $s, $m)) {
+        # Den alebo mesiac
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9]{1,2})$/', $s, $m)) {
           $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
           if (strtotime($m[2]) > 0) {
             $to = date('Y-m-d', strtotime($m[2]));
             $return = "{$columnName} {$operator} '{$to}'";
           } else {
-            //
+            $to = (int)$m[2];
+            $return = "(MONTH(`{$columnName}`) {$operator} '{$to}' OR DAY(`{$columnName}`) {$operator} '{$to}')";
           }
         }
+
         if (preg_match('/^([\>\<=\!]{1,2})([0-9\.\-]+)([\>\<=\!]{1,2})([0-9\.\-]+)$/', $s, $m)) {
           $operator_1 = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
           $date_1 = date('Y-m-d', strtotime($m[2]));
@@ -1022,6 +1025,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
             //
           }
         }
+
         if (preg_match('/^([0-9\.\-]+)-([0-9\.\-]+)$/', $s, $m)) {
           $date_1 = date('Y-m-d', strtotime($m[1]));
           $date_2 = date('Y-m-d', strtotime($m[2]));
@@ -1031,15 +1035,36 @@ class Model extends \Illuminate\Database\Eloquent\Model
             //
           }
         }
-        if (preg_match('/^([0-9]+)\.([0-9]+)$/', $s, $m)) {
+
+        # Den a mesiac
+        if (preg_match('/^([0-9]{1,2})\.([0-9]{1,2})$/', $s, $m)) {
+          $day = $m[1];
+          $month = $m[2];
+          $return = "(DAY({$columnName}) = '{$day}') and (MONTH({$columnName}) = '{$month}')";
+        }
+
+        # Mesiac a rok
+        if (preg_match('/^([0-9]{1,2})\.([0-9]{4})$/', $s, $m)) {
           $month = $m[1];
           $year = $m[2];
           $return = "(month({$columnName}) = '{$month}') and (year({$columnName}) = '{$year}')";
         }
-        if (preg_match('/^([\>\<=\!]{1,2})?([0-9]+)$/', $s, $m)) {
+
+        # Rok
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9]{4})$/', $s, $m)) {
           $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
           $year = $m[2];
           $return = "(year({$columnName}) {$operator} '{$year}')";
+        }
+
+        # Presny datum
+        if (preg_match('/^([\>\<=\!]{1,2})?([0-9]{1,2})\.([0-9]{1,2})\.([0-9]{4})$/', $s, $m)) {
+          $operator = (in_array($m[1], ['=', '!=', '<>', '>', '<', '>=', '<=']) ? $m[1] : '=');
+          $day = $m[2];
+          $month = $m[3];
+          $year = $m[4];
+
+          $return = "`{$columnName}` {$operator} '{$year}-{$month}-{$day}'";
         }
       }
 
