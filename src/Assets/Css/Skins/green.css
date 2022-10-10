@@ -1,17 +1,17 @@
 :root {
-  --cl-main: #2d4a8a;
+  --cl-main: #007f01;
   --cl-altr: #ff9800;
-  --cl-href: #e78b00;
-  --cl-hove: #e78b00;
+  --cl-href: #00a300;
+  --cl-hove: #00a300;
 
   --cl-text-1: #212121;
   --cl-text-2: #616161;
 
-  --cl-icon-1: #2d4a8a;
+  --cl-icon-1: #007f01;
   --cl-icon-2: yellow;
 
-  --cl-bckg-1: #2d4a8a;
-  --cl-bckg-2: #4b68a7;
+  --cl-bckg-1: #007f01;
+  --cl-bckg-2: #00a300;
 
   --cl-gray-1: #2D2D2D;
   --cl-gray-2: #464646;
@@ -24,5 +24,5 @@
 
   --cl-green: #4CAF50;
 
-  --cl-link: rgba(255, 255, 255, 0.8);
+  --cl-link: #FFFFFF;
 }

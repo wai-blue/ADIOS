@@ -52,15 +52,15 @@
 ::-webkit-scrollbar-track {
   background: #f1f1f1;
 }
- 
+
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #DDDDDD; 
+  background: #DDDDDD;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #244ec9; 
+  background: #244ec9;
 }
 
 *,
@@ -2284,8 +2284,8 @@ fieldset:disabled a.btn {
 
 .btn-primary:hover {
   color: #fff;
-  background-color: #2e59d9;
-  border-color: #2653d4;
+  background-color: var(--cl-hove);
+  border-color: var(--cl-main);
 }
 
 .btn-primary:focus, .btn-primary.focus {
@@ -2301,8 +2301,8 @@ fieldset:disabled a.btn {
 .btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
 .show > .btn-primary.dropdown-toggle {
   color: #fff;
-  background-color: #2653d4;
-  border-color: #244ec9;
+  background-color: var(--cl-hove);
+  border-color: var(--cl-main);
 }
 
 .btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
@@ -2811,7 +2811,7 @@ fieldset:disabled a.btn {
 }
 
 .btn-link:hover {
-  color: #224abe;
+  color: var( --cl-hove);
   text-decoration: underline;
 }
 
@@ -4625,7 +4625,7 @@ input[type="button"].btn-block {
 
 .page-link:hover {
   z-index: 2;
-  color: #224abe;
+  color: var( --cl-hove);
   text-decoration: none;
   background-color: #eaecf4;
   border-color: #dddfeb;
@@ -9390,7 +9390,7 @@ button.bg-dark:focus {
 }
 
 a.text-primary:hover, a.text-primary:focus {
-  color: #224abe !important;
+  color: var( --cl-hove) !important;
 }
 
 .text-secondary {
@@ -9693,7 +9693,7 @@ a:focus {
 
 .bg-gradient-primary {
   background-color: var(--cl-main);
-  background-image: linear-gradient(180deg, var(--cl-main) 10%, #224abe 100%);
+  background-image: linear-gradient(180deg, var(--cl-main) 10%, var( --cl-hove) 100%);
   background-size: cover;
 }
 
@@ -10264,7 +10264,7 @@ a:focus {
 
 .sidebar .sidebar-brand .sidebar-brand-icon img {
   max-height: 2rem;
-  max-width: 2rem;
+  /*max-width: 2rem;*/
 }
 
 .sidebar .sidebar-brand .sidebar-brand-text {
@@ -10472,11 +10472,11 @@ a:focus {
 }
 
 .sidebar-dark .nav-item .nav-link {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--cl-link);
 }
 
 .sidebar-dark .nav-item .nav-link i {
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--cl-link);
 }
 
 .sidebar-dark .nav-item .nav-link:active, .sidebar-dark .nav-item .nav-link:focus, .sidebar-dark .nav-item .nav-link:hover {
