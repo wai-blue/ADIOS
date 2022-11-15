@@ -97,8 +97,10 @@
               {% endif %}
               href="javascript:void(0)"
               onclick="
-                Cookies.set('sidebarActiveMainItem', '{{ loop.index }}', 1);
-                Cookies.set('sidebarActiveSubItem', '0', 1);
+                if(typeof Cookies == 'object') {
+                  Cookies.set('sidebarActiveMainItem', '{{ loop.index }}', 1);
+                  Cookies.set('sidebarActiveSubItem', '0', 1);
+                }
                 {{ shortcut.onclick|raw }}
               "
             >
@@ -165,97 +167,106 @@
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow">
-          {% if config.top_bar.custom.action != "" %}
-            {{ adiosAction(config.top_bar.custom.action, config.top_bar.custom.action_params)|raw }}
-          {% endif %}
+        <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow row">
+          <div class="col col-12 col-md-4">
+            {% if config.top_bar.custom.action != "" %}
+              {{ adiosAction(config.top_bar.custom.action, config.top_bar.custom.action_params)|raw }}
+            {% endif %}
+          </div>
+
           {% if searchButton.display %}
-            <form
-              class='d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search'
-              method='GET'
-            >
-              <div class='input-group'>
-                <input
-                  type='text'
-                  name='search'
-                  class='form-control bg-light border-0 small'
-                  value='{{ _REQUEST.search }}'
-                  placeholder='{{ searchButton.placeholder }}'
-                  aria-label='Search'
-                />
-                <div class='input-group-append'>
-                  <button class='btn btn-primary' type='button' onclick='$(this).closest("form").submit();'>
-                    <i class='fas fa-search fa-sm'></i>
-                  </button>
+            <div class="col col-12 col-md-4">
+              <form
+                class='d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search'
+                method='GET'
+              >
+                <div class='input-group'>
+                  <input
+                    type='text'
+                    name='search'
+                    class='form-control bg-light border-0 small'
+                    value='{{ _REQUEST.search }}'
+                    placeholder='{{ searchButton.placeholder }}'
+                    aria-label='Search'
+                  />
+                  <div class='input-group-append'>
+                    <button class='btn btn-primary' type='button' onclick='$(this).closest("form").submit();'>
+                      <i class='fas fa-search fa-sm'></i>
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </div>
           {% endif %}
 
           <!-- Topbar Navbar -->
-          <ul class="navbar-nav ml-auto">
+          <div class="col col-2">
+            <ul class="navbar-nav flex-row-reverse">
 
-            <!-- Language selection -->
-            {% if config.available_languages|length > 0 %}
-              <li class="nav-item dropdown no-arrow">
-                <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ config.language|upper }}</span>
-                  <i class='btn btn-light btn-sm fas fa-language'></i>
-                </a>
-                <div class="dropdown-menu shadow animated--grow-in" aria-labelledby="languageDropdown">
-                  {% for lang in config.available_languages %}
-                    <a
-                      href="javascript:void(0);"
-                      onclick="
-                        _ajax_read('Desktop/Ajax/SetLanguage', {'language': '{{ lang }}'}, function(res) {
-                          location.reload()
-                        });
-                      ";
-                      class="dropdown-item {% if lang == config.language %} active {% endif %}"
-                    >
-                      <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
-                      {{ lang|upper }}
-                    </a>
-                  {% endfor %}
-                </div>
-              </li>
-            {% endif %}
-
-            <!-- Nav Item - User Information -->
-            {% if user.id > 0 %}
-              <li class="nav-item dropdown no-arrow">
-                <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.name }} {{ user.surname }}</span>
-                  {% if updates_available %}
-                    <i class='btn btn-warning btn-sm btn-circle fas fa-exclamation-triangle' style='font-weight:900'></i>
-                  {% else %}
-                    <i class='btn btn-primary btn-sm btn-circle fas fa-user-tie' style='font-weight:900'></i>
-                  {% endif %}
-                </a>
-                <!-- Dropdown - User Information -->
-                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
-                  {% for item in settingsMenuItems %}
-                    <a class="dropdown-item" href="javascript:void(0)" onclick="{{ item.onclick|raw }}">
-                      <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
-                      {{ item.text }}
-                    </a>
-                  {% endfor %}
-                  <div class="dropdown-divider"></div>
-                  {% for item in develMenuItems %}
-                    <a class="dropdown-item" href="javascript:void(0)" onclick="{{ item.onclick|raw }}">
-                      <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
-                      {{ item.text }}
-                    </a>
-                  {% endfor %}
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#logoutModal">
-                    <i class="{{ settingsLogoutItems.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
-                    {{ settingsLogoutItems.text }}
+              <!-- Language selection -->
+              {% if config.available_languages|length > 1 %}
+                <li class="nav-item dropdown no-arrow">
+                  <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ config.language|upper }}</span>
+                    <i class='btn btn-light btn-sm fas fa-language'></i>
                   </a>
-                </div>
-              </li>
-            {% endif %}
-          </ul>
+                  <div class="dropdown-menu shadow animated--grow-in" aria-labelledby="languageDropdown">
+                    {% for lang in config.available_languages %}
+                      <a
+                        href="javascript:void(0);"
+                        onclick="
+                          _ajax_read('Desktop/Ajax/SetLanguage', {'language': '{{ lang }}'}, function(res) {
+                            location.reload()
+                          });
+                        ";
+                        class="dropdown-item {% if lang == config.language %} active {% endif %}"
+                      >
+                        <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
+                        {{ lang|upper }}
+                      </a>
+                    {% endfor %}
+                  </div>
+                </li>
+              {% endif %}
+
+              <!-- Nav Item - User Information -->
+              {% if user.id > 0 %}
+                <li class="nav-item dropdown no-arrow">
+                  <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.name }} {{ user.surname }}</span>
+                    {% if updates_available %}
+                      <i class='btn btn-warning btn-sm btn-circle fas fa-exclamation-triangle' style='font-weight:900'></i>
+                    {% else %}
+                      <i class='btn btn-primary btn-sm btn-circle fas fa-user-tie' style='font-weight:900'></i>
+                    {% endif %}
+                  </a>
+                  <!-- Dropdown - User Information -->
+                  <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                    {% for item in settingsMenuItems %}
+                      <a class="dropdown-item" href="javascript:void(0)" onclick="{{ item.onclick|raw }}">
+                        <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
+                        {{ item.text }}
+                      </a>
+                    {% endfor %}
+                    {% if develMenuItems|length > 0 %}
+                      <div class="dropdown-divider"></div>
+                      {% for item in develMenuItems %}
+                        <a class="dropdown-item" href="javascript:void(0)" onclick="{{ item.onclick|raw }}">
+                          <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
+                          {{ item.text }}
+                        </a>
+                      {% endfor %}
+                    {% endif %}
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#logoutModal">
+                      <i class="{{ settingsLogoutItems.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
+                      {{ settingsLogoutItems.text }}
+                    </a>
+                  </div>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
 
         </nav>
         <!-- End of Topbar -->

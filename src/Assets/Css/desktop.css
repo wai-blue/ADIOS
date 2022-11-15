@@ -59,7 +59,7 @@ h3 { padding-bottom: 0.5em; }
   color: var(--cl-main);
 }
 
-#adios_loader_line {position:fixed;z-index:10000;background: var(--cl-green); height:4px; width: 0vw;top:0px;left:0px;transition: 0.1s;}
+#adios_loader_line {position:fixed;z-index:10000;background: var(--cl-loader); height:4px; width: 0vw;top:0px;left:0px;transition: 0.1s;}
 /* #adios_console {
   position:fixed;
   bottom:0px;

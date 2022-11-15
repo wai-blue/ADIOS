@@ -367,7 +367,7 @@ class Loader
             $userData = $userModel->getByEmail($email);
 
             if (!empty($userData)) {
-              $passwordResetToken = 
+              $passwordResetToken =
                 $userModel->generatePasswordResetToken(
                   $userData["id"], $email
                 )
@@ -383,11 +383,11 @@ class Loader
                   ->setLogin($config["smtp_login"], $config["smtp_password"])
                   ->setFrom($config["smtp_from"])
                 ;
-          
+
                 if ($config["smtp_protocol"] == 'ssl') {
                   $this->email->setProtocol(\ADIOS\Core\Lib\Email::SSL);
                 }
-          
+
                 if ($config["smtp_protocol"] == 'tls') {
                   $this->email->setProtocol(\ADIOS\Core\Lib\Email::TLS);
                 }
@@ -417,13 +417,13 @@ class Loader
               $this->userPasswordReset["success"] = TRUE;
             } else {
               $this->userPasswordReset["error"] = TRUE;
-              $this->userPasswordReset["errorMessage"] = 
+              $this->userPasswordReset["errorMessage"] =
                 $this->translate("The entered e-mail address does not exist.", $this)
               ;
             }
           } else {
             $this->userPasswordReset["error"] = TRUE;
-            $this->userPasswordReset["errorMessage"] = 
+            $this->userPasswordReset["errorMessage"] =
               $this->translate("Email cannot be empty. Fill the email field.", $this)
             ;
           }
@@ -437,24 +437,24 @@ class Loader
           $this->userPasswordReset["error"] = TRUE;
 
           if ($newPassword == "") {
-            $this->userPasswordReset["errorMessage"] = 
+            $this->userPasswordReset["errorMessage"] =
               $this->translate("New password cannot be empty.", $this)
             ;
           } else if ($newPassword2 == "") {
-            $this->userPasswordReset["errorMessage"] = 
+            $this->userPasswordReset["errorMessage"] =
               $this->translate("Repeated new password cannot be empty.", $this)
             ;
           } else if ($newPassword != $newPassword2) {
-            $this->userPasswordReset["errorMessage"] = 
+            $this->userPasswordReset["errorMessage"] =
               $this->translate("Entered passwords do not match.", $this)
             ;
           } else if (strlen($newPassword) < 8) {
-            $this->userPasswordReset["errorMessage"] = 
+            $this->userPasswordReset["errorMessage"] =
               $this->translate("Minimum password length is 8 characters.", $this)
             ;
           } else {
             $this->userPasswordReset["error"] = FALSE;
-            
+
             $userModel = $this->getModel("Core/Models/User");
             $userData = $userModel->validateToken($_GET["token"], true);
 
@@ -1803,6 +1803,8 @@ class Loader
       dirname(__FILE__) . "/../Assets/Js/jquery-3.5.1.js",
       dirname(__FILE__) . "/../Assets/Js/jquery.scrollTo.min.js",
       dirname(__FILE__) . "/../Assets/Js/jquery.window.js",
+      dirname(__FILE__) . "/../Assets/Js/jquery.ui.widget.js",
+      dirname(__FILE__) . "/../Assets/Js/jquery.ui.mouse.js",
       dirname(__FILE__) . "/../Assets/Js/jquery-ui-touch-punch.js",
       dirname(__FILE__) . "/../Assets/Js/md5.js",
       dirname(__FILE__) . "/../Assets/Js/base64.js",

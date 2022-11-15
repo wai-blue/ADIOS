@@ -100,11 +100,11 @@ class Desktop extends \ADIOS\Core\Action {
       //   "fa_icon" => "fas fa-terminal",
       //   "onclick" => "desktop_show_console();",
       // ];
-      $develMenuItems[] = [
+      /*$develMenuItems[] = [
         "text" => $this->translate("Examples of UI"),
         "fa_icon" => "fas fa-hammer",
         "onclick" => "desktop_render('SkinSamples');",
-      ];
+      ];*/
     }
 
     $params = [
