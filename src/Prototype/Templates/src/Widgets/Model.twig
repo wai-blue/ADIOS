@@ -14,17 +14,7 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model
   public function columns($columns = []) {
     return parent::columns([
 {% for colName, colDefinition in thisModel.config.columns %}
-      "{{ colName }}" => [
-{% for key,value in colDefinition %}
-{% if getVariableType(value) == "numeric" %}
-        "{{ key }}" => {{ value }},
-{% elseif getVariableType(value) == "bool" %}
-        "{{ key }}" => {% if value %}TRUE{% else %}FALSE{% endif %},
-{% else %}
-        "{{ key }}" => "{{ value }}",
-{% endif %}
-{% endfor %}
-      ],
+      "{{ colName }}" => json_decode('{{ colDefinition|json_encode|raw }}', TRUE),
 {% endfor %}
     ]);
   }

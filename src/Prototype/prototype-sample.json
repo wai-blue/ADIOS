@@ -11,6 +11,7 @@
   },
   "ConfigApp": {
     "applicationName": "Prototype CRM",
+    "defaultAction": "Home/Dashboard",
     "smtp": {
       "host": "test.smtphost.com",
       "port": "465",
@@ -54,6 +55,12 @@
               "type": "varchar",
               "title": "Customer name",
               "show_column": true
+            },
+            "priority": {
+              "type": "int",
+              "title": "Priority",
+              "enum_values": ["High", "Middle", "Low"],
+              "show_column": true
             }
           }
         },
@@ -65,6 +72,12 @@
           "formTitleForEditing": "Edit bid",
           "lookupSqlValue": "{%TABLE%}.title",
           "columns": {
+            "id_customer": {
+              "type": "lookup",
+              "title": "Customer",
+              "model": "Widgets/CustomersAndBids/Models/Customer",
+              "show_column": true
+            },
             "title": {
               "type": "varchar",
               "title": "Bid title",

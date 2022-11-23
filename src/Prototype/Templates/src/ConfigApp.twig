@@ -25,7 +25,7 @@ $config['widgets']['{{ widgetName }}']['enabled'] = TRUE;
 {% endfor %}
 
 // misc
-$config['default_action'] = "Desktop";
+$config['default_action'] = "{% if ConfigApp.defaultAction == "" %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}";
 $config['available_languages'] = ["sk"];
 
 {% if ConfigApp.smtp %}
