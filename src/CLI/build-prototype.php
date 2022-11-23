@@ -42,6 +42,6 @@ $builder->buildPrototype();
 $builder->createEmptyDatabase();
 
 echo "\n";
-echo "SUCCESS: Prototype was successfuly build.\n";
+echo "SUCCESS: Prototype was successfuly built.\n";
 echo "Run ROOT_DIR/install.php script from your browser now.\n";
 echo "\n";
