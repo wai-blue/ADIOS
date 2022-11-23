@@ -22,11 +22,9 @@
   },
   "Widgets": {
     "Home": {
-      "faIcon": "fa-cog",
+      "faIcon": "fa-home",
       "sidebar": {
-        "Home": {
-          "Dashboard": "Home/Dashboard"
-        }
+        "Home": "Home/Dashboard"
       },
       "actions": {
         "Dashboard": {
@@ -77,11 +75,9 @@
       }
     },
     "Calendar": {
-      "faIcon": "fa-cog",
+      "faIcon": "fa-calendar",
       "sidebar": {
-        "Calendar": {
-          "Calendar": "Calendar/Main"
-        }
+        "Calendar": "Calendar/Main"
       },
       "actions": {
         "Main": {
@@ -93,12 +89,45 @@
       "faIcon": "fa-cog",
       "sidebar": {
         "Settings": {
-          "Basic settings": "Settings/Basic"
+          "Basic settings": "Settings/Basic",
+          "Extended settings": "Settings/Extended"
         }
       },
       "actions": {
         "Basic": {
-          "template": "SettingsPanel"
+          "template": "SettingsPanel",
+          "title": "Basic settings",
+          "items": [
+            {
+              "title": "Global Margin",
+              "input": { "type": "float", "unit": "%" },
+              "description": "The basic margin is applied to each product and at each sale."
+            },
+            {
+              "title": "Product-based margins",
+              "input": { "type": "int", "enum_values": ["Apply product-based margins globally", "Apply product-based margins per category"] },
+              "description": "Setting other margins according to selected purchase parameters."
+            },
+            {
+              "title": "Notify reduced cashflow",
+              "input": { "type": "bool" },
+              "description": "Notify when cashflow is significantly reduced."
+            }
+          ]
+        },
+        "Extended": {
+          "template": "SettingsPanel",
+          "title": "Extended settings",
+          "items": [
+            {
+              "title": "Setting 1",
+              "button": { "text": "Go to extended settings #1", "fa_icon": "fas fa-home" }
+            },
+            {
+              "title": "Setting 2",
+              "button": { "text": "Go to extended settings #2", "fa_icon": "fas fa-home" }
+            }
+          ]
         }
       }
     }

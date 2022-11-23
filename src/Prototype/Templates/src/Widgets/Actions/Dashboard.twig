@@ -5,51 +5,12 @@ namespace ADIOS\Actions\{{ thisWidget.name }};
 class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
   public function render() {
     return <<<HTML_CONTENT
-
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500&display=swap" rel="stylesheet">
-
-<link rel="preconnect" href="https://fonts.gstatic.com">
-<link href="https://fonts.googleapis.com/css2?family=Nova+Flat&display=swap" rel="stylesheet">
-
+<h1>Welcome</h1>
 <div class="row">
   <div class="col-md-6">
-    <div class="row">
-      <div class="col-12 p-0">
-        <div class="card shadow mb-2">
-          <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Your online stores</h6>
-          </div>
-          <div class="card-body">
-            <table class="table table-striped table-borderless table-sm" width="100%" cellspacing="0">
-              {% for domainName, domainData in config.widgets.Website.domains %}
-                <tr>
-                  <td class="align-middle">
-                    <div>{{ domainData.name }}</div>
-                    <small>{{ domainData.description }}</small>
-                  </td>
-                  <td class="align-middle text-right">
-                    <a
-                      href="//{{ domainData.rootUrl }}"
-                      class="btn btn-light btn-sm btn-icon-split"
-                      target=_blank
-                    >
-                      <span class="icon text-gray-600"><i class="fas fa-external-link-alt"></i></span>
-                      <span class="text">Visit</span>
-                    </a>
-                  </td>
-                </tr>
-              {% endfor %}
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
     <div class="card shadow mb-2">
       <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Monthly turnover for {{ currentYear }}</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Monthly turnover for 2022</h6>
       </div>
       <div class="card-body">
 
@@ -74,8 +35,8 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
           var data = {
             labels: labels,
             datasets: [{
-              label: "Monthly turnover for {{ currentYear }}",
-              data: {{ data|raw }},
+              label: "Monthly turnover for 2022",
+              data: {'jan': 300, 'feb': 520, 'mar': 600, 'apr': 800, 'may': 650, 'jun': 420, 'jul': 680, 'aug': 890, 'sep': 250, 'oct': 290, 'nov': 480, 'dec': 940},
               fill: false,
               borderColor: 'rgb(75, 192, 192)',
               tension: 0.1
@@ -95,7 +56,7 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
 
     <div class="card shadow mb-2">
       <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Best sold products for {{ currentYear }}</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Best sold products for 2022</h6>
       </div>
       <div class="card-body">
 
@@ -103,11 +64,11 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
 
         <script>
           var data = {
-            labels: {{ chartLabels|raw }},
+            labels: ['Outdoor camera', 'Office 365', 'Laptop', 'e-Bike', 'Smart watch'],
             datasets: [
               {
-                label: 'Best sold products for {{ currentYear }}',
-                data: {{ data|raw }},
+                label: 'Best sold products for 2022',
+                data: [10, 20, 30, 40, 50],
                 backgroundColor: [
                   'rgb(255, 99, 132)',
                   'rgb(255, 159, 64)',
@@ -145,15 +106,20 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
     </div>
 
   </div>
-  
-    
+
   <div class="col-md-6">
-    <div style="text-align:center;margin-top:2em;color:var(--cl-main);user-select: none;">
-      <div style="margin:2em">
-        <img
-          src="{{ config.url }}/surikata/assets/images/Surikata_logo_farebne_znak.png"
-          style="max-width: 100%"
-        >
+    <div class="card shadow mb-2">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Feedback</h6>
+      </div>
+      <div class="card-body text-justify">
+        Need help? Found a bug? Want new features?<br/>
+        <br/>
+        <a href='javascript:void(0)' onclick='window_render("HelpAndSupport/ContactForm");' class='btn btn-info btn-icon-split'>
+          <span class='icon'><i class='fas fa-bolt'></i></span>
+          <span class='text'>Ask for help, report a bug or request new feature</span>
+        </a>
+        </p>
       </div>
     </div>
 
@@ -172,21 +138,6 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
         It is characterised by a broad head, large eyes, a pointed snout, long legs, a thin tapering tail, and a brindled coat pattern. The head-and-body length is around 24–35 cm (9.4–13.8 in), and the weight is typically between 0.62 and 0.97 kg (1.4 and 2.1 lb). The coat is light grey to yellowish brown with alternate, poorly defined light and dark bands on the back. Meerkats have foreclaws adapted for digging and have the ability to thermoregulate to survive in their harsh, dry habitat. Three subspecies are recognised.<br/>
         <br/>
         Learn more at <a href="https://en.wikipedia.org/wiki/Meerkat" target=_blank>Wikipedia</a>.
-        </p>
-      </div>
-    </div>
-
-    <div class="card shadow mb-2">
-      <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Feedback</h6>
-      </div>
-      <div class="card-body text-justify">
-        Need help? Found a bug? Want new features?<br/>
-        <br/>
-        <a href='javascript:void(0)' onclick='window_render("HelpAndSupport/ContactForm");' class='btn btn-info btn-icon-split'>
-          <span class='icon'><i class='fas fa-bolt'></i></span>
-          <span class='text'>Ask for help, report a bug or request new feature</span>
-        </a>
         </p>
       </div>
     </div>
