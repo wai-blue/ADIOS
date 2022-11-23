@@ -21,13 +21,29 @@
     }
   },
   "Widgets": {
-    "Customers": {
-      "isDefault": true,
+    "Home": {
+      "faIcon": "fa-cog",
+      "sidebar": {
+        "Home": {
+          "Dashboard": "Home/Dashboard"
+        }
+      },
+      "actions": {
+        "Dashboard": {
+          "template": "Dashboard"
+        }
+      }
+    },
+    "CustomersAndBids": {
       "faIcon": "fa-address-book",
-      "sidebarTitle": "Customers",
-      "sidebarUrl": "Customers",
+      "sidebar": {
+        "Customers + Bids": {
+          "Customers": "Customers",
+          "Bids": "Bids"
+        }
+      },
 
-      "Models": {
+      "models": {
         "Customer": {
           "sqlName": "customers",
           "urlBase": "Customers",
@@ -42,6 +58,47 @@
               "show_column": true
             }
           }
+        },
+        "Bid": {
+          "sqlName": "bids",
+          "urlBase": "Bids",
+          "tableTitle": "Bids",
+          "formTitleForInserting": "New bid",
+          "formTitleForEditing": "Edit bid",
+          "lookupSqlValue": "{%TABLE%}.title",
+          "columns": {
+            "title": {
+              "type": "varchar",
+              "title": "Bid title",
+              "show_column": true
+            }
+          }
+        }
+      }
+    },
+    "Calendar": {
+      "faIcon": "fa-cog",
+      "sidebar": {
+        "Calendar": {
+          "Calendar": "Calendar/Main"
+        }
+      },
+      "actions": {
+        "Main": {
+          "template": "Calendar"
+        }
+      }
+    },
+    "Settings": {
+      "faIcon": "fa-cog",
+      "sidebar": {
+        "Settings": {
+          "Basic settings": "Settings/Basic"
+        }
+      },
+      "actions": {
+        "Basic": {
+          "template": "SettingsPanel"
         }
       }
     }

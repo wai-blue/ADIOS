@@ -116,25 +116,50 @@ class Builder {
           )
         );
 
-        $this->createFolder("src/Widgets/{$widgetName}/Models");
-        foreach ($widgetConfig['Models'] as $modelName => $modelConfig) {
-          $this->renderFile(
-            "src/Widgets/{$widgetName}/Models/{$modelName}.php",
-            "src/Widgets/Model.twig",
-            array_merge(
-              $this->prototype,
-              [
-                "thisWidget" => [
-                  "name" => $widgetName,
-                  "config" => $widgetConfig
-                ],
-                "thisModel" => [
-                  "name" => $modelName,
-                  "config" => $modelConfig
+        if (is_array($widgetConfig['models'] ?? NULL)) {
+          $this->createFolder("src/Widgets/{$widgetName}/Models");
+          foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
+            $this->renderFile(
+              "src/Widgets/{$widgetName}/Models/{$modelName}.php",
+              "src/Widgets/Model.twig",
+              array_merge(
+                $this->prototype,
+                [
+                  "thisWidget" => [
+                    "name" => $widgetName,
+                    "config" => $widgetConfig
+                  ],
+                  "thisModel" => [
+                    "name" => $modelName,
+                    "config" => $modelConfig
+                  ]
                 ]
-              ]
-            )
-          );
+              )
+            );
+          }
+        }
+
+        if (is_array($widgetConfig['actions'] ?? NULL)) {
+          $this->createFolder("src/Widgets/{$widgetName}/Actions");
+          foreach ($widgetConfig['actions'] as $actionName => $actionConfig) {
+            $this->renderFile(
+              "src/Widgets/{$widgetName}/Actions/{$actionName}.php",
+              "src/Widgets/Actions/{$actionConfig['template']}.twig",
+              array_merge(
+                $this->prototype,
+                [
+                  "thisWidget" => [
+                    "name" => $widgetName,
+                    "config" => $widgetConfig
+                  ],
+                  "thisAction" => [
+                    "name" => $actionName,
+                    "config" => $actionConfig
+                  ]
+                ]
+              )
+            );
+          }
         }
       }
     } catch (\Twig\Error\SyntaxError $e) {
