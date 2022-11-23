@@ -1,0 +1,6 @@
+create database `{{ ConfigEnv.db.name }}` character set utf8 collate utf8_general_ci;
+{% if ConfigEnv.db.password != "" and ConfigEnv.db.password != "root" %}
+  create user `{{ ConfigEnv.db.login }}` identified by '{{ ConfigEnv.db.password }}';
+  grant all on {{ ConfigEnv.db.name }}.* to {{ ConfigEnv.db.login }}@localhost identified by '{{ ConfigEnv.db.password }}';
+  flush privileges;
+{% endif %}

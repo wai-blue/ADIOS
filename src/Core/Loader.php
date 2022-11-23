@@ -131,7 +131,9 @@ class Loader
 
   public $factories = [];
 
-  public function __construct($config = NULL, $mode = NULL)
+  public $forceUserLogout = FALSE;
+
+  public function __construct($config = NULL, $mode = NULL, $forceUserLogout = FALSE)
   {
 
     global $___ADIOSObject;
@@ -147,6 +149,7 @@ class Loader
 
     $this->gtp = $this->config['global_table_prefix'];
     $this->requestedAction = $_REQUEST['action'];
+    $this->forceUserLogout = $forceUserLogout;
 
     if (empty($this->config['system_table_prefix'])) {
       $this->config['system_table_prefix'] = "adios";
@@ -473,6 +476,7 @@ class Loader
         }
 
         // user authentication
+        if ($this->forceUserLogout) unset($_SESSION[_ADIOS_ID]['userProfile']);
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
           $adiosUserModel = $this->getModel("Core/Models/User");
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;

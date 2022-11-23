@@ -1,0 +1,15 @@
+<?php
+
+namespace ADIOS\Widgets;
+
+class {{ thisWidget.name }} extends \ADIOS\Core\Widget {
+  public function init() {
+    if ($this->adios->hasPermissionsForAction("{{ thisWidget.name }}")) {
+      $this->adios->config['desktop']['sidebarItems'][] = [
+        "fa_icon" => "fas {{ thisWidget.config.faIcon }}",
+        "title" => "{{ thisWidget.config.sidebarTitle }}",
+        "onclick" => "desktop_update('{{ thisWidget.config.sidebarUrl }}');",
+      ];
+    }
+  }
+}

@@ -1,0 +1,35 @@
+<?php
+
+set_time_limit(60*10);
+session_start();
+
+require(__DIR__."/src/Init.php");
+
+try {
+
+  $myAdiosApp = new MyAdiosApp($config, TRUE);
+  $myAdiosApp->install();
+
+  // user roles and users
+  $userModel = $myAdiosApp->getModel("Core/Models/User");
+  $userRoleModel = $myAdiosApp->getModel("Core/Models/UserRole");
+
+  $idRole = $userRoleModel->insertRow(["name" => "Administrator"]);
+
+  $userModel->insertRow([
+    "name" => "Admin",
+    "login" => "admin",
+    "password" => "abcd",
+    "password_1" => "abcd",
+    "password_2" => "abcd",
+    "is_active" => 1,
+    "id_role" => $idRole,
+  ]);
+
+} catch (\Exception $e) {
+  echo $e->getMessage();
+}
+
+echo "Default ADIOS App installation was successful.<br/>";
+echo "<span style='color:red'>We recommend to delete the install.php file.</span><br/>";
+echo "<a href='.'>Go to Login</a>";

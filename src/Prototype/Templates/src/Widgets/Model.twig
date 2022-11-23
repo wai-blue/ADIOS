@@ -1,0 +1,31 @@
+<?php
+
+namespace ADIOS\Widgets\{{ thisWidget.name }}\Models;
+
+class {{ thisModel.name }} extends \ADIOS\Core\Model
+{
+  var $sqlName = "{{ thisModel.config.sqlName }}";
+  var $urlBase = "{{ thisModel.config.urlBase }}";
+  var $tableTitle = "{{ thisModel.config.tableTitle }}";
+  var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting }}";
+  var $formTitleForEditing = "{{ thisModel.config.formTitleForEditing }}";
+  var $lookupSqlValue = "{{ thisModel.config.lookupSqlValue }}";
+
+  public function columns($columns = []) {
+    return parent::columns([
+{% for colName, colDefinition in thisModel.config.columns %}
+      "{{ colName }}" => [
+{% for key,value in colDefinition %}
+{% if getVariableType(value) == "numeric" %}
+        "{{ key }}" => {{ value }},
+{% elseif getVariableType(value) == "bool" %}
+        "{{ key }}" => {% if value %}TRUE{% else %}FALSE{% endif %},
+{% else %}
+        "{{ key }}" => "{{ value }}",
+{% endif %}
+{% endfor %}
+      ],
+{% endfor %}
+    ]);
+  }
+}
