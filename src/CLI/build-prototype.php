@@ -22,15 +22,13 @@ if (
   exit(<<<USAGE
 ADIOS prototype builder.
 
-Usage:
-
-php build-prototype.php <options>
-
+Usage: php build-prototype.php <options>
 Options:
   -I, --input        Path to a prototype definition file
   -A, --autoloader   Path to composer's autoloader file
   -O, --output       Path to an output folder. Default: "."
   -L, --log          Path to a log file. Default: "prototype.log"
+Example: php vendor/wai-blue/adios/src/CLI/build-prototype -I prototype.json -A vendor/autoload.php
 USAGE
   );
 }

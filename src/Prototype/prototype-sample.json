@@ -1,0 +1,49 @@
+{
+  "ConfigEnv": {
+    "db": {
+      "host": "localhost",
+      "login": "root",
+      "password": "",
+      "name": "prototype_crm"
+    },
+    "globalTablePrefix": "gtp",
+    "rewriteBase": "/prototype_crm/"
+  },
+  "ConfigApp": {
+    "applicationName": "Prototype CRM",
+    "smtp": {
+      "host": "test.smtphost.com",
+      "port": "465",
+      "login": "test",
+      "password": "password123",
+      "protocol": "ssl",
+      "from": "test@smtphost.com"
+    }
+  },
+  "Widgets": {
+    "Customers": {
+      "isDefault": true,
+      "faIcon": "fa-address-book",
+      "sidebarTitle": "Customers",
+      "sidebarUrl": "Customers",
+
+      "Models": {
+        "Customer": {
+          "sqlName": "customers",
+          "urlBase": "Customers",
+          "tableTitle": "Customers",
+          "formTitleForInserting": "New customer",
+          "formTitleForEditing": "Edit customer",
+          "lookupSqlValue": "{%TABLE%}.name",
+          "columns": {
+            "name": {
+              "type": "varchar",
+              "title": "Customer name",
+              "show_column": true
+            }
+          }
+        }
+      }
+    }
+  }
+}
