@@ -72,6 +72,10 @@ class Action {
       $this->params = [];
     }
 
+    if (!empty($this->adios->config['templates'][static::class])) {
+      $this->twigTemplate = $this->adios->config['templates'][static::class];
+    }
+
     $this->init();
   }
 
