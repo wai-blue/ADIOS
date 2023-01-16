@@ -79,7 +79,7 @@ spl_autoload_register(function ($class) {
         }
       }
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
-      include($___ADIOSObject->config['dir'] . "/{$m[1]}.php");
+      include(__DIR__."/../{$m[1]}.php");
     }
   }
 });
@@ -91,6 +91,7 @@ class Loader
   const ADIOS_MODE_FULL = 1;
   const ADIOS_MODE_LITE = 2;
 
+  public $version = "";
   public $gtp = "";
   public $requestedURI = "";
   public $requestedAction = "";
@@ -147,22 +148,38 @@ class Loader
       $this->config = $config;
     }
 
-    $this->gtp = $this->config['global_table_prefix'];
-    $this->requestedAction = $_REQUEST['action'];
+    $this->version = file_get_contents(__DIR__."/../version.txt");
+
+    $this->gtp = $this->config['global_table_prefix'] ?? "";
+    $this->requestedAction = $_REQUEST['action'] ?? "";
     $this->forceUserLogout = $forceUserLogout;
+
+    if (empty($this->config['dir'])) $this->config['dir'] = "";
+    if (empty($this->config['url'])) $this->config['url'] = "";
+    if (empty($this->config['rewrite_base'])) $this->config['rewrite_base'] = "";
 
     if (empty($this->config['system_table_prefix'])) {
       $this->config['system_table_prefix'] = "adios";
     }
 
+    if (empty($this->config['session_salt'])) {
+      $this->config['session_salt'] = rand(100000, 999999);
+    }
+
+    $this->config['request_uri'] = $_SERVER['REQUEST_URI'] ?? "";
+
     // load available languages
-    if (!is_array($this->config['available_languages'])) {
+    if (empty($this->config['available_languages'] ?? [])) {
       $this->config['available_languages'] = ["en"];
-      foreach (scandir("{$this->config["dir"]}/Lang") as $tmpLang) {
-        if (!in_array($tmpLang, [".", ".."]) && is_dir("{$this->config["dir"]}/Lang/{$tmpLang}")) {
-          $this->config['available_languages'][] = $tmpLang;
-        }
-      }
+
+      // 2023-01-16 Dusan: automatic loading of languages is deprecated
+      // The developer must provide exact list of available languages in the config.
+
+      // foreach (scandir("{$this->config["dir"]}/Lang") as $tmpLang) {
+      //   if (!in_array($tmpLang, [".", ".."]) && is_dir("{$this->config["dir"]}/Lang/{$tmpLang}")) {
+      //     $this->config['available_languages'][] = $tmpLang;
+      //   }
+      // }
     }
 
     // pouziva sa ako vseobecny prefix niektorych session premennych,
@@ -176,9 +193,9 @@ class Loader
 
     // ak requestuje nejaky Asset (css, js, image, font), tak ho vyplujem a skoncim
     if ($this->config['rewrite_base'] == "/") {
-      $this->requestedURI = ltrim($_SERVER['REQUEST_URI'], "/");
+      $this->requestedURI = ltrim($this->config['request_uri'], "/");
     } else {
-      $this->requestedURI = str_replace($this->config['rewrite_base'], "", $_SERVER['REQUEST_URI']);
+      $this->requestedURI = str_replace($this->config['rewrite_base'], "", $this->config['request_uri']);
     }
 
     $this->assetsUrlMap["adios/assets/css/"] = __DIR__ . "/../Assets/Css/";
@@ -219,9 +236,9 @@ class Loader
       $this->console = new $consoleFactoryClass($this);
       $this->console->clearLog("timestamps", "info");
 
-      // global $gtp;
+      // global $gtp; - pouziva sa v basic_functions.php
 
-      $gtp = $this->config['global_table_prefix'];
+      $gtp = $this->gtp;
 
       // nacitanie zakladnych ADIOS lib suborov
       require_once dirname(__FILE__) . "/Lib/basic_functions.php";
@@ -1129,7 +1146,7 @@ class Loader
       if ($this->config['debug']) {
         $lines[] = "Requested URI = {$this->requestedURI}";
         $lines[] = "Rewrite base = {$this->config['rewrite_base']}";
-        $lines[] = "SERVER.REQUEST_URI = {$_SERVER['REQUEST_URI']}";
+        $lines[] = "SERVER.REQUEST_URI = {$this->config['request_uri']}";
       }
 
       echo join(" ", $lines);
@@ -1510,22 +1527,24 @@ class Loader
   public function loadConfigFromDB()
   {
     try {
-      $this->db->query("
+      $queryOk = $this->db->query("
         select
           *
         from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
         order by id asc
       ");
 
-      while ($row = $this->db->db_result->fetch_array(MYSQLI_ASSOC)) {
-        $tmp = &$this->config;
-        foreach (explode("/", $row['path']) as $tmp_path) {
-          if (!is_array($tmp[$tmp_path])) {
-            $tmp[$tmp_path] = [];
+      if ($queryOk) {
+        while ($row = $this->db->db_result->fetch_array(MYSQLI_ASSOC)) {
+          $tmp = &$this->config;
+          foreach (explode("/", $row['path']) as $tmp_path) {
+            if (!is_array($tmp[$tmp_path])) {
+              $tmp[$tmp_path] = [];
+            }
+            $tmp = &$tmp[$tmp_path];
           }
-          $tmp = &$tmp[$tmp_path];
+          $tmp = $row['value'];
         }
-        $tmp = $row['value'];
       }
     } catch (\Exception $e) {
       // do nothing

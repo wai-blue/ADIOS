@@ -17,15 +17,31 @@ namespace ADIOS\Core;
 $onkeypress_request = '';
 
 class DB {
+    public $adios;
+
     /**
      * Multidimensional array which completely defines the table structure of a database
      * with which will datapub work.
      */
     public $tables;
 
+    public $registered_columns = [];
+    public $connection = NULL;
+
     public $existingSqlTables = [];
     public $bufferQueries = FALSE;
     public $queryBuffer = "";
+
+    private string $db_host = "";
+    private string $db_port = "";
+    private string $db_login = "";
+    private string $db_password = "";
+    private string $db_name = "";
+    private string $db_codepage = "";
+
+    public bool $ob_mode = FALSE;
+    public string $ob = "";
+    public bool $debugCorrectQueries = FALSE;
 
     /**
      * Constructor.
@@ -43,25 +59,22 @@ class DB {
       $this->db_name = $params['db_name'];
       $this->db_codepage = $params['db_codepage'];
 
-      $this->connect();
-
-      $this->ob_mode = false;
-      $this->ob = '';
-      $this->debugCorrectQueries = false;
-
       $this->tables = [];
 
-      $tmp = $this->get_all_rows_query("show tables", "");
-      foreach ($tmp as $value) {
-        $this->existingSqlTables[] = reset($value);
+      if (!empty($this->db_host)) {
+        $this->connect();
+        
+        $tmp = $this->get_all_rows_query("show tables", "");
+        foreach ($tmp as $value) {
+          $this->existingSqlTables[] = reset($value);
+        }
       }
 
       $h = opendir(dirname(__FILE__).'/DB/DataTypes');
       while (false !== ($file = readdir($h))) {
         if ('.' != $file && '..' != $file) {
           $col_type = substr($file, 0, -4);
-          $tmp = "m_datapub_column_{$col_type}";
-          $this->register_column_type($col_type, $$tmp);
+          $this->register_column_type($col_type);
         }
       }
     }
@@ -155,8 +168,10 @@ class DB {
      * @return object DB result object.
      */
     public function query($query, $initiatingModel = NULL) {
+      if ($this->connection === NULL) return FALSE;
+
       $query = trim($query, " ;");
-      if (empty($query)) return;
+      if (empty($query)) return FALSE;
 
       if ($this->bufferQueries) {
         $this->addQueryToBuffer($query);
@@ -374,13 +389,15 @@ class DB {
         return '%%table_params%%' == $col_name || 'id' == $col_name;
     }
 
-    public function register_column_type($column_type, $column_object)
+    public function register_column_type($column_type)
     {
         $class = "\\ADIOS\\Core\\DB\\DataTypes\\{$column_type}";
 
-        $tmp = str_replace("DataType", "", $column_type);
-        $tmp = strtolower($tmp);
-        $this->registered_columns[$tmp] = new $class($this->adios);
+        if (class_exists($class)) {
+          $tmp = str_replace("DataType", "", $column_type);
+          $tmp = strtolower($tmp);
+          $this->registered_columns[$tmp] = new $class($this->adios);
+        }
     }
 
     public function is_registered_column_type($column_type)

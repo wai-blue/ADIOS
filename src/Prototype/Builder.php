@@ -15,6 +15,14 @@ class Builder {
     $this->outputFolder = $outputFolder;
     $this->logFile = $logFile;
 
+    if (empty($this->outputFolder)) {
+      throw new \Exception("No output folder for the prototype project provided.");
+    }
+
+    if (!is_dir($this->outputFolder)) {
+      throw new \Exception("Output folder does not exist.");
+    }
+
     $this->prototype = json_decode(file_get_contents($this->inputFile), TRUE);
     $this->logHandle = fopen($this->logFile, "w");
 

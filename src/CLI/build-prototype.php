@@ -2,6 +2,9 @@
 
 if (php_sapi_name() !== 'cli') exit();
 
+require(__DIR__."/../Core/Loader.php");
+$adios = new \ADIOS\Core\Loader(NULL, \ADIOS\Core\Loader::ADIOS_MODE_LITE);
+
 $arguments = getopt(
   "I:A:O:L:",
   ["input:", "autoloader:", "output:", "log:"],
@@ -10,8 +13,8 @@ $arguments = getopt(
 
 $inputFile = $arguments["I"] ?? $arguments["input"] ?? "";
 $autoloaderFile = $arguments["A"] ?? $arguments["autoloader"] ?? "";
-$outputFolder = $arguments["O"] ?? $arguments["output"] ?? ".";
-$logFile = $arguments["L"] ?? $arguments["log"] ?? "prototype.log";
+$outputFolder = $arguments["O"] ?? $arguments["output"] ?? "";
+$logFile = $arguments["L"] ?? $arguments["log"] ?? "{$outputFolder}/prototype.log";
 
 if (
   empty($inputFile)
@@ -20,15 +23,27 @@ if (
   || empty($logFile)
 ) {
   exit(<<<USAGE
-ADIOS prototype builder.
+
+ADIOS v{$adios->version} PROTOTYPE BUILDER.
+
+Creates folder structure and files of an ADIOS project based on provided prototype definition file.
+
+Requires some composer packages installed. Copy **docs/Prototype/composer-sample-non-adios-developer.json** or
+**docs/Prototype/composer-sample-adios-developer.json** to your project folder run 'composer install' before
+running the prototype builder.
 
 Usage: php build-prototype.php <options>
 Options:
-  -I, --input        Path to a prototype definition file
-  -A, --autoloader   Path to composer's autoloader file
-  -O, --output       Path to an output folder. Default: "."
-  -L, --log          Path to a log file. Default: "prototype.log"
+  -I, --input        Required. Path to a prototype definition file.
+  -A, --autoloader   Required. Path to composer's autoloader file.
+  -O, --output       Required. Path to an output folder.
+  -L, --log          Path to a log file. Default: "{% outputFolder %}/prototype.log".
+
 Example: php vendor/wai-blue/adios/src/CLI/build-prototype -I prototype.json -A vendor/autoload.php
+
+Try sample prototype.json file is in **docs/Prototype/prototype-sample.json**.
+or refer to **docs/Prototype/user-guide.md** for more information.
+
 USAGE
   );
 }

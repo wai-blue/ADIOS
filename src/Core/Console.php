@@ -18,6 +18,9 @@ use Monolog\Handler\RotatingFileHandler;
  * Debugger console for ADIOS application.
  */
 class Console {
+  var $adios;
+  var $logDir = "";
+
   var $loggers = [];
 
   var $infos = [];
@@ -30,20 +33,23 @@ class Console {
 
   public function __construct(&$adios) {
     $this->adios = $adios;
+    $this->logDir = $this->adios->config['log_dir'] ?? "";
 
     $this->initLogger('core');
   }
 
   public function initLogger(string $loggerName = "") {
+    if (!class_exists("\\Monolog\\Logger")) return;
+
     // inicializacia loggerov
     $this->loggers[$loggerName] = new Logger($loggerName);
-    $infoStreamHandler = new RotatingFileHandler($this->adios->config['log_dir']."/{$loggerName}-info.log", 1000, Logger::INFO);
+    $infoStreamHandler = new RotatingFileHandler("{$this->logDir}/{$loggerName}-info.log", 1000, Logger::INFO);
     $infoStreamHandler->setFilenameFormat('{date}/{filename}', 'Y/m/d');
 
-    $warningStreamHandler = new RotatingFileHandler($this->adios->config['log_dir']."/{$loggerName}-warning.log", 1000, Logger::WARNING);
+    $warningStreamHandler = new RotatingFileHandler("{$this->logDir}/{$loggerName}-warning.log", 1000, Logger::WARNING);
     $warningStreamHandler->setFilenameFormat('{date}/{filename}', 'Y/m/d');
 
-    $errorStreamHandler = new RotatingFileHandler($this->adios->config['log_dir']."/{$loggerName}-error.log", 1000, Logger::ERROR);
+    $errorStreamHandler = new RotatingFileHandler("{$this->logDir}/{$loggerName}-error.log", 1000, Logger::ERROR);
     $errorStreamHandler->setFilenameFormat('{date}/{filename}', 'Y/m/d');
 
     $this->loggers[$loggerName]->pushHandler($infoStreamHandler);
@@ -78,7 +84,7 @@ class Console {
       $logSeverity = "info";
     }
 
-    $logFile = "{$this->adios->config['log_dir']}/".date("Y")."/".date("m")."/".date("d")."/{$logger}-{$logSeverity}.log";
+    $logFile = "{$this->logDir}/".date("Y")."/".date("m")."/".date("d")."/{$logger}-{$logSeverity}.log";
     if (is_file($logFile)) {
       unlink($logFile);
     }
