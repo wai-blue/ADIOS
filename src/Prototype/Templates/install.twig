@@ -16,12 +16,14 @@ try {
 
   $idRole = $userRoleModel->insertRow(["name" => "Administrator"]);
 
+  $adminPassword = "admin.".rand(1000, 9999);
+
   $userModel->insertRow([
-    "name" => "Admin",
-    "login" => "admin",
-    "password" => "abcd",
-    "password_1" => "abcd",
-    "password_2" => "abcd",
+    "name" => "Administrator",
+    "login" => "administrator",
+    "password" => $adminPassword,
+    "password_1" => $adminPassword,
+    "password_2" => $adminPassword,
     "is_active" => 1,
     "id_role" => $idRole,
   ]);
@@ -31,5 +33,9 @@ try {
 }
 
 echo "Default ADIOS App installation was successful.<br/>";
+echo "<br/>";
+echo "Administrator credentials: <b>administrator</b> / <b>{$adminPassword}</b><br/>";
+echo "<br/>";
 echo "<span style='color:red'>We recommend to delete the install.php file.</span><br/>";
-echo "<a href='.'>Go to Login</a>";
+echo "<br/>";
+echo "<a href='.' target=_blank>Login as administrator</a>";

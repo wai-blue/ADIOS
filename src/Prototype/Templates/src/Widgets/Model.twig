@@ -2,8 +2,7 @@
 
 namespace ADIOS\Widgets\{{ thisWidget.name }}\Models;
 
-class {{ thisModel.name }} extends \ADIOS\Core\Model
-{
+class {{ thisModel.name }} extends \ADIOS\Core\Model {
   var $sqlName = "{{ thisModel.config.sqlName }}";
   var $urlBase = "{{ thisModel.config.urlBase }}";
   var $tableTitle = "{{ thisModel.config.tableTitle }}";
@@ -18,4 +17,23 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model
 {% endfor %}
     ]);
   }
+
+{% if (thisModel.config.formParams) %}
+  public function formParams($data, $params) {
+    $id = (int) $data["id"];
+
+    if ($id <= 0) {
+      $params["template"] = {{ varExport(thisModel.config.formParams.templateForInserting) }};
+    } else {
+      $params["template"] = {{ varExport(thisModel.config.formParams.templateForEditing) }};
+    }
+
+    return $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
+      "model" => $this,
+      "data" => $data,
+      "params" => $params,
+    ])["params"];
+
+  }
+{% endif %}
 }

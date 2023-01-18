@@ -3,16 +3,19 @@
 namespace ADIOS\Prototype;
 
 class Builder {
-  protected $inputFile = "";
-  protected $outputFolder = "";
-  protected $prototype = [];
+  protected string $inputFile = "";
+  protected string $outputFolder = "";
+  protected string $sessionSalt = "";
+  protected string $logFile = "";
+
+  protected array $prototype = [];
   protected $twig = NULL;
-  protected $logFile = "";
   protected $logHandle = NULL;
 
-  public function __construct($inputFile, $outputFolder, $logFile) {
+  public function __construct(string $inputFile, string $outputFolder, string $sessionSalt, string $logFile) {
     $this->inputFile = $inputFile;
     $this->outputFolder = $outputFolder;
+    $this->sessionSalt = $sessionSalt;
     $this->logFile = $logFile;
 
     if (empty($this->outputFolder)) {
@@ -25,6 +28,10 @@ class Builder {
 
     $this->prototype = json_decode(file_get_contents($this->inputFile), TRUE);
     $this->logHandle = fopen($this->logFile, "w");
+
+    if (!is_array($this->prototype["ConfigApp"])) throw new \Exception("ConfigApp is missing in prototype definition.");
+
+    $this->prototype["ConfigApp"]["sessionSalt"] = $this->sessionSalt;
 
     $twigLoader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/Templates');
     $this->twig = new \Twig\Environment($twigLoader, [
@@ -39,6 +46,12 @@ class Builder {
         else $type = "string";
 
         return $type;
+      }
+    ));
+    $this->twig->addFunction(new \Twig\TwigFunction(
+      'varExport',
+      function ($var) {
+        return var_export($var);
       }
     ));
 
@@ -63,6 +76,24 @@ class Builder {
     @mkdir($this->outputFolder . "/" . $folder);
   }
 
+  public function removeFolder($dir) { 
+   if (is_dir($dir)) { 
+      $objects = scandir($this->outputFolder.DIRECTORY_SEPARATOR.$dir);
+      foreach ($objects as $object) {
+        if (in_array($object, [".", ".."])) continue;
+        if (
+          is_dir($dir.DIRECTORY_SEPARATOR.$object)
+          && !is_link($dir.DIRECTORY_SEPARATOR.$object)
+        ) {
+          $this->removeFolder($dir.DIRECTORY_SEPARATOR.$object);
+        } else {
+          unlink($dir.DIRECTORY_SEPARATOR.$object);
+        }
+      }
+      rmdir($this->outputFolder.DIRECTORY_SEPARATOR.$dir);
+    }
+  }
+
   public function renderFile($fileName, $template, $twigParams = NULL) {
     $this->log("Rendering file {$fileName} from {$template}.");
     file_put_contents(
@@ -80,6 +111,12 @@ class Builder {
   }
 
   public function buildPrototype() {
+
+    // delete folders if they exist
+    $this->removeFolder("src");
+    $this->removeFolder("log");
+    $this->removeFolder("tmp");
+    $this->removeFolder("upload");
 
     // create folder structure
     $this->createFolder("src");

@@ -12,6 +12,15 @@ namespace ADIOS\Core\UI;
 
 class Form extends \ADIOS\Core\UI\View
 {
+  public $model = NULL;
+  public array $data = [];
+
+  public $gtp;
+  public $close_button = NULL;
+  public $copy_button = NULL;
+  public $save_button = NULL;
+  public $delete_button = NULL;
+
   public function __construct(&$adios, $params = null)
   {
 
@@ -401,10 +410,17 @@ class Form extends \ADIOS\Core\UI\View
       } else {
 
         $cols_html = [];
+        $cols_count = count($this->params['template']['columns']);
+
+        if ($cols_count <= 6) {
+          $col_class = "col-".round(12 / $cols_count);
+        } else {
+          $col_class = "col-2";
+        }
 
         foreach ($this->params['template']['columns'] as $col) {
 
-          $col_html = "<div class='".($col["class"] ?? "col-12 px-0")."'>";
+          $col_html = "<div class='".($col["class"] ?? $col_class." px-0")."'>";
 
           if (is_string($col)) {
             $col_html .= $col;
@@ -431,6 +447,8 @@ class Form extends \ADIOS\Core\UI\View
               $this->params['tab_params']
             ))->render();
 
+          } else if (is_string($col['action'])) {
+            $col_html .= $this->adios->renderAction($col['action'], $col['params']);
           } else if (is_string($col['html'])) {
             $col_html .= $col['html'];
           } else if (is_array($col['content'])) {

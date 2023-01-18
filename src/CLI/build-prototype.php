@@ -6,20 +6,22 @@ require(__DIR__."/../Core/Loader.php");
 $adios = new \ADIOS\Core\Loader(NULL, \ADIOS\Core\Loader::ADIOS_MODE_LITE);
 
 $arguments = getopt(
-  "I:A:O:L:",
-  ["input:", "autoloader:", "output:", "log:"],
+  "I:A:O:S:L:",
+  ["input:", "autoloader:", "output:", "salt:", "log:"],
   $restIndex
 );
 
 $inputFile = $arguments["I"] ?? $arguments["input"] ?? "";
 $autoloaderFile = $arguments["A"] ?? $arguments["autoloader"] ?? "";
 $outputFolder = $arguments["O"] ?? $arguments["output"] ?? "";
+$sessionSalt = $arguments["S"] ?? $arguments["salt"] ?? "";
 $logFile = $arguments["L"] ?? $arguments["log"] ?? "{$outputFolder}/prototype.log";
 
 if (
   empty($inputFile)
   || empty($autoloaderFile)
   || empty($outputFolder)
+  || empty($sessionSalt)
   || empty($logFile)
 ) {
   exit(<<<USAGE
@@ -37,9 +39,10 @@ Options:
   -I, --input        Required. Path to a prototype definition file.
   -A, --autoloader   Required. Path to composer's autoloader file.
   -O, --output       Required. Path to an output folder.
+  -S, --salt         Required. Session salt for the application's session data.
   -L, --log          Path to a log file. Default: "{% outputFolder %}/prototype.log".
 
-Example: php vendor/wai-blue/adios/src/CLI/build-prototype -I prototype.json -A vendor/autoload.php
+Example: php vendor/wai-blue/adios/src/CLI/build-prototype -I prototype.json -A vendor/autoload.php -S my-first-adios-app
 
 Try sample prototype.json file is in **docs/Prototype/prototype-sample.json**.
 or refer to **docs/Prototype/user-guide.md** for more information.
@@ -51,7 +54,7 @@ if (!is_file($inputFile)) exit("Input file does not exist.");
 
 require_once($autoloaderFile);
 
-$builder = new \ADIOS\Prototype\Builder($inputFile, $outputFolder, $logFile);
+$builder = new \ADIOS\Prototype\Builder($inputFile, $outputFolder, $sessionSalt, $logFile);
 
 $builder->buildPrototype();
 $builder->createEmptyDatabase();

@@ -12,7 +12,14 @@ namespace ADIOS\Core\UI;
 
 class View {
   
-  var $useSession = FALSE;
+  var string $uid = "";
+  var bool $useSession = FALSE;
+  var array $params = [];
+  var $adios = NULL;
+  var array $views = [];
+  var array $classes = [];
+  var array $html = [];
+  var array $attrs = [];
   
   /**
    * languageDictionary
