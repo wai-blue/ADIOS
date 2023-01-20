@@ -268,8 +268,9 @@ class Form extends \ADIOS\Core\UI\View
       $tmpAction = $rows['action'];
       
       $tmpActionParams = $rows['params'];
-      $tmpActionParams['parent_form_model'] = $this->params['model'];
-      $tmpActionParams['parent_form_id'] = $this->params['id'];
+      $tmpActionParams['form_uid'] = $this->params['uid'];
+      $tmpActionParams['form_data'] = $this->data;
+      $tmpActionParams['initiating_model'] = $this->params['model'];
 
       $html = $this->adios->renderAction($tmpAction, $tmpActionParams);
     } else if (is_callable($rows['template'])) {
@@ -320,17 +321,37 @@ class Form extends \ADIOS\Core\UI\View
               ".$this->adios->renderAction($row['action'], $row['params'])."
             </div>
           ";
-        } else if (is_string($row['title']) && is_string($row['input'])) {
+        } else if (isset($row['input'])) {
+          $inputHtml = "";
+
+          if (is_string($row['input'])) {
+            $inputHtml = $row['input'];
+          } else if (is_array($row['input'])) {
+            $inputClass = $row['input']['class'];
+
+            $inputParams = $row['input']['params'];
+            $inputParams['form_uid'] = $this->params['uid'];
+            $inputParams['form_data'] = $this->data;
+            $inputParams['initiating_model'] = $this->params['model'];
+
+            $inputHtml = (new $inputClass(
+              $this->adios,
+              "{$this->params['uid']}_{$row['input']['uid']}",
+              $inputParams
+            ))->render();
+          }
           $html .= "
             <div class='adios ui Form subrow'>
-              <div class='adios ui Form form_title {$row['class']}'>
-                {$row['title']}
-              </div>
+              ".(empty($row['title']) ? "" : "
+                <div class='adios ui Form form_title {$row['class']}'>
+                  {$row['title']}
+                </div>
+              ")."
               <div
                 class='adios ui Form form_input {$row['class']}'
                 style='{$row['style']}'
               >
-                {$row['input']}
+                {$inputHtml}
               </div>
               ".(empty($row['description']) ? "" : "
                 <div class='adios ui Form form_description'>

@@ -132,6 +132,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   private static $allItemsCache = NULL;
 
+  public $crossTableAssignments = [];
+
   /**
    * Creates instance of model's object.
    *
@@ -1303,9 +1305,35 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $returnValue = $this->updateRow($data, $id);
       }
 
-      // POZN. tuto bol kod, ktory zabezpecoval ukladanie udajov stlpca typu
-      // 'table'. Ak to budes dorabat, pozri si stary adios, funkcie
-      // save_form_catched(), save_form_table_data() a save_form_table_tag_data().
+      foreach ($this->crossTableAssignments as $ctaName => $ctaParams) {
+        if (!isset($data[$ctaName])) continue;
+
+        $assignments = @json_decode($data[$ctaName], TRUE);
+
+        if (is_array($assignments)) {
+          $ctaModel = $this->adios->getModel($ctaParams["assignment_model"]);
+
+          foreach ($assignments as $assignment) {
+            $this->adios->db->query("
+              insert into `{$ctaModel->getFullTableSQLName()}` (
+                `{$ctaParams['key_column']}`,
+                `{$ctaParams['assignment_column']}`
+              ) values (
+                {$id},
+                '".$this->adios->db->escape($assignment)."'
+              )
+              on duplicate key update `{$ctaParams['key_column']}` = {$id}
+            ");
+          }
+
+          $ctaModel
+            ->where($ctaParams['key_column'], $id)
+            ->whereNotIn($ctaParams['assignment_column'], $assignments)
+            ->delete()
+          ;
+        }
+      }
+
 
       $returnValue = $this->adios->dispatchEventToPlugins("onModelAfterSave", [
         "model" => $this,

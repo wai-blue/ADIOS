@@ -9,6 +9,7 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
   var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting }}";
   var $formTitleForEditing = "{{ thisModel.config.formTitleForEditing }}";
   var $lookupSqlValue = "{{ thisModel.config.lookupSqlValue }}";
+  var $crossTableAssignments = {{ varExport(thisModel.config.crossTableAssignments) }};
 
   public function columns($columns = []) {
     return parent::columns([

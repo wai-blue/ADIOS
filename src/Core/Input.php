@@ -13,6 +13,11 @@ namespace ADIOS\Core;
 class Input {
   public $name;
   public $adios;
+  public $params;
+  public $gtp;
+  public $uid;
+  public $cssUid;
+  public $value;
 
   /**
    * languageDictionary

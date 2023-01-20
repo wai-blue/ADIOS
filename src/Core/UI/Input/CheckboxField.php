@@ -12,7 +12,28 @@ namespace ADIOS\Core\UI\Input;
 
 class CheckboxField extends \ADIOS\Core\Input {
   public function render() {
-    $model = $this->adios->getModel($this->params['model']);
+
+    if (isset($this->params['crossTableAssignment'])) {
+      $initiatingModel = $this->adios->getModel($this->params['initiating_model']);
+      $cta = $initiatingModel->crossTableAssignments[$this->params['crossTableAssignment']];
+
+      $assignmentModel = $this->adios->getModel($cta['assignment_model']);
+      $keyColumn = $cta['key_column'];
+      $assignmentColumn = $cta['assignment_column'];
+      $options = $this->adios->getModel($cta['options_model'])->getEnumValues();
+
+    } else {
+      $assignmentModel = $this->adios->getModel($this->params['model']);
+      $keyColumn = $this->params['key_column'] ?? "";
+      $assignmentColumn = $this->params['assignment_column'] ?? $this->params['value_column'] ?? "";
+      $options = $this->params['values'];
+    }
+
+    if (isset($this->params['form_data'])) {
+      $keyValue = (int) $this->params['form_data']['id'];
+    } else {
+      $keyValue = $this->params['key_value'];
+    }
 
     switch ($this->params['columns'] ?? 3) {
       case 1: default: $bootstrapColumnSize = 12; break;
@@ -22,46 +43,47 @@ class CheckboxField extends \ADIOS\Core\Input {
       case 6: $bootstrapColumnSize = 2; break;
     }
     
-    $columns = $model->columns();
+    $columns = $assignmentModel->columns();
 
-    if (empty($this->params['model']) || !is_array($columns)) {
+    if (empty($assignmentModel) || !is_array($columns)) {
       throw new \ADIOS\Core\Exceptions\GeneralException("CheckboxField Input: Error #1");
     }
 
-    $valuesRaw = $this->adios->db->get_all_rows_query("
+    $assignmentsRaw = $this->adios->db->get_all_rows_query("
       select
         *
-      from `".$model->getFullTableSQLName()."`
+      from `".$assignmentModel->getFullTableSQLName()."`
       where
-        `{$this->params['key_column']}` = '".$this->adios->db->escape($this->params['key_value'])."'
+        `{$keyColumn}` = '".$this->adios->db->escape($keyValue)."'
     ");
-    $values = [];
-    foreach ($valuesRaw as $valueRaw) {
-      $values[] = $valueRaw[$this->params['value_column']];
+
+    $assignments = [];
+    foreach ($assignmentsRaw as $assignmentRaw) {
+      $assignments[] = $assignmentRaw[$assignmentColumn];
     }
-    $values = array_unique($values);
+    $assignments = array_unique($assignments);
     
     $html = "
       <div class='adios ui Input checkbox-field'>
-        <input type='hidden' id='{$this->uid}' data-is-adios-input='1'>
+        <input type='hidden' id='{$this->uid}' data-is-adios-input='1' data-adios-input-class='CheckboxField'>
         <div class='row'>
     ";
     $i = 0;
 
-    // var_dump($this->params['values']);
-    foreach ($this->params['values'] as $assignedItemRowId => $displayValue) {
+
+    foreach ($options as $optionId => $optionDisplayValue) {
       $html .= "
         <div class='col-lg-{$bootstrapColumnSize} col-md-12'>
           <input
             type='checkbox'
-            data-key='".ads($assignedItemRowId)."'
+            data-key='".ads($optionId)."'
             adios-do-not-serialize='1'
             id='{$this->uid}_checkbox_{$i}'
             onchange='{$this->uid}_serialize();'
-            ".(in_array($assignedItemRowId, $values) ? "checked" : "")."
+            ".(in_array($optionId, $assignments) ? "checked" : "")."
           >
           <label for='{$this->uid}_checkbox_{$i}'>
-            ".hsc($displayValue)."
+            ".hsc($optionDisplayValue)."
           </label>
         </div>
       ";

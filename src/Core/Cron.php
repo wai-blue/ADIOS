@@ -17,6 +17,7 @@ namespace ADIOS\Core;
 
 class Cron {
   protected $adios;
+  protected array $params = [];
 
   function __construct(&$adios, $params = []) {
     $this->adios = &$adios;

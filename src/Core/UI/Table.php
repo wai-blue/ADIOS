@@ -201,7 +201,7 @@ class Table extends \ADIOS\Core\UI\View
         $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
         if ($fkColumnDefinition !== NULL) {
           $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-          $tmpUrl = $tmpModel->urlBase."/".$this->params['parent_form_id']."/".$tmpUrl;
+          $tmpUrl = $tmpModel->urlBase."/".((int) $this->params['form_data']['id'] ?? 0)."/".$tmpUrl;
         }
       }
 
@@ -313,7 +313,11 @@ class Table extends \ADIOS\Core\UI\View
       $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
       if ($fkColumnDefinition !== NULL) {
         $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-        $where .= " and `lookup_{$tmpModel->getFullTableSQLName()}_{$fkColumnName}`.`id` = {$this->params['parent_form_id']}";
+        $where .= "
+          and
+            `lookup_{$tmpModel->getFullTableSQLName()}_{$fkColumnName}`.`id`
+            = ".((int) $this->params['form_data']['id'])
+        ;
       }
     }
 
