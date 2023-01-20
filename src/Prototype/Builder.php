@@ -50,8 +50,8 @@ class Builder {
     ));
     $this->twig->addFunction(new \Twig\TwigFunction(
       'varExport',
-      function ($var) {
-        return var_export($var);
+      function ($var, $indent = "") {
+        return $indent.str_replace("\n", "\n{$indent}", var_export($var, TRUE));
       }
     ));
 

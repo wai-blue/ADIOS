@@ -9,12 +9,16 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
   var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting }}";
   var $formTitleForEditing = "{{ thisModel.config.formTitleForEditing }}";
   var $lookupSqlValue = "{{ thisModel.config.lookupSqlValue }}";
-  var $crossTableAssignments = {{ varExport(thisModel.config.crossTableAssignments) }};
+  var $crossTableAssignments =
+{{ varExport(thisModel.config.crossTableAssignments, "    ")|raw }}
+  ;
 
   public function columns($columns = []) {
     return parent::columns([
 {% for colName, colDefinition in thisModel.config.columns %}
-      "{{ colName }}" => json_decode('{{ colDefinition|json_encode|raw }}', TRUE),
+      "{{ colName }}" =>
+{{ varExport(colDefinition, "        ")|raw }}
+      ,
 {% endfor %}
     ]);
   }
@@ -24,12 +28,18 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
     $id = (int) $data["id"];
 
     if ($id <= 0) {
-      $params["template"] = {{ varExport(thisModel.config.formParams.templateForInserting) }};
+      $params["template"] =
+{{ varExport(thisModel.config.formParams.templateForInserting, "        ")|raw }}
+      ;
     } else {
-      $params["template"] = {{ varExport(thisModel.config.formParams.templateForEditing) }};
+      $params["template"] =
+{{ varExport(thisModel.config.formParams.templateForEditing, "        ")|raw }}
+      ;
     }
 
-    $params["default_values"] = {{ varExport(thisModel.config.formParams.defaultValues) }};
+    $params["default_values"] =
+{{ varExport(thisModel.config.formParams.defaultValues, "      ")|raw }}
+    ;
 
     return $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
       "model" => $this,
