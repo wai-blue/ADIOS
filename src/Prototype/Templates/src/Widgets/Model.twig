@@ -28,6 +28,8 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
       $params["template"] = {{ varExport(thisModel.config.formParams.templateForEditing) }};
     }
 
+    $params["default_values"] = {{ varExport(thisModel.config.formParams.defaultValues) }};
+
     return $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
       "model" => $this,
       "data" => $data,

@@ -1,16 +1,9 @@
-<?php
-
-namespace ADIOS\Actions\{{ thisWidget.name }};
-
-class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
-  public function render() {
-    return <<<HTML_CONTENT
 <h1>Welcome</h1>
 <div class="row">
   <div class="col-md-6">
     <div class="card shadow mb-2">
       <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Monthly turnover for 2022</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Monthly turnover</h6>
       </div>
       <div class="card-body">
 
@@ -35,7 +28,7 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
           var data = {
             labels: labels,
             datasets: [{
-              label: "Monthly turnover for 2022",
+              label: "Monthly turnover",
               data: {'jan': 300, 'feb': 520, 'mar': 600, 'apr': 800, 'may': 650, 'jun': 420, 'jul': 680, 'aug': 890, 'sep': 250, 'oct': 290, 'nov': 480, 'dec': 940},
               fill: false,
               borderColor: 'rgb(75, 192, 192)',
@@ -56,7 +49,7 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
 
     <div class="card shadow mb-2">
       <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Best sold products for 2022</h6>
+        <h6 class="m-0 font-weight-bold text-primary">Best sold products</h6>
       </div>
       <div class="card-body">
 
@@ -67,7 +60,7 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
             labels: ['Outdoor camera', 'Office 365', 'Laptop', 'e-Bike', 'Smart watch'],
             datasets: [
               {
-                label: 'Best sold products for 2022',
+                label: 'Best sold products',
                 data: [10, 20, 30, 40, 50],
                 backgroundColor: [
                   'rgb(255, 99, 132)',
@@ -142,9 +135,5 @@ class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
       </div>
     </div>
 
-  </div>  
+  </div>
 </div>
-
-HTML_CONTENT;
-  }
-}

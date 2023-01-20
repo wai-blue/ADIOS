@@ -51,11 +51,18 @@ class Action {
   public static $webSAPIEnabled = TRUE;
 
   /**
-   * Full name of the model.
+   * Full name of the action.
    *
    * @var mixed
    */
-  var $name = "";
+  public string $name = "";
+  
+  public string $shortName = "";
+  public string $uid = "";
+  public string $action = "";
+  public string $myRootFolder = "";
+  public array $dictionary = [];
+  public string $twigTemplate = "";
 
   function __construct(&$adios, $params = []) {
     $this->name = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
@@ -149,7 +156,10 @@ class Action {
 
     try {
       return $this->adios->twig->render(
-        $this->twigTemplate ?? str_replace("\\Actions\\", "\\Templates\\", static::class),
+        empty($this->twigTemplate)
+          ? str_replace("\\Actions\\", "\\Templates\\", static::class)
+          : $this->twigTemplate
+        ,
         $twigParams
       );
     } catch (\Twig\Error\RuntimeError $e) {

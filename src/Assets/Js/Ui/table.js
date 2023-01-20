@@ -91,7 +91,7 @@
     });
   };
 
-  function ui_table_set_column_filter(uid, params) {
+  function ui_table_set_column_filter(uid, col_name, value, params) {
     // $('.'+uid+'_column_filter').each(function(){
     //   params['column_filter_'+$(this).attr('data-col-name')] = $(this).val();
     // });

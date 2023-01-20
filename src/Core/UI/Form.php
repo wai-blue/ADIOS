@@ -265,7 +265,13 @@ class Form extends \ADIOS\Core\UI\View
 
     if (!empty($rows['action'])) {
       // ak je definovana akcia, generuje akciu s parametrami
-      $html = $this->adios->renderAction($rows['action'], $rows['params']);
+      $tmpAction = $rows['action'];
+      
+      $tmpActionParams = $rows['params'];
+      $tmpActionParams['parent_form_model'] = $this->params['model'];
+      $tmpActionParams['parent_form_id'] = $this->params['id'];
+
+      $html = $this->adios->renderAction($tmpAction, $tmpActionParams);
     } else if (is_callable($rows['template'])) {
       // template je definovany ako anonymna funkcia
       $html = $rows['template']($this->params['columns'], $this);
@@ -413,14 +419,14 @@ class Form extends \ADIOS\Core\UI\View
         $cols_count = count($this->params['template']['columns']);
 
         if ($cols_count <= 6) {
-          $col_class = "col-".round(12 / $cols_count);
+          $col_class = "col-lg-".round(12 / $cols_count);
         } else {
-          $col_class = "col-2";
+          $col_class = "col-lg-2";
         }
 
         foreach ($this->params['template']['columns'] as $col) {
 
-          $col_html = "<div class='".($col["class"] ?? $col_class." px-0")."'>";
+          $col_html = "<div class='col col-sm-12 ".($col["class"] ?? $col_class." pl-0")."'>";
 
           if (is_string($col)) {
             $col_html .= $col;
@@ -441,7 +447,7 @@ class Form extends \ADIOS\Core\UI\View
             $col_html .= $this->adios->ui->Tabs(parent::params_merge(
               [
                 'padding' => false,
-                'height' => "calc(100vh - 17em)",
+                // 'height' => "calc(100vh - 17em)",
                 'tabs' => $tab_pages
               ],
               $this->params['tab_params']

@@ -70,15 +70,28 @@
   width: 100%;
 }
 
+.adios.ui.Form > .row > .col > .adios.ui.Tabs > .tab_contents {
+  height: calc(100vh - 15em) !important;
+}
+
 .adios.ui.Form.form_description { font-size: 0.8em; font-style: italic; color: orange; }
 
 .badge-adios { font-size: 13px; vertical-align: middle; margin-bottom: 4px; margin-left: 5px; color: #fff; }
 
 /* .adios.ui.Form.subrow:hover { background: #FAFAFA; } */
 
-@media screen and (max-width: 1000px) {
+@media screen and (max-width: 992px) { /* 992px = col-lg */
   .adios.ui.Form.table {display:block;}
   .adios.ui.Form.form_col {display:block;}
+
+  .adios.ui.Form > .row > .col > .adios.ui.Tabs > .tab_contents {
+    height: auto !important;
+  }
+
+  .adios.ui.Form > .row > .col > .adios.ui.Tabs > .tab_contents .tab_content {
+    margin-right: 0px !important;
+  }
+
 }
 
 @media screen and (max-width: 480px) {

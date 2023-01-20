@@ -16,4 +16,4 @@ $config["url"]                           = "http://{$_SERVER['HTTP_HOST']}/".tri
 // misc
 $config['devel_mode'] = TRUE;
 $config['language'] = "sk";
-$config["skin"] = "wireframe";
+{% if ConfigEnv.skin %}$config["skin"] = "{{ ConfigEnv.skin }}";{% endif %}

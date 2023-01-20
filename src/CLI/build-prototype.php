@@ -15,7 +15,13 @@ $inputFile = $arguments["I"] ?? $arguments["input"] ?? "";
 $autoloaderFile = $arguments["A"] ?? $arguments["autoloader"] ?? "";
 $outputFolder = $arguments["O"] ?? $arguments["output"] ?? "";
 $sessionSalt = $arguments["S"] ?? $arguments["salt"] ?? "";
-$logFile = $arguments["L"] ?? $arguments["log"] ?? "{$outputFolder}/prototype.log";
+$logFile = $arguments["L"] ?? $arguments["log"] ?? "";
+
+if (empty($outputFolder)) $outputFolder = ".";
+if (empty($inputFile)) $inputFile = __DIR__."/../../docs/Prototype/examples/01-one-widget.json";
+if (empty($autoloaderFile)) $autoloaderFile = "{$outputFolder}/vendor/autoload.php";
+if (empty($sessionSalt)) $sessionSalt = "random-".rand(1000, 9999);
+if (empty($logFile)) $logFile = "{$outputFolder}/prototype.log";
 
 if (
   empty($inputFile)
@@ -36,10 +42,10 @@ running the prototype builder.
 
 Usage: php build-prototype.php <options>
 Options:
-  -I, --input        Required. Path to a prototype definition file.
-  -A, --autoloader   Required. Path to composer's autoloader file.
-  -O, --output       Required. Path to an output folder.
-  -S, --salt         Required. Session salt for the application's session data.
+  -O, --output       Path to an output folder. Default: "."
+  -I, --input        Path to a prototype definition file. Default: prototype-sample.json
+  -A, --autoloader   Path to composer's autoloader file. Default: {% outputFolder %}/vendor/autoload.php
+  -S, --salt         Session salt for the application's session data. Default: random generated.
   -L, --log          Path to a log file. Default: "{% outputFolder %}/prototype.log".
 
 Example: php vendor/wai-blue/adios/src/CLI/build-prototype -I prototype.json -A vendor/autoload.php -S my-first-adios-app
@@ -50,6 +56,7 @@ or refer to **docs/Prototype/user-guide.md** for more information.
 USAGE
   );
 }
+
 if (!is_file($inputFile)) exit("Input file does not exist.");
 
 require_once($autoloaderFile);

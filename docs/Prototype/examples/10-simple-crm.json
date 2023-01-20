@@ -6,20 +6,12 @@
       "password": "",
       "name": "prototype_crm"
     },
-    "globalTablePrefix": "gtp",
+    "globalTablePrefix": "proto",
     "rewriteBase": "/prototype_crm/"
   },
   "ConfigApp": {
     "applicationName": "Prototype CRM",
-    "defaultAction": "Home/Dashboard",
-    "smtp": {
-      "host": "test.smtphost.com",
-      "port": "465",
-      "login": "test",
-      "password": "password123",
-      "protocol": "ssl",
-      "from": "test@smtphost.com"
-    }
+    "defaultAction": "Home/Dashboard"
   },
   "Widgets": {
     "Home": {
@@ -62,6 +54,49 @@
               "enum_values": ["High", "Middle", "Low"],
               "show_column": true
             }
+          },
+          "formParams": {
+            "templateForInserting": {
+              "columns": [
+                {
+                  "rows": [
+                    "name",
+                    "priority"
+                  ]
+                }
+              ]
+            },
+            "templateForEditing": {
+              "columns": [
+                {
+                  "class": "col-lg-8",
+                  "tabs": {
+                    "Basic info": [
+                      "name",
+                      "priority"
+                    ],
+                    "Bids": {
+                      "action": "UI/Table",
+                      "params": {
+                        "model": "Widgets/CustomersAndBids/Models/Bid",
+                        "foreign_key": "id_customer"
+                      }
+                    }
+                  }
+                },
+                {
+                  "class": "col-lg-4",
+                  "rows": [
+                    {
+                      "action": "CustomersAndBids/BestSoldProducts"
+                    },
+                    {
+                      "action": "CustomersAndBids/MonthlyTurnover"
+                    }
+                  ]
+                }
+              ]
+            }
           }
         },
         "Bid": {
@@ -85,6 +120,14 @@
             }
           }
         }
+      },
+      "actions": {
+        "BestSoldProducts": {
+          "template": "BestSoldProducts"
+        },
+        "MonthlyTurnover": {
+          "template": "MonthlyTurnover"
+        }
       }
     },
     "Calendar": {
@@ -94,7 +137,8 @@
       },
       "actions": {
         "Main": {
-          "template": "Calendar"
+          "template": "Calendar",
+          "templateContainsPhpScript": true
         }
       }
     },
@@ -109,6 +153,7 @@
       "actions": {
         "Basic": {
           "template": "SettingsPanel",
+          "templateContainsPhpScript": true,
           "title": "Basic settings",
           "items": [
             {
@@ -130,6 +175,7 @@
         },
         "Extended": {
           "template": "SettingsPanel",
+          "templateContainsPhpScript": true,
           "title": "Extended settings",
           "items": [
             {

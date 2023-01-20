@@ -33,7 +33,7 @@ class Builder {
 
     $this->prototype["ConfigApp"]["sessionSalt"] = $this->sessionSalt;
 
-    $twigLoader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/Templates');
+    $twigLoader = new \Twig\Loader\FilesystemLoader(__DIR__.'/Templates');
     $this->twig = new \Twig\Environment($twigLoader, [
       'cache' => FALSE,
       'debug' => TRUE,
@@ -63,8 +63,8 @@ class Builder {
   }
 
   public function log($msg) {
-    echo $msg . "\n";
-    fwrite($this->logHandle, $msg . "\n");
+    echo $msg."\n";
+    fwrite($this->logHandle, $msg."\n");
   }
 
   public function checkPrototype() {
@@ -73,7 +73,7 @@ class Builder {
 
   public function createFolder($folder) {
     $this->log("Creating folder {$folder}.");
-    @mkdir($this->outputFolder . "/" . $folder);
+    @mkdir($this->outputFolder."/".$folder);
   }
 
   public function removeFolder($dir) { 
@@ -97,17 +97,22 @@ class Builder {
   public function renderFile($fileName, $template, $twigParams = NULL) {
     $this->log("Rendering file {$fileName} from {$template}.");
     file_put_contents(
-      $this->outputFolder . "/" . $fileName,
+      $this->outputFolder."/".$fileName,
       $this->twig->render($template, $twigParams ?? $this->prototype)
     );
   }
 
   public function copyFile($srcFile, $destFile) {
     $this->log("Copying file {$srcFile} to {$destFile}.");
-    copy(
-      __DIR__ . "/Templates/" . $srcFile,
-      $this->outputFolder . "/" . $destFile
-    );
+    if (!file_exists(__DIR__."/Templates/".$srcFile)) {
+      throw new \Exception("File ".__DIR__."/Templates/{$srcFile} does not exist.");
+    } else {
+      copy(
+        __DIR__."/Templates/".$srcFile,
+        $this->outputFolder."/".$destFile
+      );
+    }
+
   }
 
   public function buildPrototype() {
@@ -186,10 +191,28 @@ class Builder {
 
         if (is_array($widgetConfig['actions'] ?? NULL)) {
           $this->createFolder("src/Widgets/{$widgetName}/Actions");
+          $this->createFolder("src/Widgets/{$widgetName}/Templates");
           foreach ($widgetConfig['actions'] as $actionName => $actionConfig) {
+            $templateContainsPhpScript = ($actionConfig['templateContainsPhpScript'] ?? FALSE);
+
+            if ($templateContainsPhpScript) {
+              $twigTemplate = "src/Widgets/Actions/{$actionConfig['template']}.twig";
+            } else {
+              $twigTemplate = "src/Widgets/Action.twig";
+
+              $this->copyFile(
+                "src/Widgets/Templates/{$actionConfig['template']}.twig",
+                "src/Widgets/{$widgetName}/Templates/{$actionConfig['template']}.twig"
+              );
+            }
+
+            $tmpActionConfig = $actionConfig;
+            unset($tmpActionConfig["template"]);
+            unset($tmpActionConfig["templateContainsPhpScript"]);
+
             $this->renderFile(
               "src/Widgets/{$widgetName}/Actions/{$actionName}.php",
-              "src/Widgets/Actions/{$actionConfig['template']}.twig",
+              $twigTemplate,
               array_merge(
                 $this->prototype,
                 [
@@ -199,7 +222,7 @@ class Builder {
                   ],
                   "thisAction" => [
                     "name" => $actionName,
-                    "config" => $actionConfig
+                    "config" => $tmpActionConfig
                   ]
                 ]
               )

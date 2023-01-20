@@ -3,6 +3,9 @@
 namespace ADIOS\Core\Lib;
 
 class TwigLoader implements \Twig\Loader\LoaderInterface {
+
+  public $adios;
+
   public function __construct(&$adios) {
     $this->adios = $adios;
   }
@@ -22,7 +25,7 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $widget = substr($templateName, 0, strpos($templateName, "/"));
       $action = substr($templateName, strpos($templateName, "/") + 1);
 
-      $templateFile = ADIOS_WIDGETS_DIR."/{$widget}/Templates/{$action}.twig";
+      $templateFile = $this->adios->widgetsDir."/{$widget}/Templates/{$action}.twig";
     } else if (strpos($templateName, "ADIOS/Templates/") === 0) {
       $templateName = str_replace("ADIOS/Templates/", "", $templateName);
 
@@ -32,14 +35,14 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       // ...potom Widget akciu
       if (!is_file($templateFile)) {
         preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
-        $templateFile = ADIOS_WIDGETS_DIR."/{$m[1]}/Templates/{$m[2]}.twig";
+        $templateFile = $this->adios->widgetsDir."/{$m[1]}/Templates/{$m[2]}.twig";
       }
 
       // ...a nakoniec Plugin akciu
       if (!is_file($templateFile)) {
         preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
         foreach ($this->adios->pluginFolders as $pluginFolder) {
-          $folder = $pluginFolder."/{$this->name}/Models";
+          $folder = $pluginFolder."/{$name}/Models";
 
           $templateFile = "{$folder}/{$m[1]}/Templates/{$m[2]}.twig";
           if (is_file($templateFile)) {

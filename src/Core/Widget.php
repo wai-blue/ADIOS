@@ -17,11 +17,15 @@ namespace ADIOS\Core;
 
 class Widget {
   public $adios;
-  public $gtp;
+  public string $gtp = "";
   // public $languageDictionary = [];
 
-  public $params = [];
-  public $models = [];
+  public string $name = "";
+  public string $shortName = "";
+  public string $myRootFolder = "";
+
+  public array $params = [];
+  public array $models = [];
 
   function __construct($adios, $params = []) {
     $this->name = str_replace("ADIOS\\Widgets\\", "", get_class($this));
@@ -69,7 +73,7 @@ class Widget {
   }
 
   public function loadModels() {
-    $dir = ADIOS_WIDGETS_DIR."/{$this->name}/Models";
+    $dir = $this->adios->widgetsDir."/{$this->name}/Models";
 
     if (is_dir($dir)) {
       foreach (scandir($dir) as $file) {

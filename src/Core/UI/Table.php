@@ -19,6 +19,7 @@ class Table extends \ADIOS\Core\UI\View
   var $columnsFilter = [];
 
   var $data = [];
+  var array $search = [];
 
   /**
    * __construct
@@ -31,7 +32,7 @@ class Table extends \ADIOS\Core\UI\View
   {
 
     $this->adios = &$adios;
-    $this->userParams = $params;
+    // $this->userParams = $params;
 
     if ($params['refresh'] && !empty($params['uid'])) {
       $params = parent::params_merge(
@@ -101,16 +102,10 @@ class Table extends \ADIOS\Core\UI\View
     //   ";
     // }
 
-    if (empty($params['add_button_params']['onclick'])) {
-      $params['add_button_params']['onclick'] = "
-        window_render('" . $this->model->getFullUrlBase($params) . "/Add')
-      ";
-    }
-
     if (!empty($params['search'])) {
       $this->search = @json_decode(base64_decode($params['search']), TRUE);
     } else {
-      $this->search = NULL;
+      $this->search = [];
     }
 
     if ($this->model->isCrossTable) {
@@ -124,9 +119,9 @@ class Table extends \ADIOS\Core\UI\View
     unset($params['_REQUEST']);
     unset($params['_COOKIE']);
 
-    foreach ($params as $key => $value) {
-      if (strpos($key, 'column_filter_') === 0) {
-        unset($params[$key]);
+    foreach ($paramsToSession as $k => $v) {
+      if (strpos($k, "column_filter_") === 0) {
+        unset($paramsToSession[$k]);
       }
     }
 
@@ -147,9 +142,9 @@ class Table extends \ADIOS\Core\UI\View
 
     $this->columns = $this->params["columns"];
 
-    foreach ($this->userParams as $key => $value) {
-      $this->params[$key] = $value;
-    }
+    // foreach ($this->userParams as $key => $value) {
+    //   $this->params[$key] = $value;
+    // }
 
     $this->params['page'] = (int) $this->params['page'];
     $this->params['items_per_page'] = (int) $this->params['items_per_page'];
@@ -166,6 +161,13 @@ class Table extends \ADIOS\Core\UI\View
         }
       }
       $this->columns = $tmp_columns;
+    }
+
+    if (
+      !empty($this->params['foreign_key'])
+      && isset($this->columns[$this->params['foreign_key']])
+    ) {
+      $this->columns[$this->params['foreign_key']]['show_column'] = FALSE;
     }
 
     // nastavenie poradia
@@ -188,6 +190,24 @@ class Table extends \ADIOS\Core\UI\View
         $this->columnsFilter[$col_name] = $this->params['column_filter_' . $col_name];
         unset($this->params['column_filter_' . $col_name]);
       }
+    }
+
+    //
+    if (empty($this->params['add_button_params']['onclick'])) {
+      $tmpUrl = $this->model->getFullUrlBase($this->params);
+
+      if (!empty($this->params['foreign_key'])) {
+        $fkColumnName = $this->params['foreign_key'];
+        $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
+        if ($fkColumnDefinition !== NULL) {
+          $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
+          $tmpUrl = $tmpModel->urlBase."/".$this->params['parent_form_id']."/".$tmpUrl;
+        }
+      }
+
+      $this->params['add_button_params']['onclick'] = "
+        window_render('" . $tmpUrl . "/Add')
+      ";
     }
 
     // kontroly pre vylucenie nelogickosti parametrov
@@ -287,6 +307,15 @@ class Table extends \ADIOS\Core\UI\View
 
     // where
     $where = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
+
+    if (!empty($this->params['foreign_key'])) {
+      $fkColumnName = $this->params['foreign_key'];
+      $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
+      if ($fkColumnDefinition !== NULL) {
+        $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
+        $where .= " and `lookup_{$tmpModel->getFullTableSQLName()}_{$fkColumnName}`.`id` = {$this->params['parent_form_id']}";
+      }
+    }
 
     // having
     $having = (empty($this->params['having']) ? 'TRUE' : $this->params['having']);
@@ -440,11 +469,16 @@ class Table extends \ADIOS\Core\UI\View
     }
 
     if (!$this->params['refresh']) {
-      $html .= "
-        <script>
-          ui_table_params['{$this->uid}'] = JSON.parse(Base64.decode('" . base64_encode(json_encode($this->params)) . "'));
-        </script>
-      ";
+      if (_count($this->params)) {
+        $tmp = json_encode($this->params);
+        if (!empty($tmp)) {
+          $html .= "
+            <script>
+              ui_table_params['{$this->uid}'] = JSON.parse(Base64.decode('" . base64_encode($tmp) . "'));
+            </script>
+          ";
+        }
+      }
 
       if ($this->params['show_title']) {
 
@@ -707,30 +741,41 @@ class Table extends \ADIOS\Core\UI\View
 
           if ('text' == $input_type) {
             $filter_input = "
-                  <input
-                    type='text'
-                    class='{$params['uid']}_column_filter'
-                    data-col-name='{$col_name}'
-                    id='{$params['uid']}_column_filter_{$col_name}'
-                    required='required'
-                    value=\"" . htmlspecialchars($this->columnsFilter[$col_name]) . "\"
-                    title=' '
-                    onkeydown='if (event.keyCode == 13) { event.cancelBubble = true; }'
-                    onkeypress='if (event.keyCode == 13) { event.cancelBubble = true; ui_table_set_column_filter(\"{$params['uid']}\", {}); }'
-                    {$col_def['table_filter_attributes']}
-                    placeholder='🔍'
-                  >
-                ";
+              <input
+                type='text'
+                class='{$params['uid']}_column_filter'
+                data-col-name='{$col_name}'
+                id='{$params['uid']}_column_filter_{$col_name}'
+                required='required'
+                value=\"" . htmlspecialchars($this->columnsFilter[$col_name]) . "\"
+                title=' '
+                onkeydown='
+                  if (event.keyCode == 13) { event.cancelBubble = true; }
+                '
+                onkeypress='
+                  if (event.keyCode == 13) {
+                    event.cancelBubble = true;
+                    ui_table_set_column_filter(\"{$params['uid']}\", {});
+                  }
+                '
+                {$col_def['table_filter_attributes']}
+                placeholder='🔍'
+              >
+            ";
           }
 
           if ('select' == $input_type) {
-            $filter_input = "<select
-                    class='{$params['uid']}_column_filter'
-                    data-col-name='{$col_name}'
-                    id='{$params['uid']}_column_filter_{$col_name}'
-                    title=' '
-                    required='required'
-                    onchange=' ui_table_set_column_filter(\"{$params['uid']}\", {}); '><option></option>";
+            $filter_input = "
+              <select
+                class='{$params['uid']}_column_filter'
+                data-col-name='{$col_name}'
+                id='{$params['uid']}_column_filter_{$col_name}'
+                title=' '
+                required='required'
+                onchange=' ui_table_set_column_filter(\"{$params['uid']}\", {}); '
+              >
+              <option></option>
+            ";
 
             if (_count($input_values)) {
               foreach ($input_values as $enum_val) {
@@ -743,35 +788,43 @@ class Table extends \ADIOS\Core\UI\View
 
           if ('bool' == $input_type) {
             $filter_input = "
-                  <div
-                    class='bool_controls " . (is_numeric($this->columnsFilter[$col_name]) ? "filter_active" : "") . "'
-                  >
-                    <input type='hidden'
-                      class='{$params['uid']}_column_filter'
-                      data-col-name='{$col_name}'
-                      id='{$params['uid']}_column_filter_{$col_name}'
-                      required='required'
-                      value='" . ads($this->columnsFilter[$col_name]) . "'
-                    />
+              <div
+                class='bool_controls " . (is_numeric($this->columnsFilter[$col_name]) ? "filter_active" : "") . "'
+              >
+                <input type='hidden'
+                  class='{$params['uid']}_column_filter'
+                  data-col-name='{$col_name}'
+                  id='{$params['uid']}_column_filter_{$col_name}'
+                  required='required'
+                  value='" . ads($this->columnsFilter[$col_name]) . "'
+                />
 
-                    <i
-                      class='fas fa-check-circle " . ($this->columnsFilter[$col_name] == 1 ? "active" : "") . "'
-                      style='color:#4caf50'
-                      onclick='
-                        if ($(\"#{$params['uid']}_column_filter_{$col_name}\").val() == \"$true_value\") $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"\"); else $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$true_value}\");
-                        ui_table_set_column_filter(\"{$params['uid']}\", {});
-                      '
-                    ></i>
-                    <i
-                      class='fas fa-times-circle " . ($this->columnsFilter[$col_name] == 0 ? "active" : "") . "'
-                      style='color:#ff5722'
-                      onclick='
-                        if ($(\"#{$params['uid']}_column_filter_{$col_name}\").val() == \"{$false_value}\") $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"\"); else $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$false_value}\");
-                        ui_table_set_column_filter(\"{$params['uid']}\", {});
-                      '
-                    ></i>
-                  </div>
-                ";
+                <i
+                  class='fas fa-check-circle " . ($this->columnsFilter[$col_name] == 1 ? "active" : "") . "'
+                  style='color:#4caf50'
+                  onclick='
+                    if ($(\"#{$params['uid']}_column_filter_{$col_name}\").val() == \"$true_value\") {
+                      $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"\");
+                    } else {
+                      $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$true_value}\");
+                    }
+                    ui_table_set_column_filter(\"{$params['uid']}\", {});
+                  '
+                ></i>
+                <i
+                  class='fas fa-times-circle " . ($this->columnsFilter[$col_name] == 0 ? "active" : "") . "'
+                  style='color:#ff5722'
+                  onclick='
+                    if ($(\"#{$params['uid']}_column_filter_{$col_name}\").val() == \"{$false_value}\") {
+                      $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"\");
+                    } else {
+                      $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$false_value}\");
+                    }
+                    ui_table_set_column_filter(\"{$params['uid']}\", {});
+                  '
+                ></i>
+              </div>
+            ";
           }
 
           $html .= "

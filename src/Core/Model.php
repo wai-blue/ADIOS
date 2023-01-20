@@ -527,7 +527,32 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $routing = [];
     }
 
-    $routing = array_merge($routing, [
+    $routing = array_merge(
+      $routing,
+      $this->getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
+    );
+
+    foreach ($this->columns() as $colName => $colDefinition) {
+      if ($colDefinition['type'] == 'lookup') {
+        $tmpModel = $this->adios->getModel($colDefinition['model']);
+        $tmpUrlParams = $urlParams;
+        $tmpUrlParams['default_values'][$colName] = '$1';
+        $routing = array_merge(
+          $routing,
+          $this->getStandardCRUDRoutes(
+            $tmpModel->urlBase.'\/(\d+)\/'.$urlBase,
+            $tmpUrlParams,
+            $varsInUrl + 1
+          )
+        );
+      }
+    }
+
+    return $routing;
+  }
+
+  public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl) {
+    $routing = [
       '/^' . $urlBase . '$/' => [
         "action" => "UI/Table",
         "params" => array_merge($urlParams, [
@@ -585,7 +610,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
           "model" => $this->name,
         ])
       ],
-    ]);
+    ];
 
     return $routing;
   }
