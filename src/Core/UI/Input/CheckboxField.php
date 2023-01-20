@@ -14,18 +14,20 @@ class CheckboxField extends \ADIOS\Core\Input {
   public function render() {
 
     if (isset($this->params['crossTableAssignment'])) {
+      $this->uid = $this->params['crossTableAssignment'];
+
       $initiatingModel = $this->adios->getModel($this->params['initiating_model']);
       $cta = $initiatingModel->crossTableAssignments[$this->params['crossTableAssignment']];
 
-      $assignmentModel = $this->adios->getModel($cta['assignment_model']);
-      $keyColumn = $cta['key_column'];
-      $assignmentColumn = $cta['assignment_column'];
-      $options = $this->adios->getModel($cta['options_model'])->getEnumValues();
+      $assignmentModel = $this->adios->getModel($cta['assignmentModel']);
+      $masterKeyColumn = $cta['masterKeyColumn'];
+      $optionKeyColumn = $cta['optionKeyColumn'];
+      $options = $this->adios->getModel($cta['optionsModel'])->getEnumValues();
 
-    } else {
+    } else { // 2023-01-20 DEPRECATED
       $assignmentModel = $this->adios->getModel($this->params['model']);
-      $keyColumn = $this->params['key_column'] ?? "";
-      $assignmentColumn = $this->params['assignment_column'] ?? $this->params['value_column'] ?? "";
+      $masterKeyColumn = $this->params['key_column'] ?? "";
+      $optionKeyColumn = $this->params['assignment_column'] ?? $this->params['value_column'] ?? "";
       $options = $this->params['values'];
     }
 
@@ -54,12 +56,12 @@ class CheckboxField extends \ADIOS\Core\Input {
         *
       from `".$assignmentModel->getFullTableSQLName()."`
       where
-        `{$keyColumn}` = '".$this->adios->db->escape($keyValue)."'
+        `{$masterKeyColumn}` = '".$this->adios->db->escape($keyValue)."'
     ");
 
     $assignments = [];
     foreach ($assignmentsRaw as $assignmentRaw) {
-      $assignments[] = $assignmentRaw[$assignmentColumn];
+      $assignments[] = $assignmentRaw[$optionKeyColumn];
     }
     $assignments = array_unique($assignments);
     

@@ -1311,24 +1311,24 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $assignments = @json_decode($data[$ctaName], TRUE);
 
         if (is_array($assignments)) {
-          $ctaModel = $this->adios->getModel($ctaParams["assignment_model"]);
+          $assignmentModel = $this->adios->getModel($ctaParams["assignmentModel"]);
 
           foreach ($assignments as $assignment) {
             $this->adios->db->query("
-              insert into `{$ctaModel->getFullTableSQLName()}` (
-                `{$ctaParams['key_column']}`,
-                `{$ctaParams['assignment_column']}`
+              insert into `{$assignmentModel->getFullTableSQLName()}` (
+                `{$ctaParams['masterKeyColumn']}`,
+                `{$ctaParams['optionKeyColumn']}`
               ) values (
                 {$id},
                 '".$this->adios->db->escape($assignment)."'
               )
-              on duplicate key update `{$ctaParams['key_column']}` = {$id}
+              on duplicate key update `{$ctaParams['masterKeyColumn']}` = {$id}
             ");
           }
 
-          $ctaModel
-            ->where($ctaParams['key_column'], $id)
-            ->whereNotIn($ctaParams['assignment_column'], $assignments)
+          $assignmentModel
+            ->where($ctaParams['masterKeyColumn'], $id)
+            ->whereNotIn($ctaParams['optionKeyColumn'], $assignments)
             ->delete()
           ;
         }

@@ -164,10 +164,10 @@ class Table extends \ADIOS\Core\UI\View
     }
 
     if (
-      !empty($this->params['foreign_key'])
-      && isset($this->columns[$this->params['foreign_key']])
+      !empty($this->params['foreignKey'])
+      && isset($this->columns[$this->params['foreignKey']])
     ) {
-      $this->columns[$this->params['foreign_key']]['show_column'] = FALSE;
+      $this->columns[$this->params['foreignKey']]['show_column'] = FALSE;
     }
 
     // nastavenie poradia
@@ -196,8 +196,8 @@ class Table extends \ADIOS\Core\UI\View
     if (empty($this->params['add_button_params']['onclick'])) {
       $tmpUrl = $this->model->getFullUrlBase($this->params);
 
-      if (!empty($this->params['foreign_key'])) {
-        $fkColumnName = $this->params['foreign_key'];
+      if (!empty($this->params['foreignKey'])) {
+        $fkColumnName = $this->params['foreignKey'];
         $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
         if ($fkColumnDefinition !== NULL) {
           $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
@@ -308,8 +308,8 @@ class Table extends \ADIOS\Core\UI\View
     // where
     $where = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
 
-    if (!empty($this->params['foreign_key'])) {
-      $fkColumnName = $this->params['foreign_key'];
+    if (!empty($this->params['foreignKey'])) {
+      $fkColumnName = $this->params['foreignKey'];
       $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
       if ($fkColumnDefinition !== NULL) {
         $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);

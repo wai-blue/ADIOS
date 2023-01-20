@@ -79,7 +79,7 @@
                       "action": "UI/Table",
                       "params": {
                         "model": "Widgets/CustomersAndBids/Models/Bid",
-                        "foreign_key": "id_customer"
+                        "foreignKey": "id_customer"
                       }
                     }
                   }

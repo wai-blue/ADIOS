@@ -45,10 +45,10 @@
           "lookupSqlValue": "{%TABLE%}.name",
           "crossTableAssignments": {
             "CustomerHasCategory": {
-              "assignment_model": "Widgets/Customers/Models/CustomerHasCategory",
-              "options_model": "Widgets/Customers/Models/CustomerCategory",
-              "key_column": "id_customer",
-              "assignment_column": "id_customer_category"
+              "assignmentModel": "Widgets/Customers/Models/CustomerHasCategory",
+              "optionsModel": "Widgets/Customers/Models/CustomerCategory",
+              "masterKeyColumn": "id_customer",
+              "optionKeyColumn": "id_customer_category"
             }
           },
           "columns": {
@@ -88,7 +88,6 @@
                       {
                         "input": {
                           "class": "\\ADIOS\\Core\\UI\\Input\\CheckboxField",
-                          "uid": "CustomerHasCategory",
                           "params": {
                             "crossTableAssignment": "CustomerHasCategory",
                             "columns": 1
@@ -101,7 +100,7 @@
                         "action": "UI/Table",
                         "params": {
                           "model": "Widgets/Customers/Models/Bid",
-                          "foreign_key": "id_customer"
+                          "foreignKey": "id_customer"
                         }
                       }
                     ]
