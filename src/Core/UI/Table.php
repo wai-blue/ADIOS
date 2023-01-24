@@ -195,15 +195,18 @@ class Table extends \ADIOS\Core\UI\View
     //
     if (empty($this->params['add_button_params']['onclick'])) {
       $tmpUrl = $this->model->getFullUrlBase($this->params);
+      $tmpParentFormId = ((int) $this->params['form_data']['id'] ?? 0);
 
       if (!empty($this->params['foreignKey'])) {
         $fkColumnName = $this->params['foreignKey'];
         $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
         if ($fkColumnDefinition !== NULL) {
           $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-          $tmpUrl = $tmpModel->urlBase."/".((int) $this->params['form_data']['id'] ?? 0)."/".$tmpUrl;
+          $tmpUrl = $tmpModel->urlBase."/".$tmpParentFormId."/".$tmpUrl;
         }
       }
+
+      $tmpUrl = str_replace("{{ {$this->params['foreignKey']} }}", $tmpParentFormId, $tmpUrl);
 
       $this->params['add_button_params']['onclick'] = "
         window_render('" . $tmpUrl . "/Add')

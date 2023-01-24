@@ -537,13 +537,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
     foreach ($this->columns() as $colName => $colDefinition) {
       if ($colDefinition['type'] == 'lookup') {
         $tmpModel = $this->adios->getModel($colDefinition['model']);
-        $tmpUrlParams = $urlParams;
-        $tmpUrlParams['default_values'][$colName] = '$1';
         $routing = array_merge(
           $routing,
           $this->getStandardCRUDRoutes(
-            $tmpModel->urlBase.'\/(\d+)\/'.$urlBase,
-            $tmpUrlParams,
+            str_replace("/", "\\/", $tmpModel->urlBase) . '\/(\d+)\/' . $urlBase,
+            $urlParams,
             $varsInUrl + 1
           )
         );
@@ -573,6 +571,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "params" => array_merge($urlParams, [
           "model" => $this->name,
           "id" => -1,
+          "defaultValues" => $urlParams,
         ])
       ],
       '/^' . $urlBase . '\/Search$/' => [

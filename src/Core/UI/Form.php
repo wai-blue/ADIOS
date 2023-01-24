@@ -35,7 +35,7 @@ class Form extends \ADIOS\Core\UI\View
       'title' => '',
       'formatter' => 'ui_form_formatter',
       'columns_order' => [],
-      'default_values' => [],
+      'defaultValues' => [],
       'readonly' => false,
       'template' => [],
       'template_callback' => '',
@@ -117,11 +117,21 @@ class Form extends \ADIOS\Core\UI\View
     unset($this->params['columns']['id']);
 
     // default values
-    if (is_string($this->params['default_values'])) {
-      $this->params['default_values'] = @json_decode($this->params['default_values'], TRUE);
+
+    // 2023-01-24 Dusan: default_values ako string je uz deprecated
+    // if (is_string($this->params['default_values'])) {
+    //   $this->params['default_values'] = @json_decode($this->params['default_values'], TRUE);
+    // }
+
+    if (
+      isset($this->params['default_values'])
+      && !isset($this->params['defaultValues'])
+    ) {
+      $this->params['defaultValues'] = $this->params['default_values'];
     }
-    if (_count($this->params['default_values']) && $this->params['id'] <= 0) {
-      foreach ($this->params['default_values'] as $col_name => $def_value) {
+
+    if (_count($this->params['defaultValues']) && $this->params['id'] <= 0) {
+      foreach ($this->params['defaultValues'] as $col_name => $def_value) {
         $this->data[$col_name] = $def_value;
       }
     }
