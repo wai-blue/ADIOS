@@ -17,7 +17,9 @@
     "Home": {
       "faIcon": "fa-home",
       "sidebar": {
-        "Home": "Home/Dashboard"
+        "Home": {
+          "url": "Home/Dashboard"
+        }
       },
       "actions": {
         "Dashboard": {
@@ -29,8 +31,14 @@
       "faIcon": "fa-address-book",
       "sidebar": {
         "Customers + Bids": {
-          "Customers": "Customers",
-          "Bids": "Bids"
+          "sub": {
+            "Customers": {
+              "url": "Customers"
+            },
+            "Bids": {
+              "url": "Bids"
+            }
+          }
         }
       },
 
