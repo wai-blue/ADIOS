@@ -17,7 +17,9 @@
     "Home": {
       "faIcon": "fa-home",
       "sidebar": {
-        "Home": "Home/Dashboard"
+        "Home": {
+          "url": "Home/Dashboard"
+        }
       },
       "actions": {
         "Dashboard": {
@@ -29,8 +31,14 @@
       "faIcon": "fa-address-book",
       "sidebar": {
         "Customers + Bids": {
-          "Customers": "Customers",
-          "Bids": "Bids"
+          "sub": {
+            "Customers": {
+              "url": "Customers"
+            },
+            "Bids": {
+              "url": "Bids"
+            }
+          }
         }
       },
 
@@ -135,8 +143,14 @@
       "faIcon": "fa-cog",
       "sidebar": {
         "Settings": {
-          "Basic settings": "Settings/Basic",
-          "Extended settings": "Settings/Extended"
+          "sub": {
+            "Basic settings": {
+              "url": "Settings/Basic"
+            },
+            "Extended settings": {
+              "url": "Settings/Extended"
+            }
+          }
         }
       },
       "actions": {

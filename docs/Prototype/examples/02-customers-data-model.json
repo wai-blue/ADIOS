@@ -17,7 +17,9 @@
     "Home": {
       "faIcon": "fa-home",
       "sidebar": {
-        "Home": "Home/Dashboard"
+        "Home": {
+          "url": "Home/Dashboard"
+        }
       },
       "actions": {
         "Dashboard": {
@@ -28,7 +30,9 @@
     "Customers": {
       "faIcon": "fa-address-book",
       "sidebar": {
-        "Customers": "Customers"
+        "Customers": {
+          "url": "Customers"
+        }
       },
 
       "models": {

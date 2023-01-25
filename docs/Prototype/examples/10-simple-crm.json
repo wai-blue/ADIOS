@@ -17,7 +17,9 @@
     "Home": {
       "faIcon": "fa-home",
       "sidebar": {
-        "Home": "Home/Dashboard"
+        "Home": {
+          "url": "Home/Dashboard"
+        }
       },
       "actions": {
         "Dashboard": {
