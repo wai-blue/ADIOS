@@ -49,11 +49,14 @@ class DataTable extends \ADIOS\Core\UI\View {
 
     /** GET DATA */
     if (empty($this->params['table_data'])) {
-      $this->params['table_data'] = $this->adios->db->get_all_rows_query("
-        SELECT
-          *
-        FROM {$this->params['table']}
-      ");
+      $this->params['table_data'] = array_values(
+        $this->adios->db->get_all_rows_query("
+          SELECT
+            *
+          FROM {$this->params['table']}
+        ")
+      );
+
 
       // ENUMS
       foreach ($this->params['table_data'] as $rowKey => $rowData) {
