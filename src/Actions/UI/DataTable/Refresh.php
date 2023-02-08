@@ -13,13 +13,14 @@ namespace ADIOS\Actions\UI\DataTable;
 /**
  * @package UI\Actions\DataTable
  */
-class Copy extends \ADIOS\Core\Action {
-  public function render($params = []) {
+class Refresh extends \ADIOS\Core\Action {
+  public function render() {
+    $tmpParams['datatableName'] = $this->params['datatableName'];
+    $tmpParams['columns'] = json_decode($this->params['columns'], TRUE);
+    $tmpParams['model'] = $this->params['model'];
+    $tmpParams['dataReset'] = true;
+    $tmpParams['refresh'] = true;
 
-    return [];
+    return $this->adios->ui->datatable($tmpParams)->render();
   }
 }
-
-/*
-  
-*/

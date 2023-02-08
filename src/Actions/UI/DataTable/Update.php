@@ -18,22 +18,25 @@ class Update extends \ADIOS\Core\Action {
   public function render() {
     try {
       if (is_numeric($this->params['id'])) {
-        $tmpModel = $this->adios->getModel($this->params['model'])
-          ->find($this->params['id'])
-        ;
+        $tmpModel = $this->adios->getModel($this->params['model']);
 
-        return $tmpModel->update([
-          $this->params['colName'] => $this->params['newValue']
+        $newValue = $this->params['newValue'];
+
+        // Replace newValue if col is type of enum
+        $columnSettings = $this->adios->db->tables["{$this->adios->gtp}_{$tmpModel->sqlName}"];
+        if (!empty($columnSettings[$this->params['colName']]['enum_values'])) {
+          $newValue = array_search(
+            $this->params['newValue'], 
+            $columnSettings[$this->params['colName']]['enum_values']
+          );
+        } 
+
+        return $tmpModel->find($this->params['id'])->update([
+          $this->params['colName'] => $newValue
         ]);
       } else {
         throw new \ADIOS\Core\Exceptions\GeneralException("Nothing to update.");
       }
-
-      // Replace newValue if col is type of enum
-      /*$columnSettings = $adios->db->tables[$table];
-      if (!empty($columnSettings[$colName]['enum_values'])) {
-        $newValue = array_search($newValue, $columnSettings[$colName]['enum_values']);
-      } */
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       return $e->getMessage();
     }

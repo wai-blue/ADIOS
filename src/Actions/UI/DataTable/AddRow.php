@@ -18,7 +18,7 @@ class AddRow extends \ADIOS\Core\Action {
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
-      return $tmpModel->insertGetId(json_decode($this->params['default_values'], TRUE));
+      return $tmpModel->insertGetId(json_decode($this->params['defaultValues'], TRUE));
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       return $e->getMessage();
     }

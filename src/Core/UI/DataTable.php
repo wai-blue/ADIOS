@@ -12,6 +12,8 @@ class DataTable extends \ADIOS\Core\UI\View {
   private string $titleHtml = '';
   private string $script = '';
 
+  private $model = NULL;
+
   /**
    * __construct
    *
@@ -23,47 +25,51 @@ class DataTable extends \ADIOS\Core\UI\View {
     $this->adios = &$adios;
 
     $this->params = parent::params_merge([
-      'datatable_name' => '',
-      'table' => '',
-      'show_add_button' => true,
-      'show_delete_button' => true,
-      'edit_enabled' => true,
-      'default_values' => [],
-      'onrefresh_action' => 'UI/DataTable/Refresh',
-      'onupdate_action' => 'UI/DataTable/Update',
-      'table_data' => [],
-      'table_data_reset' => true,
-      'table_columns' => [],
-      'style' => 'padding:10px'
+      'datatableName' => '',
+      'model' => '',
+      'showAddButton' => true,
+      'showDeleteButton' => true,
+      'editEnabled' => true,
+      'defaultValues' => [],
+      'refreshAction' => 'UI/DataTable/Refresh',
+      'updateAction' => 'UI/DataTable/Update',
+      'data' => [],
+      'dataReset' => true,
+      'columns' => [],
+      'style' => 'padding:10px',
+      'tooltip' => '⊘'
     ], $params);
 
+    if ($this->params['model'] == '') {
+      exit("UI/DataTable: Don't know what model to work with.");
+      return;
+    }
+
     if ($this->params['refresh'] == false) {
-      $this->params['datatable_name'] = $this->params['datatable_name'] . '_datatable';
+      $this->params['datatableName'] = $this->params['datatableName'] . '_datatable';
     }
 
-    if ($this->params['table_data_reset']) $this->params['table_data'] = [];
+    if ($this->params['dataReset']) $this->params['data'] = [];
 
-    if (empty($this->params['column_settings']) && $this->params['table'] != '') {
-      $this->params['column_settings'] = $this->adios->db->tables[$this->params['table']];
+    if (empty($this->params['columnSettings']) && $this->params['model'] != '') {
+      $tmpModel = $this->adios->getModel($this->params['model']);
+      $this->params['columnSettings'] = $this->adios->db->tables[
+        "{$this->adios->gtp}_{$tmpModel->sqlName}"
+      ];
     }
 
-    /** GET DATA */
-    if (empty($this->params['table_data'])) {
-      $this->params['table_data'] = array_values(
-        $this->adios->db->get_all_rows_query("
-          SELECT
-            *
-          FROM {$this->params['table']}
-        ")
-      );
+    /** data */
+    if (empty($this->params['data'])) {
+      $this->model = $this->adios->getModel($this->params['model']);
 
+      $this->params['data'] = array_values($this->model->getAll());
 
-      // ENUMS
-      foreach ($this->params['table_data'] as $rowKey => $rowData) {
+      /** Enums */
+      foreach ($this->params['data'] as $rowKey => $rowData) {
         foreach ($rowData as $colName => $colVal) {
-          if (!empty($this->params['column_settings'][$colName]['enum_values'])) {
-            $this->params['table_data'][$rowKey][$colName] = 
-              $this->params['column_settings'][$colName]['enum_values'][$colVal]
+          if (!empty($this->params['columnSettings'][$colName]['enum_values'])) {
+            $this->params['data'][$rowKey][$colName] = 
+              $this->params['columnSettings'][$colName]['enum_values'][$colVal]
             ;
           }
         }
@@ -73,17 +79,15 @@ class DataTable extends \ADIOS\Core\UI\View {
   }
 
   public function render($render_panel = ''): string {
-    /** titleHtml */
     $this->titleHtml = "<div style='margin-bottom:10px;overflow:auto'>";
 
-    /** ADD BUTTON HTML*/
-    if ($this->params['show_add_button']) {
+    if ($this->params['showAddButton']) {
       $this->titleHtml .= "
         <div style='float:right'>
           ".$this->adios->ui->button([
             'text' => 'Add row',
             'type' => 'add',
-            'onclick' => "{$this->params['datatable_name']}_add_row()",
+            'onclick' => "{$this->params['datatableName']}_add_row()",
           ])->render()."
         </div>
       ";
@@ -93,13 +97,13 @@ class DataTable extends \ADIOS\Core\UI\View {
 
     $contentHtml = "
       {$this->titleHtml}
-      <table id='{$this->params['datatable_name']}' class='display' style='width:100%;'></table>
+      <table id='{$this->params['datatableName']}' class='display' style='width:100%;'></table>
     ";
 
     if ($this->params['refresh']) {
 
       // Initialize columns editor functions
-      foreach ($this->params['table_columns'] as $colDefinition) {
+      foreach ($this->params['columns'] as $colDefinition) {
         $colName = $colDefinition['data'];
 
         if (
@@ -107,47 +111,44 @@ class DataTable extends \ADIOS\Core\UI\View {
           && $colName != 'id'
           && !$colDefinition['adios_column_definition']['readonly']
         ) {
-          $this->script .= "{$this->params['datatable_name']}_init_editor_{$colDefinition['data']}();";
+          $this->script .= "{$this->params['datatableName']}_init_editor_{$colDefinition['data']}();";
         }
       }
 
       $html = $contentHtml;
     } else {
       $html = "
-        <div id='{$this->params['datatable_name']}_main_div' ".$this->main_params().">
+        <div id='{$this->params['datatableName']}_main_div' ".$this->main_params().">
           {$contentHtml}
         </div>
       ";
 
-      foreach ($this->params['column_settings'] as $columnName => $column) {
+      foreach ($this->params['columnSettings'] as $columnName => $column) {
         if ($columnName != '%%table_params%%') {
 
           if ($columnName == 'id') continue;
 
-          // Create header columns
-          $this->params['table_columns'][] = [
+          $this->params['columns'][] = [
             'adios_column_definition' => $column,
             'title' => $column['title'],
             'data' => $columnName
           ];
 
-          // Set new row default values 
-          if ($this->params['show_add_button']) {
+          if ($this->params['showAddButton']) {
             $this->newRowDefaultValues[$columnName] = '';
           }
 
-          // Set enum values
           if (isset($column['enum_values'])) {
             $this->tableColumnsEnums[$columnName] = $column['enum_values'];
           }
         }
       }
 
-      if ($this->params['show_delete_button']) {
-        $this->params['table_columns'][] = [
+      if ($this->params['showDeleteButton']) {
+        $this->params['columns'][] = [
           'defaultContent' => '
             <button
-              onclick="'. $this->params['datatable_name'] . '_delete_row(this)"
+              onclick="'. $this->params['datatableName'] . '_delete_row(this)"
             >
               <i class="fa fa-trash"></i class="fa fa-trash">
             </button>
@@ -157,7 +158,7 @@ class DataTable extends \ADIOS\Core\UI\View {
         ];
       }
 
-      foreach ($this->params['table_columns'] as $colDefinition) {
+      foreach ($this->params['columns'] as $colDefinition) {
         $colName = $colDefinition['data'];
 
         if (
@@ -171,77 +172,71 @@ class DataTable extends \ADIOS\Core\UI\View {
           if (!empty($tmpEditableEnumData)) $editorColType = 'select';
 
           $this->script .= "
-            function {$this->params['datatable_name']}_refresh() {
+            function {$this->params['datatableName']}_refresh() {
               _ajax_update(
-                '{$this->params['onrefresh_action']}',
+                '{$this->params['refreshAction']}',
                 {
-                  table: '{$this->params['table']}',
-                  datatable_name: '{$this->params['datatable_name']}',
-                  table_columns: " . json_encode($this->params['table_columns']) .",
+                  model: '{$this->params['model']}',
+                  datatableName: '{$this->params['datatableName']}',
+                  columns: " . json_encode($this->params['columns']) .",
                   refresh: true
                 },
-                '{$this->params['datatable_name']}_main_div'
+                '{$this->params['datatableName']}_main_div'
               );
             }
 
-            function {$this->params['datatable_name']}_init_editor_{$colName}() {
-              let {$this->params['datatable_name']}_editorSettings_{$colName} = {};
-              {$this->params['datatable_name']}_editorSettings_{$colName}.type = '{$editorColType}';
+            function {$this->params['datatableName']}_init_editor_{$colName}() {
+              let {$this->params['datatableName']}_editorSettings_{$colName} = {
+                type: '{$editorColType}',
+                placeholder: '{$this->params['tooltip']}',
+                tooltip: '{$this->params['tooltip']}'
+              };
   
-              if ({$this->params['datatable_name']}_editorSettings_{$colName}.type == 'select') {
-                {$this->params['datatable_name']}_editorSettings_{$colName}.data = '" . json_encode(array_combine($tmpEditableEnumData, $tmpEditableEnumData)) . "';
+              if ('{$editorColType}' == 'select') {
+                {$this->params['datatableName']}_editorSettings_{$colName}.data = '" . json_encode(array_combine($tmpEditableEnumData, $tmpEditableEnumData)) . "';
               }
 
-              {$this->params['datatable_name']}.$('td[col-name={$colName}]').editable(function(value, settings) {
+              {$this->params['datatableName']}.$('td[col-name={$colName}]').editable(function(value, settings) {
                 let data = {};
-                data.table = '{$this->params['table']}';
                 data.model = '{$this->params['model']}';
-                data.datatable_name = '{$this->params['datatable_name']}';
+                data.datatableName = '{$this->params['datatableName']}';
                 data.onupdate = '1';
                 data.id = $(this).closest('tr').attr('id-record');
                 data.colName = $(this).closest('td').attr('col-name');
                 data.newValue = value;
 
                 _ajax_read(
-                  '{$this->params['onupdate_action']}',
+                  '{$this->params['updateAction']}',
                   data,
                   (res) => {
                     if (isNaN(res)) {
                       alert(res);
-                      $(this).closest('tr').addClass('updated-error', 500, () => {
-                        $(this).closest('tr').removeClass('updated-error')
-                      });
-                    } else {
-                      $(this).closest('tr').addClass('updated-success', 500, () => {
-                        $(this).closest('tr').removeClass('updated-success');
 
-                        {$this->params['datatable_name']}_refresh();
-                      });
+                      $(this).closest('tr').addClass('updated-error');
+                    } else {
+                      {$this->params['datatableName']}_refresh();
                     }
                   }
                 );
 
                 return(value);
-              }, {$this->params['datatable_name']}_editorSettings_{$colName});
+              }, {$this->params['datatableName']}_editorSettings_{$colName});
             };
 
-            {$this->params['datatable_name']}_init_editor_{$colName}();
+            {$this->params['datatableName']}_init_editor_{$colName}();
           ";
 
-          $this->tableColumnsEnumsInitEditorFunctions .= "{$this->params['datatable_name']}_init_editor_{$colName}();";
+          $this->tableColumnsEnumsInitEditorFunctions .= "{$this->params['datatableName']}_init_editor_{$colName}();";
         }
       }
 
-      /** SCRIPT */
-      /** ADD BUTTON SCRIPT*/
-      if ($this->params['show_add_button']) {
+      if ($this->params['showAddButton']) {
         $this->script .= "
-          function {$this->params['datatable_name']}_add_row() {
+          function {$this->params['datatableName']}_add_row() {
             let data = {};
-            data.table = '{$this->params['table']}';
             data.model = '{$this->params['model']}';
-            data.default_values = '" . json_encode($this->params['default_values']) . "';
-            data.uid = '{$this->params['datatable_name']}';
+            data.defaultValues = '" . json_encode($this->params['defaultValues']) . "';
+            data.uid = '{$this->params['datatableName']}';
 
             _ajax_read(
               'UI/DataTable/AddRow', 
@@ -253,12 +248,14 @@ class DataTable extends \ADIOS\Core\UI\View {
                   let defaultValues = " . json_encode($this->newRowDefaultValues) . ";
                   defaultValues.id = res;
 
-                  {$this->params['datatable_name']}.row.add(defaultValues)
-                    .node().id = '{$this->params['datatable_name']}_' + res
+                  {$this->params['datatableName']}.row.add(defaultValues)
+                    .node().id = '{$this->params['datatableName']}_' + res
                   ;
 
-                  {$this->params['datatable_name']}.draw();
+                  {$this->params['datatableName']}.draw();
                   {$this->tableColumnsEnumsInitEditorFunctions}
+
+                  {$this->params['datatableName']}_refresh();
                 };
               }
             );
@@ -266,12 +263,10 @@ class DataTable extends \ADIOS\Core\UI\View {
         ";
       }
 
-      /** DELETE BUTTON SCRIPT*/
-      if ($this->params['show_delete_button']) {
+      if ($this->params['showDeleteButton']) {
         $this->script .= "
-          function {$this->params['datatable_name']}_delete_row(_this) {
+          function {$this->params['datatableName']}_delete_row(_this) {
             let data = {};
-            data.table = '{$this->params['table']}';
             data.model = '{$this->params['model']}';
             data.id = $(_this).closest('tr').attr('id-record');
 
@@ -283,7 +278,7 @@ class DataTable extends \ADIOS\Core\UI\View {
                   if (isNaN(res)) {
                     alert(res);
                   } else {
-                    {$this->params['datatable_name']}.row($(_this).closest('tr'))
+                    {$this->params['datatableName']}.row($(_this).closest('tr'))
                       .remove()
                       .draw()
                     ;
@@ -315,26 +310,37 @@ class DataTable extends \ADIOS\Core\UI\View {
           .dt-delete-button i {
             color: grey;
           }
+          .dt-empty-td {
+            color: #d4d4d4;
+            text-align: center;
+          }
           table {          
             table-layout: fixed;
             word-wrap: break-word;
           }
+          #{$this->params['datatableName']}_main_div {
+            color: #212121;
+          }
         </style>
       ";
     }
-
+    
     return $html . "
       <script>
-        var {$this->params['datatable_name']} = $('#{$this->params['datatable_name']}').DataTable({
-          columns: " . json_encode($this->params['table_columns']) . ",
-          data: " . json_encode($this->params['table_data']) . ",
+        var {$this->params['datatableName']} = $('#{$this->params['datatableName']}').DataTable({
+          columns: " . json_encode($this->params['columns']) . ",
+          data: " . json_encode($this->params['data']) . ",
           createdRow: function(row, data, dataIndex) {
-            $(row).attr('id', '{$this->params['datatable_name']}_' + data.id);
+            $(row).attr('id', '{$this->params['datatableName']}_' + data.id);
             $(row).attr('id-record', data.id);
 
             // Add column-name attribute to td element
-            let columnNames =  " . json_encode($this->params['table_columns']) . ";
+            let columnNames =  " . json_encode($this->params['columns']) . ";
             $.each($('td', row), function (colIndex) {
+              if (data[columnNames[colIndex]['data']] == '') {
+                $(this).addClass('dt-empty-td');
+              }
+
               $(this).attr('col-name', columnNames[colIndex]['data']);
             });
           }
