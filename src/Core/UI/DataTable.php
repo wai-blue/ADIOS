@@ -31,6 +31,7 @@ class DataTable extends \ADIOS\Core\UI\View {
       'showDeleteButton' => true,
       'editEnabled' => true,
       'defaultValues' => [],
+      'loadDataAction' => 'UI/DataTable/LoadData',
       'refreshAction' => 'UI/DataTable/Refresh',
       'updateAction' => 'UI/DataTable/Update',
       'data' => [],
@@ -324,12 +325,13 @@ class DataTable extends \ADIOS\Core\UI\View {
         </style>
       ";
     }
-    
+
     return $html . "
       <script>
         var {$this->params['datatableName']} = $('#{$this->params['datatableName']}').DataTable({
           columns: " . json_encode($this->params['columns']) . ",
-          data: " . json_encode($this->params['data']) . ",
+          ajax: '{$this->adios->config['url']}/{$this->params['loadDataAction']}',
+          //data: " . json_encode($this->params['data']) . ",
           createdRow: function(row, data, dataIndex) {
             $(row).attr('id', '{$this->params['datatableName']}_' + data.id);
             $(row).attr('id-record', data.id);

@@ -1107,6 +1107,7 @@ class Loader
       } else if (
         !$this->getConfig("hide_default_desktop", FALSE)
         && !$actionClassName::$hideDefaultDesktop
+        && !method_exists($actionClassName, "renderJSON")
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
         $this->desktopContentAction = $this->action;
@@ -1202,16 +1203,23 @@ class Loader
 
       if ($this->actionExists($action)) {
         $this->actionObject = new $actionClassName($this, $params);
-        $actionReturn = $this->actionObject->render($params);
 
-        if ($actionReturn === NULL) {
-          // akcia nic nereturnovala, iba robila echo
-          $actionHtml = "";
-        } else if (is_string($actionReturn)) {
-          $actionHtml = $actionReturn;
+        if (method_exists($actionClassName, "renderJSON")) {
+          $actionReturn = $this->actionObject->renderJSON($params);
+          $actionHtml = json_encode($actionReturn);
         } else {
-          $actionHtml = $this->renderReturn($actionReturn);
+          $actionReturn = $this->actionObject->render($params);
+
+          if ($actionReturn === NULL) {
+            // akcia nic nereturnovala, iba robila echo
+            $actionHtml = "";
+          } else if (is_string($actionReturn)) {
+            $actionHtml = $actionReturn;
+          } else {
+            $actionHtml = $this->renderReturn($actionReturn);
+          }
         }
+
       } else {
 
         // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
@@ -1251,14 +1259,14 @@ class Loader
   }
 
   public function renderReturn($return) {
-    if ($this->isAjax() && !$this->isWindow()) {
+    // if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
         "result" => "SUCCESS",
         "content" => $return,
       ]);
-    } else {
-      return $return;
-    }
+    // } else {
+    //   return $return;
+    // }
   }
 
   public function renderWarning($message, $isHtml = TRUE) {
