@@ -104,20 +104,7 @@ class DataTable extends \ADIOS\Core\UI\View {
     ";
 
     if ($this->params['refresh']) {
-
-      // Initialize columns editor functions
-      foreach ($this->params['columns'] as $colDefinition) {
-        $colName = $colDefinition['data'];
-
-        if (
-          $colName != null 
-          && $colName != 'id'
-          && !$colDefinition['adios_column_definition']['readonly']
-        ) {
-          $this->script .= "{$this->params['datatableName']}_init_editor_{$colDefinition['data']}();";
-        }
-      }
-
+      $this->initEditor();
       $html = $contentHtml;
     } else {
       $html = "
@@ -161,6 +148,21 @@ class DataTable extends \ADIOS\Core\UI\View {
         ];
       }
 
+      $this->script .= "
+        function {$this->params['datatableName']}_refresh() {
+          _ajax_update(
+            '{$this->params['refreshAction']}',
+            {
+              model: '{$this->params['model']}',
+              datatableName: '{$this->params['datatableName']}',
+              columns: " . json_encode($this->params['columns']) .",
+              refresh: true
+            },
+            '{$this->params['datatableName']}_main_div'
+          );
+        }
+      ";
+
       foreach ($this->params['columns'] as $colDefinition) {
         $colName = $colDefinition['data'];
 
@@ -175,19 +177,6 @@ class DataTable extends \ADIOS\Core\UI\View {
           if (!empty($tmpEditableEnumData)) $editorColType = 'select';
 
           $this->script .= "
-            function {$this->params['datatableName']}_refresh() {
-              _ajax_update(
-                '{$this->params['refreshAction']}',
-                {
-                  model: '{$this->params['model']}',
-                  datatableName: '{$this->params['datatableName']}',
-                  columns: " . json_encode($this->params['columns']) .",
-                  refresh: true
-                },
-                '{$this->params['datatableName']}_main_div'
-              );
-            }
-
             function {$this->params['datatableName']}_init_editor_{$colName}() {
               let {$this->params['datatableName']}_editorSettings_{$colName} = {
                 type: '{$editorColType}',
@@ -358,5 +347,20 @@ class DataTable extends \ADIOS\Core\UI\View {
       </script>
     ";
   }
+
+  private function initEditor(): void {
+    foreach ($this->params['columns'] as $colDefinition) {
+      $colName = $colDefinition['data'];
+
+      if (
+        $colName != null 
+        && $colName != 'id'
+        && !$colDefinition['adios_column_definition']['readonly']
+      ) {
+        $this->tableColumnsEnumsInitEditorFunctions .= "{$this->params['datatableName']}_init_editor_{$colName}();";
+      }
+    }
+  }
+
 
 }

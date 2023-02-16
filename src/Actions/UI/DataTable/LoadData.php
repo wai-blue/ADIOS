@@ -17,6 +17,7 @@ class LoadData extends \ADIOS\Core\Action {
   
   private array $sessionParams = [];
   private array $data = [];
+  private array $columns = [];
 
   private string $table = '';
 
@@ -29,11 +30,37 @@ class LoadData extends \ADIOS\Core\Action {
     $this->sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
   }
 
-  private function loadData(array $params = []): void {
+  private function getSearchValue(): string {
+    return $this->params['search']['value'] ?? '';
+  }
+
+  private function getOrderBy(): string {
+    $orderBy = $this->params['order'][0];
+
+    return $this->columns[$orderBy['column']]['data'] . ' ' . $orderBy['dir'];
+  }
+
+  private function getSearchInWhere(string $where): string {
+    if ($this->getSearchValue() == '') return $where;
+
+    $where .= ' and (';
+    foreach($this->columns as $column) {
+      if (is_numeric($column['data'])) continue;
+
+      $where .= "{$this->table}.{$column['data']} LIKE '%" . ads($this->getSearchValue()) . "%' or "; 
+    }
+
+    return substr($where, 0, -3) . ')';
+  }
+
+  private function loadData(): void {
     $this->model = $this->adios->getModel($this->sessionParams['model']);
     $this->table = $this->adios->gtp . '_' . $this->model->sqlName;
+    $this->columns = $this->params['columns'];
 
     $where = (empty($this->sessionParams['where']) ? 'TRUE' : $this->sessionParams['where']);
+    $where = $this->getSearchInWhere($where);
+
 
     /*if (!empty($this->sessionParams['foreignKey'])) {
       $fkColumnName = $this->sessionParams['foreignKey'];
@@ -58,6 +85,7 @@ class LoadData extends \ADIOS\Core\Action {
     }*/
 
     $orderBy = $this->sessionParams['orderBy'];
+    $orderBy = $this->getOrderBy();
     $groupBy = $this->sessionParams['groupBy'];
 
     $tmpColumnSettings = $this->adios->db->tables[$this->table];
@@ -85,8 +113,8 @@ class LoadData extends \ADIOS\Core\Action {
       'having' => $having,
       'order' => $orderBy,
       'group' => $groupBy,
-      'limit_start' => (int) $params['start'],
-      'limit_end' => (int) $params['length']
+      'limit_start' => (int) $this->params['start'],
+      'limit_end' => (int) $this->params['length']
     ];
 
     //if (is_numeric($limit_1)) $get_all_rows_params['limit_start'] = $limit_1;
@@ -106,7 +134,7 @@ class LoadData extends \ADIOS\Core\Action {
   public function renderJSON() {
     $this->setSessionParams();
 
-    $this->loadData($this->params);
+    $this->loadData();
 
     /** Enums */
     foreach ($this->data as $rowKey => $rowData) {
@@ -120,12 +148,10 @@ class LoadData extends \ADIOS\Core\Action {
     }
 
     return  [
-      'start' => $this->params['start'],
-      //'draw'            => $this->selectedRecordCount,
-			'recordsTotal'    => $this->selectedRecordCount,
-			'recordsFiltered' => $this->recordsCount,
-      //'deferLoading'    => 100,
-			'data'            => $this->data
+      'start'           => $this->params['start'],
+      'recordsTotal'    => $this->selectedRecordCount,
+      'recordsFiltered' => $this->recordsCount,
+      'data'            => $this->data
     ];
   }
 }
