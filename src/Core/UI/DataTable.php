@@ -59,6 +59,8 @@ class DataTable extends \ADIOS\Core\UI\View {
       ];
     }
 
+    $this->saveParamsToSession($this->adios->uid, $this->params);
+
     /** data */
     if (empty($this->params['data'])) {
       $this->model = $this->adios->getModel($this->params['model']);
@@ -330,8 +332,12 @@ class DataTable extends \ADIOS\Core\UI\View {
       <script>
         var {$this->params['datatableName']} = $('#{$this->params['datatableName']}').DataTable({
           columns: " . json_encode($this->params['columns']) . ",
-          ajax: '{$this->adios->config['url']}/{$this->params['loadDataAction']}',
-          //data: " . json_encode($this->params['data']) . ",
+          ajax: '{$this->adios->config['url']}/{$this->params['loadDataAction']}?uid={$this->adios->uid}',
+          proccessing: true,
+          serverSide: true,
+          'fnDrawCallback': () => {
+            {$this->tableColumnsEnumsInitEditorFunctions}
+          },
           createdRow: function(row, data, dataIndex) {
             $(row).attr('id', '{$this->params['datatableName']}_' + data.id);
             $(row).attr('id-record', data.id);
