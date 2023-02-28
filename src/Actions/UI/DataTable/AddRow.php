@@ -16,9 +16,11 @@ namespace ADIOS\Actions\UI\DataTable;
 class AddRow extends \ADIOS\Core\Action {
   public function render($params = []) {
     try {
-      $tmpModel = $this->adios->getModel($this->params['model']);
+      $sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
 
-      return $tmpModel->insertGetId(json_decode($this->params['defaultValues'], TRUE));
+      $tmpModel = $this->adios->getModel($sessionParams['model']);
+
+      return $tmpModel->insertGetId($sessionParams['defaultValues']);
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       return $e->getMessage();
     }

@@ -17,22 +17,26 @@ class Update extends \ADIOS\Core\Action {
 
   public function render() {
     try {
-      if (is_numeric($this->params['id'])) {
-        $tmpModel = $this->adios->getModel($this->params['model']);
+      
+      $idToUpdate = (int) $this->params['id'];
 
+      if ($idToUpdate > 0) {
+        $sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
+        $colNameToUpdate = $this->params['colName'];
         $newValue = $this->params['newValue'];
 
+        $tmpModel = $this->adios->getModel($sessionParams['model']);
+
         // Replace newValue if col is type of enum
-        $columnSettings = $this->adios->db->tables["{$this->adios->gtp}_{$tmpModel->sqlName}"];
-        if (!empty($columnSettings[$this->params['colName']]['enum_values'])) {
+        if (!empty($sessionParams['columnSettings'][$colNameToUpdate]['enum_values'])) {
           $newValue = array_search(
             $this->params['newValue'], 
-            $columnSettings[$this->params['colName']]['enum_values']
+            $sessionParams['columnSettings'][$colNameToUpdate]['enum_values']
           );
         } 
 
-        return $tmpModel->find($this->params['id'])->update([
-          $this->params['colName'] => $newValue
+        return $tmpModel->find($idToUpdate)->update([
+          $colNameToUpdate => $newValue
         ]);
       } else {
         throw new \ADIOS\Core\Exceptions\GeneralException("Nothing to update.");

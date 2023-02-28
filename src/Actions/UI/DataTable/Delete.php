@@ -17,7 +17,9 @@ class Delete extends \ADIOS\Core\Action {
 
   public function render() {
     try {
-      $tmpModel = $this->adios->getModel($this->params['model']);
+      $sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
+
+      $tmpModel = $this->adios->getModel($sessionParams['model']);
 
       if (is_numeric($this->params['id'])) {
         return $tmpModel->formDelete($this->params['id']);

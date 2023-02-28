@@ -5,14 +5,13 @@ namespace ADIOS\Core\UI;
 
 class DataTable extends \ADIOS\Core\UI\View {
 
-  private array $newRowDefaultValues = [];
   private array $tableColumnsEnums = [];
 
   private string $tableColumnsEnumsInitEditorFunctions = '';
   private string $titleHtml = '';
   private string $script = '';
 
-  private $model = NULL;
+  private ?\ADIOS\Core\Model $model = null;
 
   /**
    * __construct
@@ -25,18 +24,18 @@ class DataTable extends \ADIOS\Core\UI\View {
     $this->adios = &$adios;
 
     $this->params = parent::params_merge([
-      'datatableName' => '',
-      'model' => '',
-      'showAddButton' => true,
-      'showDeleteButton' => true,
-      'editEnabled' => true,
-      'defaultValues' => [],
+      'datatableName' => null,
+      'model' => null,
       'loadDataAction' => 'UI/DataTable/LoadData',
       'refreshAction' => 'UI/DataTable/Refresh',
       'updateAction' => 'UI/DataTable/Update',
-      'data' => [],
-      'dataReset' => true,
+      'defaultValues' => [],
       'columns' => [],
+      'data' => [],
+      'showAddButton' => true,
+      'showDeleteButton' => true,
+      'itemsPerPage' => 25,
+      'displayStart' => 0,
       'style' => 'padding:10px',
       'tooltip' => '⊘'
     ], $params);
@@ -47,16 +46,49 @@ class DataTable extends \ADIOS\Core\UI\View {
     }
 
     if ($this->params['refresh'] == false) {
-      $this->params['datatableName'] = $this->params['datatableName'] . '_datatable';
+      $this->params['datatableName'] = 
+        ($this->params['datatableName'] ?? $this->adios->uid) 
+        . '_datatable'
+      ;
     }
 
-    if ($this->params['dataReset']) $this->params['data'] = [];
-
-    if (empty($this->params['columnSettings']) && $this->params['model'] != '') {
+    if (empty($this->params['columnSettings']) && $this->params['model'] != null) {
       $tmpModel = $this->adios->getModel($this->params['model']);
+
       $this->params['columnSettings'] = $this->adios->db->tables[
         "{$this->adios->gtp}_{$tmpModel->sqlName}"
       ];
+
+      foreach ($this->params['columnSettings'] as $columnName => $column) {
+        if ($columnName != '%%table_params%%') {
+  
+          if ($columnName == 'id') continue;
+  
+          $this->params['columns'][] = [
+            'adios_column_definition' => $column,
+            'title' => $column['title'],
+            'data' => $columnName
+          ];
+  
+          if (isset($column['enum_values'])) {
+            $this->tableColumnsEnums[$columnName] = $column['enum_values'];
+          }
+        }
+      }
+
+      if ($this->params['showDeleteButton']) {
+        $this->params['columns'][] = [
+          'defaultContent' => '
+            <button
+              onclick="'. $this->params['datatableName'] . '_delete_row(this)"
+            >
+              <i class="fa fa-trash"></i class="fa fa-trash">
+            </button>
+          ',
+          'orderable' => false,
+          'className' => 'dt-delete-button dt-center'
+        ];
+      }
     }
 
     $this->saveParamsToSession($this->adios->uid, $this->params);
@@ -78,7 +110,6 @@ class DataTable extends \ADIOS\Core\UI\View {
         }
       }
     }
-
   }
 
   public function render($render_panel = ''): string {
@@ -113,50 +144,12 @@ class DataTable extends \ADIOS\Core\UI\View {
         </div>
       ";
 
-      foreach ($this->params['columnSettings'] as $columnName => $column) {
-        if ($columnName != '%%table_params%%') {
-
-          if ($columnName == 'id') continue;
-
-          $this->params['columns'][] = [
-            'adios_column_definition' => $column,
-            'title' => $column['title'],
-            'data' => $columnName
-          ];
-
-          if ($this->params['showAddButton']) {
-            $this->newRowDefaultValues[$columnName] = '';
-          }
-
-          if (isset($column['enum_values'])) {
-            $this->tableColumnsEnums[$columnName] = $column['enum_values'];
-          }
-        }
-      }
-
-      if ($this->params['showDeleteButton']) {
-        $this->params['columns'][] = [
-          'defaultContent' => '
-            <button
-              onclick="'. $this->params['datatableName'] . '_delete_row(this)"
-            >
-              <i class="fa fa-trash"></i class="fa fa-trash">
-            </button>
-          ',
-          'orderable' => false,
-          'className' => 'dt-delete-button dt-center'
-        ];
-      }
-
       $this->script .= "
         function {$this->params['datatableName']}_refresh() {
           _ajax_update(
             '{$this->params['refreshAction']}',
             {
-              model: '{$this->params['model']}',
-              datatableName: '{$this->params['datatableName']}',
-              columns: " . json_encode($this->params['columns']) .",
-              refresh: true
+              uid: '{$this->adios->uid}'
             },
             '{$this->params['datatableName']}_main_div'
           );
@@ -190,9 +183,7 @@ class DataTable extends \ADIOS\Core\UI\View {
 
               {$this->params['datatableName']}.$('td[col-name={$colName}]').editable(function(value, settings) {
                 let data = {};
-                data.model = '{$this->params['model']}';
-                data.datatableName = '{$this->params['datatableName']}';
-                data.onupdate = '1';
+                data.uid = '{$this->adios->uid}';
                 data.id = $(this).closest('tr').attr('id-record');
                 data.colName = $(this).closest('td').attr('col-name');
                 data.newValue = value;
@@ -203,7 +194,6 @@ class DataTable extends \ADIOS\Core\UI\View {
                   (res) => {
                     if (isNaN(res)) {
                       alert(res);
-
                       $(this).closest('tr').addClass('updated-error');
                     } else {
                       {$this->params['datatableName']}_refresh();
@@ -225,28 +215,15 @@ class DataTable extends \ADIOS\Core\UI\View {
       if ($this->params['showAddButton']) {
         $this->script .= "
           function {$this->params['datatableName']}_add_row() {
-            let data = {};
-            data.model = '{$this->params['model']}';
-            data.defaultValues = '" . json_encode($this->params['defaultValues']) . "';
-            data.uid = '{$this->params['datatableName']}';
-
             _ajax_read(
               'UI/DataTable/AddRow', 
-              data, 
+              {
+                uid: '{$this->adios->uid}'
+              }, 
               (res) => {
                 if (isNaN(res)) {
                   alert(res);
                 } else {
-                  let defaultValues = " . json_encode($this->newRowDefaultValues) . ";
-                  defaultValues.id = res;
-
-                  {$this->params['datatableName']}.row.add(defaultValues)
-                    .node().id = '{$this->params['datatableName']}_' + res
-                  ;
-
-                  {$this->params['datatableName']}.draw();
-                  {$this->tableColumnsEnumsInitEditorFunctions}
-
                   {$this->params['datatableName']}_refresh();
                 };
               }
@@ -258,14 +235,15 @@ class DataTable extends \ADIOS\Core\UI\View {
       if ($this->params['showDeleteButton']) {
         $this->script .= "
           function {$this->params['datatableName']}_delete_row(_this) {
-            let data = {};
-            data.model = '{$this->params['model']}';
-            data.id = $(_this).closest('tr').attr('id-record');
+            let idRecordToDelete = $(_this).closest('tr').attr('id-record');
 
             _confirm('Are you sure to delete this record?', {}, function() {
               _ajax_read(
                 'UI/DataTable/Delete', 
-                data, 
+                {
+                  uid: '{$this->adios->uid}',
+                  id: idRecordToDelete,
+                }, 
                 (res) => {
                   if (isNaN(res)) {
                     alert(res);
@@ -281,40 +259,6 @@ class DataTable extends \ADIOS\Core\UI\View {
           }
         ";
       }
-
-      $html .= "
-        <style>
-          .updated-success {
-            background: #f1ffed !important;
-          }
-          .updated-error {
-            background: #ffeded !important;
-          }
-          .dt-delete-button button {
-            background: none;
-            box-shadow: 0 0 3px grey;
-            border-radius: 5px;
-          }
-          .dt-delete-button button:hover {
-            color: grey;
-            box-shadow: 0 0 3px #ad241f;
-          }
-          .dt-delete-button i {
-            color: grey;
-          }
-          .dt-empty-td {
-            color: #d4d4d4;
-            text-align: center;
-          }
-          table {          
-            table-layout: fixed;
-            word-wrap: break-word;
-          }
-          #{$this->params['datatableName']}_main_div {
-            color: #212121;
-          }
-        </style>
-      ";
     }
 
     return $html . "
@@ -324,6 +268,8 @@ class DataTable extends \ADIOS\Core\UI\View {
           ajax: '{$this->adios->config['url']}/{$this->params['loadDataAction']}?uid={$this->adios->uid}',
           proccessing: true,
           serverSide: true,
+          pageLength: {$this->params['itemsPerPage']},
+          displayStart: {$this->params['displayStart']},
           'fnDrawCallback': () => {
             {$this->tableColumnsEnumsInitEditorFunctions}
           },

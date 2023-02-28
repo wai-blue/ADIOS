@@ -21,15 +21,18 @@ class LoadData extends \ADIOS\Core\Action {
 
   private string $table = '';
 
-  private $model = NULL;
+  private ?\ADIOS\Core\Model $model = null;
 
   private int $recordsCount = 0;
   private int $selectedRecordCount = 0;
 
   private function setSessionParams(): void {
     $this->sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
-  }
 
+    $_SESSION[_ADIOS_ID]['views'][$this->params['uid']]['itemsPerPage'] = $this->params['length'];
+    $_SESSION[_ADIOS_ID]['views'][$this->params['uid']]['displayStart'] = $this->params['start'];
+  }
+  
   private function getSearchValue(): string {
     return $this->params['search']['value'] ?? '';
   }
@@ -61,52 +64,18 @@ class LoadData extends \ADIOS\Core\Action {
     $where = (empty($this->sessionParams['where']) ? 'TRUE' : $this->sessionParams['where']);
     $where = $this->getSearchInWhere($where);
 
-
-    /*if (!empty($this->sessionParams['foreignKey'])) {
-      $fkColumnName = $this->sessionParams['foreignKey'];
-      $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
-      if ($fkColumnDefinition !== NULL) {
-        $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-        $where .= "
-          and
-            `lookup_{$tmpModel->getFullTableSQLName()}_{$fkColumnName}`.`id`
-            = ".((int) $this->sessionParams['form_data']['id'])
-        ;
-      }
-    }*/
-
-    // having
     $having = (empty($this->sessionParams['having']) ? 'TRUE' : $this->sessionParams['having']);
-    /*if (_count($this->columnsFilter)) {
-      $having .= " and " . $this->model->tableFilterSqlWhere($this->columnsFilter);
-    }
-    if (_count($this->search)) {
-      $having .= " and " . $this->model->tableFilterSqlWhere($this->search);
-    }*/
 
     $orderBy = $this->sessionParams['orderBy'];
     $orderBy = $this->getOrderBy();
+    
     $groupBy = $this->sessionParams['groupBy'];
-
-    $tmpColumnSettings = $this->adios->db->tables[$this->table];
-    //$this->adios->db->tables[$this->sessionParams['table']] = $this->columns;
 
     $this->recordsCount = $this->adios->db->count_all_rows($this->table, [
       'where' => $where,
       'having' => $having,
       'group' => $groupBy,
     ]);
-
-    //if (_count($tmpColumnSettings)) {
-    //  $this->adios->db->tables[$this->sessionParams['table']] = $tmpColumnSettings;
-    //}
-  
-
-    //if ($this->sessionParams['page'] * $this->sessionParams['items_per_page'] > $this->table_item_count) {
-    //  $this->sessionParams['page'] = floor($this->table_item_count / $this->sessionParams['items_per_page']) + 1;
-    //}
-    //$limit_1 = ($this->sessionParams['show_paging'] ? max(0, ($this->sessionParams['page'] - 1) * $this->sessionParams['items_per_page']) : '');
-    //$limit_2 = ($this->sessionParams['show_paging'] ? $this->sessionParams['items_per_page'] : '');
 
     $getAllRowsParams = [
       'where' => $where,
@@ -117,12 +86,6 @@ class LoadData extends \ADIOS\Core\Action {
       'limit_end' => (int) $this->params['length']
     ];
 
-    //if (is_numeric($limit_1)) $get_all_rows_params['limit_start'] = $limit_1;
-    //if (is_numeric($limit_2)) $get_all_rows_params['limit_end'] = $limit_2;
-
-
-    //$tmpColumnSettings = $this->adios->db->tables[$this->sessionParams['table']];
-    //$this->adios->db->tables[$this->sessionParams['table']] = $this->columns;
     $this->data = $this->adios->db->get_all_rows(
       $this->table,
       $getAllRowsParams

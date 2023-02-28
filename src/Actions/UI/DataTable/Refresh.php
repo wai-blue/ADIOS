@@ -15,10 +15,8 @@ namespace ADIOS\Actions\UI\DataTable;
  */
 class Refresh extends \ADIOS\Core\Action {
   public function render() {
-    $tmpParams['datatableName'] = $this->params['datatableName'];
-    $tmpParams['columns'] = json_decode($this->params['columns'], TRUE);
-    $tmpParams['model'] = $this->params['model'];
-    $tmpParams['dataReset'] = true;
+    $tmpParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
+
     $tmpParams['refresh'] = true;
 
     return $this->adios->ui->datatable($tmpParams)->render();

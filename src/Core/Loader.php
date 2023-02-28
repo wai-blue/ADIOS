@@ -1782,6 +1782,7 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
+      dirname(__FILE__)."/../Assets/Css/datatables.css",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {
