@@ -34,7 +34,7 @@ class DataTable extends \ADIOS\Core\UI\View {
       'data' => [],
       'showAddButton' => true,
       'showDeleteButton' => true,
-      'itemsPerPage' => 25,
+      'itemsPerPage' => 10,
       'displayStart' => 0,
       'style' => 'padding:10px',
       'tooltip' => '⊘'
@@ -91,7 +91,7 @@ class DataTable extends \ADIOS\Core\UI\View {
       }
     }
 
-    $this->saveParamsToSession($this->adios->uid, $this->params);
+    $this->saveParamsToSession($this->params['datatableName'], $this->params);
 
     /** data */
     if (empty($this->params['data'])) {
@@ -149,7 +149,7 @@ class DataTable extends \ADIOS\Core\UI\View {
           _ajax_update(
             '{$this->params['refreshAction']}',
             {
-              uid: '{$this->adios->uid}'
+              uid: '{$this->params['datatableName']}'
             },
             '{$this->params['datatableName']}_main_div'
           );
@@ -183,7 +183,7 @@ class DataTable extends \ADIOS\Core\UI\View {
 
               {$this->params['datatableName']}.$('td[col-name={$colName}]').editable(function(value, settings) {
                 let data = {};
-                data.uid = '{$this->adios->uid}';
+                data.uid = '{$this->params['datatableName']}';
                 data.id = $(this).closest('tr').attr('id-record');
                 data.colName = $(this).closest('td').attr('col-name');
                 data.newValue = value;
@@ -218,7 +218,7 @@ class DataTable extends \ADIOS\Core\UI\View {
             _ajax_read(
               'UI/DataTable/AddRow', 
               {
-                uid: '{$this->adios->uid}'
+                uid: '{$this->params['datatableName']}'
               }, 
               (res) => {
                 if (isNaN(res)) {
@@ -241,17 +241,14 @@ class DataTable extends \ADIOS\Core\UI\View {
               _ajax_read(
                 'UI/DataTable/Delete', 
                 {
-                  uid: '{$this->adios->uid}',
+                  uid: '{$this->params['datatableName']}',
                   id: idRecordToDelete,
                 }, 
                 (res) => {
                   if (isNaN(res)) {
                     alert(res);
                   } else {
-                    {$this->params['datatableName']}.row($(_this).closest('tr'))
-                      .remove()
-                      .draw()
-                    ;
+                    {$this->params['datatableName']}_refresh();
                   };
                 }
               );
@@ -265,7 +262,7 @@ class DataTable extends \ADIOS\Core\UI\View {
       <script>
         var {$this->params['datatableName']} = $('#{$this->params['datatableName']}').DataTable({
           columns: " . json_encode($this->params['columns']) . ",
-          ajax: '{$this->adios->config['url']}/{$this->params['loadDataAction']}?uid={$this->adios->uid}',
+          ajax: '{$this->adios->config['url']}/{$this->params['loadDataAction']}?uid={$this->params['datatableName']}',
           proccessing: true,
           serverSide: true,
           pageLength: {$this->params['itemsPerPage']},

@@ -29,8 +29,13 @@ class LoadData extends \ADIOS\Core\Action {
   private function setSessionParams(): void {
     $this->sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
 
-    $_SESSION[_ADIOS_ID]['views'][$this->params['uid']]['itemsPerPage'] = $this->params['length'];
-    $_SESSION[_ADIOS_ID]['views'][$this->params['uid']]['displayStart'] = $this->params['start'];
+    $_SESSION[_ADIOS_ID]['views'][$this->params['uid']]['itemsPerPage'] = 
+      $this->params['length']
+    ;
+
+    $_SESSION[_ADIOS_ID]['views'][$this->params['uid']]['displayStart'] = 
+      $this->params['start']
+    ;
   }
   
   private function getSearchValue(): string {
