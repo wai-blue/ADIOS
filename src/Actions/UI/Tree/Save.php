@@ -13,8 +13,10 @@ namespace ADIOS\Actions\UI\Tree;
 /**
  * @package UI\Actions\Tree
  */
-class Save extends \ADIOS\Core\Action {
-  public function render() {
+class Save extends \ADIOS\Core\Action
+{
+  public function render()
+  {
     $params = $this->params;
 
     $model = $this->adios->getModel($params['model']);
@@ -22,7 +24,7 @@ class Save extends \ADIOS\Core\Action {
     // najdem stlpec pre rodica
 
     foreach ($model->columns() as $colName => $colDef) {
-      if ($colDef["type"] == "lookup" && $colDef["model"] == $model->name) {
+      if ($colDef["type"] == "lookup" && $colDef["model"] == $model->fullName) {
         $parentColumn = $colName;
         $orderColumn = $colDef["order_column"];
       }
@@ -45,7 +47,7 @@ class Save extends \ADIOS\Core\Action {
         $updateData = [
           $parentColumn => ($value['parent'] ? $value['parent'] : NULL),
         ];
-        
+
         if (!empty($orderColumn)) {
           $updateData[$orderColumn] = $order++;
         }
