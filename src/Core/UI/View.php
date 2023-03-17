@@ -20,6 +20,8 @@ class View {
   var array $classes = [];
   var array $html = [];
   var array $attrs = [];
+
+  var string $twigTemplate = "";
   
   /**
    * languageDictionary
@@ -289,6 +291,16 @@ class View {
 
     return $this;
   }
+
+  /**
+   * getTwigParams
+   *
+   * @internal
+   * @return array Array of parameters used in TWIG
+   */
+  public function getTwigParams(): array {
+    return [];
+  }
   
   /**
    * render
@@ -300,7 +312,18 @@ class View {
   public function render(string $panel = '') {
     $html = '';
 
-    if ('' != $this->html[$panel]) {
+    if (!empty($this->twigTemplate)) {
+      $twigParams = [
+        "view" => $this->params, // vid '{{ dump(view) }}' v DataTable.twig - po pochopeni komentar zmaz
+        "params" => $this->getTwigParams(), // vid '{{ dump(params) }}' v DataTable.twig - po pochopeni komentar zmaz
+      ];
+
+      $html = $this->adios->twig->render(
+        $this->twigTemplate,
+        $twigParams
+      );
+
+    } else if ('' != $this->html[$panel]) {
       $html = $this->html[$panel];
       if (_count($this->views[$panel])) {
         foreach ($this->views[$panel] as $view) {

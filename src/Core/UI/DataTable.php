@@ -11,6 +11,8 @@ class DataTable extends \ADIOS\Core\UI\View {
   private string $titleHtml = '';
   private string $script = '';
 
+  var string $twigTemplate = "Core/UI/DataTable"; // Neviem uplne presne, aka ma byt tuto cesta. Treba to vydebugovat.
+
   private ?\ADIOS\Core\Model $model = null;
 
   /**
@@ -112,7 +114,16 @@ class DataTable extends \ADIOS\Core\UI\View {
     }
   }
 
-  public function render($render_panel = ''): string {
+
+  public function getTwigParams(): array {
+    return [
+      "today" => date("d.m.Y"),
+    ];
+  }
+  
+  // render() metoda bude pouzita default z View. Vsetky nastavovacky treba presunut do getTwigParams()
+  // Komentar zmaz.
+  public function Xrender($render_panel = ''): string {
     $this->titleHtml = "<div style='margin-bottom:10px;overflow:auto'>";
 
     if ($this->params['showAddButton']) {
