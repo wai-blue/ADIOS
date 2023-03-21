@@ -981,7 +981,7 @@ class Loader
   public function replaceRouteVariables($routeParams, $variables) {
     if (is_array($routeParams)) {
       foreach ($routeParams as $paramName => $paramValue) {
-        
+
         if (is_array($paramValue)) {
           $routeParams[$paramName] = $this->replaceRouteVariables($paramValue, $variables);
         } else {
@@ -1774,6 +1774,7 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
+      dirname(__FILE__)."/../Assets/Css/multi-select.dist.css",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {
@@ -1829,6 +1830,8 @@ class Loader
       dirname(__FILE__)."/../Assets/Js/jquery.tag-editor.js",
       dirname(__FILE__)."/../Assets/Js/jquery.caret.min.js",
       dirname(__FILE__)."/../Assets/Js/jquery-ui.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.multi-select.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.quicksearch.js",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
