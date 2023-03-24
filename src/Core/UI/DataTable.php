@@ -11,8 +11,7 @@ class DataTable extends \ADIOS\Core\UI\View {
   private string $titleHtml = '';
   private string $script = '';
 
-  var string $twigTemplate = "Core/UI/DataTable"; // Neviem uplne presne, aka ma byt tuto cesta. Treba to vydebugovat.
-
+  public string $twigTemplate = "Core/UI/DataTable";
   private ?\ADIOS\Core\Model $model = null;
 
   /**
@@ -51,6 +50,10 @@ class DataTable extends \ADIOS\Core\UI\View {
       $this->params['datatableName'] = 
         ($this->params['datatableName'] ?? $this->adios->uid) 
         . '_datatable'
+      ;
+
+      $this->params['loadDataActionFullUrl'] = $this->adios->config['url'] . '/' .
+        $this->params['loadDataAction'] . '?uid=' . $this->params['datatableName']
       ;
     }
 
@@ -116,15 +119,18 @@ class DataTable extends \ADIOS\Core\UI\View {
 
 
   public function getTwigParams(): array {
-    return [
-      "today" => date("d.m.Y"),
-    ];
+    return array_merge(
+      $this->params,
+      [
+        'ui' => $this->adios->ui
+      ]
+    );
   }
   
   // render() metoda bude pouzita default z View. Vsetky nastavovacky treba presunut do getTwigParams()
   // Komentar zmaz.
   public function Xrender($render_panel = ''): string {
-    $this->titleHtml = "<div style='margin-bottom:10px;overflow:auto'>";
+    /*$this->titleHtml = "<div style='margin-bottom:10px;overflow:auto'>";
 
     if ($this->params['showAddButton']) {
       $this->titleHtml .= "
@@ -136,7 +142,7 @@ class DataTable extends \ADIOS\Core\UI\View {
           ])->render()."
         </div>
       ";
-    }
+    }*/
 
     $this->titleHtml .= "</div>";
 
@@ -155,7 +161,7 @@ class DataTable extends \ADIOS\Core\UI\View {
         </div>
       ";
 
-      $this->script .= "
+      /*$this->script .= "
         function {$this->params['datatableName']}_refresh() {
           _ajax_update(
             '{$this->params['refreshAction']}',
@@ -165,7 +171,7 @@ class DataTable extends \ADIOS\Core\UI\View {
             '{$this->params['datatableName']}_main_div'
           );
         }
-      ";
+      ";*/
 
       foreach ($this->params['columns'] as $colDefinition) {
         $colName = $colDefinition['data'];

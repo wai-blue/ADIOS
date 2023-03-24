@@ -1,3 +1,151 @@
-Hello DataTable world. It is {{ params.today }} today.<br/>
-View: {{ dump(view) }}<br/>
-{arams: {{ dump(params) }}
+{% if not params.refresh %}
+  <div id="{{ params.datatableName }}_main_div">
+{% endif %}
+
+{% if params.showAddButton %}
+  <div style="float:right;margin-bottom:10px;">
+    {{ params.ui.button({
+      text: 'Add row',
+      type: 'add',
+      onclick: "#{params.datatableName}_add_row()"
+    }).render()|raw }}
+  </div>
+{% endif %}
+
+<table id="{{ params.datatableName }}" class="display" style="width:100%;"></table>
+
+{% if not params.refresh %}
+  </div>
+{% endif %}
+
+<script>
+  {% if not params.refresh %}
+    function {{ params.datatableName }}_refresh() {
+      _ajax_update(
+        "{{ params.refreshAction }}",
+        {
+          uid: "{{ params.datatableName }}"
+        },
+        "{{ params.datatableName }}_main_div"
+      );
+    }
+
+    function {{ params.datatableName }}_add_row() {
+      _ajax_read(
+        "UI/DataTable/AddRow", 
+        {
+          uid: "{{ params.datatableName }}"
+        }, 
+        (res) => {
+          if (isNaN(res)) {
+            alert(res);
+          } else {
+            {{ params.datatableName }}_refresh();
+          };
+        }
+      );
+    }
+
+    function {{ params.datatableName }}_delete_row(_this) {
+      let idRecordToDelete = $(_this).closest('tr').attr('id-record');
+
+      _confirm('Are you sure to delete this record?', {}, function() {
+        _ajax_read(
+          'UI/DataTable/Delete', 
+          {
+            uid: "{{ params.datatableName }}",
+            id: idRecordToDelete,
+          }, 
+          (res) => {
+            if (isNaN(res)) {
+              alert(res);
+            } else {
+              {{ params.datatableName }}_refresh();
+            };
+          }
+        );
+      });
+    }
+
+    let columns = {{ params.columns|json_encode|raw }};
+    
+    {% set tableColumnsEnumsInitEditorFunctions = "" %}
+    let colDefinition = {};
+    let colName = "";
+
+    {% for colDefinition in params.columns %}
+      colDefinition = {{ colDefinition|json_encode|raw }};
+
+      {%set colName = colDefinition.data %}; 
+      colName = colDefinition.data;
+
+      if (typeof colName == "string") {
+        let tmpEditableEnumData = colDefinition.adios_column_definition.enum_values
+
+        let editorColType = 'text';
+        if (typeof tmpEditableEnumData != "undefined") editorColType = 'select';
+
+        function {{ params.datatableName }}_init_editor_{{ colName }}() {
+          let {{ params.datatableName }}_editorSettings_{{ colName }} = {
+            type: editorColType,
+            placeholder: "{{ params.tooltip }}",
+            tooltip: "{{ params.tooltip }}"
+          };
+
+          if (editorColType== 'select') {
+            {{ params.datatableName }}_editorSettings_{{ colName }}.data = tmpEditableEnumData;
+          }
+
+          {{ params.datatableName }}.$('td[col-name={{ colName }}]').editable(function(value, settings) {
+            let data = {};
+            data.uid = "{{ params.datatableName }}";
+            data.id = $(this).closest('tr').attr('id-record');
+            data.colName = $(this).closest('td').attr('col-name');
+            data.newValue = value;
+
+            _ajax_read(
+              "{{ params.updateAction }}",
+              data,
+              (res) => {
+                if (isNaN(res)) {
+                  alert(res);
+                  $(this).closest('tr').addClass('updated-error');
+                } else {
+                  {{ params.datatableName }}_refresh();
+                }
+              }
+            );
+
+            return(value);
+          }, {{ params.datatableName }}_editorSettings_{{ colName }});
+        };
+
+        {% set tableColumnsEnumsInitEditorFunctions = tableColumnsEnumsInitEditorFunctions ~ "#{ params.datatableName }_init_editor_#{ colName }();" %};
+      }
+    {% endfor %}
+  {% endif %}
+
+  var {{ params.datatableName }} = $("#{{ params.datatableName }}").DataTable({
+    columns: columns,
+    ajax: "{{ params.loadDataActionFullUrl }}",
+    proccessing: true,
+    serverSide: true,
+    pageLength: {{ params.itemsPerPage }},
+    displayStart: {{ params.displayStart }},
+    fnDrawCallback: () => {
+      {{ tableColumnsEnumsInitEditorFunctions }}
+    },
+    createdRow: function(row, data, dataIndex) {
+      $(row).attr('id', {{ params.datatableName }} + data.id);
+      $(row).attr('id-record', data.id);
+
+      $.each($('td', row), function (colIndex) {
+        if (data[columns[colIndex]['data']] == '') {
+          $(this).addClass('dt-empty-td');
+        }
+
+        $(this).attr('col-name', columns[colIndex]['data']);
+      });
+    }
+  });
+</script>

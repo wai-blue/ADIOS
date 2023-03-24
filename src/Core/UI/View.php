@@ -314,12 +314,12 @@ class View {
 
     if (!empty($this->twigTemplate)) {
       $twigParams = [
-        "view" => $this->params, // vid '{{ dump(view) }}' v DataTable.twig - po pochopeni komentar zmaz
-        "params" => $this->getTwigParams(), // vid '{{ dump(params) }}' v DataTable.twig - po pochopeni komentar zmaz
+        "view" => $this->params,
+        "params" => $this->getTwigParams(),
       ];
 
       $html = $this->adios->twig->render(
-        $this->twigTemplate,
+        'ADIOS\\Templates\\' . $this->twigTemplate,
         $twigParams
       );
 
