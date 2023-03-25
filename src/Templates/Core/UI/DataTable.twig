@@ -69,17 +69,16 @@
 
     let columns = {{ params.columns|json_encode|raw }};
     
-    {% set tableColumnsEnumsInitEditorFunctions = "" %}
+    let editorFunctions = [];
     let colDefinition = {};
     let colName = "";
-
     {% for colDefinition in params.columns %}
       colDefinition = {{ colDefinition|json_encode|raw }};
 
       {%set colName = colDefinition.data %}; 
       colName = colDefinition.data;
 
-      if (typeof colName == "string") {
+      if (typeof colName != "undefined") {
         let tmpEditableEnumData = colDefinition.adios_column_definition.enum_values
 
         let editorColType = 'text';
@@ -120,7 +119,7 @@
           }, {{ params.datatableName }}_editorSettings_{{ colName }});
         };
 
-        {% set tableColumnsEnumsInitEditorFunctions = tableColumnsEnumsInitEditorFunctions ~ "#{ params.datatableName }_init_editor_#{ colName }();" %};
+        editorFunctions.push("{{ params.datatableName }}_init_editor_{{ colName }}");
       }
     {% endfor %}
   {% endif %}
@@ -133,7 +132,10 @@
     pageLength: {{ params.itemsPerPage }},
     displayStart: {{ params.displayStart }},
     fnDrawCallback: () => {
-      {{ tableColumnsEnumsInitEditorFunctions }}
+      editorFunctions.forEach((fnName) => {
+        let fn = window[fnName];
+        fn();
+      })
     },
     createdRow: function(row, data, dataIndex) {
       $(row).attr('id', {{ params.datatableName }} + data.id);
