@@ -61,6 +61,18 @@ class LoadData extends \ADIOS\Core\Action {
     return substr($where, 0, -3) . ')';
   }
 
+  private function addEnums(): void {
+    foreach ($this->data as $rowKey => $rowData) {
+      foreach ($rowData as $colName => $colVal) {
+        if (!empty($this->sessionParams['columnSettings'][$colName]['enum_values'])) {
+          $this->data[$rowKey][$colName] = 
+            $this->sessionParams['columnSettings'][$colName]['enum_values'][$colVal]
+          ;
+        }
+      }
+    }
+  }
+
   private function loadData(): void {
     $this->model = $this->adios->getModel($this->sessionParams['model']);
     $this->table = $this->adios->gtp . '_' . $this->model->sqlName;
@@ -103,17 +115,7 @@ class LoadData extends \ADIOS\Core\Action {
     $this->setSessionParams();
 
     $this->loadData();
-
-    /** Enums */
-    foreach ($this->data as $rowKey => $rowData) {
-      foreach ($rowData as $colName => $colVal) {
-        if (!empty($params['columnSettings'][$colName]['enum_values'])) {
-          $data[$rowKey][$colName] = 
-            $params['columnSettings'][$colName]['enum_values'][$colVal]
-          ;
-        }
-      }
-    }
+    $this->addEnums();
 
     return  [
       'start'           => $this->params['start'],

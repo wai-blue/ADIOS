@@ -79,36 +79,31 @@
       colName = colDefinition.data;
 
       if (typeof colName != "undefined") {
-        let tmpEditableEnumData = colDefinition.adios_column_definition.enum_values
-
-        let editorColType = 'text';
-        if (typeof tmpEditableEnumData != "undefined") editorColType = 'select';
+        let tmpEditableEnumData = colDefinition.adiosColumn.enum_values;
 
         function {{ params.datatableName }}_init_editor_{{ colName }}() {
           let {{ params.datatableName }}_editorSettings_{{ colName }} = {
-            type: editorColType,
-            placeholder: "{{ params.tooltip }}",
+            type: "{{ colDefinition.editorType }}",
+            placeholder: "{{ params.placeholder }}",
             tooltip: "{{ params.tooltip }}"
           };
 
-          if (editorColType== 'select') {
+          if ("{{ colDefinition.editorType }}" == "select") {
             {{ params.datatableName }}_editorSettings_{{ colName }}.data = tmpEditableEnumData;
           }
 
           {{ params.datatableName }}.$('td[col-name={{ colName }}]').editable(function(value, settings) {
-            let data = {};
-            data.uid = "{{ params.datatableName }}";
-            data.id = $(this).closest('tr').attr('id-record');
-            data.colName = $(this).closest('td').attr('col-name');
-            data.newValue = value;
-
             _ajax_read(
               "{{ params.updateAction }}",
-              data,
+              {
+                uid: "{{ params.datatableName }}",
+                id: $(this).closest('tr').attr('id-record'),
+                colName: $(this).closest('td').attr('col-name'),
+                newValue: value
+              },
               (res) => {
                 if (isNaN(res)) {
                   alert(res);
-                  $(this).closest('tr').addClass('updated-error');
                 } else {
                   {{ params.datatableName }}_refresh();
                 }
@@ -142,7 +137,10 @@
       $(row).attr('id-record', data.id);
 
       $.each($('td', row), function (colIndex) {
-        if (data[columns[colIndex]['data']] == '') {
+        if (
+          data[columns[colIndex]['data']] == null
+          || data[columns[colIndex]['data']] == ""
+        ) {
           $(this).addClass('dt-empty-td');
         }
 

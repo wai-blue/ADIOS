@@ -17,7 +17,7 @@
   color: grey;
 }
 .dataTables_wrapper .dt-empty-td {
-  color: #d4d4d4;
+  color: rgba(166, 166, 166, 0.30);
   text-align: center;
 }
 .dataTables_wrapper table {          
