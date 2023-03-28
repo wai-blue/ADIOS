@@ -85,7 +85,9 @@
           let {{ params.datatableName }}_editorSettings_{{ colName }} = {
             type: "{{ colDefinition.editorType }}",
             placeholder: "{{ params.placeholder }}",
-            tooltip: "{{ params.tooltip }}"
+            tooltip: "{{ params.tooltip }}",
+            cssclass: "datatable-form-control",
+            //style: "background:red"
           };
 
           if ("{{ colDefinition.editorType }}" == "select") {
@@ -133,7 +135,7 @@
       })
     },
     createdRow: function(row, data, dataIndex) {
-      $(row).attr('id', {{ params.datatableName }} + data.id);
+      $(row).attr('id', "{{ params.datatableName }}_" + data.id);
       $(row).attr('id-record', data.id);
 
       $.each($('td', row), function (colIndex) {

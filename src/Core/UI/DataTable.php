@@ -66,17 +66,21 @@ class DataTable extends \ADIOS\Core\UI\View {
   
           if ($columnName == 'id') continue;
 
-          $editorType = 'text';
           if (isset($column['enum_values'])) {
-            $this->tableColumnsEnums[$columnName] = $column['enum_values'];
-            $editorType = 'select';
+            $tmpEnums = [];
+            
+            foreach ($column['enum_values'] as $enumVal) {
+              $tmpEnums[$enumVal] = $enumVal;
+            }
+
+            $column['enum_values'] = $tmpEnums;
           }
 
           $this->params['columns'][] = [
             'adiosColumn' => $column,
             'title' => $column['title'],
             'data' => $columnName,
-            'editorType' => $editorType
+            'editorType' => isset($column['enum_values']) ? 'select' : 'text'
           ];
         }
       }
