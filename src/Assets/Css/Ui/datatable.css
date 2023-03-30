@@ -25,7 +25,8 @@
   word-wrap: break-word;
   color: #212121;
 }
-.datatable-form-control input, select {
+.datatable-form-control input, 
+.datatable-form-control select {
   display:block; 
   width:100% !important; 
   height:calc(1.5em + .75rem + 2px);

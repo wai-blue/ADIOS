@@ -67,11 +67,11 @@
       });
     }
 
-    let columns = {{ params.columns|json_encode|raw }};
+    var columns = {{ params.columns|json_encode|raw }};
     
-    let editorFunctions = [];
-    let colDefinition = {};
-    let colName = "";
+    var editorFunctions = [];
+    var colDefinition = {};
+    var colName = "";
     {% for colDefinition in params.columns %}
       colDefinition = {{ colDefinition|json_encode|raw }};
 
