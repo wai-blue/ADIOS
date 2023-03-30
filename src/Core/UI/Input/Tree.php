@@ -10,10 +10,12 @@
 
 namespace ADIOS\Core\UI\Input;
 
-class Tree extends \ADIOS\Core\Input {
-  public function itemDropdownButton($text, $hasSubItems) {
+class Tree extends \ADIOS\Core\Input
+{
+  public function itemDropdownButton($text, $hasSubItems)
+  {
     return $this->adios->ui->Button([
-      "fa_icon" => "fas fa-angle-".($hasSubItems ? "down" : "right"),
+      "fa_icon" => "fas fa-angle-" . ($hasSubItems ? "down" : "right"),
       "text" => $text,
       "class" => "item btn btn-sm btn-secondary btn-icon-split my-1",
       "dropdown" => [
@@ -25,10 +27,10 @@ class Tree extends \ADIOS\Core\Input {
             let btn = $(this).closest('.dropdown').find(' > .btn');
 
             window_render(
-              '".$this->model->getFullUrlBase($this->params)."/' + li.data('id') + '/Edit',
+              '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/Edit',
               '',
               function(res) {
-                _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->name}', id: res.data.id }, function(res2) {
+                _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
                   btn.find('.text').text(res2);
                 });
               }
@@ -93,7 +95,8 @@ class Tree extends \ADIOS\Core\Input {
     ]);
   }
 
-  public function renderTree(&$items, $parentColumn, $parent = 0) {
+  public function renderTree(&$items, $parentColumn, $parent = 0)
+  {
     $itemsHtml = "";
 
     foreach ($items as $item) {
@@ -107,8 +110,8 @@ class Tree extends \ADIOS\Core\Input {
 
         $itemsHtml .= "
           <li class='sortable node' data-id='{$item['id']}'>
-            ".$this->itemDropdownButton($this->enumValues[$item['id']], $subItemsCnt > 0)->render()."
-            ".$this->renderTree($items, $parentColumn, $item['id'])."
+            " . $this->itemDropdownButton($this->enumValues[$item['id']], $subItemsCnt > 0)->render() . "
+            " . $this->renderTree($items, $parentColumn, $item['id']) . "
           </li>
         ";
       }
@@ -118,23 +121,23 @@ class Tree extends \ADIOS\Core\Input {
       <ul class='adios ui Tree'>
         {$itemsHtml}
         <li class='node' data-id='-1' style='display:none'>
-          ".$this->itemDropdownButton("Pridať", FALSE)->render()."
+          " . $this->itemDropdownButton("Pridať", FALSE)->render() . "
         </li>
         <li>
-          ".$this->adios->ui->button([
-            "fa_icon" => "fas fa-plus",
-            "text" => $this->translate("Add"),
-            "class" => "item btn btn-sm btn-light btn-icon-split my-1",
-            "onclick" => "
+          " . $this->adios->ui->button([
+      "fa_icon" => "fas fa-plus",
+      "text" => $this->translate("Add"),
+      "class" => "item btn btn-sm btn-light btn-icon-split my-1",
+      "onclick" => "
               let ul = $(this).closest('ul');
               let li = ul.find(' > li[data-id=-1]');
 
               window_render(
-                '".$this->model->getFullUrlBase($this->params)."/{$parent}/Add',
+                '" . $this->model->getFullUrlBase($this->params) . "/{$parent}/Add',
                 {},
                 function(res) {
                   if (res.data.id > 0) {
-                    _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->name}', id: res.data.id }, function(res2) {
+                    _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
                       let clone = li.clone(true);
                       clone
                         .data('id', res.data.id)
@@ -152,7 +155,7 @@ class Tree extends \ADIOS\Core\Input {
                 }
               );
             ",
-          ])->render()."
+    ])->render() . "
         </li>
       </ul>
     ";
@@ -160,7 +163,8 @@ class Tree extends \ADIOS\Core\Input {
     return $treeHtml;
   }
 
-  public function render() {
+  public function render()
+  {
     $params = $this->params;
     $this->model = $this->adios->getModel($params['model']);
 
@@ -171,7 +175,7 @@ class Tree extends \ADIOS\Core\Input {
     $orderColumn = "";
 
     foreach ($this->model->columns() as $colName => $colDef) {
-      if ($colDef["type"] == "lookup" && $colDef["model"] == $this->model->name) {
+      if ($colDef["type"] == "lookup" && $colDef["model"] == $this->model->fullName) {
         $parentColumn = $colName;
         $orderColumn = $colDef["order_column"];
       }
@@ -241,7 +245,7 @@ class Tree extends \ADIOS\Core\Input {
 
         $('.adios.ui.Tree li .btn-secondary .icon').click(function() {
           $(this).closest('li.node').find(' > ul').toggle();
-          
+
           let i = $(this).find('i');
           if (i.hasClass('fa-angle-down')) {
             i.removeClass('fa-angle-down');

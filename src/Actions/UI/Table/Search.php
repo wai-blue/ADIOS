@@ -26,9 +26,9 @@ class Search extends \ADIOS\Core\Action
     ];
 
     $tabs = [];
-    $tabs[$model->name] = [];
-    $tabs[$model->name]["title"] = $model->tableTitle;
-    $tabs[$model->name]["items"] = [];
+    $tabs[$model->fullName] = [];
+    $tabs[$model->fullName]["title"] = $model->tableTitle;
+    $tabs[$model->fullName]["items"] = [];
 
     foreach ($model->columns() as $colName => $colDef) {
       if (!($colDef["is_searchable"] ?? TRUE)) continue;
@@ -36,14 +36,14 @@ class Search extends \ADIOS\Core\Action
       if ($colDef['type'] == "lookup") {
         $lookupModelName = $colDef['model'];
         $lookupModel = $this->adios->getModel($lookupModelName);
-        $tabs[$lookupModel->name] = [];
-        $tabs[$lookupModel->name]["title"] = $lookupModel->tableTitle;
+        $tabs[$lookupmodel->fullName] = [];
+        $tabs[$lookupmodel->fullName]["title"] = $lookupModel->tableTitle;
 
         foreach ($lookupModel->columns() as $lookupColName => $lookupColDef) {
           if (!($colDef["is_searchable"] ?? TRUE)) continue;
 
           if (!in_array($lookupColDef["type"], $unsearchableColumnTypes)) {
-            $tabs[$lookupModel->name]["items"][] = [
+            $tabs[$lookupmodel->fullName]["items"][] = [
               "title" => $lookupColDef['title'],
               "input" => $this->adios->ui->Input([
                 "model" => $this->params['model'],
@@ -57,7 +57,7 @@ class Search extends \ADIOS\Core\Action
       }
 
       if (!in_array($colDef["type"], $unsearchableColumnTypes)) {
-        $tabs[$model->name]["items"][] = [
+        $tabs[$model->fullName]["items"][] = [
           "title" => $colDef['title'],
           "input" => $this->adios->ui->Input([
             "model" => $colDef['model'] ?? $this->params['model'],

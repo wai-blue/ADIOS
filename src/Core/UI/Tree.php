@@ -12,11 +12,14 @@ namespace ADIOS\Core\UI;
 
 /* UI komponenta, ktora okrem Input Tree generuje aj nejake buttony/titles a save funkcionalitu okolo */
 /* pouziva \ADIOS\Core\UI\Input\Tree */
-class Tree extends \ADIOS\Core\UI\View {
-  public function render(string $panel = "") {
+
+class Tree extends \ADIOS\Core\UI\View
+{
+  public function render(string $panel = "")
+  {
     $this->model = $this->adios->getModel($this->params['model']);
 
-    $inputUid = $this->adios->getUid($this->model->name);
+    $inputUid = $this->adios->getUid($this->model->fullName);
 
     $contentHtml = (new \ADIOS\Core\UI\Input\Tree($this->adios, $inputUid, $this->params))->render();
 
@@ -31,7 +34,7 @@ class Tree extends \ADIOS\Core\UI\View {
         function {$this->uid}_save() {
           let serialized = {$inputUid}_serialize();
           let data = {
-            'model': '{$this->model->name}',
+            'model': '{$this->model->fullName}',
             'values': serialized,
           };
 
@@ -49,7 +52,7 @@ class Tree extends \ADIOS\Core\UI\View {
 
       </script>
     ";
-    
+
     if ($this->params['__IS_WINDOW__']) {
       $html = $this->adios->ui->Window(
         [
@@ -61,7 +64,7 @@ class Tree extends \ADIOS\Core\UI\View {
             "
               <span id='{$this->uid}_save_info_span' class='pl-4' style='color:green;display:none'>
                 <i class='fas fa-check'></i>
-                  ".$this->translate("Saved")."
+                  " . $this->translate("Saved") . "
               </span>
             ",
           ],
@@ -75,7 +78,7 @@ class Tree extends \ADIOS\Core\UI\View {
           "
             <span id='{$this->uid}_save_info_span' class='pr-4' style='color:green;display:none'>
               <i class='fas fa-check'></i>
-                ".$this->translate("Saved")."
+                " . $this->translate("Saved") . "
             </span>
           ",
           $this->adios->ui->Button(["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),

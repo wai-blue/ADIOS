@@ -44,7 +44,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @var mixed
    */
-  var $name = "";
+  var $fullName = "";
 
   /**
    * Short name of the model. Useful for debugging purposes
@@ -150,8 +150,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // v tomto pripade ide o volanie construktora z Eloquentu
       return parent::__construct($adiosOrAttributes ?? []);
     } else {
-      $this->name = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
-      $this->shortName = end(explode("/", $this->name));
+      $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
+      $this->shortName = end(explode("/", $this->fullName));
       $this->adios = &$adiosOrAttributes;
 
       $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
@@ -180,7 +180,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     if ($this->hasAvailableUpgrades()) {
       $this->adios->userNotifications->addHtml("
-        Model <b>{$this->name}</b> has new upgrades available.
+        Model <b>{$this->fullName}</b> has new upgrades available.
         <a
           href='javascript:void(0)'
           onclick='desktop_update(\"Desktop/InstallUpgrades\");'
@@ -188,7 +188,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ");
     } else if (!$this->hasSqlTable()) {
       $this->adios->userNotifications->addHtml("
-        Model <b>{$this->name}</b> has no SQL table.
+        Model <b>{$this->fullName}</b> has no SQL table.
         <a
           href='javascript:void(0)'
           onclick='desktop_update(\"Desktop/InstallUpgrades\");'
@@ -196,7 +196,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ");
     } else if (!$this->isInstalled()) {
       $this->adios->userNotifications->addHtml("
-        Model <b>{$this->name}</b> is not installed.
+        Model <b>{$this->fullName}</b> is not installed.
         <a
           href='javascript:void(0)'
           onclick='desktop_update(\"Desktop/InstallUpgrades\");'
@@ -221,7 +221,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function getConfig(string $configName): string
   {
-    return $this->adios->config['models'][str_replace("/", "-", $this->name)][$configName] ?? "";
+    return $this->adios->config['models'][str_replace("/", "-", $this->fullName)][$configName] ?? "";
   }
 
   /**
@@ -231,7 +231,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function setConfig(string $configName, $value): void
   {
-    $this->adios->config['models'][str_replace("/", "-", $this->name)][$configName] = $value;
+    $this->adios->config['models'][str_replace("/", "-", $this->fullName)][$configName] = $value;
   }
 
   /**
@@ -243,7 +243,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     $this->adios->saveConfig([
       "models" => [
-        str_replace("/", "-", $this->name) => [
+        str_replace("/", "-", $this->fullName) => [
           $configName => $value,
         ],
       ],
@@ -452,8 +452,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     foreach ($this->adios->models as $model) {
       foreach ($model->columns() as $colName => $colDef) {
-        if (!empty($colDef["model"]) && $colDef["model"] == $this->name) {
-          $foreignKeyModels[$model->name] = $colName;
+        if (!empty($colDef["model"]) && $colDef["model"] == $this->fullName) {
+          $foreignKeyModels[$model->fullName] = $colName;
         }
       }
     }
@@ -551,25 +551,26 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $routing;
   }
 
-  public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl) {
+  public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
+  {
     $routing = [
       '/^' . $urlBase . '$/' => [
         "action" => "UI/Table",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
         ])
       ],
       '/^' . $urlBase . '\/(\d+)\/Edit$/' => [
         "action" => "UI/Form",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
         ])
       ],
       '/^' . $urlBase . '\/Add$/' => [
         "action" => "UI/Form",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
           "id" => -1,
           "defaultValues" => $urlParams,
         ])
@@ -577,38 +578,38 @@ class Model extends \Illuminate\Database\Eloquent\Model
       '/^' . $urlBase . '\/Search$/' => [
         "action" => "UI/Table/Search",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
         ])
       ],
       '/^' . $urlBase . '\/Export\/CSV$/' => [
         "action" => "UI/Table/Export/CSV",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
         ])
       ],
       '/^' . $urlBase . '\/Import\/CSV$/' => [
         "action" => "UI/Table/Import/CSV",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
         ])
       ],
       '/^' . $urlBase . '\/Import\/CSV\/Import$/' => [
         "action" => "UI/Table/Import/CSV/Import",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
         ])
       ],
       '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/' => [
         "action" => "UI/Table/Import/CSV/DownloadTemplate",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
         ])
       ],
       '/^' . $urlBase . '\/Import\/CSV\/Preview$/' => [
         "action" => "UI/Table/Import/CSV/Preview",
         "params" => array_merge($urlParams, [
-          "model" => $this->name,
+          "model" => $this->fullName,
         ])
       ],
     ];
@@ -624,7 +625,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     // default column settings
     foreach ($columns as $colName => $colDefinition) {
       if ($colDefinition["type"] == "char") {
-        $this->adios->console->info("{$this->name}, {$colName}: char type is deprecated");
+        $this->adios->console->info("{$this->fullName}, {$colName}: char type is deprecated");
       }
 
       switch ($colDefinition["type"]) {
@@ -845,7 +846,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function lookupSqlValue($tableAlias = NULL)
   {
-    $value = $this->lookupSqlValue ?? "concat('{$this->name}, id = ', {%TABLE%}.id)";
+    $value = $this->lookupSqlValue ?? "concat('{$this->fullName}, id = ', {%TABLE%}.id)";
 
     return ($tableAlias !== NULL
       ? str_replace('{%TABLE%}', "`{$tableAlias}`", $value)
@@ -1319,7 +1320,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
                 `{$ctaParams['optionKeyColumn']}`
               ) values (
                 {$id},
-                '".$this->adios->db->escape($assignment)."'
+                '" . $this->adios->db->escape($assignment) . "'
               )
               on duplicate key update `{$ctaParams['masterKeyColumn']}` = {$id}
             ");
@@ -1328,8 +1329,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
           $assignmentModel
             ->where($ctaParams['masterKeyColumn'], $id)
             ->whereNotIn($ctaParams['optionKeyColumn'], $assignments)
-            ->delete()
-          ;
+            ->delete();
         }
       }
 
@@ -1514,7 +1514,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     $foreignKey = "";
     foreach ($crossTableModel->columns() as $crossTableColName => $crossTableColDef) {
-      if ($crossTableColDef['model'] == $this->name) {
+      if ($crossTableColDef['model'] == $this->fullName) {
         $foreignKey = $crossTableColName;
       }
     }
