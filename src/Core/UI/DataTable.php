@@ -5,8 +5,6 @@ namespace ADIOS\Core\UI;
 
 class DataTable extends \ADIOS\Core\UI\View {
 
-  private array $tableColumnsEnums = [];
-
   public string $twigTemplate = "Core/UI/DataTable";
   private ?\ADIOS\Core\Model $model = null;
 
@@ -33,6 +31,7 @@ class DataTable extends \ADIOS\Core\UI\View {
       'showDeleteButton' => true,
       'itemsPerPage' => 10,
       'displayStart' => 0,
+      'search' => '',
       'style' => 'padding:10px',
       'tooltip' => 'Editovať kliknutím',
       'placeholder' => 'Editovať kliknutím'

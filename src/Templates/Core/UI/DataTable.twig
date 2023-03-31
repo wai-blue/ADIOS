@@ -86,8 +86,7 @@
             type: "{{ colDefinition.editorType }}",
             placeholder: "{{ params.placeholder }}",
             tooltip: "{{ params.tooltip }}",
-            cssclass: "datatable-form-control",
-            //style: "background:red"
+            cssclass: "datatable-form-control"
           };
 
           if ("{{ colDefinition.editorType }}" == "select") {
@@ -128,6 +127,7 @@
     serverSide: true,
     pageLength: {{ params.itemsPerPage }},
     displayStart: {{ params.displayStart }},
+    oSearch: {"sSearch": "{{ params.search }}"},
     fnDrawCallback: () => {
       editorFunctions.forEach((fnName) => {
         let fn = window[fnName];
