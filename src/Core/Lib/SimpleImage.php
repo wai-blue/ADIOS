@@ -20,6 +20,8 @@ class SimpleImage {
       $this->image = imagecreatefromgif($filename);
     } elseif (IMAGETYPE_PNG == $this->image_type) {
       $this->image = imagecreatefrompng($filename);
+    } elseif (IMAGETYPE_WEBP == $this->image_type) {
+      $this->image = imagecreatefromwebp($filename);
     }
   }
 
@@ -30,6 +32,8 @@ class SimpleImage {
       imagegif($this->image, $filename);
     } elseif (IMAGETYPE_PNG == $image_type) {
       imagepng($this->image, $filename, (100 - $compression) * 0.1);
+    } elseif (IMAGETYPE_WEBP == $image_type) {
+      imagewebp($this->image, $filename, $compression);
     }
 
     if (null != $permissions) {
@@ -50,6 +54,11 @@ class SimpleImage {
       imagealphablending($this->image, false);
       imagesavealpha($this->image, true);
       imagepng($this->image);
+    } elseif (IMAGETYPE_WEBP == $image_type) {
+      imagecolortransparent($this->image, imagecolorallocatealpha($this->image, 0, 0, 0, 127));
+      imagealphablending($this->image, false);
+      imagesavealpha($this->image, true);
+      imagewebp($this->image);
     }
   }
 
