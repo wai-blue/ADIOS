@@ -65,7 +65,10 @@ class DataTable extends \ADIOS\Core\UI\View {
   
           if ($columnName == 'id') continue;
 
+          $edtitorType = 'text';
+
           if (isset($column['enum_values'])) {
+            $edtitorType = 'select';
             $tmpEnums = [];
             
             foreach ($column['enum_values'] as $enumVal) {
@@ -73,13 +76,25 @@ class DataTable extends \ADIOS\Core\UI\View {
             }
 
             $column['enum_values'] = $tmpEnums;
+          } elseif ($column['type'] == 'lookup') {
+            $edtitorType = 'select';
+
+            $model = $this->adios->getModel($column['model']);
+
+            if ($model == NULL) exit('Model not found');
+
+            foreach ($model->getAll() as $record) {
+              $column['enum_values'][$record['id']] = $record['name'];
+            };
+
+            $column['enum_values']['selected'] = ' Vyberte zo zoznamu';
           }
 
           $this->params['columns'][] = [
             'adiosColumn' => $column,
             'title' => $column['title'],
             'data' => $columnName,
-            'editorType' => isset($column['enum_values']) ? 'select' : 'text'
+            'editorType' => $edtitorType
           ];
         }
       }

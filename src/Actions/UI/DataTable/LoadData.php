@@ -10,6 +10,8 @@
 
 namespace ADIOS\Actions\UI\DataTable;
 
+use \Illuminate\Database\Eloquent\Builder;
+
 /**
  * @package UI\Actions\DataTable
  */
@@ -75,6 +77,18 @@ class LoadData extends \ADIOS\Core\Action {
         return $this->data;
     }
 
+    private function getRelationshipsWhere(Builder $builder): Builder {
+        if ($this->getSearchValue() != '') {
+            foreach ($this->relationships as $relationship) {
+                $builder = $builder->orWhereHas($relationship, function ($query) {
+                    return $query->where('name', 'LIKE', '%' . $this->getSearchValue() . '%');
+                });
+            }
+        }
+
+        return $builder;
+    }
+
     private function getSearchInWhere(string $where): string {
         if ($this->getSearchValue() == '') return $where;
 
@@ -116,13 +130,20 @@ class LoadData extends \ADIOS\Core\Action {
 
         $this->setRelationships();
 
-        $this->recordsCount = $this->model->whereRaw($where)
-            ->get()
+        $builderAllRecords = $this->model->with(array_values($this->relationships))
+            ->whereRaw($where);
+        
+        $builderAllRecords = $this->getRelationshipsWhere($builderAllRecords);
+
+        $this->recordsCount = $builderAllRecords->get()
             ->count();
 
-        $this->data = $this->model->with(array_values($this->relationships))
-            ->whereRaw($where)
-            ->orderByRaw($orderBy)
+        $builder = $this->model->with(array_values($this->relationships))
+            ->whereRaw($where);
+        
+        $builder = $this->getRelationshipsWhere($builder);
+
+        $this->data = $builder->orderByRaw($orderBy)
             ->skip((int) $this->params['start'])
             ->take((int) $this->params['length'])
             ->get()
