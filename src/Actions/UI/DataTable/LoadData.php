@@ -64,19 +64,6 @@ class LoadData extends \ADIOS\Core\Action {
         return $this->columns[$orderBy['column']]['data'] . ' ' . $orderBy['dir'];
     }
 
-    private function getRelationshipsData(): array {
-        foreach ($this->relationships as $relationshipColName => $relationshipVal) {
-            $lookupColumn = $this->sessionParams['columnSettings'][$relationshipColName]['lookupColumn'];
-
-            foreach ($this->data as $recordKey => $record) {
-                $this->data[$recordKey][$relationshipColName] = $record[
-                    $this->relationships[$relationshipColName]][$lookupColumn];
-            }
-        }
-       
-        return $this->data;
-    }
-
     private function getRelationshipsWhere(Builder $builder): Builder {
         if ($this->getSearchValue() != '') {
             foreach ($this->relationships as $relationship) {
@@ -102,9 +89,37 @@ class LoadData extends \ADIOS\Core\Action {
         return substr($where, 0, -3) . ')';
     }
 
-    private function addEnums(): void {
+    private function formatInputsTypes(): void {
         foreach ($this->data as $rowKey => $rowData) {
             foreach ($rowData as $colName => $colVal) {
+                $columnType = $this->sessionParams['columnSettings'][$colName]['type'];
+
+                switch ($columnType) {
+                    case 'boolean':
+                        $this->data[$rowKey][$colName] = "
+                            <div class='text-center w-100'>
+                                <input 
+                                    class='form-check-input' 
+                                    type='checkbox'
+                                    value='{$this->data[$rowKey][$colName]}'
+                                    onclick='{$this->sessionParams['datatableName']}_update(
+                                        \"{$this->data[$rowKey]['id']}\",
+                                        \"{$colName}\",
+                                        + $(this).is(\":checked\")
+                                    )'
+                                    " . ($this->data[$rowKey][$colName] ? "checked='checked'" : "") . "
+                                />
+                            </div>";
+                    break;
+                    case 'lookup':
+                        foreach ($this->relationships as $relationshipColName => $relationshipVal) {
+                            $lookupColumn = $this->sessionParams['columnSettings'][$relationshipColName]['lookupColumn'];
+                            $this->data[$rowKey][$relationshipColName] = $rowData[
+                                $this->relationships[$relationshipColName]][$lookupColumn];
+                        }
+                    break;
+                }
+
                 if (!empty($this->sessionParams['columnSettings'][$colName]['enum_values'])) {
                     $this->data[$rowKey][$colName] = 
                         $this->sessionParams['columnSettings'][$colName]['enum_values'][$colVal];
@@ -149,8 +164,6 @@ class LoadData extends \ADIOS\Core\Action {
             ->get()
             ->toArray();
 
-        $this->data = $this->getRelationshipsData();
-
         $this->selectedRecordCount = count($this->data);
     }
 
@@ -158,7 +171,7 @@ class LoadData extends \ADIOS\Core\Action {
         $this->setSessionParams();
 
         $this->loadData();
-        $this->addEnums();
+        $this->formatInputsTypes();
 
         return    [
             'start'            => $this->params['start'],

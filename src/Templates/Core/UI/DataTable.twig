@@ -30,6 +30,25 @@
       );
     }
 
+    function {{ params.datatableName}}_update(id, colName, newValue) {
+      _ajax_read(
+        "{{ params.updateAction }}",
+        {
+          uid: "{{ params.datatableName }}",
+          id: id,
+          colName: colName,
+          newValue: newValue
+        },
+        (res) => {
+          if (isNaN(res)) {
+            alert(res);
+          } else {
+            {{ params.datatableName }}_refresh();
+          }
+        }
+      );
+    }
+
     function {{ params.datatableName }}_add_row() {
       _ajax_read(
         "UI/DataTable/AddRow", 
@@ -78,7 +97,7 @@
       {%set colName = colDefinition.data %}; 
       colName = colDefinition.data;
 
-      if (typeof colName != "undefined") {
+      if (typeof colName != "undefined" && colDefinition.adiosColumn.type != "boolean") {
         let tmpEditableEnumData = colDefinition.adiosColumn.enum_values;
 
         function {{ params.datatableName }}_init_editor_{{ colName }}() {
@@ -94,21 +113,10 @@
           }
 
           {{ params.datatableName }}.$('td[col-name={{ colName }}]').editable(function(value, settings) {
-            _ajax_read(
-              "{{ params.updateAction }}",
-              {
-                uid: "{{ params.datatableName }}",
-                id: $(this).closest('tr').attr('id-record'),
-                colName: $(this).closest('td').attr('col-name'),
-                newValue: value
-              },
-              (res) => {
-                if (isNaN(res)) {
-                  alert(res);
-                } else {
-                  {{ params.datatableName }}_refresh();
-                }
-              }
+            {{ params.datatableName}}_update(
+              $(this).closest('tr').attr('id-record'), 
+              $(this).closest('td').attr('col-name'), 
+              value
             );
 
             return(value);
