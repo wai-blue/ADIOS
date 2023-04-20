@@ -204,33 +204,6 @@
           <!-- Topbar Navbar -->
           <div class="col col-2">
             <ul class="navbar-nav flex-row-reverse">
-
-              <!-- Language selection -->
-              {% if config.available_languages|length > 1 %}
-                <li class="nav-item dropdown no-arrow">
-                  <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ config.language|upper }}</span>
-                    <i class='btn btn-light btn-sm fas fa-language'></i>
-                  </a>
-                  <div class="dropdown-menu shadow animated--grow-in" aria-labelledby="languageDropdown">
-                    {% for lang in config.available_languages %}
-                      <a
-                        href="javascript:void(0);"
-                        onclick="
-                          _ajax_read('Desktop/Ajax/SetLanguage', {'language': '{{ lang }}'}, function(res) {
-                            location.reload()
-                          });
-                        ";
-                        class="dropdown-item {% if lang == config.language %} active {% endif %}"
-                      >
-                        <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
-                        {{ lang|upper }}
-                      </a>
-                    {% endfor %}
-                  </div>
-                </li>
-              {% endif %}
-
               <!-- Nav Item - User Information -->
               {% if user.id > 0 %}
                 <li class="nav-item dropdown no-arrow">
@@ -264,6 +237,32 @@
                       <i class="{{ settingsLogoutItems.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
                       {{ settingsLogoutItems.text }}
                     </a>
+                  </div>
+                </li>
+              {% endif %}
+
+              <!-- Language selection -->
+              {% if config.available_languages|length > 1 %}
+                <li class="nav-item dropdown no-arrow">
+                  <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ config.language|upper }}</span>
+                    <i class='btn btn-light btn-sm fas fa-language'></i>
+                  </a>
+                  <div class="dropdown-menu shadow animated--grow-in" aria-labelledby="languageDropdown">
+                    {% for lang in config.available_languages %}
+                      <a
+                        href="javascript:void(0);"
+                        onclick="
+                          _ajax_read('Desktop/Ajax/SetLanguage', {'language': '{{ lang }}'}, function(res) {
+                            location.reload()
+                          });
+                        ";
+                        class="dropdown-item {% if lang == config.language %} active {% endif %}"
+                      >
+                        <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
+                        {{ lang|upper }}
+                      </a>
+                    {% endfor %}
                   </div>
                 </li>
               {% endif %}
