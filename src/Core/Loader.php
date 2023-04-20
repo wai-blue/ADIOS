@@ -685,6 +685,9 @@ class Loader
       try {
         $modelClassName = $this->getModelClassName($modelName);
         $this->modelObjects[$modelName] = new $modelClassName($this);
+
+        $this->addRouting($this->modelObjects[$modelName]->routing());
+
       } catch (\Exception $e) {
         throw new \ADIOS\Core\Exceptions\GeneralException("Can't find model '{$modelName}'. ".$e->getMessage());
       }

@@ -175,7 +175,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       }
 
       $this->adios->db->addTable($this->table, $this->columns(), $this->isCrossTable);
-      $this->adios->addRouting($this->routing());
+      // $this->adios->addRouting($this->routing());
     }
 
     if ($this->hasAvailableUpgrades()) {
