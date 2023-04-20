@@ -16,6 +16,17 @@ namespace ADIOS\Core;
  */
 class Model extends \Illuminate\Database\Eloquent\Model
 {
+
+  /**
+   * Default set of permissions for the checkPermissions() method
+   *
+   * @var int
+   */
+  const PERMISSION_SQL_SELECT = 1;
+  const PERMISSION_SQL_INSERT = 2;
+  const PERMISSION_SQL_UPDATE = 3;
+  const PERMISSION_SQL_DELETE = 4;
+
   /**
    * ADIOS model's primary key is always 'id'
    *
@@ -369,7 +380,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function installUpgrades(): void
   {
     if ($this->hasAvailableUpgrades()) {
-      $currentVersion = $this->getCurrentInstalledVersion();
+      $currentVersion = (int) $this->getCurrentInstalledVersion();
       $lastVersion = max(array_keys($this->upgrades()));
 
       try {
@@ -394,6 +405,27 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
   }
 
+  /**
+   * Checks whether there are enough permissions to perform an activity
+   * in a model. In your own model, it is strongly recommended to
+   * apply at first the functionality of this method with parent::checkPermissions().
+   *
+   * @param int $permissions Identification of permissions which is checked.
+   *                         Can be any value recognized by the application.
+   *                         See "PERMISSION" constants for default permission.
+   * @param mixed $params Additional parameters (arguments) for the activity.
+   * @return boolean
+   */
+  public function checkPermissions(int $activity, mixed $params): bool
+  {
+    return TRUE;
+  }
+
+  /**
+   * Runs SQL queries to drop the SQL tables of this model
+   *
+   * @return void
+   */
   public function dropTableIfExists()
   {
     $this->adios->db->query("set foreign_key_checks = 0");
@@ -491,6 +523,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
   }
 
+  /**
+   * Runs arbitrary SQL query
+   *
+   * @param string $query Query to run
+   * @return void
+   */
   public function sqlQuery($query)
   {
     return $this->adios->db->query($query, $this);
