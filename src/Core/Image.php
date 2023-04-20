@@ -125,6 +125,11 @@ if (!isset($configurations[$cfg_name])) { // ak nie je zadana konfiguracia, vrat
             header('Content-Type: image/png');
         }
         $img->output(IMAGETYPE_PNG);
+    } elseif (IMAGETYPE_WEBP == $img->image_type) {
+        if ($output_header) {
+            header('Content-Type: image/webp');
+        }
+        $img->output(IMAGETYPE_WEBP);
     }
 }
 
@@ -188,6 +193,11 @@ if (is_file("{$img_cache_dir}/{$new_filename}") && !$debug && !$this->config['de
             header('Content-Type: image/png');
         }
         $img->output(IMAGETYPE_PNG);
+    } elseif (IMAGETYPE_WEBP == $img->image_type) {
+        if ($output_header) {
+            header('Content-Type: image/webp');
+        }
+        $img->output(IMAGETYPE_WEBP);
     }
 } else { // ak neexistuje tak ho musim spracovat a ulozit do cache
     $result = null;
@@ -365,6 +375,11 @@ if (is_file("{$img_cache_dir}/{$new_filename}") && !$debug && !$this->config['de
                 header('Content-Type: image/png');
             }
             $img->output(IMAGETYPE_PNG);
+        } elseif (IMAGETYPE_WEBP == $img->image_type) {
+            if ($output_header) {
+                header('Content-Type: image/webp');
+            }
+            $img->output(IMAGETYPE_WEBP);
         }
     }
 }
