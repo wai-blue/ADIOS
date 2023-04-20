@@ -29,7 +29,7 @@ class DataTypeImage extends DataType
         $params = _put_default_params_values($params, [
             'null_value' => false,
             'dumping_data' => false,
-            'supported_extensions' => $this->adios->getConfig('m_datapub/columns/image/supported_extensions', ['jpg', 'gif', 'png', 'jpeg']),
+            'supported_extensions' => $this->adios->getConfig('m_datapub/columns/image/supported_extensions', ['jpg', 'gif', 'png', 'jpeg', 'webp']),
             'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
         ]);
 
