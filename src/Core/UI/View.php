@@ -16,10 +16,13 @@ class View {
   var bool $useSession = FALSE;
   var array $params = [];
   var $adios = NULL;
+  var string $fullName = "";
+  var string $shortName = "";
   var array $views = [];
   var array $classes = [];
   var array $html = [];
   var array $attrs = [];
+  var string $twigTemplate;
   
   /**
    * languageDictionary
@@ -49,6 +52,9 @@ class View {
       $params = $this->loadParamsFromSession($params['uid']);
     }
 
+    $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\Core\\UI\\", "", static::class));
+    $this->shortName = end(explode("/", $this->fullName));
+
     if (empty($params['uid'])) {
       $params['uid'] =
         $this->adios->uid."_"
@@ -69,6 +75,7 @@ class View {
     $this->uid = $params['uid'];
     $this->views = [];
     $this->classes = ['adios', 'ui', $params['component_class']];
+    $this->twigTemplate = "UI/{$this->fullName}";
 
     $this->add_class($params['class']);
   }
@@ -291,6 +298,15 @@ class View {
   }
   
   /**
+   * Used to return values for TWIG renderer. Applies only in TWIG template of the action.
+   *
+   * @return array Values for action's TWIG template
+   */
+  public function preRender() {
+    return [];
+  }
+
+  /**
    * render
    *
    * @internal
@@ -298,22 +314,41 @@ class View {
    * @return void
    */
   public function render(string $panel = '') {
-    $html = '';
 
-    if ('' != $this->html[$panel]) {
-      $html = $this->html[$panel];
-      if (_count($this->views[$panel])) {
-        foreach ($this->views[$panel] as $view) {
-          $html = str_replace("{%UI:{$view->uid}%}", $view->render(), $html);
-        }
-      }
+    if (
+      !empty($this->twigTemplate)
+      && is_file(__DIR__."/../../Templates/{$this->twigTemplate}.twig")
+    ) {
+      $twigParams = array_merge($this->params, $this->preRender());
+      $twigParams["uid"] = $this->adios->uid;
+      $twigParams["gtp"] = $this->adios->gtp;
+      $twigParams["config"] = $this->adios->config;
+      $twigParams["user"] = $this->adios->userProfile;
+      $twigParams["locale"] = $this->adios->locale->getAll();
+      $twigParams["dictionary"] = $this->adios->dictionary;
+
+      $html = $this->adios->twig->render(
+        "ADIOS/Templates/{$this->twigTemplate}",
+        $twigParams
+      );
     } else {
-      if (_count($this->views[$panel])) {
-        foreach ($this->views[$panel] as $view) {
-          if (is_string($view) || '' == $view) {
-            $html .= $view;
-          } else {
-            $html .= $view->render();
+      $html = '';
+
+      if ('' != $this->html[$panel]) {
+        $html = $this->html[$panel];
+        if (_count($this->views[$panel])) {
+          foreach ($this->views[$panel] as $view) {
+            $html = str_replace("{%UI:{$view->uid}%}", $view->render(), $html);
+          }
+        }
+      } else {
+        if (_count($this->views[$panel])) {
+          foreach ($this->views[$panel] as $view) {
+            if (is_string($view) || '' == $view) {
+              $html .= $view;
+            } else {
+              $html .= $view->render();
+            }
           }
         }
       }
