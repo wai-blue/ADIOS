@@ -67,8 +67,7 @@
   #{{ uid }}_div > div {
     background-color: rgba(255, 255, 255, 0.8);
     text-align: center;
-    padding: 20px 0;
-    font-size: 30px;
+    padding: 0.63em;
     border: 1px solid var(--cl-main);
   }
 
@@ -79,8 +78,11 @@
 
 <div id='{{ uid }}_div'>
   {% for areaName, areaParams in areas %}
-    <div class='{{ uid }}-area-{{ areaName }}'>
-      {{ areaName }}
+    <div
+      class='{{ uid }}-area-{{ areaName }} {{ areaParams.cssClass }}'
+    >
+      {% if areaParams.html %}{{ areaParams.html }}{% endif %}
+      {% if areaParams.action %}{{ adiosAction(areaParams.action, areaParams.params)|raw }}{% endif %}
     </div>
   {% endfor %}
 </div>
