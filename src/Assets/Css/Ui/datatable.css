@@ -1,0 +1,48 @@
+.dataTables_wrapper .updated-success {
+  background: #f1ffed !important;
+}
+.dataTables_wrapper  .updated-error {
+  background: #ffeded !important;
+}
+.dataTables_wrapper .dt-delete-button button {
+  background: none;
+  box-shadow: 0 0 3px grey;
+  border-radius: 5px;
+}
+.dataTables_wrapper .dt-delete-button button:hover {
+  color: grey;
+  box-shadow: 0 0 3px #ad241f;
+}
+.dataTables_wrapper .dt-delete-button i {
+  color: grey;
+}
+.dataTables_wrapper .dt-empty-td {
+  color: rgba(166, 166, 166, 0.30);
+  text-align: center;
+}
+.dataTables_wrapper table {          
+  table-layout: fixed;
+  word-wrap: break-word;
+  color: #212121;
+}
+.datatable-form-control input, 
+.datatable-form-control select {
+  display:block; 
+  width:100% !important; 
+  height:calc(1.5em + .75rem + 2px);
+  padding:.375rem .75rem;
+  font-size:0.9rem;
+  font-weight:400;
+  line-height:1.5;
+  color:#495057;
+  background-color:#fff;
+  background-clip:
+  padding-box;
+  border:1px solid #ced4da;
+  border-radius:.25rem;
+  transition:border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+}
+
+.datatable-form-control select {
+  font-size:0.7rem;
+}

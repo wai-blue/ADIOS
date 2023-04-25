@@ -22,7 +22,8 @@ class View {
   var array $classes = [];
   var array $html = [];
   var array $attrs = [];
-  var string $twigTemplate;
+
+  var string $twigTemplate = "";
   
   /**
    * languageDictionary
@@ -296,16 +297,17 @@ class View {
 
     return $this;
   }
-  
+
   /**
    * Used to return values for TWIG renderer. Applies only in TWIG template of the action.
    *
-   * @return array Values for action's TWIG template
+   * @internal
+   * @return array Array of parameters used in TWIG
    */
-  public function preRender() {
+  public function getTwigParams(): array {
     return [];
   }
-
+  
   /**
    * render
    *
@@ -315,22 +317,30 @@ class View {
    */
   public function render(string $panel = '') {
 
-    if (
-      !empty($this->twigTemplate)
-      && is_file(__DIR__."/../../Templates/{$this->twigTemplate}.twig")
-    ) {
-      $twigParams = array_merge($this->params, $this->preRender());
-      $twigParams["uid"] = $this->adios->uid;
-      $twigParams["gtp"] = $this->adios->gtp;
-      $twigParams["config"] = $this->adios->config;
-      $twigParams["user"] = $this->adios->userProfile;
-      $twigParams["locale"] = $this->adios->locale->getAll();
-      $twigParams["dictionary"] = $this->adios->dictionary;
+    if (!empty($this->twigTemplate)) {
+      $twigParams = [
+        "uid" => $this->uid,
+        "gtp" => $this->adios->gtp,
+        "config" => $this->adios->config,
+        "user" => $this->adios->userProfile,
+        "locale" => $this->adios->locale->getAll(),
+        "dictionary" => $this->adios->dictionary,
+        "view" => $this->params,
+        "params" => $this->getTwigParams(),
+      ];
 
       $html = $this->adios->twig->render(
-        "ADIOS/Templates/{$this->twigTemplate}",
+        'ADIOS\\Templates\\' . $this->twigTemplate,
         $twigParams
       );
+
+    } else if ('' != $this->html[$panel]) {
+      $html = $this->html[$panel];
+      if (_count($this->views[$panel])) {
+        foreach ($this->views[$panel] as $view) {
+          $html = str_replace("{%UI:{$view->uid}%}", $view->render(), $html);
+        }
+      }
     } else {
       $html = '';
 

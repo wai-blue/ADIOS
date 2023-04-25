@@ -106,4 +106,9 @@ class UI
   {
     return $this->create('Button', $params);
   }
+
+  public function DataTable($params = [])
+  {
+    return $this->create('DataTable', $params);
+  }
 }

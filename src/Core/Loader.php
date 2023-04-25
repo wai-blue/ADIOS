@@ -1110,6 +1110,7 @@ class Loader
       } else if (
         !$this->getConfig("hide_default_desktop", FALSE)
         && !$actionClassName::$hideDefaultDesktop
+        && !method_exists($actionClassName, "renderJSON")
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
         $this->desktopContentAction = $this->action;
@@ -1205,16 +1206,23 @@ class Loader
 
       if ($this->actionExists($action)) {
         $this->actionObject = new $actionClassName($this, $params);
-        $actionReturn = $this->actionObject->render($params);
 
-        if ($actionReturn === NULL) {
-          // akcia nic nereturnovala, iba robila echo
-          $actionHtml = "";
-        } else if (is_string($actionReturn)) {
-          $actionHtml = $actionReturn;
+        if (method_exists($actionClassName, "renderJSON")) {
+          $actionReturn = $this->actionObject->renderJSON($params);
+          $actionHtml = json_encode($actionReturn);
         } else {
-          $actionHtml = $this->renderReturn($actionReturn);
+          $actionReturn = $this->actionObject->render($params);
+
+          if ($actionReturn === NULL) {
+            // akcia nic nereturnovala, iba robila echo
+            $actionHtml = "";
+          } else if (is_string($actionReturn)) {
+            $actionHtml = $actionReturn;
+          } else {
+            $actionHtml = $this->renderReturn($actionReturn);
+          }
         }
+
       } else {
 
         // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
@@ -1254,14 +1262,14 @@ class Loader
   }
 
   public function renderReturn($return) {
-    if ($this->isAjax() && !$this->isWindow()) {
+    // if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
         "result" => "SUCCESS",
         "content" => $return,
       ]);
-    } else {
-      return $return;
-    }
+    // } else {
+    //   return $return;
+    // }
   }
 
   public function renderWarning($message, $isHtml = TRUE) {
@@ -1778,6 +1786,7 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
       dirname(__FILE__)."/../Assets/Css/multi-select.dist.css",
+      dirname(__FILE__)."/../Assets/Css/datatables.css",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {
@@ -1835,6 +1844,8 @@ class Loader
       dirname(__FILE__)."/../Assets/Js/jquery-ui.min.js",
       dirname(__FILE__)."/../Assets/Js/jquery.multi-select.js",
       dirname(__FILE__)."/../Assets/Js/jquery.quicksearch.js",
+      dirname(__FILE__)."/../Assets/Js/datatables.js",
+      dirname(__FILE__)."/../Assets/Js/jeditable.js"
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
