@@ -2,7 +2,7 @@
   #{{ uid }}_div {
     display: grid;
     grid-template-areas:
-      {% for layoutRow in layout %}
+      {% for layoutRow in view.layout %}
         '{{ layoutRow }}'
       {% endfor %}
     ;
@@ -16,7 +16,7 @@
     @media (max-width: 575.98px) {
       #{{ uid }}_div {
         grid-template-areas:
-          {% for layoutRow in layoutSm %}
+          {% for layoutRow in view.layoutSm %}
             '{{ layoutRow }}'
           {% endfor %}
         !important;
@@ -29,7 +29,7 @@
     @media (min-width: 576px) and (max-width: 767.98px) {
       #{{ uid }}_div {
         grid-template-areas:
-          {% for layoutRow in layoutMd %}
+          {% for layoutRow in view.layoutMd %}
             '{{ layoutRow }}'
           {% endfor %}
         !important;
@@ -42,7 +42,7 @@
     @media (min-width: 768px) and (max-width: 991.98px) {
       #{{ uid }}_div {
         grid-template-areas:
-          {% for layoutRow in layoutLg %}
+          {% for layoutRow in view.layoutLg %}
             '{{ layoutRow }}'
           {% endfor %}
         !important;
@@ -55,7 +55,7 @@
     @media (min-width: 992px) {
       #{{ uid }}_div {
         grid-template-areas:
-          {% for layoutRow in layoutXl %}
+          {% for layoutRow in view.layoutXl %}
             '{{ layoutRow }}'
           {% endfor %}
         !important;
@@ -71,13 +71,13 @@
     border: 1px solid var(--cl-main);
   }
 
-  {% for areaName, areaParams in areas %}
+  {% for areaName, areaParams in view.areas %}
     .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; }
   {% endfor %}
 </style>
 
 <div id='{{ uid }}_div'>
-  {% for areaName, areaParams in areas %}
+  {% for areaName, areaParams in view.areas %}
     <div
       class='{{ uid }}-area-{{ areaName }} {{ areaParams.cssClass }}'
     >
