@@ -16,6 +16,8 @@ namespace ADIOS\Core\Models;
  * @package DefaultModels
  */
 class UserRole extends \ADIOS\Core\Model {
+  const ADMINISTRATOR = 1;
+
   var $sqlName = "";
   var $lookupSqlValue = "{%TABLE%}.name";
   

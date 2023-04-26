@@ -585,6 +585,33 @@ class Model extends \Illuminate\Database\Eloquent\Model
         ])
       ],
 
+      // Save
+      '/^' . $urlBase . '\/Save$/' => [
+        "permission" => "{$this->fullName}/Save",
+        "action" => "UI/Form/Save",
+        "params" => array_merge($urlParams, [
+          "model" => $this->fullName,
+        ])
+      ],
+
+      // Delete
+      '/^' . $urlBase . '\/Delete$/' => [
+        "permission" => "{$this->fullName}/Delete",
+        "action" => "UI/Form/Delete",
+        "params" => array_merge($urlParams, [
+          "model" => $this->fullName,
+        ])
+      ],
+
+      // Copy
+      '/^' . $urlBase . '\/Copy$/' => [
+        "permission" => "{$this->fullName}/Copy",
+        "action" => "UI/Form/Copy",
+        "params" => array_merge($urlParams, [
+          "model" => $this->fullName,
+        ])
+      ],
+
       // Search
       '/^' . $urlBase . '\/Search$/' => [
         "permission" => "{$this->fullName}/Search",

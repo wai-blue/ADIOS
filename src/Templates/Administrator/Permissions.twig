@@ -1,5 +1,17 @@
 <h1>Permissions</h1>
 
+<script>
+  function {{ uid }}_set_permission(checkbox) {
+    _ajax_read(
+      'Administrator/Permissions/Set',
+      {
+        'idUserRole': $(checkbox).data('id-user-role'),
+        'permission': $(checkbox).data('permission'),
+        'isEnabled': ($(checkbox).is(':checked') ? '1' : '0')
+      }
+    );
+  }
+</script>
 <table class='table'>
   <thead class="thead-dark">
     <tr>
@@ -10,11 +22,19 @@
     </tr>
   </thead>
   <tbody>
-    {% for permission in permissions %}
+    {% for permissionPath, permissionsByRole in permissions %}
       <tr>
-        <td><b>{{ permission }}</b></td>
-        {% for role in userRoles %}
-          <td class="text-center"><input type='checkbox' /></td>
+        <td><b>{{ permissionPath }}</b></td>
+        {% for roleId, permissionEnabled in permissionsByRole %}
+          <td class="text-center">
+            <input
+              type='checkbox'
+              data-id-user-role='{{ roleId }}'
+              data-permission='{{ permissionPath }}'
+              onchange='{{ uid }}_set_permission(this);'
+              {% if (permissionEnabled) %} checked {% endif %}
+            />
+          </td>
         {% endfor %}
       </tr>
     {% endfor %}

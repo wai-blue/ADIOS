@@ -26,7 +26,10 @@ class Permissions extends \ADIOS\Core\Action {
     $permissions = [];
     foreach ($this->adios->routing as $routeParams) {
       if (!empty($routeParams['permission'])) {
-        $permissions[] = $routeParams['permission'];
+        $tmpPath = $routeParams['permission'];
+        foreach ($userRoles as $role) {
+          $permissions[$tmpPath][$role['id']] = $this->adios->permissions->isEnabled($tmpPath, $role['id']);
+        }
       }
     }
 
@@ -39,14 +42,17 @@ class Permissions extends \ADIOS\Core\Action {
       if (is_array($widgetActions)) {
         foreach ($widgetActions as $action) {
           if (substr($action, -4) == ".php") {
-            $permissions[] = "Widgets/{$widget->fullName}/Actions/".substr($action, 0, -4);
+            $tmpPath = "Widgets/{$widget->fullName}/Actions/".substr($action, 0, -4);
+            foreach ($userRoles as $role) {
+              $permissions[$tmpPath][$role['id']] = $this->adios->permissions->isEnabled($tmpPath, $role['id']);
+            }
           }
         }
       }
     }
 
     // sort
-    sort($permissions);
+    ksort($permissions);
 
     return [
       "userRoles" => $userRoles,

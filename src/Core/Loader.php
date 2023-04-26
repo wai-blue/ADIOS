@@ -124,6 +124,7 @@ class Loader
   public $locale = NULL;
   public $email = NULL;
   public $userNotifications = NULL;
+  public $permissions = NULL; // objekt triedy Permissions
 
   public array $assetsUrlMap = [];
 
@@ -383,6 +384,9 @@ class Loader
       $this->finalizeConfig();
 
       $this->onAfterConfigLoaded();
+
+      // object pre kontrolu permissions
+      $this->permissions = new \ADIOS\Core\Permissions($this);
 
       // timezone
       date_default_timezone_set($this->config['timezone']);
@@ -1044,6 +1048,27 @@ class Loader
         $params = $_REQUEST;
       }
 
+
+      // Kontrola permissions, krok 1
+      // Tu sa permissions kontroluju na zaklade REQUEST_URI, cize na zaklade routingu
+
+      $permissionForRequestedURI = "";
+      foreach ($this->routing as $routePattern => $route) {
+        if (preg_match($routePattern, $params['action'], $m)) {
+          $permissionForRequestedURI = $route['permission'];
+        }
+      }
+
+      if (
+        !empty($permissionForRequestedURI)
+        && !$this->permissions->has($permissionForRequestedURI)
+      ) {
+        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
+      }
+
+      // TODO: Docasne. Ked bude fungovat, vymazat.
+      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
+
       if (!empty($params['action'])) {
         // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
         // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
@@ -1093,7 +1118,7 @@ class Loader
         }
       }
 
-      // mam moznost upravit config (napr. na skrytie desktopu)
+      // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
       $this->config = $actionClassName::overrideConfig($this->config, $params);
 
       if ($params['__IS_AJAX__']) {
@@ -1147,6 +1172,9 @@ class Loader
       $this->setUid($uid);
 
       return $this->renderAction($this->action, $params);
+    } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
+      echo $this->renderFatal($e->getMessage());
+      exit();
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: ".$e->getMessage();
@@ -1191,10 +1219,15 @@ class Loader
     $actionClassName = $this->getActionClassName($action);
 
     try {
+      // Kontrola permissions, krok 2
+      // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
+      // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
+      // to moze zmenit)
       if ($actionClassName::$requiresUserAuthentication) {
         $this->checkPermissionsForAction($action, $params);
       }
 
+      // permissions udelene
       if ($this->actionExists($action)) {
         $this->actionObject = new $actionClassName($this, $params);
 
@@ -1488,7 +1521,7 @@ class Loader
   //   return $this->config;
   // }
 
-  public function saveConfig($config, $path = '') {
+  public function saveConfig(array $config, string $path = '') {
     if (is_array($config)) {
       foreach ($config as $key => $value) {
         $tmpPath = $path.$key;
@@ -1511,6 +1544,19 @@ class Loader
           ");
         }
       }
+    }
+  }
+
+  public function saveConfigByPath(string $path, $value) {
+    if (!empty($path)) {
+      $this->db->query("
+        insert into `{$this->gtp}_{$this->config['system_table_prefix']}_config` set
+          `path` = '".$this->db->escape($path)."',
+          `value` = '".$this->db->escape($value)."'
+        on duplicate key update
+          `path` = '".$this->db->escape($path)."',
+          `value` = '".$this->db->escape($value)."'
+      ");
     }
   }
 
