@@ -1045,10 +1045,13 @@ class Loader
       }
 
       if (!empty($params['action'])) {
-        // prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params
+        // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
+        // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
+        // povodne $params['action'], cize requestovana URLka.
 
         foreach ($this->routing as $routePattern => $route) {
           if (preg_match($routePattern, $params['action'], $m)) {
+            // povodnu $params['action'] nahradim novou $route['action']
             $params['action'] = $route['action'];
 
             $route['params'] = $this->replaceRouteVariables($route['params'], $m);
@@ -1056,18 +1059,6 @@ class Loader
             foreach ($route['params'] as $k => $v) {
               $params[$k] = $v;
             }
-
-            // if (is_array($route['params'])) {
-            //   foreach ($route['params'] as $k1 => $v1) {
-            //     foreach ($m as $k2 => $v2) {
-            //       $routeParams['params'] = str_replace('$'.$k2, $v2, $route['params']);
-            //     }
-            //   }
-
-            //   foreach ($routeParams['params'] as $k => $v) {
-            //     $params[$k] = $v;
-            //   }
-            // }
           }
         }
       }

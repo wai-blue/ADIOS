@@ -554,20 +554,29 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
   {
     $routing = [
+
+      // List
       '/^' . $urlBase . '$/' => [
+        "permission" => "{$this->fullName}/Read",
         "action" => "UI/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
+
+      // Edit
       '/^' . $urlBase . '\/(\d+)\/Edit$/' => [
+        "permission" => "{$this->fullName}/Edit",
         "action" => "UI/Form",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
         ])
       ],
+
+      // Add
       '/^' . $urlBase . '\/Add$/' => [
+        "permission" => "{$this->fullName}/Add",
         "action" => "UI/Form",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
@@ -575,38 +584,56 @@ class Model extends \Illuminate\Database\Eloquent\Model
           "defaultValues" => $urlParams,
         ])
       ],
+
+      // Search
       '/^' . $urlBase . '\/Search$/' => [
+        "permission" => "{$this->fullName}/Search",
         "action" => "UI/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
         ])
       ],
+
+      // Export/CSV
       '/^' . $urlBase . '\/Export\/CSV$/' => [
+        "permission" => "{$this->fullName}/Export/CSV",
         "action" => "UI/Table/Export/CSV",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
+
+      // Import/CSV
       '/^' . $urlBase . '\/Import\/CSV$/' => [
+        "permission" => "{$this->fullName}/Export/CSV",
         "action" => "UI/Table/Import/CSV",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
+
+      // Import/CSV/Import
       '/^' . $urlBase . '\/Import\/CSV\/Import$/' => [
+        "permission" => "{$this->fullName}/Import/CSV",
         "action" => "UI/Table/Import/CSV/Import",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
+
+      // Import/CSV/DownloadTemplate
       '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/' => [
+        "permission" => "{$this->fullName}/Import/CSV",
         "action" => "UI/Table/Import/CSV/DownloadTemplate",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
+
+      // Import/CSV/Preview
       '/^' . $urlBase . '\/Import\/CSV\/Preview$/' => [
+        "permission" => "{$this->fullName}/Import/CSV",
         "action" => "UI/Table/Import/CSV/Preview",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
