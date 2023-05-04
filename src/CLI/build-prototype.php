@@ -6,8 +6,8 @@ require(__DIR__."/../Core/Loader.php");
 $adios = new \ADIOS\Core\Loader(NULL, \ADIOS\Core\Loader::ADIOS_MODE_LITE);
 
 $arguments = getopt(
-  "I:A:O:S:L:",
-  ["input:", "autoloader:", "output:", "salt:", "log:"],
+  "I:A:O:S:L:U:",
+  ["input:", "autoloader:", "output:", "salt:", "log:", "root-url:"],
   $restIndex
 );
 
@@ -16,6 +16,7 @@ $autoloaderFile = $arguments["A"] ?? $arguments["autoloader"] ?? "";
 $outputFolder = $arguments["O"] ?? $arguments["output"] ?? "";
 $sessionSalt = $arguments["S"] ?? $arguments["salt"] ?? "";
 $logFile = $arguments["L"] ?? $arguments["log"] ?? "";
+$rootUrl = $arguments["U"] ?? $arguments["root-url"] ?? "http://localhost";
 
 if (empty($outputFolder)) $outputFolder = ".";
 if (empty($inputFile)) $inputFile = __DIR__."/../../docs/Prototype/examples/01-one-widget.json";
@@ -68,5 +69,5 @@ $builder->createEmptyDatabase();
 
 echo "\n";
 echo "SUCCESS: Prototype was successfuly built.\n";
-echo "Run ROOT_DIR/install.php script from your browser now.\n";
+echo "Run {$rootUrl}/install.php script from your browser now.\n";
 echo "\n";
