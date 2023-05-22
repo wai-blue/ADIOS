@@ -104,6 +104,19 @@ function _ajax_action_url(action, params) {
   return _action_url(action, params) + '&__IS_AJAX__=1';
 }
 
+function _ajax_post_data(params) {
+  let postData = {};
+  let paramsObj = _ajax_params(params);
+  
+  for (var i in paramsObj) {
+    postData[i] = paramsObj[i];
+  }
+
+  postData['__IS_AJAX__'] = '1';
+
+  return postData;
+}
+
 function _ajax_load(action, params, onsuccess){
   if (typeof params == 'undefined') params = new Object;
   if (typeof onsuccess == 'undefined') onsuccess = function(){};
@@ -170,9 +183,14 @@ function _ajax_check_result(res, use_alert = true){
 
 function _ajax_read(action, params, onsuccess, onreadystatechange) {
   $.ajax({
-    'type': 'GET',
-    'url': _APP_URL + '/' + _ajax_action_url(action, params),
+    // 'type': 'GET',
+    // 'url': _APP_URL + '/' + _ajax_action_url(action, params),
     // 'data': data,
+
+    'type': 'POST',
+    'url': _APP_URL + '/' + action,
+    'data': _ajax_post_data(params),
+
     'success': function(res) {
       try {
         var resJson = JSON.parse(res);
@@ -227,8 +245,13 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
 
 function _ajax_read_json(action, params, onsuccess, onwarning, onfatal) {
   $.ajax({
-    'type': 'GET',
-    'url': _APP_URL + '/' + _ajax_action_url(action, params),
+    // 'type': 'GET',
+    // 'url': _APP_URL + '/' + _ajax_action_url(action, params),
+
+    'type': 'POST',
+    'url': _APP_URL + '/' + action,
+    'data': _ajax_post_data(params),
+
     'dataType': 'json',
     'success': function(res) {
       if (res.result == 'SUCCESS') {
@@ -269,9 +292,15 @@ function _ajax_sread(action, params, options) {
   try {
     var ret_val = trim(
       $.ajax({
-        type: 'GET',
         async: false,
-        url: _APP_URL + '/' + _ajax_action_url(action, params),
+
+        // type: 'GET',
+        // url: _APP_URL + '/' + _ajax_action_url(action, params),
+
+        'type': 'POST',
+        'url': _APP_URL + '/' + action,
+        'data': _ajax_post_data(params),
+
         success: options.success,
         complete: function() { desktop_console_update(); }
       }).responseText

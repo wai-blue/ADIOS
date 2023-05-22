@@ -31,8 +31,10 @@
       "faIcon": "fa-address-book",
       "sidebar": {
         "Customers + Bids": {
-          "Customers": "Customers",
-          "Bids": "Bids"
+          "sub": {
+            "Customers": { "url": "Customers" },
+            "Bids": { "url": "Bids" }
+          }
         }
       },
 

@@ -6,8 +6,8 @@ require(__DIR__."/../Core/Loader.php");
 $adios = new \ADIOS\Core\Loader(NULL, \ADIOS\Core\Loader::ADIOS_MODE_LITE);
 
 $arguments = getopt(
-  "I:A:O:S:L:U:",
-  ["input:", "autoloader:", "output:", "salt:", "log:", "root-url:"],
+  "I:A:O:S:L:U:B:",
+  ["input:", "autoloader:", "output:", "salt:", "log:", "root-url:", "rewrite-base:"],
   $restIndex
 );
 
@@ -17,6 +17,7 @@ $outputFolder = $arguments["O"] ?? $arguments["output"] ?? "";
 $sessionSalt = $arguments["S"] ?? $arguments["salt"] ?? "";
 $logFile = $arguments["L"] ?? $arguments["log"] ?? "";
 $rootUrl = $arguments["U"] ?? $arguments["root-url"] ?? "http://localhost";
+$rewriteBase = $arguments["B"] ?? $arguments["rewrite-base"] ?? "http://localhost";
 
 if (empty($outputFolder)) $outputFolder = ".";
 if (empty($inputFile)) $inputFile = __DIR__."/../../docs/Prototype/examples/01-one-widget.json";
@@ -63,6 +64,8 @@ if (!is_file($inputFile)) exit("Input file does not exist.");
 require_once($autoloaderFile);
 
 $builder = new \ADIOS\Prototype\Builder($inputFile, $outputFolder, $sessionSalt, $logFile);
+
+if (!empty($rewriteBase)) $builder->setRewriteBase($rewriteBase);
 
 $builder->buildPrototype();
 $builder->createEmptyDatabase();

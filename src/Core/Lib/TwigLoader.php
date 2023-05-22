@@ -56,7 +56,7 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
     }
 
     if (!is_file($templateFile)) {
-      throw new \Twig\Error\LoaderError("Template {$name} does not exist. {$templateName}");
+      throw new \Twig\Error\LoaderError("Template {$name} ({$templateName}) does not exist. Tried to load '{$templateFile}'.");
     } else {
       return new \Twig\Source(file_get_contents($templateFile), $name);
     }

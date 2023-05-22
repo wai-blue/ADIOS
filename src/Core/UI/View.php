@@ -16,6 +16,8 @@ class View {
   var bool $useSession = FALSE;
   var array $params = [];
   var $adios = NULL;
+  var string $fullName = "";
+  var string $shortName = "";
   var array $views = [];
   var array $classes = [];
   var array $html = [];
@@ -51,6 +53,9 @@ class View {
       $params = $this->loadParamsFromSession($params['uid']);
     }
 
+    $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\Core\\UI\\", "", static::class));
+    $this->shortName = end(explode("/", $this->fullName));
+
     if (empty($params['uid'])) {
       $params['uid'] =
         $this->adios->uid."_"
@@ -71,6 +76,7 @@ class View {
     $this->uid = $params['uid'];
     $this->views = [];
     $this->classes = ['adios', 'ui', $params['component_class']];
+    $this->twigTemplate = "UI/{$this->fullName}";
 
     $this->add_class($params['class']);
   }
@@ -293,7 +299,7 @@ class View {
   }
 
   /**
-   * getTwigParams
+   * Used to return values for TWIG renderer. Applies only in TWIG template of the action.
    *
    * @internal
    * @return array Array of parameters used in TWIG
@@ -310,10 +316,18 @@ class View {
    * @return void
    */
   public function render(string $panel = '') {
-    $html = '';
 
-    if (!empty($this->twigTemplate)) {
+    if (
+      !empty($this->twigTemplate)
+       && is_file(__DIR__."/../../Templates/{$this->twigTemplate}.twig")
+    ) {
       $twigParams = [
+        "uid" => $this->uid,
+        "gtp" => $this->adios->gtp,
+        "config" => $this->adios->config,
+        "user" => $this->adios->userProfile,
+        "locale" => $this->adios->locale->getAll(),
+        "dictionary" => $this->adios->dictionary,
         "view" => $this->params,
         "params" => $this->getTwigParams(),
       ];
@@ -331,12 +345,23 @@ class View {
         }
       }
     } else {
-      if (_count($this->views[$panel])) {
-        foreach ($this->views[$panel] as $view) {
-          if (is_string($view) || '' == $view) {
-            $html .= $view;
-          } else {
-            $html .= $view->render();
+      $html = '';
+
+      if ('' != $this->html[$panel]) {
+        $html = $this->html[$panel];
+        if (_count($this->views[$panel])) {
+          foreach ($this->views[$panel] as $view) {
+            $html = str_replace("{%UI:{$view->uid}%}", $view->render(), $html);
+          }
+        }
+      } else {
+        if (_count($this->views[$panel])) {
+          foreach ($this->views[$panel] as $view) {
+            if (is_string($view) || '' == $view) {
+              $html .= $view;
+            } else {
+              $html .= $view->render();
+            }
           }
         }
       }
