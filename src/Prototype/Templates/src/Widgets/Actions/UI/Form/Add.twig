@@ -1,0 +1,31 @@
+<?php
+
+namespace ADIOS\Actions\{{ thisWidget.name }};
+
+// {{ thisAction.abcd }} 
+
+class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
+  public function render() {
+    return $this->adios->renderAction("UI/Form", [
+      "settings_group" => "sales",
+      "title" => "{{ thisAction.config.title }}",
+      "readonly" => TRUE,
+      "template" => [
+        "items" => [
+{% for item in thisAction.config.items %}
+          [
+            "title" => "{{ item.title }}",
+{% if item.input is iterable %}
+            "input" => $this->adios->ui->Input(json_decode('{{ item.input|json_encode|raw }}', TRUE)),
+{% endif %}
+{% if item.button is iterable %}
+            "input" => $this->adios->ui->Button(json_decode('{{ item.button|json_encode|raw }}', TRUE)),
+{% endif %}
+            "description" => "{{ item.descriptiopn }}",
+          ],
+{% endfor %}
+        ],
+      ],
+    ]);
+  }
+}
