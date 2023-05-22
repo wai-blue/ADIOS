@@ -317,7 +317,10 @@ class View {
    */
   public function render(string $panel = '') {
 
-    if (!empty($this->twigTemplate)) {
+    if (
+      !empty($this->twigTemplate)
+       && is_file(__DIR__."/../../Templates/{$this->twigTemplate}.twig")
+    ) {
       $twigParams = [
         "uid" => $this->uid,
         "gtp" => $this->adios->gtp,
