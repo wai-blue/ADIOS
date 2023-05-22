@@ -126,6 +126,7 @@ class Loader
   public $locale = NULL;
   public $email = NULL;
   public $userNotifications = NULL;
+  public $test = NULL;
 
   public array $assetsUrlMap = [];
 
@@ -151,6 +152,8 @@ class Loader
     if ($mode === NULL) {
       $mode = self::ADIOS_MODE_FULL;
     }
+
+    $this->test = new \ADIOS\Core\Test($this);
 
     if (is_array($config)) {
       $this->config = $config;
