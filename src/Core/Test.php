@@ -30,24 +30,35 @@ class Test {
     // Exceptions should be thrown in case of problem.
   }
 
+  public function log($msg) {
+    echo $msg."\n";
+  }
+
   public function run() {
     try {
       $this->assertionCounter = 0;
       $this->init();
 
-      echo "Test '".get_class($this)."' succeeded with {$this->assertionCounter} assertions checked.\n";
+      $this->log("Test '".get_class($this)."' succeeded with {$this->assertionCounter} assertions checked.");
     } catch (\ADIOS\Core\Exceptions\TestAssertionFailed $e) {
-      list($assertionName, $assertionValue, $expectedValue) = json_decode($e->getMessage(), TRUE);
-      echo "Test '".get_class($this)."' failed at assertion '{$assertionName}'.\n";
-      echo "Received value: ".json_encode($assertionValue, JSON_PRETTY_PRINT)."\n";
-      echo "Expected value: ".json_encode($expectedValue, JSON_PRETTY_PRINT)."\n";
+      list($assertionName, $assertionValueAndParams, $expectedValue) = json_decode($e->getMessage(), TRUE);
+      list($assertionValue, $assertionParams) = $assertionValueAndParams;
+
+      $this->log(
+        "Test '".get_class($this)."' failed at assertion '{$assertionName}'"
+        .(count($assertionParams) == 0 ? "" : " with params ".json_encode($assertionParams))
+        ."."
+      );
+
+      $this->log("Received value: ".json_encode($assertionValue));
+      $this->log("Expected value: ".($expectedValue == "[CLOSURE]" ? "[CLOSURE]" : json_encode($expectedValue)));
     } catch (\Exception $e) {
-      echo "Test '".get_class($this)."' failed with exception' ".get_class($e)."' and message '{$e->getMessage()}'\n";
+      $this->log("Test '".get_class($this)."' failed with exception '".get_class($e)."' and message '{$e->getMessage()}'");
     }
   }
 
-  public function assert(string $name, $value) {
-    $this->assertions[$name] = $value;
+  public function assert(string $name, $assertionValue, array $assertionParams = []) {
+    $this->assertions[$name] = [ $assertionValue, $assertionParams ];
   }
 
   public function checkAssertion(string $name, $expectedValue) {
@@ -55,17 +66,34 @@ class Test {
     $ok = TRUE;
 
     if (!isset($this->assertions[$name])) {
+      $this->log("Assertion '{$name}' is unknown.");
+
       $ok = FALSE;
     } else {
-      $ok = $this->assertions[$name] === $expectedValue;
+
+      list($assertionValue, $assertionParams) = $this->assertions[$name];
+
+      $this->log(
+        "Checking assertion '{$name}'"
+        .(count($assertionParams) == 0 ? "" : " with params ".json_encode($assertionParams))
+        ."."
+      );
+
+      if ($expectedValue instanceof \Closure) {
+        $ok = call_user_func($expectedValue, $this->assertions[$name]);
+      } else {
+        $ok = $assertionValue === $expectedValue;
+      }
     }
 
     if (!$ok) {
       throw new \ADIOS\Core\Exceptions\TestAssertionFailed(json_encode([
         $name,
         $this->assertions[$name] ?? NULL,
-        $expectedValue
+        ($expectedValue instanceof \Closure ? "[CLOSURE]" : $expectedValue)
       ]));
+    } else {
+      $this->log("Check succeeded with assertion value ".json_encode($assertionValue).".");
     }
   }
 
