@@ -1,0 +1,88 @@
+<style>
+  #{{ uid }}_div {
+    display: grid;
+    grid-template-areas:
+      {% for layoutRow in view.layout %}
+        '{{ layoutRow }}'
+      {% endfor %}
+    ;
+    gap: 5px;
+    height: 100vh;
+    padding: 5px;
+  }
+
+  {% if layoutSm %}
+    /* Small devices (landscape phones, 576px and up) */
+    @media (max-width: 575.98px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutSm %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutMd %}
+    /* Medium devices (tablets, 768px and up) */
+    @media (min-width: 576px) and (max-width: 767.98px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutMd %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutLg %}
+    /* Large devices (desktops, 992px and up) */
+    @media (min-width: 768px) and (max-width: 991.98px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutLg %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutXl %}
+    /* X-Large devices (large desktops, 1200px and up) */
+    @media (min-width: 992px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutXl %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+
+  #{{ uid }}_div > div {
+    background-color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    padding: 0.63em;
+    border: 1px solid var(--cl-main);
+  }
+
+  {% for areaName, areaParams in view.areas %}
+    .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; }
+  {% endfor %}
+</style>
+
+<div id='{{ uid }}_div'>
+  {% for areaName, areaParams in view.areas %}
+    <div
+      class='{{ uid }}-area-{{ areaName }} {{ areaParams.cssClass }}'
+    >
+      {% if areaParams.html %}{{ areaParams.html }}{% endif %}
+      {% if areaParams.action %}{{ adiosAction(areaParams.action, areaParams.params)|raw }}{% endif %}
+    </div>
+  {% endfor %}
+</div>

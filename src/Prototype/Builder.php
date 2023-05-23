@@ -71,6 +71,10 @@ class Builder {
     if (!is_array($this->prototype)) throw new \Exception("Prototype definition must be an array.");
   }
 
+  public function setRewriteBase($rewriteBase) {
+    $this->prototype['ConfigEnv']['rewriteBase'] = $rewriteBase;
+  }
+
   public function createFolder($folder) {
     $this->log("Creating folder {$folder}.");
     @mkdir($this->outputFolder."/".$folder);

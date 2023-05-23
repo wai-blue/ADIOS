@@ -106,6 +106,8 @@ class Loader
   public array $routing = [];
   public array $widgets = [];
 
+  public array $widgetsInstalled = [];
+
   public array $pluginFolders = [];
   public array $pluginObjects = [];
   public array $plugins = [];
@@ -125,6 +127,7 @@ class Loader
   public $email = NULL;
   public $userNotifications = NULL;
   public $permissions = NULL; // objekt triedy Permissions
+  public $test = NULL;
 
   public array $assetsUrlMap = [];
 
@@ -150,6 +153,8 @@ class Loader
     if ($mode === NULL) {
       $mode = self::ADIOS_MODE_FULL;
     }
+
+    $this->test = new \ADIOS\Core\Test($this);
 
     if (is_array($config)) {
       $this->config = $config;
@@ -571,9 +576,7 @@ class Loader
 
         $this->onBeforeWidgetsLoaded();
 
-        foreach ($this->config['widgets'] as $w_name => $w_config) {
-          $this->addWidget($w_name);
-        }
+        $this->addAllWidgets($this->config['widgets']);
 
         $this->onAfterWidgetsLoaded();
 
@@ -655,10 +658,27 @@ class Loader
   public function addWidget($widgetName) {
     if (!isset($this->widgets[$widgetName])) {
       try {
-        $widgetClassName = "\\ADIOS\\Widgets\\{$widgetName}";
+        $widgetClassName = "\\ADIOS\\Widgets\\".str_replace("/", "\\", $widgetName);
+        if (!class_exists($widgetClassName)) {
+          throw new \Exception("Widget {$widgetName} not found.");
+        }
         $this->widgets[$widgetName] = new $widgetClassName($this);
       } catch (\Exception $e) {
         exit("Failed to load widget {$widgetName}: ".$e->getMessage());
+      }
+    }
+  }
+
+  public function addAllWidgets(array $widgets = [], $path = "") {
+    foreach ($widgets as $wName => $w_config) {
+      $fullWidgetName = ($path == "" ? "" : "{$path}/").$wName;
+      if (isset($w_config['enabled']) && $w_config['enabled'] === TRUE) {
+        $this->addWidget($fullWidgetName);
+      } else {
+        // ak nie je enabled, moze to este byt dalej vetvene
+        if (is_array($w_config)) {
+          $this->addAllWidgets($w_config, $fullWidgetName);
+        }
       }
     }
   }

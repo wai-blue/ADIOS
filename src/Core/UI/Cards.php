@@ -8,7 +8,7 @@ namespace ADIOS\Core\UI;
  * @package UI\Elements
  */
 class Cards extends \ADIOS\Core\UI\View {
-  var $useSession = TRUE;
+  var bool $useSession = TRUE;
   
   public function render(string $panel = "") {
     $model = $this->adios->getModel($this->params['model']);

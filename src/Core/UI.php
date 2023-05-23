@@ -4,6 +4,9 @@ namespace ADIOS\Core;
 
 class UI
 {
+
+  public $adios;
+
   public function __construct(&$adios, $params)
   {
     $this->adios = $adios;
@@ -20,6 +23,23 @@ class UI
 
     $class_name = "\\ADIOS\\Core\\UI\\{$component_class}";
     return new $class_name($this->adios, $params);
+  }
+
+  public function __call(string $name, array $arguments)
+  {
+    $chr = substr($name, 0, 1);
+    $firstLetterIsCapital = strtolower($chr, "UTF-8") != $chr;
+
+    $className = "\\ADIOS\\Core\\UI\\{$name}";
+
+    if (
+      $firstLetterIsCapital
+      && class_exists($className)
+    ) {
+      return new $className($this->adios, $arguments[0]);
+    } else {
+      throw new \ADIOS\Core\Exceptions\UnknownUIComponent();
+    }
   }
 
   public function render($component_name, $params = null)
