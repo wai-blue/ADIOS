@@ -13,6 +13,7 @@ namespace ADIOS\Core;
 class Test {
   public $adios = NULL;
   public array $assertions = [];
+  public int $assertionCounter = 0;
 
   public string $sourceFile = "";
 
@@ -31,16 +32,17 @@ class Test {
 
   public function run() {
     try {
+      $this->assertionCounter = 0;
       $this->init();
 
-      echo "Test ".get_class($this)." succeeded.\n";
+      echo "Test '".get_class($this)."' succeeded with {$this->assertionCounter} assertions checked.\n";
     } catch (\ADIOS\Core\Exceptions\TestAssertionFailed $e) {
       list($assertionName, $assertionValue, $expectedValue) = json_decode($e->getMessage(), TRUE);
-      echo "Test ".get_class($this)." failed at assertion '{$assertionName}'.\n";
-      echo "Assertion value: ".json_encode($assertionValue, JSON_PRETTY_PRINT)."\n";
+      echo "Test '".get_class($this)."' failed at assertion '{$assertionName}'.\n";
+      echo "Received value: ".json_encode($assertionValue, JSON_PRETTY_PRINT)."\n";
       echo "Expected value: ".json_encode($expectedValue, JSON_PRETTY_PRINT)."\n";
     } catch (\Exception $e) {
-      echo "Test ".get_class($this)." failed with message: {$e->getMessage()}\n";
+      echo "Test '".get_class($this)."' failed with exception' ".get_class($e)."' and message '{$e->getMessage()}'\n";
     }
   }
 
@@ -49,6 +51,7 @@ class Test {
   }
 
   public function checkAssertion(string $name, $expectedValue) {
+    $this->assertionCounter++;
     $ok = TRUE;
 
     if (!isset($this->assertions[$name])) {
