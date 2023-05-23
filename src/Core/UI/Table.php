@@ -21,6 +21,8 @@ class Table extends \ADIOS\Core\UI\View
   var $data = [];
   var array $search = [];
 
+  public $table_item_count = 0;
+
   /**
    * __construct
    *
@@ -81,8 +83,7 @@ class Table extends \ADIOS\Core\UI\View
     ], $params);
 
     if (empty($params['model'])) {
-      exit("UI/Table: Don't know what model to work with.");
-      return;
+      throw new \Exception("UI/Table: Don't know what model to work with.");
     }
 
     $this->model = $this->adios->getModel($params['model']);
@@ -231,6 +232,8 @@ class Table extends \ADIOS\Core\UI\View
     $this->model->onTableAfterInit($this);
 
     $this->loadData();
+
+    $this->adios->test->assert("loadedRowsCount", count($this->data), ["model" => $params['model']]);
 
     // strankovanie
 

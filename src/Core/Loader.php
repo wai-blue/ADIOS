@@ -78,6 +78,12 @@ spl_autoload_register(function ($class) {
           break;
         }
       }
+    } else if (preg_match('/ADIOS\/Tests\/UI\/([\w\/]+)/', $class, $m)) {
+      $class = str_replace("Tests/", "", $class);
+      include(__DIR__."/../../tests/{$class}.php}");
+    } else if (preg_match('/ADIOS\/Tests\/([\w\/]+)/', $class, $m)) {
+      $class = str_replace("Tests/", "", $class);
+      include($___ADIOSObject->config['dir']."/../tests/{$class}.php}");
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
       include(__DIR__."/../{$m[1]}.php");
     }
