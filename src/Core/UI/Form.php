@@ -56,9 +56,9 @@ class Form extends \ADIOS\Core\UI\View
       'height' => '',
       'onclose' => '',
       'hide_id_column' => true,
-      'save_action' => 'UI/Form/Save',
-      'delete_action' => 'UI/Table/Delete',
-      'copy_action' => 'UI/Table/Copy',
+      // 'save_action' => 'UI/Form/Save',
+      // 'delete_action' => 'UI/Table/Delete',
+      // 'copy_action' => 'UI/Table/Copy',
       'do_not_close' => false, // DEPRECATED, je nahradeny parametrom reopen_after_save
       'reopen_after_save' => $this->adios->getConfig(
         "ui/form/reopen_after_save",
@@ -102,6 +102,18 @@ class Form extends \ADIOS\Core\UI\View
       } else {
         $params['title'] = $tmpFormTitle;
       }
+    }
+
+    if (empty($params['save_action'])) {
+      $params['save_action'] = $this->model->urlBase."/Save";
+    }
+
+    if (empty($params['delete_action'])) {
+      $params['delete_action'] = $this->model->urlBase."/Delete";
+    }
+
+    if (empty($params['copy_action'])) {
+      $params['copy_action'] = $this->model->urlBase."/Copy";
     }
 
     // call the parent constructor

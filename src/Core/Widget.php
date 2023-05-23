@@ -20,7 +20,8 @@ class Widget {
   public string $gtp = "";
   // public $languageDictionary = [];
 
-  public string $name = "";
+  public string $name = ""; // $name and $fullName are the same, $name is deprecated
+  public string $fullName = ""; // $name and $fullName are the same, $name is deprecated
   public string $shortName = "";
   public string $myRootFolder = "";
 
@@ -29,7 +30,9 @@ class Widget {
 
   function __construct($adios, $params = []) {
     $this->name = str_replace("ADIOS\\Widgets\\", "", get_class($this));
+    $this->fullName = str_replace("ADIOS\\Widgets\\", "", get_class($this));
     $this->shortName = end(explode("/", $this->name));
+
     $this->adios = &$adios;
     $this->params = $params;
     $this->gtp = $this->adios->gtp;

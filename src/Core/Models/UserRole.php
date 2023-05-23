@@ -16,17 +16,34 @@ namespace ADIOS\Core\Models;
  * @package DefaultModels
  */
 class UserRole extends \ADIOS\Core\Model {
+  const ADMINISTRATOR = 1;
+
   var $sqlName = "";
   var $lookupSqlValue = "{%TABLE%}.name";
   
-  public function __construct(&$adios) {
-    $this->sqlName = "{$adios->config['system_table_prefix']}_roles";
-    parent::__construct($adios);
+  public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
+    $this->sqlName = "{$adiosOrAttributes->config['system_table_prefix']}_roles";
+    parent::__construct($adiosOrAttributes);
   }
 
   public function columns(array $columns = []) {
     return parent::columns([
-      'name' => array('type' => 'varchar', 'title' => 'Názov'),
+      'name' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Role name'),
+        'show_column' => true
+      ],
+    ]);
+  }
+
+  public function routing(array $routing = []) {
+    return parent::routing([
+      '/^Administrator\/Permissions\/(\d+)$/' => [
+        "action" => "Administrator/Permissions",
+        "params" => [
+          "idUserRole" => '$1',
+        ]
+      ],
     ]);
   }
 }

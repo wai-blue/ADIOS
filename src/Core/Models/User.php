@@ -150,20 +150,16 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function routing(array $routing = []) {
-    if ($this->adios->userLogged) {
-      return parent::routing([
-        '/^MyProfile$/' => [
-          "action" => "UI/Form",
-          "params" => [
-            "model" => "Core/Models/User",
-            "myProfileView" => TRUE,
-            "id" => $this->adios->userProfile['id'],
-          ]
-        ],
-      ]);
-    } else {
-      return parent::routing();
-    }
+    return parent::routing([
+      '/^MyProfile$/' => [
+        "action" => "UI/Form",
+        "params" => [
+          "model" => "Core/Models/User",
+          "myProfileView" => TRUE,
+          "id" => $this->adios->userProfile['id'],
+        ]
+      ],
+    ]);
   }
 
   public function getById($id) {
