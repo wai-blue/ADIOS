@@ -59,7 +59,6 @@ USAGE
   );
 }
 
-if (!is_file($inputFile)) exit("Input file does not exist.");
 
 require_once($autoloaderFile);
 

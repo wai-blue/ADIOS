@@ -3,6 +3,7 @@
 namespace ADIOS\Prototype;
 
 class Builder {
+  protected string $inputPath = "";
   protected string $inputFile = "";
   protected string $outputFolder = "";
   protected string $sessionSalt = "";
@@ -26,7 +27,15 @@ class Builder {
       throw new \Exception("Output folder does not exist.");
     }
 
+    if (!is_file($this->inputFile)) {
+      $this->inputPath = $this->inputFile;
+      $this->inputFile = $this->inputFile . 'index.json';
+    } 
+
+    if (!is_file($this->inputFile)) throw new \Exception('Input file not found: ' . $this->inputFile);
+
     $this->prototype = json_decode(file_get_contents($this->inputFile), TRUE);
+
     $this->logHandle = fopen($this->logFile, "w");
 
     if (!is_array($this->prototype["ConfigApp"])) throw new \Exception("ConfigApp is missing in prototype definition.");
@@ -119,6 +128,16 @@ class Builder {
 
   }
 
+  public function importJson(string $filePath): array {
+    $importFileFullPath = $this->inputPath . $filePath;
+
+    if (!is_file($importFileFullPath)) throw new \Exception("@import: File not found");
+
+    $fileContent = json_decode(file_get_contents($importFileFullPath), TRUE);
+
+    return $fileContent;
+  }
+
   public function buildPrototype() {
 
     // delete folders if they exist
@@ -155,6 +174,11 @@ class Builder {
 
       // render widgets
       foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
+        if (is_string($widgetConfig) && strpos($widgetConfig, "@import") !== false) {
+          $filePath = trim(str_replace("@import", "", $widgetConfig));
+          $widgetConfig = $this->importJson($filePath);
+        }
+
         $this->createFolder("src/Widgets/{$widgetName}");
         $this->renderFile(
           "src/Widgets/{$widgetName}/Main.php",
