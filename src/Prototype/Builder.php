@@ -30,7 +30,9 @@ class Builder {
     if (!is_file($this->inputFile)) {
       $this->inputPath = $this->inputFile;
       $this->inputFile = $this->inputFile . 'index.json';
-    } 
+    } else {
+      $this->inputPath = pathinfo($this->inputFile, PATHINFO_DIRNAME) . '/';
+    }
 
     if (!is_file($this->inputFile)) throw new \Exception('Input file not found: ' . $this->inputFile);
 
@@ -132,7 +134,9 @@ class Builder {
     $importFileFullPath = $this->inputPath . $filePath;
 
     // TODO: Hlaska by mohla obsahovat aj nazov suboru. Lahsie sa bude debugovat.
-    if (!is_file($importFileFullPath)) throw new \Exception("@import: File not found");
+    if (!is_file($importFileFullPath)) {
+      throw new \Exception("@import: File not found ({$importFileFullPath})");
+    }
 
     $fileContent = json_decode(file_get_contents($importFileFullPath), TRUE);
 

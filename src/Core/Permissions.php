@@ -56,11 +56,9 @@ class Permissions {
 
     // TODO: Docasne. Ked bude fungovat, vymazat.
     if (strpos($permission, "Administrator/Permission") === 0) return TRUE;
+    if (strpos($permission, "Core/Models") === 0) return TRUE;
 
-    if (
-      FALSE // TODO: Docasne. Ked bude fungovat, vymazat.
-      && $idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR
-    ) {
+    if ($idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR) {
       return TRUE;
     } else {
       return (bool) in_array($permission, $this->enabledPermissions[$idUserRole]);

@@ -7,13 +7,13 @@ $adios = new \ADIOS\Core\Loader(NULL, \ADIOS\Core\Loader::ADIOS_MODE_LITE);
 
 $arguments = getopt(
   "I:A:O:S:L:U:B:",
-  ["input:", "autoloader:", "output:", "salt:", "log:", "root-url:", "rewrite-base:"],
+  ["input:", "autoloader:", "output-folder:", "salt:", "log:", "root-url:", "rewrite-base:"],
   $restIndex
 );
 
 $inputFile = $arguments["I"] ?? $arguments["input"] ?? "";
 $autoloaderFile = $arguments["A"] ?? $arguments["autoloader"] ?? "";
-$outputFolder = $arguments["O"] ?? $arguments["output"] ?? "";
+$outputFolder = $arguments["O"] ?? $arguments["output-folder"] ?? "";
 $sessionSalt = $arguments["S"] ?? $arguments["salt"] ?? "";
 $logFile = $arguments["L"] ?? $arguments["log"] ?? "";
 $rootUrl = $arguments["U"] ?? $arguments["root-url"] ?? "http://localhost";
