@@ -131,6 +131,7 @@ class Builder {
   public function importJson(string $filePath): array {
     $importFileFullPath = $this->inputPath . $filePath;
 
+    // TODO: Hlaska by mohla obsahovat aj nazov suboru. Lahsie sa bude debugovat.
     if (!is_file($importFileFullPath)) throw new \Exception("@import: File not found");
 
     $fileContent = json_decode(file_get_contents($importFileFullPath), TRUE);
@@ -171,6 +172,8 @@ class Builder {
       $this->renderFile("index.php", "index.twig");
       $this->renderFile("ConfigEnv.php", "ConfigEnv.twig");
       $this->renderFile("install.php", "install.twig");
+
+      // TODO: spravit @import univerzalny, nie iba pre importovanie do Widgets.
 
       // render widgets
       foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
