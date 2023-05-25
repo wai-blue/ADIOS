@@ -78,12 +78,17 @@ spl_autoload_register(function ($class) {
           break;
         }
       }
-    } else if (preg_match('/ADIOS\/Tests\/UI\/([\w\/]+)/', $class, $m)) {
-      $class = str_replace("Tests/", "", $class);
-      include(__DIR__."/../../tests/{$class}.php}");
     } else if (preg_match('/ADIOS\/Tests\/([\w\/]+)/', $class, $m)) {
-      $class = str_replace("Tests/", "", $class);
-      include($___ADIOSObject->config['dir']."/../tests/{$class}.php}");
+      $class = str_replace("ADIOS/Tests/", "", $class);
+
+      $testFile = __DIR__."/../../tests/{$class}.php";
+
+      if (is_file($testFile)) {
+        require($testFile);
+      } else {
+        require($___ADIOSObject->config['dir']."/../tests/{$class}.php");
+      }
+
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
       include(__DIR__."/../{$m[1]}.php");
     }
@@ -103,6 +108,7 @@ class Loader
   public string $requestedAction = "";
   public string $action = "";
   public string $uid = "";
+  public string $srcDir = "";
 
   public $actionObject;
 
@@ -179,6 +185,8 @@ class Loader
     if (empty($this->config['dir'])) $this->config['dir'] = "";
     if (empty($this->config['url'])) $this->config['url'] = "";
     if (empty($this->config['rewrite_base'])) $this->config['rewrite_base'] = "";
+
+    $this->srcDir = realpath(__DIR__."/..");
 
     if (empty($this->config['system_table_prefix'])) {
       $this->config['system_table_prefix'] = "adios";

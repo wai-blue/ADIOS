@@ -10,14 +10,16 @@
 
 namespace ADIOS\Core;
 
-class Test {
+class Test
+{
   public $adios = NULL;
   public array $assertions = [];
   public int $assertionCounter = 0;
 
   public string $sourceFile = "";
 
-  public function __construct($adios) {
+  public function __construct($adios)
+  {
     $this->adios = $adios;
     $this->adios->test = $this;
 
@@ -25,16 +27,35 @@ class Test {
 
   }
 
-  public function init() : void {
+  public function findAllTests(string $dir) : array
+  {
+    $allTests = \ADIOS\Core\HelperFunctions::scanDirRecursively($dir);
+
+    // only .php files starting with "Test" are treated to be tests
+    foreach ($allTests as $key => $value) {
+      if (strpos(pathinfo($value, PATHINFO_FILENAME), "Test") !== 0) {
+        unset($allTests[$key]);
+      } else {
+        $allTests[$key] = str_replace(".php", "", $value);
+      }
+    }
+
+    return $allTests;
+  }
+
+  public function init() : void
+  {
     // TO BE OVERRIDEN
     // Exceptions should be thrown in case of problem.
   }
 
-  public function log($msg) {
+  public function log($msg)
+  {
     echo $msg."\n";
   }
 
-  public function run() {
+  public function run()
+  {
     try {
       $this->assertionCounter = 0;
       $this->init();
@@ -57,11 +78,13 @@ class Test {
     }
   }
 
-  public function assert(string $name, $assertionValue, array $assertionParams = []) {
+  public function assert(string $name, $assertionValue, array $assertionParams = [])
+  {
     $this->assertions[$name] = [ $assertionValue, $assertionParams ];
   }
 
-  public function checkAssertion(string $name, $expectedValue) {
+  public function checkAssertion(string $name, $expectedValue)
+  {
     $this->assertionCounter++;
     $ok = TRUE;
 
