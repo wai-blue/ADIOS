@@ -1,8 +1,8 @@
 <?php
 
-namespace ADIOS\Widgets;
+namespace {{ thisWidget.namespace }};
 
-class {{ thisWidget.name }} extends \ADIOS\Core\Widget {
+class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
   public function init() {
     if ($this->adios->hasPermissionsForAction("{{ thisWidget.name }}")) {
 {% for itemTitle, itemConfig in thisWidget.config.sidebar %}

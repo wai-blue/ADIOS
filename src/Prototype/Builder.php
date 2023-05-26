@@ -170,17 +170,71 @@ class Builder {
       $this->copyFile(".htaccess-subfolder", "tmp/.htaccess");
       $this->copyFile(".htaccess-subfolder", "upload/.htaccess");
 
-      $this->renderFile("src/ConfigApp.php", "src/ConfigApp.twig");
       $this->renderFile("src/Init.php", "src/Init.twig");
 
       $this->renderFile("index.php", "index.twig");
       $this->renderFile("ConfigEnv.php", "ConfigEnv.twig");
       $this->renderFile("install.php", "install.twig");
 
+
+      $configWidgetsEnabled = [];
+      foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
+        if (strpos($widgetName, '/') !== FALSE) {
+          $tmpCfg = &$configWidgetsEnabled;
+          $tmpDirs = explode('/', $widgetName);
+          foreach ($tmpDirs as $tmpLevel => $tmpDir) {
+            if ($tmpLevel == count($tmpDirs) - 1) {
+              $tmpCfg[$tmpDir]['enabled'] = TRUE;
+            } else {
+              if (!isset($tmpCfg[$tmpDir])) {
+                $tmpCfg[$tmpDir] = NULL;
+              }
+              $tmpCfg = &$tmpCfg[$tmpDir];
+            }
+          }
+
+        } else {
+          $configWidgetsEnabled[$widgetName]['enabled'] = TRUE;
+        }
+      }
+
+      $this->renderFile("src/ConfigApp.php", "src/ConfigApp.twig", array_merge(
+        $this->prototype,
+        [
+          'configWidgetsEnabled' => $configWidgetsEnabled,
+        ]
+      ));
+
       // TODO: spravit @import univerzalny, nie iba pre importovanie do Widgets.
 
       // render widgets
       foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
+
+        $widgetNamespace = 'ADIOS\Widgets';
+        $widgetClassName = '';
+
+        if (strpos($widgetName, '/') !== FALSE) {
+          $widgetRootDir = 'src/Widgets';
+
+          $tmpDirs = explode('/', $widgetName);
+          
+          $widgetClassName = end($tmpDirs);
+
+          foreach ($tmpDirs as $level => $tmpDir) {
+            $widgetRootDir .= '/' . $tmpDir;
+
+            if ($level != count($tmpDirs) - 1) {
+              $widgetNamespace .= '\\' . $tmpDir;
+            }
+
+            $this->createFolder($widgetRootDir);
+          }
+        } else {
+          $widgetRootDir = 'src/Widgets/' . $widgetName;
+          $widgetClassName = $widgetName;
+        }
+
+
         if (is_string($widgetConfig) && strpos($widgetConfig, "@import") !== false) {
           $filePath = trim(str_replace("@import", "", $widgetConfig));
           $widgetConfig = $this->importJson($filePath);
@@ -188,35 +242,39 @@ class Builder {
 
         $this->createFolder("src/Widgets/{$widgetName}");
         $this->renderFile(
-          "src/Widgets/{$widgetName}/Main.php",
-          "src/Widgets/WidgetMain.twig",
+          $widgetRootDir . '/Main.php',
+          'src/Widgets/WidgetMain.twig',
           array_merge(
             $this->prototype,
             [
-              "thisWidget" => [
-                "name" => $widgetName,
-                "config" => $widgetConfig
+              'thisWidget' => [
+                'name' => $widgetName,
+                'namespace' => $widgetNamespace,
+                'class' => $widgetClassName,
+                'config' => $widgetConfig
               ]
             ]
           )
         );
 
         if (is_array($widgetConfig['models'] ?? NULL)) {
-          $this->createFolder("src/Widgets/{$widgetName}/Models");
+          $this->createFolder($widgetRootDir . '/Models');
           foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
             $this->renderFile(
-              "src/Widgets/{$widgetName}/Models/{$modelName}.php",
-              "src/Widgets/Model.twig",
+              $widgetRootDir . '/Models/' . $modelName . '.php',
+              'src/Widgets/Model.twig',
               array_merge(
                 $this->prototype,
                 [
-                  "thisWidget" => [
-                    "name" => $widgetName,
-                    "config" => $widgetConfig
+                  'thisWidget' => [
+                    'name' => $widgetName,
+                    'namespace' => $widgetNamespace,
+                    'class' => $widgetClassName,
+                    'config' => $widgetConfig
                   ],
-                  "thisModel" => [
-                    "name" => $modelName,
-                    "config" => $modelConfig
+                  'thisModel' => [
+                    'name' => $modelName,
+                    'config' => $modelConfig
                   ]
                 ]
               )
@@ -225,39 +283,43 @@ class Builder {
         }
 
         if (is_array($widgetConfig['actions'] ?? NULL)) {
-          $this->createFolder("src/Widgets/{$widgetName}/Actions");
-          $this->createFolder("src/Widgets/{$widgetName}/Templates");
+          $this->createFolder($widgetRootDir . '/Actions');
+          $this->createFolder($widgetRootDir . '/Templates');
           foreach ($widgetConfig['actions'] as $actionName => $actionConfig) {
             $templateContainsPhpScript = ($actionConfig['templateContainsPhpScript'] ?? FALSE);
 
             if ($templateContainsPhpScript) {
-              $twigTemplate = "src/Widgets/Actions/{$actionConfig['template']}.twig";
+              $twigTemplate = 'src/Widgets/Actions/' . $actionConfig['template'] . '.twig';
             } else {
-              $twigTemplate = "src/Widgets/Action.twig";
+              $twigTemplate = 'src/Widgets/Action.twig';
 
               $this->copyFile(
-                "src/Widgets/Templates/{$actionConfig['template']}.twig",
-                "src/Widgets/{$widgetName}/Templates/{$actionConfig['template']}.twig"
+                'src/Widgets/Templates/' . $actionConfig['template'] . '.twig',
+                $widgetRootDir . '/Templates/' . $actionConfig['template'] . '.twig'
               );
             }
 
             $tmpActionConfig = $actionConfig;
-            unset($tmpActionConfig["template"]);
-            unset($tmpActionConfig["templateContainsPhpScript"]);
+            unset($tmpActionConfig['template']);
+            unset($tmpActionConfig['templateContainsPhpScript']);
 
             $this->renderFile(
-              "src/Widgets/{$widgetName}/Actions/{$actionName}.php",
+              $widgetRootDir . '/Actions/' . $actionName . '.php',
               $twigTemplate,
               array_merge(
                 $this->prototype,
                 [
-                  "thisWidget" => [
-                    "name" => $widgetName,
-                    "config" => $widgetConfig
+                  'thisWidget' => [
+                    'name' => $widgetName,
+                    'namespace' => $widgetNamespace,
+                    'class' => $widgetClassName,
+                    'config' => $widgetConfig
                   ],
-                  "thisAction" => [
-                    "name" => $actionName,
-                    "config" => $tmpActionConfig
+                  'thisAction' => [
+                    'name' => $actionName,
+                    'namespace' => str_replace('ADIOS\\Widgets', 'ADIOS\\Actions', $widgetNamespace) . '\\' . $widgetClassName,
+                    'class' => $actionName,
+                    'config' => $tmpActionConfig
                   ]
                 ]
               )

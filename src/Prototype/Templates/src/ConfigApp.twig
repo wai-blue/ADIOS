@@ -21,9 +21,10 @@ $config["brand"]["sidebar"]["icon"]      = "{$config["url"]}/src/Assets/images/l
 $config["brand"]["sidebar"]["title"]     = "";
 
 // widgets
-{% for widgetName, widgetConfig in Widgets %}
+$config['widgets'] = {{ varExport(configWidgetsEnabled)|raw }};
+{# {% for widgetName, widgetConfig in Widgets %}
 $config['widgets']['{{ widgetName }}']['enabled'] = TRUE;
-{% endfor %}
+{% endfor %} #}
 
 // misc
 $config['default_action'] = "{% if ConfigApp.defaultAction == "" %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}";
