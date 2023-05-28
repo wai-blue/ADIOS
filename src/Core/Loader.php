@@ -1743,7 +1743,7 @@ class Loader
 
   public function authUser($login, $password, $rememberLogin = FALSE) {
     $this->userProfile = null;
-    $login = trim($login);
+    $login = trim((string) $login);
 
     if (empty($login) && !empty($_COOKIE[_ADIOS_ID.'-user'])) {
       $login = $this->authCookieGetLogin();

@@ -18,6 +18,19 @@ $onkeypress_request = '';
 
 class DB
 {
+  private $db_result;
+
+  private bool $log_disabled; 
+
+  private float $lastQueryDurationSec;
+
+  private string $db_host = "";
+  private string $db_port = "";
+  private string $db_login = "";
+  private string $db_password = "";
+  private string $db_name = "";
+  private string $db_codepage = "";
+
   public $adios;
 
   /**
@@ -33,16 +46,10 @@ class DB
   public $bufferQueries = FALSE;
   public $queryBuffer = "";
 
-  private string $db_host = "";
-  private string $db_port = "";
-  private string $db_login = "";
-  private string $db_password = "";
-  private string $db_name = "";
-  private string $db_codepage = "";
-
   public bool $ob_mode = FALSE;
-  public string $ob = "";
   public bool $debugCorrectQueries = FALSE;
+
+  public string $ob = "";
 
   /**
    * Constructor.
@@ -187,7 +194,7 @@ class DB
     };
 
     $ts1 = _getmicrotime();
-    $this->last_query = $query;
+
     $this->db_result = $this->connection->query($query);
     $this->lastQueryDurationSec = _getmicrotime() - $ts1;
 
