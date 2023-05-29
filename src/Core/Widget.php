@@ -76,7 +76,8 @@ class Widget {
   }
 
   public function loadModels() {
-    $dir = $this->adios->widgetsDir."/{$this->name}/Models";
+    $this->name = $dir = str_replace("\\", "/", $this->name);
+    $dir = $this->adios->widgetsDir . "/{$this->name}/Models";
 
     if (is_dir($dir)) {
       foreach (scandir($dir) as $file) {

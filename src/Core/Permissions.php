@@ -21,8 +21,8 @@ class Permissions {
   {
     $this->adios = $adios;
 
-    if (is_array($this->adios->config['permissions'])) {
-      foreach ($this->adios->config['permissions'] as $idUserRole => $permissionsByRole) {
+    if (is_array($this->adios->config['permissions'] ?? [])) {
+      foreach ($this->adios->config['permissions'] ?? [] as $idUserRole => $permissionsByRole) {
         $this->enabledPermissions[$idUserRole] = [];
         foreach ($permissionsByRole as $permissionPath => $isEnabled) {
           if ((bool) $isEnabled) {
