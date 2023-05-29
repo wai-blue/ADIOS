@@ -19,9 +19,9 @@ class DataTypeLookup extends DataType {
     $col_def = $this->adios->db->tables[$table_name][$col_name];
 
     if (!$col_def['disable_foreign_key']) {
-      $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : ' NULL ';
+      $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' NULL ';
     } else {
-      $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : ' default 0 ';
+      $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default 0 ';
     }
 
     return "`{$col_name}` ".('' == $params['sql_type'] ? 'int(8)' : $params['sql_type'])." {$params['sql_definitions']}";

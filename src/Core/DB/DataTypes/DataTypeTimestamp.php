@@ -17,7 +17,7 @@ class DataTypeTimestamp extends DataType
 {
     public function get_sql_create_string($table_name, $col_name, $params = [])
     {
-        $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : ' default CURRENT_TIMESTAMP ';
+        $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default CURRENT_TIMESTAMP ';
 
         return "`$col_name` timestamp {$params['sql_definitions']}";
     }

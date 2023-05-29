@@ -19,7 +19,7 @@ class DataTypeImage extends DataType
 {
     public function get_sql_create_string($table_name, $col_name, $params = [])
     {
-        $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
+        $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
 
         return "`$col_name` varchar(255) {$params['sql_definitions']}";
     }

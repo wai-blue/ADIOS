@@ -15,7 +15,7 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypeFloat extends DataType {
     public function get_sql_create_string($table_name, $col_name, $params = []) {
-      $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
+      $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
       $float_decimals = max((int) $params['decimals'], 1);
       $float_width = (int) $params['byte_size'];
 

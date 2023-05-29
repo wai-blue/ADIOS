@@ -18,9 +18,9 @@ $onkeypress_request = '';
 
 class DB
 {
-  private bool $log_disabled; 
-
   private float $lastQueryDurationSec;
+
+  private int $log_disabled = 0;
 
   private string $db_host = "";
   private string $db_port = "";
@@ -577,6 +577,7 @@ class DB
 
     $log_status = $this->log_disabled;
     $this->log_disabled = 1;
+
     if (!$force_create) {
       try {
         $cnt = $this->count_all_rows_query("select * from `{$table_name}`");
