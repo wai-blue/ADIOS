@@ -11,7 +11,7 @@
 namespace ADIOS\Core;
 
 class Email {
-  var $adios = NULL;
+  public ?\ADIOS\Core\Loader $adios = null;
 
   var $subject = "";
   var $bodyHtml = "";

@@ -97,6 +97,7 @@ spl_autoload_register(function ($class) {
 
 
 // ADIOS Loader class
+#[\AllowDynamicProperties]
 class Loader
 {
   const ADIOS_MODE_FULL = 1;
@@ -112,7 +113,7 @@ class Loader
 
   public $actionObject;
 
-  public $logged = FALSE;
+  public bool $logged = FALSE;
 
   public array $config = [];
   public array $routing = [];
@@ -1088,7 +1089,7 @@ class Loader
 
       $permissionForRequestedURI = "";
       foreach ($this->routing as $routePattern => $route) {
-        if (preg_match($routePattern, $params['action'], $m)) {
+        if (preg_match((string) $routePattern, (string) $params['action'], $m)) {
           $permissionForRequestedURI = $route['permission'];
         }
       }

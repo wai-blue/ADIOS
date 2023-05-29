@@ -12,10 +12,11 @@ namespace ADIOS\Core\UI;
 
 class View {
   
+  public ?\ADIOS\Core\Loader $adios = null;
+
   var string $uid = "";
   var bool $useSession = FALSE;
   var array $params = [];
-  var $adios = NULL;
   var string $fullName = "";
   var string $shortName = "";
   var array $views = [];

@@ -11,7 +11,7 @@
 namespace ADIOS\Core;
 
 class Locale {
-  public $adios = NULL;
+  public ?\ADIOS\Core\Loader $adios = null;
   
   public function __construct(&$adios) {
     $this->adios = $adios;

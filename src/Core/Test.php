@@ -12,7 +12,7 @@ namespace ADIOS\Core;
 
 class Test
 {
-  public $adios = NULL;
+  public ?\ADIOS\Core\Loader $adios = null;
   public array $assertions = [];
   public int $assertionCounter = 0;
 

@@ -34,6 +34,10 @@ namespace ADIOS\Core\UI;
  * @package UI\Elements
  */
 class Input extends \ADIOS\Core\UI\View {
+
+    public array $supported_events = [];
+    public array $default_params = [];
+
     /*             */
     /* __construct */
     /*             */

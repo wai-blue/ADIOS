@@ -18,20 +18,20 @@ use Monolog\Handler\RotatingFileHandler;
  * Debugger console for ADIOS application.
  */
 class Console {
-  var $adios;
-  var $logDir = "";
+  public ?\ADIOS\Core\Loader $adios = null;
 
-  var $loggers = [];
+  public array $loggers = [];
+  public array $infos = [];
+  public array $warnings = [];
+  public array $errors = [];
+  
+  public bool $cliEchoEnabled = FALSE;
 
-  var $infos = [];
-  var $warnings = [];
-  var $errors = [];
+  public int $lastTimestamp = 0;
 
-  var $cliEchoEnabled = FALSE;
-
-  var $lastTimestamp = 0;
-
-  public function __construct(&$adios) {
+  public string $logDir = "";
+ 
+  public function __construct($adios) {
     $this->adios = $adios;
     $this->logDir = $this->adios->config['log_dir'] ?? "";
 

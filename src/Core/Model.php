@@ -25,6 +25,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   protected $guarded = [];
 
+  protected ?\Illuminate\Database\Eloquent\Builder $eloquentQuery = null;
+
   /**
    * ADIOS model does not use time stamps
    *
@@ -120,7 +122,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
   var $isCrossTable = FALSE;
 
   var $pdo;
-  var $eloquentQuery;
   var $searchAction;
 
   /**

@@ -8,14 +8,14 @@
  * Shorthand for htmlspecialchars with ENT_QUOTES.
  */
 function hsc($string) {
-  return htmlspecialchars($string, ENT_QUOTES);
+  return htmlspecialchars((string) $string, ENT_QUOTES);
 }
 
 /**
  * Shorthand for addslashes
  */
 function ads($string) {
-  return addslashes($string);
+  return addslashes((string) $string);
 }
 
 /**

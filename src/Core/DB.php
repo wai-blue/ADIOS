@@ -18,8 +18,6 @@ $onkeypress_request = '';
 
 class DB
 {
-  private $db_result;
-
   private bool $log_disabled; 
 
   private float $lastQueryDurationSec;
@@ -31,7 +29,8 @@ class DB
   private string $db_name = "";
   private string $db_codepage = "";
 
-  public $adios;
+  public ?\ADIOS\Core\Loader $adios = null;
+  public $db_result;
 
   /**
    * Multidimensional array which completely defines the table structure of a database

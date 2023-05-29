@@ -17,9 +17,9 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataType {
 
-  private ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $adios = null;
 
-  public function __construct(&$adios) {
+  public function __construct($adios) {
     $this->adios = $adios;
   }
   

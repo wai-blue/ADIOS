@@ -757,7 +757,7 @@ class Table extends \ADIOS\Core\UI\View
                 data-col-name='{$col_name}'
                 id='{$params['uid']}_column_filter_{$col_name}'
                 required='required'
-                value=\"" . htmlspecialchars($this->columnsFilter[$col_name]) . "\"
+                value=\"" . htmlspecialchars((string) $this->columnsFilter[$col_name]) . "\"
                 title=' '
                 onkeydown='
                   if (event.keyCode == 13) { event.cancelBubble = true; }
