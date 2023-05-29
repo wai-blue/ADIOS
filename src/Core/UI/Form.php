@@ -547,6 +547,7 @@ class Form extends \ADIOS\Core\UI\View
       ";
 
     }
+    
     if (is_callable($this->params['formatter'])) {
       $html .= $this->params['formatter']('after_html', $this, []);
     }
@@ -642,7 +643,7 @@ class Form extends \ADIOS\Core\UI\View
       );
       $html = $this->adios->ui->Window($window_params)->render();
     } elseif ('desktop' == $this->params['form_type']) {
-      $html = parent::render('title').$html;
+      $html = parent::render('title') . $html;
     } elseif ('form' == $this->params['form_type']) {
       $html = $html;
     }

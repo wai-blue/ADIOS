@@ -61,7 +61,7 @@ class Permissions {
     if ($idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR) {
       return TRUE;
     } else {
-      return (bool) in_array($permission, $this->enabledPermissions[$idUserRole]);
+      return (bool) in_array($permission, (array) $this->enabledPermissions[$idUserRole]);
     }
   }
   

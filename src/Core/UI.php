@@ -28,7 +28,7 @@ class UI
   public function __call(string $name, array $arguments)
   {
     $chr = substr($name, 0, 1);
-    $firstLetterIsCapital = strtolower($chr, "UTF-8") != $chr;
+    $firstLetterIsCapital = strtolower($chr) != $chr;
 
     $className = "\\ADIOS\\Core\\UI\\{$name}";
 

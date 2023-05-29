@@ -6,7 +6,7 @@
         '{{ layoutRow }}'
       {% endfor %}
     ;
-    gap: 5px;
+    gap: 15px;
     height: 100vh;
     padding: 5px;
   }
@@ -66,9 +66,9 @@
 
   #{{ uid }}_div > div {
     background-color: rgba(255, 255, 255, 0.8);
-    text-align: center;
-    padding: 0.63em;
-    border: 1px solid var(--cl-main);
+    padding: 1em;
+    box-shadow: 0 0 3px #ccc;
+    overflow: auto;
   }
 
   {% for areaName, areaParams in view.areas %}
