@@ -1,17 +1,22 @@
 # ADIOS
 
-Light-weight rapid application development framework for PHP 8
+Light-weight rapid application development framework for PHP 8.
+
+Completely free.
 
 ## Features
 
-  * Bootstrap-based user interface
-  * In-built configuration management, file-based or DB-based
+  * [Bootstrap](https://getbootstrap.com)-based user interface
+  * In-built configuration management
   * In-build models for user management, permissions and ACL
-  * In-built default routing
+  * In-built routing
+  * Multi-language support
   * Full-featured set of in-built UI components (tables, forms, tabs, inputs, charts, dashboard, ...)
   * Flexible templating engine thanks to [Twig](https://twig.symfony.com)
   * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent)
   * Powerful prototype builder
+
+And still easy to learn and use.
 
 ## Prototype builder
 
@@ -92,3 +97,22 @@ php vendor/wai-blue/adios/src/CLI/build-prototype -I prototype.json -A vendor/au
 ```
 
 More JSON examples and usage details are available [here](docs/Prototype/user-guide.md).
+
+## Want to contribute?
+
+ADIOS is an open-source MIT licensed framework. You can use it for free for both personal and commercial projects.
+
+We will be happy for any contributions to the project:
+
+  * UI componets
+  * Language dictionaries
+  * Plugins
+  * Prototype builder templates
+  * Sample applications
+  * And any other
+
+Enjoy!
+
+## Want to donate? Buy us a beer.
+
+Thank you :-)

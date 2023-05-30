@@ -66,9 +66,16 @@ $builder = new \ADIOS\Prototype\Builder($inputFile, $outputFolder, $sessionSalt,
 
 if (!empty($rewriteBase)) $builder->setRewriteBase($rewriteBase);
 
-$builder->buildPrototype();
-$builder->createEmptyDatabase();
+try {
+  $builder->buildPrototype();
+  $builder->createEmptyDatabase();
 
-echo "\n";
-echo "SUCCESS: Prototype was successfuly built.\n";
-echo "Open {$rootUrl}/install.php in your browser now or run `php install.php` in your project's folder.\n";
+  echo "\n";
+  echo "SUCCESS: Prototype was successfuly built.\n";
+  echo "Open {$rootUrl}/install.php in your browser now or run `php install.php` in your project's folder.\n";
+
+} catch (\Twig\Error\SyntaxError $e) {
+  echo 'ERROR: ' . $e->getMessage() . "\n";
+  exit(1);
+}
+
