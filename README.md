@@ -4,14 +4,13 @@ Light-weight rapid application development framework for PHP 8
 
 ## Features
 
-  * Bootstrap base user interface
+  * Bootstrap-based user interface
   * In-built configuration management, file-based or DB-based
   * In-build models for user management, permissions and ACL
   * In-built default routing
-    * Simply create a PHP file for the controller and the routing table will automatically update
   * Full-featured set of in-built UI components (tables, forms, tabs, inputs, charts, dashboard, ...)
-  * Flexible templating engine thanks to TWIG
-  * Compatible with Laravel's Eloquent
+  * Flexible templating engine thanks to [Twig](https://twig.symfony.com)
+  * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent)
   * Powerful prototype builder
 
 ## Prototype builder
