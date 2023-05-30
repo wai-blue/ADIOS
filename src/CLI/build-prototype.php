@@ -71,5 +71,4 @@ $builder->createEmptyDatabase();
 
 echo "\n";
 echo "SUCCESS: Prototype was successfuly built.\n";
-echo "Run {$rootUrl}/install.php script from your browser now.\n";
-echo "\n";
+echo "Open {$rootUrl}/install.php in your browser now or run `php install.php` in your project's folder.\n";
