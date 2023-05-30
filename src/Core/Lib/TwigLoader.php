@@ -34,8 +34,11 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
 
       // ...potom Widget akciu
       if (!is_file($templateFile)) {
-        preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
-        $templateFile = $this->adios->widgetsDir."/{$m[1]}/Templates/{$m[2]}.twig";
+        $tPath = explode("/", $templateName);
+        $tName = array_pop($tPath);
+        $tPath = join("/", $tPath);
+
+        $templateFile = $this->adios->widgetsDir."/{$tPath}/Templates/{$tName}.twig";
       }
 
       // ...a nakoniec Plugin akciu

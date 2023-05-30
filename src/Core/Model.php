@@ -369,7 +369,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function installUpgrades(): void
   {
     if ($this->hasAvailableUpgrades()) {
-      $currentVersion = $this->getCurrentInstalledVersion();
+      $currentVersion = (int) $this->getCurrentInstalledVersion();
       $lastVersion = max(array_keys($this->upgrades()));
 
       try {

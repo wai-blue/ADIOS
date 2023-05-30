@@ -33,30 +33,32 @@ spl_autoload_register(function ($class) {
       if (!@include($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
-        if (preg_match('/([\w]+)\/([\w\/]+)/', $class, $m)) {
-          if (!@include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Actions/{$m[2]}.php")) {
-            // ak ani widgetovska, skusim plugin
-            $class = str_replace("Plugins/", "", $class);
-            $pathLeft = "";
-            $pathRight = "";
-            foreach (explode("/", $class) as $pathPart) {
-              $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
-              $pathRight = str_replace("{$pathLeft}/", "", $class);
+        $widgetPath = explode("/", $class);
+        $widgetName = array_pop($widgetPath);
+        $widgetPath = join("/", $widgetPath);
 
-              $included = FALSE;
+        if (!@include($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+          // ak ani widgetovska, skusim plugin
+          $class = str_replace("Plugins/", "", $class);
+          $pathLeft = "";
+          $pathRight = "";
+          foreach (explode("/", $class) as $pathPart) {
+            $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
+            $pathRight = str_replace("{$pathLeft}/", "", $class);
 
-              foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
-                $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
-                if (is_file($file)) {
-                  include($file);
-                  $included = TRUE;
-                  break;
-                }
-              }
+            $included = FALSE;
 
-              if ($included) {
+            foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
+              $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
+              if (is_file($file)) {
+                include($file);
+                $included = TRUE;
                 break;
               }
+            }
+
+            if ($included) {
+              break;
             }
           }
         }
@@ -677,6 +679,8 @@ class Loader
           throw new \Exception("Widget {$widgetName} not found.");
         }
         $this->widgets[$widgetName] = new $widgetClassName($this);
+
+        $this->addRouting($this->widgets[$widgetName]->routing());
       } catch (\Exception $e) {
         exit("Failed to load widget {$widgetName}: ".$e->getMessage());
       }

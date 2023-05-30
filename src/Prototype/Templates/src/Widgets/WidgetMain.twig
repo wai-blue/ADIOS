@@ -9,6 +9,9 @@ class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
       $this->adios->config['desktop']['sidebarItems'][] = [
         "fa_icon" => "fas {% if itemConfig.faIcon %}{{ itemConfig.faIcon }}{% else %}{{ thisWidget.config.faIcon }}{% endif %}",
         "title" => "{{ itemTitle }}",
+{% if itemConfig.url %}
+        "onclick" => "desktop_update('{{ itemConfig.url }}');",
+{% endif %}
 {% if itemConfig.sub is iterable %}
         "sub" => [
 {% for subItemTitle, subItemConfig in itemConfig.sub %}
@@ -18,8 +21,6 @@ class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
           ],
 {% endfor %}
         ],
-{% else %}
-        "onclick" => "desktop_update('{{ itemConfig.url }}');",
 {% endif %}
       ];
 {% endfor %}
