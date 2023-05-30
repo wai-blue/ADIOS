@@ -2,7 +2,7 @@
 
 Light-weight rapid application development framework for PHP 8.
 
-Completely free.
+Easy to use and completely free.
 
 ## Features
 
