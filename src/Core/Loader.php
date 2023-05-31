@@ -97,7 +97,6 @@ spl_autoload_register(function ($class) {
   }
 });
 
-
 // ADIOS Loader class
 #[\AllowDynamicProperties]
 class Loader
@@ -1304,6 +1303,24 @@ class Loader
       $actionHtml = $this->renderFatal($e->getMessage());
     } catch (\Exception $e) {
       $actionHtml = $this->renderExceptionWarningHtml($e);
+    } catch (\Throwable $e) {
+      $error = error_get_last();
+
+      $trace = debug_backtrace(FALSE);
+      $traceStr = '';
+      foreach ($trace as $t) {
+        $traceStr .= $t['file'] . ':' . $t['line'] . ' in ' . $t['class'] . $t['type'] . $t['function'] . "()\n";
+      }
+
+      $actionHtml = $this->renderFatal(
+        '<div style="margin-bottom:1em;">'
+          . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
+        . '</div>'
+        . '<pre style="font-size:0.75em;font-family:Courier New;max-height:10em;overflow:auto">'
+          . $traceStr
+        . '</pre>',
+        TRUE
+      );
     }
 
     return $actionHtml;

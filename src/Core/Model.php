@@ -1435,9 +1435,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
 
       if ($id <= 0) {
-        $returnValue = $this->onAfterInsert($data);
+        $returnValue = $this->onAfterInsert($data, $returnValue);
       } else {
-        $returnValue = $this->onAfterUpdate($data);
+        $returnValue = $this->onAfterUpdate($data, $returnValue);
       }
 
       $returnValue = $this->onAfterSave($data, $returnValue);
@@ -1554,30 +1554,34 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onAfterInsert
    *
    * @param mixed $data
+   * @param mixed $returnValue
    * 
    * @return [type]
    */
-  public function onAfterInsert($data)
+  public function onAfterInsert($data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterInsert", [
       "model" => $this,
       "data" => $data,
-    ])["data"];
+      "returnValue" => $returnValue,
+    ])["returnValue"];
   }
 
   /**
    * onModelAfterUpdate
    *
    * @param mixed $data
+   * @param mixed $returnValue
    * 
    * @return [type]
    */
-  public function onModelAfterUpdate($data)
+  public function onModelAfterUpdate($data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterUpdate", [
       "model" => $this,
       "data" => $data,
-    ])["data"];
+      "returnValue" => $returnValue,
+    ])["returnValue"];
   }
   
   /**

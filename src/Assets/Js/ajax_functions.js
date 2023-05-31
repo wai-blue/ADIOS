@@ -205,7 +205,26 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
       } else {
         switch (resJson.result) {
           case 'WARNING':
-            _alert(resJson.content);
+            _alert(
+              resJson.content,
+              {
+                title: 'Warning',
+                titleClass: 'bg-warning text-white',
+                contentClass: 'text-warning',
+                confirmButtonClass: 'btn-warning',
+              }
+            );
+          break;
+          case 'FATAL':
+            _alert(
+              resJson.content,
+              {
+                title: 'Fatal error',
+                titleClass: 'bg-danger text-white',
+                contentClass: 'text-danger',
+                confirmButtonClass: 'btn-danger',
+              }
+            );
           break;
           case 'SUCCESS':
           default:

@@ -205,10 +205,10 @@ class Form extends \ADIOS\Core\UI\View
             '".$this->translate('You are about to delete the record. Continue?')."',
             {
               'title': '".$this->translate('Delete record confirmation')."',
-              'content_class': 'border-left-danger',
-              'confirm_button_class': 'btn-danger',
-              'confirm_button_text': '".$this->translate('Yes, delete the record')."',
-              'cancel_button_text': '".$this->translate('Do not delete')."',
+              'contentClass': 'border-left-danger',
+              'confirmButtonClass': 'btn-danger',
+              'confirmButtonText': '".$this->translate('Yes, delete the record')."',
+              'cancelButtonText': '".$this->translate('Do not delete')."',
             },
             function() { ui_form_delete('{$this->params['uid']}') }
           );

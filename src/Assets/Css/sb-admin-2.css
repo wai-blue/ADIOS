@@ -5618,7 +5618,7 @@ a.close.disabled {
 .modal-footer {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   padding: 1rem;
   border-top: 1px solid #e3e6f0;
   border-bottom-right-radius: 0.3rem;
@@ -5643,8 +5643,8 @@ a.close.disabled {
 
 @media (min-width: 576px) {
   .modal-dialog {
-    max-width: 750px;
-    margin: 1.75rem auto;
+    max-width: 10000px;
+    margin: 2.75rem;
   }
   .modal-dialog-scrollable {
     max-height: calc(100% - 3.5rem);

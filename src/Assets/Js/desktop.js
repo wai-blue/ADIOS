@@ -354,21 +354,25 @@
 
     if (typeof params == 'undefined') params = {};
 
-    if (params.title == '' || typeof params.title == 'undefined') params.title = _TRANSLATIONS['Warning'];
-    if (params.modal == '' || typeof params.modal == 'undefined') params.modal = true;
-    if (params.resizable == '' || typeof params.resizable == 'undefined') params.resizable = false;
-    if (params.modal == '' || typeof params.modal == 'undefined') params.modal = true;
-    if (params.width == '' || typeof params.width == 'undefined') params.width = 450;
-    if (params.confirm_button_text == '' || typeof params.confirm_button_text == 'undefined') params.confirm_button_text = _TRANSLATIONS['OK, I understand'];
-    if (params.cancel_button_text == '' || typeof params.cancel_button_text == 'undefined') params.cancel_button_text = _TRANSLATIONS['Cancel'];
+    params.resizable = params.resizable ?? false;
+    params.modal = params.modal ?? true;
+    params.width = params.width ?? 450;
+    params.title = params.title ?? _TRANSLATIONS['Warning'];
+    params.titleClass = params.titleClass ?? '';
+    params.contentClass = params.contentClass ?? '';
+    params.confirmButtonText = params.confirmButtonText ?? _TRANSLATIONS['OK, I understand'];
+    params.confirmButtonClass = params.confirmButtonClass ?? '';
+    params.cancelButtonText = params.cancelButtonText ?? _TRANSLATIONS['Cancel'];
+    params.cancelButtonClass = params.cancelButtonClass ?? '';
+
       
     if (params.width > $(window).width()) params.width = $(window).width() - 20;
     if (params.buttons == '' || typeof params.buttons == 'undefined') {
       params.buttons = [
         {
-          'text': params.confirm_button_text,
+          'text': params.confirmButtonText,
           'fa_icon': 'fas fa-check',
-          'class': 'btn-primary ' + params.confirm_button_class,
+          'class': 'btn-primary ' + params.confirmButtonClass,
           'onclick': function() {
             if (typeof params.onConfirm == 'function') params.onConfirm();
             $(this).closest('.adios.ui.window').remove();
@@ -378,9 +382,9 @@
 
       if (typeof params.onConfirm == 'function') {
         params.buttons.push({
-          'text': params.cancel_button_text,
+          'text': params.cancelButtonText,
           'fa_icon': 'fas fa-times',
-          'class': 'btn-secondary',
+          'class': 'btn-secondary' + params.cancelButtonClass,
           'onclick': function () {
             $(this).closest('.adios.ui.window').remove();
           }
@@ -388,18 +392,18 @@
       }
     }
 
-    let buttons_html = '';
+    let buttonsHtml = '';
     for (let i in params.buttons) {
       let button = params.buttons[i];
-      buttons_html += '<button type="button" class="btn ' + button.class + '" btn-index="' + i + '">';
-      buttons_html += '<i class="' + button.fa_icon + ' mr-1"></i> ' + button.text;
-      buttons_html += '</button>';
+      buttonsHtml += '<button type="button" class="btn ' + button.class + '" btn-index="' + i + '">';
+      buttonsHtml += '<i class="' + button.fa_icon + ' mr-1"></i> ' + button.text;
+      buttonsHtml += '</button>';
     }
 
     let html = '<div class="adios ui window modal">';
     html += '  <div class="modal-dialog shadow" role="document">';
-    html += '      <div class="modal-content border-left-primary ' + params.content_class + '">';
-    html += '          <div class="modal-header">';
+    html += '      <div class="modal-content ' + params.contentClass + '">';
+    html += '          <div class="modal-header ' + params.titleClass + '">';
     html += '              <h5 class="modal-title">' + params.title + '</h5>';
     html += '              <button type="button" class="close" data-dismiss="modal" aria-label="Close">';
     html += '                  <span aria-hidden="true">&times;</span>';
@@ -409,7 +413,7 @@
     html += '              <p>' + text + '</p>';
     html += '          </div>';
     html += '          <div class="modal-footer">';
-    html += buttons_html;
+    html += buttonsHtml;
     html += '          </div>';
     html += '      </div>';
     html += '  </div>';

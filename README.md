@@ -16,6 +16,7 @@ Easy to use and completely free.
   * Flexible templating engine thanks to [Twig](https://twig.symfony.com)
   * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent)
   * Powerful prototype builder
+  * Nice formatted exception handling including fatal errors
 
 And still easy to learn and use.
 
