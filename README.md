@@ -11,6 +11,7 @@ Easy to use and completely free.
   * In-build models for user management, permissions and ACL
   * In-built routing
   * Multi-language support
+  * Skinnable
   * Full-featured set of in-built UI components (tables, forms, tabs, inputs, charts, dashboard, ...)
   * Flexible templating engine thanks to [Twig](https://twig.symfony.com)
   * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent)
@@ -106,10 +107,13 @@ We will be happy for any contributions to the project:
 
   * UI componets
   * Language dictionaries
+  * Skins
   * Plugins
   * Prototype builder templates
   * Sample applications
-  * And any other
+  * Documentation
+  * Unit tests
+  * And anything else...
 
 Enjoy!
 

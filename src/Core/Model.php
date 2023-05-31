@@ -950,13 +950,36 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["csv"];
   }
 
-  public function onTableBeforeInit($tableObject)
+  /**
+   * onTableBeforeInit
+   *
+   * @param mixed $tableObject
+   * 
+   * @return void
+   */
+  public function onTableBeforeInit($tableObject) : void
   {
   }
-  public function onTableAfterInit($tableObject)
+
+  /**
+   * onTableAfterInit
+   *
+   * @param mixed $tableObject
+   * 
+   * @return void
+   */
+  public function onTableAfterInit($tableObject) : void
   {
   }
-  public function onTableAfterDataLoaded($tableObject)
+
+  /**
+   * onTableAfterDataLoaded
+   *
+   * @param mixed $tableObject
+   * 
+   * @return void
+   */
+  public function onTableAfterDataLoaded($tableObject) : void
   {
   }
 
@@ -1310,10 +1333,25 @@ class Model extends \Illuminate\Database\Eloquent\Model
   //////////////////////////////////////////////////////////////////
   // UI/Form methods
 
-  public function onFormBeforeInit($formObject)
+  /**
+   * onFormBeforeInit
+   *
+   * @param mixed $formObject
+   * 
+   * @return void
+   */
+  public function onFormBeforeInit($formObject) : void
   {
   }
-  public function onFormAfterInit($formObject)
+  
+  /**
+   * onFormAfterInit
+   *
+   * @param mixed $formObject
+   * 
+   * @return void
+   */
+  public function onFormAfterInit($formObject) : void
   {
   }
 
@@ -1345,13 +1383,20 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function formSave($data)
   {
     try {
+      $id = (int) $data['id'];
+
       $this->formSaveOriginalData = $data;
 
       $this->formValidate($data);
 
+      if ($id <= 0) {
+        $data = $this->onBeforeInsert($data);
+      } else {
+        $data = $this->onBeforeUpdate($data);
+      }
+
       $data = $this->onBeforeSave($data);
 
-      $id = (int) $data['id'];
 
       if ($id <= 0) {
         $returnValue = $this->insertRow($data);
@@ -1389,11 +1434,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
       }
 
 
-      $returnValue = $this->adios->dispatchEventToPlugins("onModelAfterSave", [
-        "model" => $this,
-        "data" => $data,
-        "returnValue" => $returnValue,
-      ])["returnValue"];
+      if ($id <= 0) {
+        $returnValue = $this->onAfterInsert($data);
+      } else {
+        $returnValue = $this->onAfterUpdate($data);
+      }
 
       $returnValue = $this->onAfterSave($data, $returnValue);
 
@@ -1460,6 +1505,43 @@ class Model extends \Illuminate\Database\Eloquent\Model
   //////////////////////////////////////////////////////////////////
   // save/delete events
 
+  /**
+   * onBeforeInsert
+   *
+   * @param mixed $data
+   * 
+   * @return [type]
+   */
+  public function onBeforeInsert($data)
+  {
+    return $this->adios->dispatchEventToPlugins("onModelBeforeInsert", [
+      "model" => $this,
+      "data" => $data,
+    ])["data"];
+  }
+
+  /**
+   * onModelBeforeUpdate
+   *
+   * @param mixed $data
+   * 
+   * @return [type]
+   */
+  public function onModelBeforeUpdate($data)
+  {
+    return $this->adios->dispatchEventToPlugins("onModelBeforeUpdate", [
+      "model" => $this,
+      "data" => $data,
+    ])["data"];
+  }
+
+  /**
+   * onBeforeSave
+   *
+   * @param mixed $data
+   * 
+   * @return [type]
+   */
   public function onBeforeSave($data)
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
@@ -1468,6 +1550,44 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"];
   }
 
+  /**
+   * onAfterInsert
+   *
+   * @param mixed $data
+   * 
+   * @return [type]
+   */
+  public function onAfterInsert($data)
+  {
+    return $this->adios->dispatchEventToPlugins("onModelAfterInsert", [
+      "model" => $this,
+      "data" => $data,
+    ])["data"];
+  }
+
+  /**
+   * onModelAfterUpdate
+   *
+   * @param mixed $data
+   * 
+   * @return [type]
+   */
+  public function onModelAfterUpdate($data)
+  {
+    return $this->adios->dispatchEventToPlugins("onModelAfterUpdate", [
+      "model" => $this,
+      "data" => $data,
+    ])["data"];
+  }
+  
+  /**
+   * onAfterSave
+   *
+   * @param mixed $data
+   * @param mixed $returnValue
+   * 
+   * @return [type]
+   */
   public function onAfterSave($data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterSave", [
@@ -1476,6 +1596,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "returnValue" => $returnValue,
     ])["returnValue"];
   }
+
+
 
   public function onBeforeDelete(int $id)
   {
@@ -1492,6 +1614,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "id" => $id,
     ])["id"];
   }
+
+
 
 
   //////////////////////////////////////////////////////////////////
