@@ -33,45 +33,49 @@ try {
   echo $e->getMessage();
 }
 
-echo "
-  <html>
-  <head>
-    <style>
-      * { font-family: Verdana; }
-      .main-div {
-        width: 50%;
-        margin: 3em auto;
-        padding: 2em;
-        text-align: center;
-      }
-      .main-div .success {
-        font-size: 4em;
-        color: green;
-        margin: 1em;
-      }
-      .main-div a {
-        border: 1px solid #EEEEEE;
-        padding: 1em;
-        display: block;
-      }
-      .main-div a:hover {
-        background: #EEEEEE;
-      }
-    </style>
-  </head>
-  <body>
-    <div class='main-div'>
-      <div class='success'>✓</div>
-      <div>
-        Your prototype app has been successfully created.<br/>
-        <br/>
-        Administrator credentials: <b>administrator</b> / <b>{$adminPassword}</b><br/>
-        <br/>
-        <span style='color:red'>We recommend to delete the install.php file in your project's root folder.</span><br/>
-        <br/>
-        <a href='.' target=_blank>Login as administrator</a>
+if (php_sapi_name() == "cli") {
+  echo "SUCCESS: Default database was succesfully installed.\n";
+} else {
+  echo "
+    <html>
+    <head>
+      <style>
+        * { font-family: Verdana; }
+        .main-div {
+          width: 50%;
+          margin: 3em auto;
+          padding: 2em;
+          text-align: center;
+        }
+        .main-div .success {
+          font-size: 4em;
+          color: green;
+          margin: 1em;
+        }
+        .main-div a {
+          border: 1px solid #EEEEEE;
+          padding: 1em;
+          display: block;
+        }
+        .main-div a:hover {
+          background: #EEEEEE;
+        }
+      </style>
+    </head>
+    <body>
+      <div class='main-div'>
+        <div class='success'>✓</div>
+        <div>
+          Your prototype app has been successfully created.<br/>
+          <br/>
+          Administrator credentials: <b>administrator</b> / <b>{$adminPassword}</b><br/>
+          <br/>
+          <span style='color:red'>We recommend to delete the install.php file in your project's root folder.</span><br/>
+          <br/>
+          <a href='.' target=_blank>Login as administrator</a>
+        </div>
       </div>
-    </div>
-  </body>
-  </html>
-";
+    </body>
+    </html>
+  ";
+}

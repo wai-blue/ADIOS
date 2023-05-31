@@ -10147,8 +10147,8 @@ a:focus {
 }
 
 .sidebar .nav-item .collapse .collapse-inner {
-  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-  background-color: rgba(255, 255, 255, 0.2);
+  /* box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); */
+  /* background-color: rgba(255, 255, 255, 0.2); */
 }
 
 .sidebar .nav-item .collapse .collapse-inner .sidebar-sub-sub, .sidebar .nav-item .collapsing .collapse-inner .sidebar-sub-sub {
@@ -10184,12 +10184,12 @@ a:focus {
 
 .sidebar .nav-item .collapse .collapse-inner .collapse-item,
 .sidebar .nav-item .collapsing .collapse-inner .collapse-item {
-  padding: 0.25em 0.25em 0.25em 2em;
-  margin: 0rem;
+  padding: 0.25em;
+  margin: 0.2rem 0.2rem 0.2rem 1.2rem;
   display: block;
   color: white;
   text-decoration: none;
-  border-radius: 0rem;
+  border-radius: 0.2rem;
   white-space: nowrap;
 }
 
@@ -10473,6 +10473,9 @@ a:focus {
 
 .sidebar-dark .nav-item .nav-link {
   color: var(--cl-link);
+  border-radius: 3px;
+  margin: 0.2em;
+  width: calc(100% - 0.4em);
 }
 
 .sidebar-dark .nav-item .nav-link i {
@@ -10480,7 +10483,8 @@ a:focus {
 }
 
 .sidebar-dark .nav-item .nav-link:active, .sidebar-dark .nav-item .nav-link:focus, .sidebar-dark .nav-item .nav-link:hover {
-  color: #fff;
+  color: var(--cl-text-1);
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .sidebar-dark .nav-item .nav-link:active i, .sidebar-dark .nav-item .nav-link:focus i, .sidebar-dark .nav-item .nav-link:hover i {

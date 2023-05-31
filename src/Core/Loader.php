@@ -33,30 +33,32 @@ spl_autoload_register(function ($class) {
       if (!@include($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
-        if (preg_match('/([\w]+)\/([\w\/]+)/', $class, $m)) {
-          if (!@include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Actions/{$m[2]}.php")) {
-            // ak ani widgetovska, skusim plugin
-            $class = str_replace("Plugins/", "", $class);
-            $pathLeft = "";
-            $pathRight = "";
-            foreach (explode("/", $class) as $pathPart) {
-              $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
-              $pathRight = str_replace("{$pathLeft}/", "", $class);
+        $widgetPath = explode("/", $class);
+        $widgetName = array_pop($widgetPath);
+        $widgetPath = join("/", $widgetPath);
 
-              $included = FALSE;
+        if (!@include($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+          // ak ani widgetovska, skusim plugin
+          $class = str_replace("Plugins/", "", $class);
+          $pathLeft = "";
+          $pathRight = "";
+          foreach (explode("/", $class) as $pathPart) {
+            $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
+            $pathRight = str_replace("{$pathLeft}/", "", $class);
 
-              foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
-                $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
-                if (is_file($file)) {
-                  include($file);
-                  $included = TRUE;
-                  break;
-                }
-              }
+            $included = FALSE;
 
-              if ($included) {
+            foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
+              $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
+              if (is_file($file)) {
+                include($file);
+                $included = TRUE;
                 break;
               }
+            }
+
+            if ($included) {
+              break;
             }
           }
         }
@@ -202,15 +204,6 @@ class Loader
     // load available languages
     if (empty($this->config['available_languages'] ?? [])) {
       $this->config['available_languages'] = ["en"];
-
-      // 2023-01-16 Dusan: automatic loading of languages is deprecated
-      // The developer must provide exact list of available languages in the config.
-
-      // foreach (scandir("{$this->config["dir"]}/Lang") as $tmpLang) {
-      //   if (!in_array($tmpLang, [".", ".."]) && is_dir("{$this->config["dir"]}/Lang/{$tmpLang}")) {
-      //     $this->config['available_languages'][] = $tmpLang;
-      //   }
-      // }
     }
 
     // pouziva sa ako vseobecny prefix niektorych session premennych,
@@ -678,6 +671,8 @@ class Loader
           throw new \Exception("Widget {$widgetName} not found.");
         }
         $this->widgets[$widgetName] = new $widgetClassName($this);
+
+        $this->addRouting($this->widgets[$widgetName]->routing());
       } catch (\Exception $e) {
         exit("Failed to load widget {$widgetName}: ".$e->getMessage());
       }
@@ -1137,7 +1132,7 @@ class Loader
         throw new \ADIOS\Core\Exceptions\GeneralException("No action specified.");
       }
 
-      $actionClassName = "ADIOS\\Actions\\".str_replace("/", "\\", $this->action);
+      $actionClassName = $this->getActionClassName($this->action);
 
       if (!class_exists($actionClassName)) {
         throw new \ADIOS\Core\Exceptions\GeneralException("Unknown action '{$this->action}'.");
@@ -1180,23 +1175,6 @@ class Loader
         $this->action = "Desktop";
       }
 
-      // kontrola vstupov podla kontrolneho kodu "_"
-      // vypnute, lebo JS btoa() pri niektorych znakoch nefunguje
-      // if (FALSE && $params['__IS_RENDERED_ON_DESKTOP__'] && count($params) > 0) {
-      //   $tmpParams = $params;
-      //   unset($tmpParams['__C__']);
-      //   unset($tmpParams['action']);
-
-      //   if (empty($params['__C__'])) {
-      //     return "INPUT_VALIDATION_CODE_EMPTY";
-      //   } else {
-      //     $checkCode = base64_encode(json_encode($tmpParams));
-      //     if ($checkCCode != $params['__C__']) {
-      //       return "INPUT_VALIDATION_FAILED";
-      //     }
-      //   }
-      // }
-
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
         $uid = $this->getUid($params['id']);
@@ -1208,8 +1186,13 @@ class Loader
 
       return $this->renderAction($this->action, $params);
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      echo $this->renderFatal($e->getMessage());
-      exit();
+      if ($this->isAjax()) {
+        echo $this->renderFatal($e->getMessage());
+        exit();
+      } else {
+        header('Location: ' . $this->config['url']);
+        exit;
+      }
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: ".$e->getMessage();
@@ -1225,11 +1208,34 @@ class Loader
     }
   }
 
-  public function getActionClassName($action) {
-    return "ADIOS\\Actions\\".str_replace("/", "\\", $action);
+  public function getActionClassName(string $action) : string {
+
+    $actionClassName = '';
+
+    // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
+    foreach ($this->widgets as $widgetName => $widgetData) {
+      if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
+        $actionClassName = 
+          '\\ADIOS\\Widgets\\'
+          . $widgetName
+          . '\\Actions\\'
+          . substr($action, strlen($widgetName) + 1)
+        ;
+      }
+    }
+    $actionClassName = str_replace('/', '\\', $actionClassName);
+
+    if (!class_exists($actionClassName)) {
+      // Dusan 31.5.2023: Tento sposob zapisu akcii je deprecated.
+      $actionClassName = 'ADIOS\\Actions\\' . str_replace('/', '\\', $action);
+
+      $this->console->warning('Deprecated class name for action ' . $action . '.');
+    }
+
+    return $actionClassName;
   }
 
-  public function actionExists($action) {
+  public function actionExists(string $action) : bool {
     return class_exists($this->getActionClassName($action));
   }
 

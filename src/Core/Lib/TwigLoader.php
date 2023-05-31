@@ -26,6 +26,19 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $action = substr($templateName, strpos($templateName, "/") + 1);
 
       $templateFile = $this->adios->widgetsDir."/{$widget}/Templates/{$action}.twig";
+    } else if (strpos($templateName, "ADIOS/Widgets/") === 0) {
+      $templateName = str_replace('ADIOS/Widgets/', '', $templateName);
+
+      foreach ($this->adios->widgets as $widgetName => $widgetData) {
+        if (strpos(strtolower($templateName), strtolower($widgetName)) === 0) {
+          $templateFile = 
+            $this->adios->widgetsDir
+            . '/' . $widgetName . '/'
+            . substr($templateName, strlen($widgetName) + 1)
+            . '.twig'
+          ;
+        }
+      }
     } else if (strpos($templateName, "ADIOS/Templates/") === 0) {
       $templateName = str_replace("ADIOS/Templates/", "", $templateName);
 
@@ -34,8 +47,11 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
 
       // ...potom Widget akciu
       if (!is_file($templateFile)) {
-        preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
-        $templateFile = $this->adios->widgetsDir."/{$m[1]}/Templates/{$m[2]}.twig";
+        $tPath = explode("/", $templateName);
+        $tName = array_pop($tPath);
+        $tPath = join("/", $tPath);
+
+        $templateFile = $this->adios->widgetsDir."/{$tPath}/Templates/{$tName}.twig";
       }
 
       // ...a nakoniec Plugin akciu

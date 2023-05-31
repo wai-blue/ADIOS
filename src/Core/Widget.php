@@ -67,6 +67,14 @@ class Widget {
     // desktop shortcuts, routing, ...
   }
 
+  public function routing(array $routing = [])
+  {
+    return $this->adios->dispatchEventToPlugins("onWidgetAfterRouting", [
+      "model" => $this,
+      "routing" => $routing,
+    ])["routing"];
+  }
+
   public function translate($string) {
     return $this->adios->translate($string, $this);
   }

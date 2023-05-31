@@ -97,7 +97,7 @@
               {% endif %}
               href="javascript:void(0)"
               onclick="
-                if(typeof Cookies == 'object') {
+                if (typeof Cookies == 'object') {
                   Cookies.set('sidebarActiveMainItem', '{{ loop.index }}', 1);
                   Cookies.set('sidebarActiveSubItem', '0', 1);
                 }

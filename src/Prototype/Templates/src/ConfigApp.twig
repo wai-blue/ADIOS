@@ -15,10 +15,10 @@ $config['files_url']                     = "//" . $_SERVER['HTTP_HOST'] . $confi
 
 // brand
 $config["brand"]["title"]                = "{{ ConfigApp.applicationName }}";
-$config["brand"]["favicon"]              = "{$config["url"]}/src/Assets/images/favicon.png";
-$config["brand"]["login"]["splash"]      = "{$config["url"]}/src/Assets/images/login-screen.jpg";
-$config["brand"]["sidebar"]["icon"]      = "{$config["url"]}/src/Assets/images/logo.png";
-$config["brand"]["sidebar"]["title"]     = "";
+$config["brand"]["favicon"]              = $config["url"] . '/src/Assets/images/favicon.png';
+$config["brand"]["login"]["splash"]      = $config["url"] . '/src/Assets/images/login-screen.jpg';
+$config["brand"]["sidebar"]["icon"]      = $config["url"] . '/src/Assets/images/{{ ConfigApp.brand.sidebar.icon ?? 'logo.png' }}';
+$config["brand"]["sidebar"]["title"]     = '{{ ConfigApp.brand.sidebar.title ?? "" }}';
 
 // widgets
 $config['widgets'] = {{ varExport(configWidgetsEnabled)|raw }};
@@ -28,7 +28,7 @@ $config['widgets']['{{ widgetName }}']['enabled'] = TRUE;
 
 // misc
 $config['default_action'] = "{% if ConfigApp.defaultAction == "" %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}";
-$config['available_languages'] = ["sk"];
+$config['available_languages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}["sk"]{% endif %};
 
 {% if ConfigApp.smtp %}
 // SMTP server
