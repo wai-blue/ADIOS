@@ -28,7 +28,7 @@ $config['widgets']['{{ widgetName }}']['enabled'] = TRUE;
 
 // misc
 $config['default_action'] = "{% if ConfigApp.defaultAction == "" %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}";
-$config['available_languages'] = ["sk"];
+$config['available_languages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}["sk"]{% endif %};
 
 {% if ConfigApp.smtp %}
 // SMTP server

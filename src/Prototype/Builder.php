@@ -318,7 +318,7 @@ class Builder {
                 ],
                 'thisAction' => [
                   'name' => $actionName,
-                  'namespace' => str_replace('ADIOS\\Widgets', 'ADIOS\\Actions', $widgetNamespace) . '\\' . $widgetClassName,
+                  'namespace' => $widgetNamespace . '\\' . $widgetClassName . '\\Actions',
                   'class' => $actionName,
                   'config' => $tmpActionConfig
                 ]
