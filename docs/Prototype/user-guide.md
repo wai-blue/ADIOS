@@ -1,6 +1,16 @@
 # Prototype Builder - User Guide
 
-With the prototype builder, you can generate your application with a single script. You only need to create a JSON file (see [examples](examples)) and run the `ADIOS/src/CLI/build-prototype.php`
+With the prototype builder, you can generate your application with a single script. You only need to create a JSON file (see [examples](examples)) and run the `ADIOS/src/CLI/build-prototype.php`.
+
+Prototype builder generates:
+  * Folder structure
+  * **Configuration files** for the application and for the environment
+  * **Widgets** with sidebar links
+  * **Models** with placeholders for the callbacks
+  * **Actions** (a.k.a. controllers)
+  * Initial **database** (configuration, admin user)
+
+## Steps
 
 1. Create your project folder (a "ROOT_DIR").
 2. Create composer.json file in the ROOT_DIR (see sample [composer.json](composer-non-adios-developer.json)).
