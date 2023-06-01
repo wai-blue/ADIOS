@@ -14,7 +14,13 @@ You do not need to import UI components for the CRUD operations. **UI/Table and 
 
 You can very easily create very complex forms, thanks to the **strong form templating engine**. Tabs, grids, inputs, dashboards, ... it's done in few lines of code.
 
-<img src="docs/Assets/images/dashboard.png" />
+## Screenshots
+
+![](docs/Assets/images/dashboard.png)
+**Sample dashboard in ADIOS app**
+
+![](docs/Assets/images/ui-form-complex.png)
+**Complex form for managing e-commerce product (taken from Surikata.io)**
 
 ## Features
 
@@ -28,6 +34,7 @@ You can very easily create very complex forms, thanks to the **strong form templ
   * Full-featured set of in-built UI components (tables, forms, tabs, inputs, charts, dashboard, ...)
   * Strong form-templating engine
   * Flexible templating engine thanks to [Twig](https://twig.symfony.com)
+  * In-built database relationships (1:N and M:N) management
   * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent)
   * Powerful prototype builder
   * Nice formatted exception handling including fatal errors
