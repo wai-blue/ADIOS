@@ -42,7 +42,7 @@ You can very easily create very complex forms, thanks to the **strong form templ
 
 ## Create your first CRM application (in a few minutes)
 
-You need only these simple commands to create a your first CRM application:
+You need only these simple commands to create your first CRM application:
 
 ```
 composer create-project wai-blue/adios-app
