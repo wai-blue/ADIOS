@@ -21,7 +21,7 @@ You can very easily create very complex forms, thanks to the **strong form templ
   * Small footprint
   * [Bootstrap](https://getbootstrap.com)-based user interface
   * In-built configuration management
-  * In-build models for user management, permissions and ACL
+  * In-built models for user management, permissions and ACL
   * In-built routing
   * Multi-language support
   * Skinnable
@@ -31,6 +31,7 @@ You can very easily create very complex forms, thanks to the **strong form templ
   * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent)
   * Powerful prototype builder
   * Nice formatted exception handling including fatal errors
+  * In-built unit test automation classes
 
 ## Create your first CRM application (in a few minutes)
 
