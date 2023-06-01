@@ -34,83 +34,15 @@ You can very easily create very complex forms, thanks to the **strong form templ
 
 ## Prototype builder
 
-Build your application in a second:
-
-  * create a prototype.json file, e.g:
+Three simple commands to create a your first CRM application:
 
 ```
-{
-  "ConfigEnv": {
-    "db": {
-      "host": "localhost",
-      "login": "root",
-      "password": "",
-      "name": "prototype_crm"
-    },
-    "globalTablePrefix": "proto",
-    "rewriteBase": "/prototype_crm/"
-  },
-  "ConfigApp": {
-    "applicationName": "Prototype CRM - One data model",
-    "defaultAction": "Home/Dashboard"
-  },
-  "Widgets": {
-    "Home": {
-      "faIcon": "fa-home",
-      "sidebar": {
-        "Home": {
-          "url": "Home/Dashboard"
-        }
-      },
-      "actions": {
-        "Dashboard": {
-          "template": "Dashboard"
-        }
-      }
-    },
-    "Customers": {
-      "faIcon": "fa-address-book",
-      "sidebar": {
-        "Customers": {
-          "url": "Customers"
-        }
-      },
-
-      "models": {
-        "Customer": {
-          "sqlName": "customers",
-          "urlBase": "Customers",
-          "tableTitle": "Customers",
-          "formTitleForInserting": "New customer",
-          "formTitleForEditing": "Edit customer",
-          "lookupSqlValue": "{%TABLE%}.name",
-          "columns": {
-            "name": {
-              "type": "varchar",
-              "title": "Customer name",
-              "show_column": true
-            },
-            "priority": {
-              "type": "int",
-              "title": "Priority",
-              "enum_values": ["High", "Middle", "Low"],
-              "show_column": true
-            }
-          }
-        }
-      }
-    }
-  }
-}
+composer create-project wai-blue/adios-app
+cd adios-app
+./bin/build.sh
 ```
 
-  * run prototype builder in your project's folder:
-
-```
-php vendor/wai-blue/adios/src/CLI/build-prototype -I prototype.json -A vendor/autoload
-```
-
-More JSON examples and usage details are available [here](docs/Prototype/user-guide.md).
+Interested? Read more in [docs/getting-started](docs/getting-started.md).
 
 ## Want to contribute?
 
