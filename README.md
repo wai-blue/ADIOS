@@ -14,6 +14,8 @@ You do not need to import UI components for the CRUD operations. **UI/Table and 
 
 You can very easily create very complex forms, thanks to the **strong form templating engine**. Tabs, grids, inputs, dashboards, ... it's done in few lines of code.
 
+And you can fully customize your application.
+
 ## Screenshots
 
 ![](docs/Assets/images/dashboard.png)
