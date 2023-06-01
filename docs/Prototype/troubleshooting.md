@@ -1,4 +1,4 @@
-# Prototype builder - Trouble shooting
+# Prototype builder - Troubleshooting
 
 Check following tips if you have any problem with the prototype builder.
 
