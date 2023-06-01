@@ -17,7 +17,7 @@ $outputFolder = $arguments["O"] ?? $arguments["output-folder"] ?? "";
 $sessionSalt = $arguments["S"] ?? $arguments["salt"] ?? "";
 $logFile = $arguments["L"] ?? $arguments["log"] ?? "";
 $rootUrl = $arguments["U"] ?? $arguments["root-url"] ?? "http://localhost";
-$rewriteBase = $arguments["B"] ?? $arguments["rewrite-base"] ?? "http://localhost";
+$rewriteBase = $arguments["B"] ?? $arguments["rewrite-base"] ?? "";
 
 if (empty($outputFolder)) $outputFolder = ".";
 if (empty($inputFile)) $inputFile = __DIR__."/../../docs/Prototype/examples/01-one-widget.json";
