@@ -80,8 +80,6 @@ if (empty($rootUrl)) {
 
 
 
-$logFile = realpath($logFile);
-
 require_once($autoloaderFile);
 
 $builder = new \ADIOS\Prototype\Builder($inputFile, $outputFolder, $sessionSalt, $logFile);
@@ -95,7 +93,7 @@ try {
   echo "\n";
   echo "\033[32mSUCCESS\n";
   echo "\033[0mADIOS application was successfuly built.\n";
-  echo "Check {$logFile} for details.\n";
+  echo "Check ".realpath($logFile)." for details.\n";
   echo "\n";
   echo "\033[93m  Now open {$rootUrl}/install.php in your browser\n";
   echo "\033[93m  or run `php install.php` in your project's folder.\n";
