@@ -32,15 +32,17 @@ You can very easily create very complex forms, thanks to the **strong form templ
   * Powerful prototype builder
   * Nice formatted exception handling including fatal errors
 
-## Prototype builder
+## Create your first CRM application (in a few minutes)
 
-Three simple commands to create a your first CRM application:
+You need only these simple commands to create a your first CRM application:
 
 ```
 composer create-project wai-blue/adios-app
 cd adios-app
 ./bin/build.sh
 ```
+
+<img src="docs/Assets/images/prototype-builder.png" />
 
 Interested? Read more in [docs/getting-started](docs/getting-started.md).
 
