@@ -26,5 +26,5 @@ Possible causes:
 
 Solution:
   * Start/restart your database server
-  * Check the ```ConfigEnv`` section your prototype.json file
+  * Check the ```ConfigEnv``` section your prototype.json file
   
