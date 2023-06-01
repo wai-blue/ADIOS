@@ -74,7 +74,6 @@ class Builder {
   }
 
   public function log($msg) {
-    echo $msg."\n";
     fwrite($this->logHandle, $msg."\n");
   }
 

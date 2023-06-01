@@ -16,7 +16,7 @@ $autoloaderFile = $arguments["A"] ?? $arguments["autoloader"] ?? "";
 $outputFolder = $arguments["O"] ?? $arguments["output-folder"] ?? "";
 $sessionSalt = $arguments["S"] ?? $arguments["salt"] ?? "";
 $logFile = $arguments["L"] ?? $arguments["log"] ?? "";
-$rootUrl = $arguments["U"] ?? $arguments["root-url"] ?? "http://localhost";
+$rootUrl = $arguments["U"] ?? $arguments["root-url"] ?? "";
 $rewriteBase = $arguments["B"] ?? $arguments["rewrite-base"] ?? "";
 
 if (empty($outputFolder)) $outputFolder = ".";
@@ -59,6 +59,28 @@ USAGE
   );
 }
 
+echo "ADIOS prototype builder\n";
+echo "\n";
+
+if (empty($rewriteBase)) {
+  echo "\033[93mEnter the rewrite base for your new application.\n";
+  $rewriteBase = readline("\033[93mRewriteBase = ");
+  $rewriteBase = "/".trim($rewriteBase, "/")."/";
+}
+
+if (empty($rootUrl)) {
+  $rootUrl = "http://localhost/".trim($rewriteBase, "/");
+  echo "\033[93mEnter the root URL for your new application.\n";
+  $tmpRootUrl = readline("\033[93mRootURL (Enter for '{$rootUrl}') = ");
+
+  if (!empty($tmpRootUrl)) {
+    $rootUrl = $tmpRootUrl;
+  }
+}
+
+
+
+$logFile = realpath($logFile);
 
 require_once($autoloaderFile);
 
@@ -71,8 +93,14 @@ try {
   $builder->createEmptyDatabase();
 
   echo "\n";
-  echo "SUCCESS: Prototype was successfuly built.\n";
-  echo "Open {$rootUrl}/install.php in your browser now or run `php install.php` in your project's folder.\n";
+  echo "\033[32mSUCCESS\n";
+  echo "\033[0mADIOS application was successfuly built.\n";
+  echo "Check {$logFile} for details.\n";
+  echo "\n";
+  echo "\033[93m  Now open {$rootUrl}/install.php in your browser\n";
+  echo "\033[93m  or run `php install.php` in your project's folder.\n";
+  echo "\n";
+  echo "\033[0mMore examples and documentation is at \033[94mhttps://github.com/wai-blue/adios\033[0m.\n";
 
 } catch (\Twig\Error\SyntaxError $e) {
   echo 'ERROR: ' . $e->getMessage() . "\n";
