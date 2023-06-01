@@ -6,7 +6,7 @@ Easy to use and completely free.
 
 ## Why ADIOS?
 
-ADIOS is a framework with a **small footprint**. With only a little coding, you can create application with complete CRUD functionality, containing complex inputs (like dates, WYSIWYG editors or autocomplete) and able to manage complex tables.
+ADIOS is a framework with a **small footprint**. With only a little coding, you can create application with complete CRUD functionality, containing complex inputs (like dates, WYSIWYG editors or autocomplete) and able to manage complex data structures.
 
 You do not need to waste time configuring the router. Simply create a file and the **routing table will update automatically**.
 
