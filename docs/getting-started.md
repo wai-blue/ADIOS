@@ -1,6 +1,7 @@
 # Getting started
 
 ```composer create-project wai-blue/adios-app```
+
 ```./bin/build.sh```
 
 These two simple commands create an ADIOS application for you.
