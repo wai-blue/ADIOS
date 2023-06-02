@@ -22,7 +22,7 @@ And you can fully customize your application.
 **Sample dashboard in ADIOS app**
 
 ![](docs/Assets/images/ui-form-complex.png)
-**Complex form for managing e-commerce product (taken from Surikata.io)**
+**Complex form for managing e-commerce product (taken from https://www.surikata.io)**
 
 ## Features
 
