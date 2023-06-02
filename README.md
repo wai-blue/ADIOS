@@ -37,9 +37,9 @@ And you can fully customize your application.
   * Strong form-templating engine
   * Flexible templating engine thanks to [Twig](https://twig.symfony.com)
   * In-built database relationships (1:N and M:N) management
-  * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent)
+  * Compatible with Laravel's [Eloquent](https://laravel.com/docs/eloquent) and [PDO](https://www.php.net/manual/en/book.pdo.php)
   * Powerful prototype builder
-  * Nice formatted exception handling including fatal errors
+  * Nice formatted exception handling including fatal errors and custom exceptions
   * In-built unit test automation classes
 
 ## Create your first CRM application (in a few minutes)
