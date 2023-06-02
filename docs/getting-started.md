@@ -7,7 +7,7 @@
 These two simple commands create an ADIOS application for you.
 When done, you will get a full-featured web-application with a default admin user.
 
-<img src="Assets/images/login.png?raw=true" width="50%">
+<img src="Assets/images/login.png?raw=true">
 
 Now, you are ready to customize.
 
