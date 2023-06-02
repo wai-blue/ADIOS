@@ -47,7 +47,7 @@ There are many in-built features like **routing** that respect this folder struc
 
 ## Widgets
 
-Widget is a standalone piece of code inside your app. You can copy widgets from other apps or easily delete and ADIOS will take care of the rest.
+Widget is a standalone piece of code inside your app. You can copy widgets from other apps or easily delete them and ADIOS will take care of the rest.
 
 Every widget implements *models*, *views* and *controllers*:
 
