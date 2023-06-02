@@ -7,7 +7,7 @@
 These two simple commands create an ADIOS application for you.
 When done, you will get a full-featured web-application with a default admin user.
 
-<img src="Assets/images/login.png?raw=true" width="50%">
+<img src="Assets/images/login.png?raw=true">
 
 Now, you are ready to customize.
 
@@ -25,28 +25,29 @@ Now, you are ready to customize.
 ADIOS application's root folder looks like this:
 
 ```
-  log/                 // app's log
-  upload/              // where your uploaded files are stored
-  src/                 // all source code of your application
-    Widgets/           // app's widgets
-      Customers/       // this is a widget
-        Actions/       // implementation of controllers ("actions") of the widget
-        Exceptions/    // custom exceptions of your widget
-        Models/        // definition of models in the widget
-        Templates/     // TWIG templates for the controllers
-        Main.php       // "main" class of the widget
-    Assets/            // all assets used in your app
-      images/
-      css/
-      js/
-    ConfigApp.php      // default configuration of your app
+log/                 // app's log
+upload/              // where your uploaded files are stored
+src/                 // all source code of your application
+  Widgets/           // app's widgets
+    Customers/       // this is a widget
+      Actions/       // implementation of controllers ("actions") of the widget
+      Exceptions/    // custom exceptions of your widget
+      Models/        // definition of models in the widget
+      Templates/     // TWIG templates for the controllers
+      Main.php       // "main" class of the widget
+  Assets/            // all assets used in your app
+    images/
+    css/
+   js/
+  ConfigApp.php      // default configuration of your app
+ConfigEnv.php        // environment-specific configuration of your app
 ```  
 
 There are many in-built features like **routing** that respect this folder structure. This means that you do not have to routers if you do not need a very complex application. You just need to respect this folder structure.
 
 ## Widgets
 
-Widget is a standalone piece of code inside your app. You can copy widgets from other apps or easily delete and ADIOS will take care of the rest.
+Widget is a standalone piece of code inside your app. You can copy widgets from other apps or easily delete them and ADIOS will take care of the rest.
 
 Every widget implements *models*, *views* and *controllers*:
 

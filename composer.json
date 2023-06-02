@@ -9,11 +9,5 @@
             "ADIOS\\Tests\\": "tests/"
         }
     },
-    "authors": [
-        {
-            "name": "Dusan",
-            "email": "dusan.daniska@wai.sk"
-        }
-    ],
     "minimum-stability": "dev"
 }

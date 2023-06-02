@@ -22,7 +22,7 @@ And you can fully customize your application.
 **Sample dashboard in ADIOS app**
 
 ![](docs/Assets/images/ui-form-complex.png)
-**Complex form for managing e-commerce product (taken from Surikata.io)**
+**Complex form for managing e-commerce product (taken from https://www.surikata.io)**
 
 ## Features
 
@@ -53,6 +53,8 @@ cd adios-app
 ```
 
 <img src="docs/Assets/images/prototype-builder.png" />
+
+This will create an ADIOS application based on the [simple-crm.json prototype](https://github.com/wai-blue/ADIOS/blob/main/docs/Prototype/examples/10-simple-crm.json) which you can further [customize](https://github.com/wai-blue/ADIOS/blob/main/docs/getting-started.md).
 
 Interested? Read more in [docs/getting-started](docs/getting-started.md).
 
