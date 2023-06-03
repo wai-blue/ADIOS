@@ -1,11 +1,12 @@
 # Getting started
 
-```composer create-project wai-blue/adios-app```
+```sh
+composer create-project wai-blue/adios-app
+cd adios-app
+./bin/build.sh
+```
 
-```./bin/build.sh```
-
-These two simple commands create an ADIOS application for you.
-When done, you will get a full-featured web-application with a default admin user.
+With these simple commands you will create an ADIOS application based on the [simple CRM example](Prototype/examples/10-simple-crm). You will get a full-featured web-application with a default admin user.
 
 <img src="Assets/images/login.png?raw=true">
 
