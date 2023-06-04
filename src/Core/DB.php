@@ -58,7 +58,7 @@ class DB
     if (!empty($this->db_host)) {
       $this->connect();
 
-      $tmp = $this->fetchRaw("show tables", "");
+      $tmp = $this->showTables();
       foreach ($tmp as $value) {
         $this->existingSqlTables[] = reset($value);
       }
@@ -71,6 +71,12 @@ class DB
         $this->registerColumnType($col_type);
       }
     }
+  }
+
+
+  public function showTables() : array
+  {
+    return [];
   }
 
 

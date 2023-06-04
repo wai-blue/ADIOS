@@ -20,15 +20,13 @@ class Autocomplete extends \ADIOS\Core\Action {
 
     $lookupModel = $this->adios->getModel($this->params['model']);
 
-    $query = $lookupModel->lookupSqlQuery(
+    $lookupRows = $lookupModel->lookupQuery(
       $this->params['initiating_model'],
       $this->params['initiating_column'],
       @json_decode($this->params['form_data'], TRUE) ?? [], // form_data
       [],
       $having
-    );
-
-    $lookupRows = $this->adios->db->fetchRaw($query);
+    )->fetch();
 
     $retval = [];
     if (_count($lookupRows)) {

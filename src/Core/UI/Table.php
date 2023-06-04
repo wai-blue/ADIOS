@@ -319,7 +319,6 @@ class Table extends \ADIOS\Core\UI\View
     }
   }
 
-
   /**
    * loadData
    *
@@ -331,7 +330,7 @@ class Table extends \ADIOS\Core\UI\View
     if (empty($this->params['table'])) return;
 
     // where
-    $where = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
+    $whereRaw = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
 
     if (
       !empty($this->params['foreignKey'])
@@ -341,7 +340,7 @@ class Table extends \ADIOS\Core\UI\View
       $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
       if ($fkColumnDefinition !== NULL) {
         $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-        $where .= "
+        $whereRaw .= "
           and
             `lookup_{$tmpModel->getFullTableSqlName()}_{$fkColumnName}`.`id`
             = ".((int) $this->params['form_data']['id'])
@@ -367,17 +366,17 @@ class Table extends \ADIOS\Core\UI\View
     // having
     $having = [];
     foreach ($this->columnsFilter as $tmpColumn => $tmpFilter) {
-      $having[] = [$tmpColumn, $tmpFilter, Q::columnFilter];
+      $having[] = [$tmpColumn, Q::columnFilter, $tmpFilter];
     }
 
     foreach ($this->search as $tmpColumn => $tmpFilter) {
-      $having[] = [$tmpColumn, $tmpFilter, Q::columnFilter];
+      $having[] = [$tmpColumn, Q::columnFilter, $tmpFilter];
     }
 
     // query
     $query = $db->select($this->model, [Q::countRows])
       ->columns([Q::allColumnsWithLookups])
-      ->whereRaw([$where])
+      ->whereRaw($whereRaw)
       ->having($having)
       ->order($orderBy)
     ;
@@ -398,6 +397,7 @@ class Table extends \ADIOS\Core\UI\View
       $this->params['page'] = floor($this->allRowsCount / $this->params['itemsPerPage']) + 1;
     }
 
+    // onTableAfterDataLoaded
     $this->model->onTableAfterDataLoaded($this);
   }
 
@@ -584,15 +584,13 @@ class Table extends \ADIOS\Core\UI\View
             } else if ($tmpColumn["type"] == "lookup" && is_numeric($searchValue)) {
               $tmpLookupModel = $this->adios->getModel($tmpColumn["model"]);
 
-              $tmpQuery = $tmpLookupModel->lookupSqlQuery(
+              $tmp = reset($tmpLookupModel->lookupQuery(
                 NULL,
                 NULL,
                 [],
                 [],
-                "id = {$searchValue}" // having
-              );
-
-              $tmp = reset($this->adios->db->fetchRaw($tmpQuery));
+                "`id` = {$searchValue}" // having
+              )->fetch());
 
               $tmpTitle = $tmpColumn['title'];
               $searchValue = $tmp['input_lookup_value'];

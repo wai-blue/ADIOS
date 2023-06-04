@@ -51,13 +51,13 @@ class CheckboxField extends \ADIOS\Core\Input {
       throw new \ADIOS\Core\Exceptions\GeneralException("CheckboxField Input: Error #1");
     }
 
-    $assignmentsRaw = $this->adios->db->fetchRaw("
-      select
-        *
-      from `".$assignmentModel->getFullTableSqlName()."`
-      where
-        `{$masterKeyColumn}` = '".$this->adios->db->escape($keyValue)."'
-    ");
+    $assignmentsRaw = $this->adios->db->select($assignmentModel)
+      ->columns(\ADIOS\Core\DB\Query::allColumnsWithLookups)
+      ->where([
+        [$masterKeyColumn, '=', $keyValue]
+      ])
+      ->fetch()
+    ;
 
     $assignments = [];
     foreach ($assignmentsRaw as $assignmentRaw) {

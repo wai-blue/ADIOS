@@ -23,7 +23,8 @@ class Query
   const having = 6;
   const havingRaw = 7;
   const order = 8;
-  const limit = 9;
+  const orderRaw = 9;
+  const limit = 10;
 
   // select modifiers
   const countRows = 1;
@@ -175,13 +176,18 @@ class Query
           $this->model->getFullTableSqlName(),
           TRUE
         );
-      }
-      if ($column === self::allColumnsWithoutLookups) {
+      } else if ($column === self::allColumnsWithoutLookups) {
         $this->addColumnsFromModel(
           $this->model,
           $this->model->getFullTableSqlName(),
           FALSE
         );
+      } else {
+        $this->add([
+          self::column,
+          $column[0],
+          $column[1]
+        ]);
       }
     }
     return $this;
@@ -198,8 +204,8 @@ class Query
       $this->add([
         self::where,
         $where[0], // column name
-        $where[1], // filter value
-        $where[2], // operator
+        $where[1], // operator
+        $where[2], // filter value
       ]);
     }
 
@@ -207,19 +213,13 @@ class Query
   }
 
   /**
-   * @param array $wheres
+   * @param string $where
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function whereRaw(array $wheres = []) : \ADIOS\Core\DB\Query
+  public function whereRaw(string $where) : \ADIOS\Core\DB\Query
   {
-    foreach ($wheres as $where) {
-      $this->add([
-        self::whereRaw,
-        $where
-      ]);
-    }
-
+    $this->add([self::whereRaw, $where]);
     return $this;
   }
 
@@ -234,11 +234,22 @@ class Query
       $this->add([
         self::having,
         $having[0], // column name
-        $having[1], // filter value
-        $having[2], // operator
+        $having[1], // operator
+        $having[2], // filter value
       ]);
     }
 
+    return $this;
+  }
+
+  /**
+   * @param string $having
+   * 
+   * @return \ADIOS\Core\DB\Query
+   */
+  public function havingRaw(string $having) : \ADIOS\Core\DB\Query
+  {
+    $this->add([self::havingRaw, $having]);
     return $this;
   }
 
@@ -261,6 +272,17 @@ class Query
   }
 
   /**
+   * @param string $order
+   * 
+   * @return \ADIOS\Core\DB\Query
+   */
+  public function orderRaw(string $order) : \ADIOS\Core\DB\Query
+  {
+    $this->add([self::orderRaw, $order]);
+    return $this;
+  }
+
+  /**
    * @param int $start
    * @param int $count
    * 
@@ -277,12 +299,19 @@ class Query
   }
 
   /**
+   * @return string
+   */
+  public function buildSql() : string
+  {
+    return $this->db->buildSql($this);
+  }
+
+  /**
    * @return array
    */
   public function fetch() : array
   {
-    $sql = $this->db->buildSql($this);
-    return $this->db->fetchRaw($sql);
+    return $this->db->fetchRaw($this->buildSql());
   }
 
   /**

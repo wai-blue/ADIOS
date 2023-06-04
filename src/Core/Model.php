@@ -877,30 +877,72 @@ class Model extends \Illuminate\Database\Eloquent\Model
   //////////////////////////////////////////////////////////////////
   // lookup processing methods
 
-  public function lookupSqlWhere($initiatingModel = NULL, $initiatingColumn = NULL, $formData = [], $params = [])
+  // $initiatingModel = model formulara, v ramci ktoreho je lookup generovany
+  // $initiatingColumn = nazov stlpca, z ktoreho je lookup generovany
+  // $formData = aktualne data formulara
+  public function lookupWhere(
+    $initiatingModel = NULL,
+    $initiatingColumn = NULL,
+    $formData = [],
+    $params = []
+  )
   {
-    return "TRUE";
+    return [];
   }
 
-  public function lookupSqlOrderBy($initiatingModel = NULL, $initiatingColumn = NULL, $formData = [], $params = [])
+  // $initiatingModel = model formulara, v ramci ktoreho je lookup generovany
+  // $initiatingColumn = nazov stlpca, z ktoreho je lookup generovany
+  // $formData = aktualne data formulara
+  public function lookupOrder(
+    $initiatingModel = NULL,
+    $initiatingColumn = NULL,
+    $formData = [],
+    $params = []
+  )
   {
-    return "`input_lookup_value` asc";
+    return ['input_lookup_value', 'asc'];
   }
 
-  public function lookupSqlQuery($initiatingModel = NULL, $initiatingColumn = NULL, $formData = [], $params = [], $having = "TRUE")
+  // $initiatingModel = model formulara, v ramci ktoreho je lookup generovany
+  // $initiatingColumn = nazov stlpca, z ktoreho je lookup generovany
+  // $formData = aktualne data formulara
+  public function lookupQuery(
+    $initiatingModel = NULL,
+    $initiatingColumn = NULL,
+    $formData = [],
+    $params = [],
+    $having = "TRUE"
+  ) : \ADIOS\Core\DB\Query
   {
-    return str_replace('{%TABLE%}', $this->fullTableSqlName, "
-      select
-        id,
-        " . $this->lookupSqlValue() . " as `input_lookup_value`
-      from `{$this->fullTableSqlName}`
-      where
-        " . $this->lookupSqlWhere($initiatingModel, $initiatingColumn, $formData, $params) . "
-      having
-        {$having}
-      order by
-        " . $this->lookupSqlOrderBy($initiatingModel, $initiatingColumn, $formData, $params) . "
-    ");
+    return $this->adios->db->select($this)
+      ->columns([
+        [ 'id', 'id' ],
+        [ str_replace('{%TABLE%}', $this->fullTableSqlName, $this->lookupSqlValue()), 'input_lookup_value' ]
+      ])
+      ->where($this->lookupWhere($initiatingModel, $initiatingColumn, $formData, $params))
+      ->havingRaw($having)
+      ->order($this->lookupOrder($initiatingModel, $initiatingColumn, $formData, $params))
+    ;
+  }
+
+  // $initiatingModel = model formulara, v ramci ktoreho je lookup generovany
+  // $initiatingColumn = nazov stlpca, z ktoreho je lookup generovany
+  // $formData = aktualne data formulara
+  public function lookupSqlQuery(
+    $initiatingModel = NULL,
+    $initiatingColumn = NULL,
+    $formData = [],
+    $params = [],
+    $having = "TRUE"
+  ) : string
+  {
+    return $this->lookupQuery(
+      $initiatingModel,
+      $initiatingColumn,
+      $formData,
+      $params,
+      $having
+    )->buildSql();
   }
 
   public function lookupSqlValue($tableAlias = NULL)

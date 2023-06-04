@@ -127,7 +127,7 @@ class Orders extends \ADIOS\Core\Widget\Action {
       select * from `".$customerModel->getFullTableSqlName()."`
       where id = ".(int) $this->params['id']."
     "));
-    
+
     return $this->adios->ui->Window([
       "uid" => "{$this->uid}_window",
       "title" => $customer['email'],

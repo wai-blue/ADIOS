@@ -66,6 +66,17 @@ class MySQLi extends \ADIOS\Core\DB
     return $this->connection->real_escape_string((string) $str);
   }
 
+  public function typedValue($value) : string
+  {
+    if ($value instanceof string) {
+      return "'" . $this->escape($value) . "'";
+    } else if (is_float($value)) {
+      return (float) $value;
+    } else {
+      return (int) $value;
+    }
+  }
+
   public function buildSql(\ADIOS\Core\DB\Query $query) : string
   {
     $model = $query->getModel();
@@ -78,6 +89,7 @@ class MySQLi extends \ADIOS\Core\DB
     $havings = $query->getStatements(\ADIOS\Core\DB\Query::having);
     $havingRaws = $query->getStatements(\ADIOS\Core\DB\Query::havingRaw);
     $orders = $query->getStatements(\ADIOS\Core\DB\Query::order);
+    $orderRaws = $query->getStatements(\ADIOS\Core\DB\Query::orderRaw);
     $limits = $query->getStatements(\ADIOS\Core\DB\Query::limit);
 
     switch ($query->getType()) {
@@ -102,8 +114,12 @@ class MySQLi extends \ADIOS\Core\DB
         // columns
         $columnsArray = [];
         foreach ($columns as $column) {
-          list($tmpTable, $tmpColumn) = explode(".", $column[1]);
-          $columnsArray[] = '`' . $tmpTable . '`.`' . $tmpColumn . '` as `' . $column[2] . '`';
+          if (strpos($column[1], '.') === FALSE) {
+            $columnsArray[] = '`' . $column[1] . '` as `' . $column[2] . '`';
+          } else {
+            list($tmpTable, $tmpColumn) = explode(".", $column[1]);
+            $columnsArray[] = '`' . $tmpTable . '`.`' . $tmpColumn . '` as `' . $column[2] . '`';
+          }
         }
 
         // joins
@@ -117,13 +133,14 @@ class MySQLi extends \ADIOS\Core\DB
         // wheres and whereRaws
         $wheresArray = [];
         foreach ($wheres as $where) {
-          $wheresArray[] = $where[1];
-          if ($where[3] === \ADIOS\Core\DB\Query::columnFilter) {
+          if ($where[2] === \ADIOS\Core\DB\Query::columnFilter) {
             $wheresArray[] = $this->columnFilter(
               $model,
               $where[1],
-              $where[2]
+              $where[3]
             );
+          } else {
+            $wheresArray[] = '`' . $where[1] . '` '. $where[2] . ' '. $this->typedValue($where[3]);
           }
         }
         foreach ($whereRaws as $whereRaw) {
@@ -133,20 +150,21 @@ class MySQLi extends \ADIOS\Core\DB
         // havings and havingRaws
         $havingsArray = [];
         foreach ($havings as $having) {
-          if ($having[3] === \ADIOS\Core\DB\Query::columnFilter) {
+          if ($having[2] === \ADIOS\Core\DB\Query::columnFilter) {
             $havingsArray[] = $this->columnFilter(
               $model,
               $having[1],
-              $having[2]
+              $having[3]
             );
+          } else {
+            $havingsArray[] = '`' . $having[1] . '` '. $having[2] . ' '. $this->typedValue($having[3]);
           }
         }
         foreach ($havingRaws as $havingRaw) {
           $havingsArray[] = $havingRaw[1];
         }
-        // var_dump($havingRaws);
 
-        // orders
+        // orders and orderRaws
         $ordersArray = [];
         foreach ($orders as $order) {
 
@@ -158,6 +176,9 @@ class MySQLi extends \ADIOS\Core\DB
           if (!in_array($order[2], ['ASC', 'DESC'])) continue;
 
           $ordersArray[] = $order[1] . ' ' . $order[2];
+        }
+        foreach ($orderRaws as $orderRaw) {
+          $orderArray[] = $orderRaw[1];
         }
 
         // limit
@@ -183,6 +204,12 @@ class MySQLi extends \ADIOS\Core\DB
     }
 // echo $sql;
     return $sql;
+  }
+
+
+  public function showTables() : array
+  {
+    return $this->fetchRaw("show tables", "");
   }
 
   public function countRowsFromLastSelect() : int

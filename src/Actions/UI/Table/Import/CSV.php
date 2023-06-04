@@ -14,7 +14,7 @@ namespace ADIOS\Actions\UI\Table\Import;
  * @package UI\Actions
  */
 class CSV extends \ADIOS\Core\Action {
-  // public static $hideDefaultDesktop = TRUE;
+  // public static bool $hideDefaultDesktop = TRUE;
 
   public function render() {
     $model = $this->params['model'];

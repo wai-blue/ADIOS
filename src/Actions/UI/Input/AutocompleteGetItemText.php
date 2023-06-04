@@ -18,15 +18,13 @@ class AutocompleteGetItemText extends \ADIOS\Core\Action {
     $value = (int) $this->params['value'];
     $lookupModel = $this->adios->getModel($this->params['model']);
 
-    $query = $lookupModel->lookupSqlQuery(
+    $lookupRow = reset($lookupModel->lookupQuery(
       $this->params['initiating_model'],
       $this->params['initiating_column'],
       [], // form_data
       [], // params
       "id = {$value}" // having
-    );
-
-    $lookupRow = reset($this->adios->db->fetchRaw($query));
+    )->fetch());
 
     if (!is_array($lookupRow) && $value > 0) {
       return "-- Record not found --";

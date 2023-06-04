@@ -523,12 +523,15 @@ class Loader
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
-          $user = reset($this->db->fetchRaw("
-            SELECT *
-            FROM `{$adiosUserModel->getFullTableSqlName()}`
-            WHERE `id` = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
-            LIMIT 1
-          "));
+
+          $user = reset(
+            $this->db->select($adiosUserModel)
+              ->columns([\ADIOS\Core\DB\Query::allColumnsWithoutLookups])
+              ->where([
+                ['id', '=', (int) $_SESSION[_ADIOS_ID]['userProfile']['id']]
+              ])
+              ->fetch()
+          );
 
           if (
             $user['is_active'] != 1 ||

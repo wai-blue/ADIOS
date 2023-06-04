@@ -832,7 +832,7 @@ class Input extends \ADIOS\Core\UI\View {
           $value = (int) $this->params['value'];
           $inputStyle = $this->params['input_style'] ?? "";
 
-          $lookupSqlQuery = $lookupModel->lookupSqlQuery(
+          $lookupQuery = $lookupModel->lookupQuery(
             $this->params['initiating_model'],
             $this->params['initiating_column'],
             $this->params['form_data'],
@@ -843,7 +843,7 @@ class Input extends \ADIOS\Core\UI\View {
             $rowsCnt = reset($this->adios->db->fetchRaw("
               select
                 ifnull(count(*), 0) as cnt
-              from ({$lookupSqlQuery}) dummy
+              from (" . $lookupQuery->buildSql() . ") dummy
             "))['cnt'];
 
             if ($rowsCnt > 10) {
@@ -855,7 +855,7 @@ class Input extends \ADIOS\Core\UI\View {
 
           switch ($inputStyle) {
             case "select":
-              $rows = $this->adios->db->fetchRaw($lookupSqlQuery);
+              $rows = $lookupQuery->fetch();
 
               $html = "
                 <select
@@ -899,15 +899,13 @@ class Input extends \ADIOS\Core\UI\View {
               $inputText = "";
 
               if ($value > 0) {
-                $row = reset($this->adios->db->fetchRaw(
-                  $lookupModel->lookupSqlQuery(
-                    $this->params['initiating_model'],
-                    $this->params['initiating_column'],
-                    $this->params['form_data'],
-                    $this->params,
-                    "`id` = {$value}"
-                  )
-                ));
+                $row = reset($lookupModel->lookupQuery(
+                  $this->params['initiating_model'],
+                  $this->params['initiating_column'],
+                  $this->params['form_data'],
+                  $this->params,
+                  "`id` = {$value}"
+                )->fetch());
 
                 if ((int) $row['id'] === $value) {
                   $inputText = $row['input_lookup_value'];
