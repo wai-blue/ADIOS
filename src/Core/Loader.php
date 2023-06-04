@@ -523,7 +523,7 @@ class Loader
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
-          $user = reset($this->db->getRowsRaw("
+          $user = reset($this->db->fetchRaw("
             SELECT *
             FROM `{$adiosUserModel->getFullTableSqlName()}`
             WHERE `id` = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
@@ -566,13 +566,6 @@ class Loader
         // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
         $this->onUserAuthorised();
 
-
-        // user specific config
-        // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
-        // if (is_array($this->config['user'][$this->userProfile['id']])) {
-        //   unset($this->config['user'][$this->userProfile['id']]['language']);
-        //   $this->mergeConfig($this->config['user'][$this->userProfile['id']]);
-        // }
       }
 
       if ($mode == self::ADIOS_MODE_FULL) {

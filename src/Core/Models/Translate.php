@@ -24,12 +24,12 @@ class Translate extends \ADIOS\Core\Model {
   }
 
   public function columns(array $columns = []) {
-    return [
+    return parent::columns([
       'hash' => ['type' => 'varchar', 'byte_size' => '32', 'title' => 'Hash'],
       'value' => ['type' => 'varchar', 'byte_size' => '255', 'title' => 'Text', 'show_column' => true],
       'context' => ['type' => 'varchar', 'byte_size' => '120', 'title' => 'Kontext', 'show_column' => true],
       'lang' => ['type' => 'varchar', 'byte_size' => '2', 'title' => 'Mutácia'],
       'category' => ['type' => 'varchar', 'byte_size' => '50', 'title' => 'Kategória', 'show_column' => true],
-    ];
+    ]);
   }
 }

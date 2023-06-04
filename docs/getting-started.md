@@ -123,7 +123,7 @@ class Orders extends \ADIOS\Core\Widget\Action {
     $orderModel = $this->adios->getModel("Widgets/Orders/Models/Order");
     $customerModel = $this->adios->getModel("Widgets/Customers/Models/Customer");
 
-    $customer = reset($this->adios->db->getRowsRaw("
+    $customer = reset($this->adios->db->fetchRaw("
       select * from `".$customerModel->getFullTableSqlName()."`
       where id = ".(int) $this->params['id']."
     "));

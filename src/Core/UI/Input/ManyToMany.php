@@ -34,7 +34,7 @@ class ManyToMany extends \ADIOS\Core\Input {
     $srcModel = $this->adios->getModel($columns[$srcColumn]['model']);
     $dstModel = $this->adios->getModel($columns[$dstColumn]['model']);
 
-    $dstItems = $this->adios->db->getRowsRaw("
+    $dstItems = $this->adios->db->fetchRaw("
       select
         `dst`.`id`,
         ".$dstModel->lookupSqlValue('dst')." as `lookup_sql_value`
@@ -42,7 +42,7 @@ class ManyToMany extends \ADIOS\Core\Input {
       order by ".($this->params['order'] ?? "id asc")."
     ");
 
-    $valuesRaw = $this->adios->db->getRowsRaw("
+    $valuesRaw = $this->adios->db->fetchRaw("
       select
         *
       from `".$model->getFullTableSqlName()."`

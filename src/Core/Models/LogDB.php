@@ -24,7 +24,7 @@ class LogDB extends \ADIOS\Core\Model {
   }
 
   public function columns(array $columns = []) {
-    return [
+    return parent::columns([
       'ip' => ['type' => 'varchar', 'byte_size' => 35, 'title' => 'IP', 'show_column' => true],
       'action' => ['type' => 'varchar', 'byte_size' => 150, 'title' => 'Akcia', 'show_column' => true],
       'id_user' => ['type' => 'lookup', 'title' => 'Používateľ', 'model' => "Core/Models/User", 'show_column' => true],
@@ -37,6 +37,6 @@ class LogDB extends \ADIOS\Core\Model {
       'error' => ['type' => 'text', 'interface' => 'plain_text', 'title' => 'Chyba'],
       'query' => ['type' => 'text', 'interface' => 'plain_text', 'title' => 'Požiadavka'],
       'duration' => ['type' => 'float', 'decimals' => '4', 'title' => 'Trvanie', 'show_column' => true],
-    ];
+    ]);
   }
 }

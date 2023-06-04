@@ -32,20 +32,16 @@ class Table extends \ADIOS\Core\UI\View
    * @param  mixed $params
    * @return void
    */
-  public function __construct(&$adios, $params = null)
+  public function __construct($adios, $params = null)
   {
 
-    $this->adios = &$adios;
+    $this->adios = $adios;
 
     if ($params['refresh'] && !empty($params['uid'])) {
       $params = parent::params_merge(
         $_SESSION[_ADIOS_ID]['table'][$params['uid']],
         $params
       );
-    }
-
-    if (!empty($params['itemsPerPage'])) {
-      $params['page'] = 1;
     }
 
     // defaultne parametre
@@ -56,7 +52,6 @@ class Table extends \ADIOS\Core\UI\View
 
       'where' => '',
       'having' => '',
-      'groupBy' => '',
       'orderBy' => '',
       'itemsPerPage' => 25,
 
@@ -96,11 +91,14 @@ class Table extends \ADIOS\Core\UI\View
       $params['title'] = $this->model->tableTitle;
     }
 
-
     if (!empty($params['search'])) {
       $this->search = @json_decode(base64_decode($params['search']), TRUE);
     } else {
       $this->search = [];
+    }
+
+    if ((bool) $params['reset']) {
+      $params['page'] = 1;
     }
 
     if ($this->model->isCrossTable) {
@@ -139,7 +137,6 @@ class Table extends \ADIOS\Core\UI\View
 
     $this->params['page'] = (int) $this->params['page'];
     $this->params['itemsPerPage'] = (int) $this->params['itemsPerPage'];
-
 
     if (_count($this->params['columnsOrder'])) {
       $tmp_columns = [];
@@ -214,8 +211,8 @@ class Table extends \ADIOS\Core\UI\View
 
     // strankovanie
 
-    $page_count = ceil($this->allRowsCount / $this->params['itemsPerPage']);
-    $show_pages = 4;
+    $pagesCount = ceil($this->allRowsCount / $this->params['itemsPerPage']);
+    $pageButtonsCount = 4;
 
     if ($this->params['showPaging']) {
       $this->add(
@@ -239,11 +236,55 @@ class Table extends \ADIOS\Core\UI\View
         'paging'
       );
 
-      for ($i = 1; $i <= $page_count; ++$i) {
+      for ($i = 1; $i <= $pagesCount; ++$i) {
         if ($i == $this->params['page']) {
-          $this->add("<input type='text' value='{$this->params['page']}' id='{$this->params['uid']}_paging_bottom_input' onchange=\"ui_table_show_page('{$this->params['uid']}', this.value);\" onkeypress=\"if (event.keyCode == 13) { ui_table_show_page('{$this->params['uid']}', this.value); } \" onclick='this.select();' /><script> draggable_int_input('{$this->params['uid']}_paging_bottom_input', {min_val: 1, max_val: {$page_count}});</script>", 'paging');
-        } elseif (abs($this->params['page'] - $i) <= ($show_pages / 2) || ($this->params['page'] <= ($show_pages / 2) && $i <= ($show_pages + 1)) || (($page_count - $this->params['page']) <= ($show_pages / 2) && $i >= ($page_count - $show_pages))) {
-          $this->add($this->adios->ui->button(['text' => $i, 'class' => 'pages', 'onclick' => "ui_table_show_page('{$this->params['uid']}', '{$i}'); ", 'show_border' => false]), 'paging');
+          $this->add(
+            "
+              <input
+                type='text'
+                value='{$this->params['page']}'
+                id='{$this->params['uid']}_paging_bottom_input'
+                onchange=\"
+                  ui_table_show_page('{$this->params['uid']}', this.value);
+                \"
+                onkeypress=\"
+                  if (event.keyCode == 13) {
+                    ui_table_show_page('{$this->params['uid']}', this.value);
+                  }
+                \"
+                onclick=\"
+                  this.select();
+                \"
+              />
+              <script>
+                draggable_int_input(
+                  '{$this->params['uid']}_paging_bottom_input',
+                  { min_val: 1, max_val: {$pagesCount} }
+                );
+              </script>
+            ",
+            'paging'
+          );
+        } elseif (
+          abs($this->params['page'] - $i) <= ($pageButtonsCount / 2)
+          || (
+            $this->params['page'] <= ($pageButtonsCount / 2)
+            && $i <= ($pageButtonsCount + 1)
+          )
+          || (
+            $pagesCount - $this->params['page'] <= $pageButtonsCount / 2
+            && $i >= $pagesCount - $pageButtonsCount
+          )
+        ) {
+          $this->add(
+            $this->adios->ui->button([
+              'text' => $i,
+              'class' => 'pages',
+              'onclick' => "ui_table_show_page('{$this->params['uid']}', '{$i}');",
+              'show_border' => FALSE
+            ]),
+            'paging'
+          );
         }
       }
 
@@ -252,7 +293,7 @@ class Table extends \ADIOS\Core\UI\View
           'fa_icon' => 'fas fa-angle-right',
           'class' => 'btn-light btn-circle btn-sm',
           'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] + 1) . "'); ",
-          'disabled' => ($this->params['page'] == $page_count || 0 == $this->allRowsCount ? true : false)
+          'disabled' => ($this->params['page'] == $pagesCount || 0 == $this->allRowsCount ? true : false)
         ]),
         'paging'
       );
@@ -260,8 +301,8 @@ class Table extends \ADIOS\Core\UI\View
         $this->adios->ui->button([
           'fa_icon' => 'fas fa-angle-double-right',
           'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($page_count) . "'); ",
-          'disabled' => ($this->params['page'] == $page_count || 0 == $this->allRowsCount ? true : false)
+          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($pagesCount) . "'); ",
+          'disabled' => ($this->params['page'] == $pagesCount || 0 == $this->allRowsCount ? true : false)
         ]),
         'paging'
       );
@@ -286,6 +327,7 @@ class Table extends \ADIOS\Core\UI\View
    */
   public function loadData()
   {
+    $db = $this->adios->db;
     if (empty($this->params['table'])) return;
 
     // where
@@ -307,88 +349,53 @@ class Table extends \ADIOS\Core\UI\View
       }
     }
 
-    // having
-    $having = (empty($this->params['having']) ? 'TRUE' : $this->params['having']);
-    if (_count($this->columnsFilter)) {
-      $having .= " and " . $this->adios->db->where($this->model, $this->columnsFilter);
-    }
-    if (_count($this->search)) {
-      $having .= " and " . $this->adios->db->where($this->model, $this->search);
-    }
-
-    // nastavenie poradia
-    if ($this->params['orderBy'] != "") {
-      $orderBy = [];
+    // orderBy
+    $orderBy = [];
+    if (!empty($this->params['orderBy'])) {
       foreach (explode(',', $this->params['orderBy']) as $item) {
         $item = trim($item);
-        $tmp = explode(' ', $item);
-        $tmp[0] = '`' . implode('`.`', explode(".", str_replace('`', '', $tmp[0]))) . '`';
-        $orderBy[] = "{$tmp[0]} {$tmp[1]}";
+        list($tmpColumn, $tmpDirection) = explode(' ', $item);
+
+        if (($this->model->columns()[$tmpColumn]['type'] ?? '') == 'lookup') {
+          $tmpColumn = $tmpColumn . ':LOOKUP';
+        }
+
+        $orderBy[] = [$tmpColumn, $tmpDirection];
       }
-      $orderBy = implode(', ', $orderBy);
     }
 
-    $groupBy = $this->params['groupBy'];
-
-    if ($this->params['showPaging']) {
-      // ak sa zobrazuje sumarny/statisticky riadok,
-      // tak namiesto countu vybera statisticke udaje, pricom je pre id nastavene selectovanie count(id)
-
-      $tmpColumnSettings = $this->adios->db->tables[$this->params['table']];
-      $this->adios->db->tables[$this->params['table']] = $this->columns;
-
-      $this->allRowsCount = $this->adios->db->countRows($this->params['table'], [
-        'where' => $where,
-        'having' => $having,
-        'group' => $groupBy,
-      ]);
-
-      if (_count($tmpColumnSettings)) {
-        $this->adios->db->tables[$this->params['table']] = $tmpColumnSettings;
-      }
-
-      if ($this->params['page'] * $this->params['itemsPerPage'] > $this->allRowsCount) {
-        $this->params['page'] = floor($this->allRowsCount / $this->params['itemsPerPage']) + 1;
-      }
-      $limitStart = ($this->params['showPaging'] ? max(0, ($this->params['page'] - 1) * $this->params['itemsPerPage']) : '');
-      $limitEnd = ($this->params['showPaging'] ? $this->params['itemsPerPage'] : '');
-    } else {
-      $this->allRowsCount = 0;
+    // having
+    $having = [];
+    foreach ($this->columnsFilter as $tmpColumn => $tmpFilter) {
+      $having[] = [$tmpColumn, $tmpFilter, Q::columnFilter];
     }
 
-    $getRowsParams = [
-      'where' => $where,
-      'having' => $having,
-      'order' => $orderBy,
-      'group' => $groupBy,
-    ];
+    foreach ($this->search as $tmpColumn => $tmpFilter) {
+      $having[] = [$tmpColumn, $tmpFilter, Q::columnFilter];
+    }
 
-    if (is_numeric($limitStart)) $getRowsParams['limit_start'] = $limitStart;
-    if (is_numeric($limitEnd)) $getRowsParams['limit_end'] = $limitEnd;
-
-    $tmpColumnSettings = $this->adios->db->tables[$this->params['table']];
-    $this->adios->db->tables[$this->params['table']] = $this->columns;
-    $this->data = $this->adios->db->getRows($this->params['table'], $getRowsParams);
-
-    $query = $this->adios->db->select($this->model)
+    // query
+    $query = $db->select($this->model, [Q::countRows])
       ->columns([Q::allColumnsWithLookups])
-      // ->join([Q::all])
-      // ->where($where)
-      // ->having($having)
-      // ->order($orderBy)
-      // ->group($groupBy)
+      ->whereRaw([$where])
+      ->having($having)
+      ->order($orderBy)
     ;
 
-    // if (is_numeric($limitStart)) $query = $query->limit($limitStart, $limitEnd);
-
-    $tmpData = $query->fetch();
-
-    if (_count($tmpColumnSettings)) {
-      $this->adios->db->tables[$this->params['table']] = $tmpColumnSettings;
+    // limit
+    if ($this->params['showPaging']) {
+      $query = $query->limit(
+        max(0, ($this->params['page'] - 1) * $this->params['itemsPerPage']),
+        $this->params['itemsPerPage']
+      );
     }
 
-    if (!$this->params['showPaging']) {
-      $this->allRowsCount = count($this->data);
+    // fetch
+    $this->data = $query->fetch();
+    $this->allRowsCount = $db->countRowsFromLastSelect();
+
+    if ($this->params['page'] * $this->params['itemsPerPage'] > $this->allRowsCount) {
+      $this->params['page'] = floor($this->allRowsCount / $this->params['itemsPerPage']) + 1;
     }
 
     $this->model->onTableAfterDataLoaded($this);
@@ -585,7 +592,7 @@ class Table extends \ADIOS\Core\UI\View
                 "id = {$searchValue}" // having
               );
 
-              $tmp = reset($this->adios->db->getRowsRaw($tmpQuery));
+              $tmp = reset($this->adios->db->fetchRaw($tmpQuery));
 
               $tmpTitle = $tmpColumn['title'];
               $searchValue = $tmp['input_lookup_value'];
@@ -690,7 +697,12 @@ class Table extends \ADIOS\Core\UI\View
               class='Column {$col_def['css_class']} {$order_class}'
               " . ($params['allow_order_modification'] ? "
                 onclick='
-                  ui_table_refresh(\"{$params['uid']}\", {orderBy: \"{$new_ordering}\"});
+                  ui_table_refresh(
+                    \"{$params['uid']}\",
+                    {
+                     reset: \"1\",
+                     orderBy: \"{$new_ordering}\"
+                    });
                 '
               " : "") . "
             >
@@ -766,7 +778,7 @@ class Table extends \ADIOS\Core\UI\View
                 onkeypress='
                   if (event.keyCode == 13) {
                     event.cancelBubble = true;
-                    ui_table_set_column_filter(\"{$params['uid']}\", {});
+                    ui_table_set_column_filter(\"{$params['uid']}\");
                   }
                 '
                 {$col_def['table_filter_attributes']}
@@ -783,7 +795,7 @@ class Table extends \ADIOS\Core\UI\View
                 id='{$params['uid']}_column_filter_{$col_name}'
                 title=' '
                 required='required'
-                onchange=' ui_table_set_column_filter(\"{$params['uid']}\", {}); '
+                onchange=' ui_table_set_column_filter(\"{$params['uid']}\");'
               >
               <option></option>
             ";
@@ -819,7 +831,7 @@ class Table extends \ADIOS\Core\UI\View
                     } else {
                       $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$true_value}\");
                     }
-                    ui_table_set_column_filter(\"{$params['uid']}\", {});
+                    ui_table_set_column_filter(\"{$params['uid']}\");
                   '
                 ></i>
                 <i
@@ -831,7 +843,7 @@ class Table extends \ADIOS\Core\UI\View
                     } else {
                       $(\"#{$params['uid']}_column_filter_{$col_name}\").val(\"{$false_value}\");
                     }
-                    ui_table_set_column_filter(\"{$params['uid']}\", {});
+                    ui_table_set_column_filter(\"{$params['uid']}\");
                   '
                 ></i>
               </div>
@@ -933,7 +945,7 @@ class Table extends \ADIOS\Core\UI\View
               <div class='Column settings'>
                 <select
                   id='{$this->params['uid']}_table_count'
-                  onchange='ui_table_change_itemsPerPage(\"{$this->params['uid']}\", this.value);'
+                  onchange='ui_table_change_items_per_page(\"{$this->params['uid']}\", this.value);'
                 >
                   <option value='10' " . ($this->params['itemsPerPage'] == 10 ? "selected" : "") . ">10</option>
                   <option value='25' " . ($this->params['itemsPerPage'] == 25 ? "selected" : "") . ">25</option>

@@ -840,7 +840,7 @@ class Input extends \ADIOS\Core\UI\View {
           );
 
           if (!in_array($inputStyle, ['autocomplete', 'select'])) {
-            $rowsCnt = reset($this->adios->db->getRowsRaw("
+            $rowsCnt = reset($this->adios->db->fetchRaw("
               select
                 ifnull(count(*), 0) as cnt
               from ({$lookupSqlQuery}) dummy
@@ -855,7 +855,7 @@ class Input extends \ADIOS\Core\UI\View {
 
           switch ($inputStyle) {
             case "select":
-              $rows = $this->adios->db->getRowsRaw($lookupSqlQuery);
+              $rows = $this->adios->db->fetchRaw($lookupSqlQuery);
 
               $html = "
                 <select
@@ -899,7 +899,7 @@ class Input extends \ADIOS\Core\UI\View {
               $inputText = "";
 
               if ($value > 0) {
-                $row = reset($this->adios->db->getRowsRaw(
+                $row = reset($this->adios->db->fetchRaw(
                   $lookupModel->lookupSqlQuery(
                     $this->params['initiating_model'],
                     $this->params['initiating_column'],

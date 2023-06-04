@@ -684,6 +684,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function columns(array $columns = [])
   {
+
+    if (!$this->isCrossTable) {
+      $columns['id'] = [
+        'type' => 'int',
+        'byte_size' => '8',
+        'sql_definitions' => 'primary key auto_increment',
+        'title' => 'ID',
+        'only_display' => 'yes',
+        'class' => 'primary-key'
+      ];
+    }
+
     // default column settings
     foreach ($columns as $colName => $colDefinition) {
       if ($colDefinition["type"] == "char") {

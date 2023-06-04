@@ -58,7 +58,7 @@ class DB
     if (!empty($this->db_host)) {
       $this->connect();
 
-      $tmp = $this->getRowsRaw("show tables", "");
+      $tmp = $this->fetchRaw("show tables", "");
       foreach ($tmp as $value) {
         $this->existingSqlTables[] = reset($value);
       }
@@ -78,36 +78,6 @@ class DB
   // functions for manipulating with table definitions in the database
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  /**
-   * Returns array of essential columns which must be included in each "datapub" table
-   * Appends also the $add_columns to the result.
-   *
-   * @param array array of additional columns
-   *
-   * @see parse_tables
-   */
-  public function defaultColumns($columns = [], $isCrossTable = FALSE)
-  {
-    $commonColumns = [];
-
-    if (!$isCrossTable) {
-      $commonColumns['id'] = [
-        'type' => 'int',
-        'byte_size' => '8',
-        'sql_definitions' => 'primary key auto_increment',
-        'title' => 'ID',
-        'only_display' => 'yes',
-        'class' => 'primary-key'
-      ];
-    }
-
-    if (_count($columns)) {
-      return array_merge($commonColumns, $columns);
-    } else {
-      return $commonColumns;
-    }
-  }
-
   public function registerColumnType($column_type)
   {
     $class = "\\ADIOS\\Core\\DB\\DataTypes\\{$column_type}";
@@ -126,10 +96,7 @@ class DB
 
   public function addTable($tableName, $columns, $isCrossTable = FALSE)
   {
-    $this->tables[$tableName] = $this->defaultColumns(
-      $columns,
-      $isCrossTable
-    );
+    $this->tables[$tableName] = $columns;
   }
 
 
@@ -237,7 +204,7 @@ class DB
    * @see get_row
    * @see get_column_data
    */
-  public function getRowsRaw($query, $keyBy = "id")
+  public function fetchRaw($query, $keyBy = "id") : array
   {
     $this->query($query);
 
@@ -255,9 +222,24 @@ class DB
   }
 
 
-  public function select(\ADIOS\Core\Model $model) : \ADIOS\Core\DB\Query
+  public function select(
+    \ADIOS\Core\Model $model,
+    array $modifiers = []
+  ) : \ADIOS\Core\DB\Query
   {
-    return new \ADIOS\Core\DB\Query($this, $model, \ADIOS\Core\DB\Query::select);
+    $query = new \ADIOS\Core\DB\Query(
+      $this,
+      $model,
+      \ADIOS\Core\DB\Query::select
+    );
+    foreach ($modifiers as $modifier) {
+      $query->add([
+        \ADIOS\Core\DB\Query::selectModifier,
+        $modifier
+      ]);
+    }
+
+    return $query;
   }
 
   public function insert(\ADIOS\Core\Model $model) : \ADIOS\Core\DB\Query

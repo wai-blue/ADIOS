@@ -40,7 +40,7 @@ class DataTypeLookup extends DataType {
       return "`{$colName}` = null";
     } else if (is_string($value) && !is_numeric($value)) {
       $model = $this->adios->getModel($colDefinition["model"]);
-      $tmp = reset($this->adios->db->getRowsRaw("
+      $tmp = reset($this->adios->db->fetchRaw("
         select
           id,
           " . $model->lookupSqlValue("t") . " as `input_lookup_value`
@@ -65,7 +65,7 @@ class DataTypeLookup extends DataType {
   }
 
   public function get_html_or_csv($value, $params = []) {
-    $html = $params['row']["{$params['col_name']}_lookup_sql_value"] ?? "";
+    $html = $params['row']["{$params['col_name']}:LOOKUP"] ?? "";
     return $params['export_csv'] ? $html : htmlspecialchars($html);
   }
 

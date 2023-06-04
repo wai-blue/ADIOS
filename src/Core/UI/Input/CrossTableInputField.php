@@ -27,7 +27,7 @@ class CrossTableInputField extends \ADIOS\Core\Input {
     }
 
     // Get saved values in DB
-    $itemValues = $this->adios->db->getRowsRaw(
+    $itemValues = $this->adios->db->fetchRaw(
       "
         select
           *

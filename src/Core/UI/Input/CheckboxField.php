@@ -51,7 +51,7 @@ class CheckboxField extends \ADIOS\Core\Input {
       throw new \ADIOS\Core\Exceptions\GeneralException("CheckboxField Input: Error #1");
     }
 
-    $assignmentsRaw = $this->adios->db->getRowsRaw("
+    $assignmentsRaw = $this->adios->db->fetchRaw("
       select
         *
       from `".$assignmentModel->getFullTableSqlName()."`

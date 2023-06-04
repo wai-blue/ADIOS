@@ -68,10 +68,128 @@ class MySQLi extends \ADIOS\Core\DB
 
   public function buildSql(\ADIOS\Core\DB\Query $query) : string
   {
-    var_dump($query->getStatements());
-    exit;
-    return "a";
+    $model = $query->getModel();
+
+    $selectModifiers = $query->getStatements(\ADIOS\Core\DB\Query::selectModifier);
+    $columns = $query->getStatements(\ADIOS\Core\DB\Query::column);
+    $joins = $query->getStatements(\ADIOS\Core\DB\Query::join);
+    $wheres = $query->getStatements(\ADIOS\Core\DB\Query::where);
+    $whereRaws = $query->getStatements(\ADIOS\Core\DB\Query::whereRaw);
+    $havings = $query->getStatements(\ADIOS\Core\DB\Query::having);
+    $havingRaws = $query->getStatements(\ADIOS\Core\DB\Query::havingRaw);
+    $orders = $query->getStatements(\ADIOS\Core\DB\Query::order);
+    $limits = $query->getStatements(\ADIOS\Core\DB\Query::limit);
+
+    switch ($query->getType()) {
+      case \ADIOS\Core\DB\Query::select:
+
+        // select modifiers
+        $selectModifiersArray = [];
+        foreach ($selectModifiers as $modifier) {
+          switch ($modifier[1]) {
+            case \ADIOS\Core\DB\Query::countRows:
+              $selectModifiersArray[] = 'SQL_CALC_FOUND_ROWS';
+            break;
+            case \ADIOS\Core\DB\Query::distinct:
+              $selectModifiersArray[] = 'DISTINCT';
+            break;
+            case \ADIOS\Core\DB\Query::distinctRow:
+              $selectModifiersArray[] = 'DISTINCTROW';
+            break;
+          }
+        }
+
+        // columns
+        $columnsArray = [];
+        foreach ($columns as $column) {
+          list($tmpTable, $tmpColumn) = explode(".", $column[1]);
+          $columnsArray[] = '`' . $tmpTable . '`.`' . $tmpColumn . '` as `' . $column[2] . '`';
+        }
+
+        // joins
+        $joinsArray = [];
+        foreach ($joins as $join) {
+          $joinsArray[] = 
+            'LEFT JOIN `' . $join[2] . '` as `' . $join[3] . '`'
+            . ' ON `' .  $join[3] . '`.`id` = `' . $join[1] . '`.`' . $join[4] . '`';
+        }
+
+        // wheres and whereRaws
+        $wheresArray = [];
+        foreach ($wheres as $where) {
+          $wheresArray[] = $where[1];
+          if ($where[3] === \ADIOS\Core\DB\Query::columnFilter) {
+            $wheresArray[] = $this->columnFilter(
+              $model,
+              $where[1],
+              $where[2]
+            );
+          }
+        }
+        foreach ($whereRaws as $whereRaw) {
+          $wheresArray[] = $whereRaw[1];
+        }
+
+        // havings and havingRaws
+        $havingsArray = [];
+        foreach ($havings as $having) {
+          if ($having[3] === \ADIOS\Core\DB\Query::columnFilter) {
+            $havingsArray[] = $this->columnFilter(
+              $model,
+              $having[1],
+              $having[2]
+            );
+          }
+        }
+        foreach ($havingRaws as $havingRaw) {
+          $havingsArray[] = $havingRaw[1];
+        }
+        // var_dump($havingRaws);
+
+        // orders
+        $ordersArray = [];
+        foreach ($orders as $order) {
+
+          $order[1] = trim($order[1]);
+          $order[1] = '`' . implode('`.`', explode(".", str_replace('`', '', $order[1]))) . '`';
+
+          $order[2] = strtoupper($order[2]);
+
+          if (!in_array($order[2], ['ASC', 'DESC'])) continue;
+
+          $ordersArray[] = $order[1] . ' ' . $order[2];
+        }
+
+        // limit
+        if (count($limits) > 0) {
+          $limitSql = ' LIMIT ' . $limits[0][1] . ', ' . $limits[0][2];
+        } else {
+          $limitSql = '';
+        }
+
+        // sql
+        $sql = 
+          'SELECT ' . join(' ', $selectModifiersArray) . ' '
+            . join(', ', $columnsArray)
+          . ' FROM `' . $model->getFullTableSqlName() . '`'
+          . ' ' . join(' ', $joinsArray)
+          . (count($wheresArray) == 0 ? '' : ' WHERE ' . join(' AND ', $wheresArray))
+          . (count($havingsArray) == 0 ? '' : ' HAVING ' . join(' AND ', $havingsArray))
+          . (count($ordersArray) == 0 ? '' : ' ORDER BY ' . join(' AND ', $ordersArray))
+          . $limitSql
+        ;
+
+      break;
+    }
+// echo $sql;
+    return $sql;
   }
+
+  public function countRowsFromLastSelect() : int
+  {
+    return (int) reset($this->fetchRaw('SELECT FOUND_ROWS() as FOUND_ROWS'))['FOUND_ROWS'];
+  }
+
 
   /**
    * Runs a single SQL query.
@@ -172,7 +290,8 @@ class MySQLi extends \ADIOS\Core\DB
 
     if (!$force_create) {
       try {
-        $cnt = $this->countRowsQuery("select * from `{$table_name}`");
+        $this->query("select * from `{$table_name}`");
+        $cnt = mysqli_num_rows($this->queryResult);
       } catch (\ADIOS\Core\Exceptions\DBException $e) {
         $cnt = 0;
       }
@@ -608,10 +727,7 @@ class MySQLi extends \ADIOS\Core\DB
   public function copy($table, $id)
   {
     $data = $this->getRow($table, "`id` = ".(int) $id);
-
-    foreach (array_keys($this->defaultColumns()) as $column) {
-      unset($data[$column]);
-    }
+    unset($data['id']);
 
     return $this->insertRow($table, $data);
   }
@@ -684,195 +800,6 @@ class MySQLi extends \ADIOS\Core\DB
     return $row;
   }
 
-  /**
-   * Returns array of rows and their column values which meet the given criteria.
-   *
-   * @param string name of a table
-   * @param string SQL condition to fetch the rows
-   * @param string SQL "order by" statement
-   */
-  public function getRows($table_name, $params = [])
-  {
-    $where = $params['where'] ?? "";
-    $having = $params['having'] ?? "";
-    $order = $params['order'] ?? "";
-    $group = $params['group'] ?? "";
-    $limit_start = (int) ($params['limit_start'] ?? 0);
-    $limit_end = (int) ($params['limit_end'] ?? 0);
-    $summary_settings = $params['summary_settings'] ?? "";
-    $count_rows = $params['count_rows'] ?? FALSE;
-
-    $summaryColumns = [];
-    $virtualColumns = [];
-    $codeListColumns = [];
-    $lookupColumns = [];
-    $summaryColumnsSubselect = [];
-    $leftJoins = [];
-
-    if (_count($summary_settings)) {
-      foreach ($summary_settings as $col_name => $func) {
-        $summaryColumns[] = $this->aggregate('sumtable.' . $col_name, $col_name, $func);
-      }
-
-      $group2 = '';
-      foreach ($summary_settings as $col_name => $sql_func) {
-        if ('group' == $sql_func) {
-          $group2 .= "$table_name.$col_name, ";
-        }
-      }
-      $group2 = substr($group2, 0, -2);
-      if ('' == $group) {
-        $group = $group2;
-      } else {
-        $group = "$group" . ('' != $group2 ? ", $group2" : '');
-      }
-    }
-
-    foreach ($this->tables[$table_name] as $col_name => $col_definition) {
-      if (
-        $col_definition['virtual']
-        && !empty($col_definition['sql'])
-        && !_count($col_definition['enum_values'])
-      ) {
-        $virtualColumns[] = "({$col_definition['sql']}) as {$col_name}";
-      } else if ($col_definition['type'] == 'lookup') {
-        $lookupModel = $this->adios->getModel($col_definition['model']);
-        if (!$lookupModel->isCrossTable) {
-          $lookupTable = $lookupModel->getFullTableSqlName();
-          $lookupTableAlias = "lookup_{$lookupTable}_{$col_name}";
-          $lookupSqlValue = $lookupModel->lookupSqlValue($lookupTableAlias);
-
-          $virtualColumns[] = "({$lookupSqlValue}) as `{$col_name}_lookup_sql_value`";
-          $leftJoins[] = "
-              left join
-                `{$lookupTable}` as `{$lookupTableAlias}`
-                on `{$lookupTableAlias}`.`id` = `{$table_name}`.`{$col_name}`
-            ";
-
-          foreach ($lookupModel->columns() as $lookupColumnName => $lookupColumn) {
-            if (!$lookupColumn['virtual']) {
-              $lookupColumns[] = "`{$lookupTableAlias}`.`{$lookupColumnName}` as LOOKUP___{$col_name}___{$lookupColumnName}";
-            }
-          }
-        }
-      } else if (('int' == $col_definition['type'] || 'varchar' == $col_definition['type']) && is_array($col_definition['enum_values'])) {
-        if ($col_definition['virtual']) {
-          $tmp_sql = "case (`{$col_definition['sql']}`) ";
-        } else {
-          $tmp_sql = "case (`{$table_name}`.`{$col_name}`) ";
-        }
-
-        foreach ($col_definition['enum_values'] as $tmp_key => $tmp_value) {
-          if ($tmp_key === NULL) {
-            $tmp_sql .= "when {$tmp_key} then '" . $this->escape($tmp_value) . "' ";
-          } else if (is_numeric($tmp_key)) {
-            $tmp_sql .= "when " . ((int) $tmp_key) . " then '" . $this->escape($tmp_value) . "' ";
-          } else {
-            $tmp_sql .= "when '" . $this->escape((string) $tmp_key) . "' then '" . $this->escape($tmp_value) . "' ";
-          }
-        }
-
-        $tmp_sql .= " end";
-
-        $codeListColumns[] = "({$tmp_sql}) as {$col_name}_enum_value";
-
-        if ($col_definition['virtual']) {
-          $codeListColumns[] = "({$col_definition['sql']}) as {$col_name}";
-        } else {
-          $codeListColumns[] = "{$table_name}.{$col_name} as {$col_name}";
-        }
-      } else if (
-        !$this->tables[$table_name][$col_name]['virtual']
-        && 'none' != $this->tables[$table_name][$col_name]['type']
-      ) {
-        $summaryColumnsSubselect .= "{$table_name}.{$col_name}";
-      }
-    }
-
-    if ('' != $where) {
-      $where = "where $where";
-    }
-    if ('' != $having) {
-      $having = "having $having";
-    }
-    if ('' != $order) {
-      $order = "order by $order";
-    }
-    if ('' != $group) {
-      $group = "group by $group";
-    }
-    if ($limit_start > 0 || $limit_end > 0) {
-      $limit = "limit $limit_start";
-      if ($limit_end > 0) {
-        $limit .= ", $limit_end";
-      }
-    }
-
-    if (_count($summaryColumns)) {
-      $query = "
-          select
-            " . join(", ", ["0 as dummy"] + $summaryColumns) . "
-          from (
-            select
-              " . join(", ", array_merge($summaryColumnsSubselect, $virtualColumns, $codeListColumns)) . "
-            from $table_name
-            " . join(" ", $leftJoins) . "
-            $where
-            $group
-            $having
-            $order
-            $limit
-          ) as sumtable
-        ";
-    } else {
-      if ($count_rows && empty($where)) {
-        $selectItems = ["{$table_name}.*"];
-      } else {
-        $selectItems = array_merge(["{$table_name}.*"], $virtualColumns, $codeListColumns, $lookupColumns);
-      }
-
-      $query = "
-          select
-            " . join(",\n            ", $selectItems) . "
-          from $table_name
-          " . join(" ", $leftJoins) . "
-          $where
-          $group
-          $having
-          $order
-          $limit
-        ";
-    }
-
-    $this->query($query);
-
-    $rows = [];
-    $count = 0;
-    while ($row = $this->fetchArray()) {
-      if ($count_rows) {
-        $count++;
-      } else {
-        $rows[] = $row;
-      }
-    }
-
-    return ($count_rows ? $count : $rows);
-  }
-
-  public function countRows($table_name, $params = [])
-  {
-    return $this->getRows($table_name, ['count_rows' => TRUE] + $params);
-  }
-
-  public function countRowsQuery($query)
-  {
-    $count = 0;
-    if ($this->query($query)) {
-      $count = mysqli_num_rows($this->queryResult);
-    }
-
-    return $count;
-  }
 
 
 
@@ -882,7 +809,7 @@ class MySQLi extends \ADIOS\Core\DB
 
 
 
-  public function columnWhere($model, $columnName, $filterValue, $column = NULL)
+  public function columnFilter($model, $columnName, $filterValue, $column = NULL)
   {
     if ($column === NULL) {
       $column = $model->columns()[$columnName];
@@ -971,7 +898,7 @@ class MySQLi extends \ADIOS\Core\DB
         if (is_numeric($s)) {
           $return = " `{$columnName}` = " . $this->escape($s) . "";
         } else {
-          $return = " `{$columnName}_lookup_sql_value` like '%" . $this->escape(trim($s)) . "%'";
+          $return = " `{$columnName}:LOOKUP` like '%" . $this->escape(trim($s)) . "%'";
         }
       }
 
@@ -1185,12 +1112,12 @@ class MySQLi extends \ADIOS\Core\DB
       }
     } elseif (is_array($s) && count($s) > 1) {
       foreach ($s as $val) {
-        $wheres[] = $this->columnWhere($model, $columnName, $val, $column);
+        $wheres[] = $this->columnFilter($model, $columnName, $val, $column);
       }
       $return = implode(' or ', $wheres);
     } elseif (is_array($w) && count($w) > 1) {
       foreach ($w as $val) {
-        $wheres[] = $this->columnWhere($model, $columnName, $val, $column);
+        $wheres[] = $this->columnFilter($model, $columnName, $val, $column);
       }
       $return = implode(' and ', $wheres);
     }
@@ -1216,14 +1143,14 @@ class MySQLi extends \ADIOS\Core\DB
           $srcColumn = $model->columns()[$srcColumnName];
           $lookupModel = $this->adios->getModel($srcColumn['model']);
 
-          $having .= " and (" . $lookupModel->columnWhere(
-            $model,
+          $having .= " and (" . $this->columnFilter(
+            $lookupModel,
             $columnName,
             $filterValue,
             $lookupModel->columns()[$lookupColumnName]
           ) . ")";
         } else {
-          $having .= " and (" . $this->columnWhere(
+          $having .= " and (" . $this->columnFilter(
             $model,
             $columnName,
             $filterValue
