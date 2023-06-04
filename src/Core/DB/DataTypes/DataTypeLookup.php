@@ -13,7 +13,8 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
 * @package DataTypes
 */
-class DataTypeLookup extends DataType {
+class DataTypeLookup extends \ADIOS\Core\DB\DataType
+{
 
   public function get_sql_create_string($table_name, $col_name, $params = []) {
     $col_def = $this->adios->db->tables[$table_name][$col_name];

@@ -315,6 +315,14 @@ class Query
   }
 
   /**
+   * @return array
+   */
+  public function fetchOne() : array
+  {
+    return reset($this->fetch());
+  }
+
+  /**
    * @return int
    */
   public function countRowsFromLastSelect() : int

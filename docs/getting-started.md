@@ -123,10 +123,13 @@ class Orders extends \ADIOS\Core\Widget\Action {
     $orderModel = $this->adios->getModel("Widgets/Orders/Models/Order");
     $customerModel = $this->adios->getModel("Widgets/Customers/Models/Customer");
 
-    $customer = reset($this->adios->db->fetchRaw("
-      select * from `".$customerModel->getFullTableSqlName()."`
-      where id = ".(int) $this->params['id']."
-    "));
+    $customer = $this->adios->db->select($customerModel)
+      ->columns([\ADIOS\Core\DB\Query::allColumnsWithoutLookups])
+      ->where([
+        ['id', '=', (int) $this->params['id']]
+      ])
+      ->fetchOne()
+    ;
 
     return $this->adios->ui->Window([
       "uid" => "{$this->uid}_window",

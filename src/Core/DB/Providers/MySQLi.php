@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\DB;
+namespace ADIOS\Core\DB\Providers;
 
 class MySQLi extends \ADIOS\Core\DB
 {

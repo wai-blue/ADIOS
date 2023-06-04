@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\DB\DataTypes;
+namespace ADIOS\Core\DB;
 
 /**
  * Basic class for definition of an ADIOS data type.

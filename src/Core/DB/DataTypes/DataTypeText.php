@@ -20,7 +20,8 @@ namespace ADIOS\Core\DB\DataTypes;
  *
  * @package DataTypes
  */
-class DataTypeText extends DataType {
+class DataTypeText extends \ADIOS\Core\DB\DataType
+{
   public function get_sql_create_string($table_name, $col_name, $params = []) {
     return "`{$col_name}` text ".($params['sql_definitions'] ?? "");
   }

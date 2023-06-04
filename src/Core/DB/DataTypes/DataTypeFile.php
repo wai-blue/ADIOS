@@ -15,7 +15,7 @@ define('DELETE_FILE', 'delete_file');
 /**
  * @package DataTypes
  */
-class DataTypeFile extends DataType
+class DataTypeFile extends \ADIOS\Core\DB\DataType
 {
   public function get_sql_create_string($table_name, $col_name, $params = [])
   {
