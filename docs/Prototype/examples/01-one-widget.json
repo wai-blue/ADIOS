@@ -1,14 +1,4 @@
 {
-  "ConfigEnv": {
-    "db": {
-      "host": "localhost",
-      "login": "root",
-      "password": "",
-      "name": "prototype_crm"
-    },
-    "globalTablePrefix": "proto",
-    "rewriteBase": "/prototype_crm/"
-  },
   "ConfigApp": {
     "applicationName": "Prototype CRM - One widget",
     "defaultAction": "Home/Dashboard"

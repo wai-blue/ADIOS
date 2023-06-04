@@ -27,11 +27,11 @@ class CrossTableInputField extends \ADIOS\Core\Input {
     }
 
     // Get saved values in DB
-    $itemValues = $this->adios->db->get_all_rows_query(
+    $itemValues = $this->adios->db->getRowsRaw(
       "
         select
           *
-        from `".$crossModel->getFullTableSQLName()."`
+        from `".$crossModel->getFullTableSqlName()."`
         where
           `".$this->adios->db->escape($this->params['cross_key_column'])."` = '".$this->adios->db->escape($this->params['cross_key_value'])."'
       ",

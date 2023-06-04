@@ -40,7 +40,14 @@ class DataTypeLookup extends DataType {
       return "`{$colName}` = null";
     } else if (is_string($value) && !is_numeric($value)) {
       $model = $this->adios->getModel($colDefinition["model"]);
-      $tmp = $model->getByLookupSqlValue($value);
+      $tmp = reset($this->adios->db->getRowsRaw("
+        select
+          id,
+          " . $model->lookupSqlValue("t") . " as `input_lookup_value`
+        from `" . $model->getFullTableSqlName() . "` t
+        having `input_lookup_value` = '" . $this->adios->db->escape($value) . "'
+      "));
+
       $id = (int) $tmp['id'];
 
       return "`{$colName}` = ".($id == 0 ? "null" : $id);

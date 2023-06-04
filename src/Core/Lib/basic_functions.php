@@ -19,53 +19,6 @@ function ads($string) {
 }
 
 /**
- * Switch debugging outputs on.
- *
- * @deprecated
- * @param  boolean $debugCorrectQueries If set to TRUE, also valid DB queries will be debugged.
- * @return void
- */
-function _d($debugCorrectQueries = false) {
-  global $___ADIOSObject;
-  $___ADIOSObject->config['debug_enabled'] = TRUE;
-  $___ADIOSObject->db->debugCorrectQueries = $debugCorrectQueries;
-}
-
-/**
- * Switch debugging outputs off.
- *
- * @deprecated
- * @return void
- */
-function _nd() {
-  global $___ADIOSObject;
-  $___ADIOSObject->config['debug_enabled'] = FALSE;
-}
-
-/**
- * Echo debugging output.
- *
- * @deprecated
- * @return void
- */
-function _d_echo($logger_class, $logger_name, $msg) {
-  global $___ADIOSObject;
-
-  if ($___ADIOSObject->config['debug_enabled']) {
-    // if ($___ADIOSObject->config['disable_adios_console']) {
-    //   echo "
-    //     <div style='background:#CCFFFF'>
-    //       <span style='color:red;font-size:10px;'>[$d_echo_id] $logger_name:</span>
-    //       <xmp style='font-size:10px'>$msg</xmp>
-    //     </div>
-    //   ";
-    // } else {
-      $___ADIOSObject->console->info($msg);
-    // }
-  }
-}
-
-/**
  * Translate string
  *
  * @deprecated

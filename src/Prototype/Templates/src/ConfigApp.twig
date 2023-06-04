@@ -1,7 +1,5 @@
 <?php
 
-define('ADIOS_WIDGETS_DIR', realpath(__DIR__ . "/../src/Widgets"));
-
 // global
 $config['application_name']              = "{{ ConfigApp.applicationName }}";
 $config['session_salt']                  = "{{ ConfigApp.sessionSalt }}";
@@ -10,6 +8,7 @@ $config['session_salt']                  = "{{ ConfigApp.sessionSalt }}";
 $config["dir"]                           = realpath(__DIR__ . "/../src");
 $config["log_dir"]                       = realpath(__DIR__ . "/../log");
 $config["tmp_dir"]                       = realpath(__DIR__ . "/../tmp");
+$config["widgets_dir"]                   = realpath(__DIR__ . "/../src/Widgets");
 $config['files_dir']                     = realpath(__DIR__ . "/../upload");
 $config['files_url']                     = "//" . $_SERVER['HTTP_HOST'] . $config['rewrite_base'] . "upload";
 
@@ -22,9 +21,6 @@ $config["brand"]["sidebar"]["title"]     = '{{ ConfigApp.brand.sidebar.title ?? 
 
 // widgets
 $config['widgets'] = {{ varExport(configWidgetsEnabled)|raw }};
-{# {% for widgetName, widgetConfig in Widgets %}
-$config['widgets']['{{ widgetName }}']['enabled'] = TRUE;
-{% endfor %} #}
 
 // misc
 $config['default_action'] = "{% if ConfigApp.defaultAction == "" %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}";

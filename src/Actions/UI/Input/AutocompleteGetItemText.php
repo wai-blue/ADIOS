@@ -26,7 +26,7 @@ class AutocompleteGetItemText extends \ADIOS\Core\Action {
       "id = {$value}" // having
     );
 
-    $lookupRow = reset($this->adios->db->get_all_rows_query($query));
+    $lookupRow = reset($this->adios->db->getRowsRaw($query));
 
     if (!is_array($lookupRow) && $value > 0) {
       return "-- Record not found --";

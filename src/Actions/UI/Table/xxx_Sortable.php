@@ -21,7 +21,7 @@ if (_count($ids)) {
             $in[] = $id;
         }
     }
-    $ret = $adios->db->get_all_rows(
+    $ret = $adios->db->getRows(
       $_REQUEST['table'],
       [
         "where" => 'id in ('.implode(',', $in).')',
@@ -41,7 +41,7 @@ if (_count($ids)) {
         $adios->db->startTransaction();
         foreach ($ids as $key => $id) {
             if (is_numeric($id) && $id > 0) {
-                $adios->db->update_row_part("{$_REQUEST['table']}", ["{$_REQUEST['column']}" => $new_order[$key]], $id);
+                $adios->db->updateRow("{$_REQUEST['table']}", ["{$_REQUEST['column']}" => $new_order[$key]], $id);
             }
         }
         $adios->db->commit();

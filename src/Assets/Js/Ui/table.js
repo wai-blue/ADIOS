@@ -104,7 +104,7 @@
   };
 
   function ui_table_change_items_per_page(uid, count){
-    ui_table_refresh(uid, {items_per_page: count});
+    ui_table_refresh(uid, {itemsPerPage: count});
   }
 
   function ui_table_select_all(uid){

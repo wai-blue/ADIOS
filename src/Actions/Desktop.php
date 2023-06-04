@@ -72,25 +72,6 @@ class Desktop extends \ADIOS\Core\Action {
       "not_logout" => $this->translate("Do not logout"),
     ];
 
-    // if (
-    //   is_array($this->adios->config['available_languages'])
-    //     && count($this->adios->config['available_languages']) > 1
-    // ) {
-    //   foreach ($this->adios->config['available_languages'] as $val) {
-    //     $settingsMenuItems[] = [
-    //       "text" => strtoupper($val),
-    //       "onclick" => "window.location.href=\"?language={$val}",
-    //     ];
-    //   }
-    // }
-
-    // $settingsMenuItems[] = [
-    //   "fa_icon" => "fas fa-cogs",
-    //   "text" => "Nastavenia",
-    //   "onclick" => "desktop_show_settings();",
-    // ];
-
-
     // develMenuItems
     $develMenuItems = [];
 

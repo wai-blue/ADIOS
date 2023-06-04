@@ -15,11 +15,14 @@ Now, you are ready to customize.
 # Customize
 
 - [Getting started](#getting-started)
+- [Customize](#customize)
   - [Folder structure](#folder-structure)
   - [Widgets](#widgets)
+  - [Prototypes](#prototypes)
+    - [Having troubles?](#having-troubles)
   - [Models](#models)
   - [Controllers (Actions)](#controllers-actions)
-- [Conclusions](#conclusions)
+- [Conclusion](#conclusion)
 
 ## Folder structure
 
@@ -120,8 +123,8 @@ class Orders extends \ADIOS\Core\Widget\Action {
     $orderModel = $this->adios->getModel("Widgets/Orders/Models/Order");
     $customerModel = $this->adios->getModel("Widgets/Customers/Models/Customer");
 
-    $customer = reset($this->adios->db->get_all_rows_query("
-      select * from `".$customerModel->getFullTableSQLName()."`
+    $customer = reset($this->adios->db->getRowsRaw("
+      select * from `".$customerModel->getFullTableSqlName()."`
       where id = ".(int) $this->params['id']."
     "));
     
@@ -132,8 +135,8 @@ class Orders extends \ADIOS\Core\Widget\Action {
       "content" => 
         $this->adios->renderAction("UI/Table", [
           "model" => "Widgets/Orders/Models/Order",
-          "where" => $orderModel->getFullTableSQLName().".id_customer = ".(int) $this->params['id'],
-          "show_title" => FALSE,
+          "where" => $orderModel->getFullTableSqlName().".id_customer = ".(int) $this->params['id'],
+          "showTitle" => FALSE,
           "column_settings" => ["id_customer" => ["show_column" => FALSE]],
         ]),
     ])->render();
@@ -155,7 +158,7 @@ class MonthlyTurnover extends \ADIOS\Core\Widget\Action {
         month(`i`.`delivery_time`) as `month`,
         sum(`ii`.`unit_price` * `ii`.`quantity`) as `turnover`
       from `:table` `ii`
-      left join `".$invoiceModel->getFullTableSQLName()."` `i` on `i`.`id` = `ii`.`id_invoice`
+      left join `".$invoiceModel->getFullTableSqlName()."` `i` on `i`.`id` = `ii`.`id_invoice`
       group by `i`.`delivery_time`
       having `year` = :year
       order by month(`i`.`delivery_time`)

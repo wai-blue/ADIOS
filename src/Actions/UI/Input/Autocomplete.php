@@ -28,7 +28,7 @@ class Autocomplete extends \ADIOS\Core\Action {
       $having
     );
 
-    $lookupRows = $this->adios->db->get_all_rows_query($query);
+    $lookupRows = $this->adios->db->getRowsRaw($query);
 
     $retval = [];
     if (_count($lookupRows)) {

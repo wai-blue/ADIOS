@@ -46,7 +46,7 @@ class InstallUpgrades extends \ADIOS\Core\Action
 
     foreach ($foreignKeysToInstall as $modelName) {
       $model = $this->adios->getModel($modelName);
-      $model->installForeignKeys();
+      $model->createSqlForeignKeys();
     }
 
     $html = "

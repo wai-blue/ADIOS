@@ -135,7 +135,7 @@ class Input extends \ADIOS\Core\UI\View {
         }
         
         if (empty($params['table']) && !empty($params['model'])) {
-          $params['table'] = $adios->getModel($params['model'])->getFullTableSQLName();
+          $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
         }
 
         parent::__construct($adios, $params);
@@ -840,7 +840,7 @@ class Input extends \ADIOS\Core\UI\View {
           );
 
           if (!in_array($inputStyle, ['autocomplete', 'select'])) {
-            $rowsCnt = reset($this->adios->db->get_all_rows_query("
+            $rowsCnt = reset($this->adios->db->getRowsRaw("
               select
                 ifnull(count(*), 0) as cnt
               from ({$lookupSqlQuery}) dummy
@@ -855,7 +855,7 @@ class Input extends \ADIOS\Core\UI\View {
 
           switch ($inputStyle) {
             case "select":
-              $rows = $this->adios->db->get_all_rows_query($lookupSqlQuery);
+              $rows = $this->adios->db->getRowsRaw($lookupSqlQuery);
 
               $html = "
                 <select
@@ -899,7 +899,7 @@ class Input extends \ADIOS\Core\UI\View {
               $inputText = "";
 
               if ($value > 0) {
-                $row = reset($this->adios->db->get_all_rows_query(
+                $row = reset($this->adios->db->getRowsRaw(
                   $lookupModel->lookupSqlQuery(
                     $this->params['initiating_model'],
                     $this->params['initiating_column'],
