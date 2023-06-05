@@ -35,12 +35,6 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
   }
 
   public function get_sql_column_data_string($table, $colName, $value, $params = []) {
-    $params = _put_default_params_values($params, [
-      'null_value' => false,
-      'dumping_data' => false,
-      'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
-    ]);
-
     return "`{$colName}` = ".((bool) $value ? 1 : 0);
   }
 

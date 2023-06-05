@@ -824,28 +824,68 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function insertRow($data)
   {
-    return $this->adios->db->insertRow($this->fullTableSqlName, $data, FALSE, FALSE, $this);
+    unset($data['id']);
+
+    return $this->adios->db->insert($this)
+      ->columnValues($data)
+      ->execute()
+    ;
   }
 
   public function insertOrUpdateRow($data)
   {
-    return $this->adios->db->insertOrUpdateRow($this->fullTableSqlName, $data, FALSE, FALSE, $this);
+    unset($data['id']);
+
+    $duplicateKeyData = $data;
+
+    return $this->adios->db->insert($this)
+      ->columnValues($data)
+      ->onDuplicateKey($duplicateKeyData)
+      ->execute()
+    ;
   }
 
   public function insertRandomRow($data = [], $dictionary = [])
   {
-    return $this->adios->db->insertRandomRow($this->fullTableSqlName, $data, $dictionary, $this);
+    return $this->insertRow(
+      $this->adios->db->getRandomColumnValues($this, $data, $dictionary)
+    );
   }
 
   public function updateRow($data, $id)
   {
-    return $this->adios->db->updateRow($this->fullTableSqlName, $data, $id, FALSE, $this);
+    $queryOk = $this->adios->db->update($this)
+      ->columnValues($data)
+      ->whereId((int) $id)
+      ->execute()
+    ;
+
+    return ($queryOk ? $id : FALSE);
   }
 
   public function deleteRow($id)
   {
-    return $this->adios->db->deleteRow($this->fullTableSqlName, $id);
+    return $this->adios->db->delete($this)
+      ->whereId((int) $id)
+      ->execute()
+    ;
   }
+
+  public function copyRow($id)
+  {
+    $row = $this->adios->db->select($this)
+      ->columns([\ADIOS\Core\DB\Query::allColumnsWithoutLookups])
+      ->where([
+        ['id', '=', (int) $id]
+      ])
+      ->fetchOne()
+    ;
+
+    unset($row['id']);
+
+    return $this->insertRow($row);
+  }
+
 
   public function search($q)
   {

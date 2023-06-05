@@ -197,6 +197,7 @@ class DB
 
   public function fetchArray()
   {
+    return [];
   }
 
   /**
@@ -262,5 +263,124 @@ class DB
   {
     return new \ADIOS\Core\DB\Query($this, $model, \ADIOS\Core\DB\Query::delete);
   }
+
+  public function insertedId()
+  {
+    return 0;
+  }
+
+
+
+  public function getRandomColumnValues(
+    \ADIOS\Core\Model $model,
+    $data = [],
+    $dictionary = []
+  )
+  {
+    $table = $model->getFullTableSqlName();
+
+    if (is_array($this->tables[$table])) {
+      foreach ($this->tables[$table] as $col_name => $col_definition) {
+        if ($col_name != "id" && !isset($data[$col_name])) {
+          $random_val = NULL;
+          if (is_array($dictionary[$col_name])) {
+            $random_val = $dictionary[$col_name][rand(0, count($dictionary[$col_name]) - 1)];
+          } else {
+            switch ($col_definition['type']) {
+              case "int":
+                if (is_array($col_definition['enum_values'])) {
+                  $keys = array_keys($col_definition['enum_values']);
+                  $random_val = $keys[rand(0, count($keys) - 1)];
+                } else {
+                  $random_val = rand(0, 1000);
+                }
+                break;
+              case "float":
+                $random_val = rand(0, 1000) / ($col_definition['decimals'] ?? 2);
+                break;
+              case "time":
+                $random_val = rand(10, 20) . ":" . rand(10, 59);
+                break;
+              case "date":
+                $random_val = date("Y-m-d", time() - (3600 * 24 * 365) + rand(0, 3600 * 24 * 365));
+                break;
+              case "datetime":
+                $random_val = date("Y-m-d H:i:s", time() - (3600 * 24 * 365) + rand(0, 3600 * 24 * 365));
+                break;
+              case "boolean":
+                $random_val = (rand(0, 1) ? 1 : 0);
+                break;
+              case "text":
+                switch (rand(0, 5)) {
+                  case 0:
+                    $random_val = "Nunc ac sollicitudin ipsum. Vestibulum condimentum vitae justo quis bibendum. Fusce et scelerisque dui, eu placerat nisl. Proin ut efficitur velit, nec rutrum massa.";
+                    break;
+                  case 1:
+                    $random_val = "Integer ullamcorper lacus at nisi posuere posuere. Maecenas malesuada magna id fringilla sagittis. Nam sed turpis feugiat, placerat nisi et, gravida lacus. Curabitur porta elementum suscipit.";
+                    break;
+                  case 2:
+                    $random_val = "Praesent libero diam, vulputate sed varius eget, luctus a risus. Praesent sit amet neque commodo, varius nisl dignissim, tincidunt magna. Nunc tincidunt dignissim ligula, sit amet facilisis felis mollis vel.";
+                    break;
+                  case 3:
+                    $random_val = "Sed ut ligula luctus, ullamcorper felis nec, tristique lorem. Maecenas sit amet tincidunt enim.";
+                    break;
+                  case 4:
+                    $random_val = "Mauris blandit ligula massa, sit amet auctor risus viverra at. Cras rhoncus molestie malesuada. Sed facilisis blandit augue, eu suscipit lectus vehicula quis. Mauris efficitur elementum feugiat.";
+                    break;
+                  default:
+                    $random_val = "Nulla posuere dui sit amet elit efficitur iaculis. Cras elit ligula, feugiat vitae maximus quis, volutpat sit amet sapien. Vivamus varius magna fermentum dolor varius, vel scelerisque ante mollis.";
+                    break;
+                }
+              case "varchar":
+              case "password":
+                switch (rand(0, 5)) {
+                  case 0:
+                    $random_val = rand(0, 9) . " Nunc";
+                    break;
+                  case 1:
+                    $random_val = rand(0, 9) . " Efficitur";
+                    break;
+                  case 2:
+                    $random_val = rand(0, 9) . " Vulputate";
+                    break;
+                  case 3:
+                    $random_val = rand(0, 9) . " Ligula luctus";
+                    break;
+                  case 4:
+                    $random_val = rand(0, 9) . " Mauris";
+                    break;
+                  case 5:
+                    $random_val = rand(0, 9) . " Massa";
+                    break;
+                  case 6:
+                    $random_val = rand(0, 9) . " Auctor";
+                    break;
+                  case 7:
+                    $random_val = rand(0, 9) . " Molestie";
+                    break;
+                  case 8:
+                    $random_val = rand(0, 9) . " Malesuada";
+                    break;
+                  case 9:
+                    $random_val = rand(0, 9) . " Facilisis";
+                    break;
+                  case 10:
+                    $random_val = rand(0, 9) . " Augue";
+                    break;
+                }
+                break;
+            }
+          }
+
+          if ($random_val !== NULL) {
+            $data[$col_name] = $random_val;
+          }
+        }
+      }
+    }
+
+    return $data;
+  }
+
 
 }

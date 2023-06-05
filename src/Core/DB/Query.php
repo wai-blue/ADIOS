@@ -14,7 +14,7 @@ class Query
   const allColumnsWithLookups = 1;
   const allColumnsWithoutLookups = 2;
 
-  // statement type
+  // statement types
   const selectModifier = 1;
   const column = 2;
   const join = 3;
@@ -25,6 +25,8 @@ class Query
   const order = 8;
   const orderRaw = 9;
   const limit = 10;
+  const columnValue = 11;
+  const columnValueOnDuplicateKey = 12;
 
   // select modifiers
   const countRows = 1;
@@ -212,6 +214,13 @@ class Query
     return $this;
   }
 
+  public function whereId(int $id) : \ADIOS\Core\DB\Query
+  {
+    return $this->where([
+      [ 'id', '=', $id ]
+    ]);
+  }
+
   /**
    * @param string $where
    * 
@@ -295,8 +304,41 @@ class Query
       $start,
       $count
     ]);
+
     return $this;
   }
+
+
+  public function columnValues(array $columnValues = []) : \ADIOS\Core\DB\Query
+  {
+    foreach ($columnValues as $column => $value) {
+      $this->add([
+        self::columnValue,
+        $column,
+        $value
+      ]);
+    }
+
+    return $this;
+  }
+
+  public function onDuplicateKey(array $columnValues = []) : \ADIOS\Core\DB\Query
+  {
+    foreach ($columnValues as $column => $value) {
+      $this->add([
+        self::columnValueOnDuplicateKey,
+        $column,
+        $value
+      ]);
+    }
+
+    return $this;
+  }
+
+
+
+
+
 
   /**
    * @return string
@@ -304,6 +346,25 @@ class Query
   public function buildSql() : string
   {
     return $this->db->buildSql($this);
+  }
+
+  /**
+   * @return array
+   */
+  public function execute()
+  {
+    $result = $this->db->query($this->buildSql());
+
+    switch ($this->type) {
+      case self::insert:
+        $returnValue = $this->db->insertedId();
+      break;
+      default:
+        $returnValue = $result;
+      break;
+    }
+
+    return $returnValue;
   }
 
   /**
