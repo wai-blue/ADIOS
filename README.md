@@ -16,6 +16,17 @@ You can very easily create very complex forms, thanks to the **strong form templ
 
 And you can fully customize your application.
 
+### ADIOS vs LARAVEL
+
+| ADIOS                                                                                                | Laravel                                                                                                                                    |
+|------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| Can be built easily using a json file                                                                | Requires additional configuration and libraries to reach the functionality which ADIOS offers out of the box                               |
+| Developed with CRM in mind                                                                           | Built with focus on broad usage in diverse applications                                                                                    |
+| Folder structure is straight-forward and easy to understand (1 main directory with 6 folders inside) | Folders are complexely structured to make it better for developing large applications (2 main directories with 22 folders in total inside) |
+| 0.068 ms per request                                                                                 | 55.379 ms per request                                                                                                                      |
+
+When building an identical CRM applications with both of these frameworks, ADIOS takes up only 14,5 MB (14,1 MB dependencies) of space, while Laravel 10 needs 240 MB (150,3 MB dependencies).
+
 ## Screenshots
 
 ![](docs/Assets/images/dashboard.png)
