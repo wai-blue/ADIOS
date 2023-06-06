@@ -64,4 +64,4 @@ $adios->db->insert($model)
   ->execute()
 ```
 
-See more [complex examples here](query-builder-examples).
+See more [complex examples here](query-builder-examples.md).
