@@ -211,13 +211,20 @@ class DB
    * @see get_row
    * @see get_column_data
    */
-  public function fetchRaw($query, $keyBy = "id") : array
+  public function fetchRaw(
+    string $query,
+    string $keyBy = "id",
+    ?\ADIOS\Core\Model $model = NULL) : array
   {
     $this->query($query);
 
     $rows = [];
 
     while ($row = $this->fetchArray()) {
+      if ($model !== NULL) {
+        $row = $model->normalizeRowData($row);
+      }
+
       if (empty($keyBy)) {
         $rows[] = $row;
       } else {

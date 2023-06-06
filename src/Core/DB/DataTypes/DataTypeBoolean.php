@@ -54,4 +54,9 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
   public function get_csv($value, $params = []) {
     return (int) $value;
   }
+
+  public function fromString(?string $value)
+  {
+    return (bool) $value;
+  }
 }

@@ -391,6 +391,7 @@ class Table extends \ADIOS\Core\UI\View
 
     // fetch
     $this->data = $query->fetch();
+
     $this->allRowsCount = $db->countRowsFromLastSelect();
 
     if ($this->params['page'] * $this->params['itemsPerPage'] > $this->allRowsCount) {

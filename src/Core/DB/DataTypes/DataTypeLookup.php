@@ -16,7 +16,8 @@ namespace ADIOS\Core\DB\DataTypes;
 class DataTypeLookup extends \ADIOS\Core\DB\DataType
 {
 
-  public function get_sql_create_string($table_name, $col_name, $params = []) {
+  public function get_sql_create_string($table_name, $col_name, $params = [])
+  {
     $col_def = $this->adios->db->tables[$table_name][$col_name];
 
     if (!$col_def['disable_foreign_key']) {
@@ -77,16 +78,24 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     }
   }
 
-  public function get_html_or_csv($value, $params = []) {
+  public function get_html_or_csv($value, $params = [])
+  {
     $html = $params['row']["{$params['col_name']}:LOOKUP"] ?? "";
     return $params['export_csv'] ? $html : htmlspecialchars($html);
   }
 
-  public function get_html($value, $params = []) {
+  public function get_html($value, $params = [])
+  {
     return $this->get_html_or_csv($value, $params);
   }
 
-  public function get_csv($value, $params = []) {
+  public function get_csv($value, $params = [])
+  {
     return $this->get_html_or_csv($value, $params);
+  }
+
+  public function fromString(?string $value)
+  {
+    return (int) $value;
   }
 }

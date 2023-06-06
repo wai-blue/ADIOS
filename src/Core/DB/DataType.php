@@ -71,6 +71,10 @@ class DataType {
   public function translate($string) {
     return $this->adios->translate($string, $this);
   }
+
+  public function fromString(?string $value) {
+    return $value;
+  }
   
 }
 

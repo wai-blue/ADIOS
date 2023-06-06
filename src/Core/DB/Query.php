@@ -25,8 +25,8 @@ class Query
   const order = 8;
   const orderRaw = 9;
   const limit = 10;
-  const columnValue = 11;
-  const columnValueOnDuplicateKey = 12;
+  const set = 11;
+  const setOnDuplicateKey = 12;
 
   // select modifiers
   const countRows = 1;
@@ -309,11 +309,11 @@ class Query
   }
 
 
-  public function columnValues(array $columnValues = []) : \ADIOS\Core\DB\Query
+  public function set(array $values = []) : \ADIOS\Core\DB\Query
   {
-    foreach ($columnValues as $column => $value) {
+    foreach ($values as $column => $value) {
       $this->add([
-        self::columnValue,
+        self::set,
         $column,
         $value
       ]);
@@ -322,11 +322,11 @@ class Query
     return $this;
   }
 
-  public function onDuplicateKey(array $columnValues = []) : \ADIOS\Core\DB\Query
+  public function onDuplicateKey(array $values = []) : \ADIOS\Core\DB\Query
   {
-    foreach ($columnValues as $column => $value) {
+    foreach ($values as $column => $value) {
       $this->add([
-        self::columnValueOnDuplicateKey,
+        self::setOnDuplicateKey,
         $column,
         $value
       ]);
@@ -370,9 +370,13 @@ class Query
   /**
    * @return array
    */
-  public function fetch() : array
+  public function fetch(string $keyBy = "id") : array
   {
-    return $this->db->fetchRaw($this->buildSql());
+    return $this->db->fetchRaw(
+      $this->buildSql(),
+      $keyBy,
+      $this->model
+    );
   }
 
   /**

@@ -156,7 +156,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     } else {
       $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
       $this->shortName = end(explode("/", $this->fullName));
-      $this->adios = &$adiosOrAttributes;
+      $this->adios = $adiosOrAttributes;
 
       $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 
@@ -745,6 +745,24 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return array_keys($this->indexNames());
   }
 
+  public function normalizeRowData(array $data, string $lookupKeyPrefix = "") {
+    foreach ($this->columns() as $column => $columnDefinition) {
+      $columnType = $columnDefinition['type'];
+      if (isset($this->adios->db->columnTypes[$columnType])) {
+        $data[$lookupKeyPrefix.$column] = $this->adios->db->columnTypes[$columnType]->fromString($data[$lookupKeyPrefix.$column]);
+      }
+
+      if ($columnType == 'lookup' && empty($lookupKeyPrefix)) {
+        $lookupModel = $this->adios->getModel($columnDefinition['model']);
+        $data = array_merge($data,
+          $lookupModel->normalizeRowData($data, $column . ':LOOKUP:')
+        );
+      }
+    }
+
+    return $data;
+  }
+
   //////////////////////////////////////////////////////////////////
   // CRUD methods
 
@@ -827,7 +845,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     unset($data['id']);
 
     return $this->adios->db->insert($this)
-      ->columnValues($data)
+      ->set($data)
       ->execute()
     ;
   }
@@ -839,7 +857,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $duplicateKeyData = $data;
 
     return $this->adios->db->insert($this)
-      ->columnValues($data)
+      ->set($data)
       ->onDuplicateKey($duplicateKeyData)
       ->execute()
     ;
@@ -855,7 +873,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function updateRow($data, $id)
   {
     $queryOk = $this->adios->db->update($this)
-      ->columnValues($data)
+      ->set($data)
       ->whereId((int) $id)
       ->execute()
     ;

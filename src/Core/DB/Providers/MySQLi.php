@@ -643,8 +643,6 @@ class MySQLi extends \ADIOS\Core\DB
         $selectModifiers = $query->getStatements(\ADIOS\Core\DB\Query::selectModifier);
         $columns = $query->getStatements(\ADIOS\Core\DB\Query::column);
         $joins = $query->getStatements(\ADIOS\Core\DB\Query::join);
-        $havings = $query->getStatements(\ADIOS\Core\DB\Query::having);
-        $havingRaws = $query->getStatements(\ADIOS\Core\DB\Query::havingRaw);
         $orders = $query->getStatements(\ADIOS\Core\DB\Query::order);
         $orderRaws = $query->getStatements(\ADIOS\Core\DB\Query::orderRaw);
         $limits = $query->getStatements(\ADIOS\Core\DB\Query::limit);
@@ -731,21 +729,21 @@ class MySQLi extends \ADIOS\Core\DB
       case \ADIOS\Core\DB\Query::insert:
         $sqlTableName = $model->getFullTableSqlName();
 
-        $columnValues = $query->getStatements(\ADIOS\Core\DB\Query::columnValue);
-        $columnValuesOnDuplicateKey = $query->getStatements(\ADIOS\Core\DB\Query::columnValueOnDuplicateKey);
+        $values = $query->getStatements(\ADIOS\Core\DB\Query::set);
+        $valuesOnDuplicateKey = $query->getStatements(\ADIOS\Core\DB\Query::setOnDuplicateKey);
 
         $data = [];
-        foreach ($columnValues as $value) {
+        foreach ($values as $value) {
           $data[$value[1]] = $value[2];
         }
 
         $sql = 'INSERT INTO `' . $sqlTableName . '` SET ';
         $sql .= $this->insertRowQuery($sqlTableName, $data, TRUE);
 
-        if (count($columnValuesOnDuplicateKey) > 0) {
+        if (count($valuesOnDuplicateKey) > 0) {
 
           $data = [];
-          foreach ($columnValuesOnDuplicateKey as $value) {
+          foreach ($valuesOnDuplicateKey as $value) {
             $data[$value[1]] = $value[2];
           }
 
@@ -758,10 +756,10 @@ class MySQLi extends \ADIOS\Core\DB
       case \ADIOS\Core\DB\Query::update:
         $sqlTableName = $model->getFullTableSqlName();
 
-        $columnValues = $query->getStatements(\ADIOS\Core\DB\Query::columnValue);
+        $values = $query->getStatements(\ADIOS\Core\DB\Query::set);
 
         $data = [];
-        foreach ($columnValues as $value) {
+        foreach ($values as $value) {
           $data[$value[1]] = $value[2];
         }
 
