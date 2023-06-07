@@ -38,4 +38,9 @@ class Grid extends \ADIOS\Core\UI\View {
     return $this->params;
   }
 
+  public function render(string $panel = '') {
+    $html = parent::render();
+    return $this->applyDisplayMode((string) $html);
+  }
+
 }

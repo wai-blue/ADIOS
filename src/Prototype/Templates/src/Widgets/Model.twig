@@ -6,12 +6,15 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
 
   use \{{ thisWidget.namespace }}\{{ thisWidget.class }}\Models\Callbacks\{{ thisModel.name }};
 
-  var $sqlName = "{{ thisModel.config.sqlName }}";
-  var $urlBase = "{{ thisModel.config.urlBase }}";
-  var $tableTitle = "{{ thisModel.config.tableTitle }}";
-  var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting }}";
-  var $formTitleForEditing = "{{ thisModel.config.formTitleForEditing }}";
-  var $lookupSqlValue = "{{ thisModel.config.lookupSqlValue }}";
+  var $sqlName = "{{ thisModel.config.sqlName|raw }}";
+  var $urlBase = "{{ thisModel.config.urlBase|raw }}";
+  var $crudActions = 
+{{ varExport(thisModel.config.crudActions, "    ")|raw }}
+  ;
+  var $tableTitle = "{{ thisModel.config.tableTitle|raw }}";
+  var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting|raw }}";
+  var $formTitleForEditing = "{{ thisModel.config.formTitleForEditing|raw }}";
+  var $lookupSqlValue = "{{ thisModel.config.lookupSqlValue|raw }}";
   var $crossTableAssignments =
 {{ varExport(thisModel.config.crossTableAssignments, "    ")|raw }}
   ;

@@ -370,6 +370,39 @@ class View {
 
     return $html;
   }
+
+  public function applyDisplayMode(string $html) : string
+  {
+    switch ($this->params['displayMode']) {
+      case 'window':
+        $windowParams = $this->params_merge(
+          [
+            'content' => $html,
+            'header' => $this->params['window']['header'],
+            'footer' => $this->params['window']['footer'],
+            'show_modal' => $this->params['show_modal'],
+            'form_close_click' => $this->params['close_button_params']['onclick'],
+            'uid' => $this->params['window_uid'],
+            'titleRaw' => $this->params['titleRaw'],
+            'title' => $this->params['title'],
+            'subtitle' => $this->params['subtitle'],
+          ],
+          $this->params['windowParams']
+        );
+
+        $html = $this->adios->ui->Window($windowParams)->render();
+      break;
+      case 'desktop':
+        $html = $this->render('title') . $html;
+      break;
+      case 'inline':
+      default:
+        $html = $html;
+      break;
+    }
+
+    return $html;
+  }
   
   /**
    * main_params

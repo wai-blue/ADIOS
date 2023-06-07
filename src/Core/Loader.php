@@ -520,10 +520,11 @@ class Loader
 
         // user authentication
         if ($this->forceUserLogout) unset($_SESSION[_ADIOS_ID]['userProfile']);
+
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
           $adiosUserModel = $this->getModel("Core/Models/User");
-          $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
-          $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
+          // $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
+          // $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
           $user = reset($this->db->get_all_rows_query("
             SELECT *
@@ -533,8 +534,8 @@ class Loader
           "));
 
           if (
-            $user['is_active'] != 1 ||
-            $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
+            $user['is_active'] != 1
+            // || $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
           ) {
             unset($_SESSION[_ADIOS_ID]['userProfile']);
             $this->userProfile = [];

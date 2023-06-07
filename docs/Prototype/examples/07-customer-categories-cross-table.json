@@ -216,8 +216,7 @@
       },
       "actions": {
         "Basic": {
-          "template": "SettingsPanel",
-          "templateContainsPhpScript": true,
+          "phpTemplate": "SettingsPanel",
           "title": "Basic settings",
           "items": [
             {
@@ -238,8 +237,7 @@
           ]
         },
         "Extended": {
-          "template": "SettingsPanel",
-          "templateContainsPhpScript": true,
+          "phpTemplate": "SettingsPanel",
           "title": "Extended settings",
           "items": [
             {

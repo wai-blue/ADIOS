@@ -229,6 +229,13 @@ class Table extends \ADIOS\Core\UI\View
       $this->params['show_add_button'] = false;
     }
 
+    if ($this->params['readonly']) {
+      $this->params['show_add_button'] = false;
+      $this->params['show_search_button'] = false;
+      $this->params['show_export_csv_button'] = false;
+      $this->params['show_import_csv_button'] = false;
+    }
+
     $this->model->onTableAfterInit($this);
 
     $this->loadData();

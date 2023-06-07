@@ -9,6 +9,8 @@
     gap: 15px;
     height: 100vh;
     padding: 5px;
+
+    {{ view.style }}
   }
 
   {% if layoutSm %}
@@ -72,7 +74,7 @@
   }
 
   {% for areaName, areaParams in view.areas %}
-    .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; }
+    .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; {{ areaParams.style }} }
   {% endfor %}
 </style>
 

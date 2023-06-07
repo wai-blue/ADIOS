@@ -626,29 +626,35 @@ class Form extends \ADIOS\Core\UI\View
       </script>
     ';
 
-    if ('window' == $this->params['form_type']) {
-      $window_params = parent::params_merge(
-        [
-          'content' => $html,
-          'header' => $this->params['window']['header'],
-          'footer' => $this->params['window']['footer'],
-          'show_modal' => $this->params['show_modal'],
-          'form_close_click' => $this->params['close_button_params']['onclick'],
-          'uid' => $this->params['window_uid'],
-          'titleRaw' => $this->params['titleRaw'],
-          'title' => $this->params['title'],
-          'subtitle' => $this->params['subtitle'],
-        ],
-        $this->params['window_params']
-      );
-      $html = $this->adios->ui->Window($window_params)->render();
-    } elseif ('desktop' == $this->params['form_type']) {
-      $html = parent::render('title') . $html;
-    } elseif ('form' == $this->params['form_type']) {
-      $html = $html;
+    if (empty($this->params['displayMode'])) {
+      $this->params['displayMode'] = $this->params['form_type'];
     }
+    
+    return $this->applyDisplayMode((string) $html);
 
-    return $html;
+    // if ('window' == $this->params['form_type']) {
+    //   $window_params = parent::params_merge(
+    //     [
+    //       'content' => $html,
+    //       'header' => $this->params['window']['header'],
+    //       'footer' => $this->params['window']['footer'],
+    //       'show_modal' => $this->params['show_modal'],
+    //       'form_close_click' => $this->params['close_button_params']['onclick'],
+    //       'uid' => $this->params['window_uid'],
+    //       'titleRaw' => $this->params['titleRaw'],
+    //       'title' => $this->params['title'],
+    //       'subtitle' => $this->params['subtitle'],
+    //     ],
+    //     $this->params['window_params']
+    //   );
+    //   $html = $this->adios->ui->Window($window_params)->render();
+    // } elseif ('desktop' == $this->params['form_type']) {
+    //   $html = parent::render('title') . $html;
+    // } elseif ('form' == $this->params['form_type']) {
+    //   $html = $html;
+    // }
+
+    // return $html;
   }
 
   public function Input($colName, $formData = NULL, $initiatingModel = NULL) {

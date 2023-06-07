@@ -85,6 +85,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   var $urlBase = "";
 
+  var $crudActions = [];
+
   /**
    * Readable title for the table listing.
    *
@@ -559,7 +561,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // List
       '/^' . $urlBase . '$/' => [
         "permission" => "{$this->fullName}/Read",
-        "action" => "UI/Table",
+        "action" => $this->crudActions['Read'] ?? "UI/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -568,7 +570,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Edit
       '/^' . $urlBase . '\/(\d+)\/Edit$/' => [
         "permission" => "{$this->fullName}/Edit",
-        "action" => "UI/Form",
+        "action" => $this->crudActions['Edit'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
@@ -578,7 +580,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Add
       '/^' . $urlBase . '\/Add$/' => [
         "permission" => "{$this->fullName}/Add",
-        "action" => "UI/Form",
+        "action" => $this->crudActions['Add'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "id" => -1,
@@ -589,7 +591,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Save
       '/^' . $urlBase . '\/Save$/' => [
         "permission" => "{$this->fullName}/Save",
-        "action" => "UI/Form/Save",
+        "action" => $this->crudActions['Save'] ?? "UI/Form/Save",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -598,7 +600,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Delete
       '/^' . $urlBase . '\/Delete$/' => [
         "permission" => "{$this->fullName}/Delete",
-        "action" => "UI/Form/Delete",
+        "action" => $this->crudActions['Delete'] ?? "UI/Form/Delete",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -607,7 +609,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Copy
       '/^' . $urlBase . '\/Copy$/' => [
         "permission" => "{$this->fullName}/Copy",
-        "action" => "UI/Form/Copy",
+        "action" => $this->crudActions['Copy'] ?? "UI/Form/Copy",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -616,7 +618,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Search
       '/^' . $urlBase . '\/Search$/' => [
         "permission" => "{$this->fullName}/Search",
-        "action" => "UI/Table/Search",
+        "action" => $this->crudActions['Search'] ?? "UI/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
