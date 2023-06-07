@@ -576,11 +576,17 @@ class Table extends \ADIOS\Core\UI\View
           ]);
         }
 
-        $html .= $this->adios->ui->Title([
-          'left' => $titleButtons,
-          'center' => $this->params['title'],
-          'right' => $this->params['right'],
-        ])->render();
+        if (
+          !empty($titleButtons)
+          && !empty($this->params['title'])
+          && !empty($this->params['right'])
+        ) {
+          $html .= $this->adios->ui->Title([
+            'left' => $titleButtons,
+            'center' => $this->params['title'],
+            'right' => $this->params['right'],
+          ])->render();
+        }
       }
 
       if (_count($this->search)) {
