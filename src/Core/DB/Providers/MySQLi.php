@@ -23,16 +23,26 @@ class MySQLi extends \ADIOS\Core\DB
    *
    * @return void
    */
-  public function connect() : void
+  public function connect(): void
   {
     if (empty($this->db_host)) {
       throw new \ADIOS\Core\Exceptions\DBException("Database connection string is not configured.");
     }
 
     if (!empty($this->db_port) && is_numeric($this->db_port)) {
-      $this->connection = new \mysqli($this->db_host, $this->db_name, $this->db_password, $this->db_name, $this->db_port);
+      $this->connection = new \mysqli(
+        $this->db_host, 
+        $this->db_user, 
+        $this->db_password, 
+        $this->db_name, 
+        $this->db_port
+      );
     } else {
-      $this->connection = new \mysqli($this->db_host, $this->db_user, $this->db_password);
+      $this->connection = new \mysqli(
+        $this->db_host, 
+        $this->db_user, 
+        $this->db_password)
+      ;
     }
 
     if (!empty($this->connection->connect_error)) {
@@ -61,19 +71,17 @@ class MySQLi extends \ADIOS\Core\DB
     }
   }
 
-
-
-  function escape(string $str) : string
+  function escape(string $str): string
   {
     return $this->connection->real_escape_string((string) $str);
   }
 
-  public function showTables() : array
+  public function showTables(): array
   {
     return $this->fetchRaw("show tables", "");
   }
 
-  public function countRowsFromLastSelect() : int
+  public function countRowsFromLastSelect(): int
   {
     return (int) reset($this->fetchRaw('SELECT FOUND_ROWS() as FOUND_ROWS'))['FOUND_ROWS'];
   }
@@ -110,7 +118,7 @@ class MySQLi extends \ADIOS\Core\DB
    * 
    * @return string
    */
-  public function typedSqlValue($value) : string
+  public function typedSqlValue($value): string
   {
     if ($value instanceof string) {
       return "'" . $this->escape($value) . "'";
