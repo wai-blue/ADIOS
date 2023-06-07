@@ -34,18 +34,18 @@ class ManyToMany extends \ADIOS\Core\Input {
     $srcModel = $this->adios->getModel($columns[$srcColumn]['model']);
     $dstModel = $this->adios->getModel($columns[$dstColumn]['model']);
 
-    $dstItems = $this->adios->db->get_all_rows_query("
+    $dstItems = $this->adios->db->fetchRaw("
       select
         `dst`.`id`,
         ".$dstModel->lookupSqlValue('dst')." as `lookup_sql_value`
-      from `".$dstModel->getFullTableSQLName()."` dst
+      from `".$dstModel->getFullTableSqlName()."` dst
       order by ".($this->params['order'] ?? "id asc")."
     ");
 
-    $valuesRaw = $this->adios->db->get_all_rows_query("
+    $valuesRaw = $this->adios->db->fetchRaw("
       select
         *
-      from `".$model->getFullTableSQLName()."`
+      from `".$model->getFullTableSqlName()."`
       where
         ".(empty($this->params['constraints'][$srcColumn]) ? "TRUE" : "`{$srcColumn}` = {$this->params['constraints'][$srcColumn]}")."
         and ".(empty($this->params['constraints'][$dstColumn]) ? "TRUE" : "`{$dstColumn}` = {$this->params['constraints'][$dstColumn]}")."

@@ -50,12 +50,14 @@ class View {
 
     $this->adios = $adios;
 
-    if ($params['lpfs']) {
+    if ($params['lpfs'] ?? FALSE) {
       $params = $this->loadParamsFromSession($params['uid']);
     }
 
     $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\Core\\UI\\", "", static::class));
-    $this->shortName = end(explode("/", $this->fullName));
+
+    $tmp = explode("/", $this->fullName);
+    $this->shortName = end($tmp);
 
     if (empty($params['uid'])) {
       $params['uid'] =
@@ -79,7 +81,9 @@ class View {
     $this->classes = ['adios', 'ui', $params['component_class']];
     $this->twigTemplate = "UI/{$this->fullName}";
 
-    $this->add_class($params['class']);
+    if (isset($params['class'])) {
+      $this->add_class($params['class']);
+    }
   }
 
   public function saveParamsToSession(string $uid = "", $params = NULL) {
@@ -175,38 +179,15 @@ class View {
       $params = [];
     }
 
-    // ak je na danej urovni zapnuty disable merge, cele paramsy su nahradene updatom
-    if (true === $update['disable_merge']) {
-      unset($update['disable_merge']);
-      $params = $update;
-    } else {
-      // ak je vypnuty merge parametrov v prvej urovni disable_merge pola, unsetnu sa params a samotny merge
-      if (_count($update['disable_merge'])) {
-        foreach ($update['disable_merge'] as $disable_key => $disable) {
-          if (true === $disable) {
-            unset($params[$disable_key]);
-            unset($update['disable_merge'][$disable_key]);
-          }
-        }
-        // ak v disable merge nezostali parametre, cele sa unsetne
-        if (!_count($update['disable_merge'])) {
-          unset($update['disable_merge']);
-        }
-      }
-
-      if (_count($update)) {
-        foreach ($update as $key => $val) {
-          if (_count($val)) {
-            if (_count($update['disable_merge'][$key])) {
-              $val['disable_merge'] = $update['disable_merge'][$key];
-              unset($update['disable_merge'][$key]);
-            }
-            if ('disable_merge' !== $key) {
-              $params[$key] = $this->params_merge($params[$key], $val);
-            }
-          } else {
-            $params[$key] = $val;
-          }
+    if (_count($update)) {
+      foreach ($update as $key => $val) {
+        if (_count($val)) {
+          $params[$key] = $this->params_merge(
+            $params[$key] ?? NULL,
+            $val
+          );
+        } else {
+          $params[$key] = $val;
         }
       }
     }

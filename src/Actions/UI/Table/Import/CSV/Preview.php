@@ -60,7 +60,7 @@ class Preview extends \ADIOS\Core\Action {
       switch ($columns[$tmpColName]['type']) {
         case "lookup":
           $lookupModelObject = $this->adios->getModel($columns[$tmpColName]["model"]);
-          $tmp = $this->adios->db->get_all_rows_query($lookupModelObject->lookupSqlQuery());
+          $tmp = $lookupModelObject->lookupQuery()->fetch();
 
           $acceptedValuesHtml = "<select style='font-size:inherit;color:inherit'>";
           foreach ($tmp as $value) {

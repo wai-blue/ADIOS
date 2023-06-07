@@ -14,7 +14,7 @@ namespace ADIOS\Actions\UI\FileBrowser;
  * @package UI\Actions\FileBrowser
  */
 class Upload extends \ADIOS\Core\Action {
-  public static $hideDefaultDesktop = TRUE;
+  public static bool $hideDefaultDesktop = TRUE;
 
   public function render() {
     if (!empty($_FILES['upload'])) {

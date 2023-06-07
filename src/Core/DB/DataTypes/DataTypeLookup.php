@@ -13,9 +13,11 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
 * @package DataTypes
 */
-class DataTypeLookup extends DataType {
+class DataTypeLookup extends \ADIOS\Core\DB\DataType
+{
 
-  public function get_sql_create_string($table_name, $col_name, $params = []) {
+  public function get_sql_create_string($table_name, $col_name, $params = [])
+  {
     $col_def = $this->adios->db->tables[$table_name][$col_name];
 
     if (!$col_def['disable_foreign_key']) {
@@ -40,7 +42,26 @@ class DataTypeLookup extends DataType {
       return "`{$colName}` = null";
     } else if (is_string($value) && !is_numeric($value)) {
       $model = $this->adios->getModel($colDefinition["model"]);
-      $tmp = $model->getByLookupSqlValue($value);
+
+      // $tmp = reset($this->adios->db->fetchRaw("
+      //   select
+      //     id,
+      //     " . $model->lookupSqlValue("t") . " as `input_lookup_value`
+      //   from `" . $model->getFullTableSqlName() . "` t
+      //   having `input_lookup_value` = '" . $this->adios->db->escape($value) . "'
+      // "));
+
+      $tmp = reset($this->adios->db->select($model)
+        ->columns([
+          [ 'id', 'id' ],
+          [ $model->lookupSqlValue(), 'input_lookup_value' ]
+        ])
+        ->having([
+          ['input_lookup_value', '=', $value]
+        ])
+        ->fetch()
+      );
+
       $id = (int) $tmp['id'];
 
       return "`{$colName}` = ".($id == 0 ? "null" : $id);
@@ -57,16 +78,24 @@ class DataTypeLookup extends DataType {
     }
   }
 
-  public function get_html_or_csv($value, $params = []) {
-    $html = $params['row']["{$params['col_name']}_lookup_sql_value"] ?? "";
+  public function get_html_or_csv($value, $params = [])
+  {
+    $html = $params['row']["{$params['col_name']}:LOOKUP"] ?? "";
     return $params['export_csv'] ? $html : htmlspecialchars($html);
   }
 
-  public function get_html($value, $params = []) {
+  public function get_html($value, $params = [])
+  {
     return $this->get_html_or_csv($value, $params);
   }
 
-  public function get_csv($value, $params = []) {
+  public function get_csv($value, $params = [])
+  {
     return $this->get_html_or_csv($value, $params);
+  }
+
+  public function fromString(?string $value)
+  {
+    return (int) $value;
   }
 }

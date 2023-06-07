@@ -25,7 +25,7 @@ class Config extends \ADIOS\Core\Model {
   }
 
   public function columns(array $columns = []) {
-    return [
+    return parent::columns([
       'path' => [
         'type' => 'varchar',
         'byte_size' => '250',
@@ -38,7 +38,7 @@ class Config extends \ADIOS\Core\Model {
         'title' => 'Value',
         'show_column' => true
       ],
-    ];
+    ]);
   }
 
   public function indexes(array $indexes = []) {

@@ -124,25 +124,25 @@ class User extends \ADIOS\Core\Model {
     return [
       0 => [], // upgrade to version 0 is the same as installation
       1 => [
-        "ALTER TABLE `{$this->getFullTableSQLName()}` RENAME COLUMN `active` TO `is_active`;",
+        "ALTER TABLE `{$this->getFullTableSqlName()}` RENAME COLUMN `active` TO `is_active`;",
         "
-          ALTER TABLE `{$this->getFullTableSQLName()}`
+          ALTER TABLE `{$this->getFullTableSqlName()}`
           ADD column `phone_number` varchar(255) DEFAULT '' after `email`
         ",
         "
-          ALTER TABLE `{$this->getFullTableSQLName()}`
+          ALTER TABLE `{$this->getFullTableSqlName()}`
           ADD column `last_login_time` varchar(255) DEFAULT '' after `is_active`
         ",
         "
-          ALTER TABLE `{$this->getFullTableSQLName()}`
+          ALTER TABLE `{$this->getFullTableSqlName()}`
           ADD column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
         ",
         "
-          ALTER TABLE `{$this->getFullTableSQLName()}`
+          ALTER TABLE `{$this->getFullTableSqlName()}`
           ADD column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
         ",
         "
-          ALTER TABLE `{$this->getFullTableSQLName()}`
+          ALTER TABLE `{$this->getFullTableSqlName()}`
           ADD column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
         ",
       ],

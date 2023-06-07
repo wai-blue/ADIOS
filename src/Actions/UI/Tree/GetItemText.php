@@ -18,8 +18,8 @@ class GetItemText extends \ADIOS\Core\Action {
     $model = $this->adios->getModel($this->params['model']);
 
     $tmp = reset($model
-      ->selectRaw($model->getFullTableSQLName().".id")
-      ->selectRaw("(".str_replace("{%TABLE%}", $model->getFullTableSQLName(), $model->lookupSqlValue).") as ___lookupSqlValue")
+      ->selectRaw($model->getFullTableSqlName().".id")
+      ->selectRaw("(".str_replace("{%TABLE%}", $model->getFullTableSqlName(), $model->lookupSqlValue).") as ___lookupSqlValue")
       ->where('id', (int) $this->params['id'])
       ->get()
       ->toArray()

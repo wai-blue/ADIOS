@@ -13,7 +13,8 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
  * @package DataTypes
  */
-class DataTypeVarchar extends DataType {
+class DataTypeVarchar extends \ADIOS\Core\DB\DataType
+{
   public function get_sql_create_string($table_name, $col_name, $params = []) {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
     return "`$col_name` varchar({$params['byte_size']}) {$params['sql_definitions']}";

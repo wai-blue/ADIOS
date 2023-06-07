@@ -7,7 +7,7 @@ class UI
 
   public $adios;
 
-  public function __construct(&$adios, $params)
+  public function __construct($adios)
   {
     $this->adios = $adios;
   }

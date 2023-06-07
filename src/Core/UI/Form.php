@@ -86,7 +86,7 @@ class Form extends \ADIOS\Core\UI\View
     $this->model = $this->adios->getModel($params['model']);
     $this->data = (array) $this->model->getById($params['id']);
 
-    $params['table'] = $this->model->getFullTableSQLName();
+    $params['table'] = $this->model->getFullTableSqlName();
 
     if (empty($params['uid'])) {
       $params['uid'] = $this->adios->getUid("{$params['model']}_{$params['id']}")."_".rand(1000, 9999);

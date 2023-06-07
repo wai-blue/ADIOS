@@ -13,7 +13,7 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
  * @package DataTypes
  */
-class DataTypeTable extends DataType
+class DataTypeTable extends \ADIOS\Core\DB\DataType
 {
     public function get_sql_create_string($table_name, $col_name, $params = [])
     {
@@ -32,7 +32,7 @@ class DataTypeTable extends DataType
 
     public function get_html_or_csv($value, $params = [])
     {
-        return $html;
+        return '';
     }
 
     public function get_html($value, $params = [])

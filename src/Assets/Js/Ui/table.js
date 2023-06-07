@@ -91,12 +91,8 @@
     });
   };
 
-  function ui_table_set_column_filter(uid, col_name, value, params) {
-    // $('.'+uid+'_column_filter').each(function(){
-    //   params['column_filter_'+$(this).attr('data-col-name')] = $(this).val();
-    // });
-
-    ui_table_refresh(uid, params);
+  function ui_table_set_column_filter(uid) {
+    ui_table_refresh(uid, { reset: '1' });
   };
 
   function ui_table_show_page(uid, page){
@@ -104,7 +100,7 @@
   };
 
   function ui_table_change_items_per_page(uid, count){
-    ui_table_refresh(uid, {items_per_page: count});
+    ui_table_refresh(uid, {itemsPerPage: count});
   }
 
   function ui_table_select_all(uid){
