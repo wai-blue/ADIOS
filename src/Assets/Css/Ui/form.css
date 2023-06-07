@@ -4,7 +4,10 @@
 /* .adios.ui.Form.default_table_wrapper {margin:20px;} */
 .adios.ui.Form.form_col {display:table-cell;vertical-align:top;}
 .adios.ui.Form.subtable {width:100%;display:table;}
-.adios.ui.Form.subrow { margin: 0.5em 0em;/* border-bottom: 1px solid transparent; */}
+.adios.ui.Form.subrow {
+  /* margin: 0.5em 0em; */
+  /* border-bottom: 1px solid transparent; */
+}
 /* .adios.ui.Form.form_title {vertical-align:middle;display:table-cell;min-width:100px;padding:0.5em;} */
 /* .adios.ui.Form .subrow:hover { border-bottom-color: #EEEEEE; } */
 .adios.ui.Form .subrow:hover .form_title { color: var(--cl-main); }
@@ -70,6 +73,10 @@
   width: 100%;
 }
 
+.adios.ui.Form.form_input label {
+  margin: 0 !important;
+}
+
 .adios.ui.Form > .row > .col > .adios.ui.Tabs > .tab_contents {
   height: calc(100vh - 15em) !important;
 }
@@ -79,6 +86,8 @@
 .badge-adios { font-size: 13px; vertical-align: middle; margin-bottom: 4px; margin-left: 5px; color: #fff; }
 
 /* .adios.ui.Form.subrow:hover { background: #FAFAFA; } */
+
+.adios.ui.Form.table { margin: 0 !important; }
 
 @media screen and (max-width: 992px) { /* 992px = col-lg */
   .adios.ui.Form.table {display:block;}

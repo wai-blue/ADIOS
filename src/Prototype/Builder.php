@@ -323,14 +323,13 @@ class Builder {
 
             $this->copyFile(
               'src/Widgets/Templates/' . $actionConfig['template'] . '.twig',
-              $widgetRootDir . '/Templates/' . $actionConfig['template'] . '.twig'
+              $widgetRootDir . '/Templates/' . $actionName . '.twig'
             );
           }
 
           $tmpActionConfig = $actionConfig;
           unset($tmpActionConfig['template']);
           unset($tmpActionConfig['phpTemplate']);
-
 
           $actionNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Actions';
           $actionClassName = str_replace('/', '\\', $actionName);

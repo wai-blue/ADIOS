@@ -1,0 +1,11 @@
+<h1>{{ title }}</h1>
+<div class='row p-4'>
+  {% for button in buttons %}
+    <div class='col-2 m-4'>
+      <a
+        class='btn btn-primary btn-lg d-block p-4'
+        href='{{ config.url }}/{{ button.url }}'
+      >{{ button.title }}</a>
+    </div>
+  {% endfor %}
+</div>

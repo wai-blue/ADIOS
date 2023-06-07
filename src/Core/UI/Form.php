@@ -257,7 +257,7 @@ class Form extends \ADIOS\Core\UI\View
       $this->params['window_uid'] = $this->params['window_params']['uid'];
     }
 
-    if ('desktop' == $this->params['form_type']) {
+    if ($this->displayMode == 'desktop') {
       if (is_array($this->params['title_params']['left'])) {
         $this->params['title_params']['left'] = array_merge([$this->closeButton, $this->saveButton], $this->params['title_params']['left']);
       } elseif ('' != $this->params['title_params']['left']) {
@@ -629,10 +629,6 @@ class Form extends \ADIOS\Core\UI\View
         });
       </script>
     ';
-
-    if (empty($this->params['displayMode'])) {
-      $this->params['displayMode'] = $this->params['form_type'];
-    }
 
     if ($window !== NULL) {
       $window->setTitle($this->model->formTitleForEditing);

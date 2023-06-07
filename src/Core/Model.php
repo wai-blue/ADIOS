@@ -579,6 +579,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "permission" => "{$this->fullName}/Edit",
         "action" => $this->crudActions['Edit'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
+          "displayMode" => "window",
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
         ])
@@ -589,6 +590,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "permission" => "{$this->fullName}/Add",
         "action" => $this->crudActions['Add'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
+          "displayMode" => "window",
           "model" => $this->fullName,
           "id" => -1,
           "defaultValues" => $urlParams,
@@ -987,7 +989,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $this->adios->db->select($this)
       ->columns([
         [ 'id', 'id' ],
-        [ str_replace('{%TABLE%}', $this->fullTableSqlName, $this->lookupSqlValue()), 'input_lookup_value' ]
+        [ $this->lookupSqlValue($this->fullTableSqlName), 'input_lookup_value' ]
       ])
       ->where($this->lookupWhere($initiatingModel, $initiatingColumn, $formData, $params))
       ->havingRaw($having)

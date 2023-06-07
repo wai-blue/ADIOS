@@ -578,8 +578,8 @@ class Table extends \ADIOS\Core\UI\View
 
         if (
           !empty($titleButtons)
-          && !empty($this->params['title'])
-          && !empty($this->params['right'])
+          || !empty($this->params['title'])
+          || !empty($this->params['right'])
         ) {
           $html .= $this->adios->ui->Title([
             'left' => $titleButtons,
@@ -641,10 +641,10 @@ class Table extends \ADIOS\Core\UI\View
                   {$tmpSearchHtml}
                 </div>
                 " . $this->adios->ui->Button([
-          "type" => "close",
-          "text" => $this->translate("Clear filter"),
-          "onclick" => "desktop_update('{$this->adios->requestedAction}');",
-        ])->render() . "
+                  "type" => "close",
+                  "text" => $this->translate("Clear filter"),
+                  "onclick" => "desktop_update('{$this->adios->requestedAction}');",
+                ])->render() . "
               </div>
             </div>
           </div>
@@ -893,7 +893,11 @@ class Table extends \ADIOS\Core\UI\View
             'row' => $val,
           ]);
 
-          $onclick = $params['onclick'] ?: "window_render('" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/Edit')";
+          $onclick = $params['onclick'] ?: "
+            window_render(
+              '" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/Edit'
+            )
+          ";
 
           $html .= "
             <div

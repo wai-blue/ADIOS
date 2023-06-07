@@ -74,8 +74,9 @@ class View {
       $params['uid'] =
         'view_'
         . str_replace("\\", "", str_replace("ADIOS\\Core\\", "", get_class($this)))
-        . '_'
-        . $adios->viewsCounter
+        . '_' . substr(md5('_' . rand(1000, 9999)), 0, 5)
+        . '_' . substr(md5('_' . rand(1000, 9999)), 0, 5)
+        . '_' . substr(md5('_' . rand(1000, 9999)), 0, 5)
       ;
     }
 
