@@ -747,6 +747,16 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return array_keys($this->indexNames());
   }
 
+  /**
+   * Parses the $data containing strings as a result of DB fetch operation
+   * and converts the value of each column to the appropriate PHP type.
+   * E.g. columns of type 'int' or 'lookup' will have integer values.
+   *
+   * @param array $data
+   * @param string $lookupKeyPrefix
+   * 
+   * @return [type]
+   */
   public function normalizeRowData(array $data, string $lookupKeyPrefix = "") {
     foreach ($this->columns() as $column => $columnDefinition) {
       $columnType = $columnDefinition['type'];

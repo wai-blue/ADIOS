@@ -23,7 +23,7 @@ class Grid extends \ADIOS\Core\UI\View {
    * @internal
    */
   public function __construct($adios, ?array $params = null) {
-    $this->adios = &$adios;
+    $this->adios = $adios;
 
     $this->params = parent::params_merge([
       "layout" => [],
@@ -32,15 +32,43 @@ class Grid extends \ADIOS\Core\UI\View {
       "layoutLg" => [],
       "areas" => []
     ], $params);
+
+    parent::__construct($adios, $params);
   }
 
   public function getTwigParams(): array {
-    return $this->params;
-  }
+    $html = '';
 
-  public function render(string $panel = '') {
-    $html = parent::render();
-    return $this->applyDisplayMode((string) $html);
+    foreach ($this->params['areas'] as $areaName => $areaParams) {
+      $html .= "
+        <div
+          class='{$this->uid}-area-{$areaName} ".($areaParams['cssClass'] ?? '')."'
+        >
+      ";
+
+      if (!empty($areaParams['uiComponent'])) {
+        $html .= $this->adios->ui->create(
+          $areaParams['uiComponent'],
+          $areaParams['params'],
+          $this
+        )->render();
+      } else if (!empty($areaParams['action'])) {
+        $html .= $this->adios->renderAction(
+          $areaParams['action'],
+          $areaParams['params']
+        );
+      } else if (!empty($areaParams['html'])) {
+        $html .= $areaParams['html'];
+      }
+
+      $html .= "
+        </div>
+      ";
+    }
+
+    $this->params['html'] = $html;
+
+    return $this->params;
   }
 
 }

@@ -138,11 +138,11 @@ class Query
       ) {
         $lookupModelClass = '\\ADIOS\\' . str_replace('/', '\\', $modelColumnParams['model']);
         $lookupModel = new $lookupModelClass($this->adios);
-        $lookupTableAlias = $modelColumn . ':LOOKUP';
+        $lookupTableAlias = $modelColumn . '___LOOKUP';
 
         $this->add([
           self::column,
-          str_replace("{%TABLE%}", $lookupTableAlias, $lookupModel->lookupSqlValue()),
+          $lookupModel->lookupSqlValue($lookupTableAlias),
           $modelColumn . ':LOOKUP'
         ]);
 

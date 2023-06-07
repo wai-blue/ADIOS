@@ -471,7 +471,9 @@ class MySQLi extends \ADIOS\Core\DB
       }
     }
     foreach ($whereRaws as $whereRaw) {
-      $wheresArray[] = $whereRaw[1];
+      if (!empty($whereRaw[1])) {
+        $wheresArray[] = $whereRaw[1];
+      }
     }
 
     return (count($wheresArray) == 0 ? '' : join(' AND ', $wheresArray));
@@ -503,7 +505,9 @@ class MySQLi extends \ADIOS\Core\DB
       }
     }
     foreach ($havingRaws as $havingRaw) {
-      $havingsArray[] = $havingRaw[1];
+      if (!empty($havingRaw[1])) {
+        $havingsArray[] = $havingRaw[1];
+      }
     }
 
     return (count($havingsArray) == 0 ? '' : join(' AND ', $havingsArray));
@@ -666,11 +670,15 @@ class MySQLi extends \ADIOS\Core\DB
         // columns
         $columnsArray = [];
         foreach ($columns as $column) {
-          if (strpos($column[1], '.') === FALSE) {
-            $columnsArray[] = '`' . $column[1] . '` as `' . $column[2] . '`';
+          if (strpos($column[1], '`') === FALSE) {
+            if (strpos($column[1], '.') === FALSE) {
+              $columnsArray[] = '`' . $column[1] . '` as `' . $column[2] . '`';
+            } else {
+              list($tmpTable, $tmpColumn) = explode(".", $column[1]);
+              $columnsArray[] = '`' . $tmpTable . '`.`' . $tmpColumn . '` as `' . $column[2] . '`';
+            }
           } else {
-            list($tmpTable, $tmpColumn) = explode(".", $column[1]);
-            $columnsArray[] = '`' . $tmpTable . '`.`' . $tmpColumn . '` as `' . $column[2] . '`';
+            $columnsArray[] = $column[1] . ' as `' . $column[2] . '`';
           }
         }
 

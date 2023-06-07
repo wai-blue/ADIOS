@@ -79,12 +79,5 @@
 </style>
 
 <div id='{{ uid }}_div'>
-  {% for areaName, areaParams in view.areas %}
-    <div
-      class='{{ uid }}-area-{{ areaName }} {{ areaParams.cssClass }}'
-    >
-      {% if areaParams.html %}{{ areaParams.html }}{% endif %}
-      {% if areaParams.action %}{{ adiosAction(areaParams.action, areaParams.params)|raw }}{% endif %}
-    </div>
-  {% endfor %}
+  {{ params.html|raw }}
 </div>

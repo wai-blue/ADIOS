@@ -604,11 +604,14 @@ class Loader
             return $this->translate($string, $this->actionObject);
           }
         ));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosUI', function ($uid, $componentName, $componentParams) {
+        $this->twig->addFunction(new \Twig\TwigFunction('adiosUIComponent', function ($uid, $componentName, $componentParams) {
           if (!is_array($componentParams)) {
-            $componentParams = array();
+            $componentParams = [];
           }
-          return $this->ui->create("{$componentName}#{$uid}", $componentParams)->render();
+          return $this->ui->create(
+            $componentName . (empty($uid) ? '' : '#' . $uid),
+            $componentParams
+          )->render();
         }));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
           return $this->renderAction($action, $params);

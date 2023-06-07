@@ -24,6 +24,12 @@ class View {
   var array $html = [];
   var array $attrs = [];
 
+  var $displayMode = '';
+
+  var $window = NULL;
+
+  var $parentView = NULL;
+
   var string $twigTemplate = "";
   
   /**
@@ -42,13 +48,18 @@ class View {
    * @param  mixed $params
    * @return void
    */
-  public function __construct(object $adios, array $params = []) {
+  public function __construct(
+   object $adios,
+   array $params = [],
+   ?\ADIOS\Core\UI\View $parentView = NULL
+  ) {
     if (!isset($adios->viewsCounter)) {
       $adios->viewsCounter = 0;
     }
     ++$adios->viewsCounter;
 
     $this->adios = $adios;
+    $this->parentView = $parentView;
 
     if ($params['lpfs'] ?? FALSE) {
       $params = $this->loadParamsFromSession($params['uid']);
@@ -61,9 +72,10 @@ class View {
 
     if (empty($params['uid'])) {
       $params['uid'] =
-        $this->adios->uid."_"
-        .str_replace("\\", "", str_replace("ADIOS\\Core\\", "", get_class($this)))."_"
-        .$adios->viewsCounter
+        'view_'
+        . str_replace("\\", "", str_replace("ADIOS\\Core\\", "", get_class($this)))
+        . '_'
+        . $adios->viewsCounter
       ;
     }
 
@@ -75,15 +87,35 @@ class View {
       $this->saveParamsToSession($params['uid'], $tmpParams);
     }
 
+    $componentName = end(explode("\\", get_class($this)));
+
     $this->params = $params;
     $this->uid = $params['uid'];
+    $this->displayMode = $this->params['displayMode'];
     $this->views = [];
-    $this->classes = ['adios', 'ui', $params['component_class']];
-    $this->twigTemplate = "UI/{$this->fullName}";
+    $this->classes = ['adios', 'ui', $componentName];
+    $this->twigTemplate = $this->twigTemplate ?? "UI/{$this->fullName}";
 
     if (isset($params['class'])) {
       $this->add_class($params['class']);
     }
+
+    if ($this->displayMode == 'window') {
+
+    //       'content' => $html,
+    //       'header' => $this->params['window']['header'],
+    //       'footer' => $this->params['window']['footer'],
+    //       'show_modal' => $this->params['show_modal'],
+    //       'form_close_click' => $this->params['close_button_params']['onclick'],
+    //       'uid' => $this->params['window_uid'],
+    //       'titleRaw' => $this->params['titleRaw'],
+    //       'title' => $this->params['title'],
+    //       'subtitle' => $this->params['subtitle'],
+
+      $this->window = $this->adios->ui->create('Window', [], $this);
+      $this->parentView = $this->window;
+    }
+
   }
 
   public function saveParamsToSession(string $uid = "", $params = NULL) {
@@ -113,22 +145,22 @@ class View {
    * @internal
    */
   public function add($subviews, $panel = 'default') {
-      if (is_array($subviews)) {
-          foreach ($subviews as $subview) {
-              $this->add($subview, $panel);
-          }
-      } elseif (is_string($subviews) || '' == $subviews) {
-          $this->views[$panel][] = $subviews;
-      } else {
-          $subviews->param('parent_uid', $this->uid);
-          if ('' != $subviews->params['key']) {
-              $this->views[$panel][$subviews->params['key']] = $subviews;
-          } else {
-              $this->views[$panel][] = $subviews;
-          }
+    if (is_array($subviews)) {
+      foreach ($subviews as $subview) {
+        $this->add($subview, $panel);
       }
+    } elseif (is_string($subviews) || '' == $subviews) {
+      $this->views[$panel][] = $subviews;
+    } else {
+      $subviews->param('parent_uid', $this->uid);
+      if ('' != $subviews->params['key']) {
+        $this->views[$panel][$subviews->params['key']] = $subviews;
+      } else {
+        $this->views[$panel][] = $subviews;
+      }
+    }
 
-      return $this;
+    return $this;
   }
   
   /**
@@ -303,6 +335,7 @@ class View {
       !empty($this->twigTemplate)
        && is_file(__DIR__."/../../Templates/{$this->twigTemplate}.twig")
     ) {
+
       $twigParams = [
         "uid" => $this->uid,
         "gtp" => $this->adios->gtp,
@@ -349,29 +382,15 @@ class View {
       }
     }
 
-    return $html;
+    return $this->applyDisplayMode((string) $html);
   }
 
   public function applyDisplayMode(string $html) : string
   {
-    switch ($this->params['displayMode']) {
+    switch ($this->displayMode) {
       case 'window':
-        $windowParams = $this->params_merge(
-          [
-            'content' => $html,
-            'header' => $this->params['window']['header'],
-            'footer' => $this->params['window']['footer'],
-            'show_modal' => $this->params['show_modal'],
-            'form_close_click' => $this->params['close_button_params']['onclick'],
-            'uid' => $this->params['window_uid'],
-            'titleRaw' => $this->params['titleRaw'],
-            'title' => $this->params['title'],
-            'subtitle' => $this->params['subtitle'],
-          ],
-          $this->params['windowParams']
-        );
-
-        $html = $this->adios->ui->Window($windowParams)->render();
+        $this->window->setContent($html);
+        $html = $this->window->render();
       break;
       case 'desktop':
         $html = $this->render('title') . $html;
@@ -418,4 +437,19 @@ class View {
   public function attr($attr, $val) {
     $this->attrs[$attr] = $val;
   }
+
+  public function findParentComponent($componentName) {
+    $result = NULL;
+
+    if ($this->parentView !== NULL) {
+      if (get_class($this->parentView) == "ADIOS\\Core\\UI\\{$componentName}") {
+        $result = $this->parentView;
+      } else {
+        $result = $this->parentView->findParentComponent($componentName);
+      }
+    }
+
+    return $result;
+  }
+
 }

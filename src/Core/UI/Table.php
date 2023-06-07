@@ -204,10 +204,10 @@ class Table extends \ADIOS\Core\UI\View
     }
 
     if ($this->params['readonly']) {
-      $this->params['show_add_button'] = false;
-      $this->params['show_search_button'] = false;
-      $this->params['show_export_csv_button'] = false;
-      $this->params['show_import_csv_button'] = false;
+      $this->params['showAddButton'] = false;
+      $this->params['showSearchButton'] = false;
+      $this->params['showExportCsvButton'] = false;
+      $this->params['showImportCsvButton'] = false;
     }
 
     $this->model->onTableAfterInit($this);
@@ -336,23 +336,30 @@ class Table extends \ADIOS\Core\UI\View
     $db = $this->adios->db;
     if (empty($this->params['table'])) return;
 
-    // where
-    $whereRaw = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
+    // where and whereRaw
+    $whereRaw = "";
+    $where = [];
+    
+    if (is_string($this->params['where'])) {
+      $whereRaw = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
 
-    if (
-      !empty($this->params['foreignKey'])
-      && (int) $this->params['form_data']['id'] > 0
-    ) {
-      $fkColumnName = $this->params['foreignKey'];
-      $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
-      if ($fkColumnDefinition !== NULL) {
-        $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-        $whereRaw .= "
-          and
-            `lookup_{$tmpModel->getFullTableSqlName()}_{$fkColumnName}`.`id`
-            = ".((int) $this->params['form_data']['id'])
-        ;
+      if (
+        !empty($this->params['foreignKey'])
+        && (int) $this->params['form_data']['id'] > 0
+      ) {
+        $fkColumnName = $this->params['foreignKey'];
+        $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
+        if ($fkColumnDefinition !== NULL) {
+          $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
+          $whereRaw .= "
+            and
+              `lookup_{$tmpModel->getFullTableSqlName()}_{$fkColumnName}`.`id`
+              = ".((int) $this->params['form_data']['id'])
+          ;
+        }
       }
+    } else {
+      $where = $this->params['where'];
     }
 
     // orderBy
@@ -383,6 +390,7 @@ class Table extends \ADIOS\Core\UI\View
     // query
     $query = $db->select($this->model, [Q::countRows])
       ->columns([Q::allColumnsWithLookups])
+      ->where($where)
       ->whereRaw($whereRaw)
       ->having($having)
       ->order($orderBy)

@@ -41,7 +41,6 @@
 
       let refresh_action = $('#' + uid).attr('data-refresh-action');
       let action = (refresh_action == '' ? $('#' + uid).attr('data-action') : refresh_action);
-      // let is_ajax = $('#' + uid).attr('data-is-ajax') == '1';
       let refresh_params = JSON.parse($('#' + uid).attr('data-refresh-params'));
 
       for (var i in params) {
