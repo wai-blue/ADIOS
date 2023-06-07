@@ -64,7 +64,7 @@ class Query
    * 
    * @return void
    */
-  public function add(array $statement) : void
+  public function add(array $statement): void
   {
     $this->statements[] = $statement;
   }
@@ -72,7 +72,7 @@ class Query
   /**
    * @return int
    */
-  public function getType() : int
+  public function getType(): int
   {
     return $this->type;
   }
@@ -80,7 +80,7 @@ class Query
   /**
    * @return \ADIOS\Core\Model
    */
-  public function getModel() : \ADIOS\Core\Model
+  public function getModel(): \ADIOS\Core\Model
   {
     return $this->model;
   }
@@ -90,7 +90,7 @@ class Query
    * 
    * @return array
    */
-  public function getStatements(int $type = 0) : array
+  public function getStatements(int $type = 0): array
   {
     $statements = [];
     foreach ($this->statements as $statement) {
@@ -114,7 +114,7 @@ class Query
     string $tableAlias = '',
     bool $followLookups,
     int $level = 0
-  ) : void
+  ): void
   {
     foreach ($model->columns() as $modelColumn => $modelColumnParams) {
 
@@ -169,7 +169,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function columns(array $columns = []) : \ADIOS\Core\DB\Query
+  public function columns(array $columns = []): \ADIOS\Core\DB\Query
   {
     foreach ($columns as $column) {
       if ($column === self::allColumnsWithLookups) {
@@ -192,6 +192,7 @@ class Query
         ]);
       }
     }
+    
     return $this;
   }
 
@@ -200,7 +201,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function where(array $wheres = []) : \ADIOS\Core\DB\Query
+  public function where(array $wheres = []): \ADIOS\Core\DB\Query
   {
     foreach ($wheres as $where) {
       $this->add([
@@ -214,7 +215,7 @@ class Query
     return $this;
   }
 
-  public function whereId(int $id) : \ADIOS\Core\DB\Query
+  public function whereId(int $id): \ADIOS\Core\DB\Query
   {
     return $this->where([
       [ 'id', '=', $id ]
@@ -226,7 +227,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function whereRaw(string $where) : \ADIOS\Core\DB\Query
+  public function whereRaw(string $where): \ADIOS\Core\DB\Query
   {
     $this->add([self::whereRaw, $where]);
     return $this;
@@ -237,7 +238,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function having(array $havings = []) : \ADIOS\Core\DB\Query
+  public function having(array $havings = []): \ADIOS\Core\DB\Query
   {
     foreach ($havings as $having) {
       $this->add([
@@ -256,7 +257,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function havingRaw(string $having) : \ADIOS\Core\DB\Query
+  public function havingRaw(string $having): \ADIOS\Core\DB\Query
   {
     $this->add([self::havingRaw, $having]);
     return $this;
@@ -267,7 +268,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function order(array $orders = []) : \ADIOS\Core\DB\Query
+  public function order(array $orders = []): \ADIOS\Core\DB\Query
   {
     foreach ($orders as $order) {
       $this->add([
@@ -285,7 +286,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function orderRaw(string $order) : \ADIOS\Core\DB\Query
+  public function orderRaw(string $order): \ADIOS\Core\DB\Query
   {
     $this->add([self::orderRaw, $order]);
     return $this;
@@ -297,7 +298,7 @@ class Query
    * 
    * @return \ADIOS\Core\DB\Query
    */
-  public function limit(int $start, int $count) : \ADIOS\Core\DB\Query
+  public function limit(int $start, int $count): \ADIOS\Core\DB\Query
   {
     $this->add([
       self::limit,
@@ -308,8 +309,7 @@ class Query
     return $this;
   }
 
-
-  public function set(array $values = []) : \ADIOS\Core\DB\Query
+  public function set(array $values = []): \ADIOS\Core\DB\Query
   {
     foreach ($values as $column => $value) {
       $this->add([
@@ -322,7 +322,7 @@ class Query
     return $this;
   }
 
-  public function onDuplicateKey(array $values = []) : \ADIOS\Core\DB\Query
+  public function onDuplicateKey(array $values = []): \ADIOS\Core\DB\Query
   {
     foreach ($values as $column => $value) {
       $this->add([
@@ -335,15 +335,10 @@ class Query
     return $this;
   }
 
-
-
-
-
-
   /**
    * @return string
    */
-  public function buildSql() : string
+  public function buildSql(): string
   {
     return $this->db->buildSql($this);
   }
@@ -370,7 +365,7 @@ class Query
   /**
    * @return array
    */
-  public function fetch(string $keyBy = "id") : array
+  public function fetch(string $keyBy = "id"): array
   {
     return $this->db->fetchRaw(
       $this->buildSql(),
@@ -382,7 +377,7 @@ class Query
   /**
    * @return array
    */
-  public function fetchOne() : array
+  public function fetchOne(): array
   {
     return reset($this->fetch());
   }
@@ -390,7 +385,7 @@ class Query
   /**
    * @return int
    */
-  public function countRowsFromLastSelect() : int
+  public function countRowsFromLastSelect(): int
   {
     return 0;
   }

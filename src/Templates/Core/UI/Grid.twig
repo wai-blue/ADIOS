@@ -15,7 +15,7 @@
 
   {% if layoutSm %}
     /* Small devices (landscape phones, 576px and up) */
-    @media (max-width: 575.98px) {
+    @media (min-width: 576px) {
       #{{ uid }}_div {
         grid-template-areas:
           {% for layoutRow in view.layoutSm %}
@@ -28,7 +28,7 @@
 
   {% if layoutMd %}
     /* Medium devices (tablets, 768px and up) */
-    @media (min-width: 576px) and (max-width: 767.98px) {
+    @media (min-width: 768px) {
       #{{ uid }}_div {
         grid-template-areas:
           {% for layoutRow in view.layoutMd %}
@@ -41,7 +41,7 @@
 
   {% if layoutLg %}
     /* Large devices (desktops, 992px and up) */
-    @media (min-width: 768px) and (max-width: 991.98px) {
+    @media (min-width: 992px) {
       #{{ uid }}_div {
         grid-template-areas:
           {% for layoutRow in view.layoutLg %}
@@ -54,10 +54,23 @@
 
   {% if layoutXl %}
     /* X-Large devices (large desktops, 1200px and up) */
-    @media (min-width: 992px) {
+    @media (min-width: 1200px) {
       #{{ uid }}_div {
         grid-template-areas:
           {% for layoutRow in view.layoutXl %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutXXl %}
+    /* XX-Large devices (larger desktops, 1400px and up) */
+    @media (min-width: 1400px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutXXl %}
             '{{ layoutRow }}'
           {% endfor %}
         !important;
