@@ -875,7 +875,7 @@ class MySQLi extends \ADIOS\Core\DB
    * @param bool If this param is TRUE, it only returns the SQL command to be executed
    *
    */
-  public function createSqlTable($table_name, $only_sql_command = false, $force_create = false)
+  public function createSqlTable(string $table_name, bool $only_sql_command = false, bool $force_create = true)
   {
     $do_create = true;
 
@@ -896,8 +896,6 @@ class MySQLi extends \ADIOS\Core\DB
     }
 
     if ($do_create) {
-
-
       if (!isset($this->tables[$table_name])) {
         throw new \ADIOS\Core\Exceptions\DBException(
           "Cannot create SQL table `{$table_name}`. It is not defined."
