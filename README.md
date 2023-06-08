@@ -16,6 +16,8 @@ You can very easily create very complex forms, thanks to the **strong form templ
 
 And you can fully customize your application.
 
+If you wonder how ADIOS compares to other frameworks, a comparison between ADIOS ad Laravel can be found in [adios-vs-laravel.md](./docs/Miscellaneous/adios-vs-laravel.md).
+
 ## Screenshots
 
 ![](docs/Assets/images/dashboard.png)
