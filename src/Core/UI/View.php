@@ -374,6 +374,9 @@ class View {
       case 'window':
         $this->window->setContent($html);
         if (is_array($this->params['windowParams'])) {
+          if (!empty($this->params['windowParams']['title'])) {
+            $this->window->setTitle($this->params['windowParams']['title']);
+          }
           $this->window->addCssClass($this->params['windowParams']['cssClass'] ?? '');
         }
 
