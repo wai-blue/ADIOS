@@ -479,25 +479,21 @@ class Form extends \ADIOS\Core\View
           } else if (!empty($col['rows'])) {
             $col_html .= $this->renderRows($col['rows']);
           } else if (is_array($col['tabs'])) {
-            $tab_pages = [];
+            $tabPages = [];
 
             // kazdy element predstavuje jeden tab vo formulari
             foreach ($col['tabs'] as $tab_name => $rows) {
-              $tab_pages[] = [
+              $tabPages[] = [
                 'title' => $tab_name,
                 'content' => $this->renderRows($rows),
               ];
 
             }
 
-            $col_html .= $this->addView('Tabs', parent::params_merge(
-              [
-                'padding' => false,
-                // 'height' => "calc(100vh - 17em)",
-                'tabs' => $tab_pages
-              ],
-              $this->params['tab_params']
-            ))->render();
+            $col_html .= $this->addView('Tabs', [
+              'padding' => false,
+              'tabs' => $tabPages
+            ])->render();
 
           } else if (is_string($col['action'])) {
             $col_html .= $this->adios->renderAction($col['action'], $col['params']);

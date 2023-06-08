@@ -106,7 +106,7 @@ Thanks to the ```$urlBase```, you do not need to configure routing, following UR
 
   * https://localhost/adios-app/customers - shows the table (listing) of the customers
   * https://localhost/adios-app/customers/Add - shows the inserting form
-  * https://localhost/adios-app/customers/ID_CUSTOMER/Edit - shows the editing form
+  * https://localhost/adios-app/customers/ID_CUSTOMER/edit - shows the editing form
   * and some others e.g. for importing from CSV or exporting to CSV
 
 ## Controllers (Actions)

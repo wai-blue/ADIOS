@@ -49,7 +49,7 @@ class Grid extends \ADIOS\Core\View {
       if (!empty($areaParams['view'])) {
         $tmp = $this->addView(
           $areaParams['view'],
-          $areaParams['params']
+          $areaParams['params'] ?? []
         );
         $html .= $tmp->render();
       } else if (!empty($areaParams['action'])) {

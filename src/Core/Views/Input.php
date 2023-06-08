@@ -151,877 +151,879 @@ class Input extends \ADIOS\Core\View {
     public function render(string $render_panel = ''): string
     {
 
-        if (!empty($this->params['input'])) {
-          if (is_string($this->params['input'])) {
-            $tmpParams = $this->params;
-            unset($tmpParams['uid']);
-            $inputClassName = "\\ADIOS\\".str_replace("/", "\\", $this->params['input']);
-            $input = new $inputClassName($this->adios, $this->params['uid'], $tmpParams);
-            return $input->render();
-          } else if (is_array($this->params['input'])) {
-            $this->params = array_merge($this->params, $this->params['input']);
-            unset($this->params['input']);
-          }
+      $html = '';
+
+      if (!empty($this->params['input'])) {
+        if (is_string($this->params['input'])) {
+          $tmpParams = $this->params;
+          unset($tmpParams['uid']);
+          $inputClassName = "\\ADIOS\\".str_replace("/", "\\", $this->params['input']);
+          $input = new $inputClassName($this->adios, $this->params['uid'], $tmpParams);
+          return $input->render();
+        } else if (is_array($this->params['input'])) {
+          $this->params = array_merge($this->params, $this->params['input']);
+          unset($this->params['input']);
         }
+      }
 
-        if ($this->params['disabled']) {
-            $this->params['readonly'] = true;
-        }
+      if ($this->params['disabled']) {
+          $this->params['readonly'] = true;
+      }
 
-        if ('' != $this->params['gc_function'] && is_callable($this->params['gc_function'])) {
-            $html = $this->params['gc_function']($this->params, $this);
+      if ('' != $this->params['gc_function'] && is_callable($this->params['gc_function'])) {
+          $html = $this->params['gc_function']($this->params, $this);
 
-            return $html;
-        }
+          return $html;
+      }
 
-        // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ui_form_get_values
-        if ($this->params['disabled']) {
-            $adios_disabled_attribute = "adios-do-not-serialize='1'";
-        }
+      // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ui_form_get_values
+      if ($this->params['disabled']) {
+          $adios_disabled_attribute = "adios-do-not-serialize='1'";
+      }
 
-        /* bool */
-        if (
-          $this->params['type'] == 'bool'
-          || $this->params['type'] == 'boolean'
-        ) {
-          // hodnota
-          if ('bool' == $this->params['type']) {
-            if (1 === $this->params['value'] || true === $this->params['value'] || 'Y' === $this->params['value']) {
-              $this->params['value'] = 'Y';
-            } else {
-              $this->params['value'] = 'N';
-            }
-            $true_val = 'Y';
+      /* bool */
+      if (
+        $this->params['type'] == 'bool'
+        || $this->params['type'] == 'boolean'
+      ) {
+        // hodnota
+        if ('bool' == $this->params['type']) {
+          if (1 === $this->params['value'] || true === $this->params['value'] || 'Y' === $this->params['value']) {
+            $this->params['value'] = 'Y';
           } else {
-            if (0 != $this->params['value']) {
-              $this->params['value'] = 1;
-            }
-            $true_val = '1';
+            $this->params['value'] = 'N';
           }
+          $true_val = 'Y';
+        } else {
+          if (0 != $this->params['value']) {
+            $this->params['value'] = 1;
+          }
+          $true_val = '1';
+        }
 
-          $html = "
-            <input
-              type='checkbox'
-              id='{$this->params['uid']}'
-              name='{$this->params['uid']}'
-              data-is-adios-input='1'
-              class='ui_input_type_boolean ".join(' ', $this->classes)."'
-              ".$this->generate_input_events().'
-              '.($this->params['value'] == $true_val ? "checked='checked'" : '')."
-              {$this->params['html_attributes']}
-              value='{$true_val}'
-              ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-            />
+        $html = "
+          <input
+            type='checkbox'
+            id='{$this->params['uid']}'
+            name='{$this->params['uid']}'
+            data-is-adios-input='1'
+            class='ui_input_type_boolean ".join(' ', $this->classes)."'
+            ".$this->generate_input_events().'
+            '.($this->params['value'] == $true_val ? "checked='checked'" : '')."
+            {$this->params['html_attributes']}
+            value='{$true_val}'
+            ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+          />
 
-            <label for='{$this->params['uid']}'>
-              <i class='input_bool_true fas fa-check-square'></i>
-              <i class='input_bool_false fas fa-square'></i>
-            </label>
+          <label for='{$this->params['uid']}'>
+            <i class='input_bool_true fas fa-check-square'></i>
+            <i class='input_bool_false fas fa-square'></i>
+          </label>
+        ";
+      }
+
+      /* varchar / int (s enum_values) */
+      if (
+        in_array($this->params['type'], ['int', 'varchar'])
+        && is_array($this->params['enum_values'])
+      ) {
+        $html = "
+          <select
+            name='{$this->params['uid']}'
+            data-is-adios-input='1'
+            ".$this->main_params()."
+            ".$this->generate_input_events()."
+            title=\"".htmlspecialchars($this->params['title'])."\"
+            {$this->params['html_attributes']}
+            ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+          >
+        ";
+
+        foreach ($this->params['enum_values'] as $enum_key => $enum_value) {
+          if (strval($this->params['value']) === strval($enum_key)) {
+            $sel = 'selected';
+          } else {
+            $sel = '';
+          }
+          $html .= "
+            <option value='{$enum_key}' {$sel}>
+              ".hsc($enum_value)."
+            </option>
           ";
         }
 
-        /* varchar / int (s enum_values) */
-        if (
-          in_array($this->params['type'], ['int', 'varchar'])
-          && is_array($this->params['enum_values'])
-        ) {
-          $html = "
-            <select
-              name='{$this->params['uid']}'
-              data-is-adios-input='1'
-              ".$this->main_params()."
-              ".$this->generate_input_events()."
-              title=\"".htmlspecialchars($this->params['title'])."\"
-              {$this->params['html_attributes']}
-              ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-            >
-          ";
+        $html .= '</select>';
+      }
 
-          foreach ($this->params['enum_values'] as $enum_key => $enum_value) {
-            if (strval($this->params['value']) === strval($enum_key)) {
-              $sel = 'selected';
-            } else {
-              $sel = '';
-            }
-            $html .= "
-              <option value='{$enum_key}' {$sel}>
-                ".hsc($enum_value)."
-              </option>
-            ";
-          }
+      /* text (plain text) */
+      if ('text' == $this->params['type'] && ('' == $this->params['interface'] || 'plain_text' == $this->params['interface'] || 'text' == $this->params['interface'])) {
+        $html .= "
+          <textarea
+            id='{$this->params['uid']}'
+            name='{$this->params['uid']}'
+            data-is-adios-input='1'
+            ".$this->main_params().'
+            '.$this->generate_input_events().'
+            title="'.htmlspecialchars($this->params['title']).'"
+            placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
+            {$this->params['html_attributes']}
+            ".($this->params['readonly'] ? "disabled='disabled'" : '').'
+          >'.htmlspecialchars($this->params['value']).'</textarea>
+        ';
+      }
 
-          $html .= '</select>';
-        }
-
-        /* text (plain text) */
-        if ('text' == $this->params['type'] && ('' == $this->params['interface'] || 'plain_text' == $this->params['interface'] || 'text' == $this->params['interface'])) {
-          $html .= "
-            <textarea
-              id='{$this->params['uid']}'
-              name='{$this->params['uid']}'
-              data-is-adios-input='1'
-              ".$this->main_params().'
-              '.$this->generate_input_events().'
-              title="'.htmlspecialchars($this->params['title']).'"
-              placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
-              {$this->params['html_attributes']}
-              ".($this->params['readonly'] ? "disabled='disabled'" : '').'
-            >'.htmlspecialchars($this->params['value']).'</textarea>
-          ';
-        }
-
-        /* text (json editor) */
-        if ('text' == $this->params['type'] && $this->params['interface'] == 'json_editor') {
-          $html .= "
-            <div class='row'>
-              <div class='col-lg-8'>
-                <div id='{$this->params['uid']}_editor'></div>
-              </div>
-              <div class='col-lg-4'>
-                <textarea
-                  name='{$this->params['uid']}'
-                  data-is-adios-input='1'
-                  ".$this->main_params()."
-                  style='font-size:0.8em;background:#EEEEEE;height:2em;opacity:0.5'
-                >".htmlspecialchars($this->params['value'])."</textarea>
-              </div>
+      /* text (json editor) */
+      if ('text' == $this->params['type'] && $this->params['interface'] == 'json_editor') {
+        $html .= "
+          <div class='row'>
+            <div class='col-lg-8'>
+              <div id='{$this->params['uid']}_editor'></div>
             </div>
-            <script>
-              var {$this->params['uid']}_editorOptions = {
-                schema: ".json_encode($this->params['schema']).",
-                theme: 'bootstrap4',
-                disable_collapse: true,
-                disable_edit_json: true,
-                disable_properties: true,
-              }
-
-              ".(empty($this->params['value']) ? "" : "
-                {$this->params['uid']}_editorOptions.startval =
-                  ".json_encode(json_decode($this->params['value'], TRUE))."
-                ;
-              ")."
-
-              var editor = new JSONEditor(
-                document.getElementById('{$this->params['uid']}_editor'),
-                {$this->params['uid']}_editorOptions
-              );
-
-              editor.on('change', function() {
-                document.getElementById('{$this->params['uid']}').value = JSON.stringify(editor.getValue());
-              });
-
-            </script>
-            <style>
-              #{$this->params['uid']}_editor h3.card-title { display: none !important; }
-              #{$this->params['uid']}_editor span.btn-group.je-object__controls { display: none !important; }
-            </style>
-          ";
-        }
-
-        /* text (editor) */
-        if ('text' == $this->params['type'] && $this->params['interface'] == 'formatted_text') {
-            $html .= "
+            <div class='col-lg-4'>
               <textarea
                 name='{$this->params['uid']}'
                 data-is-adios-input='1'
-                style='display:none'
                 ".$this->main_params()."
-              >".hsc($this->params['value'])."</textarea>
+                style='font-size:0.8em;background:#EEEEEE;height:2em;opacity:0.5'
+              >".htmlspecialchars($this->params['value'])."</textarea>
+            </div>
+          </div>
+          <script>
+            var {$this->params['uid']}_editorOptions = {
+              schema: ".json_encode($this->params['schema']).",
+              theme: 'bootstrap4',
+              disable_collapse: true,
+              disable_edit_json: true,
+              disable_properties: true,
+            }
 
-              <div id='{$this->params['uid']}_editor'></div>
-              <script>
-                setTimeout(function() {
-                  var {$this->params['uid']}_quill = new Quill('#{$this->params['uid']}_editor', {
-                    theme: 'snow',
-                    placeholder: '".ads($this->params['placeholder'])."',
-                    readOnly: ".($this->params['readonly'] ? "true" : "false").",
-                  });
+            ".(empty($this->params['value']) ? "" : "
+              {$this->params['uid']}_editorOptions.startval =
+                ".json_encode(json_decode($this->params['value'], TRUE))."
+              ;
+            ")."
 
-                  let delta = {$this->params['uid']}_quill.clipboard.convert(
-                    $('#{$this->params['uid']}').val()
-                  );
-                  
-                  {$this->params['uid']}_quill.setContents(delta);
-                  
-                  {$this->params['uid']}_quill.on('editor-change', function(eventName, ...args) {
-                    $('#{$this->params['uid']}').val({$this->params['uid']}_quill.root.innerHTML);
-                  });
-                  
+            var editor = new JSONEditor(
+              document.getElementById('{$this->params['uid']}_editor'),
+              {$this->params['uid']}_editorOptions
+            );
 
-                }, 10);
-              </script>
-            ";
+            editor.on('change', function() {
+              document.getElementById('{$this->params['uid']}').value = JSON.stringify(editor.getValue());
+            });
 
-            $html .= "
-            ";
-        }
+          </script>
+          <style>
+            #{$this->params['uid']}_editor h3.card-title { display: none !important; }
+            #{$this->params['uid']}_editor span.btn-group.je-object__controls { display: none !important; }
+          </style>
+        ";
+      }
 
-        /* password */
-        if ($this->params['type'] == 'password') {
-          $this->addCssClass("ui_input_type_password");
-
+      /* text (editor) */
+      if ('text' == $this->params['type'] && $this->params['interface'] == 'formatted_text') {
           $html .= "
-            <input
-              type='hidden'
-              id='{$this->params['uid']}'
+            <textarea
+              name='{$this->params['uid']}'
               data-is-adios-input='1'
-              value=''
-            /> <!-- toto tu je iba preto, aby do formSave() presli inputy '_1' a '_2' -->
-            <input
-              type='password'
-              id='{$this->params['uid']}_1'
-              name='{$this->params['uid']}_1'
+              style='display:none'
               ".$this->main_params()."
-              title='".htmlspecialchars($this->params['title'])."'
-              placeholder='New password'
-              ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-              onkeyup='{$this->params['uid']}_check_passwords();'
-            />
-            <input
-              type='password'
-              id='{$this->params['uid']}_2'
-              name='{$this->params['uid']}_2'
-              ".$this->main_params()."
-              title='".htmlspecialchars($this->params['title'])."'
-              placeholder='Confirm new password'
-              ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-              onkeyup='{$this->params['uid']}_check_passwords();'
-            />
+            >".hsc($this->params['value'])."</textarea>
+
+            <div id='{$this->params['uid']}_editor'></div>
             <script>
-              function {$this->params['uid']}_check_passwords() {
-                let input_1 = $('#{$this->params['uid']}_1');
-                let input_2 = $('#{$this->params['uid']}_2');
-                let pswd_1 = input_1.val();
-                let pswd_2 = input_2.val();
+              setTimeout(function() {
+                var {$this->params['uid']}_quill = new Quill('#{$this->params['uid']}_editor', {
+                  theme: 'snow',
+                  placeholder: '".ads($this->params['placeholder'])."',
+                  readOnly: ".($this->params['readonly'] ? "true" : "false").",
+                });
 
-                input_1.removeClass('password_mismatch');
-                input_2.removeClass('password_mismatch');
+                let delta = {$this->params['uid']}_quill.clipboard.convert(
+                  $('#{$this->params['uid']}').val()
+                );
+                
+                {$this->params['uid']}_quill.setContents(delta);
+                
+                {$this->params['uid']}_quill.on('editor-change', function(eventName, ...args) {
+                  $('#{$this->params['uid']}').val({$this->params['uid']}_quill.root.innerHTML);
+                });
+                
 
-                if (pswd_1 != '') {
-                  if (pswd_1 == pswd_2) {
-                  } else {
-                    input_1.addClass('password_mismatch');
-                    input_2.addClass('password_mismatch');
-                  }
-                }
-              }
+              }, 10);
             </script>
           ";
-        }
 
-        /* char, varchar */
-        /* color */
-        /* date, datetime, time, timestamp */
-        /* int (bez enum_values), year */
-        /* float */
-        /* text (single_line) */
-        if (
-          ($this->params['type'] == 'varchar' && !_count($this->params['enum_values']))
-          || ($this->params['type'] == 'int' && !_count($this->params['enum_values']))
-          || ($this->params['type'] == 'text' && 'single_line' == $this->params['interface'])
-          || in_array(
-            $this->params['type'],
-            ['color', 'date', 'datetime', 'timestamp', 'float', 'year', 'time']
-          )
-        ) {
+          $html .= "
+          ";
+      }
 
-            if ($this->params['type'] == 'color') {
-              $input_type = 'color';
-            } else {
-              $input_type = "text";
-            }
+      /* password */
+      if ($this->params['type'] == 'password') {
+        $this->addCssClass("ui_input_type_password");
 
-            /* date */
-            if ('date' == $this->params['type']) {
-                if ('' == $this->params['placeholder']) {
-                    $this->params['placeholder'] = 'dd.mm.yyyy';
+        $html .= "
+          <input
+            type='hidden'
+            id='{$this->params['uid']}'
+            data-is-adios-input='1'
+            value=''
+          /> <!-- toto tu je iba preto, aby do formSave() presli inputy '_1' a '_2' -->
+          <input
+            type='password'
+            id='{$this->params['uid']}_1'
+            name='{$this->params['uid']}_1'
+            ".$this->main_params()."
+            title='".htmlspecialchars($this->params['title'])."'
+            placeholder='New password'
+            ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+            onkeyup='{$this->params['uid']}_check_passwords();'
+          />
+          <input
+            type='password'
+            id='{$this->params['uid']}_2'
+            name='{$this->params['uid']}_2'
+            ".$this->main_params()."
+            title='".htmlspecialchars($this->params['title'])."'
+            placeholder='Confirm new password'
+            ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+            onkeyup='{$this->params['uid']}_check_passwords();'
+          />
+          <script>
+            function {$this->params['uid']}_check_passwords() {
+              let input_1 = $('#{$this->params['uid']}_1');
+              let input_2 = $('#{$this->params['uid']}_2');
+              let pswd_1 = input_1.val();
+              let pswd_2 = input_2.val();
+
+              input_1.removeClass('password_mismatch');
+              input_2.removeClass('password_mismatch');
+
+              if (pswd_1 != '') {
+                if (pswd_1 == pswd_2) {
+                } else {
+                  input_1.addClass('password_mismatch');
+                  input_2.addClass('password_mismatch');
                 }
-                if ('' == $this->params['value']) {
-                    $this->params['value'] = ('' != $this->params['default_date_value'] ? $this->params['default_date_value'] : '');
-                }
-                $this->params['value'] = (false !== strtotime($this->params['value']) ? date($this->adios->locale->dateFormat(), strtotime($this->params['value'])) : '');
+              }
             }
+          </script>
+        ";
+      }
 
-            /* datetime, timestamp */
-            if ('datetime' == $this->params['type'] || 'timestamp' == $this->params['type']) {
+      /* char, varchar */
+      /* color */
+      /* date, datetime, time, timestamp */
+      /* int (bez enum_values), year */
+      /* float */
+      /* text (single_line) */
+      if (
+        ($this->params['type'] == 'varchar' && !_count($this->params['enum_values']))
+        || ($this->params['type'] == 'int' && !_count($this->params['enum_values']))
+        || ($this->params['type'] == 'text' && 'single_line' == $this->params['interface'])
+        || in_array(
+          $this->params['type'],
+          ['color', 'date', 'datetime', 'timestamp', 'float', 'year', 'time']
+        )
+      ) {
+
+          if ($this->params['type'] == 'color') {
+            $input_type = 'color';
+          } else {
+            $input_type = "text";
+          }
+
+          /* date */
+          if ('date' == $this->params['type']) {
               if ('' == $this->params['placeholder']) {
-                $this->params['placeholder'] = 'dd.mm.yyyy hh:mm';
+                  $this->params['placeholder'] = 'dd.mm.yyyy';
               }
               if ('' == $this->params['value']) {
-                $this->params['value'] = ('' != $this->params['default_date_value'] ? $this->params['default_date_value'] : '');
+                  $this->params['value'] = ('' != $this->params['default_date_value'] ? $this->params['default_date_value'] : '');
               }
-              $this->params['value'] = (false !== strtotime($this->params['value']) ? date('d.m.Y H:i:s', strtotime($this->params['value'])) : '');
+              $this->params['value'] = (false !== strtotime($this->params['value']) ? date($this->adios->locale->dateFormat(), strtotime($this->params['value'])) : '');
+          }
+
+          /* datetime, timestamp */
+          if ('datetime' == $this->params['type'] || 'timestamp' == $this->params['type']) {
+            if ('' == $this->params['placeholder']) {
+              $this->params['placeholder'] = 'dd.mm.yyyy hh:mm';
             }
-
-            /* float */
-            if ('float' == $this->params['type']) {
-              if (!($this->params['decimals'] > 0)) {
-                $this->params['decimals'] = 2;
-              }
+            if ('' == $this->params['value']) {
+              $this->params['value'] = ('' != $this->params['default_date_value'] ? $this->params['default_date_value'] : '');
             }
+            $this->params['value'] = (false !== strtotime($this->params['value']) ? date('d.m.Y H:i:s', strtotime($this->params['value'])) : '');
+          }
 
-            /* int - slider */
-            if ('int' == $this->params['type'] && 'slider' == $this->params['input_style']) {
-              $input_type = 'hidden';
+          /* float */
+          if ('float' == $this->params['type']) {
+            if (!($this->params['decimals'] > 0)) {
+              $this->params['decimals'] = 2;
             }
+          }
 
-            /* time */
-            if ('time' == $this->params['type']) {
-              if ('' == $this->params['placeholder']) {
-                $this->params['placeholder'] = 'hh:mm:ss';
-              }
-              // medzera s x je tam naschval kvoli parsovaniu do inputov. nemazat
-              $this->params['onkeyup'] = "ui_input_parse_time('{$this->params['uid']}', 'x '+this.value); ".$this->params['onchange'];
-              $this->params['onkeydown'] = ' if (event.which > 31 && (event.which < 48 || event.which > 57) && event.which != 186) return false; '.$this->params['onchange'];
+          /* int - slider */
+          if ('int' == $this->params['type'] && 'slider' == $this->params['input_style']) {
+            $input_type = 'hidden';
+          }
+
+          /* time */
+          if ('time' == $this->params['type']) {
+            if ('' == $this->params['placeholder']) {
+              $this->params['placeholder'] = 'hh:mm:ss';
             }
+            // medzera s x je tam naschval kvoli parsovaniu do inputov. nemazat
+            $this->params['onkeyup'] = "ui_input_parse_time('{$this->params['uid']}', 'x '+this.value); ".$this->params['onchange'];
+            $this->params['onkeydown'] = ' if (event.which > 31 && (event.which < 48 || event.which > 57) && event.which != 186) return false; '.$this->params['onchange'];
+          }
 
-            $this->params['onkeyup'] .= "
-              $(this).removeClass('invalid');
-              if (!this.checkValidity()) {
-                $(this).addClass('invalid');
-              }
-            ";
-
-            $this->addCssClass("ui_input_type_{$this->params['type']}");
-
-            if (empty($this->params['placeholder'])) {
-                $tmp_placeholder = $this->params['title'];
-            } else {
-                $tmp_placeholder = $this->params['placeholder'];
+          $this->params['onkeyup'] .= "
+            $(this).removeClass('invalid');
+            if (!this.checkValidity()) {
+              $(this).addClass('invalid');
             }
+          ";
 
-            $html .= "
-              <span style='white-space:nowrap'>
-                <input
-                  name='{$this->params['uid']}'
-                  data-is-adios-input='1'
-                  ".$this->main_params()."
-                  type='{$input_type}'
-                  ".($this->params['pattern'] == "" ? "" : "pattern='".hsc($this->params['pattern'])."'")."
-                  ".$this->generate_input_events()."
-                  value=\"".htmlspecialchars($this->params['value'])."\"
-                  title=\"".htmlspecialchars($this->params['title'])."\"
-                  placeholder=\"".htmlspecialchars($tmp_placeholder)."\"
-                  {$this->params['html_attributes']}
-                  onkeypress='if (event.keyCode == 13) { ui_form_save(\"{$this->params['form_uid']}\"); }'
-                  ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-                />
+          $this->addCssClass("ui_input_type_{$this->params['type']}");
 
-                ".($input_type == "color" ? "
-                  <span style='margin-left:3em'>
-                    <div style='background:#000000;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#000000\");'>&nbsp;</div>
-                    <div style='background:#666666;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#666666\");'>&nbsp;</div>
-                    <div style='background:#AAAAAA;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#AAAAAA\");'>&nbsp;</div>
-                    <div style='background:#EEEEEE;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#EEEEEE\");'>&nbsp;</div>
-                    <div style='background:#FFFFFF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FFFFFF\");'>&nbsp;</div>
-                    <div style='background:#FF0000;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FF0000\");'>&nbsp;</div>
-                    <div style='background:#00FF00;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#00FF00\");'>&nbsp;</div>
-                    <div style='background:#0000FF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#0000FF\");'>&nbsp;</div>
-                    <div style='background:#FFFF00;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FFFF00\");'>&nbsp;</div>
-                    <div style='background:#FF00FF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FF00FF\");'>&nbsp;</div>
-                    <div style='background:#00FFFF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#00FFFF\");'>&nbsp;</div>
-                  </span>
-                " : "")."
-              </span>
-            ";
+          if (empty($this->params['placeholder'])) {
+              $tmp_placeholder = $this->params['title'];
+          } else {
+              $tmp_placeholder = $this->params['placeholder'];
+          }
 
-            //        //
-            // slider //
-            //        //
+          $html .= "
+            <span style='white-space:nowrap'>
+              <input
+                name='{$this->params['uid']}'
+                data-is-adios-input='1'
+                ".$this->main_params()."
+                type='{$input_type}'
+                ".($this->params['pattern'] == "" ? "" : "pattern='".hsc($this->params['pattern'])."'")."
+                ".$this->generate_input_events()."
+                value=\"".htmlspecialchars($this->params['value'])."\"
+                title=\"".htmlspecialchars($this->params['title'])."\"
+                placeholder=\"".htmlspecialchars($tmp_placeholder)."\"
+                {$this->params['html_attributes']}
+                onkeypress='if (event.keyCode == 13) { ui_form_save(\"{$this->params['form_uid']}\"); }'
+                ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+              />
 
-            /* int - slider */
-            if ('int' == $this->params['type'] && 'slider' == $this->params['input_style']) {
+              ".($input_type == "color" ? "
+                <span style='margin-left:3em'>
+                  <div style='background:#000000;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#000000\");'>&nbsp;</div>
+                  <div style='background:#666666;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#666666\");'>&nbsp;</div>
+                  <div style='background:#AAAAAA;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#AAAAAA\");'>&nbsp;</div>
+                  <div style='background:#EEEEEE;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#EEEEEE\");'>&nbsp;</div>
+                  <div style='background:#FFFFFF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FFFFFF\");'>&nbsp;</div>
+                  <div style='background:#FF0000;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FF0000\");'>&nbsp;</div>
+                  <div style='background:#00FF00;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#00FF00\");'>&nbsp;</div>
+                  <div style='background:#0000FF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#0000FF\");'>&nbsp;</div>
+                  <div style='background:#FFFF00;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FFFF00\");'>&nbsp;</div>
+                  <div style='background:#FF00FF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#FF00FF\");'>&nbsp;</div>
+                  <div style='background:#00FFFF;display:inline-block;width:1em;height:1em;cursor:pointer;border:1px solid #AAAAAA' onclick='$(\"#{$this->params['uid']}\").val(\"#00FFFF\");'>&nbsp;</div>
+                </span>
+              " : "")."
+            </span>
+          ";
+
+          //        //
+          // slider //
+          //        //
+
+          /* int - slider */
+          if ('int' == $this->params['type'] && 'slider' == $this->params['input_style']) {
+              $html .= "
+                <div id='{$this->params['uid']}_slider' class='adios ui Input_slider'></div>
+                <script>
+                  $('#{$this->params['uid']}_slider').slider({
+                    disabled: ".($this->params['readonly'] ? 'true' : 'false').',
+                    '.($this->params['max'] ? "max: {$this->params['max']}," : '').'
+                    '.($this->params['min'] ? "min: {$this->params['min']}," : '').'
+                    '.($this->params['step'] ? "step: {$this->params['step']}," : '').'
+                    '.($this->params['value'] ? "value: {$this->params['value']}," : '')."
+                    change: function( event, ui ) {
+                      $('#{$this->params['uid']}').val(ui.value);
+                      ".($this->params['onchange'] ? "{$this->params['onchange']}" : '').'
+                    }
+                  });
+                </script>
+              ';
+          }
+
+          //               //
+          // datumove veci //
+          //               //
+
+          if (!$this->params['readonly']) {
+              /* date, datetime, timestamp */
+              if ('date' == $this->params['type'] || 'datetime' == $this->params['type'] || 'timestamp' == $this->params['type']) {
                 $html .= "
-                  <div id='{$this->params['uid']}_slider' class='adios ui Input_slider'></div>
                   <script>
-                    $('#{$this->params['uid']}_slider').slider({
-                      disabled: ".($this->params['readonly'] ? 'true' : 'false').',
-                      '.($this->params['max'] ? "max: {$this->params['max']}," : '').'
-                      '.($this->params['min'] ? "min: {$this->params['min']}," : '').'
-                      '.($this->params['step'] ? "step: {$this->params['step']}," : '').'
-                      '.($this->params['value'] ? "value: {$this->params['value']}," : '')."
-                      change: function( event, ui ) {
-                        $('#{$this->params['uid']}').val(ui.value);
-                        ".($this->params['onchange'] ? "{$this->params['onchange']}" : '').'
-                      }
+                    $(function() {
+                      $('#{$this->params['uid']}').datepicker({
+                        changeYear: true,
+                        dateFormat: 'dd.mm.yy".('datetime' == $this->params['type'] ? ' H:i:s' : '')."',
+                        'showOn': 'both',
+                        'constrainInput': true,
+                        'nextText': '',
+                        'prevText': '',
+                        'defaultDate': '{$this->params['default_date_value']}',
+                        'firstDay': 1,
+                        ".('' != $this->params['max_date'] ? "'maxDate': '{$this->params['max_date']}'," : '').'
+                        '.('' != $this->params['min_date'] ? "'minDate': '{$this->params['min_date']}'," : '').'
+                        '.('datetime' == $this->params['type'] || 'timestamp' == $this->params['type'] ? "'onSelect': function(){ ui_input_datetime_change('{$this->params['uid']}'); }," : '').'
+                      });
+
+                      '.('datetime' == $this->params['type'] || 'timestamp' == $this->params['type'] ? " $('#{$this->params['uid']}').keyup(function(){ ui_input_parse_time('{$this->params['uid']}', $(this).val()); }); " : '').'
                     });
                   </script>
                 ';
-            }
+              }
 
-            //               //
-            // datumove veci //
-            //               //
-
-            if (!$this->params['readonly']) {
-                /* date, datetime, timestamp */
-                if ('date' == $this->params['type'] || 'datetime' == $this->params['type'] || 'timestamp' == $this->params['type']) {
+              /* datetime, timestamp */
+              if ('datetime' == $this->params['type'] || 'timestamp' == $this->params['type']) {
+                  $tmp_timeval = explode(' ', $this->params['value']);
+                  $tmp_timeval = explode(':', $tmp_timeval[1]);
                   $html .= "
+                    <input type='text' id='{$this->params['uid']}_time_hour_picker' class='adios ui Input ui_input_type_hour draggable' value='{$tmp_timeval[0]}' placeholder='HH' onchange=\" ui_input_datetime_change('{$this->params['uid']}'); \" /> :
+                    <input type='text' id='{$this->params['uid']}_time_minute_picker' class='adios ui Input ui_input_type_minute draggable' value='{$tmp_timeval[1]}' placeholder='MM' onchange=\" ui_input_datetime_change('{$this->params['uid']}'); \"/> :
+                    <input type='text' id='{$this->params['uid']}_time_second_picker' class='adios ui Input ui_input_type_second draggable' value='{$tmp_timeval[2]}' placeholder='SS' onchange=\" ui_input_datetime_change('{$this->params['uid']}'); \"/>
                     <script>
                       $(function() {
-                        $('#{$this->params['uid']}').datepicker({
-                          changeYear: true,
-                          dateFormat: 'dd.mm.yy".('datetime' == $this->params['type'] ? ' H:i:s' : '')."',
-                          'showOn': 'both',
-                          'constrainInput': true,
-                          'nextText': '',
-                          'prevText': '',
-                          'defaultDate': '{$this->params['default_date_value']}',
-                          'firstDay': 1,
-                          ".('' != $this->params['max_date'] ? "'maxDate': '{$this->params['max_date']}'," : '').'
-                          '.('' != $this->params['min_date'] ? "'minDate': '{$this->params['min_date']}'," : '').'
-                          '.('datetime' == $this->params['type'] || 'timestamp' == $this->params['type'] ? "'onSelect': function(){ ui_input_datetime_change('{$this->params['uid']}'); }," : '').'
-                        });
-
-                        '.('datetime' == $this->params['type'] || 'timestamp' == $this->params['type'] ? " $('#{$this->params['uid']}').keyup(function(){ ui_input_parse_time('{$this->params['uid']}', $(this).val()); }); " : '').'
+                        draggable_int_input('{$this->params['uid']}_time_hour_picker', {sensitivity: 6, min_val: 0, max_val: 23, callback: function(){ ui_input_datetime_change('{$this->params['uid']}'); } });
+                        draggable_int_input('{$this->params['uid']}_time_minute_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_datetime_change('{$this->params['uid']}'); }});
+                        draggable_int_input('{$this->params['uid']}_time_second_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_datetime_change('{$this->params['uid']}'); }});
                       });
                     </script>
-                  ';
-                }
+                  ";
+              }
 
-                /* datetime, timestamp */
-                if ('datetime' == $this->params['type'] || 'timestamp' == $this->params['type']) {
-                    $tmp_timeval = explode(' ', $this->params['value']);
-                    $tmp_timeval = explode(':', $tmp_timeval[1]);
-                    $html .= "
-                      <input type='text' id='{$this->params['uid']}_time_hour_picker' class='adios ui Input ui_input_type_hour draggable' value='{$tmp_timeval[0]}' placeholder='HH' onchange=\" ui_input_datetime_change('{$this->params['uid']}'); \" /> :
-                      <input type='text' id='{$this->params['uid']}_time_minute_picker' class='adios ui Input ui_input_type_minute draggable' value='{$tmp_timeval[1]}' placeholder='MM' onchange=\" ui_input_datetime_change('{$this->params['uid']}'); \"/> :
-                      <input type='text' id='{$this->params['uid']}_time_second_picker' class='adios ui Input ui_input_type_second draggable' value='{$tmp_timeval[2]}' placeholder='SS' onchange=\" ui_input_datetime_change('{$this->params['uid']}'); \"/>
-                      <script>
-                        $(function() {
-                          draggable_int_input('{$this->params['uid']}_time_hour_picker', {sensitivity: 6, min_val: 0, max_val: 23, callback: function(){ ui_input_datetime_change('{$this->params['uid']}'); } });
-                          draggable_int_input('{$this->params['uid']}_time_minute_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_datetime_change('{$this->params['uid']}'); }});
-                          draggable_int_input('{$this->params['uid']}_time_second_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_datetime_change('{$this->params['uid']}'); }});
-                        });
-                      </script>
-                    ";
-                }
+              /* time */
+              if ('time' == $this->params['type']) {
+                  $tmp_timeval = explode(':', $this->params['value']);
+                  $html .= "
+                    <input type='text' id='{$this->params['uid']}_time_hour_picker' class='adios ui Input ui_input_type_hour draggable' value='{$tmp_timeval[0]}' placeholder='hh' onchange=\" ui_input_time_change('{$this->params['uid']}'); \" />
+                    <input type='text' id='{$this->params['uid']}_time_minute_picker' class='adios ui Input ui_input_type_minute draggable' value='{$tmp_timeval[1]}' placeholder='mm' onchange=\" ui_input_time_change('{$this->params['uid']}'); \"/>
+                    <input type='text' id='{$this->params['uid']}_time_second_picker' class='adios ui Input ui_input_type_second draggable' value='{$tmp_timeval[2]}' placeholder='ss' onchange=\" ui_input_time_change('{$this->params['uid']}'); \"/>
+                    <script>
+                      $(function() {
+                        draggable_int_input('{$this->params['uid']}_time_hour_picker', {sensitivity: 6,min_val: 0, max_val: 23, callback: function(){ ui_input_time_change('{$this->params['uid']}'); } });
+                        draggable_int_input('{$this->params['uid']}_time_minute_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_time_change('{$this->params['uid']}'); }});
+                        draggable_int_input('{$this->params['uid']}_time_second_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_time_change('{$this->params['uid']}'); }});
+                      });
+                    </script>
+                  ";
+              }
 
-                /* time */
-                if ('time' == $this->params['type']) {
-                    $tmp_timeval = explode(':', $this->params['value']);
-                    $html .= "
-                      <input type='text' id='{$this->params['uid']}_time_hour_picker' class='adios ui Input ui_input_type_hour draggable' value='{$tmp_timeval[0]}' placeholder='hh' onchange=\" ui_input_time_change('{$this->params['uid']}'); \" />
-                      <input type='text' id='{$this->params['uid']}_time_minute_picker' class='adios ui Input ui_input_type_minute draggable' value='{$tmp_timeval[1]}' placeholder='mm' onchange=\" ui_input_time_change('{$this->params['uid']}'); \"/>
-                      <input type='text' id='{$this->params['uid']}_time_second_picker' class='adios ui Input ui_input_type_second draggable' value='{$tmp_timeval[2]}' placeholder='ss' onchange=\" ui_input_time_change('{$this->params['uid']}'); \"/>
-                      <script>
-                        $(function() {
-                          draggable_int_input('{$this->params['uid']}_time_hour_picker', {sensitivity: 6,min_val: 0, max_val: 23, callback: function(){ ui_input_time_change('{$this->params['uid']}'); } });
-                          draggable_int_input('{$this->params['uid']}_time_minute_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_time_change('{$this->params['uid']}'); }});
-                          draggable_int_input('{$this->params['uid']}_time_second_picker', {sensitivity: 6,min_val: 0, max_val: 59, callback: function(){ ui_input_time_change('{$this->params['uid']}'); }});
-                        });
-                      </script>
-                    ";
-                }
+          }
 
-            }
+          if ('' != $this->params['unit']) {
+              $html .= "<span class='unit'>".hsc($this->params['unit']).'</span>';
+          }
+      }
 
-            if ('' != $this->params['unit']) {
-                $html .= "<span class='unit'>".hsc($this->params['unit']).'</span>';
-            }
+      /* image */
+      if ('image' == $this->params['type']) {
+        $img_src_base = "{$this->adios->config['url']}/Image?cfg=input&f=";
+
+        if ('' != $this->params['value']) {
+          $img_src = "{$this->adios->config['url']}/Image?cfg=input&f=".urlencode($this->params['value']);
+        } else {
+          $img_src = "{$this->adios->config['url']}/adios/assets/images/empty.png";
         }
 
-        /* image */
-        if ('image' == $this->params['type']) {
-          $img_src_base = "{$this->adios->config['url']}/Image?cfg=input&f=";
+        $html = "
+          <div class='adios ui Input ui_input_type_image'>
+            <img
+              src='{$img_src}'
+              id='{$this->params['uid']}_image'
+              class='adios ui Input'
+              onclick='$(\"#{$this->params['uid']}_browser\").show(100);'
+            />
+            <div class='image_path'>".hsc($this->params['value'])."</div>
+          </div>
+
+          <div
+            id='{$this->params['uid']}_browser'
+            style='
+              position: fixed;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              background: #FFFFFF80;
+              display: none;
+            '
+          >
+            <div
+              class='shadow'
+              style='
+                position: fixed;
+                right: 0px;
+                top: 0px;
+                width: 85%;
+                height: 100%;
+                z-index: 1;
+                background: white;
+                
+              '
+            >
+              <div>
+                ".$this->addView('Button', [
+                  "fa_icon" => "fas fa-times",
+                  "text" => $this->translate("Close files and media browser"),
+                  "class" => "btn btn-secondary btn-icon-split",
+                  "onclick" => "
+                    $('#{$this->params['uid']}_browser').hide();
+                  ",
+                ])->render()."
+              </div>
+              <div style='margin:1em'>
+                ".(new \ADIOS\Core\Views\Inputs\FileBrowser($this->adios, $this->params['uid'], [
+                  "mode" => "select",
+                  "value" => $this->params['value'],
+                  "subdir" => $this->params['subdir'],
+                  "onchange" => "
+                    $('#{$this->params['uid']}_image').attr(
+                      'src',
+                      '{$img_src_base}/' + file
+                    );
+
+                    $('#{$this->params['uid']}_browser').hide();
+                  ",
+                ]))->render()."
+              </div>
+            </div>
+          </div>
+        ";
+      }
+
+      /* file */
+      if ('file' == $this->params['type']) {
+          $default_src = $this->translate("No file uploaded");
+          $file_src_base = "{$this->adios->config['url']}/File?f=";
+          // $upload_params = "type=file&table_column={$this->params['table_column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
+          // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
 
           if ('' != $this->params['value']) {
-            $img_src = "{$this->adios->config['url']}/Image?cfg=input&f=".urlencode($this->params['value']);
+            $file_short_name = end(explode('/', $this->params['value']));
+            if (strlen($file_short_name) > 75) {
+              $file_short_name = substr($file_short_name, 0, 75).'...';
+            }
           } else {
-            $img_src = "{$this->adios->config['url']}/adios/assets/images/empty.png";
+            $file_short_name = $default_src;
           }
 
           $html = "
-            <div class='adios ui Input ui_input_type_image'>
-              <img
-                src='{$img_src}'
-                id='{$this->params['uid']}_image'
-                class='adios ui Input'
-                onclick='$(\"#{$this->params['uid']}_browser\").show(100);'
-              />
-              <div class='image_path'>".hsc($this->params['value'])."</div>
-            </div>
-
             <div
-              id='{$this->params['uid']}_browser'
-              style='
-                position: fixed;
-                left: 0;
-                top: 0;
-                width: 100%;
-                height: 100%;
-                background: #FFFFFF80;
-                display: none;
-              '
+              onmouseover='$(\"#{$this->params['uid']}_operations\").css({opacity: 1});'
+              onmouseleave='$(\"#{$this->params['uid']}_operations\").css({opacity: 0});'
             >
-              <div
-                class='shadow'
-                style='
-                  position: fixed;
-                  right: 0px;
-                  top: 0px;
-                  width: 85%;
-                  height: 100%;
-                  z-index: 1;
-                  background: white;
-                  
-                '
-              >
-                <div>
-                  ".$this->addView('Button', [
-                    "fa_icon" => "fas fa-times",
-                    "text" => $this->translate("Close files and media browser"),
-                    "class" => "btn btn-secondary btn-icon-split",
-                    "onclick" => "
-                      $('#{$this->params['uid']}_browser').hide();
-                    ",
-                  ])->render()."
-                </div>
-                <div style='margin:1em'>
-                  ".(new \ADIOS\Core\Views\Inputs\FileBrowser($this->adios, $this->params['uid'], [
-                    "mode" => "select",
-                    "value" => $this->params['value'],
-                    "subdir" => $this->params['subdir'],
-                    "onchange" => "
-                      $('#{$this->params['uid']}_image').attr(
-                        'src',
-                        '{$img_src_base}/' + file
-                      );
-
-                      $('#{$this->params['uid']}_browser').hide();
-                    ",
-                  ]))->render()."
+              <input
+                type='hidden'
+                id='{$this->params['uid']}'
+                name='{$this->params['uid']}'
+                data-is-adios-input='1'
+                ".$this->main_params().'
+                '.$this->generate_input_events().'
+                value="'.ads($this->params['value'])."\"
+                {$this->params['html_attributes']}
+                data-src-real-base=\"".ads($this->adios->config['files_url']).'"
+                data-src-base="'.ads($file_src_base).'"
+                data-default-txt="'.ads($default_src).'"
+                data-subdir="'.ads($this->params['subdir']).'"
+                data-rename-pattern="'.ads($this->params['rename_pattern']).'"
+                '.($this->params['readonly'] ? "disabled='disabled'" : '')."
+              />
+              
+              <div style='float:left'>
+                <form id='{$this->params['uid']}_file_form' enctype='multipart/form-data'>
+                  <input
+                    ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+                    type='file'
+                    style='display:none;'
+                    name='{$this->params['uid']}_file_input'
+                    id='{$this->params['uid']}_file_input'
+                    onchange='
+                      ui_input_upload_file(\"{$this->params['uid']}\");
+                    '
+                  />
+                  <label for='{$this->params['uid']}_file_input'>
+                    <span
+                      class='adios ui Input file_upload_div'
+                      id='{$this->params['uid']}_file'
+                      ".($this->params['readonly'] && '' != $this->params['value'] ? "
+                        onclick=\"
+                          ui_input_file_open('{$this->params['uid']}');
+                        \"
+                      " : '')."
+                      title='".($this->params['readonly'] ? '' : $this->translate("Drag and drop file here or click to find it on a computer."))."'
+                    >
+                      {$file_short_name}
+                    </span>
+                    <span class='ml-1'>
+                      <div class='btn float-left ml-1 btn-primary btn-sm btn-icon-split'>
+                        <span class='icon'><i class='fas fa-window-restore'></i></span>
+                        <span class='text'>".$this->translate("Find on this computer")."</span>
+                      </div>
+                    </span>
+                  </label>
+                </form>
+                <div class='adios ui Input file_info_div' id='{$this->params['uid']}_info_div'>
+                  ".$this->translate('Uploading file. Please wait.')."
                 </div>
               </div>
-            </div>
-          ";
-        }
-
-        /* file */
-        if ('file' == $this->params['type']) {
-            $default_src = $this->translate("No file uploaded");
-            $file_src_base = "{$this->adios->config['url']}/File?f=";
-            // $upload_params = "type=file&table_column={$this->params['table_column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
-            // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
-
-            if ('' != $this->params['value']) {
-              $file_short_name = end(explode('/', $this->params['value']));
-              if (strlen($file_short_name) > 75) {
-                $file_short_name = substr($file_short_name, 0, 75).'...';
-              }
-            } else {
-              $file_short_name = $default_src;
-            }
-
-            $html = "
-              <div
-                onmouseover='$(\"#{$this->params['uid']}_operations\").css({opacity: 1});'
-                onmouseleave='$(\"#{$this->params['uid']}_operations\").css({opacity: 0});'
-              >
-                <input
-                  type='hidden'
-                  id='{$this->params['uid']}'
-                  name='{$this->params['uid']}'
-                  data-is-adios-input='1'
-                  ".$this->main_params().'
-                  '.$this->generate_input_events().'
-                  value="'.ads($this->params['value'])."\"
-                  {$this->params['html_attributes']}
-                  data-src-real-base=\"".ads($this->adios->config['files_url']).'"
-                  data-src-base="'.ads($file_src_base).'"
-                  data-default-txt="'.ads($default_src).'"
-                  data-subdir="'.ads($this->params['subdir']).'"
-                  data-rename-pattern="'.ads($this->params['rename_pattern']).'"
-                  '.($this->params['readonly'] ? "disabled='disabled'" : '')."
-                />
-                
-                <div style='float:left'>
-                  <form id='{$this->params['uid']}_file_form' enctype='multipart/form-data'>
-                    <input
-                      ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-                      type='file'
-                      style='display:none;'
-                      name='{$this->params['uid']}_file_input'
-                      id='{$this->params['uid']}_file_input'
-                      onchange='
-                        ui_input_upload_file(\"{$this->params['uid']}\");
-                      '
-                    />
-                    <label for='{$this->params['uid']}_file_input'>
-                      <span
-                        class='adios ui Input file_upload_div'
-                        id='{$this->params['uid']}_file'
-                        ".($this->params['readonly'] && '' != $this->params['value'] ? "
-                          onclick=\"
-                            ui_input_file_open('{$this->params['uid']}');
-                          \"
-                        " : '')."
-                        title='".($this->params['readonly'] ? '' : $this->translate("Drag and drop file here or click to find it on a computer."))."'
-                      >
-                        {$file_short_name}
-                      </span>
-                      <span class='ml-1'>
-                        <div class='btn float-left ml-1 btn-primary btn-sm btn-icon-split'>
-                          <span class='icon'><i class='fas fa-window-restore'></i></span>
-                          <span class='text'>".$this->translate("Find on this computer")."</span>
-                        </div>
-                      </span>
-                    </label>
-                  </form>
-                  <div class='adios ui Input file_info_div' id='{$this->params['uid']}_info_div'>
-                    ".$this->translate('Uploading file. Please wait.')."
-                  </div>
-                </div>
-
-                ".(!$this->params['readonly'] ? "
-                    <div class='adios ui file_operations_div' id='{$this->params['uid']}_operations' style='opacity:0;float:left;'>
-                      ".(FALSE && $this->params['show_file_browser'] ?
-                        $this->addView('Button', [
-                          'uid' => $this->params['uid'].'_file_input_browser_button',
-                          'onclick' => "ui_input_ftp_browser('{$this->params['uid']}', 'file');",
-                          'fa_icon' => 'fas fa-search',
-                          'text' => $this->translate("Browse in uploaded files"),
-                          'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
-                        ])->render()
-                      : '').
-                      (FALSE && $this->params['show_download_url_button'] ?
-                        $this->addView('Button', [
-                          'uid' => $this->params['uid'].'_file_input_download_button',
-                          'onclick' => "ui_input_file_download('{$this->params['uid']}', '".$this->translate("Enter URL address")."');",
-                          'fa_icon' => 'fas fa-download',
-                          'title' => $this->translate('Download'),
-                          'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
-                        ])->render()
-                      : '').
-                      ($this->params['show_open_button'] ?
-                        $this->addView('Button', [
-                          'uid' => $this->params['uid'].'_file_input_open_button',
-                          'onclick' => "ui_input_file_open('{$this->params['uid']}');",
-                          'fa_icon' => 'fas fa-eye',
-                          'title' => $this->translate('Preview'),
-                          'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
-                          'style' => (empty($this->params['value']) ? 'display:none;' : '')
-                        ])->render()
-                      : '').
-                      ($this->params['show_delete_button'] ?
-                        $this->addView('Button', [
-                          'uid' => $this->params['uid'].'_file_input_delete_button',
-                          'onclick' => "ui_input_file_remove('{$this->params['uid']}');",
-                          'fa_icon' => 'fas fa-trash-alt',
-                          'title' => $this->translate('Clear'),
-                          'class' => "float-left mr-1 btn-danger btn-sm btn-icon-split",
-                          'style' => (empty($this->params['value']) ? 'display:none;' : '')
-                        ])->render()
-                      : '')."
-                    </div>
-                " : "")."
-              </div>
-
-              <div style='clear:both'></div>
 
               ".(!$this->params['readonly'] ? "
-                <script>
-                  $(document).ready(function(){
-                    ui_input_activate_drop('{$this->params['uid']}');
-                  });
-                </script>
+                  <div class='adios ui file_operations_div' id='{$this->params['uid']}_operations' style='opacity:0;float:left;'>
+                    ".(FALSE && $this->params['show_file_browser'] ?
+                      $this->addView('Button', [
+                        'uid' => $this->params['uid'].'_file_input_browser_button',
+                        'onclick' => "ui_input_ftp_browser('{$this->params['uid']}', 'file');",
+                        'fa_icon' => 'fas fa-search',
+                        'text' => $this->translate("Browse in uploaded files"),
+                        'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
+                      ])->render()
+                    : '').
+                    (FALSE && $this->params['show_download_url_button'] ?
+                      $this->addView('Button', [
+                        'uid' => $this->params['uid'].'_file_input_download_button',
+                        'onclick' => "ui_input_file_download('{$this->params['uid']}', '".$this->translate("Enter URL address")."');",
+                        'fa_icon' => 'fas fa-download',
+                        'title' => $this->translate('Download'),
+                        'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
+                      ])->render()
+                    : '').
+                    ($this->params['show_open_button'] ?
+                      $this->addView('Button', [
+                        'uid' => $this->params['uid'].'_file_input_open_button',
+                        'onclick' => "ui_input_file_open('{$this->params['uid']}');",
+                        'fa_icon' => 'fas fa-eye',
+                        'title' => $this->translate('Preview'),
+                        'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
+                        'style' => (empty($this->params['value']) ? 'display:none;' : '')
+                      ])->render()
+                    : '').
+                    ($this->params['show_delete_button'] ?
+                      $this->addView('Button', [
+                        'uid' => $this->params['uid'].'_file_input_delete_button',
+                        'onclick' => "ui_input_file_remove('{$this->params['uid']}');",
+                        'fa_icon' => 'fas fa-trash-alt',
+                        'title' => $this->translate('Clear'),
+                        'class' => "float-left mr-1 btn-danger btn-sm btn-icon-split",
+                        'style' => (empty($this->params['value']) ? 'display:none;' : '')
+                      ])->render()
+                    : '')."
+                  </div>
               " : "")."
-            ";
+            </div>
+
+            <div style='clear:both'></div>
+
+            ".(!$this->params['readonly'] ? "
+              <script>
+                $(document).ready(function(){
+                  ui_input_activate_drop('{$this->params['uid']}');
+                });
+              </script>
+            " : "")."
+          ";
+      }
+
+      /* lookup */
+      if ('lookup' == $this->params['type']) {
+        $lookupModel = $this->adios->getModel($this->params['model']);
+        $value = (int) $this->params['value'];
+        $inputStyle = $this->params['input_style'] ?? "";
+
+        $lookupQuery = $lookupModel->lookupQuery(
+          $this->params['initiating_model'],
+          $this->params['initiating_column'],
+          $this->params['form_data'],
+          $this->params
+        );
+
+        if (!in_array($inputStyle, ['autocomplete', 'select'])) {
+          $rowsCnt = reset($this->adios->db->fetchRaw("
+            select
+              ifnull(count(*), 0) as cnt
+            from (" . $lookupQuery->buildSql() . ") dummy
+          "))['cnt'];
+
+          if ($rowsCnt > 10) {
+            $inputStyle = 'autocomplete';
+          } else {
+            $inputStyle = 'select';
+          }
         }
 
-        /* lookup */
-        if ('lookup' == $this->params['type']) {
-          $lookupModel = $this->adios->getModel($this->params['model']);
-          $value = (int) $this->params['value'];
-          $inputStyle = $this->params['input_style'] ?? "";
+        switch ($inputStyle) {
+          case "select":
+            $rows = $lookupQuery->fetch();
 
-          $lookupQuery = $lookupModel->lookupQuery(
-            $this->params['initiating_model'],
-            $this->params['initiating_column'],
-            $this->params['form_data'],
-            $this->params
-          );
+            $html = "
+              <select
+                id='{$this->params['uid']}'
+                name='{$this->params['uid']}'
+                data-is-adios-input='1'
+                ".$this->main_params()."
+                ".$this->generate_input_events()."
+                title='".hsc($this->params['title'])."'
+                {$this->params['html_attributes']}
+                ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+              >
+                ".(!$this->params['required']
+                  ? "<option value='0'>".($this->params['not_selected_text'] ?? "[Not selected]")."</option>"
+                  : ""
+                )."
+            ";
 
-          if (!in_array($inputStyle, ['autocomplete', 'select'])) {
-            $rowsCnt = reset($this->adios->db->fetchRaw("
-              select
-                ifnull(count(*), 0) as cnt
-              from (" . $lookupQuery->buildSql() . ") dummy
-            "))['cnt'];
+            if (is_array($rows)) {
+              foreach ($rows as $row) {
+                if ($this->params['translate_value']) {
+                  $row['input_lookup_value'] = l($row['input_lookup_value']);
+                }
 
-            if ($rowsCnt > 10) {
-              $inputStyle = 'autocomplete';
-            } else {
-              $inputStyle = 'select';
+                $html .= "
+                  <option
+                    value='{$row['id']}'
+                    ".((int) $row['id'] === $value ? "selected" : "")."
+                  >
+                    ".hsc($row['input_lookup_value'])."
+                  </option>
+                ";
+              }
             }
-          }
 
-          switch ($inputStyle) {
-            case "select":
-              $rows = $lookupQuery->fetch();
+            $html .= "</select>";
+          break;
+          case "autocomplete":
+          default:
 
-              $html = "
-                <select
+            $inputText = "";
+
+            if ($value > 0) {
+              $row = reset($lookupModel->lookupQuery(
+                $this->params['initiating_model'],
+                $this->params['initiating_column'],
+                $this->params['form_data'],
+                $this->params,
+                "`id` = {$value}"
+              )->fetch());
+
+              if ((int) $row['id'] === $value) {
+                $inputText = $row['input_lookup_value'];
+              }
+            } else {
+              $inputText = '';
+            }
+
+            if ('' == $this->params['placeholder']) {
+              $this->params['placeholder'] = $this->translate('Search')."...";
+            }
+
+            $onchange_hidden = $this->params['onchange'];
+            $this->params['onchange'] = $this->params['onchange_text'];
+
+            $this->params['onkeydown'] = " ui_input_lookup_onkeydown(event, '{$this->params['uid']}'); ".$this->params['onkeydown'];
+            $this->params['onchange'] = " ui_input_lookup_set_value('{$this->params['uid']}', $('#{$this->params['uid']}').val(), '', function(){ ".$this->params['onchange'].' }); ';
+
+            // if (!$this->adios->db_perms($this->params['table'].'/select')) {
+            //   if ('' == $this->params['lookup_detail_onclick']) {
+            //     $this->params['lookup_detail_enabled'] = false;
+            //   }
+            //   if ('' == $this->params['lookup_search_onclick']) {
+            //     $this->params['lookup_search_enabled'] = false;
+            //   }
+            // }
+
+            $detail_onclick = ('' != $this->params['lookup_detail_onclick'] ? $this->params['lookup_detail_onclick'] : 'ui_input_lookup_detail');
+            $search_onclick = ('' != $this->params['lookup_search_onclick'] ? $this->params['lookup_search_onclick'] : 'ui_input_lookup_search');
+            $add_onclick = ('' != $this->params['lookup_add_onclick'] ? $this->params['lookup_add_onclick'] : 'ui_input_lookup_add');
+
+            $html .= "
+              <span style='white-space:nowrap;'>
+                <input type='hidden'
                   id='{$this->params['uid']}'
-                  name='{$this->params['uid']}'
                   data-is-adios-input='1'
-                  ".$this->main_params()."
-                  ".$this->generate_input_events()."
-                  title='".hsc($this->params['title'])."'
+                  {$adios_disabled_attribute}
+                  name='{$this->params['uid']}'
+                  data-form-uid='{$this->params['form_uid']}'
+                  data-initiating-model='{$this->params['initiating_model']}'
+                  data-initiating-column='{$this->params['initiating_column']}'
+                  value='{$value}'
+                  data-model='".hsc($this->params['model'])."'
+                  xxx-data-table='".hsc($this->params['table'])."'
+                  xxx-data-key='".hsc($this->params['key'])."'
+                  xxx-data-order='".hsc($this->params['order'])."'
+                  xxx-data-where='".hsc($this->params['where'])."'
+                  xxx-data-lookup-search-type='".hsc($this->params['lookup_search_type'])."'
+                  xxx-data-follow-lookups='".hsc($this->params['follow_lookups'])."'
+                  onchange=\"{$onchange_hidden}\"
+                />
+                <input
+                  type='{$input_type}'
+                  name='{$this->params['uid']}_autocomplete_input'
+                  id='{$this->params['uid']}_autocomplete_input'
+                  class='col-md-9 px-1 ".join(' ', $this->classes)."'
+                  style='{$this->params['style']}'
+                  ".$this->generate_input_events().'
+                  value="'.htmlspecialchars($inputText).'"
+                  data-value="'.htmlspecialchars($inputText).'"
+                  title="'.htmlspecialchars($this->params['title']).'"
+                  placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
                   {$this->params['html_attributes']}
                   ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+                  autocomplete='off'
+                  onfocus='ui_input_lookup_onkeydown(event, \"{$this->params['uid']}\");'
+                />
+                <div
+                  class='adios ui Input lookup autocomplete shadow-sm col-md-9'
+                  style='display:none;'
+                  id='{$this->params['uid']}_result_div'
                 >
-                  ".(!$this->params['required']
-                    ? "<option value='0'>".($this->params['not_selected_text'] ?? "[Not selected]")."</option>"
-                    : ""
-                  )."
-              ";
-
-              if (is_array($rows)) {
-                foreach ($rows as $row) {
-                  if ($this->params['translate_value']) {
-                    $row['input_lookup_value'] = l($row['input_lookup_value']);
-                  }
-
-                  $html .= "
-                    <option
-                      value='{$row['id']}'
-                      ".((int) $row['id'] === $value ? "selected" : "")."
-                    >
-                      ".hsc($row['input_lookup_value'])."
-                    </option>
-                  ";
-                }
-              }
-
-              $html .= "</select>";
-            break;
-            case "autocomplete":
-            default:
-
-              $inputText = "";
-
-              if ($value > 0) {
-                $row = reset($lookupModel->lookupQuery(
-                  $this->params['initiating_model'],
-                  $this->params['initiating_column'],
-                  $this->params['form_data'],
-                  $this->params,
-                  "`id` = {$value}"
-                )->fetch());
-
-                if ((int) $row['id'] === $value) {
-                  $inputText = $row['input_lookup_value'];
-                }
-              } else {
-                $inputText = '';
-              }
-
-              if ('' == $this->params['placeholder']) {
-                $this->params['placeholder'] = $this->translate('Search')."...";
-              }
-
-              $onchange_hidden = $this->params['onchange'];
-              $this->params['onchange'] = $this->params['onchange_text'];
-
-              $this->params['onkeydown'] = " ui_input_lookup_onkeydown(event, '{$this->params['uid']}'); ".$this->params['onkeydown'];
-              $this->params['onchange'] = " ui_input_lookup_set_value('{$this->params['uid']}', $('#{$this->params['uid']}').val(), '', function(){ ".$this->params['onchange'].' }); ';
-
-              // if (!$this->adios->db_perms($this->params['table'].'/select')) {
-              //   if ('' == $this->params['lookup_detail_onclick']) {
-              //     $this->params['lookup_detail_enabled'] = false;
-              //   }
-              //   if ('' == $this->params['lookup_search_onclick']) {
-              //     $this->params['lookup_search_enabled'] = false;
-              //   }
-              // }
-
-              $detail_onclick = ('' != $this->params['lookup_detail_onclick'] ? $this->params['lookup_detail_onclick'] : 'ui_input_lookup_detail');
-              $search_onclick = ('' != $this->params['lookup_search_onclick'] ? $this->params['lookup_search_onclick'] : 'ui_input_lookup_search');
-              $add_onclick = ('' != $this->params['lookup_add_onclick'] ? $this->params['lookup_add_onclick'] : 'ui_input_lookup_add');
-
-              $html .= "
-                <span style='white-space:nowrap;'>
-                  <input type='hidden'
-                    id='{$this->params['uid']}'
-                    data-is-adios-input='1'
-                    {$adios_disabled_attribute}
-                    name='{$this->params['uid']}'
-                    data-form-uid='{$this->params['form_uid']}'
-                    data-initiating-model='{$this->params['initiating_model']}'
-                    data-initiating-column='{$this->params['initiating_column']}'
-                    value='{$value}'
-                    data-model='".hsc($this->params['model'])."'
-                    xxx-data-table='".hsc($this->params['table'])."'
-                    xxx-data-key='".hsc($this->params['key'])."'
-                    xxx-data-order='".hsc($this->params['order'])."'
-                    xxx-data-where='".hsc($this->params['where'])."'
-                    xxx-data-lookup-search-type='".hsc($this->params['lookup_search_type'])."'
-                    xxx-data-follow-lookups='".hsc($this->params['follow_lookups'])."'
-                    onchange=\"{$onchange_hidden}\"
-                  />
-                  <input
-                    type='{$input_type}'
-                    name='{$this->params['uid']}_autocomplete_input'
-                    id='{$this->params['uid']}_autocomplete_input'
-                    class='col-md-9 px-1 ".join(' ', $this->classes)."'
-                    style='{$this->params['style']}'
-                    ".$this->generate_input_events().'
-                    value="'.htmlspecialchars($inputText).'"
-                    data-value="'.htmlspecialchars($inputText).'"
-                    title="'.htmlspecialchars($this->params['title']).'"
-                    placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
-                    {$this->params['html_attributes']}
-                    ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-                    autocomplete='off'
-                    onfocus='ui_input_lookup_onkeydown(event, \"{$this->params['uid']}\");'
-                  />
-                  <div
-                    class='adios ui Input lookup autocomplete shadow-sm col-md-9'
-                    style='display:none;'
-                    id='{$this->params['uid']}_result_div'
-                  >
-                    <div id='{$this->params['uid']}_result_div_inner' class='innner' style='text-align:left;' >
-                    </div>
+                  <div id='{$this->params['uid']}_result_div_inner' class='innner' style='text-align:left;' >
                   </div>
-                  <div class='adios ui Input lookup_controls'>
-                    ".($this->params['lookup_search_enabled'] && !$this->params['readonly'] ? "
-                      <span class='btn btn-light btn-sm' onclick=\"{$search_onclick}('{$this->params['uid']}')\">
-                        <i
-                          class='icon fas fa-search'
-                          title='".$this->translate('Search in list')."'
-                        ></i>
-                      </span>
-                    " : "")."
-                    ".($this->params['lookup_detail_enabled'] ? "
-                      <span class='btn btn-light btn-sm' onclick=\"{$detail_onclick}($('#{$this->params['uid']}').val(), '{$this->params['uid']}');\">
-                        <i
-                          id='{$this->params['uid']}_detail_button'
-                          style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;')."'
-                          class='icon fas fa-id-card'
-                          title='".$this->translate("Show details")."' 
-                        ></i>
-                      </span>
-                    " : "")."
-                    ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->adios->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='".l('Pridať')."' />" : '').'
-                    '.(!$this->params['readonly'] ? "
-                      <span class='btn btn-light btn-sm' onclick=\"ui_input_lookup_set_value('{$this->params['uid']}', 0);\">
-                        <i
-                          id='{$this->params['uid']}_clear_button'
-                          style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;').";'
-                          class='icon fas fa-times'
-                          title='".$this->translate("Clear selection")."' 
-                        ></i>
-                      </span>
-                    " : '')."
-                  </div>
-                </span>
-              ";
-            break;
-          }
+                </div>
+                <div class='adios ui Input lookup_controls'>
+                  ".($this->params['lookup_search_enabled'] && !$this->params['readonly'] ? "
+                    <span class='btn btn-light btn-sm' onclick=\"{$search_onclick}('{$this->params['uid']}')\">
+                      <i
+                        class='icon fas fa-search'
+                        title='".$this->translate('Search in list')."'
+                      ></i>
+                    </span>
+                  " : "")."
+                  ".($this->params['lookup_detail_enabled'] ? "
+                    <span class='btn btn-light btn-sm' onclick=\"{$detail_onclick}($('#{$this->params['uid']}').val(), '{$this->params['uid']}');\">
+                      <i
+                        id='{$this->params['uid']}_detail_button'
+                        style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;')."'
+                        class='icon fas fa-id-card'
+                        title='".$this->translate("Show details")."' 
+                      ></i>
+                    </span>
+                  " : "")."
+                  ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->adios->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='".l('Pridať')."' />" : '').'
+                  '.(!$this->params['readonly'] ? "
+                    <span class='btn btn-light btn-sm' onclick=\"ui_input_lookup_set_value('{$this->params['uid']}', 0);\">
+                      <i
+                        id='{$this->params['uid']}_clear_button'
+                        style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;').";'
+                        class='icon fas fa-times'
+                        title='".$this->translate("Clear selection")."' 
+                      ></i>
+                    </span>
+                  " : '')."
+                </div>
+              </span>
+            ";
+          break;
         }
+      }
 
-        return $html;
+      return $html;
     }
 
     /*                       */

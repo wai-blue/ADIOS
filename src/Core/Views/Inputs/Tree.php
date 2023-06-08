@@ -32,7 +32,7 @@ class Tree extends \ADIOS\Core\Input
             let btn = $(this).closest('.dropdown').find(' > .btn');
 
             window_render(
-              '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/Edit',
+              '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/edit',
               '',
               function(res) {
                 _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {

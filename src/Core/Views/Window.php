@@ -81,12 +81,13 @@ class Window extends \ADIOS\Core\View {
     unset($_REQUEST_without_action['action']);
 
     $html = "
-      <span
+      <div
         class='".$this->getCssClassesString()."'
         id='{$this->params['uid']}'
       >
+        <div class='modal-overlay'></div>
         <div class='header'>
-          <div class='bg-white p-4 mb-4 shadow'>
+          <div class='p-4 mb-4'>
             <div class='row'>
               <div class='col'>
                 " . $this->headerLeft->render() . "
@@ -115,7 +116,7 @@ class Window extends \ADIOS\Core\View {
             {$this->params['content']}
           </div>
         </div>
-      </span>
+      </div>
 
       <script>
         setTimeout(function() {
