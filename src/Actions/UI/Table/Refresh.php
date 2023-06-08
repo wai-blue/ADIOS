@@ -18,7 +18,7 @@ class Refresh extends \ADIOS\Core\Action {
     $tmp['refresh'] = 1;
     $tmp['uid'] = $_REQUEST['uid'];
     $this->adios->setUid($tmp['uid']);
-    $table = $this->adios->ui->Table($tmp);
+    $table = $this->adios->view->Table($tmp);
     return $table->render();
   }
 }

@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 /**
  * Renders input element (or elements) for a specific data type.
@@ -25,7 +25,7 @@ namespace ADIOS\Core\UI;
  * Example code to render the input for *char* data type:
  *
  * ```php
- *   $adios->ui->Input([
+ *   $adios->view->Input([
  *     "type" => "char",
  *     "value" => "Hello World",
  *   ]);
@@ -33,7 +33,9 @@ namespace ADIOS\Core\UI;
  *
  * @package UI\Elements
  */
-class Input extends \ADIOS\Core\UI\View {
+class Input extends \ADIOS\Core\View {
+
+  public ?\ADIOS\Core\Model $model;
 
     public array $supported_events = [];
     public array $default_params = [];
@@ -146,7 +148,8 @@ class Input extends \ADIOS\Core\UI\View {
     /*        */
     /* render */
     /*        */
-    public function render($render_panel = '') {
+    public function render(string $render_panel = ''): string
+    {
 
         if (!empty($this->params['input'])) {
           if (is_string($this->params['input'])) {
@@ -665,7 +668,7 @@ class Input extends \ADIOS\Core\UI\View {
                 '
               >
                 <div>
-                  ".$this->adios->ui->Button([
+                  ".$this->adios->view->Button([
                     "fa_icon" => "fas fa-times",
                     "text" => $this->translate("Close files and media browser"),
                     "class" => "btn btn-secondary btn-icon-split",
@@ -675,7 +678,7 @@ class Input extends \ADIOS\Core\UI\View {
                   ])->render()."
                 </div>
                 <div style='margin:1em'>
-                  ".(new \ADIOS\Core\UI\Input\FileBrowser($this->adios, $this->params['uid'], [
+                  ".(new \ADIOS\Core\Views\Inputs\FileBrowser($this->adios, $this->params['uid'], [
                     "mode" => "select",
                     "value" => $this->params['value'],
                     "subdir" => $this->params['subdir'],
@@ -773,7 +776,7 @@ class Input extends \ADIOS\Core\UI\View {
                 ".(!$this->params['readonly'] ? "
                     <div class='adios ui file_operations_div' id='{$this->params['uid']}_operations' style='opacity:0;float:left;'>
                       ".(FALSE && $this->params['show_file_browser'] ?
-                        $this->adios->ui->button([
+                        $this->adios->view->Button([
                           'uid' => $this->params['uid'].'_file_input_browser_button',
                           'onclick' => "ui_input_ftp_browser('{$this->params['uid']}', 'file');",
                           'fa_icon' => 'fas fa-search',
@@ -782,7 +785,7 @@ class Input extends \ADIOS\Core\UI\View {
                         ])->render()
                       : '').
                       (FALSE && $this->params['show_download_url_button'] ?
-                        $this->adios->ui->button([
+                        $this->adios->view->Button([
                           'uid' => $this->params['uid'].'_file_input_download_button',
                           'onclick' => "ui_input_file_download('{$this->params['uid']}', '".$this->translate("Enter URL address")."');",
                           'fa_icon' => 'fas fa-download',
@@ -791,7 +794,7 @@ class Input extends \ADIOS\Core\UI\View {
                         ])->render()
                       : '').
                       ($this->params['show_open_button'] ?
-                        $this->adios->ui->button([
+                        $this->adios->view->Button([
                           'uid' => $this->params['uid'].'_file_input_open_button',
                           'onclick' => "ui_input_file_open('{$this->params['uid']}');",
                           'fa_icon' => 'fas fa-eye',
@@ -801,7 +804,7 @@ class Input extends \ADIOS\Core\UI\View {
                         ])->render()
                       : '').
                       ($this->params['show_delete_button'] ?
-                        $this->adios->ui->button([
+                        $this->adios->view->Button([
                           'uid' => $this->params['uid'].'_file_input_delete_button',
                           'onclick' => "ui_input_file_remove('{$this->params['uid']}');",
                           'fa_icon' => 'fas fa-trash-alt',

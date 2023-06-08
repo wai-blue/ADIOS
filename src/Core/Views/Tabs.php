@@ -8,9 +8,9 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
-class Tabs extends \ADIOS\Core\UI\View {
+class Tabs extends \ADIOS\Core\View {
     public function __construct(&$adios, $params = null)
     {
         parent::__construct($adios, $params);
@@ -36,7 +36,8 @@ class Tabs extends \ADIOS\Core\UI\View {
         }
     }
 
-    public function render(string $panel = '') {
+    public function render(string $panel = ''): string
+    {
 
       $contents = "";
       $titles = "";

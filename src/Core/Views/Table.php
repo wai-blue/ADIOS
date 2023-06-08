@@ -8,11 +8,11 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 use \ADIOS\Core\DB\Query as Q;
 
-class Table extends \ADIOS\Core\UI\View
+class Table extends \ADIOS\Core\View
 {
 
   var $model = NULL;
@@ -223,7 +223,7 @@ class Table extends \ADIOS\Core\UI\View
 
     if ($this->params['showPaging']) {
       $this->add(
-        $this->adios->ui->button(
+        $this->adios->view->Button(
           [
             'fa_icon' => 'fas fa-angle-double-left',
             'class' => 'btn-light btn-circle btn-sm',
@@ -234,7 +234,7 @@ class Table extends \ADIOS\Core\UI\View
         'paging'
       );
       $this->add(
-        $this->adios->ui->button([
+        $this->adios->view->Button([
           'fa_icon' => 'fas fa-angle-left',
           'class' => 'btn-light btn-circle btn-sm',
           'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] - 1) . "'); ",
@@ -284,7 +284,7 @@ class Table extends \ADIOS\Core\UI\View
           )
         ) {
           $this->add(
-            $this->adios->ui->button([
+            $this->adios->view->Button([
               'text' => $i,
               'class' => 'pages',
               'onclick' => "ui_table_show_page('{$this->params['uid']}', '{$i}');",
@@ -296,7 +296,7 @@ class Table extends \ADIOS\Core\UI\View
       }
 
       $this->add(
-        $this->adios->ui->button([
+        $this->adios->view->Button([
           'fa_icon' => 'fas fa-angle-right',
           'class' => 'btn-light btn-circle btn-sm',
           'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] + 1) . "'); ",
@@ -305,7 +305,7 @@ class Table extends \ADIOS\Core\UI\View
         'paging'
       );
       $this->add(
-        $this->adios->ui->button([
+        $this->adios->view->Button([
           'fa_icon' => 'fas fa-angle-double-right',
           'class' => 'btn-light btn-circle btn-sm',
           'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($pagesCount) . "'); ",
@@ -487,7 +487,7 @@ class Table extends \ADIOS\Core\UI\View
    * @param  mixed $panel
    * @return void
    */
-  public function render(string $panel = '')
+  public function render(string $panel = ''): string
   {
     $params = $this->params;
 
@@ -563,11 +563,11 @@ class Table extends \ADIOS\Core\UI\View
         $titleButtons = [];
 
         if ($this->params['showAddButton']) {
-          $titleButtons[] = $this->adios->ui->Button($this->params['buttons']['add']);
+          $titleButtons[] = $this->adios->view->Button($this->params['buttons']['add']);
         }
 
         if (_count($moreActionsButtonItems)) {
-          $titleButtons[] = $this->adios->ui->Button([
+          $titleButtons[] = $this->adios->view->Button([
             "fa_icon" => "fas fa-ellipsis-v",
             "title" => "",
             "onclick" => "window_render('{$searchAction}');",
@@ -581,7 +581,7 @@ class Table extends \ADIOS\Core\UI\View
           || !empty($this->params['title'])
           || !empty($this->params['right'])
         ) {
-          $html .= $this->adios->ui->Title([
+          $html .= $this->adios->view->Title([
             'left' => $titleButtons,
             'center' => $this->params['title'],
             'right' => $this->params['right'],
@@ -640,7 +640,7 @@ class Table extends \ADIOS\Core\UI\View
                 <div class='mb-2'>
                   {$tmpSearchHtml}
                 </div>
-                " . $this->adios->ui->Button([
+                " . $this->adios->view->Button([
                   "type" => "close",
                   "text" => $this->translate("Clear filter"),
                   "onclick" => "desktop_update('{$this->adios->requestedAction}');",
@@ -978,7 +978,7 @@ class Table extends \ADIOS\Core\UI\View
                   <option value='1000' " . ($this->params['itemsPerPage'] == 1000 ? "selected" : "") . ">1000</option>
                 </select>
 
-                " . $this->adios->ui->button([
+                " . $this->adios->view->Button([
                   'fa_icon' => 'fas fa-sync-alt',
                   'class' => 'btn-light btn-circle btn-sm',
                   'title' => "Refresh",
@@ -997,12 +997,12 @@ class Table extends \ADIOS\Core\UI\View
     }
 
     if ($params['__IS_WINDOW__']) {
-      $html = $this->adios->ui->Window(
+      $html = $this->adios->view->Window(
         [
           'uid' => "{$this->uid}_window",
           'content' => $html,
           'header' => [
-            $this->adios->ui->Button(["text" => $this->translate("Close"), "type" => "close", "onclick" => "ui_form_close('{$this->uid}_window');"]),
+            $this->adios->view->Button(["text" => $this->translate("Close"), "type" => "close", "onclick" => "ui_form_close('{$this->uid}_window');"]),
           ],
           'title' => " ",
         ]

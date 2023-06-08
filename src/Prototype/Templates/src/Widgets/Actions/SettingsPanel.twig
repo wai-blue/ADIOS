@@ -13,10 +13,10 @@ class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
           [
             "title" => "{{ item.title }}",
 {% if item.input is iterable %}
-            "input" => $this->adios->ui->Input(json_decode('{{ item.input|json_encode|raw }}', TRUE)),
+            "input" => $this->adios->view->Input(json_decode('{{ item.input|json_encode|raw }}', TRUE)),
 {% endif %}
 {% if item.button is iterable %}
-            "input" => $this->adios->ui->Button(json_decode('{{ item.button|json_encode|raw }}', TRUE)),
+            "input" => $this->adios->view->Button(json_decode('{{ item.button|json_encode|raw }}', TRUE)),
 {% endif %}
             "description" => "{{ item.descriptiopn }}",
           ],

@@ -8,10 +8,12 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI\Input;
+namespace ADIOS\Core\Views\Inputs;
 
-class ManyToMany extends \ADIOS\Core\Input {
-  public function render() {
+class ManyToMany extends \ADIOS\Core\Views\Input {
+
+  public function render(string $panel = ''): string
+  {
     $model = $this->adios->getModel($this->params['model']);
     
     switch ($this->params['columns'] ?? 3) {

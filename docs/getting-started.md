@@ -131,7 +131,7 @@ class Orders extends \ADIOS\Core\Widget\Action {
       ->fetchOne()
     ;
 
-    return $this->adios->ui->Window([
+    return $this->adios->view->Window([
       "uid" => "{$this->uid}_window",
       "title" => $customer['email'],
       "subtitle" => $this->translate("Orders"),

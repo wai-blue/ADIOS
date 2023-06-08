@@ -8,10 +8,12 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI\Input;
+namespace ADIOS\Core\Views\Inputs;
 
-class CheckboxField extends \ADIOS\Core\Input {
-  public function render() {
+class CheckboxField extends \ADIOS\Core\Views\Input {
+
+  public function render(string $panel = ''): string
+  {
 
     if (isset($this->params['crossTableAssignment'])) {
       $this->uid = $this->params['crossTableAssignment'];

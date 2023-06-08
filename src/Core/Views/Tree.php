@@ -8,20 +8,23 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 /* UI komponenta, ktora okrem Input Tree generuje aj nejake buttony/titles a save funkcionalitu okolo */
-/* pouziva \ADIOS\Core\UI\Input\Tree */
+/* pouziva \ADIOS\Core\Views\Inputs\Tree */
 
-class Tree extends \ADIOS\Core\UI\View
+class Tree extends \ADIOS\Core\View
 {
-  public function render(string $panel = "")
+
+  public ?\ADIOS\Core\Model $model = NULL;
+
+  public function render(string $panel = ''): string
   {
     $this->model = $this->adios->getModel($this->params['model']);
 
     $inputUid = $this->adios->getUid($this->model->fullName);
 
-    $contentHtml = (new \ADIOS\Core\UI\Input\Tree($this->adios, $inputUid, $this->params))->render();
+    $contentHtml = (new \ADIOS\Core\Views\Inputs\Tree($this->adios, $inputUid, $this->params))->render();
 
     $contentHtml .= "
       <script>
@@ -54,13 +57,13 @@ class Tree extends \ADIOS\Core\UI\View
     ";
 
     if ($this->params['__IS_WINDOW__']) {
-      $html = $this->adios->ui->Window(
+      $html = $this->adios->view->Window(
         [
           'uid' => "{$this->uid}_window",
           'content' => $contentHtml,
           'header' => [
-            $this->adios->ui->Button(["text" => $this->translate("Close"), "type" => "close", "onclick" => "{$this->uid}_close();"]),
-            $this->adios->ui->Button(["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
+            $this->adios->view->Button(["text" => $this->translate("Close"), "type" => "close", "onclick" => "{$this->uid}_close();"]),
+            $this->adios->view->Button(["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
             "
               <span id='{$this->uid}_save_info_span' class='pl-4' style='color:green;display:none'>
                 <i class='fas fa-check'></i>
@@ -73,7 +76,7 @@ class Tree extends \ADIOS\Core\UI\View
         ]
       )->render();
     } else {
-      $html = $this->adios->ui->Title([
+      $html = $this->adios->view->Title([
         'left' => [
           "
             <span id='{$this->uid}_save_info_span' class='pr-4' style='color:green;display:none'>
@@ -81,7 +84,7 @@ class Tree extends \ADIOS\Core\UI\View
                 " . $this->translate("Saved") . "
             </span>
           ",
-          $this->adios->ui->Button(["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
+          $this->adios->view->Button(["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
         ],
         'center' => $this->params['title']
       ])->render();

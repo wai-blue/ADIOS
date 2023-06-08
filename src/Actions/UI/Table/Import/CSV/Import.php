@@ -73,14 +73,14 @@ class Import extends \ADIOS\Core\Action {
       <pre>{$log}</pre>
     ";
 
-    $window = $this->adios->ui->Window([
+    $window = $this->adios->view->Window([
       'uid' => "{$this->uid}_window",
       'title' => " ",
       'content' => $content,
     ]);
 
     $window->params['header'] = [
-      $this->adios->ui->button([
+      $this->adios->view->Button([
         'type' => 'close',
         'onclick' => "{$this->uid}_close();",
       ]),

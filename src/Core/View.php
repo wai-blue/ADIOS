@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core;
 
 class View {
   
@@ -51,7 +51,7 @@ class View {
   public function __construct(
    object $adios,
    array $params = [],
-   ?\ADIOS\Core\UI\View $parentView = NULL
+   ?\ADIOS\Core\View $parentView = NULL
   ) {
     if (!isset($adios->viewsCounter)) {
       $adios->viewsCounter = 0;
@@ -65,7 +65,7 @@ class View {
       $params = $this->loadParamsFromSession($params['uid']);
     }
 
-    $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\Core\\UI\\", "", static::class));
+    $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\Core\\View\\", "", static::class));
 
     $tmp = explode("/", $this->fullName);
     $this->shortName = end($tmp);
@@ -103,21 +103,30 @@ class View {
 
     if ($this->displayMode == 'window') {
 
-    //       'content' => $html,
-    //       'header' => $this->params['window']['header'],
-    //       'footer' => $this->params['window']['footer'],
-    //       'show_modal' => $this->params['show_modal'],
-    //       'form_close_click' => $this->params['close_button_params']['onclick'],
-    //       'uid' => $this->params['window_uid'],
-    //       'titleRaw' => $this->params['titleRaw'],
-    //       'title' => $this->params['title'],
-    //       'subtitle' => $this->params['subtitle'],
-
-      $this->window = $this->adios->ui->create('Window', [], $this);
+      $this->window = $this->adios->view->create('Window', [], $this);
       $this->parentView = $this->window;
     }
 
   }
+
+
+  public function __call(string $name, array $arguments)
+  {
+    $chr = substr($name, 0, 1);
+    $firstLetterIsCapital = strtolower($chr) != $chr;
+
+    $className = "\\ADIOS\\Core\\Views\\{$name}";
+
+    if (
+      $firstLetterIsCapital
+      && class_exists($className)
+    ) {
+      return new $className($this->adios, $arguments[0], $arguments[1]);
+    } else {
+      throw new \ADIOS\Core\Exceptions\UnknownView();
+    }
+  }
+
 
   public function saveParamsToSession(string $uid = "", $params = NULL) {
     $_SESSION[_ADIOS_ID]['views'][$uid ?? $this->uid] = is_array($params) ? $params : $this->params;
@@ -128,7 +137,26 @@ class View {
     $params["uid"] = $uid ?? $this->uid;
     return $params;
   }
-  
+
+  public function create(
+    string $view,
+    array $params = null,
+    \ADIOS\Core\View $parentView = NULL)
+  {
+    list($viewClassName, $uid) = explode('#', $view);
+
+    if (!empty($uid)) {
+      $params['uid'] = $uid;
+    }
+
+    $viewClassName = "\\ADIOS\\Core\\Views\\{$viewClassName}";
+    return new $viewClassName(
+      $this->adios,
+      $params,
+      $parentView
+    );
+  }
+
   /**
    * translate
    *
@@ -173,7 +201,7 @@ class View {
    * @return void
    */
   public function cadd($component_name, $params = null) {
-    $this->add($this->adios->ui->create($component_name, $params));
+    $this->add($this->adios->view->create($component_name, $params));
 
     return $this;
   }
@@ -267,7 +295,7 @@ class View {
    * @param  mixed $cssClass
    * @return void
    */
-  public function addCssClass(string $cssClass): \ADIOS\Core\UI\View {
+  public function addCssClass(string $cssClass): \ADIOS\Core\View {
     if (!empty($cssClass)) $this->classes[] = $cssClass;
     return $this;
   }
@@ -312,11 +340,12 @@ class View {
    * @param  mixed $panel
    * @return void
    */
-  public function render(string $panel = '') {
+  public function render(string $panel = ''): string
+  {
 
     if (
       !empty($this->twigTemplate)
-       && is_file(__DIR__."/../../Templates/{$this->twigTemplate}.twig")
+       && is_file(__DIR__."/../Templates/{$this->twigTemplate}.twig")
     ) {
 
       $twigParams = [
@@ -432,7 +461,7 @@ class View {
     $result = NULL;
 
     if ($this->parentView !== NULL) {
-      if (get_class($this->parentView) == "ADIOS\\Core\\UI\\{$componentName}") {
+      if (get_class($this->parentView) == "ADIOS\\Core\\View\\{$componentName}") {
         $result = $this->parentView;
       } else {
         $result = $this->parentView->findParentComponent($componentName);

@@ -1,16 +1,17 @@
 <?php
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 /**
  * Renders Card-based list of elements.
  *
  * @package UI\Elements
  */
-class Cards extends \ADIOS\Core\UI\View {
+class Cards extends \ADIOS\Core\View {
   var bool $useSession = TRUE;
   
-  public function render(string $panel = "") {
+  public function render(string $panel = ''): string
+  {
     $model = $this->adios->getModel($this->params['model']);
 
     $params = $model->cardsParams($this->params);
@@ -36,7 +37,7 @@ class Cards extends \ADIOS\Core\UI\View {
     if ($params['show_add_button'] ?? FALSE) {
       $html .= "
         <div class='row mb-3'>
-          ".$this->adios->ui->Button([
+          ".$this->adios->view->Button([
             "type" => "add",
             "onclick" => "
               window_render(
@@ -67,7 +68,7 @@ class Cards extends \ADIOS\Core\UI\View {
 
 
     if ($this->params['__IS_WINDOW__']) {
-      $html = $this->adios->ui->Window([
+      $html = $this->adios->view->Window([
         'content' => $html,
         'titleRaw' => $params['window']['titleRaw'],
         'title' => $params['window']['title'],

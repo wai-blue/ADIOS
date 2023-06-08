@@ -8,9 +8,9 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
-class Window extends \ADIOS\Core\UI\View {
+class Window extends \ADIOS\Core\View {
 
   public function __construct(&$adios, $params = null) {
     $this->adios = $adios;
@@ -29,7 +29,7 @@ class Window extends \ADIOS\Core\UI\View {
 
     if (empty($this->params['headerLeft'])) {
       $this->params['headerLeft'] = [
-        $this->adios->ui->Button([
+        $this->adios->view->Button([
           "type" => "close",
           "onclick" => "window_close('{$this->uid}');",
         ])
@@ -58,15 +58,16 @@ class Window extends \ADIOS\Core\UI\View {
     $this->params['headerRight'] = $components;
   }
 
-  public function addButtonToHeaderLeft(?\ADIOS\Core\UI\Button $button): void {
+  public function addButtonToHeaderLeft(?\ADIOS\Core\Views\Button $button): void {
     $this->params['headerLeft'][] = $button;
   }
 
-  public function addButtonToHeaderRight(?\ADIOS\Core\UI\Button $button): void {
+  public function addButtonToHeaderRight(?\ADIOS\Core\Views\Button $button): void {
     $this->params['headerRight'][] = $button;
   }
 
-  public function render(string $panel = '') {
+  public function render(string $panel = ''): string
+  {
     $this->add($this->params['headerLeft'], 'headerLeft');
     $this->add($this->params['content'], 'content');
     $this->add($this->params['headerRight'], 'headerRight');

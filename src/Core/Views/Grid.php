@@ -1,6 +1,6 @@
 <?php
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 /**
  * Renders a layout based on HTML grid configuration.
@@ -8,14 +8,14 @@ namespace ADIOS\Core\UI;
  * Example code to render layout:
  *
  * ```php
- *   $adios->ui->Layout([
+ *   $adios->view->Layout([
  *     ...
  *   ]);
  * ```
  *
  * @package UI\Elements
  */
-class Grid extends \ADIOS\Core\UI\View {
+class Grid extends \ADIOS\Core\View {
 
   public string $twigTemplate = "Core/UI/Grid";
 
@@ -47,7 +47,7 @@ class Grid extends \ADIOS\Core\UI\View {
       ";
 
       if (!empty($areaParams['view'])) {
-        $html .= $this->adios->ui->create(
+        $html .= $this->adios->view->create(
           $areaParams['view'],
           $areaParams['params'],
           $this

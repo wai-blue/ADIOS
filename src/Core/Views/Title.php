@@ -8,9 +8,9 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
-class Title extends \ADIOS\Core\UI\View
+class Title extends \ADIOS\Core\View
 {
   public function __construct(&$adios, $params = null)
   {
@@ -26,7 +26,7 @@ class Title extends \ADIOS\Core\UI\View
     $this->add($this->params['center'], 'center');
   }
 
-  public function render($render_panel = '')
+  public function render(string $panel = ''): string
   {
     $center = (string) parent::render('center');
     $center = trim($center);

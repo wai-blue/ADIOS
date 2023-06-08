@@ -8,14 +8,16 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 
 
-class SettingsPanel extends \ADIOS\Core\UI\View {
-  public function render(string $panel = "") {
+class SettingsPanel extends \ADIOS\Core\View {
 
-    $inputHtml = (new \ADIOS\Core\UI\Input\SettingsPanel(
+  public function render(string $panel = ''): string
+  {
+
+    $inputHtml = (new \ADIOS\Core\Views\Inputs\SettingsPanel(
       $this->adios,
       $this->params['uid'],
       $this->params
@@ -48,16 +50,16 @@ class SettingsPanel extends \ADIOS\Core\UI\View {
     ";
     
 
-    $html = $this->adios->ui->Window(
+    $html = $this->adios->view->Window(
       [
         'uid' => "{$this->uid}_window",
         'content' => $inputHtml,
         'header' => [
-          $this->adios->ui->Button([
+          $this->adios->view->Button([
             "type" => "close",
             "onclick" => (empty($this->params['onclose']) ? "{$this->uid}_close();" : $this->params['onsave']),
           ]),
-          $this->adios->ui->Button([
+          $this->adios->view->Button([
             "type" => "save",
             "onclick" => (empty($this->params['onsave']) ? "{$this->uid}_save();" : $this->params['onsave']),
           ]),

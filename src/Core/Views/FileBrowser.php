@@ -8,14 +8,15 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 /* akcia, ktora okrem Input FileBrowser generuje aj nejake window/buttony/titles a funkcionalitu okolo */
-/* pouziva \ADIOS\Core\UI\Input\FileBrowser */
-class FileBrowser extends \ADIOS\Core\UI\View {
-  public function render(string $panel = "") {
+/* pouziva \ADIOS\Core\Views\Inputs\FileBrowser */
+class FileBrowser extends \ADIOS\Core\View {
 
-    $inputHtml = (new \ADIOS\Core\UI\Input\FileBrowser(
+  public function render(string $panel = ''): string
+  {
+    $inputHtml = (new \ADIOS\Core\Views\Inputs\FileBrowser(
       $this->adios,
       $this->params['uid'],
       $this->params
@@ -26,7 +27,7 @@ class FileBrowser extends \ADIOS\Core\UI\View {
         $this->params['onchange'] = "{$this->uid}_close($(this).val());";
       }
 
-      $html = $this->adios->ui->Window(
+      $html = $this->adios->view->Window(
         [
           'uid' => "{$this->uid}_window",
           'content' => "
@@ -40,7 +41,7 @@ class FileBrowser extends \ADIOS\Core\UI\View {
             </script>
           ",
           'header' => [
-            $this->adios->ui->Button([
+            $this->adios->view->Button([
               "text" => $this->translate("Close"),
               "type" => "close",
               "onclick" => "{$this->uid}_close();",
@@ -53,7 +54,7 @@ class FileBrowser extends \ADIOS\Core\UI\View {
       $html = "";
 
       if (!empty($this->params['title'])) {
-        $html .= $this->adios->ui->Title([
+        $html .= $this->adios->view->Title([
           'center' => $this->translate($this->params['title']),
         ])->render();
       }
