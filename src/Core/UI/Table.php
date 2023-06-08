@@ -185,7 +185,7 @@ class Table extends \ADIOS\Core\UI\View
       }
 
       $this->params['buttons']['add']['onclick'] = "
-        window_render('" . $tmpUrl . "/Add')
+        window_render('" . $tmpUrl . "/add')
       ";
     }
 
@@ -201,6 +201,13 @@ class Table extends \ADIOS\Core\UI\View
       $this->params['showTitle'] = false;
 
       $this->params['showAddButton'] = false;
+    }
+
+    if ($this->params['readonly']) {
+      $this->params['showAddButton'] = false;
+      $this->params['showSearchButton'] = false;
+      $this->params['showExportCsvButton'] = false;
+      $this->params['showImportCsvButton'] = false;
     }
 
     $this->model->onTableAfterInit($this);
@@ -329,23 +336,30 @@ class Table extends \ADIOS\Core\UI\View
     $db = $this->adios->db;
     if (empty($this->params['table'])) return;
 
-    // where
-    $whereRaw = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
+    // where and whereRaw
+    $whereRaw = "";
+    $where = [];
+    
+    if (is_string($this->params['where'])) {
+      $whereRaw = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
 
-    if (
-      !empty($this->params['foreignKey'])
-      && (int) $this->params['form_data']['id'] > 0
-    ) {
-      $fkColumnName = $this->params['foreignKey'];
-      $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
-      if ($fkColumnDefinition !== NULL) {
-        $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-        $whereRaw .= "
-          and
-            `lookup_{$tmpModel->getFullTableSqlName()}_{$fkColumnName}`.`id`
-            = ".((int) $this->params['form_data']['id'])
-        ;
+      if (
+        !empty($this->params['foreignKey'])
+        && (int) $this->params['form_data']['id'] > 0
+      ) {
+        $fkColumnName = $this->params['foreignKey'];
+        $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
+        if ($fkColumnDefinition !== NULL) {
+          $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
+          $whereRaw .= "
+            and
+              `lookup_{$tmpModel->getFullTableSqlName()}_{$fkColumnName}`.`id`
+              = ".((int) $this->params['form_data']['id'])
+          ;
+        }
       }
+    } else {
+      $where = $this->params['where'];
     }
 
     // orderBy
@@ -376,6 +390,7 @@ class Table extends \ADIOS\Core\UI\View
     // query
     $query = $db->select($this->model, [Q::countRows])
       ->columns([Q::allColumnsWithLookups])
+      ->where($where)
       ->whereRaw($whereRaw)
       ->having($having)
       ->order($orderBy)
@@ -477,14 +492,14 @@ class Table extends \ADIOS\Core\UI\View
     $params = $this->params;
 
     $html = "";
-    $this->add_class('Container');
+    $this->addCssClass('Container');
 
     if (!in_array("UI/Form", $this->adios->actionStack)) {
-      $this->add_class('shadow');
+      $this->addCssClass('shadow');
     }
 
     if (!$this->params['__IS_WINDOW__']) {
-      $this->add_class('desktop');
+      $this->addCssClass('desktop');
     }
 
     if (!$this->params['refresh']) {
@@ -504,7 +519,7 @@ class Table extends \ADIOS\Core\UI\View
         $moreActionsButtonItems = [];
 
         if ($this->params['showSearchButton']) {
-          $searchAction = $this->model->searchAction ?? $this->model->getFullUrlBase($params) . "/Search";
+          $searchAction = $this->model->searchAction ?? $this->model->getFullUrlBase($params) . "/search";
 
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-search",
@@ -561,11 +576,17 @@ class Table extends \ADIOS\Core\UI\View
           ]);
         }
 
-        $html .= $this->adios->ui->Title([
-          'left' => $titleButtons,
-          'center' => $this->params['title'],
-          'right' => $this->params['right'],
-        ])->render();
+        if (
+          !empty($titleButtons)
+          || !empty($this->params['title'])
+          || !empty($this->params['right'])
+        ) {
+          $html .= $this->adios->ui->Title([
+            'left' => $titleButtons,
+            'center' => $this->params['title'],
+            'right' => $this->params['right'],
+          ])->render();
+        }
       }
 
       if (_count($this->search)) {
@@ -620,10 +641,10 @@ class Table extends \ADIOS\Core\UI\View
                   {$tmpSearchHtml}
                 </div>
                 " . $this->adios->ui->Button([
-          "type" => "close",
-          "text" => $this->translate("Clear filter"),
-          "onclick" => "desktop_update('{$this->adios->requestedAction}');",
-        ])->render() . "
+                  "type" => "close",
+                  "text" => $this->translate("Clear filter"),
+                  "onclick" => "desktop_update('{$this->adios->requestedAction}');",
+                ])->render() . "
               </div>
             </div>
           </div>
@@ -872,7 +893,11 @@ class Table extends \ADIOS\Core\UI\View
             'row' => $val,
           ]);
 
-          $onclick = $params['onclick'] ?: "window_render('" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/Edit')";
+          $onclick = $params['onclick'] ?: "
+            window_render(
+              '" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/edit'
+            )
+          ";
 
           $html .= "
             <div

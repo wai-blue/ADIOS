@@ -63,7 +63,17 @@ class Builder {
     $this->twig->addFunction(new \Twig\TwigFunction(
       'varExport',
       function ($var, $indent = "") {
-        return $indent.str_replace("\n", "\n{$indent}", var_export($var, TRUE));
+        $var = $indent.str_replace("\n", "\n{$indent}", var_export($var, TRUE));
+
+        $var = preg_replace_callback(
+          '/\'```php (.*?) ```\'/',
+          function ($m) {
+            return str_replace('\\\'', '\'', $m[1]);
+          },
+          $var
+        );
+
+        return $var;
       }
     ));
 
@@ -245,7 +255,6 @@ class Builder {
         $widgetClassName = $widgetName;
       }
 
-
       if (is_string($widgetConfig) && strpos($widgetConfig, "@import") !== false) {
         $filePath = trim(str_replace("@import", "", $widgetConfig));
         $this->log('Importing ' . $filePath);
@@ -307,22 +316,45 @@ class Builder {
         $this->createFolder($widgetRootDir . '/Actions');
         $this->createFolder($widgetRootDir . '/Templates');
         foreach ($widgetConfig['actions'] as $actionName => $actionConfig) {
-          $templateContainsPhpScript = ($actionConfig['templateContainsPhpScript'] ?? FALSE);
-
-          if ($templateContainsPhpScript) {
-            $twigTemplate = 'src/Widgets/Actions/' . $actionConfig['template'] . '.twig';
+          if (isset($actionConfig['phpTemplate'])) {
+            $twigTemplate = 'src/Widgets/Actions/' . $actionConfig['phpTemplate'] . '.twig';
           } else {
             $twigTemplate = 'src/Widgets/Action.twig';
 
             $this->copyFile(
               'src/Widgets/Templates/' . $actionConfig['template'] . '.twig',
-              $widgetRootDir . '/Templates/' . $actionConfig['template'] . '.twig'
+              $widgetRootDir . '/Templates/' . $actionName . '.twig'
             );
           }
 
           $tmpActionConfig = $actionConfig;
           unset($tmpActionConfig['template']);
-          unset($tmpActionConfig['templateContainsPhpScript']);
+          unset($tmpActionConfig['phpTemplate']);
+
+          $actionNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Actions';
+          $actionClassName = str_replace('/', '\\', $actionName);
+
+          if (strpos($actionName, '/') !== FALSE) {
+            $actionRootDir = $widgetRootDir . '/Actions';
+
+            $tmpDirs = explode('/', $actionName);
+            
+            $actionClassName = end($tmpDirs);
+
+            foreach ($tmpDirs as $level => $tmpDir) {
+              $actionRootDir .= '/' . $tmpDir;
+
+              if ($level != count($tmpDirs) - 1) {
+                $actionNamespace .= '\\' . $tmpDir;
+                $this->createFolder($actionRootDir);
+              }
+
+            }
+          } else {
+            $actionClassName = $actionName;
+          }
+
+
 
           $this->renderFile(
             $widgetRootDir . '/Actions/' . $actionName . '.php',
@@ -338,8 +370,8 @@ class Builder {
                 ],
                 'thisAction' => [
                   'name' => $actionName,
-                  'namespace' => $widgetNamespace . '\\' . $widgetClassName . '\\Actions',
-                  'class' => $actionName,
+                  'namespace' => $actionNamespace,
+                  'class' => $actionClassName,
                   'config' => $tmpActionConfig
                 ]
               ]

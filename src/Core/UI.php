@@ -12,17 +12,23 @@ class UI
     $this->adios = $adios;
   }
 
-  public function create($component_name, $params = null)
+  public function create(
+    string $viewName,
+    array $params = null,
+    \ADIOS\Core\UI\View $parentView = NULL)
   {
-    list($component_class, $uid) = explode('#', $component_name);
+    list($viewClassName, $uid) = explode('#', $viewName);
 
-    $params['component_class'] = $component_class;
     if (!empty($uid)) {
       $params['uid'] = $uid;
     }
 
-    $class_name = "\\ADIOS\\Core\\UI\\{$component_class}";
-    return new $class_name($this->adios, $params);
+    $viewClassName = "\\ADIOS\\Core\\UI\\{$viewClassName}";
+    return new $viewClassName(
+      $this->adios,
+      $params,
+      $parentView
+    );
   }
 
   public function __call(string $name, array $arguments)
@@ -36,9 +42,9 @@ class UI
       $firstLetterIsCapital
       && class_exists($className)
     ) {
-      return new $className($this->adios, $arguments[0]);
+      return new $className($this->adios, $arguments[0], $arguments[1]);
     } else {
-      throw new \ADIOS\Core\Exceptions\UnknownUIComponent();
+      throw new \ADIOS\Core\Exceptions\UnknownView();
     }
   }
 

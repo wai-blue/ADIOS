@@ -18,7 +18,7 @@ class Title extends \ADIOS\Core\UI\View
     parent::__construct($adios, $params);
 
     if ($this->params['fixed']) {
-      $this->add_class('fixed');
+      $this->addCssClass('fixed');
     }
 
     $this->add($this->params['left'], 'left');

@@ -24,6 +24,12 @@ class View {
   var array $html = [];
   var array $attrs = [];
 
+  var $displayMode = '';
+
+  var $window = NULL;
+
+  var $parentView = NULL;
+
   var string $twigTemplate = "";
   
   /**
@@ -42,13 +48,18 @@ class View {
    * @param  mixed $params
    * @return void
    */
-  public function __construct(object $adios, array $params = []) {
+  public function __construct(
+   object $adios,
+   array $params = [],
+   ?\ADIOS\Core\UI\View $parentView = NULL
+  ) {
     if (!isset($adios->viewsCounter)) {
       $adios->viewsCounter = 0;
     }
     ++$adios->viewsCounter;
 
     $this->adios = $adios;
+    $this->parentView = $parentView;
 
     if ($params['lpfs'] ?? FALSE) {
       $params = $this->loadParamsFromSession($params['uid']);
@@ -61,9 +72,11 @@ class View {
 
     if (empty($params['uid'])) {
       $params['uid'] =
-        $this->adios->uid."_"
-        .str_replace("\\", "", str_replace("ADIOS\\Core\\", "", get_class($this)))."_"
-        .$adios->viewsCounter
+        'view_'
+        . str_replace("\\", "", str_replace("ADIOS\\Core\\", "", get_class($this)))
+        . '_' . substr(md5('_' . rand(1000, 9999)), 0, 5)
+        . '_' . substr(md5('_' . rand(1000, 9999)), 0, 5)
+        . '_' . substr(md5('_' . rand(1000, 9999)), 0, 5)
       ;
     }
 
@@ -75,15 +88,35 @@ class View {
       $this->saveParamsToSession($params['uid'], $tmpParams);
     }
 
+    $componentName = end(explode("\\", get_class($this)));
+
     $this->params = $params;
     $this->uid = $params['uid'];
+    $this->displayMode = $this->params['displayMode'];
     $this->views = [];
-    $this->classes = ['adios', 'ui', $params['component_class']];
-    $this->twigTemplate = "UI/{$this->fullName}";
+    $this->classes = ['adios', 'ui', $componentName];
+    $this->twigTemplate = $this->twigTemplate ?? "UI/{$this->fullName}";
 
-    if (isset($params['class'])) {
-      $this->add_class($params['class']);
+    if (isset($params['cssClass'])) {
+      $this->addCssClass($params['cssClass']);
     }
+
+    if ($this->displayMode == 'window') {
+
+    //       'content' => $html,
+    //       'header' => $this->params['window']['header'],
+    //       'footer' => $this->params['window']['footer'],
+    //       'show_modal' => $this->params['show_modal'],
+    //       'form_close_click' => $this->params['close_button_params']['onclick'],
+    //       'uid' => $this->params['window_uid'],
+    //       'titleRaw' => $this->params['titleRaw'],
+    //       'title' => $this->params['title'],
+    //       'subtitle' => $this->params['subtitle'],
+
+      $this->window = $this->adios->ui->create('Window', [], $this);
+      $this->parentView = $this->window;
+    }
+
   }
 
   public function saveParamsToSession(string $uid = "", $params = NULL) {
@@ -113,22 +146,22 @@ class View {
    * @internal
    */
   public function add($subviews, $panel = 'default') {
-      if (is_array($subviews)) {
-          foreach ($subviews as $subview) {
-              $this->add($subview, $panel);
-          }
-      } elseif (is_string($subviews) || '' == $subviews) {
-          $this->views[$panel][] = $subviews;
-      } else {
-          $subviews->param('parent_uid', $this->uid);
-          if ('' != $subviews->params['key']) {
-              $this->views[$panel][$subviews->params['key']] = $subviews;
-          } else {
-              $this->views[$panel][] = $subviews;
-          }
+    if (is_array($subviews)) {
+      foreach ($subviews as $subview) {
+        $this->add($subview, $panel);
       }
+    } elseif (is_string($subviews) || '' == $subviews) {
+      $this->views[$panel][] = $subviews;
+    } else {
+      $subviews->param('parent_uid', $this->uid);
+      if ('' != $subviews->params['key']) {
+        $this->views[$panel][$subviews->params['key']] = $subviews;
+      } else {
+        $this->views[$panel][] = $subviews;
+      }
+    }
 
-      return $this;
+    return $this;
   }
   
   /**
@@ -228,37 +261,19 @@ class View {
   }
   
   /**
-   * add_class
+   * addCssClass
    *
    * @internal
-   * @param  mixed $class_name
-   * @param  mixed $target
+   * @param  mixed $cssClass
    * @return void
    */
-  public function add_class($class_name, $target = '') {
-    if (empty($class_name)) return;
-
-    if (!in_array($target, ['', 'desktop', 'mobile', 'tablet'])) {
-      $target = '';
-    }
-
-    $add = false;
-    //if (Akernel()->is_mobile && $target == "mobile") $add = TRUE;
-    //else if (Akernel()->is_tablet && $target == "tablet") $add = TRUE;
-    //else
-    if ('desktop' == $target || '' == $target) {
-      $add = true;
-    }
-
-    if ($add) {
-      $classes = explode(' ', $class_name);
-      foreach ($classes as $class_name) {
-        $this->classes[] = $class_name;
-        $this->classes = array_unique($this->classes);
-      }
-    }
-
+  public function addCssClass(string $cssClass): \ADIOS\Core\UI\View {
+    if (!empty($cssClass)) $this->classes[] = $cssClass;
     return $this;
+  }
+
+  public function getCssClassesString(): string {
+    return join(" ", $this->classes);
   }
   
   /**
@@ -303,6 +318,7 @@ class View {
       !empty($this->twigTemplate)
        && is_file(__DIR__."/../../Templates/{$this->twigTemplate}.twig")
     ) {
+
       $twigParams = [
         "uid" => $this->uid,
         "gtp" => $this->adios->gtp,
@@ -349,6 +365,32 @@ class View {
       }
     }
 
+    return $this->applyDisplayMode((string) $html);
+  }
+
+  public function applyDisplayMode(string $html) : string
+  {
+    switch ($this->displayMode) {
+      case 'window':
+        $this->window->setContent($html);
+        if (is_array($this->params['windowParams'])) {
+          if (!empty($this->params['windowParams']['title'])) {
+            $this->window->setTitle($this->params['windowParams']['title']);
+          }
+          $this->window->addCssClass($this->params['windowParams']['cssClass'] ?? '');
+        }
+
+        $html = $this->window->render();
+      break;
+      case 'desktop':
+        $html = $this->render('title') . $html;
+      break;
+      case 'inline':
+      default:
+        $html = $html;
+      break;
+    }
+
     return $html;
   }
   
@@ -385,4 +427,19 @@ class View {
   public function attr($attr, $val) {
     $this->attrs[$attr] = $val;
   }
+
+  public function findParentComponent($componentName) {
+    $result = NULL;
+
+    if ($this->parentView !== NULL) {
+      if (get_class($this->parentView) == "ADIOS\\Core\\UI\\{$componentName}") {
+        $result = $this->parentView;
+      } else {
+        $result = $this->parentView->findParentComponent($componentName);
+      }
+    }
+
+    return $result;
+  }
+
 }

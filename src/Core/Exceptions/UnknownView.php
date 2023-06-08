@@ -8,4 +8,4 @@ namespace ADIOS\Core\Exceptions;
  *
  * @package Exceptions
  */
-class UnknownUIComponent extends \Exception { }
+class UnknownView extends \Exception { }

@@ -11,7 +11,7 @@
 /* Table.Container */
 .adios.ui.Table.Container {
   flex: 1;
-  margin-bottom: 1em;
+  /* margin-bottom: 1em; */
   padding: 0;
   display: flex;
   flex-direction: column;

@@ -85,6 +85,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   var $urlBase = "";
 
+  var $crud = [];
+
   /**
    * Readable title for the table listing.
    *
@@ -563,30 +565,32 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     $routing = [
 
-      // List
+      // Browse
       '/^' . $urlBase . '$/' => [
-        "permission" => "{$this->fullName}/Read",
-        "action" => "UI/Table",
+        "permission" => "{$this->fullName}/Browse",
+        "action" => $this->crud['browse']['action'] ?? "UI/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Edit
-      '/^' . $urlBase . '\/(\d+)\/Edit$/' => [
+      '/^' . $urlBase . '\/(\d+)\/edit$/' => [
         "permission" => "{$this->fullName}/Edit",
-        "action" => "UI/Form",
+        "action" => $this->crud['edit']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
+          "displayMode" => "window",
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
         ])
       ],
 
       // Add
-      '/^' . $urlBase . '\/Add$/' => [
+      '/^' . $urlBase . '\/add$/' => [
         "permission" => "{$this->fullName}/Add",
-        "action" => "UI/Form",
+        "action" => $this->crud['add']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
+          "displayMode" => "window",
           "model" => $this->fullName,
           "id" => -1,
           "defaultValues" => $urlParams,
@@ -594,36 +598,36 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Save
-      '/^' . $urlBase . '\/Save$/' => [
+      '/^' . $urlBase . '\/save$/' => [
         "permission" => "{$this->fullName}/Save",
-        "action" => "UI/Form/Save",
+        "action" => $this->crud['save']['action'] ?? "UI/Form/Save",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Delete
-      '/^' . $urlBase . '\/Delete$/' => [
+      '/^' . $urlBase . '\/delete$/' => [
         "permission" => "{$this->fullName}/Delete",
-        "action" => "UI/Table/Delete",
+        "action" => $this->crud['delete']['action'] ?? "UI/Form/Delete",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Copy
-      '/^' . $urlBase . '\/Copy$/' => [
+      '/^' . $urlBase . '\/copy$/' => [
         "permission" => "{$this->fullName}/Copy",
-        "action" => "UI/Table/Copy",
+        "action" => $this->crud['copy']['action'] ?? "UI/Form/Copy",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Search
-      '/^' . $urlBase . '\/Search$/' => [
+      '/^' . $urlBase . '\/search$/' => [
         "permission" => "{$this->fullName}/Search",
-        "action" => "UI/Table/Search",
+        "action" => $this->crud['search']['action'] ?? "UI/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
@@ -745,6 +749,16 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return array_keys($this->indexNames());
   }
 
+  /**
+   * Parses the $data containing strings as a result of DB fetch operation
+   * and converts the value of each column to the appropriate PHP type.
+   * E.g. columns of type 'int' or 'lookup' will have integer values.
+   *
+   * @param array $data
+   * @param string $lookupKeyPrefix
+   * 
+   * @return [type]
+   */
   public function normalizeRowData(array $data, string $lookupKeyPrefix = "") {
     foreach ($this->columns() as $column => $columnDefinition) {
       $columnType = $columnDefinition['type'];
@@ -975,7 +989,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $this->adios->db->select($this)
       ->columns([
         [ 'id', 'id' ],
-        [ str_replace('{%TABLE%}', $this->fullTableSqlName, $this->lookupSqlValue()), 'input_lookup_value' ]
+        [ $this->lookupSqlValue($this->fullTableSqlName), 'input_lookup_value' ]
       ])
       ->where($this->lookupWhere($initiatingModel, $initiatingColumn, $formData, $params))
       ->havingRaw($having)

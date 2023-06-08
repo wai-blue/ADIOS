@@ -1,8 +1,8 @@
 <?php
 
-namespace ADIOS\Actions\{{ thisWidget.name }};
+namespace {{ thisAction.namespace }};
 
-class {{ thisAction.name }} extends \ADIOS\Core\Widget\Action {
+class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
   public function render() {
     return $this->adios->renderAction("UI/SettingsPanel", [
       "settings_group" => "sales",

@@ -6,9 +6,11 @@
         '{{ layoutRow }}'
       {% endfor %}
     ;
-    gap: 15px;
-    height: 100vh;
+    gap: 0.25em;
+    {# height: 100vh; #}
     padding: 5px;
+
+    {{ view.style }}
   }
 
   {% if layoutSm %}
@@ -79,23 +81,16 @@
 
   #{{ uid }}_div > div {
     background-color: rgba(255, 255, 255, 0.8);
-    padding: 1em;
+    padding: 0.25em;
     box-shadow: 0 0 3px #ccc;
     overflow: auto;
   }
 
   {% for areaName, areaParams in view.areas %}
-    .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; }
+    .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; {{ areaParams.style }} }
   {% endfor %}
 </style>
 
 <div id='{{ uid }}_div'>
-  {% for areaName, areaParams in view.areas %}
-    <div
-      class='{{ uid }}-area-{{ areaName }} {{ areaParams.cssClass }}'
-    >
-      {% if areaParams.html %}{{ areaParams.html }}{% endif %}
-      {% if areaParams.action %}{{ adiosAction(areaParams.action, areaParams.params)|raw }}{% endif %}
-    </div>
-  {% endfor %}
+  {{ params.html|raw }}
 </div>

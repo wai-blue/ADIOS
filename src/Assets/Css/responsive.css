@@ -30,8 +30,8 @@
     display: none;
   }
 
-  .adios_window.activated > .header,
-  .adios_window.activated > .content {
+  .adios.ui.Window.activated > .header,
+  .adios.ui.Window.activated > .content {
     margin-left: 0em !important;
     width: 100% !important;
   }

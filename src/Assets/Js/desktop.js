@@ -37,13 +37,21 @@
 
         $('#adios_main_content').append(html);
 
-        if ($('#adios_main_content .adios_window').length == 1) {
-          desktop_main_box_history_push(action, params, $('#adios_main_content').html(), options);
+        if ($('#adios_main_content .adios.ui.Window').length == 1) {
+          desktop_main_box_history_push(
+            action,
+            params,
+            $('#adios_main_content').html(),
+            options
+          );
         }
 
-        let last_win = $('#adios_main_content .adios_window').last();
-        window_id = last_win.attr('id');
-        ADIOS_windows[window_id] = {
+        windowId = $('#adios_main_content .adios.ui.Window')
+          .last()
+          .attr('id')
+        ;
+
+        ADIOS_windows[windowId] = {
           'action': action,
           'params': params,
           'onclose': onclose,
@@ -78,7 +86,7 @@
       // okno bolo otvarane cez URL
       window.location.href = _APP_URL;
     } else {
-      if ($('#adios_main_content .adios_window').length == 1) {
+      if ($('#adios_main_content .adios.ui.Window').length == 1) {
         window.history.back();
       }
 
