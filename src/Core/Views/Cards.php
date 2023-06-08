@@ -37,7 +37,7 @@ class Cards extends \ADIOS\Core\View {
     if ($params['show_add_button'] ?? FALSE) {
       $html .= "
         <div class='row mb-3'>
-          ".$this->adios->view->Button([
+          ".$this->addView('Button', [
             "type" => "add",
             "onclick" => "
               window_render(

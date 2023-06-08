@@ -8,7 +8,7 @@ namespace ADIOS\Core\Views;
  * Example code to render button:
  *
  * ```php
- *   $adios->view->Button([
+ *   $adios->view->create('Button', [
  *     "type" => "close",
  *     "onclick" => "window_close('{$this->uid}');",
  *   ]);

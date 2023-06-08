@@ -19,7 +19,7 @@ class Tree extends \ADIOS\Core\Input
 
   public function itemDropdownButton($text, $hasSubItems)
   {
-    return $this->adios->view->Button([
+    return $this->addView('Button', [
       "fa_icon" => "fas fa-angle-" . ($hasSubItems ? "down" : "right"),
       "text" => $text,
       "class" => "item btn btn-sm btn-secondary btn-icon-split my-1",
@@ -129,7 +129,7 @@ class Tree extends \ADIOS\Core\Input
           " . $this->itemDropdownButton("Pridať", FALSE)->render() . "
         </li>
         <li>
-          " . $this->adios->view->button([
+          " . $this->addView('Button', [
       "fa_icon" => "fas fa-plus",
       "text" => $this->translate("Add"),
       "class" => "item btn btn-sm btn-light btn-icon-split my-1",

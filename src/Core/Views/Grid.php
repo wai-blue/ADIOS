@@ -8,7 +8,7 @@ namespace ADIOS\Core\Views;
  * Example code to render layout:
  *
  * ```php
- *   $adios->view->Layout([
+ *   $adios->view->create('Grid', [
  *     ...
  *   ]);
  * ```
@@ -47,11 +47,11 @@ class Grid extends \ADIOS\Core\View {
       ";
 
       if (!empty($areaParams['view'])) {
-        $html .= $this->adios->view->create(
+        $tmp = $this->addView(
           $areaParams['view'],
-          $areaParams['params'],
-          $this
-        )->render();
+          $areaParams['params']
+        );
+        $html .= $tmp->render();
       } else if (!empty($areaParams['action'])) {
         $html .= "
           <div
@@ -106,10 +106,6 @@ class Grid extends \ADIOS\Core\View {
             }, ".rand(200, 1300).");
           </script>
         ";
-        // $html .= $this->adios->renderAction(
-        //   $areaParams['action'],
-        //   $areaParams['params']
-        // );
       } else if (!empty($areaParams['html'])) {
         $html .= $areaParams['html'];
       }

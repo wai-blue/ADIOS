@@ -68,7 +68,7 @@ class SettingsPanel extends \ADIOS\Core\Views\Input {
         ];
       }
 
-      $html .= $this->adios->view->Tabs([
+      $html .= $this->addView('Tabs', ([
         'tabs' => $tab_pages,
         'height' => "calc(100vh - 16em)",
       ])->render();

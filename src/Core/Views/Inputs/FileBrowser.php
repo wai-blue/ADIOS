@@ -180,7 +180,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
             </div>
 
             <div class='operation-buttons'>
-              ".$this->adios->view->Button([
+              ".$this->addView('Button', [
                 "fa_icon" => "fas fa-folder-plus",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split",
                 "text" => $this->translate("Create folder"),
@@ -227,14 +227,14 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
                 ",
               ])->render()."
 
-              ".$this->adios->view->Button([
+              ".$this->addView('Button', [
                 "fa_icon" => "fas fa-file-upload",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split",
                 "text" => $this->translate("Upload file"),
                 "onclick" => "$('#{$this->uid}_{{ dirId }}_file_input').click();",
               ])->render()."
 
-              ".$this->adios->view->Button([
+              ".$this->addView('Button', [
                 "fa_icon" => "fas fa-ellipsis-v",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split btn-more-operations",
                 "dropdown" => [
@@ -306,7 +306,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
         </div>
 
         <div class='template btn-folder-up'>
-          ".$this->adios->view->Button([
+          ".$this->addView('Button', [
             "fa_icon" => "fas fa-reply",
             "text" => "..",
             "class" => "btn btn-folder btn-sm btn-light btn-icon-split mb-1",
@@ -316,7 +316,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
         </div>
 
         <div class='template btn-folder'>
-          ".$this->adios->view->Button([
+          ".$this->addView('Button', [
             "uid" => "{{ btnUid }}",
             "fa_icon" => "{{ icon }}",
             "text" => "{{ text }}",
@@ -333,7 +333,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
         </div>
 
         <div class='template btn-file'>
-          ".$this->adios->view->Button([
+          ".$this->addView('Button', [
             "uid" => "{{ btnUid }}",
             "fa_icon" => "{{ icon }}",
             "class" => "btn btn-file btn-sm btn-light btn-icon-split mb-1",

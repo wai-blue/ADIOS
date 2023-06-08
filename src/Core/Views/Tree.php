@@ -62,8 +62,8 @@ class Tree extends \ADIOS\Core\View
           'uid' => "{$this->uid}_window",
           'content' => $contentHtml,
           'header' => [
-            $this->adios->view->Button(["text" => $this->translate("Close"), "type" => "close", "onclick" => "{$this->uid}_close();"]),
-            $this->adios->view->Button(["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
+            $this->addView('Button', ["text" => $this->translate("Close"), "type" => "close", "onclick" => "{$this->uid}_close();"]),
+            $this->addView('Button', ["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
             "
               <span id='{$this->uid}_save_info_span' class='pl-4' style='color:green;display:none'>
                 <i class='fas fa-check'></i>
@@ -76,7 +76,7 @@ class Tree extends \ADIOS\Core\View
         ]
       )->render();
     } else {
-      $html = $this->adios->view->Title([
+      $html = $this->addView('Title', [
         'left' => [
           "
             <span id='{$this->uid}_save_info_span' class='pr-4' style='color:green;display:none'>
@@ -84,7 +84,7 @@ class Tree extends \ADIOS\Core\View
                 " . $this->translate("Saved") . "
             </span>
           ",
-          $this->adios->view->Button(["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
+          $this->addView('Button', ["text" => $this->translate("Save"), "type" => "save", "onclick" => "{$this->uid}_save();"]),
         ],
         'center' => $this->params['title']
       ])->render();

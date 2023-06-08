@@ -46,6 +46,9 @@ class Tabs extends \ADIOS\Core\View {
         $i = 0;
         
         foreach ($this->params['tabs'] as $key => $val) {
+          // TODO: Po zmene z \ADIOS\Core\UI na \ADIOS\Core\View toto sposobuje nekonecnu rekurziu
+          $tabs = parent::render('tab_'.$key);
+
           $contents .= "
             <div
               class='shadow-sm tab_content tab_content_{$key} {$val['content_class']} ".($key == 0 ? "active" : "")."'
@@ -59,10 +62,13 @@ class Tabs extends \ADIOS\Core\View {
                 ".hsc($val['title'])."
               </div>
               <div class='px-2'>
-                ".parent::render('tab_'.$key)."
+                {$tabs}
               </div>
             </div>
           ";
+
+          // TODO: Po zmene z \ADIOS\Core\UI na \ADIOS\Core\View toto sposobuje nekonecnu rekurziu
+          $titles = parent::render('title_'.$key);
 
           $titles .= "
             <li class='nav-item'>
@@ -74,7 +80,7 @@ class Tabs extends \ADIOS\Core\View {
                   {$val['onclick']} 
                 \"
               >
-                ".parent::render('title_'.$key)."
+                {$titles}
               </a>
             </li>
           ";

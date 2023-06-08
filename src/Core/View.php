@@ -19,7 +19,6 @@ class View {
   var array $params = [];
   var string $fullName = "";
   var string $shortName = "";
-  var array $views = [];
   var array $classes = [];
   var array $html = [];
   var array $attrs = [];
@@ -28,7 +27,8 @@ class View {
 
   var $window = NULL;
 
-  var $parentView = NULL;
+  public ?\ADIOS\Core\View $parentView = NULL;
+  public array $childViews = [];
 
   var string $twigTemplate = "";
   
@@ -93,9 +93,16 @@ class View {
     $this->params = $params;
     $this->uid = $params['uid'];
     $this->displayMode = $this->params['displayMode'];
-    $this->views = [];
+    $this->childViews = [];
     $this->classes = ['adios', 'ui', $componentName];
     $this->twigTemplate = $this->twigTemplate ?? "UI/{$this->fullName}";
+
+    if (
+      empty($this->displayMode)
+      && $this->parentView === NULL
+    ) {
+      $this->displayMode = 'desktop';
+    }
 
     if (isset($params['cssClass'])) {
       $this->addCssClass($params['cssClass']);
@@ -103,7 +110,8 @@ class View {
 
     if ($this->displayMode == 'window') {
 
-      $this->window = $this->adios->view->create('Window', [], $this);
+      $this->window = $this->adios->view->create('Window', []);
+      $this->window->addViewAsObject($this);
       $this->parentView = $this->window;
     }
 
@@ -139,8 +147,8 @@ class View {
   }
 
   public function create(
-    string $view,
-    array $params = null,
+    string $view = '',
+    array $params = [],
     \ADIOS\Core\View $parentView = NULL)
   {
     list($viewClassName, $uid) = explode('#', $view);
@@ -149,12 +157,41 @@ class View {
       $params['uid'] = $uid;
     }
 
-    $viewClassName = "\\ADIOS\\Core\\Views\\{$viewClassName}";
+    if (empty($viewClassName)) {
+      $viewClassName = "\\ADIOS\\Core\\View";
+    } else {
+      $viewClassName = "\\ADIOS\\Core\\Views\\{$viewClassName}";
+    }
+
     return new $viewClassName(
       $this->adios,
       $params,
       $parentView
     );
+  }
+
+  public function addView(string $view = '', array $params = []): \ADIOS\Core\View
+  {
+    $view = $this->create($view, $params, $this);
+    $this->childViews[] = $view;
+    return $view;
+  }
+
+  public function addViewAsObject(\ADIOS\Core\View $viewObject): \ADIOS\Core\View
+  {
+    $viewObject->parentView = $this;
+    $this->childViews[] = $viewObject;
+    return $viewObject;
+  }
+
+  public function removeAllViews(): \ADIOS\Core\View {
+    foreach (array_keys($this->childViews) as $key) {
+      unset($this->childViews[$key]);
+    }
+
+    $this->childViews = [];
+
+    return $this;
   }
 
   /**
@@ -179,13 +216,13 @@ class View {
         $this->add($subview, $panel);
       }
     } elseif (is_string($subviews) || '' == $subviews) {
-      $this->views[$panel][] = $subviews;
+      $this->childViews[$panel][] = $subviews;
     } else {
       $subviews->param('parent_uid', $this->uid);
       if ('' != $subviews->params['key']) {
-        $this->views[$panel][$subviews->params['key']] = $subviews;
+        $this->childViews[$panel][$subviews->params['key']] = $subviews;
       } else {
-        $this->views[$panel][] = $subviews;
+        $this->childViews[$panel][] = $subviews;
       }
     }
 
@@ -363,36 +400,21 @@ class View {
         'ADIOS\\Templates\\' . $this->twigTemplate,
         $twigParams
       );
-
-    } else if ('' != $this->html[$panel]) {
-      $html = $this->html[$panel];
-      if (_count($this->views[$panel])) {
-        foreach ($this->views[$panel] as $view) {
-          $html = str_replace("{%UI:{$view->uid}%}", $view->render(), $html);
-        }
-      }
     } else {
       $html = '';
-
-      if ('' != $this->html[$panel]) {
-        $html = $this->html[$panel];
-        if (_count($this->views[$panel])) {
-          foreach ($this->views[$panel] as $view) {
-            $html = str_replace("{%UI:{$view->uid}%}", $view->render(), $html);
-          }
-        }
-      } else {
-        if (_count($this->views[$panel])) {
-          foreach ($this->views[$panel] as $view) {
-            if (is_string($view) || '' == $view) {
-              $html .= $view;
-            } else {
-              $html .= $view->render();
-            }
-          }
+      foreach ($this->childViews as $view) {
+        if ($view instanceof \ADIOS\Core\View) {
+          $html .= $view->render();
+        } else {
+          var_dump($view);
         }
       }
     }
+
+    // if ($this->parentView === NULL) {
+    // } else {
+    //   $html .= "[has_parent]";
+    // }
 
     return $this->applyDisplayMode((string) $html);
   }
@@ -412,7 +434,9 @@ class View {
         $html = $this->window->render();
       break;
       case 'desktop':
-        $html = $this->render('title') . $html;
+        $title = $this->addView('Title', ['title' => 'asdf']);
+        // $html = $title->render() . $html;
+        $html = $html;
       break;
       case 'inline':
       default:
@@ -457,14 +481,14 @@ class View {
     $this->attrs[$attr] = $val;
   }
 
-  public function findParentComponent($componentName) {
+  public function findParentView($viewName) {
     $result = NULL;
 
     if ($this->parentView !== NULL) {
-      if (get_class($this->parentView) == "ADIOS\\Core\\View\\{$componentName}") {
+      if (get_class($this->parentView) == "ADIOS\\Core\\Views\\{$viewName}") {
         $result = $this->parentView;
       } else {
-        $result = $this->parentView->findParentComponent($componentName);
+        $result = $this->parentView->findParentView($viewName);
       }
     }
 

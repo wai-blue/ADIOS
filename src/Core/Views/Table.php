@@ -25,6 +25,11 @@ class Table extends \ADIOS\Core\View
 
   private $allRowsCount = 0;
 
+  private int $pagesCount = 0;
+  private int $pageButtonsCount = 0;
+
+  private \ADIOS\Core\View $paging;
+
   /**
    * __construct
    *
@@ -218,102 +223,8 @@ class Table extends \ADIOS\Core\View
 
     // strankovanie
 
-    $pagesCount = ceil($this->allRowsCount / $this->params['itemsPerPage']);
-    $pageButtonsCount = 4;
-
-    if ($this->params['showPaging']) {
-      $this->add(
-        $this->adios->view->Button(
-          [
-            'fa_icon' => 'fas fa-angle-double-left',
-            'class' => 'btn-light btn-circle btn-sm',
-            'onclick' => "ui_table_show_page('{$this->params['uid']}', '1'); ",
-            'disabled' => (1 == $this->params['page'] ? true : false)
-          ]
-        ),
-        'paging'
-      );
-      $this->add(
-        $this->adios->view->Button([
-          'fa_icon' => 'fas fa-angle-left',
-          'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] - 1) . "'); ",
-          'disabled' => (1 == $this->params['page'] ? true : false)
-        ]),
-        'paging'
-      );
-
-      for ($i = 1; $i <= $pagesCount; ++$i) {
-        if ($i == $this->params['page']) {
-          $this->add(
-            "
-              <input
-                type='text'
-                value='{$this->params['page']}'
-                id='{$this->params['uid']}_paging_bottom_input'
-                onchange=\"
-                  ui_table_show_page('{$this->params['uid']}', this.value);
-                \"
-                onkeypress=\"
-                  if (event.keyCode == 13) {
-                    ui_table_show_page('{$this->params['uid']}', this.value);
-                  }
-                \"
-                onclick=\"
-                  this.select();
-                \"
-              />
-              <script>
-                draggable_int_input(
-                  '{$this->params['uid']}_paging_bottom_input',
-                  { min_val: 1, max_val: {$pagesCount} }
-                );
-              </script>
-            ",
-            'paging'
-          );
-        } elseif (
-          abs($this->params['page'] - $i) <= ($pageButtonsCount / 2)
-          || (
-            $this->params['page'] <= ($pageButtonsCount / 2)
-            && $i <= ($pageButtonsCount + 1)
-          )
-          || (
-            $pagesCount - $this->params['page'] <= $pageButtonsCount / 2
-            && $i >= $pagesCount - $pageButtonsCount
-          )
-        ) {
-          $this->add(
-            $this->adios->view->Button([
-              'text' => $i,
-              'class' => 'pages',
-              'onclick' => "ui_table_show_page('{$this->params['uid']}', '{$i}');",
-              'show_border' => FALSE
-            ]),
-            'paging'
-          );
-        }
-      }
-
-      $this->add(
-        $this->adios->view->Button([
-          'fa_icon' => 'fas fa-angle-right',
-          'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] + 1) . "'); ",
-          'disabled' => ($this->params['page'] == $pagesCount || 0 == $this->allRowsCount ? true : false)
-        ]),
-        'paging'
-      );
-      $this->add(
-        $this->adios->view->Button([
-          'fa_icon' => 'fas fa-angle-double-right',
-          'class' => 'btn-light btn-circle btn-sm',
-          'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($pagesCount) . "'); ",
-          'disabled' => ($this->params['page'] == $pagesCount || 0 == $this->allRowsCount ? true : false)
-        ]),
-        'paging'
-      );
-    }
+    $this->pagesCount = ceil($this->allRowsCount / $this->params['itemsPerPage']);
+    $this->pageButtonsCount = 4;
 
     $this->params['showAddButton'] = (empty($this->params['buttons']['add']['onclick']) ? FALSE : $this->params['showAddButton']);
 
@@ -502,6 +413,87 @@ class Table extends \ADIOS\Core\View
       $this->addCssClass('desktop');
     }
 
+
+    $this->paging = $this->addView();
+
+    if ($this->params['showPaging']) {
+      $this->paging->addView('Button', [
+        'fa_icon' => 'fas fa-angle-double-left',
+        'class' => 'btn-light btn-circle btn-sm',
+        'onclick' => "ui_table_show_page('{$this->params['uid']}', '1'); ",
+        'disabled' => (1 == $this->params['page'] ? true : false)
+      ]);
+      
+      $this->paging->addView('Button', [
+        'fa_icon' => 'fas fa-angle-left',
+        'class' => 'btn-light btn-circle btn-sm',
+        'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] - 1) . "'); ",
+        'disabled' => (1 == $this->params['page'] ? true : false)
+      ]);
+
+      for ($i = 1; $i <= $this->pagesCount; ++$i) {
+        if ($i == $this->params['page']) {
+          $this->paging->addView('Html', ["html" => "
+            <input
+              type='text'
+              value='{$this->params['page']}'
+              id='{$this->params['uid']}_paging_bottom_input'
+              onchange=\"
+                ui_table_show_page('{$this->params['uid']}', this.value);
+              \"
+              onkeypress=\"
+                if (event.keyCode == 13) {
+                  ui_table_show_page('{$this->params['uid']}', this.value);
+                }
+              \"
+              onclick=\"
+                this.select();
+              \"
+            />
+            <script>
+              draggable_int_input(
+                '{$this->params['uid']}_paging_bottom_input',
+                { min_val: 1, max_val: {$this->pagesCount} }
+              );
+            </script>
+          "]);
+        } elseif (
+          abs($this->params['page'] - $i) <= ($this->pageButtonsCount / 2)
+          || (
+            $this->params['page'] <= ($this->pageButtonsCount / 2)
+            && $i <= ($this->pageButtonsCount + 1)
+          )
+          || (
+            $this->pagesCount - $this->params['page'] <= $this->pageButtonsCount / 2
+            && $i >= $this->pagesCount - $this->pageButtonsCount
+          )
+        ) {
+          $this->paging->addView('Button', [
+            'text' => $i,
+            'class' => 'pages',
+            'onclick' => "ui_table_show_page('{$this->params['uid']}', '{$i}');",
+            'show_border' => FALSE
+          ]);
+        }
+      }
+
+      $this->paging->addView('Button', [
+        'fa_icon' => 'fas fa-angle-right',
+        'class' => 'btn-light btn-circle btn-sm',
+        'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] + 1) . "'); ",
+        'disabled' => ($this->params['page'] == $this->pagesCount || 0 == $this->allRowsCount ? true : false)
+      ]);
+      $this->paging->addView('Button', [
+        'fa_icon' => 'fas fa-angle-double-right',
+        'class' => 'btn-light btn-circle btn-sm',
+        'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->pagesCount) . "'); ",
+        'disabled' => ($this->params['page'] == $this->pagesCount || 0 == $this->allRowsCount ? true : false)
+      ]);
+    }
+
+
+
+
     if (!$this->params['refresh']) {
       if (_count($this->params)) {
         $tmp = json_encode($this->params);
@@ -536,10 +528,11 @@ class Table extends \ADIOS\Core\View
             "text" => $this->translate("Export to CSV"),
             "onclick" => "
               let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
-              window_popup('{$exportCsvAction}', {tableParams: tmpTableParams}, {'type': 'POST'});
-              // window.open(
-              //   '{$this->adios->config['url']}/{$exportCsvAction}?tableParams=' + tmpTableParams
-              // );
+              window_popup(
+                '{$exportCsvAction}',
+                {tableParams: tmpTableParams},
+                {'type': 'POST'}
+              );
             ",
           ];
         }
@@ -563,11 +556,11 @@ class Table extends \ADIOS\Core\View
         $titleButtons = [];
 
         if ($this->params['showAddButton']) {
-          $titleButtons[] = $this->adios->view->Button($this->params['buttons']['add']);
+          $titleButtons[] = $this->addView('Button', $this->params['buttons']['add']);
         }
 
         if (_count($moreActionsButtonItems)) {
-          $titleButtons[] = $this->adios->view->Button([
+          $titleButtons[] = $this->addView('Button', [
             "fa_icon" => "fas fa-ellipsis-v",
             "title" => "",
             "onclick" => "window_render('{$searchAction}');",
@@ -579,13 +572,12 @@ class Table extends \ADIOS\Core\View
         if (
           !empty($titleButtons)
           || !empty($this->params['title'])
-          || !empty($this->params['right'])
         ) {
-          $html .= $this->adios->view->Title([
-            'left' => $titleButtons,
-            'center' => $this->params['title'],
-            'right' => $this->params['right'],
-          ])->render();
+          $html .= $this->addView('Title')
+            ->setLeftButtons($titleButtons)
+            ->setTitle($this->params['title'])
+            ->render()
+          ;
         }
       }
 
@@ -640,7 +632,7 @@ class Table extends \ADIOS\Core\View
                 <div class='mb-2'>
                   {$tmpSearchHtml}
                 </div>
-                " . $this->adios->view->Button([
+                " . $this->addView('Button', [
                   "type" => "close",
                   "text" => $this->translate("Clear filter"),
                   "onclick" => "desktop_update('{$this->adios->requestedAction}');",
@@ -964,7 +956,7 @@ class Table extends \ADIOS\Core\View
                 {$this->allRowsCount} " . $this->translate("items total") . "
               </div>
               <div class='Column paging'>
-                " . parent::render('paging') . "
+                " . $this->paging->render() . "
               </div>
               <div class='Column settings'>
                 <select
@@ -978,7 +970,7 @@ class Table extends \ADIOS\Core\View
                   <option value='1000' " . ($this->params['itemsPerPage'] == 1000 ? "selected" : "") . ">1000</option>
                 </select>
 
-                " . $this->adios->view->Button([
+                " . $this->addView('Button', [
                   'fa_icon' => 'fas fa-sync-alt',
                   'class' => 'btn-light btn-circle btn-sm',
                   'title' => "Refresh",
@@ -996,20 +988,20 @@ class Table extends \ADIOS\Core\View
       $html .= '</div>';
     }
 
-    if ($params['__IS_WINDOW__']) {
-      $html = $this->adios->view->Window(
-        [
-          'uid' => "{$this->uid}_window",
-          'content' => $html,
-          'header' => [
-            $this->adios->view->Button(["text" => $this->translate("Close"), "type" => "close", "onclick" => "ui_form_close('{$this->uid}_window');"]),
-          ],
-          'title' => " ",
-        ]
-      )->render();
-    } else {
-      //
-    }
+    // if ($params['__IS_WINDOW__']) {
+    //   $html = $this->adios->view->Window(
+    //     [
+    //       'uid' => "{$this->uid}_window",
+    //       'content' => $html,
+    //       'header' => [
+    //         $this->addView('Button', ["text" => $this->translate("Close"), "type" => "close", "onclick" => "ui_form_close('{$this->uid}_window');"]),
+    //       ],
+    //       'title' => " ",
+    //     ]
+    //   )->render();
+    // } else {
+    //   //
+    // }
 
     return \ADIOS\Core\HelperFunctions::minifyHtml($html);
   }

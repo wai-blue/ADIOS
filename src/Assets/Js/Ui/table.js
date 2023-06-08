@@ -129,7 +129,7 @@
   function ui_table_delete_item(uid, id){
     table = $('#'+uid).attr('data-table');
     if (table != ''){
-      action = 'UI/Table/Delete';
+      action = 'UI/Form/Delete';
       var params = {};
       params.ids = id;
       params.table = table;
@@ -145,7 +145,7 @@
     var ids = ui_table_get_selected(uid);
     table = $('#'+uid).attr('data-table');
     if (table != ''){
-      action = 'UI/Table/Delete';
+      action = 'UI/Form/Delete';
       var params = {};
       params.ids = ids;
       params.table = table;

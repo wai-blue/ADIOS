@@ -12,7 +12,12 @@ namespace ADIOS\Core\Views;
 
 class Title extends \ADIOS\Core\View
 {
-  public function __construct(&$adios, $params = null)
+
+  private \ADIOS\Core\View $left;
+  private \ADIOS\Core\View $center;
+  private \ADIOS\Core\View $right;
+
+  public function __construct($adios, $params = NULL)
   {
 
     parent::__construct($adios, $params);
@@ -21,34 +26,61 @@ class Title extends \ADIOS\Core\View
       $this->addCssClass('fixed');
     }
 
-    $this->add($this->params['left'], 'left');
-    $this->add($this->params['right'], 'right');
-    $this->add($this->params['center'], 'center');
+    $this->left = $this->addView();
+    $this->center = $this->addView();
+    $this->right = $this->addView();
+
+  }
+
+  public function setLeftButtons(array $buttons = []): \ADIOS\Core\View
+  {
+    $this->left->removeAllViews();
+    foreach ($buttons as $button) {
+      if ($button instanceof \ADIOS\Core\Views\Button) {
+        $this->left->addViewAsObject($button);
+      }
+    }
+
+    return $this;
+  }
+
+  public function setTitle(string $title): \ADIOS\Core\View
+  {
+    $this->center
+      ->removeAllViews()
+      ->addView('Html', ['html' => $title])
+    ;
+
+    return $this;
   }
 
   public function render(string $panel = ''): string
   {
-    $center = (string) parent::render('center');
-    $center = trim($center);
+
+    $leftHtml = $this->left->render();
+    $centerHtml = $this->center->render();
+    $rightHtml = $this->right->render();
 
     return "
-        <div class='adios ui Title'>
-          " . (empty($center) ? "" : "
-            <div class='row mb-3'>
-              <div class='col-lg-12 p-0'>
-                <div class='h3 text-primary mb-0'>{$center}</div>
+      <div class='adios ui Title'>
+        " . (empty($centerHtml) ? "" : "
+          <div class='row mb-3'>
+            <div class='col-lg-12 p-0'>
+              <div class='h3 text-primary mb-0'>
+                {$centerHtml}
               </div>
             </div>
-          ") . "
-          <div class='row mb-3'>
-            <div class='col-lg-6 p-0'>
-              " . parent::render('left') . "
-            </div>
-            <div class='col-lg-6 p-0 text-right'>
-              " . parent::render('right') . "
-            </div>
+          </div>
+        ") . "
+        <div class='row mb-3'>
+          <div class='col-lg-6 p-0'>
+            {$leftHtml}
+          </div>
+          <div class='col-lg-6 p-0 text-right'>
+            {$rightHtml}
           </div>
         </div>
-      ";
+      </div>
+    ";
   }
 }
