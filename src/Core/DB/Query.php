@@ -111,7 +111,7 @@ class Query
    */
   private function addColumnsFromModel(
     \ADIOS\Core\Model $model,
-    string $tableAlias = '',
+    string $tableAlias,
     bool $followLookups,
     int $level = 0
   ): void
