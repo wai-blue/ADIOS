@@ -49,7 +49,7 @@ class SaveProfile extends \ADIOS\Core\Action {
       exit();
     }
 
-    $this->adios->db->update_row_part(
+    $this->adios->db->updateRow(
       "{$this->gtp}_{$this->adios->config['system_table_prefix']}_users",
       [
         'name' => $this->params['name'],

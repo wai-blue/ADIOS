@@ -14,7 +14,7 @@ namespace ADIOS\Actions\UI\Table\Export;
  * @package UI\Actions
  */
 class CSV extends \ADIOS\Core\Action {
-  public static $hideDefaultDesktop = TRUE;
+  public static bool $hideDefaultDesktop = TRUE;
 
   public function render() {
     $model = $this->adios->getModel($this->params['model']);

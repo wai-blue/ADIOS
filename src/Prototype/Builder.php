@@ -3,11 +3,12 @@
 namespace ADIOS\Prototype;
 
 class Builder {
-  protected string $inputPath = "";
-  protected string $inputFile = "";
-  protected string $outputFolder = "";
-  protected string $sessionSalt = "";
-  protected string $logFile = "";
+  protected string $inputPath = '';
+  protected string $inputFile = '';
+  protected string $outputFolder = '';
+  protected string $sessionSalt = '';
+  protected string $logFile = '';
+  protected string $adminPassword = '';
 
   protected array $prototype = [];
   protected $twig = NULL;
@@ -81,8 +82,12 @@ class Builder {
     if (!is_array($this->prototype)) throw new \Exception("Prototype definition must be an array.");
   }
 
-  public function setRewriteBase($rewriteBase) {
-    $this->prototype['ConfigEnv']['rewriteBase'] = $rewriteBase;
+  public function setConfigEnv($configEnv) {
+    $this->prototype['ConfigEnv'] = $configEnv;
+  }
+
+  public function setAdminPassword($adminPassword) {
+    $this->adminPassword = $adminPassword;
   }
 
   public function createFolder($folder) {
@@ -145,34 +150,41 @@ class Builder {
   public function buildPrototype() {
 
     // delete folders if they exist
-    $this->removeFolder("src");
-    $this->removeFolder("log");
-    $this->removeFolder("tmp");
-    $this->removeFolder("upload");
+    $this->removeFolder('src');
+    $this->removeFolder('log');
+    $this->removeFolder('tmp');
+    $this->removeFolder('upload');
 
     // create folder structure
-    $this->createFolder("src");
-    $this->createFolder("src/Assets");
-    $this->createFolder("src/Assets/images");
-    $this->createFolder("src/Widgets");
-    $this->createFolder("log");
-    $this->createFolder("tmp");
-    $this->createFolder("upload");
+    $this->createFolder('src');
+    $this->createFolder('src/Assets');
+    $this->createFolder('src/Assets/images');
+    $this->createFolder('src/Widgets');
+    $this->createFolder('log');
+    $this->createFolder('tmp');
+    $this->createFolder('upload');
 
     // render files
-    $this->copyFile("src/Assets/images/favicon.png", "src/Assets/images/favicon.png");
-    $this->copyFile("src/Assets/images/logo.png", "src/Assets/images/logo.png");
-    $this->copyFile("src/Assets/images/login-screen.jpg", "src/Assets/images/login-screen.jpg");
-    $this->copyFile(".htaccess", ".htaccess");
-    $this->copyFile(".htaccess-subfolder", "log/.htaccess");
-    $this->copyFile(".htaccess-subfolder", "tmp/.htaccess");
-    $this->copyFile(".htaccess-subfolder", "upload/.htaccess");
+    $this->copyFile('src/Assets/images/favicon.png', 'src/Assets/images/favicon.png');
+    $this->copyFile('src/Assets/images/logo.png', 'src/Assets/images/logo.png');
+    $this->copyFile('src/Assets/images/login-screen.jpg', 'src/Assets/images/login-screen.jpg');
+    $this->copyFile('.htaccess', '.htaccess');
+    $this->copyFile('.htaccess-subfolder', 'log/.htaccess');
+    $this->copyFile('.htaccess-subfolder', 'tmp/.htaccess');
+    $this->copyFile('.htaccess-subfolder', 'upload/.htaccess');
 
-    $this->renderFile("src/Init.php", "src/Init.twig");
+    $this->renderFile('src/Init.php', 'src/Init.twig');
 
-    $this->renderFile("index.php", "index.twig");
-    $this->renderFile("ConfigEnv.php", "ConfigEnv.twig");
-    $this->renderFile("install.php", "install.twig");
+    $this->renderFile('index.php', 'index.twig');
+    $this->renderFile('ConfigEnv.php', 'ConfigEnv.twig');
+
+    $this->renderFile(
+      'install.php',
+      'install.twig',
+      [
+        'adminPassword' => $this->adminPassword ?? 'admin.'.rand(1000, 9999),
+      ]
+    );
 
 
     $configWidgetsEnabled = [];
@@ -338,20 +350,20 @@ class Builder {
     }
   }
 
-  public function createEmptyDatabase() {
-    $this->log("Creating empty database.");
+  // public function createEmptyDatabase() {
+  //   $this->log("Creating empty database.");
 
-    $dbCfg = $this->prototype['ConfigEnv']['db'];
+  //   $dbCfg = $this->prototype['ConfigEnv']['db'];
 
-    $db = new \mysqli(
-      $dbCfg['host'],
-      $dbCfg['login'],
-      $dbCfg['password'],
-      "",
-      (int) ($dbCfg['port'] ?? 0)
-    );
+  //   $db = new \mysqli(
+  //     $dbCfg['host'],
+  //     $dbCfg['user'],
+  //     $dbCfg['password'],
+  //     "",
+  //     (int) ($dbCfg['port'] ?? 0)
+  //   );
 
-    $multiQuery = $this->twig->render("emptyDatabase.sql.twig", $this->prototype);
-    $db->multi_query($multiQuery);
-  }
+  //   $multiQuery = $this->twig->render("emptyDatabase.sql.twig", $this->prototype);
+  //   $db->multi_query($multiQuery);
+  // }
 }

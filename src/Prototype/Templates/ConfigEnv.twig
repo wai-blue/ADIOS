@@ -3,15 +3,15 @@
 define('GTP', "{{ ConfigEnv.db.globalTablePrefix }}");
 
 // db
-$config["db_host"]                       = "{{ ConfigEnv.db.host }}";
-$config["db_login"]                      = "{{ ConfigEnv.db.login }}";
-$config["db_password"]                   = "{{ ConfigEnv.db.password }}";
-$config["db_name"]                       = "{{ ConfigEnv.db.name }}";
-$config["global_table_prefix"]           = "{{ ConfigEnv.globalTablePrefix }}";
+$config["db_host"]             = "{{ ConfigEnv.db.host }}";
+$config["db_user"]             = "{{ ConfigEnv.db.user }}";
+$config["db_password"]         = "{{ ConfigEnv.db.password }}";
+$config["db_name"]             = "{{ ConfigEnv.db.database }}";
+$config["global_table_prefix"] = "{{ ConfigEnv.globalTablePrefix }}";
 
 // dirs & urls
-$config['rewrite_base']                  = "{{ ConfigEnv.rewriteBase }}";
-$config["url"]                           = "http://{$_SERVER['HTTP_HOST']}/".trim($config['rewrite_base'], "/");
+$config['rewrite_base']        = "{{ ConfigEnv.rewriteBase }}";
+$config["url"]                 = "http://{$_SERVER['HTTP_HOST']}/".trim($config['rewrite_base'], "/");
 
 // misc
 $config['devel_mode'] = TRUE;

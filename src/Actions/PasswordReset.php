@@ -16,8 +16,8 @@ namespace ADIOS\Actions;
  * @package UI\Actions
  */
 class PasswordReset extends \ADIOS\Core\Action {
-  public static $requiresUserAuthentication = FALSE;
-  public static $hideDefaultDesktop = TRUE;
+  public static bool $requiresUserAuthentication = FALSE;
+  public static bool $hideDefaultDesktop = TRUE;
 
   public function preRender() {
     $token = $this->params["token"];

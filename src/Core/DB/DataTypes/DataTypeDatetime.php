@@ -13,7 +13,8 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
  * @package DataTypes
  */
-class DataTypeDatetime extends DataType {
+class DataTypeDatetime extends \ADIOS\Core\DB\DataType
+{
 
     public function get_sql_create_string($table_name, $col_name, $params = []) {
       $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
@@ -21,28 +22,11 @@ class DataTypeDatetime extends DataType {
     }
 
     public function get_sql_column_data_string($table_name, $col_name, $value, $params = []) {
-      $params = _put_default_params_values($params, [
-        'null_value' => false,
-        'dumping_data' => false,
-      ]);
-
-      if ($params['dumping_data']) {
-        if (false == $params['null_value']) {
-          if ('' == $value) {
-            $sql = "$col_name=NULL";
-          } else {
-            $sql = "$col_name='$value'";
-          }
-        }
+      if (strtotime($value) == 0) {
+        $sql = "`{$col_name}` = NULL";
       } else {
-        if (false == $params['null_value']) {
-          if (0 == strtotime($value)) {
-            $sql = "$col_name=null";
-          } else {
-            $end_value = date('Y-m-d H:i:s', strtotime($value));
-            $sql = "$col_name='$end_value'";
-          }
-        }
+        $ts = date('Y-m-d H:i:s', strtotime($value));
+        $sql = "`{$col_name}` = '{$ts}'";
       }
 
       return $sql;

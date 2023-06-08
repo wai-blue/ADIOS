@@ -15,7 +15,7 @@ define('DELETE_FILE', 'delete_file');
 /**
  * @package DataTypes
  */
-class DataTypeFile extends DataType
+class DataTypeFile extends \ADIOS\Core\DB\DataType
 {
   public function get_sql_create_string($table_name, $col_name, $params = [])
   {
@@ -26,37 +26,13 @@ class DataTypeFile extends DataType
 
   public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
   {
-    $params = _put_default_params_values($params, [
-      'null_value' => false,
-      'dumping_data' => false,
-      'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
-    ]);
-
-    $col_definition = $this->adios->db->tables[$table_name][$col_name];
-
-    if ($params['dumping_data']) {
-      $sql = "`{$col_name}` = '".$this->adios->db->escape($value)."'";
+    if ($value == DELETE_FILE) {
+      $sql = "`{$col_name}` = ''";
     } else {
-      if ($value == DELETE_FILE) {
-        $sql = "`{$col_name}` = ''";
+      if (is_string($value)) {
+        $sql = "`{$col_name}` = '" . $this->adios->db->escape($value) . "'";
       } else {
-        if (is_string($value)) {
-          $sql = "`{$col_name}` = '".($params['escape_string'] ? $this->adios->db->escape($value) : $value)."'";
-        }
-
-        // DEPRECATED, 14.7.2022, upload suborov prebieha cez Actions/UI/FileBrowser
-        // if (is_array($value)) {
-        //   // ak to nie je uploadovane ajaxom,
-        //   // tak vo $value je hodnota z $_FILES - cize pole
-
-        //   if ($error == UPLOAD_ERR_OK) {
-        //     $tmp_name = $value['tmp_name'];
-        //     $name = $value['name'].'_'.date('YmdHis');
-        //     if (@move_uploaded_file($tmp_name, "{$this->adios->config['files_dir']}/".('' == $col_definition['subdir'] ? '' : "{$col_definition['subdir']}/")."{$name}")) {
-        //       $sql = "$col_name='".($params['escape_string'] ? $this->adios->db->escape($name) : $name)."'";
-        //     }
-        //   }
-        // }
+        $sql = "`{$col_name}` = ''";
       }
     }
 

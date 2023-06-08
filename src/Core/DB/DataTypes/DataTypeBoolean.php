@@ -28,19 +28,13 @@ namespace ADIOS\Core\DB\DataTypes;
  *
  * @package DataTypes
  */
-class DataTypeBoolean extends DataType {
+class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
   public function get_sql_create_string($table_name, $col_name, $params = []) {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' NOT NULL default 0 ';
     return "`{$col_name}` boolean {$params['sql_definitions']}";
   }
 
   public function get_sql_column_data_string($table, $colName, $value, $params = []) {
-    $params = _put_default_params_values($params, [
-      'null_value' => false,
-      'dumping_data' => false,
-      'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
-    ]);
-
     return "`{$colName}` = ".((bool) $value ? 1 : 0);
   }
 
@@ -59,5 +53,10 @@ class DataTypeBoolean extends DataType {
 
   public function get_csv($value, $params = []) {
     return (int) $value;
+  }
+
+  public function fromString(?string $value)
+  {
+    return (bool) $value;
   }
 }

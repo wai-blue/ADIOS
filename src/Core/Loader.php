@@ -150,7 +150,7 @@ class Loader
 
   public string $dictionaryFilename = "Core-Loader";
 
-  public array $factories = [];
+  public array $classFactories = [];
 
   public bool $forceUserLogout = FALSE;
 
@@ -174,9 +174,7 @@ class Loader
       $this->config = $config;
     }
 
-    if (defined('ADIOS_WIDGETS_DIR')) {
-      $this->widgetsDir = ADIOS_WIDGETS_DIR;
-    }
+    $this->widgetsDir = $config['widgets_dir'] ?? "";
 
     $this->version = file_get_contents(__DIR__."/../version.txt");
 
@@ -255,7 +253,7 @@ class Loader
     try {
 
       // inicializacia debug konzoly
-      $consoleFactoryClass = $this->factories['console'] ?? \ADIOS\Core\Console::class;
+      $consoleFactoryClass = $this->classFactories['console'] ?? \ADIOS\Core\Console::class;
       $this->console = new $consoleFactoryClass($this);
       $this->console->clearLog("timestamps", "info");
 
@@ -278,7 +276,7 @@ class Loader
           "host"      => $this->config['db_host'],
           "port"      => $this->config['db_port'],
           "database"  => $this->config['db_name'],
-          "username"  => $this->config['db_login'],
+          "username"  => $this->config['db_user'],
           "password"  => $this->config['db_password'],
           "charset"   => 'utf8mb4',
           "collation" => 'utf8mb4_unicode_ci',
@@ -346,24 +344,24 @@ class Loader
       }
 
       // inicializacia locale objektu
-      $localeFactoryClass = $this->factories['locale'] ?? \ADIOS\Core\Locale::class;
+      $localeFactoryClass = $this->classFactories['locale'] ?? \ADIOS\Core\Locale::class;
       $this->locale = new $localeFactoryClass($this);
 
       // inicializacia objektu notifikacii
-      $userNotificationsFactoryClass = $this->factories['userNotifications'] ?? \ADIOS\Core\UserNotifications::class;
+      $userNotificationsFactoryClass = $this->classFactories['userNotifications'] ?? \ADIOS\Core\UserNotifications::class;
       $this->userNotifications = new $userNotificationsFactoryClass($this);
 
       // inicializacia mailera
-      $emailFactoryClass = $this->factories['userNotifications'] ?? \ADIOS\Core\Email::class;
+      $emailFactoryClass = $this->classFactories['userNotifications'] ?? \ADIOS\Core\Email::class;
       $this->email = new $emailFactoryClass($this);
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
-      $dbFactoryClass = $this->factories['db'] ?? DB::class;
+      $dbFactoryClass = $this->classFactories['db'] ?? \ADIOS\Core\DB\Providers\MySQLi::class;
       $this->db = new $dbFactoryClass($this, [
         'db_host' => $this->getConfig('db_host', ''),
         'db_port' => $this->getConfig('db_port', ''),
-        'db_login' => $this->getConfig('db_login', ''),
+        'db_user' => $this->getConfig('db_user', ''),
         'db_password' => $this->getConfig('db_password', ''),
         'db_name' => $this->getConfig('db_name', ''),
         'db_codepage' => $this->getConfig('db_codepage', 'utf8mb4'),
@@ -525,12 +523,15 @@ class Loader
           $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
-          $user = reset($this->db->get_all_rows_query("
-            SELECT *
-            FROM `{$adiosUserModel->getFullTableSQLName()}`
-            WHERE `id` = ".(int) $_SESSION[_ADIOS_ID]['userProfile']['id']."
-            LIMIT 1
-          "));
+
+          $user = reset(
+            $this->db->select($adiosUserModel)
+              ->columns([\ADIOS\Core\DB\Query::allColumnsWithoutLookups])
+              ->where([
+                ['id', '=', (int) $_SESSION[_ADIOS_ID]['userProfile']['id']]
+              ])
+              ->fetch()
+          );
 
           if (
             $user['is_active'] != 1 ||
@@ -544,7 +545,7 @@ class Loader
             $this->userLogged = TRUE;
             $clientIp = $this->getClientIpAddress();
             $this->db->query("
-              UPDATE `{$adiosUserModel->getFullTableSQLName()}`
+              UPDATE `{$adiosUserModel->getFullTableSqlName()}`
               SET
                 `last_access_time` = '".date('Y-m-d H:i:s')."',
                 `last_access_ip` = '{$clientIp}'
@@ -568,13 +569,6 @@ class Loader
         // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
         $this->onUserAuthorised();
 
-
-        // user specific config
-        // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
-        // if (is_array($this->config['user'][$this->userProfile['id']])) {
-        //   unset($this->config['user'][$this->userProfile['id']]['language']);
-        //   $this->mergeConfig($this->config['user'][$this->userProfile['id']]);
-        // }
       }
 
       if ($mode == self::ADIOS_MODE_FULL) {
@@ -595,7 +589,7 @@ class Loader
 
         // inicializacia twigu
 
-        $twigLoaderFactoryClass = $this->factories['twigLoader'] ?? \ADIOS\Core\Lib\TwigLoader::class;
+        $twigLoaderFactoryClass = $this->classFactories['twigLoader'] ?? \ADIOS\Core\Lib\TwigLoader::class;
         $twigLoader = new $twigLoaderFactoryClass($this);
         $this->twig = new \Twig\Environment($twigLoader, array(
           'cache' => FALSE,
@@ -620,13 +614,13 @@ class Loader
         }));
 
         // inicializacia UI wrappera
-        $uiFactoryClass = $this->factories['uid'] ?? \ADIOS\Core\UI::class;
-        $this->ui = new $uiFactoryClass($this, []);
+        $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\UI::class;
+        $this->ui = new $uiFactoryClass($this);
       }
 
       $this->dispatchEventToPlugins("onADIOSAfterInit", ["adios" => $this]);
     } catch (\Exception $e) {
-      exit("ADIOS INIT failed. ".$e->getMessage());
+      exit("ADIOS INIT failed: [".get_class($e)."] ".$e->getMessage());
     }
 
     return $this;
@@ -977,7 +971,7 @@ class Loader
 
         $start = microtime(TRUE);
 
-        $model->installForeignKeys();
+        $model->createSqlForeignKeys();
         $this->console->info("Indexes for model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
       } catch (\Exception $e) {
         $this->console->error("Indexes installation for model {$modelName} failed.", ["exception" => $e->getMessage()]);
@@ -1194,7 +1188,7 @@ class Loader
       }
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
-      $lines[] = "ADIOS RUN failed: ".$e->getMessage();
+      $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
       if ($this->config['debug']) {
         $lines[] = "Requested URI = {$this->requestedURI}";
         $lines[] = "Rewrite base = {$this->config['rewrite_base']}";
@@ -1294,33 +1288,40 @@ class Loader
         $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
         $tmpTemplateName = str_replace("/Actions/", "/Templates/", $tmpTemplateName);
 
-        $actionFactoryClass = $this->factories['action'] ?? \ADIOS\Core\Action::class;
+        $actionFactoryClass = $this->classFactories['action'] ?? \ADIOS\Core\Action::class;
         $tmp = new $actionFactoryClass($this);
         $tmp->twigTemplate = $tmpTemplateName;
         $actionHtml = $tmp->render($params);
       }
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
       $actionHtml = $this->renderFatal($e->getMessage());
-    } catch (\Exception $e) {
-      $actionHtml = $this->renderExceptionWarningHtml($e);
-    } catch (\Throwable $e) {
+    } catch (
+      \Exception
+      // | \Throwable
+      $e) {
       $error = error_get_last();
 
-      $trace = debug_backtrace(FALSE);
-      $traceStr = '';
-      foreach ($trace as $t) {
-        $traceStr .= $t['file'] . ':' . $t['line'] . ' in ' . $t['class'] . $t['type'] . $t['function'] . "()\n";
+      if ($error['type'] == E_ERROR) {
+        $actionHtml = $this->renderFatal(
+          '<div style="margin-bottom:1em;">'
+            . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
+          . '</div>'
+          . '<pre style="font-size:0.75em;font-family:Courier New">'
+            . $e->getTraceAsString()
+          . '</pre>',
+          TRUE
+        );
+      } else {
+        $actionHtml = $this->renderFatal(
+          '<div style="margin-bottom:1em;">'
+            . get_class($e) . ': ' . $e->getMessage()
+          . '</div>'
+          . '<pre style="font-size:0.75em;font-family:Courier New">'
+            . $e->getTraceAsString()
+          . '</pre>',
+          TRUE
+        );
       }
-
-      $actionHtml = $this->renderFatal(
-        '<div style="margin-bottom:1em;">'
-          . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
-        . '</div>'
-        . '<pre style="font-size:0.75em;font-family:Courier New;max-height:10em;overflow:auto">'
-          . $traceStr
-        . '</pre>',
-        TRUE
-      );
     }
 
     return $actionHtml;
@@ -1637,7 +1638,7 @@ class Loader
       ");
 
       if ($queryOk) {
-        while ($row = $this->db->db_result->fetch_array(MYSQLI_ASSOC)) {
+        while ($row = $this->db->fetchArray()) {
           $tmp = &$this->config;
           foreach (explode("/", $row['path']) as $tmp_path) {
             if (!is_array($tmp[$tmp_path])) {
@@ -1778,7 +1779,7 @@ class Loader
       $this->db->query("
         select
           *
-        from `{$adiosUserModel->getFullTableSQLName()}`
+        from `{$adiosUserModel->getFullTableSqlName()}`
         where
           (
             `login`= '".$this->db->escape($login)."'
@@ -1787,7 +1788,7 @@ class Loader
           and `is_active` <> 0
       ");
 
-      while ($data = $this->db->fetch_array()) {
+      while ($data = $this->db->fetchArray()) {
         $passwordMatch = FALSE;
 
         if (!empty($password) && password_verify($password, $data['password'])) {

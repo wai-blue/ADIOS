@@ -16,8 +16,7 @@ try {
 
   $idRole = $userRoleModel->insertRow(["name" => "Administrator"]);
 
-  //$adminPassword = "admin.".rand(1000, 9999);
-  $adminPassword = "abcd";
+  $adminPassword = "{{ adminPassword }}";
 
   $userModel->insertRow([
     "name" => "Administrator",

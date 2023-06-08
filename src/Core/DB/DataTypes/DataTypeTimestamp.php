@@ -13,7 +13,7 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
  * @package DataTypes
  */
-class DataTypeTimestamp extends DataType
+class DataTypeTimestamp extends \ADIOS\Core\DB\DataType
 {
     public function get_sql_create_string($table_name, $col_name, $params = [])
     {
@@ -60,7 +60,7 @@ class DataTypeTimestamp extends DataType
         }
 
         $ts = strtotime($value);
-        $date_formatted = ('readable' == $format ? _readable_time($value) : date($format, $ts));
+        $date_formatted = date($format, $ts);
         $html = (0 == $ts ? '' : $date_formatted);
 
         return $html;

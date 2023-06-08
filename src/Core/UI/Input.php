@@ -135,7 +135,7 @@ class Input extends \ADIOS\Core\UI\View {
         }
         
         if (empty($params['table']) && !empty($params['model'])) {
-          $params['table'] = $adios->getModel($params['model'])->getFullTableSQLName();
+          $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
         }
 
         parent::__construct($adios, $params);
@@ -832,7 +832,7 @@ class Input extends \ADIOS\Core\UI\View {
           $value = (int) $this->params['value'];
           $inputStyle = $this->params['input_style'] ?? "";
 
-          $lookupSqlQuery = $lookupModel->lookupSqlQuery(
+          $lookupQuery = $lookupModel->lookupQuery(
             $this->params['initiating_model'],
             $this->params['initiating_column'],
             $this->params['form_data'],
@@ -840,10 +840,10 @@ class Input extends \ADIOS\Core\UI\View {
           );
 
           if (!in_array($inputStyle, ['autocomplete', 'select'])) {
-            $rowsCnt = reset($this->adios->db->get_all_rows_query("
+            $rowsCnt = reset($this->adios->db->fetchRaw("
               select
                 ifnull(count(*), 0) as cnt
-              from ({$lookupSqlQuery}) dummy
+              from (" . $lookupQuery->buildSql() . ") dummy
             "))['cnt'];
 
             if ($rowsCnt > 10) {
@@ -855,7 +855,7 @@ class Input extends \ADIOS\Core\UI\View {
 
           switch ($inputStyle) {
             case "select":
-              $rows = $this->adios->db->get_all_rows_query($lookupSqlQuery);
+              $rows = $lookupQuery->fetch();
 
               $html = "
                 <select
@@ -899,15 +899,13 @@ class Input extends \ADIOS\Core\UI\View {
               $inputText = "";
 
               if ($value > 0) {
-                $row = reset($this->adios->db->get_all_rows_query(
-                  $lookupModel->lookupSqlQuery(
-                    $this->params['initiating_model'],
-                    $this->params['initiating_column'],
-                    $this->params['form_data'],
-                    $this->params,
-                    "`id` = {$value}"
-                  )
-                ));
+                $row = reset($lookupModel->lookupQuery(
+                  $this->params['initiating_model'],
+                  $this->params['initiating_column'],
+                  $this->params['form_data'],
+                  $this->params,
+                  "`id` = {$value}"
+                )->fetch());
 
                 if ((int) $row['id'] === $value) {
                   $inputText = $row['input_lookup_value'];
