@@ -140,7 +140,7 @@ class Input extends \ADIOS\Core\UI\View {
 
         parent::__construct($adios, $params);
 
-        $this->add_class($this->params['type']);
+        $this->addCssClass($this->params['type']);
     }
 
     /*        */
@@ -355,7 +355,7 @@ class Input extends \ADIOS\Core\UI\View {
 
         /* password */
         if ($this->params['type'] == 'password') {
-          $this->add_class("ui_input_type_password");
+          $this->addCssClass("ui_input_type_password");
 
           $html .= "
             <input
@@ -479,7 +479,7 @@ class Input extends \ADIOS\Core\UI\View {
               }
             ";
 
-            $this->add_class("ui_input_type_{$this->params['type']}");
+            $this->addCssClass("ui_input_type_{$this->params['type']}");
 
             if (empty($this->params['placeholder'])) {
                 $tmp_placeholder = $this->params['title'];

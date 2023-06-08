@@ -16,13 +16,13 @@ class Window extends \ADIOS\Core\UI\View {
     $this->adios = $adios;
 
     $this->params = [
-      'title' => 'Adios',
+      'title' => 'Window',
       'subtitle' => '',
       'content' => '',
       'footer' => '',
       'window' => [],
       'onclose' => '',
-      'show_close_button' => false,
+      'cssClass' => '',
     ];
 
     parent::__construct($adios, $params);
@@ -38,31 +38,31 @@ class Window extends \ADIOS\Core\UI\View {
 
   }
 
-  public function setContent($content) {
+  public function setContent($content): void {
     $this->params['content'] = $content;
   }
 
-  public function setTitle(string $title) {
+  public function setTitle(string $title): void {
     $this->params['titleRaw'] = $title;
   }
 
-  public function setSubtitle(string $subtitle) {
+  public function setSubtitle(string $subtitle): void {
     $this->params['subtitle'] = $subtitle;
   }
 
-  public function setHeaderLeft(array $components = []) {
+  public function setHeaderLeft(array $components = []): void {
     $this->params['headerLeft'] = $components;
   }
 
-  public function setHeaderRight(array $components = []) {
+  public function setHeaderRight(array $components = []): void {
     $this->params['headerRight'] = $components;
   }
 
-  public function addButtonToHeaderLeft(?\ADIOS\Core\UI\Button $button) {
+  public function addButtonToHeaderLeft(?\ADIOS\Core\UI\Button $button): void {
     $this->params['headerLeft'][] = $button;
   }
 
-  public function addButtonToHeaderRight(?\ADIOS\Core\UI\Button $button) {
+  public function addButtonToHeaderRight(?\ADIOS\Core\UI\Button $button): void {
     $this->params['headerRight'][] = $button;
   }
 
@@ -76,7 +76,7 @@ class Window extends \ADIOS\Core\UI\View {
 
     $html = "
       <span
-        class='adios ui Window adios_window'
+        class='".$this->getCssClassesString()."'
         id='{$this->params['uid']}'
       >
         <div class='header'>

@@ -185,7 +185,7 @@ class Table extends \ADIOS\Core\UI\View
       }
 
       $this->params['buttons']['add']['onclick'] = "
-        window_render('" . $tmpUrl . "/Add')
+        window_render('" . $tmpUrl . "/add')
       ";
     }
 
@@ -492,14 +492,14 @@ class Table extends \ADIOS\Core\UI\View
     $params = $this->params;
 
     $html = "";
-    $this->add_class('Container');
+    $this->addCssClass('Container');
 
     if (!in_array("UI/Form", $this->adios->actionStack)) {
-      $this->add_class('shadow');
+      $this->addCssClass('shadow');
     }
 
     if (!$this->params['__IS_WINDOW__']) {
-      $this->add_class('desktop');
+      $this->addCssClass('desktop');
     }
 
     if (!$this->params['refresh']) {
@@ -519,7 +519,7 @@ class Table extends \ADIOS\Core\UI\View
         $moreActionsButtonItems = [];
 
         if ($this->params['showSearchButton']) {
-          $searchAction = $this->model->searchAction ?? $this->model->getFullUrlBase($params) . "/Search";
+          $searchAction = $this->model->searchAction ?? $this->model->getFullUrlBase($params) . "/search";
 
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-search",
@@ -895,7 +895,7 @@ class Table extends \ADIOS\Core\UI\View
 
           $onclick = $params['onclick'] ?: "
             window_render(
-              '" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/Edit'
+              '" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/edit'
             )
           ";
 

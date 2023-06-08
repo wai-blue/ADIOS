@@ -13,18 +13,18 @@ class UI
   }
 
   public function create(
-    string $uiComponentName,
+    string $viewName,
     array $params = null,
     \ADIOS\Core\UI\View $parentView = NULL)
   {
-    list($uiComponentClassName, $uid) = explode('#', $uiComponentName);
+    list($viewClassName, $uid) = explode('#', $viewName);
 
     if (!empty($uid)) {
       $params['uid'] = $uid;
     }
 
-    $uiComponentClassName = "\\ADIOS\\Core\\UI\\{$uiComponentClassName}";
-    return new $uiComponentClassName(
+    $viewClassName = "\\ADIOS\\Core\\UI\\{$viewClassName}";
+    return new $viewClassName(
       $this->adios,
       $params,
       $parentView
@@ -44,7 +44,7 @@ class UI
     ) {
       return new $className($this->adios, $arguments[0], $arguments[1]);
     } else {
-      throw new \ADIOS\Core\Exceptions\UnknownUIComponent();
+      throw new \ADIOS\Core\Exceptions\UnknownView();
     }
   }
 

@@ -77,6 +77,7 @@ class Form extends \ADIOS\Core\UI\View
       'onload' => '',
       'simple_insert' => false,
       'javascript' => '',
+      'windowCssClass' => '',
     ], $params);
 
     // nacitanie udajov
@@ -107,15 +108,15 @@ class Form extends \ADIOS\Core\UI\View
     }
 
     if (empty($params['save_action'])) {
-      $params['save_action'] = $this->model->urlBase."/Save";
+      $params['save_action'] = $this->model->urlBase."/save";
     }
 
     if (empty($params['delete_action'])) {
-      $params['delete_action'] = $this->model->urlBase."/Delete";
+      $params['delete_action'] = $this->model->urlBase."/selete";
     }
 
     if (empty($params['copy_action'])) {
-      $params['copy_action'] = $this->model->urlBase."/Copy";
+      $params['copy_action'] = $this->model->urlBase."/copy";
     }
 
     // call the parent constructor
@@ -238,7 +239,6 @@ class Form extends \ADIOS\Core\UI\View
 
       $this->params['copy_button_params']['style'] .= 'float:right;';
       $this->copyButton = $this->adios->ui->button($this->params['copy_button_params']);
-      // $this->copyButton->add_class("{$this->params['uid']}_button");
     }
 
     if (empty($this->params['header'])) {
@@ -304,7 +304,7 @@ class Form extends \ADIOS\Core\UI\View
       $html = $rows;
     } else {
       $html = "
-        <div class='adios ui Form default_table_wrapper'>
+        <div class='".$this->getCssClassesString()." form-wrapper'>
           <div class='adios ui Form table'>
             <div class='adios ui Form subrow save_error_info' style='display:none'>
               ".$this->translate("Some of the required fields are empty.")."

@@ -8,8 +8,8 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
 
   var $sqlName = "{{ thisModel.config.sqlName|raw }}";
   var $urlBase = "{{ thisModel.config.urlBase|raw }}";
-  var $crudActions = 
-{{ varExport(thisModel.config.crudActions, "    ")|raw }}
+  var $crud = 
+{{ varExport(thisModel.config.crud, "    ")|raw }}
   ;
   var $tableTitle = "{{ thisModel.config.tableTitle|raw }}";
   var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting|raw }}";

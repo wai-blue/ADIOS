@@ -31,16 +31,16 @@ class MySQLi extends \ADIOS\Core\DB
 
     if (!empty($this->db_port) && is_numeric($this->db_port)) {
       $this->connection = new \mysqli(
-        $this->db_host, 
-        $this->db_user, 
-        $this->db_password, 
-        $this->db_name, 
+        $this->db_host,
+        $this->db_user,
+        $this->db_password,
+        $this->db_name,
         $this->db_port
       );
     } else {
       $this->connection = new \mysqli(
-        $this->db_host, 
-        $this->db_user, 
+        $this->db_host,
+        $this->db_user,
         $this->db_password)
       ;
     }

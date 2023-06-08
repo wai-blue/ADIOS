@@ -85,7 +85,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   var $urlBase = "";
 
-  var $crudActions = [];
+  var $crud = [];
 
   /**
    * Readable title for the table listing.
@@ -565,19 +565,19 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     $routing = [
 
-      // List
+      // Browse
       '/^' . $urlBase . '$/' => [
-        "permission" => "{$this->fullName}/Read",
-        "action" => $this->crudActions['Read'] ?? "UI/Table",
+        "permission" => "{$this->fullName}/Browse",
+        "action" => $this->crud['browse']['action'] ?? "UI/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Edit
-      '/^' . $urlBase . '\/(\d+)\/Edit$/' => [
+      '/^' . $urlBase . '\/(\d+)\/edit$/' => [
         "permission" => "{$this->fullName}/Edit",
-        "action" => $this->crudActions['Edit'] ?? "UI/Form",
+        "action" => $this->crud['edit']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "model" => $this->fullName,
@@ -586,9 +586,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Add
-      '/^' . $urlBase . '\/Add$/' => [
+      '/^' . $urlBase . '\/add$/' => [
         "permission" => "{$this->fullName}/Add",
-        "action" => $this->crudActions['Add'] ?? "UI/Form",
+        "action" => $this->crud['add']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "model" => $this->fullName,
@@ -598,36 +598,36 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Save
-      '/^' . $urlBase . '\/Save$/' => [
+      '/^' . $urlBase . '\/save$/' => [
         "permission" => "{$this->fullName}/Save",
-        "action" => $this->crudActions['Save'] ?? "UI/Form/Save",
+        "action" => $this->crud['save']['action'] ?? "UI/Form/Save",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Delete
-      '/^' . $urlBase . '\/Delete$/' => [
+      '/^' . $urlBase . '\/delete$/' => [
         "permission" => "{$this->fullName}/Delete",
-        "action" => $this->crudActions['Delete'] ?? "UI/Form/Delete",
+        "action" => $this->crud['delete']['action'] ?? "UI/Form/Delete",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Copy
-      '/^' . $urlBase . '\/Copy$/' => [
+      '/^' . $urlBase . '\/copy$/' => [
         "permission" => "{$this->fullName}/Copy",
-        "action" => "UI/Form/Copy",
+        "action" => $this->crud['copy']['action'] ?? "UI/Form/Copy",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
 
       // Search
-      '/^' . $urlBase . '\/Search$/' => [
+      '/^' . $urlBase . '\/search$/' => [
         "permission" => "{$this->fullName}/Search",
-        "action" => $this->crudActions['Search'] ?? "UI/Table/Search",
+        "action" => $this->crud['search']['action'] ?? "UI/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,

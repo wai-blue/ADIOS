@@ -97,8 +97,8 @@ class View {
     $this->classes = ['adios', 'ui', $componentName];
     $this->twigTemplate = $this->twigTemplate ?? "UI/{$this->fullName}";
 
-    if (isset($params['class'])) {
-      $this->add_class($params['class']);
+    if (isset($params['cssClass'])) {
+      $this->addCssClass($params['cssClass']);
     }
 
     if ($this->displayMode == 'window') {
@@ -261,37 +261,19 @@ class View {
   }
   
   /**
-   * add_class
+   * addCssClass
    *
    * @internal
-   * @param  mixed $class_name
-   * @param  mixed $target
+   * @param  mixed $cssClass
    * @return void
    */
-  public function add_class($class_name, $target = '') {
-    if (empty($class_name)) return;
-
-    if (!in_array($target, ['', 'desktop', 'mobile', 'tablet'])) {
-      $target = '';
-    }
-
-    $add = false;
-    //if (Akernel()->is_mobile && $target == "mobile") $add = TRUE;
-    //else if (Akernel()->is_tablet && $target == "tablet") $add = TRUE;
-    //else
-    if ('desktop' == $target || '' == $target) {
-      $add = true;
-    }
-
-    if ($add) {
-      $classes = explode(' ', $class_name);
-      foreach ($classes as $class_name) {
-        $this->classes[] = $class_name;
-        $this->classes = array_unique($this->classes);
-      }
-    }
-
+  public function addCssClass(string $cssClass): \ADIOS\Core\UI\View {
+    if (!empty($cssClass)) $this->classes[] = $cssClass;
     return $this;
+  }
+
+  public function getCssClassesString(): string {
+    return join(" ", $this->classes);
   }
   
   /**
@@ -391,6 +373,10 @@ class View {
     switch ($this->displayMode) {
       case 'window':
         $this->window->setContent($html);
+        if (is_array($this->params['windowParams'])) {
+          $this->window->addCssClass($this->params['windowParams']['cssClass'] ?? '');
+        }
+
         $html = $this->window->render();
       break;
       case 'desktop':
