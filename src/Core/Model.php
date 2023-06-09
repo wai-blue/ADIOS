@@ -166,9 +166,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $this->eloquentQuery = $this->select('id');
       } else {
         $this->eloquentQuery = $eloquentQuery;
+        $this->eloquentQuery->pdoCrossTables = [];
       }
-
-      $this->eloquentQuery->pdoCrossTables = [];
 
       $this->pdo = $this->getConnection()->getPdo();
 
@@ -1476,6 +1475,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if (empty($query->pdoCrossTables)) {
       $query->pdoCrossTables = [];
     }
+    
     $query->pdoCrossTables[] = [$crossTableModel, $foreignKey, $resultKey];
 
     return $this;
