@@ -11,7 +11,9 @@ class Builder {
   protected string $adminPassword = '';
 
   protected array $prototype = [];
-  protected $twig = NULL;
+  protected ?\Twig\Loader\ArrayLoader $twigArrayLoader = NULL;
+  protected ?\Twig\Loader\FilesystemLoader $twigFilesystemLoader = NULL;
+  protected ?\Twig\Environment $twig = NULL;
   protected $logHandle = NULL;
 
   public function __construct(string $inputFile, string $outputFolder, string $sessionSalt, string $logFile) {
@@ -37,7 +39,7 @@ class Builder {
 
     if (!is_file($this->inputFile)) throw new \Exception('Input file not found: ' . $this->inputFile);
 
-    $this->prototype = json_decode(file_get_contents($this->inputFile), TRUE);
+    $this->prototype = $this->parsePrototypeFile($this->inputFile);
 
     $this->logHandle = fopen($this->logFile, "w");
 
@@ -45,7 +47,9 @@ class Builder {
 
     $this->prototype["ConfigApp"]["sessionSalt"] = $this->sessionSalt;
 
-    $twigLoader = new \Twig\Loader\FilesystemLoader(__DIR__.'/Templates');
+    $this->twigArrayLoader = new \Twig\Loader\ArrayLoader([]);
+    $this->twigFilesystemLoader = new \Twig\Loader\FilesystemLoader(__DIR__.'/Templates');
+    $twigLoader = new \Twig\Loader\ChainLoader([$this->twigFilesystemLoader, $this->twigArrayLoader]);
     $this->twig = new \Twig\Environment($twigLoader, [
       'cache' => FALSE,
       'debug' => TRUE,
@@ -63,10 +67,14 @@ class Builder {
     $this->twig->addFunction(new \Twig\TwigFunction(
       'varExport',
       function ($var, $indent = "") {
-        $var = $indent.str_replace("\n", "\n{$indent}", var_export($var, TRUE));
+        if (is_string($var)) {
+          $var = $var;
+        } else {
+          $var = $indent.str_replace("\n", "\n{$indent}", var_export($var, TRUE));
+        }
 
         $var = preg_replace_callback(
-          '/\'```php (.*?) ```\'/',
+          '/\'{php (.*?) php}\'/',
           function ($m) {
             return str_replace('\\\'', '\'', $m[1]);
           },
@@ -144,17 +152,27 @@ class Builder {
 
   }
 
-  public function importJson(string $filePath): array {
-    $importFileFullPath = $this->inputPath . $filePath;
+  public function parsePrototypeFile(string $file): array {
 
-    // TODO: Hlaska by mohla obsahovat aj nazov suboru. Lahsie sa bude debugovat.
-    if (!is_file($importFileFullPath)) {
-      throw new \Exception("@import: File not found ({$importFileFullPath})");
+    if (!is_file($file)) {
+      throw new \Exception("Parse file: File not found ({$file})");
     }
 
-    $fileContent = json_decode(file_get_contents($importFileFullPath), TRUE);
+    $format = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
-    return $fileContent;
+    switch ($format) {
+      case 'json':
+        $prototype = json_decode(file_get_contents($file), TRUE);
+      break;
+      case 'yml':
+        $prototype = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($file));
+      break;
+      default:
+        $prototype = [];
+      break;
+    }
+
+    return $prototype;
   }
 
   public function buildPrototype() {
@@ -258,7 +276,7 @@ class Builder {
       if (is_string($widgetConfig) && strpos($widgetConfig, "@import") !== false) {
         $filePath = trim(str_replace("@import", "", $widgetConfig));
         $this->log('Importing ' . $filePath);
-        $widgetConfig = $this->importJson($filePath);
+        $widgetConfig = $this->parsePrototypeFile($this->inputPath . $filePath);
       }
 
       $this->createFolder("src/Widgets/{$widgetName}");

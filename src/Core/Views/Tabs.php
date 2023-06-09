@@ -87,7 +87,7 @@ class Tabs extends \ADIOS\Core\View {
                 params,
                 '{$this->uid}_tab_{$tabKey}_content_div'
               );
-            }, ".rand(200, 1300).");
+            }, ".rand(200, 600).");
           </script>
         ";
       } else if (!empty($tabParams['content']['html'])) {

@@ -30,7 +30,11 @@ class LoremIpsum extends \ADIOS\Core\View {
 
   public function render(string $panel = ''): string
   {
-    return $this->dictionary[rand(0, count($this->dictionary) - 1)];
+    return "
+      <div class='".$this->getCssClassesString()."'>
+        " . $this->dictionary[rand(0, count($this->dictionary) - 1)] . "
+      </div>
+    ";
   }
 
 }

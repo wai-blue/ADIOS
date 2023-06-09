@@ -103,7 +103,7 @@ class Grid extends \ADIOS\Core\View {
                 params,
                 '{$this->uid}_area_{$areaName}_content_div'
               );
-            }, ".rand(200, 1300).");
+            }, ".rand(200, 600).");
           </script>
         ";
       } else if (!empty($areaParams['html'])) {
