@@ -87,7 +87,7 @@ class Form extends \ADIOS\Core\View
     }
 
     $this->model = $this->adios->getModel($params['model']);
-    $this->data = (array) $this->model->getById($params['id']);
+    $this->data = (array) $this->model->getById((int) $params['id']);
 
     $params['table'] = $this->model->getFullTableSqlName();
 
