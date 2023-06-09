@@ -15,6 +15,6 @@ namespace ADIOS\Actions\UI;
  */
 class Tree extends \ADIOS\Core\Action {
   function render($params = []) {
-    return $this->adios->ui->Tree($params)->render();
+    return $this->adios->view->Tree($params)->render();
   }
 }

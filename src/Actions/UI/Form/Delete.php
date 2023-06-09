@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Actions\UI\Table;
+namespace ADIOS\Actions\UI\Form;
 
 /**
  * @package UI\Actions\Table

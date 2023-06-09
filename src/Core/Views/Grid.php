@@ -1,6 +1,6 @@
 <?php
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 /**
  * Renders a layout based on HTML grid configuration.
@@ -8,14 +8,14 @@ namespace ADIOS\Core\UI;
  * Example code to render layout:
  *
  * ```php
- *   $adios->ui->Layout([
+ *   $adios->view->create('Grid', [
  *     ...
  *   ]);
  * ```
  *
  * @package UI\Elements
  */
-class Grid extends \ADIOS\Core\UI\View {
+class Grid extends \ADIOS\Core\View {
 
   public string $twigTemplate = "Core/UI/Grid";
 
@@ -47,11 +47,11 @@ class Grid extends \ADIOS\Core\UI\View {
       ";
 
       if (!empty($areaParams['view'])) {
-        $html .= $this->adios->ui->create(
+        $tmp = $this->addView(
           $areaParams['view'],
-          $areaParams['params'],
-          $this
-        )->render();
+          $areaParams['params'] ?? []
+        );
+        $html .= $tmp->render();
       } else if (!empty($areaParams['action'])) {
         $html .= "
           <div
@@ -103,13 +103,9 @@ class Grid extends \ADIOS\Core\UI\View {
                 params,
                 '{$this->uid}_area_{$areaName}_content_div'
               );
-            }, ".rand(200, 1300).");
+            }, ".rand(200, 600).");
           </script>
         ";
-        // $html .= $this->adios->renderAction(
-        //   $areaParams['action'],
-        //   $areaParams['params']
-        // );
       } else if (!empty($areaParams['html'])) {
         $html .= $areaParams['html'];
       }

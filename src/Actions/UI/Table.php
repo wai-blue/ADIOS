@@ -15,7 +15,7 @@ namespace ADIOS\Actions\UI;
  */
 class Table extends \ADIOS\Core\Action {
   function render() {
-    $table = $this->adios->ui->Table($this->params);
+    $table = $this->adios->view->create('Table', $this->params);
     return $table->render();
   }
 }

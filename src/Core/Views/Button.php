@@ -1,6 +1,6 @@
 <?php
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
 /**
  * Renders a button element. Used by many other UI elements.
@@ -8,7 +8,7 @@ namespace ADIOS\Core\UI;
  * Example code to render button:
  *
  * ```php
- *   $adios->ui->Button([
+ *   $adios->view->create('Button', [
  *     "type" => "close",
  *     "onclick" => "window_close('{$this->uid}');",
  *   ]);
@@ -16,7 +16,7 @@ namespace ADIOS\Core\UI;
  *
  * @package UI\Elements
  */
-class Button extends \ADIOS\Core\UI\View {
+class Button extends \ADIOS\Core\View {
   
   /**
    * Type of the button. Determines default configuration.
@@ -185,7 +185,8 @@ class Button extends \ADIOS\Core\UI\View {
 
   }
 
-  public function render($render_panel = '') {
+  public function render(string $panel = ''): string
+  {
     if (_count($this->params['dropdown'])) {
       $dropdowns_html = "";
       foreach ($this->params['dropdown'] as $dropdown) {
@@ -245,7 +246,6 @@ class Button extends \ADIOS\Core\UI\View {
       return "
         <a
           href='".($this->href ?? "javascript:void(0);")."'
-          ".(empty($this->id) ? "" : "x-id='{$this->id}'")."
           id='".ads($this->uid)."'
           class='
             btn

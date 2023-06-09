@@ -1,0 +1,13 @@
+<?php
+
+namespace {{ thisAction.namespace }};
+
+class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
+  public function render() {
+    return $this->adios->twig->render(<<<TWIG
+{{ varExport(thisAction.config.twig)|raw }}
+TWIG,
+{{ varExport(thisAction.config.params, "    ")|raw }}
+    );
+  }
+}

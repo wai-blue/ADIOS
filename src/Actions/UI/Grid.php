@@ -15,6 +15,6 @@ namespace ADIOS\Actions\UI;
  */
 class Grid extends \ADIOS\Core\Action {
   public function render(): string {
-    return $this->adios->ui->Grid($this->params)->render();
+    return $this->adios->view->Grid($this->params)->render();
   }
 }

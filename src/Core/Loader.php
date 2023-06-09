@@ -604,13 +604,13 @@ class Loader
             return $this->translate($string, $this->actionObject);
           }
         ));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $viewName, $viewParams) {
-          if (!is_array($viewParams)) {
-            $viewParams = [];
+        $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
+          if (!is_array($params)) {
+            $params = [];
           }
-          return $this->ui->create(
-            $viewName . (empty($uid) ? '' : '#' . $uid),
-            $viewParams
+          return $this->view->create(
+            $view . (empty($uid) ? '' : '#' . $uid),
+            $params
           )->render();
         }));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
@@ -618,8 +618,12 @@ class Loader
         }));
 
         // inicializacia UI wrappera
-        $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\UI::class;
-        $this->ui = new $uiFactoryClass($this);
+        // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\View::class;
+        // $this->ui = new $uiFactoryClass($this);
+
+        // inicializacia UI wrappera
+        $viewFactoryClass = $this->classFactories['view'] ?? \ADIOS\Core\View::class;
+        $this->view = new $viewFactoryClass($this);
       }
 
       $this->dispatchEventToPlugins("onADIOSAfterInit", ["adios" => $this]);
@@ -711,7 +715,7 @@ class Loader
    * @throws \ADIOS\Core\Exception If $modelName is not available.
    * @return object Instantiated object of the model.
    */
-  public function getModel(string $modelName) {
+  public function getModel(string $modelName): \ADIOS\Core\Model {
     if (!isset($this->modelObjects[$modelName])) {
       try {
         $modelClassName = $this->getModelClassName($modelName);

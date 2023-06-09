@@ -8,15 +8,18 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Actions\UI;
+namespace ADIOS\Actions;
 
 /**
+ * 'Login' action. Renders the login screen of the ADIOS application.
+ *
  * @package UI\Actions
  */
-class Html extends \ADIOS\Core\Action
-{
-  function render()
+class LoremIpsum extends \ADIOS\Core\Action {
+
+
+  public function render()
   {
-    return $this->adios->view->Html($this->params)->render();
+    return $this->adios->view->create('LoremIpsum', $this->params)->render();
   }
 }

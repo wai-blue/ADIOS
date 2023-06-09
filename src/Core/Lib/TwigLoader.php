@@ -68,7 +68,7 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       }
 
     } else {
-      return new \Twig\Source("", $name);
+      return new \Twig\Source($name, $name);
     }
 
     if (!is_file($templateFile)) {

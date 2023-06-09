@@ -1,6 +1,6 @@
 
   function ui_tabs_change_tab(uid, tab) {
-    let scrollTo = $('#' + uid + ' .tab_content_' + tab);
+    let scrollTo = $('#' + uid + '_tab_content_' + tab);
     let container = $('#' + uid + ' .tab_contents');
 
     container.find('.tab_title_tag').removeClass('active');

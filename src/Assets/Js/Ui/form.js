@@ -84,7 +84,7 @@
           ui_form_close(uid);
 
           if (reopen_after_save) {
-            window_render(data.modelUrlBase + '/' + data.id + '/Edit');
+            window_render(data.modelUrlBase + '/' + data.id + '/edit');
           }
 
           if (typeof params.aftersave_callback === 'function') {

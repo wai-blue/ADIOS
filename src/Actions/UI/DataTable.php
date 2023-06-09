@@ -15,6 +15,6 @@ namespace ADIOS\Actions\UI;
  */
 class DataTable extends \ADIOS\Core\Action {
   public function render() {
-    return $this->adios->ui->DataTable($this->params)->render();
+    return $this->adios->view->DataTable($this->params)->render();
   }
 }

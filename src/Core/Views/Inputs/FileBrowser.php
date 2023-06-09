@@ -8,9 +8,9 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI\Input;
+namespace ADIOS\Core\Views\Inputs;
 
-class FileBrowser extends \ADIOS\Core\Input {
+class FileBrowser extends \ADIOS\Core\Views\Input {
   const MODE_SELECT = "select";
   const MODE_BROWSE = "browse";
 
@@ -72,10 +72,9 @@ class FileBrowser extends \ADIOS\Core\Input {
     $this->folderTreeHtmlItems[] = $html;
   }
 
-  public function render() {
-    // $this->languageDictionary = $this->adios->loadLanguageDictionary($this);
+  public function render(string $panel = ''): string
+  {
 
-    // $params = $this->params;
     $mode = $this->params["mode"] ?? self::MODE_BROWSE;
 
     $rootDir = $this->adios->config['files_dir'].(empty($this->params['subdir']) ? "" : "/{$this->params['subdir']}");
@@ -181,7 +180,7 @@ class FileBrowser extends \ADIOS\Core\Input {
             </div>
 
             <div class='operation-buttons'>
-              ".$this->adios->ui->Button([
+              ".$this->addView('Button', [
                 "fa_icon" => "fas fa-folder-plus",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split",
                 "text" => $this->translate("Create folder"),
@@ -228,14 +227,14 @@ class FileBrowser extends \ADIOS\Core\Input {
                 ",
               ])->render()."
 
-              ".$this->adios->ui->Button([
+              ".$this->addView('Button', [
                 "fa_icon" => "fas fa-file-upload",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split",
                 "text" => $this->translate("Upload file"),
                 "onclick" => "$('#{$this->uid}_{{ dirId }}_file_input').click();",
               ])->render()."
 
-              ".$this->adios->ui->Button([
+              ".$this->addView('Button', [
                 "fa_icon" => "fas fa-ellipsis-v",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split btn-more-operations",
                 "dropdown" => [
@@ -307,7 +306,7 @@ class FileBrowser extends \ADIOS\Core\Input {
         </div>
 
         <div class='template btn-folder-up'>
-          ".$this->adios->ui->Button([
+          ".$this->addView('Button', [
             "fa_icon" => "fas fa-reply",
             "text" => "..",
             "class" => "btn btn-folder btn-sm btn-light btn-icon-split mb-1",
@@ -317,7 +316,7 @@ class FileBrowser extends \ADIOS\Core\Input {
         </div>
 
         <div class='template btn-folder'>
-          ".$this->adios->ui->Button([
+          ".$this->addView('Button', [
             "uid" => "{{ btnUid }}",
             "fa_icon" => "{{ icon }}",
             "text" => "{{ text }}",
@@ -334,7 +333,7 @@ class FileBrowser extends \ADIOS\Core\Input {
         </div>
 
         <div class='template btn-file'>
-          ".$this->adios->ui->Button([
+          ".$this->addView('Button', [
             "uid" => "{{ btnUid }}",
             "fa_icon" => "{{ icon }}",
             "class" => "btn btn-file btn-sm btn-light btn-icon-split mb-1",

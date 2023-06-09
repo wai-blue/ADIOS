@@ -22,7 +22,7 @@ class LookupSearch extends \ADIOS\Core\Action {
 
     $lookupModel = $this->adios->getModel($this->params['model']);
 
-    $content = $this->adios->ui->Table([
+    $content = $this->adios->view->Table([
       "uid" => $tableUid,
       "model" => $this->params['model'],
       "where" => $lookupModel->lookupSqlWhere(
@@ -42,7 +42,7 @@ class LookupSearch extends \ADIOS\Core\Action {
       'uid' => $windowUid,
       'content' => $content->render(),
       'header' => [
-        $this->adios->ui->Button([
+        $this->adios->view->Button([
           'type' => 'close',
           'onclick' => "window_close('{$windowUid}');"
         ]),
@@ -50,6 +50,6 @@ class LookupSearch extends \ADIOS\Core\Action {
       'title' => $this->translate("Search in list"),
     ];
 
-    return $this->adios->ui->Window($window_params)->render();
+    return $this->adios->view->Window($window_params)->render();
   }
 }

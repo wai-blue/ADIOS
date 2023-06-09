@@ -15,6 +15,6 @@ namespace ADIOS\Actions\UI;
  */
 class FileBrowser extends \ADIOS\Core\Action {
   public function render() {
-    return $this->adios->ui->FileBrowser($this->params)->render();
+    return $this->adios->view->FileBrowser($this->params)->render();
   }
 }

@@ -8,12 +8,13 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI\Input;
+namespace ADIOS\Core\Views\Inputs;
 
-class SettingsPanel extends \ADIOS\Core\Input {
+class SettingsPanel extends \ADIOS\Core\Views\Input {
   var $folderTreeHtmlItems = [];
 
-  public function render() {
+  public function render(string $panel = ''): string
+  {
     $html = "
       <div id='{$this->uid}_form' class='adios ui Form'>
         <div class='adios ui Form table'>
@@ -67,7 +68,7 @@ class SettingsPanel extends \ADIOS\Core\Input {
         ];
       }
 
-      $html .= $this->adios->ui->Tabs([
+      $html .= $this->addView('Tabs', ([
         'tabs' => $tab_pages,
         'height' => "calc(100vh - 16em)",
       ])->render();

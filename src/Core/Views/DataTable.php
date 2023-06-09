@@ -1,9 +1,9 @@
 <?php
 
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
-class DataTable extends \ADIOS\Core\UI\View {
+class DataTable extends \ADIOS\Core\View {
 
   public string $twigTemplate = "Core/UI/DataTable";
   private ?\ADIOS\Core\Model $model = null;

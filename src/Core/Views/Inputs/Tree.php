@@ -8,13 +8,18 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI\Input;
+namespace ADIOS\Core\Views\Inputs;
 
 class Tree extends \ADIOS\Core\Input
 {
+
+  public ?\ADIOS\Core\Model $model = NULL;
+
+  public array $enumValues = [];
+
   public function itemDropdownButton($text, $hasSubItems)
   {
-    return $this->adios->ui->Button([
+    return $this->addView('Button', [
       "fa_icon" => "fas fa-angle-" . ($hasSubItems ? "down" : "right"),
       "text" => $text,
       "class" => "item btn btn-sm btn-secondary btn-icon-split my-1",
@@ -27,7 +32,7 @@ class Tree extends \ADIOS\Core\Input
             let btn = $(this).closest('.dropdown').find(' > .btn');
 
             window_render(
-              '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/Edit',
+              '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/edit',
               '',
               function(res) {
                 _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
@@ -124,7 +129,7 @@ class Tree extends \ADIOS\Core\Input
           " . $this->itemDropdownButton("Pridať", FALSE)->render() . "
         </li>
         <li>
-          " . $this->adios->ui->button([
+          " . $this->addView('Button', [
       "fa_icon" => "fas fa-plus",
       "text" => $this->translate("Add"),
       "class" => "item btn btn-sm btn-light btn-icon-split my-1",
@@ -163,7 +168,7 @@ class Tree extends \ADIOS\Core\Input
     return $treeHtml;
   }
 
-  public function render()
+  public function render(string $panel = ''): string
   {
     $params = $this->params;
     $this->model = $this->adios->getModel($params['model']);

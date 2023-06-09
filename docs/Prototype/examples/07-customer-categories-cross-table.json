@@ -87,7 +87,7 @@
                     "Categories": [
                       {
                         "input": {
-                          "class": "\\ADIOS\\Core\\UI\\Input\\CheckboxField",
+                          "class": "\\ADIOS\\Core\\View\\Input\\CheckboxField",
                           "params": {
                             "crossTableAssignment": "CustomerHasCategory",
                             "columns": 1

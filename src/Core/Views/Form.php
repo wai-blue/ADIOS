@@ -8,23 +8,23 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
-class Form extends \ADIOS\Core\UI\View
+class Form extends \ADIOS\Core\View
 {
   public $model = NULL;
   public array $data = [];
 
   public $gtp;
-  public $closeButton = NULL;
-  public $copyButton = NULL;
-  public $saveButton = NULL;
-  public $deleteButton = NULL;
+  public ?\ADIOS\Core\View $closeButton = NULL;
+  public ?\ADIOS\Core\View $copyButton = NULL;
+  public ?\ADIOS\Core\View $saveButton = NULL;
+  public ?\ADIOS\Core\View $deleteButton = NULL;
 
   public function __construct(
    object $adios,
    array $params = [],
-   ?\ADIOS\Core\UI\View $parentView = NULL
+   ?\ADIOS\Core\View $parentView = NULL
   ) {
 
     $this->adios = $adios;
@@ -59,7 +59,7 @@ class Form extends \ADIOS\Core\UI\View
       'onclose' => '',
       'hide_id_column' => true,
       // 'save_action' => 'UI/Form/Save',
-      // 'delete_action' => 'UI/Table/Delete',
+      // 'delete_action' => 'UI/Form/Delete',
       // 'copy_action' => 'UI/Table/Copy',
       'do_not_close' => false, // DEPRECATED, je nahradeny parametrom reopen_after_save
       'reopen_after_save' => $this->adios->getConfig(
@@ -112,7 +112,7 @@ class Form extends \ADIOS\Core\UI\View
     }
 
     if (empty($params['delete_action'])) {
-      $params['delete_action'] = $this->model->urlBase."/selete";
+      $params['delete_action'] = $this->model->urlBase."/delete";
     }
 
     if (empty($params['copy_action'])) {
@@ -185,7 +185,7 @@ class Form extends \ADIOS\Core\UI\View
       }
 
       $this->params['save_button_params']['class'] = "btn-save";
-      $this->saveButton = $this->adios->ui->button($this->params['save_button_params']);
+      $this->saveButton = $this->addView('Button', $this->params['save_button_params']);
     } else {
       $this->saveButton = NULL;
     }
@@ -197,7 +197,7 @@ class Form extends \ADIOS\Core\UI\View
         $this->params['close_button_params']['onclick'] = "ui_form_close('{$this->params['uid']}');";
       }
 
-      $this->closeButton = $this->adios->ui->button($this->params['close_button_params']);
+      $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
     }
 
     if ($this->params['show_delete_button']) {
@@ -219,7 +219,7 @@ class Form extends \ADIOS\Core\UI\View
         ";
       }
       $this->params['delete_button_params']['style'] .= 'float:right;';
-      $this->deleteButton = $this->adios->ui->button($this->params['delete_button_params']);
+      $this->deleteButton = $this->addView('Button', $this->params['delete_button_params']);
     }
 
     if ($this->params['show_copy_button']) {
@@ -238,7 +238,7 @@ class Form extends \ADIOS\Core\UI\View
       }
 
       $this->params['copy_button_params']['style'] .= 'float:right;';
-      $this->copyButton = $this->adios->ui->button($this->params['copy_button_params']);
+      $this->copyButton = $this->addView('Button', $this->params['copy_button_params']);
     }
 
     if (empty($this->params['header'])) {
@@ -277,7 +277,7 @@ class Form extends \ADIOS\Core\UI\View
       if ('' == $this->params['title_params']['center']) {
         $this->params['title_params']['center'] = $this->params['title'];
       }
-      $this->add($this->adios->ui->Title($this->params['title_params']), 'title');
+      $this->add($this->addView('Button', $this->params['title_params']), 'title');
     }
 
     $this->model->onFormAfterInit($this);
@@ -396,9 +396,9 @@ class Form extends \ADIOS\Core\UI\View
   }
 
   // render
-
-  public function render($render_panel = '') {
-    $window = $this->findParentComponent('Window');
+  public function render(string $panel = ''): string
+  {
+    $window = $this->findParentView('Window');
     
     if (!_count($this->params['columns'])) {
       $this->adios->console->error("No columns provided: {$this->params['model']}");
@@ -479,25 +479,21 @@ class Form extends \ADIOS\Core\UI\View
           } else if (!empty($col['rows'])) {
             $col_html .= $this->renderRows($col['rows']);
           } else if (is_array($col['tabs'])) {
-            $tab_pages = [];
+            $tabPages = [];
 
             // kazdy element predstavuje jeden tab vo formulari
             foreach ($col['tabs'] as $tab_name => $rows) {
-              $tab_pages[] = [
+              $tabPages[] = [
                 'title' => $tab_name,
                 'content' => $this->renderRows($rows),
               ];
 
             }
 
-            $col_html .= $this->adios->ui->Tabs(parent::params_merge(
-              [
-                'padding' => false,
-                // 'height' => "calc(100vh - 17em)",
-                'tabs' => $tab_pages
-              ],
-              $this->params['tab_params']
-            ))->render();
+            $col_html .= $this->addView('Tabs', [
+              'padding' => false,
+              'tabs' => $tabPages
+            ])->render();
 
           } else if (is_string($col['action'])) {
             $col_html .= $this->adios->renderAction($col['action'], $col['params']);
@@ -640,39 +636,13 @@ class Form extends \ADIOS\Core\UI\View
         $this->copyButton,
         $this->deleteButton
       ]);
-      // $window->addButtonToHeaderRight($this->deleteButton);
-      // $window->setSubtitle('abcd');
     }
-    
+
     return $this->applyDisplayMode((string) $html);
-
-    // if ('window' == $this->params['form_type']) {
-    //   $window_params = parent::params_merge(
-    //     [
-    //       'content' => $html,
-    //       'header' => $this->params['window']['header'],
-    //       'footer' => $this->params['window']['footer'],
-    //       'show_modal' => $this->params['show_modal'],
-    //       'form_close_click' => $this->params['close_button_params']['onclick'],
-    //       'uid' => $this->params['window_uid'],
-    //       'titleRaw' => $this->params['titleRaw'],
-    //       'title' => $this->params['title'],
-    //       'subtitle' => $this->params['subtitle'],
-    //     ],
-    //     $this->params['window_params']
-    //   );
-    //   $html = $this->adios->ui->Window($window_params)->render();
-    // } elseif ('desktop' == $this->params['form_type']) {
-    //   $html = parent::render('title') . $html;
-    // } elseif ('form' == $this->params['form_type']) {
-    //   $html = $html;
-    // }
-
-    // return $html;
   }
 
   public function Input($colName, $formData = NULL, $initiatingModel = NULL) {
-    return $this->adios->ui->Input(
+    return $this->addView('Input',
       array_merge(
         [
           'uid' => $this->params['uid'].'_'.$colName,

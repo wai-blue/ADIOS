@@ -20,7 +20,7 @@ class CSV extends \ADIOS\Core\Action {
     $model = $this->params['model'];
     $modelObject = $this->adios->getModel($model);
 
-    $fileUploadInput = new \ADIOS\Core\UI\Input(
+    $fileUploadInput = new \ADIOS\Core\Views\Input(
       $this->adios,
       [
         "uid" => "{$this->uid}_csv_file",
@@ -119,23 +119,23 @@ class CSV extends \ADIOS\Core\Action {
       </div>
     ";
 
-    $window = $this->adios->ui->Window([
+    $window = $this->adios->view->Window([
       'uid' => "{$this->uid}_window",
       'title' => $this->translate("Import from CSV"),
       'content' => $content,
     ]);
 
     $window->params['header'] = [
-      $this->adios->ui->button([
+      $this->adios->view->button([
         'type' => 'close',
         'onclick' => "{$this->uid}_close();",
       ]),
-      $this->adios->ui->button([
+      $this->adios->view->button([
         'fa_icon' => 'fas fa-file-alt',
         'text' => $this->translate("Download CSV file template"),
         'onclick' => "{$this->uid}_downloadTemplate();",
       ]),
-      $this->adios->ui->button([
+      $this->adios->view->button([
         'type' => 'save',
         'text' => $this->translate("Start import !"),
         'onclick' => "{$this->uid}_import();",

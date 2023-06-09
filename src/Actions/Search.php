@@ -41,15 +41,16 @@ class Search extends \ADIOS\Core\Action {
   }
 
   public function render() {
+     // TODO: Po zmene z \ADIOS\Core\UI na \ADIOS\Core\View toto sposobuje nekonecnu rekurziu
     $content = parent::render();
 
-    $window = $this->adios->ui->Window([
+    $window = $this->adios->view->Window([
       'title' => "Hľadanie: {$this->params['q']}",
       'content' => $content,
     ]);
 
     $window->params['header'] = [
-      $this->adios->ui->button([
+      $this->adios->view->Button([
         'type' => 'close',
         'onclick' => "window_close('{$window->params['uid']}');",
       ]),

@@ -14,6 +14,6 @@ namespace ADIOS\Actions\UI;
  */
 class Form extends \ADIOS\Core\Action {
   public function render() {
-    return $this->adios->ui->form($this->params)->render();
+    return $this->adios->view->Form($this->params)->render();
   }
 }
