@@ -11,7 +11,7 @@ $config["global_table_prefix"] = "{{ ConfigEnv.globalTablePrefix }}";
 
 // dirs & urls
 $config['rewrite_base']        = "{{ ConfigEnv.rewriteBase }}";
-$config["url"]                 = "http://{$_SERVER['HTTP_HOST']}/".trim($config['rewrite_base'], "/");
+$config["url"]                 = "https://{$_SERVER['HTTP_HOST']}/".trim($config['rewrite_base'], "/");
 
 // misc
 $config['devel_mode'] = TRUE;
