@@ -29,6 +29,16 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
     ]);
   }
 
+  public function indexes($columns = []) {
+    return parent::indexes([
+{% for colName, colDefinition in thisModel.config.indexes %}
+      "{{ colName }}" =>
+{{ varExport(colDefinition, "        ")|raw }}
+      ,
+{% endfor %}
+    ]);
+  }
+
 {% if (thisModel.config.formParams) %}
   public function formParams($data, $params) {
     $id = (int) $data["id"];
