@@ -132,12 +132,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * @var mixed
    */
   var $formSaveOriginalData = NULL;
+  protected string $fullTableSqlName = "";
 
   private static $allItemsCache = NULL;
 
   public $crossTableAssignments = [];
-
-  protected string $fullTableSqlName = "";
+  
+  public ?string $addButtonText = null;
+  public ?string $formSaveButtonText = null;
+  public ?string $formAddButtonText = null;
 
   /**
    * Creates instance of model's object.

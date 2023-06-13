@@ -232,7 +232,7 @@ class Table extends \ADIOS\Core\View
       $this->params['buttons']['add']['type'] = 'add';
     }
 
-    if (!empty($this->model->addButtonText)) {
+    if ($this->model->addButtonText != null) {
       $this->params['buttons']['add']['text'] = $this->model->addButtonText;
     }
   }
