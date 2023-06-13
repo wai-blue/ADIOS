@@ -1,25 +1,26 @@
 <?php
 
-namespace ADIOS\Widgets;
+namespace {{ thisWidget.namespace }};
 
-class {{ thisWidget.name }} extends \ADIOS\Core\Widget {
+class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
   public function init() {
     if ($this->adios->hasPermissionsForAction("{{ thisWidget.name }}")) {
-{% for sidebarItemTitle, subItems in thisWidget.config.sidebar %}
+{% for itemTitle, itemConfig in thisWidget.config.sidebar %}
       $this->adios->config['desktop']['sidebarItems'][] = [
-        "fa_icon" => "fas {{ thisWidget.config.faIcon }}",
-        "title" => "{{ sidebarItemTitle }}",
-{% if subItems is iterable %}
+        "fa_icon" => "fas {% if itemConfig.faIcon %}{{ itemConfig.faIcon }}{% else %}{{ thisWidget.config.faIcon }}{% endif %}",
+        "title" => "{{ itemTitle }}",
+{% if itemConfig.url %}
+        "onclick" => "desktop_update('{{ itemConfig.url }}');",
+{% endif %}
+{% if itemConfig.sub is iterable %}
         "sub" => [
-{% for subItemTitle, subItemUrl in subItems %}
+{% for subItemTitle, subItemConfig in itemConfig.sub %}
           [
             "title" => "{{ subItemTitle }}",
-            "onclick" => "desktop_update('{{ subItemUrl }}');",
+            "onclick" => "desktop_update('{{ subItemConfig.url }}');",
           ],
 {% endfor %}
         ],
-{% else %}
-        "onclick" => "desktop_update('{{ subItems }}');",
 {% endif %}
       ];
 {% endfor %}

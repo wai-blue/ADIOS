@@ -16,15 +16,15 @@ namespace ADIOS\Actions;
  * @package UI\Actions
  */
 class PasswordReset extends \ADIOS\Core\Action {
-  public static $requiresUserAuthentication = FALSE;
-  public static $hideDefaultDesktop = TRUE;
+  public static bool $requiresUserAuthentication = FALSE;
+  public static bool $hideDefaultDesktop = TRUE;
 
   public function preRender() {
     $token = $this->params["token"];
     $tokenStatus = "";
     $tokenError = "";
 
-    if ($token != NULL) { 
+    if ($token != NULL) {
       try {
         $userModel = $this->adios->getModel("Core/Models/User");
         $userModel->validateToken($token, false);
@@ -32,7 +32,7 @@ class PasswordReset extends \ADIOS\Core\Action {
       } catch (\ADIOS\Core\Exceptions\InvalidToken $e) {
         $tokenStatus = "fail";
         $tokenError = "Invalid token: ".$e->getMessage();
-      } 
+      }
     }
 
     return [

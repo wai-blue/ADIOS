@@ -14,14 +14,14 @@ namespace ADIOS\Actions\UI\Table\Export;
  * @package UI\Actions
  */
 class CSV extends \ADIOS\Core\Action {
-  public static $hideDefaultDesktop = TRUE;
+  public static bool $hideDefaultDesktop = TRUE;
 
   public function render() {
     $model = $this->adios->getModel($this->params['model']);
     $columns = $model->columns();
     $tableParams = json_decode(base64_decode($this->params['tableParams']), TRUE);
 
-    $uiTable = new \ADIOS\Core\UI\Table($this->adios, $tableParams);
+    $uiTable = new \ADIOS\Core\Views\Table($this->adios, $tableParams);
     $data = $uiTable->data;
     $firstRow = reset($data);
 

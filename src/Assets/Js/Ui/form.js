@@ -84,7 +84,7 @@
           ui_form_close(uid);
 
           if (reopen_after_save) {
-            window_render(data.modelUrlBase + '/' + data.id + '/Edit');
+            window_render(data.modelUrlBase + '/' + data.id + '/edit');
           }
 
           if (typeof params.aftersave_callback === 'function') {
@@ -178,7 +178,7 @@
   };
 
   function ui_form_close(uid) {
-    let is_ajax = $('#' + uid).attr('data-is-ajax') == '1';
+    let is_in_window = $('#' + uid).attr('data-is-in-window') == '1';
 
     var data = {};
     data.id = $('#' + uid).attr('data-id');
@@ -195,7 +195,7 @@
     }
 
     if (allowed) {
-      if (is_ajax) {
+      if (is_in_window) {
         $('.' + uid + '_button').attr('disabled', 'disabled');
 
         window_close(

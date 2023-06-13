@@ -14,6 +14,8 @@ class UserNotifications {
   const FORMAT_HTML = 1;
   const FORMAT_STRING = 2;
 
+  public ?\ADIOS\Core\Loader $adios = null;
+
   public $notifications = [];
 
   public function __construct(&$adios) {

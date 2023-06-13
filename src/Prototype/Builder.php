@@ -3,22 +3,53 @@
 namespace ADIOS\Prototype;
 
 class Builder {
-  protected $inputFile = "";
-  protected $outputFolder = "";
-  protected $prototype = [];
-  protected $twig = NULL;
-  protected $logFile = "";
+  protected string $inputPath = '';
+  protected string $inputFile = '';
+  protected string $outputFolder = '';
+  protected string $sessionSalt = '';
+  protected string $logFile = '';
+  protected string $adminPassword = '';
+
+  protected array $prototype = [];
+  protected ?\Twig\Loader\ArrayLoader $twigArrayLoader = NULL;
+  protected ?\Twig\Loader\FilesystemLoader $twigFilesystemLoader = NULL;
+  protected ?\Twig\Environment $twig = NULL;
   protected $logHandle = NULL;
 
-  public function __construct($inputFile, $outputFolder, $logFile) {
+  public function __construct(string $inputFile, string $outputFolder, string $sessionSalt, string $logFile) {
     $this->inputFile = $inputFile;
     $this->outputFolder = $outputFolder;
+    $this->sessionSalt = $sessionSalt;
     $this->logFile = $logFile;
 
-    $this->prototype = json_decode(file_get_contents($this->inputFile), TRUE);
+    if (empty($this->outputFolder)) {
+      throw new \Exception("No output folder for the prototype project provided.");
+    }
+
+    if (!is_dir($this->outputFolder)) {
+      throw new \Exception("Output folder does not exist.");
+    }
+
+    if (!is_file($this->inputFile)) {
+      $this->inputPath = $this->inputFile;
+      $this->inputFile = $this->inputFile . 'index.json';
+    } else {
+      $this->inputPath = pathinfo($this->inputFile, PATHINFO_DIRNAME) . '/';
+    }
+
+    if (!is_file($this->inputFile)) throw new \Exception('Input file not found: ' . $this->inputFile);
+
+    $this->prototype = $this->parsePrototypeFile($this->inputFile);
+
     $this->logHandle = fopen($this->logFile, "w");
 
-    $twigLoader = new \Twig\Loader\FilesystemLoader(__DIR__ . '/Templates');
+    if (!is_array($this->prototype["ConfigApp"])) throw new \Exception("ConfigApp is missing in prototype definition.");
+
+    $this->prototype["ConfigApp"]["sessionSalt"] = $this->sessionSalt;
+
+    $this->twigArrayLoader = new \Twig\Loader\ArrayLoader([]);
+    $this->twigFilesystemLoader = new \Twig\Loader\FilesystemLoader(__DIR__.'/Templates');
+    $twigLoader = new \Twig\Loader\ChainLoader([$this->twigFilesystemLoader, $this->twigArrayLoader]);
     $this->twig = new \Twig\Environment($twigLoader, [
       'cache' => FALSE,
       'debug' => TRUE,
@@ -33,6 +64,26 @@ class Builder {
         return $type;
       }
     ));
+    $this->twig->addFunction(new \Twig\TwigFunction(
+      'varExport',
+      function ($var, $indent = "") {
+        if (is_string($var)) {
+          $var = $var;
+        } else {
+          $var = $indent.str_replace("\n", "\n{$indent}", var_export($var, TRUE));
+        }
+
+        $var = preg_replace_callback(
+          '/\'{php (.*?) php}\'/',
+          function ($m) {
+            return str_replace('\\\'', '\'', $m[1]);
+          },
+          $var
+        );
+
+        return $var;
+      }
+    ));
 
     $this->checkPrototype();
   }
@@ -42,145 +93,327 @@ class Builder {
   }
 
   public function log($msg) {
-    echo $msg . "\n";
-    fwrite($this->logHandle, $msg . "\n");
+    fwrite($this->logHandle, $msg."\n");
   }
 
   public function checkPrototype() {
     if (!is_array($this->prototype)) throw new \Exception("Prototype definition must be an array.");
   }
 
+  public function setConfigEnv($configEnv) {
+    $this->prototype['ConfigEnv'] = $configEnv;
+  }
+
+  public function setAdminPassword($adminPassword) {
+    $this->adminPassword = $adminPassword;
+  }
+
   public function createFolder($folder) {
     $this->log("Creating folder {$folder}.");
-    @mkdir($this->outputFolder . "/" . $folder);
+    @mkdir($this->outputFolder."/".$folder);
+  }
+
+  public function removeFolder($dir) { 
+   if (is_dir($dir)) { 
+      $objects = scandir($this->outputFolder.DIRECTORY_SEPARATOR.$dir);
+      foreach ($objects as $object) {
+        if (in_array($object, [".", ".."])) continue;
+        if (
+          is_dir($dir.DIRECTORY_SEPARATOR.$object)
+          && !is_link($dir.DIRECTORY_SEPARATOR.$object)
+        ) {
+          $this->removeFolder($dir.DIRECTORY_SEPARATOR.$object);
+        } else {
+          unlink($dir.DIRECTORY_SEPARATOR.$object);
+        }
+      }
+      rmdir($this->outputFolder.DIRECTORY_SEPARATOR.$dir);
+    }
   }
 
   public function renderFile($fileName, $template, $twigParams = NULL) {
     $this->log("Rendering file {$fileName} from {$template}.");
     file_put_contents(
-      $this->outputFolder . "/" . $fileName,
+      $this->outputFolder."/".$fileName,
       $this->twig->render($template, $twigParams ?? $this->prototype)
     );
   }
 
   public function copyFile($srcFile, $destFile) {
     $this->log("Copying file {$srcFile} to {$destFile}.");
-    copy(
-      __DIR__ . "/Templates/" . $srcFile,
-      $this->outputFolder . "/" . $destFile
-    );
+    if (!file_exists(__DIR__."/Templates/".$srcFile)) {
+      throw new \Exception("File ".__DIR__."/Templates/{$srcFile} does not exist.");
+    } else {
+      copy(
+        __DIR__."/Templates/".$srcFile,
+        $this->outputFolder."/".$destFile
+      );
+    }
+
+  }
+
+  public function parsePrototypeFile(string $file): array {
+
+    if (!is_file($file)) {
+      throw new \Exception("Parse file: File not found ({$file})");
+    }
+
+    $format = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+
+    switch ($format) {
+      case 'json':
+        $prototype = json_decode(file_get_contents($file), TRUE);
+      break;
+      case 'yml':
+        $prototype = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($file));
+      break;
+      default:
+        $prototype = [];
+      break;
+    }
+
+    return $prototype;
   }
 
   public function buildPrototype() {
 
+    // delete folders if they exist
+    $this->removeFolder('src');
+    $this->removeFolder('log');
+    $this->removeFolder('tmp');
+    $this->removeFolder('upload');
+
     // create folder structure
-    $this->createFolder("src");
-    $this->createFolder("src/Assets");
-    $this->createFolder("src/Assets/images");
-    $this->createFolder("src/Widgets");
-    $this->createFolder("log");
-    $this->createFolder("tmp");
-    $this->createFolder("upload");
+    $this->createFolder('src');
+    $this->createFolder('src/Assets');
+    $this->createFolder('src/Assets/images');
+    $this->createFolder('src/Widgets');
+    $this->createFolder('log');
+    $this->createFolder('tmp');
+    $this->createFolder('upload');
 
     // render files
-    try {
-      $this->copyFile("src/Assets/images/favicon.png", "src/Assets/images/favicon.png");
-      $this->copyFile("src/Assets/images/logo.png", "src/Assets/images/logo.png");
-      $this->copyFile("src/Assets/images/login-screen.jpg", "src/Assets/images/login-screen.jpg");
-      $this->copyFile(".htaccess", ".htaccess");
-      $this->copyFile(".htaccess-subfolder", "log/.htaccess");
-      $this->copyFile(".htaccess-subfolder", "tmp/.htaccess");
-      $this->copyFile(".htaccess-subfolder", "upload/.htaccess");
+    $this->copyFile('src/Assets/images/favicon.png', 'src/Assets/images/favicon.png');
+    $this->copyFile('src/Assets/images/logo.png', 'src/Assets/images/logo.png');
+    $this->copyFile('src/Assets/images/login-screen.jpg', 'src/Assets/images/login-screen.jpg');
+    $this->copyFile('.htaccess', '.htaccess');
+    $this->copyFile('.htaccess-subfolder', 'log/.htaccess');
+    $this->copyFile('.htaccess-subfolder', 'tmp/.htaccess');
+    $this->copyFile('.htaccess-subfolder', 'upload/.htaccess');
 
-      $this->renderFile("src/ConfigApp.php", "src/ConfigApp.twig");
-      $this->renderFile("src/Init.php", "src/Init.twig");
+    $this->renderFile('src/Init.php', 'src/Init.twig');
 
-      $this->renderFile("index.php", "index.twig");
-      $this->renderFile("ConfigEnv.php", "ConfigEnv.twig");
-      $this->renderFile("install.php", "install.twig");
+    $this->renderFile('index.php', 'index.twig');
+    $this->renderFile('ConfigEnv.php', 'ConfigEnv.twig');
 
-      // render widgets
-      foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
-        $this->createFolder("src/Widgets/{$widgetName}");
-        $this->renderFile(
-          "src/Widgets/{$widgetName}/Main.php",
-          "src/Widgets/WidgetMain.twig",
-          array_merge(
+    $this->renderFile(
+      'install.php',
+      'install.twig',
+      [
+        'adminPassword' => $this->adminPassword ?? 'admin.'.rand(1000, 9999),
+      ]
+    );
+
+
+    $configWidgetsEnabled = [];
+    foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
+      if (strpos($widgetName, '/') !== FALSE) {
+        $tmpCfg = &$configWidgetsEnabled;
+        $tmpDirs = explode('/', $widgetName);
+        foreach ($tmpDirs as $tmpLevel => $tmpDir) {
+          if ($tmpLevel == count($tmpDirs) - 1) {
+            $tmpCfg[$tmpDir]['enabled'] = TRUE;
+          } else {
+            if (!isset($tmpCfg[$tmpDir])) {
+              $tmpCfg[$tmpDir] = NULL;
+            }
+            $tmpCfg = &$tmpCfg[$tmpDir];
+          }
+        }
+
+      } else {
+        $configWidgetsEnabled[$widgetName]['enabled'] = TRUE;
+      }
+    }
+
+    $this->renderFile("src/ConfigApp.php", "src/ConfigApp.twig", array_merge(
+      $this->prototype,
+      [
+        'configWidgetsEnabled' => $configWidgetsEnabled,
+      ]
+    ));
+
+    // TODO: spravit @import univerzalny, nie iba pre importovanie do Widgets.
+
+    // render widgets
+    foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
+      $this->log('Building widget ' . $widgetName);
+
+      $widgetNamespace = 'ADIOS\Widgets';
+      $widgetClassName = '';
+
+      if (strpos($widgetName, '/') !== FALSE) {
+        $widgetRootDir = 'src/Widgets';
+
+        $tmpDirs = explode('/', $widgetName);
+        
+        $widgetClassName = end($tmpDirs);
+
+        foreach ($tmpDirs as $level => $tmpDir) {
+          $widgetRootDir .= '/' . $tmpDir;
+
+          if ($level != count($tmpDirs) - 1) {
+            $widgetNamespace .= '\\' . $tmpDir;
+          }
+
+          $this->createFolder($widgetRootDir);
+        }
+      } else {
+        $widgetRootDir = 'src/Widgets/' . $widgetName;
+        $widgetClassName = $widgetName;
+      }
+
+      if (is_string($widgetConfig) && strpos($widgetConfig, "@import") !== false) {
+        $filePath = trim(str_replace("@import", "", $widgetConfig));
+        $this->log('Importing ' . $filePath);
+        $widgetConfig = $this->parsePrototypeFile($this->inputPath . $filePath);
+      }
+
+      $this->createFolder("src/Widgets/{$widgetName}");
+      $this->renderFile(
+        $widgetRootDir . '/Main.php',
+        'src/Widgets/WidgetMain.twig',
+        array_merge(
+          $this->prototype,
+          [
+            'thisWidget' => [
+              'name' => $widgetName,
+              'namespace' => $widgetNamespace,
+              'class' => $widgetClassName,
+              'config' => $widgetConfig
+            ]
+          ]
+        )
+      );
+
+      if (is_array($widgetConfig['models'] ?? NULL)) {
+        $this->createFolder($widgetRootDir . '/Models');
+        $this->createFolder($widgetRootDir . '/Models/Callbacks/');
+        foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
+          $tmpModelParams = array_merge(
             $this->prototype,
             [
-              "thisWidget" => [
-                "name" => $widgetName,
-                "config" => $widgetConfig
+              'thisWidget' => [
+                'name' => $widgetName,
+                'namespace' => $widgetNamespace,
+                'class' => $widgetClassName,
+                'config' => $widgetConfig
+              ],
+              'thisModel' => [
+                'name' => $modelName,
+                'config' => $modelConfig
               ]
             ]
-          )
-        );
+          );
 
-        if (is_array($widgetConfig['models'] ?? NULL)) {
-          $this->createFolder("src/Widgets/{$widgetName}/Models");
-          foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
-            $this->renderFile(
-              "src/Widgets/{$widgetName}/Models/{$modelName}.php",
-              "src/Widgets/Model.twig",
-              array_merge(
-                $this->prototype,
-                [
-                  "thisWidget" => [
-                    "name" => $widgetName,
-                    "config" => $widgetConfig
-                  ],
-                  "thisModel" => [
-                    "name" => $modelName,
-                    "config" => $modelConfig
-                  ]
-                ]
-              )
-            );
-          }
-        }
+          $this->renderFile(
+            $widgetRootDir . '/Models/' . $modelName . '.php',
+            'src/Widgets/Model.twig',
+            $tmpModelParams
+          );
 
-        if (is_array($widgetConfig['actions'] ?? NULL)) {
-          $this->createFolder("src/Widgets/{$widgetName}/Actions");
-          foreach ($widgetConfig['actions'] as $actionName => $actionConfig) {
-            $this->renderFile(
-              "src/Widgets/{$widgetName}/Actions/{$actionName}.php",
-              "src/Widgets/Actions/{$actionConfig['template']}.twig",
-              array_merge(
-                $this->prototype,
-                [
-                  "thisWidget" => [
-                    "name" => $widgetName,
-                    "config" => $widgetConfig
-                  ],
-                  "thisAction" => [
-                    "name" => $actionName,
-                    "config" => $actionConfig
-                  ]
-                ]
-              )
-            );
-          }
+          $this->renderFile(
+            $widgetRootDir . '/Models/Callbacks/' . $modelName . '.php',
+            'src/Widgets/ModelCallbacks.twig',
+            $tmpModelParams
+          );
         }
       }
-    } catch (\Twig\Error\SyntaxError $e) {
-      echo $e->getMessage();
+
+      if (is_array($widgetConfig['actions'] ?? NULL)) {
+        $this->createFolder($widgetRootDir . '/Actions');
+        $this->createFolder($widgetRootDir . '/Templates');
+        foreach ($widgetConfig['actions'] as $actionName => $actionConfig) {
+          if (isset($actionConfig['phpTemplate'])) {
+            $twigTemplate = 'src/Widgets/Actions/' . $actionConfig['phpTemplate'] . '.twig';
+          } else {
+            $twigTemplate = 'src/Widgets/Action.twig';
+
+            $this->copyFile(
+              'src/Widgets/Templates/' . $actionConfig['template'] . '.twig',
+              $widgetRootDir . '/Templates/' . $actionName . '.twig'
+            );
+          }
+
+          $tmpActionConfig = $actionConfig;
+          unset($tmpActionConfig['template']);
+          unset($tmpActionConfig['phpTemplate']);
+
+          $actionNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Actions';
+          $actionClassName = str_replace('/', '\\', $actionName);
+
+          if (strpos($actionName, '/') !== FALSE) {
+            $actionRootDir = $widgetRootDir . '/Actions';
+
+            $tmpDirs = explode('/', $actionName);
+            
+            $actionClassName = end($tmpDirs);
+
+            foreach ($tmpDirs as $level => $tmpDir) {
+              $actionRootDir .= '/' . $tmpDir;
+
+              if ($level != count($tmpDirs) - 1) {
+                $actionNamespace .= '\\' . $tmpDir;
+                $this->createFolder($actionRootDir);
+              }
+
+            }
+          } else {
+            $actionClassName = $actionName;
+          }
+
+
+
+          $this->renderFile(
+            $widgetRootDir . '/Actions/' . $actionName . '.php',
+            $twigTemplate,
+            array_merge(
+              $this->prototype,
+              [
+                'thisWidget' => [
+                  'name' => $widgetName,
+                  'namespace' => $widgetNamespace,
+                  'class' => $widgetClassName,
+                  'config' => $widgetConfig
+                ],
+                'thisAction' => [
+                  'name' => $actionName,
+                  'namespace' => $actionNamespace,
+                  'class' => $actionClassName,
+                  'config' => $tmpActionConfig
+                ]
+              ]
+            )
+          );
+        }
+      }
     }
   }
 
-  public function createEmptyDatabase() {
-    $this->log("Creating empty database.");
+  // public function createEmptyDatabase() {
+  //   $this->log("Creating empty database.");
 
-    $dbCfg = $this->prototype['ConfigEnv']['db'];
+  //   $dbCfg = $this->prototype['ConfigEnv']['db'];
 
-    $db = new \mysqli(
-      $dbCfg['host'],
-      $dbCfg['login'],
-      $dbCfg['password'],
-      "",
-      (int) ($dbCfg['port'] ?? 0)
-    );
+  //   $db = new \mysqli(
+  //     $dbCfg['host'],
+  //     $dbCfg['user'],
+  //     $dbCfg['password'],
+  //     "",
+  //     (int) ($dbCfg['port'] ?? 0)
+  //   );
 
-    $multiQuery = $this->twig->render("emptyDatabase.sql.twig", $this->prototype);
-    $db->multi_query($multiQuery);
-  }
+  //   $multiQuery = $this->twig->render("emptyDatabase.sql.twig", $this->prototype);
+  //   $db->multi_query($multiQuery);
+  // }
 }

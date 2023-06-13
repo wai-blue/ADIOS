@@ -15,8 +15,10 @@ namespace ADIOS\Actions\Desktop;
  *
  * @package UI\Actions\Desktop
  */
-class InstallUpgrades extends \ADIOS\Core\Action {
-  function render($params = []) {
+class InstallUpgrades extends \ADIOS\Core\Action
+{
+  function render($params = [])
+  {
     $contentHtml = "";
     $foreignKeysToInstall = [];
 
@@ -24,27 +26,27 @@ class InstallUpgrades extends \ADIOS\Core\Action {
       $model = $this->adios->getModel($modelName);
 
       if ($model->hasAvailableUpgrades()) {
-        $contentHtml .= "{$model->name}: ";
+        $contentHtml .= "{$model->fullName}: ";
         try {
           $model->installUpgrades();
           $contentHtml .= "<span style='color:green'>OK</span><br/>";
         } catch (\ADIOS\Core\Exceptions\DBException $e) {
-          $contentHtml .= "<span style='color:red'>".$e->getMessage()."</span><br/>";
+          $contentHtml .= "<span style='color:red'>" . $e->getMessage() . "</span><br/>";
         }
       } else if (!$model->hasSqlTable()) {
         $model->install();
         $foreignKeysToInstall[] = $modelName;
         $model->saveConfig('installed-version', max(array_keys($model->upgrades())));
-        $contentHtml .= "{$model->name}: <span style='color:green'>SQL table created</span><br/>";
+        $contentHtml .= "{$model->fullName}: <span style='color:green'>SQL table created</span><br/>";
       } else if (!$model->isInstalled()) {
-        $contentHtml .= "<span style='color:orange'>{$model->name}: Information about installed version was missing. Set to 0.</span><br/>";
+        $contentHtml .= "<span style='color:orange'>{$model->fullName}: Information about installed version was missing. Set to 0.</span><br/>";
         $model->saveConfig('installed-version', 0);
       }
     }
 
     foreach ($foreignKeysToInstall as $modelName) {
       $model = $this->adios->getModel($modelName);
-      $model->installForeignKeys();
+      $model->createSqlForeignKeys();
     }
 
     $html = "
@@ -53,7 +55,7 @@ class InstallUpgrades extends \ADIOS\Core\Action {
           <h6 class='m-0 font-weight-bold text-primary'>Installing upgrades</h6>
         </div>
         <div class='card-body'>
-          ".($contentHtml == "" ? "Nothing to be done here." : $contentHtml)."
+          " . ($contentHtml == "" ? "Nothing to be done here." : $contentHtml) . "
         </div>
       </div>
 

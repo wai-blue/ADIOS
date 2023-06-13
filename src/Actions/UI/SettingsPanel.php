@@ -16,6 +16,6 @@ namespace ADIOS\Actions\UI;
 class SettingsPanel extends \ADIOS\Core\Action {
   public function render() {
     $this->params['uid'] = $this->uid;
-    return $this->adios->ui->SettingsPanel($this->params)->render();
+    return $this->adios->view->SettingsPanel($this->params)->render();
   }
 }

@@ -13,11 +13,11 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
  * @package DataTypes
  */
-class DataTypeTimestamp extends DataType
+class DataTypeTimestamp extends \ADIOS\Core\DB\DataType
 {
     public function get_sql_create_string($table_name, $col_name, $params = [])
     {
-        $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : ' default CURRENT_TIMESTAMP ';
+        $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default CURRENT_TIMESTAMP ';
 
         return "`$col_name` timestamp {$params['sql_definitions']}";
     }
@@ -60,7 +60,7 @@ class DataTypeTimestamp extends DataType
         }
 
         $ts = strtotime($value);
-        $date_formatted = ('readable' == $format ? _readable_time($value) : date($format, $ts));
+        $date_formatted = date($format, $ts);
         $html = (0 == $ts ? '' : $date_formatted);
 
         return $html;

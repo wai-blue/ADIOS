@@ -1,0 +1,98 @@
+{
+  "ConfigApp": {
+    "applicationName": "Prototype CRM - One data model",
+    "defaultAction": "Home/Dashboard"
+  },
+  "Widgets": {
+    "Home": {
+      "faIcon": "fa-home",
+      "sidebar": {
+        "Home": {
+          "url": "Home/Dashboard"
+        }
+      },
+      "actions": {
+        "Dashboard": {
+          "template": "Dashboard"
+        }
+      }
+    },
+    "Customers": {
+      "faIcon": "fa-address-book",
+      "sidebar": {
+        "Customers": {
+          "url": "Customers"
+        }
+      },
+
+      "models": {
+        "Customer": {
+          "sqlName": "customers",
+          "urlBase": "Customers",
+          "tableTitle": "Customers",
+          "formTitleForInserting": "New customer",
+          "formTitleForEditing": "Edit customer",
+          "lookupSqlValue": "{%TABLE%}.name",
+          "columns": {
+            "name": {
+              "type": "varchar",
+              "title": "Customer name",
+              "show_column": true
+            },
+            "priority": {
+              "type": "int",
+              "title": "Priority",
+              "enum_values": ["High", "Middle", "Low"],
+              "show_column": true
+            }
+          },
+          "formParams": {
+            "templateForInserting": {
+              "columns": [
+                {
+                  "rows": [
+                    "name",
+                    "priority"
+                  ]
+                }
+              ]
+            },
+            "templateForEditing": {
+              "columns": [
+                {
+                  "class": "col-lg-8",
+                  "tabs": {
+                    "About customer": [
+                      "name",
+                      "priority"
+                    ]
+                  }
+                },
+                {
+                  "class": "col-lg-4",
+                  "rows": [
+                    {
+                      "action": "Customers/BestSoldProducts"
+                    },
+                    {
+                      "action": "Customers/MonthlyTurnover"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      },
+
+      "actions": {
+        "BestSoldProducts": {
+          "template": "BestSoldProducts"
+        },
+        "MonthlyTurnover": {
+          "template": "MonthlyTurnover"
+        }
+      }
+    }
+  }
+}

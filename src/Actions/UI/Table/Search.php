@@ -26,9 +26,9 @@ class Search extends \ADIOS\Core\Action
     ];
 
     $tabs = [];
-    $tabs[$model->name] = [];
-    $tabs[$model->name]["title"] = $model->tableTitle;
-    $tabs[$model->name]["items"] = [];
+    $tabs[$model->fullName] = [];
+    $tabs[$model->fullName]["title"] = $model->tableTitle;
+    $tabs[$model->fullName]["items"] = [];
 
     foreach ($model->columns() as $colName => $colDef) {
       if (!($colDef["is_searchable"] ?? TRUE)) continue;
@@ -36,16 +36,16 @@ class Search extends \ADIOS\Core\Action
       if ($colDef['type'] == "lookup") {
         $lookupModelName = $colDef['model'];
         $lookupModel = $this->adios->getModel($lookupModelName);
-        $tabs[$lookupModel->name] = [];
-        $tabs[$lookupModel->name]["title"] = $lookupModel->tableTitle;
+        $tabs[$lookupModel->fullName] = [];
+        $tabs[$lookupModel->fullName]["title"] = $lookupModel->tableTitle;
 
         foreach ($lookupModel->columns() as $lookupColName => $lookupColDef) {
           if (!($colDef["is_searchable"] ?? TRUE)) continue;
 
           if (!in_array($lookupColDef["type"], $unsearchableColumnTypes)) {
-            $tabs[$lookupModel->name]["items"][] = [
+            $tabs[$lookupModel->fullName]["items"][] = [
               "title" => $lookupColDef['title'],
-              "input" => $this->adios->ui->Input([
+              "input" => $this->adios->view->Input([
                 "model" => $this->params['model'],
                 "type" => $lookupColDef["type"],
                 "value" => NULL,
@@ -57,9 +57,9 @@ class Search extends \ADIOS\Core\Action
       }
 
       if (!in_array($colDef["type"], $unsearchableColumnTypes)) {
-        $tabs[$model->name]["items"][] = [
+        $tabs[$model->fullName]["items"][] = [
           "title" => $colDef['title'],
-          "input" => $this->adios->ui->Input([
+          "input" => $this->adios->view->Input([
             "model" => $colDef['model'] ?? $this->params['model'],
             "type" => $colDef["type"],
             "input_style" => "select",
@@ -73,7 +73,7 @@ class Search extends \ADIOS\Core\Action
     $content = "
       <div class='row'>
         <div class='col-12 col-lg-8'>
-          " . (new \ADIOS\Core\UI\Input\SettingsPanel(
+          " . (new \ADIOS\Core\Views\Inputs\SettingsPanel(
       $this->adios,
       $this->uid . "_settings_panel",
       [
@@ -192,23 +192,23 @@ class Search extends \ADIOS\Core\Action
       </script>
     ";
 
-    $window = $this->adios->ui->Window([
+    $window = $this->adios->view->Window([
       'uid' => "{$this->uid}_window",
       'title' => $this->translate("Search in") . ": " . hsc($searchGroup),
       'content' => $content,
     ]);
 
     $window->params['header'] = [
-      $this->adios->ui->button([
+      $this->adios->view->button([
         'type' => 'close',
         'onclick' => "{$this->uid}_close();",
       ]),
-      $this->adios->ui->button([
+      $this->adios->view->button([
         'type' => 'save',
         'text' => $this->translate('Apply'),
         'onclick' => "{$this->uid}_search();",
       ]),
-      $this->adios->ui->button([
+      $this->adios->view->button([
         'text' => $this->translate('Save this search'),
         'onclick' => "{$this->uid}_save_search();",
         'class' => 'btn-light btn-icon-split float-right',

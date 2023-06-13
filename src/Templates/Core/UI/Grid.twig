@@ -1,0 +1,96 @@
+<style>
+  #{{ uid }}_div {
+    display: grid;
+    grid-template-areas:
+      {% for layoutRow in view.layout %}
+        '{{ layoutRow }}'
+      {% endfor %}
+    ;
+    gap: 0.25em;
+    {# height: 100vh; #}
+    padding: 5px;
+
+    {{ view.style }}
+  }
+
+  {% if layoutSm %}
+    /* Small devices (landscape phones, 576px and up) */
+    @media (min-width: 576px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutSm %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutMd %}
+    /* Medium devices (tablets, 768px and up) */
+    @media (min-width: 768px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutMd %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutLg %}
+    /* Large devices (desktops, 992px and up) */
+    @media (min-width: 992px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutLg %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutXl %}
+    /* X-Large devices (large desktops, 1200px and up) */
+    @media (min-width: 1200px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutXl %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+  {% if layoutXXl %}
+    /* XX-Large devices (larger desktops, 1400px and up) */
+    @media (min-width: 1400px) {
+      #{{ uid }}_div {
+        grid-template-areas:
+          {% for layoutRow in view.layoutXXl %}
+            '{{ layoutRow }}'
+          {% endfor %}
+        !important;
+      }
+    }
+  {% endif %}
+
+
+  #{{ uid }}_div > div {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 0.25em;
+    box-shadow: 0 0 3px #ccc;
+    overflow: auto;
+  }
+
+  {% for areaName, areaParams in view.areas %}
+    .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; {{ areaParams.style }} }
+  {% endfor %}
+</style>
+
+<div id='{{ uid }}_div'>
+  {{ params.html|raw }}
+</div>

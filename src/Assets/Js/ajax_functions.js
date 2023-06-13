@@ -104,6 +104,19 @@ function _ajax_action_url(action, params) {
   return _action_url(action, params) + '&__IS_AJAX__=1';
 }
 
+function _ajax_post_data(params) {
+  let postData = {};
+  let paramsObj = _ajax_params(params);
+  
+  for (var i in paramsObj) {
+    postData[i] = paramsObj[i];
+  }
+
+  postData['__IS_AJAX__'] = '1';
+
+  return postData;
+}
+
 function _ajax_load(action, params, onsuccess){
   if (typeof params == 'undefined') params = new Object;
   if (typeof onsuccess == 'undefined') onsuccess = function(){};
@@ -170,9 +183,14 @@ function _ajax_check_result(res, use_alert = true){
 
 function _ajax_read(action, params, onsuccess, onreadystatechange) {
   $.ajax({
-    'type': 'GET',
-    'url': _APP_URL + '/' + _ajax_action_url(action, params),
+    // 'type': 'GET',
+    // 'url': _APP_URL + '/' + _ajax_action_url(action, params),
     // 'data': data,
+
+    'type': 'POST',
+    'url': _APP_URL + '/' + action,
+    'data': _ajax_post_data(params),
+
     'success': function(res) {
       try {
         var resJson = JSON.parse(res);
@@ -187,7 +205,26 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
       } else {
         switch (resJson.result) {
           case 'WARNING':
-            _alert(resJson.content);
+            _alert(
+              resJson.content,
+              {
+                title: 'Warning',
+                titleClass: 'bg-warning text-white',
+                contentClass: 'text-warning',
+                confirmButtonClass: 'btn-warning',
+              }
+            );
+          break;
+          case 'FATAL':
+            _alert(
+              resJson.content,
+              {
+                title: 'Fatal error',
+                titleClass: 'bg-danger text-white',
+                contentClass: 'text-danger',
+                confirmButtonClass: 'btn-danger',
+              }
+            );
           break;
           case 'SUCCESS':
           default:
@@ -227,8 +264,13 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
 
 function _ajax_read_json(action, params, onsuccess, onwarning, onfatal) {
   $.ajax({
-    'type': 'GET',
-    'url': _APP_URL + '/' + _ajax_action_url(action, params),
+    // 'type': 'GET',
+    // 'url': _APP_URL + '/' + _ajax_action_url(action, params),
+
+    'type': 'POST',
+    'url': _APP_URL + '/' + action,
+    'data': _ajax_post_data(params),
+
     'dataType': 'json',
     'success': function(res) {
       if (res.result == 'SUCCESS') {
@@ -269,9 +311,15 @@ function _ajax_sread(action, params, options) {
   try {
     var ret_val = trim(
       $.ajax({
-        type: 'GET',
         async: false,
-        url: _APP_URL + '/' + _ajax_action_url(action, params),
+
+        // type: 'GET',
+        // url: _APP_URL + '/' + _ajax_action_url(action, params),
+
+        'type': 'POST',
+        'url': _APP_URL + '/' + action,
+        'data': _ajax_post_data(params),
+
         success: options.success,
         complete: function() { desktop_console_update(); }
       }).responseText
@@ -330,7 +378,7 @@ function _ajax_supdate(action, params, selector, options) {
 
     var sel_opacity = $(selector).css('opacity');
     $(selector).animate({'opacity': 0.3}, 100);
-    adios_loading_start();
+    // adios_loading_start();
 
     setTimeout(function() {
       if (options.async) {
@@ -362,7 +410,7 @@ function _ajax_supdate(action, params, selector, options) {
 
           // }
 
-          adios_loading_stop();
+          // adios_loading_stop();
 
         });
       } else {
@@ -385,7 +433,7 @@ function _ajax_supdate(action, params, selector, options) {
             if (typeof options.success == 'function') setTimeout(options.success, 100);
           // }
 
-          adios_loading_stop();
+          // adios_loading_stop();
         }});
       };
     }, 10);
@@ -490,42 +538,42 @@ function _ajax_multiupload(options){
 
 };
 
-document.adios_loading_count = 0;
+// document.adios_loading_count = 0;
 
-function adios_loading_start() {
-  document.adios_loading_count ++;
-  clearTimeout(document.adios_loading_stop_timeout);
-  if (!document.adios_loading_started) {
-    document.adios_loading_started = 1;
-    $('.adios_menu').css('opacity', '0.87');
-    $('#adios_loader_line').css('width', '10%');
-    setTimeout(function(){ $('#adios_loader_line').css('transition', '10s').css('width', '90%'); }, 100);
-    document.body.style.cursor = "progress !important";
-  };
-};
+// function adios_loading_start() {
+//   document.adios_loading_count ++;
+//   clearTimeout(document.adios_loading_stop_timeout);
+//   if (!document.adios_loading_started) {
+//     document.adios_loading_started = 1;
+//     $('.adios_menu').css('opacity', '0.87');
+//     $('#adios_loader_line').css('width', '10%');
+//     setTimeout(function(){ $('#adios_loader_line').css('transition', '10s').css('width', '90%'); }, 100);
+//     document.body.style.cursor = "progress !important";
+//   };
+// };
 
-function adios_loading_stop() {
-  document.adios_loading_count --;
-  if (document.adios_loading_count == 0){
-    document.adios_loading_stop_timeout = setTimeout(function(){
-      document.adios_loading_started = 0;
-      $('.adios_menu').css('opacity', '1');
+// function adios_loading_stop() {
+//   document.adios_loading_count --;
+//   if (document.adios_loading_count == 0){
+//     document.adios_loading_stop_timeout = setTimeout(function(){
+//       document.adios_loading_started = 0;
+//       $('.adios_menu').css('opacity', '1');
 
-      $('#adios_loader_line').css('transition', '0.1s').css('width', '100%');
-      setTimeout(function(){
-        $('#adios_loader_line')
-          .hide()
-          .css('transition', '0s')
-          .css('width', '0%');
-      }, 200);
-      setTimeout(function() {
-        $('#adios_loader_line')
-          .css('transition', '0.1s')
-          .show()
-        ;
-      }, 220);
-      document.body.style.cursor = "inherit";
-    }, 50);
-  };
-};
+//       $('#adios_loader_line').css('transition', '0.1s').css('width', '100%');
+//       setTimeout(function(){
+//         $('#adios_loader_line')
+//           .hide()
+//           .css('transition', '0s')
+//           .css('width', '0%');
+//       }, 200);
+//       setTimeout(function() {
+//         $('#adios_loader_line')
+//           .css('transition', '0.1s')
+//           .show()
+//         ;
+//       }, 220);
+//       document.body.style.cursor = "inherit";
+//     }, 50);
+//   };
+// };
 

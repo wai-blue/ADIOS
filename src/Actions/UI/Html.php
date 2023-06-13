@@ -15,8 +15,8 @@ namespace ADIOS\Actions\UI;
  */
 class Html extends \ADIOS\Core\Action
 {
-    function render()
-    {
-        return $this->adios->ui->Html($this->params)->render();
-    }
+  function render()
+  {
+    return $this->adios->view->Html($this->params)->render();
+  }
 }

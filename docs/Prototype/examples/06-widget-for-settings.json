@@ -1,0 +1,185 @@
+{
+  "ConfigApp": {
+    "applicationName": "Prototype CRM - One data model",
+    "defaultAction": "Home/Dashboard"
+  },
+  "Widgets": {
+    "Home": {
+      "faIcon": "fa-home",
+      "sidebar": {
+        "Home": {
+          "url": "Home/Dashboard"
+        }
+      },
+      "actions": {
+        "Dashboard": {
+          "template": "Dashboard"
+        }
+      }
+    },
+    "Customers": {
+      "faIcon": "fa-address-book",
+      "sidebar": {
+        "Customers + Bids": {
+          "sub": {
+            "Customers": {
+              "url": "Customers"
+            },
+            "Bids": {
+              "url": "Bids"
+            }
+          }
+        }
+      },
+
+      "models": {
+        "Customer": {
+          "sqlName": "customers",
+          "urlBase": "Customers",
+          "tableTitle": "Customers",
+          "formTitleForInserting": "New customer",
+          "formTitleForEditing": "Edit customer",
+          "lookupSqlValue": "{%TABLE%}.name",
+          "columns": {
+            "name": {
+              "type": "varchar",
+              "title": "Customer name",
+              "show_column": true
+            },
+            "priority": {
+              "type": "int",
+              "title": "Priority",
+              "enum_values": ["High", "Middle", "Low"],
+              "show_column": true
+            }
+          },
+          "formParams": {
+            "templateForInserting": {
+              "columns": [
+                {
+                  "rows": [
+                    "name",
+                    "priority"
+                  ]
+                }
+              ]
+            },
+            "templateForEditing": {
+              "columns": [
+                {
+                  "class": "col-lg-8",
+                  "tabs": {
+                    "About customer": [
+                      "name",
+                      "priority"
+                    ],
+                    "Bids": {
+                      "action": "UI/Table",
+                      "params": {
+                        "model": "Widgets/Customers/Models/Bid",
+                        "foreignKey": "id_customer"
+                      }
+                    }
+                  }
+                },
+                {
+                  "class": "col-lg-4",
+                  "rows": [
+                    {
+                      "action": "Customers/BestSoldProducts"
+                    },
+                    {
+                      "action": "Customers/MonthlyTurnover"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "Bid": {
+          "sqlName": "bids",
+          "urlBase": "Bids",
+          "tableTitle": "Bids",
+          "formTitleForInserting": "New bid",
+          "formTitleForEditing": "Edit bid",
+          "lookupSqlValue": "{%TABLE%}.title",
+          "columns": {
+            "id_customer": {
+              "type": "lookup",
+              "title": "Customer",
+              "model": "Widgets/Customers/Models/Customer",
+              "show_column": true
+            },
+            "title": {
+              "type": "varchar",
+              "title": "Bid title",
+              "show_column": true
+            }
+          }
+        }
+      },
+
+      "actions": {
+        "BestSoldProducts": {
+          "template": "BestSoldProducts"
+        },
+        "MonthlyTurnover": {
+          "template": "MonthlyTurnover"
+        }
+      }
+    },
+    "Settings": {
+      "faIcon": "fa-cog",
+      "sidebar": {
+        "Settings": {
+          "sub": {
+            "Basic settings": {
+              "url": "Settings/Basic"
+            },
+            "Extended settings": {
+              "url": "Settings/Extended"
+            }
+          }
+        }
+      },
+      "actions": {
+        "Basic": {
+          "phpTemplate": "SettingsPanel",
+          "title": "Basic settings",
+          "items": [
+            {
+              "title": "Global Margin",
+              "input": { "type": "float", "unit": "%" },
+              "description": "The basic margin is applied to each product and at each sale."
+            },
+            {
+              "title": "Product-based margins",
+              "input": { "type": "int", "enum_values": ["Apply product-based margins globally", "Apply product-based margins per category"] },
+              "description": "Setting other margins according to selected purchase parameters."
+            },
+            {
+              "title": "Notify reduced cashflow",
+              "input": { "type": "bool" },
+              "description": "Notify when cashflow is significantly reduced."
+            }
+          ]
+        },
+        "Extended": {
+          "phpTemplate": "SettingsPanel",
+          "title": "Extended settings",
+          "items": [
+            {
+              "title": "Setting 1",
+              "button": { "text": "Go to extended settings #1", "fa_icon": "fas fa-home" }
+            },
+            {
+              "title": "Setting 2",
+              "button": { "text": "Go to extended settings #2", "fa_icon": "fas fa-home" }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -13,17 +13,17 @@ class Action {
   /**
    * Reference to ADIOS object
    */
-  protected $adios;
+  protected ?\ADIOS\Core\Loader $adios = null;
     
   /**
    * Shorthand for "global table prefix"
    */
-  protected $gtp = "";
+  protected string $gtp = "";
   
   /**
    * Array of parameters (arguments) passed to the action
    */
-  protected $params;
+  protected array $params;
   
   /**
    * Language dictionary for strings used in the action's output
@@ -33,29 +33,37 @@ class Action {
   /**
    * If set to FALSE, the rendered content of action is available to public
    */
-  public static $requiresUserAuthentication = TRUE;
+  public static bool $requiresUserAuthentication = TRUE;
 
   /**
    * If set to TRUE, the default ADIOS desktop will not be added to the rendered content
    */
-  public static $hideDefaultDesktop = FALSE;
+  public static bool $hideDefaultDesktop = FALSE;
 
   /**
    * If set to FALSE, the action will not be rendered in CLI
    */
-  public static $cliSAPIEnabled = TRUE;
+  public static bool $cliSAPIEnabled = TRUE;
 
   /**
    * If set to FALSE, the action will not be rendered in WEB
    */
-  public static $webSAPIEnabled = TRUE;
+  public static bool $webSAPIEnabled = TRUE;
 
   /**
-   * Full name of the model.
+   * Full name of the action.
    *
    * @var mixed
    */
-  var $name = "";
+
+  public array $dictionary = [];
+
+  public string $name = "";
+  public string $shortName = "";
+  public string $uid = "";
+  public string $action = "";
+  public string $myRootFolder = "";
+  public string $twigTemplate = "";
 
   function __construct(&$adios, $params = []) {
     $this->name = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
@@ -153,7 +161,10 @@ class Action {
 
     try {
       return $this->adios->twig->render(
-        $this->twigTemplate ?? str_replace("\\Actions\\", "\\Templates\\", static::class),
+        empty($this->twigTemplate)
+          ? str_replace("\\Actions\\", "\\Templates\\", static::class)
+          : $this->twigTemplate
+        ,
         $twigParams
       );
     } catch (\Twig\Error\RuntimeError $e) {

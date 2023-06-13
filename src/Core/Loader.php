@@ -20,7 +20,7 @@ spl_autoload_register(function ($class) {
 
   if (strpos($class, "ADIOS/") === FALSE) return;
 
-  $loaded = @include(dirname(__FILE__) . "/" . str_replace("ADIOS/", "", $class) . ".php");
+  $loaded = @include(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
 
   if (!$loaded) {
 
@@ -29,34 +29,36 @@ spl_autoload_register(function ($class) {
       $class = str_replace("ADIOS/Actions/", "", $class);
 
       // najprv skusim hladat core akciu
-      $tmp = dirname(__FILE__) . "/Actions/{$class}.php";
+      $tmp = dirname(__FILE__)."/Actions/{$class}.php";
       if (!@include($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
-        if (preg_match('/([\w]+)\/([\w\/]+)/', $class, $m)) {
-          if (!@include($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}/Actions/{$m[2]}.php")) {
-            // ak ani widgetovska, skusim plugin
-            $class = str_replace("Plugins/", "", $class);
-            $pathLeft = "";
-            $pathRight = "";
-            foreach (explode("/", $class) as $pathPart) {
-              $pathLeft .= ($pathLeft == "" ? "" : "/") . $pathPart;
-              $pathRight = str_replace("{$pathLeft}/", "", $class);
+        $widgetPath = explode("/", $class);
+        $widgetName = array_pop($widgetPath);
+        $widgetPath = join("/", $widgetPath);
 
-              $included = FALSE;
+        if (!@include($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+          // ak ani widgetovska, skusim plugin
+          $class = str_replace("Plugins/", "", $class);
+          $pathLeft = "";
+          $pathRight = "";
+          foreach (explode("/", $class) as $pathPart) {
+            $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
+            $pathRight = str_replace("{$pathLeft}/", "", $class);
 
-              foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
-                $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
-                if (is_file($file)) {
-                  include($file);
-                  $included = TRUE;
-                  break;
-                }
-              }
+            $included = FALSE;
 
-              if ($included) {
+            foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
+              $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
+              if (is_file($file)) {
+                include($file);
+                $included = TRUE;
                 break;
               }
+            }
+
+            if ($included) {
+              break;
             }
           }
         }
@@ -64,11 +66,11 @@ spl_autoload_register(function ($class) {
     } else if (preg_match('/ADIOS\/Widgets\/([\w\/]+)/', $class, $m)) {
 
       if (!isset($___ADIOSObject)) {
-        throw new Exception("ADIOS is not loaded.");
+        throw new \Exception("ADIOS is not loaded.");
       }
 
-      if (!@include($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}/Main.php")) {
-        include($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}.php");
+      if (!@include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
+        include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
       }
     } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
       foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
@@ -78,41 +80,58 @@ spl_autoload_register(function ($class) {
           break;
         }
       }
+    } else if (preg_match('/ADIOS\/Tests\/([\w\/]+)/', $class, $m)) {
+      $class = str_replace("ADIOS/Tests/", "", $class);
+
+      $testFile = __DIR__."/../../tests/{$class}.php";
+
+      if (is_file($testFile)) {
+        require($testFile);
+      } else {
+        require($___ADIOSObject->config['dir']."/../tests/{$class}.php");
+      }
+
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
-      include($___ADIOSObject->config['dir'] . "/{$m[1]}.php");
+      include(__DIR__."/../{$m[1]}.php");
     }
   }
 });
 
-
 // ADIOS Loader class
+#[\AllowDynamicProperties]
 class Loader
 {
   const ADIOS_MODE_FULL = 1;
   const ADIOS_MODE_LITE = 2;
 
-  public $gtp = "";
-  public $requestedURI = "";
-  public $requestedAction = "";
-  public $action = "";
-  public $uid = "";
+  public string $version = "";
+  public string $gtp = "";
+  public string $requestedURI = "";
+  public string $requestedAction = "";
+  public string $action = "";
+  public string $uid = "";
+  public string $srcDir = "";
 
-  public $logged = FALSE;
+  public $actionObject;
 
-  public $config = [];
-  public $routing = [];
-  public $widgets = [];
+  public bool $logged = FALSE;
 
-  public $pluginFolders = [];
-  public $pluginObjects = [];
-  public $plugins = [];
+  public array $config = [];
+  public array $routing = [];
+  public array $widgets = [];
 
-  public $modelObjects = [];
-  public $models = [];
+  public array $widgetsInstalled = [];
 
-  public $userLogged = FALSE;
+  public array $pluginFolders = [];
+  public array $pluginObjects = [];
+  public array $plugins = [];
+
+  public array $modelObjects = [];
+  public array $models = [];
+
+  public bool $userLogged = FALSE;
   public $userProfile = NULL;
-  public $userPasswordReset = [];
+  public array $userPasswordReset = [];
 
   public $db = NULL;
   public $twig = NULL;
@@ -121,20 +140,26 @@ class Loader
   public $locale = NULL;
   public $email = NULL;
   public $userNotifications = NULL;
+  public $permissions = NULL; // objekt triedy Permissions
+  public $test = NULL;
 
-  public $assetsUrlMap = [];
+  public array $assetsUrlMap = [];
 
-  public $actionNestingLevel = 0;
-  public $actionStack = [];
+  public int $actionNestingLevel = 0;
+  public array $actionStack = [];
 
-  public $dictionaryFilename = "Core-Loader";
+  public string $dictionaryFilename = "Core-Loader";
 
-  public $factories = [];
+  public array $classFactories = [];
 
-  public $forceUserLogout = FALSE;
+  public bool $forceUserLogout = FALSE;
 
-  public function __construct($config = NULL, $mode = NULL, $forceUserLogout = FALSE)
-  {
+  public string $desktopContentAction = "";
+  public array $desktopContentActionParams = [];
+
+  public string $widgetsDir = "";
+
+  public function __construct($config = NULL, $mode = NULL, $forceUserLogout = FALSE) {
 
     global $___ADIOSObject;
     $___ADIOSObject = $this;
@@ -143,26 +168,39 @@ class Loader
       $mode = self::ADIOS_MODE_FULL;
     }
 
+    $this->test = new \ADIOS\Core\Test($this);
+
     if (is_array($config)) {
       $this->config = $config;
     }
 
-    $this->gtp = $this->config['global_table_prefix'];
-    $this->requestedAction = $_REQUEST['action'];
+    $this->widgetsDir = $config['widgets_dir'] ?? "";
+
+    $this->version = file_get_contents(__DIR__."/../version.txt");
+
+    $this->gtp = $this->config['global_table_prefix'] ?? "";
+    $this->requestedAction = $_REQUEST['action'] ?? "";
     $this->forceUserLogout = $forceUserLogout;
+
+    if (empty($this->config['dir'])) $this->config['dir'] = "";
+    if (empty($this->config['url'])) $this->config['url'] = "";
+    if (empty($this->config['rewrite_base'])) $this->config['rewrite_base'] = "";
+
+    $this->srcDir = realpath(__DIR__."/..");
 
     if (empty($this->config['system_table_prefix'])) {
       $this->config['system_table_prefix'] = "adios";
     }
 
+    if (empty($this->config['session_salt'])) {
+      $this->config['session_salt'] = rand(100000, 999999);
+    }
+
+    $this->config['request_uri'] = $_SERVER['REQUEST_URI'] ?? "";
+
     // load available languages
-    if (!is_array($this->config['available_languages'])) {
+    if (empty($this->config['available_languages'] ?? [])) {
       $this->config['available_languages'] = ["en"];
-      foreach (scandir("{$this->config["dir"]}/Lang") as $tmpLang) {
-        if (!in_array($tmpLang, [".", ".."]) && is_dir("{$this->config["dir"]}/Lang/{$tmpLang}")) {
-          $this->config['available_languages'][] = $tmpLang;
-        }
-      }
     }
 
     // pouziva sa ako vseobecny prefix niektorych session premennych,
@@ -170,21 +208,21 @@ class Loader
     if (!defined('_ADIOS_ID')) {
       define(
         '_ADIOS_ID',
-        $this->config['session_salt'] . "-" . substr(md5($this->config['session_salt']), 0, 5)
+        $this->config['session_salt']."-".substr(md5($this->config['session_salt']), 0, 5)
       );
     }
 
     // ak requestuje nejaky Asset (css, js, image, font), tak ho vyplujem a skoncim
     if ($this->config['rewrite_base'] == "/") {
-      $this->requestedURI = ltrim($_SERVER['REQUEST_URI'], "/");
+      $this->requestedURI = ltrim($this->config['request_uri'], "/");
     } else {
-      $this->requestedURI = str_replace($this->config['rewrite_base'], "", $_SERVER['REQUEST_URI']);
+      $this->requestedURI = str_replace($this->config['rewrite_base'], "", $this->config['request_uri']);
     }
 
-    $this->assetsUrlMap["adios/assets/css/"] = __DIR__ . "/../Assets/Css/";
-    $this->assetsUrlMap["adios/assets/js/"] = __DIR__ . "/../Assets/Js/";
-    $this->assetsUrlMap["adios/assets/images/"] = __DIR__ . "/../Assets/Images/";
-    $this->assetsUrlMap["adios/assets/webfonts/"] = __DIR__ . "/../Assets/Webfonts/";
+    $this->assetsUrlMap["adios/assets/css/"] = __DIR__."/../Assets/Css/";
+    $this->assetsUrlMap["adios/assets/js/"] = __DIR__."/../Assets/Js/";
+    $this->assetsUrlMap["adios/assets/images/"] = __DIR__."/../Assets/Images/";
+    $this->assetsUrlMap["adios/assets/webfonts/"] = __DIR__."/../Assets/Webfonts/";
     $this->assetsUrlMap["adios/assets/widgets/"] = function ($adios, $url) {
       $url = str_replace("adios/assets/widgets/", "", $url);
       preg_match('/(.*?)\/(.+)/', $url, $m);
@@ -192,7 +230,7 @@ class Loader
       $widget = $m[1];
       $asset = $m[2];
 
-      return ADIOS_WIDGETS_DIR . "/{$widget}/Assets/{$asset}";
+      return $adios->widgetsDir."/{$widget}/Assets/{$asset}";
     };
     $this->assetsUrlMap["adios/assets/plugins/"] = function ($adios, $url) {
       $url = str_replace("adios/assets/plugins/", "", $url);
@@ -215,21 +253,21 @@ class Loader
     try {
 
       // inicializacia debug konzoly
-      $consoleFactoryClass = $this->factories['console'] ?? \ADIOS\Core\Console::class;
+      $consoleFactoryClass = $this->classFactories['console'] ?? \ADIOS\Core\Console::class;
       $this->console = new $consoleFactoryClass($this);
       $this->console->clearLog("timestamps", "info");
 
-      // global $gtp;
+      // global $gtp; - pouziva sa v basic_functions.php
 
-      $gtp = $this->config['global_table_prefix'];
+      $gtp = $this->gtp;
 
       // nacitanie zakladnych ADIOS lib suborov
-      require_once dirname(__FILE__) . "/Lib/basic_functions.php";
+      require_once dirname(__FILE__)."/Lib/basic_functions.php";
 
       if ($mode == self::ADIOS_MODE_FULL) {
 
         // inicializacia Twigu
-        include(dirname(__FILE__) . "/Lib/Twig.php");
+        include(dirname(__FILE__)."/Lib/Twig.php");
 
         $eloquentCapsule = new \Illuminate\Database\Capsule\Manager;
 
@@ -238,7 +276,7 @@ class Loader
           "host"      => $this->config['db_host'],
           "port"      => $this->config['db_port'],
           "database"  => $this->config['db_name'],
-          "username"  => $this->config['db_login'],
+          "username"  => $this->config['db_user'],
           "password"  => $this->config['db_password'],
           "charset"   => 'utf8mb4',
           "collation" => 'utf8mb4_unicode_ci',
@@ -306,24 +344,24 @@ class Loader
       }
 
       // inicializacia locale objektu
-      $localeFactoryClass = $this->factories['locale'] ?? \ADIOS\Core\Locale::class;
+      $localeFactoryClass = $this->classFactories['locale'] ?? \ADIOS\Core\Locale::class;
       $this->locale = new $localeFactoryClass($this);
 
       // inicializacia objektu notifikacii
-      $userNotificationsFactoryClass = $this->factories['userNotifications'] ?? \ADIOS\Core\UserNotifications::class;
+      $userNotificationsFactoryClass = $this->classFactories['userNotifications'] ?? \ADIOS\Core\UserNotifications::class;
       $this->userNotifications = new $userNotificationsFactoryClass($this);
 
       // inicializacia mailera
-      $emailFactoryClass = $this->factories['userNotifications'] ?? \ADIOS\Core\Email::class;
+      $emailFactoryClass = $this->classFactories['userNotifications'] ?? \ADIOS\Core\Email::class;
       $this->email = new $emailFactoryClass($this);
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
-      $dbFactoryClass = $this->factories['db'] ?? DB::class;
+      $dbFactoryClass = $this->classFactories['db'] ?? \ADIOS\Core\DB\Providers\MySQLi::class;
       $this->db = new $dbFactoryClass($this, [
         'db_host' => $this->getConfig('db_host', ''),
         'db_port' => $this->getConfig('db_port', ''),
-        'db_login' => $this->getConfig('db_login', ''),
+        'db_user' => $this->getConfig('db_user', ''),
         'db_password' => $this->getConfig('db_password', ''),
         'db_name' => $this->getConfig('db_name', ''),
         'db_codepage' => $this->getConfig('db_codepage', 'utf8mb4'),
@@ -340,9 +378,9 @@ class Loader
           $this->config['language'] = $_SESSION[_ADIOS_ID]['language'];
         }
 
-        if (is_array($this->adios->config['available_languages'])) {
-          if (!in_array($this->params['language'], $this->adios->config['available_languages'])) {
-            $this->config['language'] = reset($this->adios->config['available_languages']);
+        if (is_array($this->config['available_languages'])) {
+          if (!in_array($this->config['language'], $this->config['available_languages'])) {
+            $this->config['language'] = reset($this->config['available_languages']);
           }
         }
 
@@ -356,6 +394,9 @@ class Loader
       $this->finalizeConfig();
 
       $this->onAfterConfigLoaded();
+
+      // object pre kontrolu permissions
+      $this->permissions = new \ADIOS\Core\Permissions($this);
 
       // timezone
       date_default_timezone_set($this->config['timezone']);
@@ -398,7 +439,7 @@ class Loader
                 $this->email->addTo($email);
                 $this->email->setSubject(
                   $config["application_name"].
-                  " - " . $this->translate("password reset", $this)
+                  " - ".$this->translate("password reset", $this)
                 );
                 $this->email->setHtmlMessage("
                   <h4>
@@ -477,21 +518,25 @@ class Loader
 
         // user authentication
         if ($this->forceUserLogout) unset($_SESSION[_ADIOS_ID]['userProfile']);
+
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
           $adiosUserModel = $this->getModel("Core/Models/User");
-          $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
-          $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
+          // $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
+          // $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
-          $user = reset($this->db->get_all_rows_query("
-            SELECT *
-            FROM `{$adiosUserModel->getFullTableSQLName()}`
-            WHERE `id` = " . (int) $_SESSION[_ADIOS_ID]['userProfile']['id'] . "
-            LIMIT 1
-          "));
+
+          $user = reset(
+            $this->db->select($adiosUserModel)
+              ->columns([\ADIOS\Core\DB\Query::allColumnsWithoutLookups])
+              ->where([
+                ['id', '=', (int) $_SESSION[_ADIOS_ID]['userProfile']['id']]
+              ])
+              ->fetch()
+          );
 
           if (
-            $user['is_active'] != 1 ||
-            $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
+            $user['is_active'] != 1
+            // || $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
           ) {
             unset($_SESSION[_ADIOS_ID]['userProfile']);
             $this->userProfile = [];
@@ -501,11 +546,11 @@ class Loader
             $this->userLogged = TRUE;
             $clientIp = $this->getClientIpAddress();
             $this->db->query("
-              UPDATE `{$adiosUserModel->getFullTableSQLName()}`
+              UPDATE `{$adiosUserModel->getFullTableSqlName()}`
               SET
-                `last_access_time` = '" . date('Y-m-d H:i:s') . "',
+                `last_access_time` = '".date('Y-m-d H:i:s')."',
                 `last_access_ip` = '{$clientIp}'
-              WHERE `id` = " . (int)$this->userProfile['id'] . ";
+              WHERE `id` = ".(int)$this->userProfile['id'].";
             ");
           }
         } else if ($this->authUser(
@@ -525,13 +570,6 @@ class Loader
         // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
         $this->onUserAuthorised();
 
-
-        // user specific config
-        // TODO: toto treba prekontrolovat, velmi pravdepodobne to nefunguje
-        // if (is_array($this->config['user'][$this->userProfile['id']])) {
-        //   unset($this->config['user'][$this->userProfile['id']]['language']);
-        //   $this->mergeConfig($this->config['user'][$this->userProfile['id']]);
-        // }
       }
 
       if ($mode == self::ADIOS_MODE_FULL) {
@@ -540,9 +578,7 @@ class Loader
 
         $this->onBeforeWidgetsLoaded();
 
-        foreach ($this->config['widgets'] as $w_name => $w_config) {
-          $this->addWidget($w_name);
-        }
+        $this->addAllWidgets($this->config['widgets']);
 
         $this->onAfterWidgetsLoaded();
 
@@ -554,7 +590,7 @@ class Loader
 
         // inicializacia twigu
 
-        $twigLoaderFactoryClass = $this->factories['twigLoader'] ?? \ADIOS\Core\Lib\TwigLoader::class;
+        $twigLoaderFactoryClass = $this->classFactories['twigLoader'] ?? \ADIOS\Core\Lib\TwigLoader::class;
         $twigLoader = new $twigLoaderFactoryClass($this);
         $this->twig = new \Twig\Environment($twigLoader, array(
           'cache' => FALSE,
@@ -568,56 +604,58 @@ class Loader
             return $this->translate($string, $this->actionObject);
           }
         ));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosUI', function ($uid, $componentName, $componentParams) {
-          if (!is_array($componentParams)) {
-            $componentParams = array();
+        $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
+          if (!is_array($params)) {
+            $params = [];
           }
-          return $this->ui->create("{$componentName}#{$uid}", $componentParams)->render();
+          return $this->view->create(
+            $view . (empty($uid) ? '' : '#' . $uid),
+            $params
+          )->render();
         }));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
           return $this->renderAction($action, $params);
         }));
 
         // inicializacia UI wrappera
-        $uiFactoryClass = $this->factories['uid'] ?? \ADIOS\Core\UI::class;
-        $this->ui = new $uiFactoryClass($this, []);
+        // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\View::class;
+        // $this->ui = new $uiFactoryClass($this);
+
+        // inicializacia UI wrappera
+        $viewFactoryClass = $this->classFactories['view'] ?? \ADIOS\Core\View::class;
+        $this->view = new $viewFactoryClass($this);
       }
 
       $this->dispatchEventToPlugins("onADIOSAfterInit", ["adios" => $this]);
     } catch (\Exception $e) {
-      exit("ADIOS INIT failed. " . $e->getMessage());
+      exit("ADIOS INIT failed: [".get_class($e)."] ".$e->getMessage());
     }
 
     return $this;
   }
 
-  public function isAjax()
-  {
+  public function isAjax() {
     return isset($_REQUEST['__IS_AJAX__']) && $_REQUEST['__IS_AJAX__'] == "1";
   }
 
-  public function isNestedAction()
-  {
+  public function isNestedAction() {
     return ($this->actionNestingLevel > 2);
   }
 
-  public function isWindow()
-  {
+  public function isWindow() {
     return isset($_REQUEST['__IS_WINDOW__']) && $_REQUEST['__IS_WINDOW__'] == "1";
   }
 
   //////////////////////////////////////////////////////////////////////////////
   // ROUTING
 
-  public function setRouting($routing)
-  {
+  public function setRouting($routing) {
     if (is_array($routing)) {
       $this->routing = $routing;
     }
   }
 
-  public function addRouting($routing)
-  {
+  public function addRouting($routing) {
     if (is_array($routing)) {
       $this->routing = array_merge($this->routing, $routing);
     }
@@ -626,14 +664,32 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // WIDGETS
 
-  public function addWidget($widgetName)
-  {
+  public function addWidget($widgetName) {
     if (!isset($this->widgets[$widgetName])) {
       try {
-        $widgetClassName = "\\ADIOS\\Widgets\\{$widgetName}";
+        $widgetClassName = "\\ADIOS\\Widgets\\".str_replace("/", "\\", $widgetName);
+        if (!class_exists($widgetClassName)) {
+          throw new \Exception("Widget {$widgetName} not found.");
+        }
         $this->widgets[$widgetName] = new $widgetClassName($this);
+
+        $this->addRouting($this->widgets[$widgetName]->routing());
       } catch (\Exception $e) {
-        exit("Failed to load widget {$widgetName}: " . $e->getMessage());
+        exit("Failed to load widget {$widgetName}: ".$e->getMessage());
+      }
+    }
+  }
+
+  public function addAllWidgets(array $widgets = [], $path = "") {
+    foreach ($widgets as $wName => $w_config) {
+      $fullWidgetName = ($path == "" ? "" : "{$path}/").$wName;
+      if (isset($w_config['enabled']) && $w_config['enabled'] === TRUE) {
+        $this->addWidget($fullWidgetName);
+      } else {
+        // ak nie je enabled, moze to este byt dalej vetvene
+        if (is_array($w_config)) {
+          $this->addAllWidgets($w_config, $fullWidgetName);
+        }
       }
     }
   }
@@ -641,16 +697,14 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // MODELS
 
-  public function registerModel($modelName)
-  {
+  public function registerModel($modelName) {
     if (!in_array($modelName, $this->models)) {
       $this->models[] = $modelName;
     }
   }
 
-  public function getModelClassName($modelName)
-  {
-    return "\\ADIOS\\" . str_replace("/", "\\", $modelName);
+  public function getModelClassName($modelName) {
+    return "\\ADIOS\\".str_replace("/", "\\", $modelName);
   }
 
   /**
@@ -661,14 +715,16 @@ class Loader
    * @throws \ADIOS\Core\Exception If $modelName is not available.
    * @return object Instantiated object of the model.
    */
-  public function getModel(string $modelName)
-  {
+  public function getModel(string $modelName): \ADIOS\Core\Model {
     if (!isset($this->modelObjects[$modelName])) {
       try {
         $modelClassName = $this->getModelClassName($modelName);
         $this->modelObjects[$modelName] = new $modelClassName($this);
+
+        $this->addRouting($this->modelObjects[$modelName]->routing());
+
       } catch (\Exception $e) {
-        throw new \ADIOS\Core\Exceptions\GeneralException("Can't find model '{$modelName}'. " . $e->getMessage());
+        throw new \ADIOS\Core\Exceptions\GeneralException("Can't find model '{$modelName}'. ".$e->getMessage());
       }
     }
 
@@ -678,36 +734,31 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // PLUGINS
 
-  public function registerPluginFolder($folder)
-  {
+  public function registerPluginFolder($folder) {
     if (is_dir($folder) && !in_array($folder, $this->pluginFolders)) {
       $this->pluginFolders[] = $folder;
     }
   }
 
-  public function getPluginClassName($pluginName)
-  {
-    return "\\ADIOS\\Plugins\\" . str_replace("/", "\\", $pluginName);
+  public function getPluginClassName($pluginName) {
+    return "\\ADIOS\\Plugins\\".str_replace("/", "\\", $pluginName);
   }
 
-  public function getPlugin($pluginName)
-  {
+  public function getPlugin($pluginName) {
     return $this->pluginObjects[$pluginName] ?? NULL;
   }
 
-  public function getPlugins()
-  {
+  public function getPlugins() {
     return $this->pluginObjects;
   }
 
-  public function loadAllPlugins($pluginFolder, $subFolder = "")
-  {
-    $folder = $pluginFolder . (empty($subFolder) ? "" : "/{$subFolder}");
+  public function loadAllPlugins($pluginFolder, $subFolder = "") {
+    $folder = $pluginFolder.(empty($subFolder) ? "" : "/{$subFolder}");
 
     foreach (scandir($folder) as $file) {
       if (strpos($file, ".") !== FALSE) continue;
 
-      $fullPath = (empty($subFolder) ? "" : "{$subFolder}/") . $file;
+      $fullPath = (empty($subFolder) ? "" : "{$subFolder}/").$file;
 
       if (
         is_dir("{$folder}/{$file}")
@@ -723,7 +774,7 @@ class Loader
             $this->pluginObjects[$fullPath] = new $tmpPluginClassName($this);
           }
         } catch (\Exception $e) {
-          exit("Failed to load plugin {$fullPath}: " . $e->getMessage());
+          exit("Failed to load plugin {$fullPath}: ".$e->getMessage());
         }
       }
     }
@@ -732,8 +783,7 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // TRANSLATIONS
 
-  public function loadDictionary($object, $toLanguage = "")
-  {
+  public function loadDictionary($object, $toLanguage = "") {
     $dictionary = [];
     $dictionaryFolder = $object->dictionaryFolder ?? "";
 
@@ -765,8 +815,7 @@ class Loader
     return $dictionary;
   }
 
-  public function translate($string, $object, $toLanguage = "")
-  {
+  public function translate($string, $object, $toLanguage = "") {
     if (empty($toLanguage)) {
       $toLanguage = $this->config['language'] ?? "en";
     }
@@ -798,17 +847,16 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // MISCELANEOUS
 
-  public function renderAssets()
-  {
+  public function renderAssets() {
     $cachingTime = 3600;
-    $headerExpires = "Expires: " . gmdate("D, d M Y H:i:s", time() + $cachingTime) . " GMT";
+    $headerExpires = "Expires: ".gmdate("D, d M Y H:i:s", time() + $cachingTime)." GMT";
     $headerCacheControl = "Cache-Control: max-age={$cachingTime}";
 
     if ($this->requestedURI == "adios/cache.css") {
       $cssCache = $this->renderCSSCache();
 
       header("Content-type: text/css");
-      header("ETag: " . md5($cssCache));
+      header("ETag: ".md5($cssCache));
       header($headerExpires);
       header("Pragma: cache");
       header($headerCacheControl);
@@ -821,7 +869,7 @@ class Loader
       $cachingTime = 3600;
 
       header("Content-type: text/js");
-      header("ETag: " . md5($jsCache));
+      header("ETag: ".md5($jsCache));
       header($headerExpires);
       header("Pragma: cache");
       header($headerCacheControl);
@@ -831,12 +879,12 @@ class Loader
       exit();
     } else {
       foreach ($this->assetsUrlMap as $urlPart => $mapping) {
-        if (preg_match('/^' . str_replace("/", "\\/", $urlPart) . '/', $this->requestedURI, $m)) {
+        if (preg_match('/^'.str_replace("/", "\\/", $urlPart).'/', $this->requestedURI, $m)) {
 
           if ($mapping instanceof \Closure) {
             $sourceFile = $mapping($this, $this->requestedURI);
           } else {
-            $sourceFile = $mapping . str_replace($urlPart, "", $this->requestedURI);
+            $sourceFile = $mapping.str_replace($urlPart, "", $this->requestedURI);
           }
 
           $ext = strtolower(pathinfo($this->requestedURI, PATHINFO_EXTENSION));
@@ -888,8 +936,7 @@ class Loader
     }
   }
 
-  public function install()
-  {
+  public function install() {
     $this->console->clear();
 
     $installationStart = microtime(TRUE);
@@ -912,7 +959,7 @@ class Loader
         $start = microtime(TRUE);
 
         $model->install();
-        $this->console->info("Model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2) . " msec"]);
+        $this->console->info("Model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
       } catch (\ADIOS\Core\Exceptions\ModelInstallationException $e) {
         $this->console->warning("Model {$modelName} installation skipped.", ["exception" => $e->getMessage()]);
       } catch (\Exception $e) {
@@ -932,8 +979,8 @@ class Loader
 
         $start = microtime(TRUE);
 
-        $model->installForeignKeys();
-        $this->console->info("Indexes for model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2) . " msec"]);
+        $model->createSqlForeignKeys();
+        $this->console->info("Indexes for model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
       } catch (\Exception $e) {
         $this->console->error("Indexes installation for model {$modelName} failed.", ["exception" => $e->getMessage()]);
       } catch (\Illuminate\Database\QueryException $e) {
@@ -947,7 +994,7 @@ class Loader
       try {
         if ($widget->install()) {
           $this->widgetsInstalled[$widget->name] = TRUE;
-          $this->console->info("Widget {$widget->name} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2) . " msec"]);
+          $this->console->info("Widget {$widget->name} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
         } else {
           $this->console->warning("Model {$modelName} installation skipped.");
         }
@@ -966,10 +1013,25 @@ class Loader
 
     $this->db->commit();
 
-    $this->console->info("Core installation done in " . round((microtime(true) - $installationStart), 2) . " seconds.");
+    $this->console->info("Core installation done in ".round((microtime(true) - $installationStart), 2)." seconds.");
   }
 
+  public function replaceRouteVariables($routeParams, $variables) {
+    if (is_array($routeParams)) {
+      foreach ($routeParams as $paramName => $paramValue) {
 
+        if (is_array($paramValue)) {
+          $routeParams[$paramName] = $this->replaceRouteVariables($paramValue, $variables);
+        } else {
+          foreach ($variables as $k2 => $v2) {
+            $routeParams[$paramName] = str_replace('$'.$k2, $v2, $routeParams[$paramName]);
+          }
+        }
+      }
+    }
+
+    return $routeParams;
+  }
 
   // funkcia render() zabezpecuje:
   //   - routing podla a) (ne)prihlaseny user, b) $this->requestedAction, c) $_REQUEST['__IS_AJAX__']
@@ -988,8 +1050,7 @@ class Loader
    * @throws \ADIOS\Core\Exception When running in SAPI and requested action is blocked for the SAPI.
    * @return string Rendered content.
    */
-  public function render($params = [])
-  {
+  public function render($params = []) {
     if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedURI, $m)) {
       $cronClassName = str_replace("/", "\\", "/ADIOS/Widgets/{$m[0]}");
 
@@ -1018,23 +1079,41 @@ class Loader
         $params = $_REQUEST;
       }
 
+
+      // Kontrola permissions, krok 1
+      // Tu sa permissions kontroluju na zaklade REQUEST_URI, cize na zaklade routingu
+
+      $permissionForRequestedURI = "";
+      foreach ($this->routing as $routePattern => $route) {
+        if (preg_match((string) $routePattern, (string) $params['action'], $m)) {
+          $permissionForRequestedURI = $route['permission'];
+        }
+      }
+
+      if (
+        !empty($permissionForRequestedURI)
+        && !$this->permissions->has($permissionForRequestedURI)
+      ) {
+        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
+      }
+
+      // TODO: Docasne. Ked bude fungovat, vymazat.
+      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
+
       if (!empty($params['action'])) {
-        // prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params
+        // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
+        // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
+        // povodne $params['action'], cize requestovana URLka.
 
-        foreach ($this->routing as $routePattern => $routeParams) {
+        foreach ($this->routing as $routePattern => $route) {
           if (preg_match($routePattern, $params['action'], $m)) {
-            $params['action'] = $routeParams['action'];
+            // povodnu $params['action'] nahradim novou $route['action']
+            $params['action'] = $route['action'];
 
-            if (is_array($routeParams['params'])) {
-              foreach ($routeParams['params'] as $k1 => $v1) {
-                foreach ($m as $k2 => $v2) {
-                  $routeParams['params'] = str_replace('$' . $k2, $v2, $routeParams['params']);
-                }
-              }
+            $route['params'] = $this->replaceRouteVariables($route['params'], $m);
 
-              foreach ($routeParams['params'] as $k => $v) {
-                $params[$k] = $v;
-              }
+            foreach ($route['params'] as $k => $v) {
+              $params[$k] = $v;
             }
           }
         }
@@ -1054,7 +1133,7 @@ class Loader
         throw new \ADIOS\Core\Exceptions\GeneralException("No action specified.");
       }
 
-      $actionClassName = "ADIOS\\Actions\\" . str_replace("/", "\\", $this->action);
+      $actionClassName = $this->getActionClassName($this->action);
 
       if (!class_exists($actionClassName)) {
         throw new \ADIOS\Core\Exceptions\GeneralException("Unknown action '{$this->action}'.");
@@ -1070,7 +1149,7 @@ class Loader
         }
       }
 
-      // mam moznost upravit config (napr. na skrytie desktopu)
+      // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
       $this->config = $actionClassName::overrideConfig($this->config, $params);
 
       if ($params['__IS_AJAX__']) {
@@ -1078,6 +1157,7 @@ class Loader
       } else if (
         !$this->getConfig("hide_default_desktop", FALSE)
         && !$actionClassName::$hideDefaultDesktop
+        && !method_exists($actionClassName, "renderJSON")
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
         $this->desktopContentAction = $this->action;
@@ -1096,40 +1176,31 @@ class Loader
         $this->action = "Desktop";
       }
 
-      // kontrola vstupov podla kontrolneho kodu "_"
-      // vypnute, lebo JS btoa() pri niektorych znakoch nefunguje
-      // if (FALSE && $params['__IS_RENDERED_ON_DESKTOP__'] && count($params) > 0) {
-      //   $tmpParams = $params;
-      //   unset($tmpParams['__C__']);
-      //   unset($tmpParams['action']);
-
-      //   if (empty($params['__C__'])) {
-      //     return "INPUT_VALIDATION_CODE_EMPTY";
-      //   } else {
-      //     $checkCode = base64_encode(json_encode($tmpParams));
-      //     if ($checkCCode != $params['__C__']) {
-      //       return "INPUT_VALIDATION_FAILED";
-      //     }
-      //   }
-      // }
-
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
         $uid = $this->getUid($params['id']);
       } else {
-        $uid = $this->uid . '__' . $this->getUid($params['id']);
+        $uid = $this->uid.'__'.$this->getUid($params['id']);
       }
 
       $this->setUid($uid);
 
       return $this->renderAction($this->action, $params);
+    } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
+      if ($this->isAjax()) {
+        echo $this->renderFatal($e->getMessage());
+        exit();
+      } else {
+        header('Location: ' . $this->config['url']);
+        exit;
+      }
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
-      $lines[] = "ADIOS RUN failed: " . $e->getMessage();
+      $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
       if ($this->config['debug']) {
         $lines[] = "Requested URI = {$this->requestedURI}";
         $lines[] = "Rewrite base = {$this->config['rewrite_base']}";
-        $lines[] = "SERVER.REQUEST_URI = {$_SERVER['REQUEST_URI']}";
+        $lines[] = "SERVER.REQUEST_URI = {$this->config['request_uri']}";
       }
 
       echo join(" ", $lines);
@@ -1138,13 +1209,34 @@ class Loader
     }
   }
 
-  public function getActionClassName($action)
-  {
-    return "ADIOS\\Actions\\" . str_replace("/", "\\", $action);
+  public function getActionClassName(string $action) : string {
+
+    $actionClassName = '';
+
+    // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
+    foreach ($this->widgets as $widgetName => $widgetData) {
+      if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
+        $actionClassName = 
+          '\\ADIOS\\Widgets\\'
+          . $widgetName
+          . '\\Actions\\'
+          . substr($action, strlen($widgetName) + 1)
+        ;
+      }
+    }
+    $actionClassName = str_replace('/', '\\', $actionClassName);
+
+    if (!class_exists($actionClassName)) {
+      // Dusan 31.5.2023: Tento sposob zapisu akcii je deprecated.
+      $actionClassName = 'ADIOS\\Actions\\' . str_replace('/', '\\', $action);
+
+      $this->console->warning('Deprecated class name for action ' . $action . '.');
+    }
+
+    return $actionClassName;
   }
 
-  public function actionExists($action)
-  {
+  public function actionExists(string $action) : bool {
     return class_exists($this->getActionClassName($action));
   }
 
@@ -1152,8 +1244,7 @@ class Loader
   //   - kontrolu pravomoci, ci moze logged user akciu spustit
   //   - vyrenderovanie akcie alebo, ak neexistuje, vyrenderovanie twig template
 
-  public function renderAction($action, $params)
-  {
+  public function renderAction($action, $params) {
     if (!is_array($params)) $params = [];
 
     $params['_REQUEST'] = $params;
@@ -1170,22 +1261,34 @@ class Loader
     $actionClassName = $this->getActionClassName($action);
 
     try {
+      // Kontrola permissions, krok 2
+      // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
+      // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
+      // to moze zmenit)
       if ($actionClassName::$requiresUserAuthentication) {
         $this->checkPermissionsForAction($action, $params);
       }
 
+      // permissions udelene
       if ($this->actionExists($action)) {
         $this->actionObject = new $actionClassName($this, $params);
-        $actionReturn = $this->actionObject->render($params);
 
-        if ($actionReturn === NULL) {
-          // akcia nic nereturnovala, iba robila echo
-          $actionHtml = "";
-        } else if (is_string($actionReturn)) {
-          $actionHtml = $actionReturn;
+        if (method_exists($actionClassName, "renderJSON")) {
+          $actionReturn = $this->actionObject->renderJSON($params);
+          $actionHtml = json_encode($actionReturn);
         } else {
-          $actionHtml = $this->renderReturn($actionReturn);
+          $actionReturn = $this->actionObject->render($params);
+
+          if ($actionReturn === NULL) {
+            // akcia nic nereturnovala, iba robila echo
+            $actionHtml = "";
+          } else if (is_string($actionReturn)) {
+            $actionHtml = $actionReturn;
+          } else {
+            $actionHtml = $this->renderReturn($actionReturn);
+          }
         }
+
       } else {
 
         // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
@@ -1193,15 +1296,40 @@ class Loader
         $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
         $tmpTemplateName = str_replace("/Actions/", "/Templates/", $tmpTemplateName);
 
-        $actionFactoryClass = $this->factories['action'] ?? \ADIOS\Core\Action::class;
+        $actionFactoryClass = $this->classFactories['action'] ?? \ADIOS\Core\Action::class;
         $tmp = new $actionFactoryClass($this);
         $tmp->twigTemplate = $tmpTemplateName;
         $actionHtml = $tmp->render($params);
       }
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
       $actionHtml = $this->renderFatal($e->getMessage());
-    } catch (\Exception $e) {
-      $actionHtml = $this->renderExceptionWarningHtml($e);
+    } catch (
+      \Exception
+      // | \Throwable
+      $e) {
+      $error = error_get_last();
+
+      if ($error['type'] == E_ERROR) {
+        $actionHtml = $this->renderFatal(
+          '<div style="margin-bottom:1em;">'
+            . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
+          . '</div>'
+          . '<pre style="font-size:0.75em;font-family:Courier New">'
+            . $e->getTraceAsString()
+          . '</pre>',
+          TRUE
+        );
+      } else {
+        $actionHtml = $this->renderFatal(
+          '<div style="margin-bottom:1em;">'
+            . get_class($e) . ': ' . $e->getMessage()
+          . '</div>'
+          . '<pre style="font-size:0.75em;font-family:Courier New">'
+            . $e->getTraceAsString()
+          . '</pre>',
+          TRUE
+        );
+      }
     }
 
     return $actionHtml;
@@ -1220,26 +1348,23 @@ class Loader
    * @throws \ADIOS\Core\NotEnoughPermissionsException When the signed user does not have enough permissions.
    * @return void
    */
-  public function checkPermissionsForAction($action, $params = NULL)
-  {
+  public function checkPermissionsForAction($action, $params = NULL) {
     // to be overriden
   }
 
-  public function renderReturn($return)
-  {
-    if ($this->isAjax()) {
+  public function renderReturn($return) {
+    // if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
         "result" => "SUCCESS",
         "content" => $return,
       ]);
-    } else {
-      return $return;
-    }
+    // } else {
+    //   return $return;
+    // }
   }
 
-  public function renderWarning($message, $isHtml = TRUE)
-  {
-    if ($this->isAjax()) {
+  public function renderWarning($message, $isHtml = TRUE) {
+    if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
         "result" => "WARNING",
         "content" => $message,
@@ -1247,15 +1372,14 @@ class Loader
     } else {
       return "
         <div class='alert alert-warning' role='alert'>
-          " . ($isHtml ? $message : hsc($message)) . "
+          ".($isHtml ? $message : hsc($message))."
         </div>
       ";
     }
   }
 
-  public function renderFatal($message, $isHtml = TRUE)
-  {
-    if ($this->isAjax()) {
+  public function renderFatal($message, $isHtml = TRUE) {
+    if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
         "result" => "FATAL",
         "content" => $message,
@@ -1263,14 +1387,13 @@ class Loader
     } else {
       return "
         <div class='alert alert-danger' role='alert'>
-          " . ($isHtml ? $message : hsc($message)) . "
+          ".($isHtml ? $message : hsc($message))."
         </div>
       ";
     }
   }
 
-  public function renderExceptionWarningHtml($exception)
-  {
+  public function renderExceptionWarningHtml($exception) {
 
     $traceLog = "";
     foreach ($exception->getTrace() as $item) {
@@ -1280,7 +1403,7 @@ class Loader
     switch (get_class($exception)) {
       case 'ADIOS\Core\Exceptions\DBException':
         $errorMessage = $exception->getMessage();
-        $errorHash = md5(date("YmdHis") . $errorMessage);
+        $errorHash = md5(date("YmdHis").$errorMessage);
         // $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
         $html = "
           <div style='text-align:center;font-size:5em;color:red'>
@@ -1293,7 +1416,7 @@ class Loader
           <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>{$errorMessage}</div>
           <div style='color:gray;font-size:0.8em;'>
             {$errorHash}<br/>
-            " . get_class($exception) . "<br/>
+            ".get_class($exception)."<br/>
             <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
             <div class='trace-log' style='display:none'>{$traceLog}</div>
           </div>
@@ -1342,12 +1465,12 @@ class Loader
             <i class='fas fa-copy'></i>
           </div>
           <div style='margin-top:1em;margin-bottom:3em;text-align:center;color:red;'>
-            " . $this->translate($errorMessage, $this) . "<br/>
+            ".$this->translate($errorMessage, $this)."<br/>
             <br/>
-            <b>" . join(", ", $invalidColumns) . "</b>
+            <b>".join(", ", $invalidColumns)."</b>
           </div>
           <a href='javascript:void(0);' onclick='$(this).next(\"div\").slideDown();'>
-          " . $this->translate("Show more information", $this) . "
+          ".$this->translate("Show more information", $this)."
           </a>
           <div style='display:none'>
             <div style='color:red;margin-bottom:1em;font-family:courier;font-size:8pt;max-height:10em;overflow:auto;'>
@@ -1357,7 +1480,7 @@ class Loader
             </div>
             <div style='color:gray;font-size:0.8em;'>
               Error # {$errorNo}<br/>
-              " . get_class($exception) . "<br/>
+              ".get_class($exception)."<br/>
               <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
               <div class='trace-log' style='display:none'>{$traceLog}</div>
             </div>
@@ -1373,9 +1496,9 @@ class Loader
             Oops! Something went wrong.
             See logs for more information or contact the support.<br/>
           </div>
-          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>" . $exception->getMessage() . "</div>
+          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>".$exception->getMessage()."</div>
           <div style='color:gray'>
-            " . get_class($exception) . "
+            ".get_class($exception)."
           </div>
         ";
         break;
@@ -1384,8 +1507,7 @@ class Loader
     return $this->renderHtmlWarning($html);
   }
 
-  public function renderHtmlWarning($warning)
-  {
+  public function renderHtmlWarning($warning) {
     return $this->renderWarning($warning, TRUE);
   }
 
@@ -1399,8 +1521,7 @@ class Loader
    * @throws \ADIOS\Core\Exception When plugin's hook returns invalid value.
    * @return array<string, mixed> Event data modified by plugins which implement the hook.
    */
-  public function dispatchEventToPlugins($event, $eventData = [])
-  {
+  public function dispatchEventToPlugins($event, $eventData = []) {
     foreach ($this->pluginObjects as $plugin) {
       if (method_exists($plugin, $event)) {
         $eventData = $plugin->$event($eventData);
@@ -1416,16 +1537,14 @@ class Loader
     return $eventData;
   }
 
-  public function hasPermissionForAction($action, $params)
-  {
+  public function hasPermissionForAction($action, $params) {
     return TRUE;
   }
 
   ////////////////////////////////////////////////
   // metody pre pracu s konfiguraciou
 
-  public function getConfig($path, $default = NULL)
-  {
+  public function getConfig($path, $default = NULL) {
     $retval = $this->config;
     foreach (explode('/', $path) as $key => $value) {
       if (isset($retval[$value])) {
@@ -1438,8 +1557,7 @@ class Loader
     return ($retval === NULL ? $default : $retval);
   }
 
-  public function setConfig($path, $value)
-  {
+  public function setConfig($path, $value) {
     $path_array = explode('/', $path);
 
     $cfg = &$this->config;
@@ -1470,70 +1588,81 @@ class Loader
   //   return $this->config;
   // }
 
-  public function saveConfig($config, $path = '')
-  {
+  public function saveConfig(array $config, string $path = '') {
     if (is_array($config)) {
       foreach ($config as $key => $value) {
-        $tmpPath = $path . $key;
+        $tmpPath = $path.$key;
 
         if (is_array($value)) {
-          $this->saveConfig($value, $tmpPath . '/');
+          $this->saveConfig($value, $tmpPath.'/');
         } else if ($value === NULL) {
           $this->db->query("
             delete from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
-            where `path` like '" . $this->db->escape($tmpPath) . "%'
+            where `path` like '".$this->db->escape($tmpPath)."%'
           ");
         } else {
           $this->db->query("
             insert into `{$this->gtp}_{$this->config['system_table_prefix']}_config` set
-              `path` = '" . $this->db->escape($tmpPath) . "',
-              `value` = '" . $this->db->escape($value) . "'
+              `path` = '".$this->db->escape($tmpPath)."',
+              `value` = '".$this->db->escape($value)."'
             on duplicate key update
-              `path` = '" . $this->db->escape($tmpPath) . "',
-              `value` = '" . $this->db->escape($value) . "'
+              `path` = '".$this->db->escape($tmpPath)."',
+              `value` = '".$this->db->escape($value)."'
           ");
         }
       }
     }
   }
 
-  public function deleteConfig($path)
-  {
+  public function saveConfigByPath(string $path, $value) {
     if (!empty($path)) {
       $this->db->query("
-        delete from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
-        where `path` like '" . $this->db->escape($path) . "%'
+        insert into `{$this->gtp}_{$this->config['system_table_prefix']}_config` set
+          `path` = '".$this->db->escape($path)."',
+          `value` = '".$this->db->escape($value)."'
+        on duplicate key update
+          `path` = '".$this->db->escape($path)."',
+          `value` = '".$this->db->escape($value)."'
       ");
     }
   }
 
-  public function loadConfigFromDB()
-  {
-    try {
+  public function deleteConfig($path) {
+    if (!empty($path)) {
       $this->db->query("
+        delete from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
+        where `path` like '".$this->db->escape($path)."%'
+      ");
+    }
+  }
+
+  public function loadConfigFromDB() {
+    try {
+      $queryOk = $this->db->query("
         select
           *
         from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
         order by id asc
       ");
 
-      while ($row = $this->db->db_result->fetch_array(MYSQLI_ASSOC)) {
-        $tmp = &$this->config;
-        foreach (explode("/", $row['path']) as $tmp_path) {
-          if (!is_array($tmp[$tmp_path])) {
-            $tmp[$tmp_path] = [];
+      if ($queryOk) {
+        while ($row = $this->db->fetchArray()) {
+          $tmp = &$this->config;
+          foreach (explode("/", $row['path']) as $tmp_path) {
+            if (!is_array($tmp[$tmp_path])) {
+              $tmp[$tmp_path] = [];
+            }
+            $tmp = &$tmp[$tmp_path];
           }
-          $tmp = &$tmp[$tmp_path];
+          $tmp = $row['value'];
         }
-        $tmp = $row['value'];
       }
     } catch (\Exception $e) {
       // do nothing
     }
   }
 
-  public function finalizeConfig()
-  {
+  public function finalizeConfig() {
     // various default values
     $this->config['widgets'] = $this->config['widgets'] ?? [];
     $this->config['protocol'] = (strtoupper($_SERVER['HTTPS'] ?? "") == "ON" ? "https" : "http");
@@ -1548,43 +1677,35 @@ class Loader
     $this->config['files_dir'] = str_replace("\\", "/", $this->config['files_dir']);
   }
 
-  public function onUserAuthorised()
-  {
+  public function onUserAuthorised() {
     // to be overriden
   }
 
-  public function onBeforeConfigLoaded()
-  {
+  public function onBeforeConfigLoaded() {
     // to be overriden
   }
 
-  public function onAfterConfigLoaded()
-  {
+  public function onAfterConfigLoaded() {
     // to be overriden
   }
 
-  public function onBeforeWidgetsLoaded()
-  {
+  public function onBeforeWidgetsLoaded() {
     // to be overriden
   }
 
-  public function onAfterWidgetsLoaded()
-  {
+  public function onAfterWidgetsLoaded() {
     // to be overriden
   }
 
-  public function onBeforePluginsLoaded()
-  {
+  public function onBeforePluginsLoaded() {
     // to be overriden
   }
 
-  public function onAfterPluginsLoaded()
-  {
+  public function onAfterPluginsLoaded() {
     // to be overriden
   }
 
-  public function onModelsLoaded()
-  {
+  public function onModelsLoaded() {
     // to be overriden
   }
 
@@ -1592,10 +1713,9 @@ class Loader
 
 
 
-  public function getUid($uid = '')
-  {
+  public function getUid($uid = '') {
     if (empty($uid)) {
-      $tmp = $this->action . '-' . time() . rand(100000, 999999);
+      $tmp = $this->action.'-'.time().rand(100000, 999999);
     } else {
       $tmp = $uid;
     }
@@ -1623,21 +1743,18 @@ class Loader
    * @throws \ADIOS\Core\Exceptions\InvalidUidException If the provided string is not a valid ADIOS UID string.
    * @return void
    */
-  public function checkUid($uid)
-  {
+  public function checkUid($uid) {
     if (preg_match('/[^A-Za-z0-9\-_]/', $uid)) {
       throw new \ADIOS\Core\Exceptions\InvalidUidException();
     }
   }
 
-  public function setUid($uid)
-  {
+  public function setUid($uid) {
     $this->checkUid($uid);
     $this->uid = $uid;
   }
 
-  public function getClientIpAddress()
-  {
+  public function getClientIpAddress() {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
       $ip = $_SERVER['HTTP_CLIENT_IP'];
     } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
@@ -1648,23 +1765,20 @@ class Loader
     return $ip;
   }
 
-  public function authCookieSerialize($login, $password)
-  {
-    return md5($login . "." . $password) . "," . $login;
+  public function authCookieSerialize($login, $password) {
+    return md5($login.".".$password).",".$login;
   }
 
-  public function authCookieGetLogin()
-  {
-    list($tmpHash, $tmpLogin) = explode(",", $_COOKIE[_ADIOS_ID . '-user']);
+  public function authCookieGetLogin() {
+    list($tmpHash, $tmpLogin) = explode(",", $_COOKIE[_ADIOS_ID.'-user']);
     return $tmpLogin;
   }
 
-  public function authUser($login, $password, $rememberLogin = FALSE)
-  {
+  public function authUser($login, $password, $rememberLogin = FALSE) {
     $this->userProfile = null;
-    $login = trim($login);
+    $login = trim((string) $login);
 
-    if (empty($login) && !empty($_COOKIE[_ADIOS_ID . '-user'])) {
+    if (empty($login) && !empty($_COOKIE[_ADIOS_ID.'-user'])) {
       $login = $this->authCookieGetLogin();
     }
 
@@ -1673,22 +1787,22 @@ class Loader
       $this->db->query("
         select
           *
-        from `{$adiosUserModel->getFullTableSQLName()}`
+        from `{$adiosUserModel->getFullTableSqlName()}`
         where
           (
-            `login`= '" . $this->db->escape($login) . "'
-            or `email`= '" . $this->db->escape($login) . "'
+            `login`= '".$this->db->escape($login)."'
+            or `email`= '".$this->db->escape($login)."'
           )
           and `is_active` <> 0
       ");
 
-      while ($data = $this->db->fetch_array()) {
+      while ($data = $this->db->fetchArray()) {
         $passwordMatch = FALSE;
 
         if (!empty($password) && password_verify($password, $data['password'])) {
           // plain text
           $passwordMatch = TRUE;
-        } else if ($_COOKIE[_ADIOS_ID . '-user'] == $this->authCookieSerialize($data['login'], $data['password'])) {
+        } else if ($_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($data['login'], $data['password'])) {
           $passwordMatch = TRUE;
         }
 
@@ -1701,18 +1815,18 @@ class Loader
           $this->db->query("
             UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
             SET
-              last_login_time = '" . date('Y-m-d H:i:s') . "',
+              last_login_time = '".date('Y-m-d H:i:s')."',
               last_login_ip = '{$clientIp}',
-              last_access_time = '" . date('Y-m-d H:i:s') . "',
+              last_access_time = '".date('Y-m-d H:i:s')."',
               last_access_ip = '{$clientIp}'
-            WHERE id = " . (int)$this->userProfile['id'] . ";
+            WHERE id = ".(int)$this->userProfile['id'].";
           ");
 
           $_SESSION[_ADIOS_ID]['userProfile'] = $this->userProfile;
 
           if ($rememberLogin) {
             setcookie(
-              _ADIOS_ID . '-user',
+              _ADIOS_ID.'-user',
               $this->authCookieSerialize($data['login'], $data['password']),
               time() + (3600 * 24 * 30)
             );
@@ -1726,43 +1840,46 @@ class Loader
     return FALSE;
   }
 
-  public function generate_rc_perms($perms)
-  {
-  }
-  public function has_perms($perm)
-  {
-    return TRUE;
-  }
-  public function action_perms($action)
-  {
-    return TRUE;
-  }
-  public function db_perms($action)
-  {
-    return TRUE;
-  }
-  public function feature_perms($action)
-  {
-    return TRUE;
-  }
-  public function table_has_cols_perms($table_name, $operation)
-  {
-    return TRUE;
-  }
+  // 20.1.2023: Deprecated
+  // public function generate_rc_perms($perms) { }
+
+  // 20.1.2023: Deprecated
+  // public function has_perms($perm) {
+  //   return TRUE;
+  // }
+
+  // 20.1.2023: Deprecated
+  // public function action_perms($action) {
+  //   return TRUE;
+  // }
+
+  // 20.1.2023: Deprecated
+  // public function db_perms($action) {
+  //   return TRUE;
+  // }
+
+  // 20.1.2023: Deprecated
+  // public function feature_perms($action) {
+  //   return TRUE;
+  // }
+
+  // 20.1.2023: Deprecated
+  // public function table_has_cols_perms($table_name, $operation) {
+  //   return TRUE;
+  // }
 
 
 
-  public function renderCSSCache()
-  {
+  public function renderCSSCache() {
     $css = "";
 
     $cssFiles = [
-      dirname(__FILE__) . "/../Assets/Css/fontawesome-5.13.0.css",
-      dirname(__FILE__) . "/../Assets/Css/bootstrap.min.css",
-      dirname(__FILE__) . "/../Assets/Css/sb-admin-2.css",
-      dirname(__FILE__) . "/../Assets/Css/responsive.css",
-      dirname(__FILE__) . "/../Assets/Css/colors.css",
-      dirname(__FILE__) . "/../Assets/Css/desktop.css",
+      dirname(__FILE__)."/../Assets/Css/fontawesome-5.13.0.css",
+      dirname(__FILE__)."/../Assets/Css/bootstrap.min.css",
+      dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
+      dirname(__FILE__)."/../Assets/Css/responsive.css",
+      dirname(__FILE__)."/../Assets/Css/colors.css",
+      dirname(__FILE__)."/../Assets/Css/desktop.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.structure.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui-fontawesome.css",
       dirname(__FILE__)."/../Assets/Css/jquery.window.css",
@@ -1772,84 +1889,89 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery.tag-editor.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
+      dirname(__FILE__)."/../Assets/Css/multi-select.dist.css",
+      dirname(__FILE__)."/../Assets/Css/datatables.css",
     ];
 
-    foreach (scandir(dirname(__FILE__) . '/../Assets/Css/Ui') as $file) {
+    foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {
       if ('.css' == substr($file, -4)) {
-        $cssFiles[] = dirname(__FILE__) . "/../Assets/Css/Ui/{$file}";
+        $cssFiles[] = dirname(__FILE__)."/../Assets/Css/Ui/{$file}";
       }
     }
 
-    foreach (scandir(ADIOS_WIDGETS_DIR) as $widget) {
-      if (!in_array($widget, [".", ".."]) && is_file(ADIOS_WIDGETS_DIR . "/{$widget}/Main.css")) {
-        $cssFiles[] = ADIOS_WIDGETS_DIR . "/{$widget}/Main.css";
+    foreach (scandir($this->widgetsDir) as $widget) {
+      if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/Main.css")) {
+        $cssFiles[] = $this->widgetsDir."/{$widget}/Main.css";
       }
 
-      if (is_dir(ADIOS_WIDGETS_DIR . "/{$widget}/Assets/Css")) {
-        foreach (scandir(ADIOS_WIDGETS_DIR . "/{$widget}/Assets/Css") as $widgetCssFile) {
-          $cssFiles[] = ADIOS_WIDGETS_DIR . "/{$widget}/Assets/Css/{$widgetCssFile}";
+      if (is_dir($this->widgetsDir."/{$widget}/Assets/Css")) {
+        foreach (scandir($this->widgetsDir."/{$widget}/Assets/Css") as $widgetCssFile) {
+          $cssFiles[] = $this->widgetsDir."/{$widget}/Assets/Css/{$widgetCssFile}";
         }
       }
     }
 
     foreach ($cssFiles as $file) {
-      $css .= @file_get_contents($file) . "\n";
+      $css .= @file_get_contents($file)."\n";
     }
 
     return $css;
   }
 
-  public function renderJSCache()
-  {
+  public function renderJSCache() {
     $js = "";
 
     $jsFiles = [
-      dirname(__FILE__) . "/../Assets/Js/jquery-3.5.1.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery.scrollTo.min.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery.window.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery.ui.widget.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery.ui.mouse.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery-ui-touch-punch.js",
-      dirname(__FILE__) . "/../Assets/Js/md5.js",
-      dirname(__FILE__) . "/../Assets/Js/base64.js",
-      dirname(__FILE__) . "/../Assets/Js/cookie.js",
-      dirname(__FILE__) . "/../Assets/Js/keyboard_shortcuts.js",
-      dirname(__FILE__) . "/../Assets/Js/json.js",
-      dirname(__FILE__) . "/../Assets/Js/moment.min.js",
-      dirname(__FILE__) . "/../Assets/Js/chart.min.js",
-      dirname(__FILE__) . "/../Assets/Js/desktop.js",
-      dirname(__FILE__) . "/../Assets/Js/ajax_functions.js",
-      dirname(__FILE__) . "/../Assets/Js/adios.js",
-      dirname(__FILE__) . "/../Assets/Js/quill-1.3.6.min.js",
-      dirname(__FILE__) . "/../Assets/Js/bootstrap.bundle.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery.easing.js",
-      dirname(__FILE__) . "/../Assets/Js/sb-admin-2.js",
-      dirname(__FILE__) . "/../Assets/Js/jsoneditor.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery.tag-editor.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery.caret.min.js",
-      dirname(__FILE__) . "/../Assets/Js/jquery-ui.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery-3.5.1.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.scrollTo.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.window.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.ui.widget.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.ui.mouse.js",
+      dirname(__FILE__)."/../Assets/Js/jquery-ui-touch-punch.js",
+      dirname(__FILE__)."/../Assets/Js/md5.js",
+      dirname(__FILE__)."/../Assets/Js/base64.js",
+      dirname(__FILE__)."/../Assets/Js/cookie.js",
+      dirname(__FILE__)."/../Assets/Js/keyboard_shortcuts.js",
+      dirname(__FILE__)."/../Assets/Js/json.js",
+      dirname(__FILE__)."/../Assets/Js/moment.min.js",
+      dirname(__FILE__)."/../Assets/Js/chart.min.js",
+      dirname(__FILE__)."/../Assets/Js/desktop.js",
+      dirname(__FILE__)."/../Assets/Js/ajax_functions.js",
+      dirname(__FILE__)."/../Assets/Js/adios.js",
+      dirname(__FILE__)."/../Assets/Js/quill-1.3.6.min.js",
+      dirname(__FILE__)."/../Assets/Js/bootstrap.bundle.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.easing.js",
+      dirname(__FILE__)."/../Assets/Js/sb-admin-2.js",
+      dirname(__FILE__)."/../Assets/Js/jsoneditor.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.tag-editor.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.caret.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery-ui.min.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.multi-select.js",
+      dirname(__FILE__)."/../Assets/Js/jquery.quicksearch.js",
+      dirname(__FILE__)."/../Assets/Js/datatables.js",
+      dirname(__FILE__)."/../Assets/Js/jeditable.js"
     ];
 
-    foreach (scandir(dirname(__FILE__) . '/../Assets/Js/Ui') as $file) {
+    foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
       if ('.js' == substr($file, -3)) {
-        $jsFiles[] = dirname(__FILE__) . "/../Assets/Js/Ui/{$file}";
+        $jsFiles[] = dirname(__FILE__)."/../Assets/Js/Ui/{$file}";
       }
     }
 
-    foreach (scandir(ADIOS_WIDGETS_DIR) as $widget) {
-      if (!in_array($widget, [".", ".."]) && is_file(ADIOS_WIDGETS_DIR . "/{$widget}/Main.js")) {
-        $jsFiles[] = ADIOS_WIDGETS_DIR . "/{$widget}/Main.js";
+    foreach (scandir($this->widgetsDir) as $widget) {
+      if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/Main.js")) {
+        $jsFiles[] = $this->widgetsDir."/{$widget}/Main.js";
       }
 
-      if (is_dir(ADIOS_WIDGETS_DIR . "/{$widget}/Assets/Js")) {
-        foreach (scandir(ADIOS_WIDGETS_DIR . "/{$widget}/Assets/Js") as $widgetJsFile) {
-          $jsFiles[] = ADIOS_WIDGETS_DIR . "/{$widget}/Assets/Js/{$widgetJsFile}";
+      if (is_dir($this->widgetsDir."/{$widget}/Assets/Js")) {
+        foreach (scandir($this->widgetsDir."/{$widget}/Assets/Js") as $widgetJsFile) {
+          $jsFiles[] = $this->widgetsDir."/{$widget}/Assets/Js/{$widgetJsFile}";
         }
       }
     }
 
     foreach ($jsFiles as $file) {
-      $js .= @file_get_contents($file) . "\n";
+      $js .= @file_get_contents($file)."\n";
     }
 
     $js .= "
@@ -1859,10 +1981,10 @@ class Loader
     foreach ($this->config['available_languages'] as $language) {
       $js .= "
         adios_language_translations['{$language}'] = {
-          'Confirmation': '" . ads($this->translate("Confirmation", $this, $language)) . "',
-          'OK, I understand': '" . ads($this->translate("OK, I understand", $this, $language)) . "',
-          'Cancel': '" . ads($this->translate("Cancel", $this, $language)) . "',
-          'Warning': '" . ads($this->translate("Warning", $this, $language)) . "',
+          'Confirmation': '".ads($this->translate("Confirmation", $this, $language))."',
+          'OK, I understand': '".ads($this->translate("OK, I understand", $this, $language))."',
+          'Cancel': '".ads($this->translate("Cancel", $this, $language))."',
+          'Warning': '".ads($this->translate("Warning", $this, $language))."',
         };
       ";
     }

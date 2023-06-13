@@ -13,9 +13,11 @@
 .adios.ui.Tabs .tab_contents .hidden {display:none;}
 .adios.ui.Tabs .tab_content {
   box-sizing: border-box;
-  border-left: 1px solid transparent;
+  border-left: 1px solid #EEEEEE;
+  border-right: 1px solid #EEEEEE;
+  border-bottom: 1px solid #EEEEEE;
   padding-bottom: 1em; 
-  margin: 1em 1em 2em 1em;
+  margin: 1em 1em 2em 0em;
 }
 .adios.ui.Tabs .tab_content:hover,
 .adios.ui.Tabs .tab_content.active { border-color: var(--cl-main); }

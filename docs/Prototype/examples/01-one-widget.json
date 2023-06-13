@@ -1,0 +1,21 @@
+{
+  "ConfigApp": {
+    "applicationName": "Prototype CRM - One widget",
+    "defaultAction": "Home/Dashboard"
+  },
+  "Widgets": {
+    "Home": {
+      "faIcon": "fa-home",
+      "sidebar": {
+        "Home": {
+          "url": "Home/Dashboard"
+        }
+      },
+      "actions": {
+        "Dashboard": {
+          "template": "Dashboard"
+        }
+      }
+    }
+  }
+}

@@ -28,7 +28,7 @@
       if ($('#'+uid+' .window_frame > .adios.ui.Form > .adios.ui.Tabs .tab_titles').length){
         fh = parseInt(Math.ceil($('#'+uid+' .window_frame').height()));
         th = parseInt(Math.ceil($('#'+uid+' .window_frame > .adios.ui.Form > .adios.ui.Tabs .tab_titles').outerHeight(true)));
-        befh = ($('#' + uid + ' .window_frame > .adios.ui.Form > .adios.ui.Form.default_table_wrapper').length ? parseInt(Math.ceil($('#' + uid +' .window_frame > .adios.ui.Form > .adios.ui.Form.default_table_wrapper').outerHeight(true))) : 0);
+        befh = ($('#' + uid + ' .window_frame > .adios.ui.Form > .adios.ui.Form.form-wrapper').length ? parseInt(Math.ceil($('#' + uid +' .window_frame > .adios.ui.Form > .adios.ui.Form.form-wrapper').outerHeight(true))) : 0);
         $('#' + uid +' .window_frame > .adios.ui.Form > .adios.ui.Tabs .tab_contents').css('height', fh - th - befh);
       }
       if ($('#'+uid+' .window_frame > .adios.ui.Tabs .tab_titles').length){

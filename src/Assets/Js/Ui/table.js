@@ -41,7 +41,6 @@
 
       let refresh_action = $('#' + uid).attr('data-refresh-action');
       let action = (refresh_action == '' ? $('#' + uid).attr('data-action') : refresh_action);
-      // let is_ajax = $('#' + uid).attr('data-is-ajax') == '1';
       let refresh_params = JSON.parse($('#' + uid).attr('data-refresh-params'));
 
       for (var i in params) {
@@ -91,12 +90,8 @@
     });
   };
 
-  function ui_table_set_column_filter(uid, params) {
-    // $('.'+uid+'_column_filter').each(function(){
-    //   params['column_filter_'+$(this).attr('data-col-name')] = $(this).val();
-    // });
-
-    ui_table_refresh(uid, params);
+  function ui_table_set_column_filter(uid) {
+    ui_table_refresh(uid, { reset: '1' });
   };
 
   function ui_table_show_page(uid, page){
@@ -104,7 +99,7 @@
   };
 
   function ui_table_change_items_per_page(uid, count){
-    ui_table_refresh(uid, {items_per_page: count});
+    ui_table_refresh(uid, {itemsPerPage: count});
   }
 
   function ui_table_select_all(uid){
@@ -134,7 +129,7 @@
   function ui_table_delete_item(uid, id){
     table = $('#'+uid).attr('data-table');
     if (table != ''){
-      action = 'UI/Table/Delete';
+      action = 'UI/Form/Delete';
       var params = {};
       params.ids = id;
       params.table = table;
@@ -150,7 +145,7 @@
     var ids = ui_table_get_selected(uid);
     table = $('#'+uid).attr('data-table');
     if (table != ''){
-      action = 'UI/Table/Delete';
+      action = 'UI/Form/Delete';
       var params = {};
       params.ids = ids;
       params.table = table;

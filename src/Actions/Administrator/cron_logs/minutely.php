@@ -1,7 +1,7 @@
 <?php
   $log_dir = "{$___ADIOSObject->config['log_dir']}/cron/minutely";
   
-  echo $___ADIOSObject->ui->Title(array("center" => l("Systémové záznamy")))->render();
+  echo $___ADIOSObject->view->Title(array("center" => l("Systémové záznamy")))->render();
   
   echo "
     <div style='padding:5px'>

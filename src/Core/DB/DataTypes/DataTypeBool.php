@@ -30,27 +30,14 @@ namespace ADIOS\Core\DB\DataTypes;
  * @deprecated
  * @package DataTypes
  */
-class DataTypeBool extends DataType {
+class DataTypeBool extends \ADIOS\Core\DB\DataType {
   public function get_sql_create_string($table_name, $col_name, $params = []) {
-    $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : " default 'N' ";
+    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : " default 'N' ";
     return "`$col_name` char(1) {$params['sql_definitions']}";
   }
 
-  public function get_sql_column_data_string($table_name, $col_name, $value, $params = []) {
-    $params = _put_default_params_values($params, [
-      'null_value' => false,
-      'dumping_data' => false,
-      'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
-    ]);
-
-    if (1 === $value || '1' === $value || true === $value) {
-      $value = 'Y';
-    }
-    if (0 === $value || '0' === $value || false === $value) {
-      $value = 'N';
-    }
-
-    return "$col_name='".($params['escape_string'] ? $this->adios->db->escape($value) : $value)."'";
+  public function get_sql_column_data_string($tableName, $colName, $value, $params = []) {
+    return "`{$colName}` = '".((bool) $value ? 'Y' : 'N')."'";
   }
 
   public function get_html_or_csv($value, $params = []) {

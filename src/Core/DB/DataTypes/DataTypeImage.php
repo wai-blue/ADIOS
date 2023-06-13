@@ -15,11 +15,11 @@ define('DELETE_IMAGE', 'delete_image');
 /**
  * @package DataTypes
  */
-class DataTypeImage extends DataType
+class DataTypeImage extends \ADIOS\Core\DB\DataType
 {
     public function get_sql_create_string($table_name, $col_name, $params = [])
     {
-        $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
+        $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
 
         return "`$col_name` varchar(255) {$params['sql_definitions']}";
     }
@@ -29,7 +29,7 @@ class DataTypeImage extends DataType
         $params = _put_default_params_values($params, [
             'null_value' => false,
             'dumping_data' => false,
-            'supported_extensions' => $this->adios->getConfig('m_datapub/columns/image/supported_extensions', ['jpg', 'gif', 'png', 'jpeg']),
+            'supported_extensions' => $this->adios->getConfig('m_datapub/columns/image/supported_extensions', ['jpg', 'gif', 'png', 'jpeg', 'webp']),
             'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
         ]);
 

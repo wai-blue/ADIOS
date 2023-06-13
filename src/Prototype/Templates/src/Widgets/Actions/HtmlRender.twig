@@ -1,0 +1,9 @@
+<?php
+
+namespace {{ thisAction.namespace }};
+
+class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
+  public function render() {
+    return {{ varExport(thisAction.config.html)|raw }};
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "ConfigApp": {
+    "applicationName": "Prototype CRM - One data model",
+    "defaultAction": "Home/Dashboard"
+  },
+  "Widgets": {
+    "Home": {
+      "faIcon": "fa-home",
+      "sidebar": {
+        "Home": {
+          "url": "Home/Dashboard"
+        }
+      },
+      "actions": {
+        "Dashboard": {
+          "template": "Dashboard"
+        }
+      }
+    },
+    "Customers": {
+      "faIcon": "fa-address-book",
+      "sidebar": {
+        "Customers + Bids": {
+          "sub": {
+            "Customers": {
+              "url": "Customers"
+            },
+            "Bids": {
+              "url": "Bids"
+            }
+          }
+        }
+      },
+
+      "models": {
+        "Customer": {
+          "sqlName": "customers",
+          "urlBase": "Customers",
+          "tableTitle": "Customers",
+          "formTitleForInserting": "New customer",
+          "formTitleForEditing": "Edit customer",
+          "lookupSqlValue": "{%TABLE%}.name",
+          "columns": {
+            "name": {
+              "type": "varchar",
+              "title": "Customer name",
+              "show_column": true
+            },
+            "priority": {
+              "type": "int",
+              "title": "Priority",
+              "enum_values": ["High", "Middle", "Low"],
+              "show_column": true
+            }
+          },
+          "formParams": {
+            "templateForInserting": {
+              "columns": [
+                {
+                  "rows": [
+                    "name",
+                    "priority"
+                  ]
+                }
+              ]
+            },
+            "templateForEditing": {
+              "columns": [
+                {
+                  "class": "col-lg-8",
+                  "tabs": {
+                    "About customer": [
+                      "name",
+                      "priority"
+                    ],
+                    "Bids": {
+                      "action": "UI/Table",
+                      "params": {
+                        "model": "Widgets/Customers/Models/Bid",
+                        "foreignKey": "id_customer"
+                      }
+                    }
+                  }
+                },
+                {
+                  "class": "col-lg-4",
+                  "rows": [
+                    {
+                      "action": "Customers/BestSoldProducts"
+                    },
+                    {
+                      "action": "Customers/MonthlyTurnover"
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "Bid": {
+          "sqlName": "bids",
+          "urlBase": "Bids",
+          "tableTitle": "Bids",
+          "formTitleForInserting": "New bid",
+          "formTitleForEditing": "Edit bid",
+          "lookupSqlValue": "{%TABLE%}.title",
+          "columns": {
+            "id_customer": {
+              "type": "lookup",
+              "title": "Customer",
+              "model": "Widgets/Customers/Models/Customer",
+              "show_column": true
+            },
+            "title": {
+              "type": "varchar",
+              "title": "Bid title",
+              "show_column": true
+            }
+          }
+        }
+      },
+
+      "actions": {
+        "BestSoldProducts": {
+          "template": "BestSoldProducts"
+        },
+        "MonthlyTurnover": {
+          "template": "MonthlyTurnover"
+        }
+      }
+    }
+  }
+}

@@ -29,8 +29,8 @@
 </head>
 
 <body id="page-top">
-  <div id='adios_loader_line'></div>
-  <div id='adios_window_wrapper'></div>
+  {# <div id='adios_loader_line'></div> #}
+  <!-- <div id='adios_window_wrapper'></div> -->
 
   <!-- <div id='adios_console'>
     <div id='adios_console_close' onclick='desktop_hide_console();'>
@@ -97,7 +97,7 @@
               {% endif %}
               href="javascript:void(0)"
               onclick="
-                if(typeof Cookies == 'object') {
+                if (typeof Cookies == 'object') {
                   Cookies.set('sidebarActiveMainItem', '{{ loop.index }}', 1);
                   Cookies.set('sidebarActiveSubItem', '0', 1);
                 }
@@ -204,33 +204,6 @@
           <!-- Topbar Navbar -->
           <div class="col col-2">
             <ul class="navbar-nav flex-row-reverse">
-
-              <!-- Language selection -->
-              {% if config.available_languages|length > 1 %}
-                <li class="nav-item dropdown no-arrow">
-                  <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ config.language|upper }}</span>
-                    <i class='btn btn-light btn-sm fas fa-language'></i>
-                  </a>
-                  <div class="dropdown-menu shadow animated--grow-in" aria-labelledby="languageDropdown">
-                    {% for lang in config.available_languages %}
-                      <a
-                        href="javascript:void(0);"
-                        onclick="
-                          _ajax_read('Desktop/Ajax/SetLanguage', {'language': '{{ lang }}'}, function(res) {
-                            location.reload()
-                          });
-                        ";
-                        class="dropdown-item {% if lang == config.language %} active {% endif %}"
-                      >
-                        <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
-                        {{ lang|upper }}
-                      </a>
-                    {% endfor %}
-                  </div>
-                </li>
-              {% endif %}
-
               <!-- Nav Item - User Information -->
               {% if user.id > 0 %}
                 <li class="nav-item dropdown no-arrow">
@@ -267,6 +240,32 @@
                   </div>
                 </li>
               {% endif %}
+
+              <!-- Language selection -->
+              {% if config.available_languages|length > 1 %}
+                <li class="nav-item dropdown no-arrow">
+                  <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="languageDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ config.language|upper }}</span>
+                    <i class='btn btn-light btn-sm fas fa-language'></i>
+                  </a>
+                  <div class="dropdown-menu shadow animated--grow-in" aria-labelledby="languageDropdown">
+                    {% for lang in config.available_languages %}
+                      <a
+                        href="javascript:void(0);"
+                        onclick="
+                          _ajax_read('Desktop/Ajax/SetLanguage', {'language': '{{ lang }}'}, function(res) {
+                            location.reload()
+                          });
+                        ";
+                        class="dropdown-item {% if lang == config.language %} active {% endif %}"
+                      >
+                        <i class="{{ item.fa_icon }} fa-sm fa-fw mr-2 text-gray-400"></i>
+                        {{ lang|upper }}
+                      </a>
+                    {% endfor %}
+                  </div>
+                </li>
+              {% endif %}
             </ul>
           </div>
 
@@ -289,6 +288,10 @@
         <div class="copyright my-auto">
           Administration panel based on ADIOS framework. Created by <a href='https://www.wai.sk' target='_blank'>www.wai.sk</a>.<br/>
           Credits: Twig, Bootstrap, FontAwesome, Vue.js, Quilljs, jQuery, Chart.js, DataTables and other 3rd-party libraries.
+
+          <div style='font-size:14px;color:red;position:fixed;right:1em;bottom:5px'>
+            Checked permission: {{ permissionForRequestedURI }}
+          </div>
         </div>
       </footer>
       <!-- End of Footer -->

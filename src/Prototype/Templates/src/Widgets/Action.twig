@@ -1,0 +1,10 @@
+<?php
+
+namespace {{ thisAction.namespace }};
+
+class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
+  public function preRender() {
+    return {{ varExport(thisAction.config, "    ")|raw }};
+  }
+}
+

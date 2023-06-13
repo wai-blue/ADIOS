@@ -3,6 +3,9 @@
 namespace ADIOS\Core\Lib;
 
 class TwigLoader implements \Twig\Loader\LoaderInterface {
+
+  public $adios;
+
   public function __construct(&$adios) {
     $this->adios = $adios;
   }
@@ -22,7 +25,20 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $widget = substr($templateName, 0, strpos($templateName, "/"));
       $action = substr($templateName, strpos($templateName, "/") + 1);
 
-      $templateFile = ADIOS_WIDGETS_DIR."/{$widget}/Templates/{$action}.twig";
+      $templateFile = $this->adios->widgetsDir."/{$widget}/Templates/{$action}.twig";
+    } else if (strpos($templateName, "ADIOS/Widgets/") === 0) {
+      $templateName = str_replace('ADIOS/Widgets/', '', $templateName);
+
+      foreach ($this->adios->widgets as $widgetName => $widgetData) {
+        if (strpos(strtolower($templateName), strtolower($widgetName)) === 0) {
+          $templateFile = 
+            $this->adios->widgetsDir
+            . '/' . $widgetName . '/'
+            . substr($templateName, strlen($widgetName) + 1)
+            . '.twig'
+          ;
+        }
+      }
     } else if (strpos($templateName, "ADIOS/Templates/") === 0) {
       $templateName = str_replace("ADIOS/Templates/", "", $templateName);
 
@@ -31,15 +47,18 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
 
       // ...potom Widget akciu
       if (!is_file($templateFile)) {
-        preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
-        $templateFile = ADIOS_WIDGETS_DIR."/{$m[1]}/Templates/{$m[2]}.twig";
+        $tPath = explode("/", $templateName);
+        $tName = array_pop($tPath);
+        $tPath = join("/", $tPath);
+
+        $templateFile = $this->adios->widgetsDir."/{$tPath}/Templates/{$tName}.twig";
       }
 
       // ...a nakoniec Plugin akciu
       if (!is_file($templateFile)) {
         preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
         foreach ($this->adios->pluginFolders as $pluginFolder) {
-          $folder = $pluginFolder."/{$this->name}/Models";
+          $folder = $pluginFolder."/{$name}/Models";
 
           $templateFile = "{$folder}/{$m[1]}/Templates/{$m[2]}.twig";
           if (is_file($templateFile)) {
@@ -49,11 +68,11 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       }
 
     } else {
-      return new \Twig\Source("", $name);
+      return new \Twig\Source($name, $name);
     }
 
     if (!is_file($templateFile)) {
-      throw new \Twig\Error\LoaderError("Template {$name} does not exist. {$templateName}");
+      throw new \Twig\Error\LoaderError("Template {$name} ({$templateName}) does not exist. Tried to load '{$templateFile}'.");
     } else {
       return new \Twig\Source(file_get_contents($templateFile), $name);
     }

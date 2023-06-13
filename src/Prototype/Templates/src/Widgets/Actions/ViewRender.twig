@@ -1,0 +1,14 @@
+<?php
+
+namespace {{ thisAction.namespace }};
+
+class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
+  public function render() {
+    $view = $this->adios->view->create(
+      "{{ thisAction.config.view }}",
+{{ varExport(thisAction.config.params, "      ")|raw }}
+    );
+
+    return $view->render();
+  }
+}

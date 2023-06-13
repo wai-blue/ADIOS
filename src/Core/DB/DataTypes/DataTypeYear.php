@@ -13,11 +13,11 @@ namespace ADIOS\Core\DB\DataTypes;
 /**
  * @package DataTypes
  */
-class DataTypeYear extends DataType
+class DataTypeYear extends \ADIOS\Core\DB\DataType
 {
     public function get_sql_create_string($table_name, $col_name, $params = [])
     {
-        $params['sql_definitions'] = '' != trim($params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
+        $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
 
         return "`$col_name` year {$params['sql_definitions']}";
     }

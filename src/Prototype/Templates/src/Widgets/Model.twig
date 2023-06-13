@@ -1,21 +1,68 @@
 <?php
 
-namespace ADIOS\Widgets\{{ thisWidget.name }}\Models;
+namespace {{ thisWidget.namespace }}\{{ thisWidget.class }}\Models;
 
-class {{ thisModel.name }} extends \ADIOS\Core\Model
-{
-  var $sqlName = "{{ thisModel.config.sqlName }}";
-  var $urlBase = "{{ thisModel.config.urlBase }}";
-  var $tableTitle = "{{ thisModel.config.tableTitle }}";
-  var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting }}";
-  var $formTitleForEditing = "{{ thisModel.config.formTitleForEditing }}";
-  var $lookupSqlValue = "{{ thisModel.config.lookupSqlValue }}";
+class {{ thisModel.name }} extends \ADIOS\Core\Model {
+
+  use \{{ thisWidget.namespace }}\{{ thisWidget.class }}\Models\Callbacks\{{ thisModel.name }};
+
+  var $sqlName = "{{ thisModel.config.sqlName|raw }}";
+  var $urlBase = "{{ thisModel.config.urlBase|raw }}";
+  var $crud = 
+{{ varExport(thisModel.config.crud, "    ")|raw }}
+  ;
+  var $tableTitle = "{{ thisModel.config.tableTitle|raw }}";
+  var $formTitleForInserting = "{{ thisModel.config.formTitleForInserting|raw }}";
+  var $formTitleForEditing = "{{ thisModel.config.formTitleForEditing|raw }}";
+  var $lookupSqlValue = "{{ thisModel.config.lookupSqlValue|raw }}";
+  var $crossTableAssignments =
+{{ varExport(thisModel.config.crossTableAssignments, "    ")|raw }}
+  ;
 
   public function columns($columns = []) {
     return parent::columns([
 {% for colName, colDefinition in thisModel.config.columns %}
-      "{{ colName }}" => json_decode('{{ colDefinition|json_encode|raw }}', TRUE),
+      "{{ colName }}" =>
+{{ varExport(colDefinition, "        ")|raw }}
+      ,
 {% endfor %}
     ]);
   }
+
+  public function indexes($columns = []) {
+    return parent::indexes([
+{% for colName, colDefinition in thisModel.config.indexes %}
+      "{{ colName }}" =>
+{{ varExport(colDefinition, "        ")|raw }}
+      ,
+{% endfor %}
+    ]);
+  }
+
+{% if (thisModel.config.formParams) %}
+  public function formParams($data, $params) {
+    $id = (int) $data["id"];
+
+    if ($id <= 0) {
+      $params["template"] =
+{{ varExport(thisModel.config.formParams.templateForInserting, "        ")|raw }}
+      ;
+    } else {
+      $params["template"] =
+{{ varExport(thisModel.config.formParams.templateForEditing, "        ")|raw }}
+      ;
+    }
+
+    $params["default_values"] =
+{{ varExport(thisModel.config.formParams.defaultValues, "      ")|raw }}
+    ;
+
+    return $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
+      "model" => $this,
+      "data" => $data,
+      "params" => $params,
+    ])["params"];
+
+  }
+{% endif %}
 }

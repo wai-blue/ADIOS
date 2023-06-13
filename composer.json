@@ -5,14 +5,9 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "ADIOS\\": "src/"
+            "ADIOS\\": "src/",
+            "ADIOS\\Tests\\": "tests/"
         }
     },
-    "authors": [
-        {
-            "name": "Dusan",
-            "email": "dusan.daniska@wai.sk"
-        }
-    ],
     "minimum-stability": "dev"
 }

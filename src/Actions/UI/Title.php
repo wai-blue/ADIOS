@@ -15,6 +15,6 @@ namespace ADIOS\Actions\UI;
  */
 class Title extends \ADIOS\Core\Action {
   public function render() {
-    return $this->adios->ui->Title($this->params)->render();
+    return $this->adios->view->Title($this->params)->render();
   }
 }

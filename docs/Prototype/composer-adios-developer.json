@@ -1,0 +1,14 @@
+{
+    "require": {
+        "twig/twig": "^3.0",
+        "illuminate/database": "^7.12",
+        "monolog/monolog": "^2.3",
+        "wai-blue/adios": "@dev"
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../github/ADIOS"
+        }
+    ]
+}
