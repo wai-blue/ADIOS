@@ -87,7 +87,6 @@ echo "ADIOS v{$adios->version} PROTOTYPE BUILDER\n";
 if (
   empty($rewriteBase)
   || empty($rootUrl)
-  || empty($rootUrl)
   || empty($dbHost)
 ) {
   echo $colorYellow."Some environment configuration is missing.\n";
@@ -146,6 +145,7 @@ $builder->setConfigEnv([
   ],
   "globalTablePrefix" => "app",
   "rewriteBase" => $rewriteBase,
+  "rootUrl" => $rootUrl
 ]);
 
 if (!empty($adminPassword)) {
