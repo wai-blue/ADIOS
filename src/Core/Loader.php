@@ -1117,6 +1117,7 @@ class Loader
             }
           }
         }
+
       }
 
       if (empty($this->action)) {
@@ -1210,6 +1211,9 @@ class Loader
   }
 
   public function getActionClassName(string $action) : string {
+
+    // If the action contains the dash (-), it must be converted to camelCase first
+    $action = str_replace(' ', '', ucwords(str_replace('-', ' ', $action)));
 
     $actionClassName = '';
 

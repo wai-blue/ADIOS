@@ -965,18 +965,22 @@ class MySQLi extends \ADIOS\Core\DB
     $sql = '';
     foreach ($this->tables[$table] as $column => $columnDefinition) {
       if (
-        !$columnDefinition['disable_foreign_key']
+        !$columnDefinition['disableForeignKey']
         && 'lookup' == $columnDefinition['type']
       ) {
         $lookupModel = $this->adios->getModel($columnDefinition['model']);
-        $foreignKeyColumn = $columnDefinition['foreign_key_column'] ?: "id";
+        $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?: "id";
+        $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?: "RESTRICT";
+        $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?: "RESTRICT";
 
         $sql .= "
-            ALTER TABLE `{$table}`
-            ADD CONSTRAINT `fk_" . md5($table . '_' . $column) . "`
-            FOREIGN KEY (`{$column}`)
-            REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`);;
-          ";
+          ALTER TABLE `{$table}`
+          ADD CONSTRAINT `fk_" . md5($table . '_' . $column) . "`
+          FOREIGN KEY (`{$column}`)
+          REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`)
+          ON DELETE {$foreignKeyOnDelete}
+          ON UPDATE {$foreignKeyOnUpdate};;
+        ";
       }
     }
 

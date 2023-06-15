@@ -135,10 +135,9 @@ class Table extends \ADIOS\Core\View
 
     $this->model->onTableBeforeInit($this);
 
-    $this->params["columns"] = $this->model->columns();
     $this->params = $this->model->tableParams($this->params, $this);
-
-    $this->columns = $this->params["columns"];
+    
+    $this->columns = $this->getColumns();
 
     $this->params['page'] = (int) $this->params['page'];
     $this->params['itemsPerPage'] = (int) $this->params['itemsPerPage'];
@@ -232,9 +231,23 @@ class Table extends \ADIOS\Core\View
       $this->params['buttons']['add']['type'] = 'add';
     }
 
-    if (!empty($this->model->addButtonText)) {
+    if ($this->model->addButtonText != null) {
       $this->params['buttons']['add']['text'] = $this->model->addButtonText;
     }
+  }
+
+  protected function getColumns(): array 
+  {
+    $columns = $this->model->columns();
+
+    foreach ($this->params['columns'] ?? [] as $columnName => $columnParams) {
+      $columns[$columnName] = array_merge(
+        $columns[$columnName],
+        $columnParams
+      );
+    }
+
+    return $columns;
   }
 
   /**

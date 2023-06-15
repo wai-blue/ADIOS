@@ -6,6 +6,10 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
 
   use \{{ thisWidget.namespace }}\{{ thisWidget.class }}\Models\Callbacks\{{ thisModel.name }};
 
+  public ?string $addButtonText = "{{ thisModel.config.addButtonText|raw }}";
+  public ?string $formAddButtonText = "{{ thisModel.config.formAddButtonText|raw }}";
+  public ?string $formSaveButtonText = "{{ thisModel.config.formSaveButtonText|raw }}";
+
   var $sqlName = "{{ thisModel.config.sqlName|raw }}";
   var $urlBase = "{{ thisModel.config.urlBase|raw }}";
   var $crud = 
