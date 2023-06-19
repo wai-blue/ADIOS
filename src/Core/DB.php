@@ -10,6 +10,10 @@
 
 namespace ADIOS\Core;
 
+use ADIOS\Core\DB\Query;
+use ADIOS\Core\Exceptions\DBDuplicateEntryException;
+use ADIOS\Core\Exceptions\DBException;
+
 class DB
 {
   protected float $lastQueryDurationSec;
@@ -286,7 +290,19 @@ class DB
   {
     $table = $model->getFullTableSqlName();
 
+    $unique = []; # Array of unique cols
+
     if (is_array($this->tables[$table])) {
+
+      # Determines which columns are supposed to be unique
+      foreach ($model->indexes() as $index) {
+        if ($index['type'] == 'unique') {
+          foreach ($index['columns'] as $col)
+            $unique[] = $col;
+        }
+      }
+
+      # Generates a nice looking value for the column
       foreach ($this->tables[$table] as $col_name => $col_definition) {
         if ($col_name != "id" && !isset($data[$col_name])) {
           $random_val = NULL;
@@ -342,37 +358,37 @@ class DB
               case "password":
                 switch (rand(0, 5)) {
                   case 0:
-                    $random_val = rand(0, 9) . " Nunc";
+                    $random_val = "Nunc";
                     break;
                   case 1:
-                    $random_val = rand(0, 9) . " Efficitur";
+                    $random_val = "Efficitur";
                     break;
                   case 2:
-                    $random_val = rand(0, 9) . " Vulputate";
+                    $random_val = "Vulputate";
                     break;
                   case 3:
-                    $random_val = rand(0, 9) . " Ligula luctus";
+                    $random_val = "Ligula luctus";
                     break;
                   case 4:
-                    $random_val = rand(0, 9) . " Mauris";
+                    $random_val = "Mauris";
                     break;
                   case 5:
-                    $random_val = rand(0, 9) . " Massa";
+                    $random_val = "Massa";
                     break;
                   case 6:
-                    $random_val = rand(0, 9) . " Auctor";
+                    $random_val = "Auctor";
                     break;
                   case 7:
-                    $random_val = rand(0, 9) . " Molestie";
+                    $random_val = "Molestie";
                     break;
                   case 8:
-                    $random_val = rand(0, 9) . " Malesuada";
+                    $random_val = "Malesuada";
                     break;
                   case 9:
-                    $random_val = rand(0, 9) . " Facilisis";
+                    $random_val = "Facilisis";
                     break;
                   case 10:
-                    $random_val = rand(0, 9) . " Augue";
+                    $random_val = "Augue";
                     break;
                 }
                 break;
@@ -380,7 +396,7 @@ class DB
                 if (!isset($col_definition['model'])) {
                   throw new \Exception("Model for lookup: {$col_name} is empty");
                 }
-                
+
                 $model = $this->adios->getModel($col_definition['model']);
                 $modelAllData = $model->select('id')->get()->toArray();
 
@@ -390,7 +406,15 @@ class DB
             }
           }
 
+          # Adds the count of all rows in the table in front of the value if the column is supposed to be unique
+          if (in_array($col_name, $unique))
+            $random_val = count($model->getAll()) . $random_val;
+
           if ($random_val !== NULL) {
+            # Trims the size of the value to match the byte_size
+            while (strlen(mb_convert_encoding($random_val, 'UTF-8')) > $col_definition['byte_size']) {
+              $random_val = mb_substr($random_val, 0, -1);
+            }
             $data[$col_name] = $random_val;
           }
         }
