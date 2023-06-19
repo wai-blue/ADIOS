@@ -240,11 +240,20 @@ class Table extends \ADIOS\Core\View
   {
     $columns = $this->model->columns();
 
-    foreach ($this->params['columns'] ?? [] as $columnName => $columnParams) {
-      $columns[$columnName] = array_merge(
-        $columns[$columnName],
-        $columnParams
+    if (!empty($this->params['columns'])) {
+      foreach ($this->params['columns'] ?? [] as $columnName => $columnParams) {
+        $columns[$columnName] = array_merge(
+          (array) $columns[$columnName],
+          (array) $columnParams
+        );
+      }
+
+      $columnsOrder = array_merge(
+        array_keys($columns), 
+        array_keys($this->params['columns'])
       );
+
+      array_multisort(array_flip($columnsOrder), $columns);
     }
 
     return $columns;
@@ -330,6 +339,8 @@ class Table extends \ADIOS\Core\View
 
     // fetch
     $this->data = $query->fetch();
+
+    //var_dump($this->data); exit;
 
     $this->allRowsCount = $db->countRowsFromLastSelect();
 
