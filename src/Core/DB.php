@@ -376,6 +376,17 @@ class DB
                     break;
                 }
                 break;
+              case 'lookup':
+                if (!isset($col_definition['model'])) {
+                  throw new \Exception("Model for lookup: {$col_name} is empty");
+                }
+                
+                $model = $this->adios->getModel($col_definition['model']);
+                $modelAllData = $model->select('id')->get()->toArray();
+
+                $rand = rand(0, count($modelAllData) - 1);
+                $random_val = $modelAllData[$rand]['id'];
+              break;
             }
           }
 
