@@ -45,7 +45,7 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
     {
       $html = '';
 
-      $value = strip_tags($value);
+      $value = strip_tags((string) $value);
       $html = mb_substr($value, 0, ($params['col_definition']['wa_list_char_length'] ? $params['col_definition']['wa_list_char_length'] : 80), 'utf-8');
       if (strlen($html) < strlen($value)) {
         $html .= '...';
