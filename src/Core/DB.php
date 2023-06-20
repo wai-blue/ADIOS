@@ -317,88 +317,87 @@ class DB
                 } else {
                   $random_val = rand(0, 1000);
                 }
-                break;
+              break;
               case "float":
                 $random_val = rand(0, 1000) / ($col_definition['decimals'] ?? 2);
-                break;
+              break;
               case "time":
                 $random_val = rand(10, 20) . ":" . rand(10, 59);
-                break;
+              break;
               case "date":
                 $random_val = date("Y-m-d", time() - (3600 * 24 * 365) + rand(0, 3600 * 24 * 365));
-                break;
+              break;
               case "datetime":
                 $random_val = date("Y-m-d H:i:s", time() - (3600 * 24 * 365) + rand(0, 3600 * 24 * 365));
-                break;
+              break;
               case "boolean":
                 $random_val = (rand(0, 1) ? 1 : 0);
-                break;
+              break;
               case "text":
-                switch (rand(0, 5)) {
-                  case 0:
-                    $random_val = "Nunc ac sollicitudin ipsum. Vestibulum condimentum vitae justo quis bibendum. Fusce et scelerisque dui, eu placerat nisl. Proin ut efficitur velit, nec rutrum massa.";
-                    break;
-                  case 1:
-                    $random_val = "Integer ullamcorper lacus at nisi posuere posuere. Maecenas malesuada magna id fringilla sagittis. Nam sed turpis feugiat, placerat nisi et, gravida lacus. Curabitur porta elementum suscipit.";
-                    break;
-                  case 2:
-                    $random_val = "Praesent libero diam, vulputate sed varius eget, luctus a risus. Praesent sit amet neque commodo, varius nisl dignissim, tincidunt magna. Nunc tincidunt dignissim ligula, sit amet facilisis felis mollis vel.";
-                    break;
-                  case 3:
-                    $random_val = "Sed ut ligula luctus, ullamcorper felis nec, tristique lorem. Maecenas sit amet tincidunt enim.";
-                    break;
-                  case 4:
-                    $random_val = "Mauris blandit ligula massa, sit amet auctor risus viverra at. Cras rhoncus molestie malesuada. Sed facilisis blandit augue, eu suscipit lectus vehicula quis. Mauris efficitur elementum feugiat.";
-                    break;
-                  default:
-                    $random_val = "Nulla posuere dui sit amet elit efficitur iaculis. Cras elit ligula, feugiat vitae maximus quis, volutpat sit amet sapien. Vivamus varius magna fermentum dolor varius, vel scelerisque ante mollis.";
-                    break;
-                }
+                $randomTextValues = [
+                  "Nunc ac sollicitudin ipsum. Vestibulum condimentum vitae justo quis bibendum. Fusce et scelerisque dui, eu placerat nisl. Proin ut efficitur velit, nec rutrum massa.",
+                  "Integer ullamcorper lacus at nisi posuere posuere. Maecenas malesuada magna id fringilla sagittis. Nam sed turpis feugiat, placerat nisi et, gravida lacus. Curabitur porta elementum suscipit.",
+                  "Praesent libero diam, vulputate sed varius eget, luctus a risus. Praesent sit amet neque commodo, varius nisl dignissim, tincidunt magna. Nunc tincidunt dignissim ligula, sit amet facilisis felis mollis vel.",
+                  "Sed ut ligula luctus, ullamcorper felis nec, tristique lorem. Maecenas sit amet tincidunt enim.",
+                  "Mauris blandit ligula massa, sit amet auctor risus viverra at. Cras rhoncus molestie malesuada. Sed facilisis blandit augue, eu suscipit lectus vehicula quis. Mauris efficitur elementum feugiat.",
+                  "Nulla posuere dui sit amet elit efficitur iaculis. Cras elit ligula, feugiat vitae maximus quis, volutpat sit amet sapien. Vivamus varius magna fermentum dolor varius, vel scelerisque ante mollis."
+                ];
+
+                $random_val = $randomTextValues[rand(0, count($randomTextValues) - 1)];
+              break;
               case "varchar":
               case "password":
-                switch (rand(0, 5)) {
-                  case 0:
-                    $random_val = "Nunc";
-                    break;
-                  case 1:
-                    $random_val = "Efficitur";
-                    break;
-                  case 2:
-                    $random_val = "Vulputate";
-                    break;
-                  case 3:
-                    $random_val = "Ligula luctus";
-                    break;
-                  case 4:
-                    $random_val = "Mauris";
-                    break;
-                  case 5:
-                    $random_val = "Massa";
-                    break;
-                  case 6:
-                    $random_val = "Auctor";
-                    break;
-                  case 7:
-                    $random_val = "Molestie";
-                    break;
-                  case 8:
-                    $random_val = "Malesuada";
-                    break;
-                  case 9:
-                    $random_val = "Facilisis";
-                    break;
-                  case 10:
-                    $random_val = "Augue";
-                    break;
-                }
-                break;
+                $randomPasswordValues = [
+                  "Nunc",
+                  "Efficitur",
+                  "Vulputate",
+                  "Ligula luctus",
+                  "Mauris",
+                  "Massa",
+                  "Auctor",
+                  "Molestie",
+                  "Malesuada",
+                  "Facilisis",
+                  "Augue"
+                ];
+
+                $random_val = $randomPasswordValues[rand(0, count($randomPasswordValues) - 1)];
+              break;
+              case 'enum':
+                # TODO
+                //var_dump($col_definition['enum_values']); exit;
+                //$random_val = $col_definition['enum_values'];
+              break;
               case 'lookup':
                 if (!isset($col_definition['model'])) {
                   throw new \Exception("Model for lookup: {$col_name} is empty");
                 }
 
-                $model = $this->adios->getModel($col_definition['model']);
-                $modelAllData = $model->select('id')->get()->toArray();
+                $lookupModel = $this->adios->getModel($col_definition['model']);
+                if ($lookupModel == NULL) throw new \Exception("Model: {$col_definition['model']} not found");
+
+                $modelAllData = $lookupModel->select('id')
+                  ->get()
+                  ->toArray()
+                ;
+
+                if (empty($modelAllData)) {
+                  if ($model->fullName == $lookupModel->fullName) break;
+
+                  try {
+                    $lookupModel->insertRandomRow();
+                  } catch (\Exception $e) {
+                    throw new \Exception($e->getMessage());
+                  }
+
+                  $modelAllData = $lookupModel->select('id')
+                    ->get()
+                    ->toArray()
+                  ;
+                }
+
+                $modelAllDataCount = count($modelAllData);
+                if ($modelAllDataCount == 0) break;
 
                 $rand = rand(0, count($modelAllData) - 1);
                 $random_val = $modelAllData[$rand]['id'];
@@ -407,14 +406,18 @@ class DB
           }
 
           # Adds the count of all rows in the table in front of the value if the column is supposed to be unique
-          if (in_array($col_name, $unique))
+          if (in_array($col_name, $unique)) {
             $random_val = count($model->getAll()) . $random_val;
+          }
 
           if ($random_val !== NULL) {
-            # Trims the size of the value to match the byte_size
-            while (strlen(mb_convert_encoding($random_val, 'UTF-8')) > $col_definition['byte_size']) {
-              $random_val = mb_substr($random_val, 0, -1);
+            if ($col_definition['byte_size'] != NULL) {
+              # Trims the size of the value to match the byte_size
+              while (strlen(mb_convert_encoding($random_val, 'UTF-8')) > $col_definition['byte_size']) {
+                $random_val = mb_substr($random_val, 0, -1);
+              }
             }
+
             $data[$col_name] = $random_val;
           }
         }
