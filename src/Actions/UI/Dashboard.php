@@ -15,7 +15,7 @@ namespace ADIOS\Actions\UI;
  */
 class Dashboard extends \ADIOS\Core\Action {
   function render() {
-    $dashboard = new \ADIOS\Core\UI\Dashboard(
+    $dashboard = new \ADIOS\Core\Views\Dashboard(
       $this->adios,
       $this->params
     );

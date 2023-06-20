@@ -8,11 +8,11 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\UI;
+namespace ADIOS\Core\Views;
 
-class Dashboard extends \ADIOS\Core\UI\View
+class Dashboard extends \ADIOS\Core\View
 {
-  public $twigTemplate = "ADIOS/Templates/UI/Dashboard";
+  public string $twigTemplate = "ADIOS/Templates/UI/Dashboard";
 
   public function preRender(string $panel = '')
   {
@@ -36,8 +36,13 @@ class Dashboard extends \ADIOS\Core\UI\View
   // }
 
   public function getAvailableCards() {
+    $availableCards = [];
+    foreach ($this->adios->models as $model) {
+      if ($this->adios->getModel($model)->cards() != [])
+        $availableCards[] = $this->adios->getModel($model)->cards();
+    }
     // for each model->getDashboardCards, nasledne post processing
-    return $this->adios->renderReturn(["param1" => "xahoj"]);
+    return $this->adios->renderReturn($availableCards);
   }
 
   public function getCardContent($cardUid) {

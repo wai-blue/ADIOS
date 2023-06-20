@@ -14,10 +14,10 @@ namespace ADIOS\Actions\UI\Dashboard;
  * @package UI\Actions
  */
 class GetCardContent extends \ADIOS\Core\Action {
-  public static $hideDefaultDesktop = TRUE;
+  public static bool $hideDefaultDesktop = TRUE;
 
   function render() {
-    $dashboard = new \ADIOS\Core\UI\Dashboard($this->adios);
+    $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios);
     return $dashboard->getCardContent($this->params['uid'] ?? "");
   }
 }

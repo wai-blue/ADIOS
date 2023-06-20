@@ -137,7 +137,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   private static $allItemsCache = NULL;
 
   public $crossTableAssignments = [];
-  
+
   public ?string $addButtonText = null;
   public ?string $formSaveButtonText = null;
   public ?string $formAddButtonText = null;
@@ -758,7 +758,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param array $data
    * @param string $lookupKeyPrefix
-   * 
+   *
    * @return [type]
    */
   public function normalizeRowData(array $data, string $lookupKeyPrefix = "") {
@@ -1074,7 +1074,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onTableBeforeInit
    *
    * @param mixed $tableObject
-   * 
+   *
    * @return void
    */
   public function onTableBeforeInit($tableObject) : void
@@ -1085,7 +1085,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onTableAfterInit
    *
    * @param mixed $tableObject
-   * 
+   *
    * @return void
    */
   public function onTableAfterInit($tableObject) : void
@@ -1096,7 +1096,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onTableAfterDataLoaded
    *
    * @param mixed $tableObject
-   * 
+   *
    * @return void
    */
   public function onTableAfterDataLoaded($tableObject) : void
@@ -1110,18 +1110,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onFormBeforeInit
    *
    * @param mixed $formObject
-   * 
+   *
    * @return void
    */
   public function onFormBeforeInit($formObject) : void
   {
   }
-  
+
   /**
    * onFormAfterInit
    *
    * @param mixed $formObject
-   * 
+   *
    * @return void
    */
   public function onFormAfterInit($formObject) : void
@@ -1230,11 +1230,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       $returnValue = $this->deleteRow($id);
 
-      $returnValue = $this->adios->dispatchEventToPlugins("onModelAfterDelete", [
+      $returnValue = $this->adios->dispatchEventToPlugins([
         "model" => $this,
         "data" => $data,
         "returnValue" => $returnValue,
-      ])["returnValue"];
+      ], "onModelAfterDelete")["returnValue"];
 
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
@@ -1245,6 +1245,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   //////////////////////////////////////////////////////////////////
   // UI/Cards methods
+
+  public function cards(array $cards = [])
+  {
+    return $this->adios->dispatchEventToPlugins("onModelAfterCards", [
+      "model" => $this,
+      "cards" => $cards,
+    ])["cards"];
+  }
 
   public function cardsParams($params)
   {
@@ -1282,7 +1290,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onBeforeInsert
    *
    * @param mixed $data
-   * 
+   *
    * @return [type]
    */
   public function onBeforeInsert($data)
@@ -1297,7 +1305,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onModelBeforeUpdate
    *
    * @param mixed $data
-   * 
+   *
    * @return [type]
    */
   public function onBeforeUpdate($data)
@@ -1312,7 +1320,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onBeforeSave
    *
    * @param mixed $data
-   * 
+   *
    * @return [type]
    */
   public function onBeforeSave($data)
@@ -1328,7 +1336,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    * @param mixed $returnValue
-   * 
+   *
    * @return [type]
    */
   public function onAfterInsert($data, $returnValue)
@@ -1345,7 +1353,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    * @param mixed $returnValue
-   * 
+   *
    * @return [type]
    */
   public function onAfterUpdate($data, $returnValue)
@@ -1356,13 +1364,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "returnValue" => $returnValue,
     ])["returnValue"];
   }
-  
+
   /**
    * onAfterSave
    *
    * @param mixed $data
    * @param mixed $returnValue
-   * 
+   *
    * @return [type]
    */
   public function onAfterSave($data, $returnValue)
@@ -1478,7 +1486,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if (empty($query->pdoCrossTables)) {
       $query->pdoCrossTables = [];
     }
-    
+
     $query->pdoCrossTables[] = [$crossTableModel, $foreignKey, $resultKey];
 
     return $this;

@@ -14,10 +14,10 @@ namespace ADIOS\Actions\UI\Dashboard;
  * @package UI\Actions
  */
 class Configure extends \ADIOS\Core\Action {
-  public $twigTemplate = "ADIOS/Templates/UI/Dashboard/Configure";
+  public string $twigTemplate = "ADIOS/Templates/UI/Dashboard/Configure";
 
   function preRender() {
-    $dashboard = new \ADIOS\Core\UI\Dashboard($this->adios, $this->params);
+    $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios, $this->params);
     return [
       'availableCards' => $dashboard->getAvailableCards(),
     ];
