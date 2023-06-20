@@ -406,12 +406,20 @@ class DB
           }
 
           # Adds the count of all rows in the table in front of the value if the column is supposed to be unique
-          if (in_array($col_name, $unique)) {
+          if (in_array($col_name, $unique) && $col_definition['type'] != 'datetime' && $col_definition['type'] != 'date' && $col_definition['type'] != 'time') {
             $random_val = count($model->getAll()) . $random_val;
+          } else if (in_array($col_name, $unique) && $col_definition['type'] == 'datetime') {
+            $random_val->setTime((count($model->getAll()) / 60 / 60) % 24, (count($model->getAll()) / 60) % 60, count($model->getAll()) % 60); # Runs out after 86400 rows
+          } else if (in_array($col_name, $unique) && $col_definition['type'] == 'date') {
+            $random_val = new \DateTime(time());
+            $random_val->modify((rand(1, 2) == 2 ? '+' : '-') . count($model->getAll()) . ' days');
+            $random_val = $random_val->format('Y-m-d');
+          } else if (in_array($col_name, $unique) && $col_definition['type'] == 'time') {
+            $random_val->setTime((count($model->getAll()) / 60 / 60) % 24, (count($model->getAll()) / 60) % 60, count($model->getAll()) % 60); # Runs out after 86400 rows
           }
 
           if ($random_val !== NULL) {
-            if ($col_definition['byte_size'] != NULL) {
+            if ($col_definition['byte_size'] != NULL && !in_array($col_definition['type'], ['date', 'time', 'datetime'])) {
               # Trims the size of the value to match the byte_size
               while (strlen(mb_convert_encoding($random_val, 'UTF-8')) > $col_definition['byte_size']) {
                 $random_val = mb_substr($random_val, 0, -1);
