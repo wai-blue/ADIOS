@@ -14,6 +14,7 @@ class Dashboard extends \ADIOS\Core\View
 {
   public string $twigTemplate = "ADIOS/Templates/UI/Dashboard";
 
+  # TODO: Nepouziva sa
   public function preRender(string $panel = ''): array
   {
     return [
@@ -53,6 +54,7 @@ class Dashboard extends \ADIOS\Core\View
     return $availableCards;
   }
 
+  // TODO: Nepouziva sa
   public function getCardContent($cardUid): string
   {
     if (empty($cardUid)) {

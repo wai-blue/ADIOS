@@ -34,6 +34,7 @@ namespace ADIOS\Actions\UI;
  */
 
 class Cards extends \ADIOS\Core\Action {
+  # TODO: Nepouziva sa
   function render() {
     return (new \ADIOS\Core\Views\Cards($this->adios, $this->params))->render();
   }
