@@ -14,7 +14,7 @@ class Dashboard extends \ADIOS\Core\View
 {
   public string $twigTemplate = "ADIOS/Templates/UI/Dashboard";
 
-  public function preRender(string $panel = '')
+  public function preRender(string $panel = ''): array
   {
     return [
       'cfg' => $this->getUserDashboardConfig(),
@@ -35,17 +35,26 @@ class Dashboard extends \ADIOS\Core\View
   //   return $this->adios->renderReturn(["param1" => "xahoj"]);
   // }
 
-  public function getAvailableCards() {
+  public function getAvailableCards(): array
+  {
     $availableCards = [];
     foreach ($this->adios->models as $model) {
       if ($this->adios->getModel($model)->cards() != [])
         $availableCards[] = $this->adios->getModel($model)->cards();
     }
+
+    foreach ($availableCards as &$i) {
+      foreach ($i as &$card) {
+        $card['params_encoded'] = base64_encode(json_encode($card['params']));
+      }
+    }
+
     // for each model->getDashboardCards, nasledne post processing
-    return $this->adios->renderReturn($availableCards);
+    return $availableCards;
   }
 
-  public function getCardContent($cardUid) {
+  public function getCardContent($cardUid): string
+  {
     if (empty($cardUid)) {
       return "No UID.";
     } else {
