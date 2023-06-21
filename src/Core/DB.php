@@ -381,7 +381,7 @@ class DB
                   ->toArray()
                 ;
 
-                if (empty($modelAllData)) {
+                if (empty($modelAllData) || in_array($col_name, $unique)) {
                   if ($model->fullName == $lookupModel->fullName) break;
 
                   try {
@@ -390,33 +390,36 @@ class DB
                     throw new \Exception($e->getMessage());
                   }
 
-                  $modelAllData = $lookupModel->select('id')
-                    ->get()
-                    ->toArray()
+                  $modelAllData = $lookupModel->select('id')->get()->toArray();
                   ;
                 }
 
                 $modelAllDataCount = count($modelAllData);
                 if ($modelAllDataCount == 0) break;
 
-                $rand = rand(0, count($modelAllData) - 1);
+                $rand = !in_array($col_name, $unique) ? rand(0, count($modelAllData) - 1) : $modelAllDataCount - 1;
                 $random_val = $modelAllData[$rand]['id'];
               break;
             }
           }
 
+
           # Adds the count of all rows in the table in front of the value if the column is supposed to be unique
-          if (in_array($col_name, $unique) && $col_definition['type'] != 'datetime' && $col_definition['type'] != 'date' && $col_definition['type'] != 'time') {
+          if (in_array($col_name, $unique) && $col_definition['type'] != 'lookup' && $col_definition['type'] != 'datetime' && $col_definition['type'] != 'date' && $col_definition['type'] != 'time') {
             $random_val = count($model->getAll()) . $random_val;
           } else if (in_array($col_name, $unique) && $col_definition['type'] == 'datetime') {
-            $random_val->setTime((count($model->getAll()) / 60 / 60) % 24, (count($model->getAll()) / 60) % 60, count($model->getAll()) % 60); # Runs out after 86400 rows
+            $random_val = new \DateTime();
+            $random_val->setTimestamp(strtotime('-1 year') + rand(0, 3600 * 24 * 365));
+            $random_val->setTime(floor(count($model->getAll()) / 3600) % 24, floor(count($model->getAll()) / 60) % 60, count($model->getAll()) % 60); # Runs out after 86400 rows
+            $random_val = $random_val->format("Y-m-d H:i:s");
           } else if (in_array($col_name, $unique) && $col_definition['type'] == 'date') {
-            $random_val = new \DateTime(time());
+            $random_val = new \DateTime();
             $random_val->modify((rand(1, 2) == 2 ? '+' : '-') . count($model->getAll()) . ' days');
             $random_val = $random_val->format('Y-m-d');
           } else if (in_array($col_name, $unique) && $col_definition['type'] == 'time') {
             $random_val->setTime((count($model->getAll()) / 60 / 60) % 24, (count($model->getAll()) / 60) % 60, count($model->getAll()) % 60); # Runs out after 86400 rows
           }
+
 
           if ($random_val !== NULL) {
             if ($col_definition['byte_size'] != NULL && !in_array($col_definition['type'], ['date', 'time', 'datetime'])) {
