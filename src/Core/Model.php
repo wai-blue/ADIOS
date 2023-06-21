@@ -567,8 +567,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     $routing = [
 
-      // Browse
+      // Default
       '/^' . $urlBase . '$/' => [
+        "permission" => "{$this->fullName}/Browse",
+        "action" => $this->crud['browse']['action'] ?? "UI/Table",
+        "params" => array_merge($urlParams, [
+          "model" => $this->fullName,
+        ])
+      ],
+
+      // Browse
+      '/^' . $urlBase . '\/browse$/' => [
         "permission" => "{$this->fullName}/Browse",
         "action" => $this->crud['browse']['action'] ?? "UI/Table",
         "params" => array_merge($urlParams, [
