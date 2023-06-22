@@ -25,16 +25,28 @@ class Dashboard extends \ADIOS\Core\View
   }
 
   public function getUserDashboardConfig() {
+    if ($this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0'] == null || json_decode($this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0']) == null) {
+      $this->initUserDashboardConfig();
+    }
     return
-      $this->adios->config['dashboard']
-      [$this->adios->userProfile['id']]
-      [$this->uid]
+      $this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0']
     ;
   }
 
-  // public function getUserAvailableCards() {
-  //   return $this->adios->renderReturn(["param1" => "xahoj"]);
-  // }
+  public function initUserDashboardConfig(): void
+  {
+    $cards = $this->getAvailableCards();
+
+    foreach ($cards as &$i) {
+      foreach ($i as &$card) {
+        $card['left'] = true;
+        $card['is_active'] = false;
+        $card['order'] = 999;
+      }
+    }
+
+    $this->adios->saveConfig([json_encode($cards)], 'dashboard-'.$this->adios->userProfile['id']);
+  }
 
   public function getAvailableCards(): array
   {
@@ -42,12 +54,6 @@ class Dashboard extends \ADIOS\Core\View
     foreach ($this->adios->models as $model) {
       if ($this->adios->getModel($model)->cards() != [])
         $availableCards[] = $this->adios->getModel($model)->cards();
-    }
-
-    foreach ($availableCards as &$i) {
-      foreach ($i as &$card) {
-        $card['params_encoded'] = base64_encode(json_encode($card['params']));
-      }
     }
 
     // for each model->getDashboardCards, nasledne post processing
