@@ -1,8 +1,8 @@
-<canvas id="chart-1" class="display" style="width:100%;"></canvas>
+<canvas id="chart-1"></canvas>
 
 <script>
 
-    const config = {
+    var config = {
         type: '{{ params.type }}',
         data: {
             labels: ['{{ params.labels|join("', '")|raw }}'],
