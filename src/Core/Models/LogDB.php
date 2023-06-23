@@ -16,8 +16,7 @@ namespace ADIOS\Core\Models;
  * @package DefaultModels
  */
 class LogDB extends \ADIOS\Core\Model {
-  var $sqlName = "";
-  
+
   public function __construct(&$adios) {
     $this->sqlName = "{$adios->config['system_table_prefix']}_db_log";
     parent::__construct($adios);

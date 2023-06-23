@@ -18,9 +18,8 @@ namespace ADIOS\Core\Models;
 class User extends \ADIOS\Core\Model {
   const TOKEN_TYPE_USER_FORGOT_PASSWORD = 551155;
 
-  var $sqlName = "";
-  var $urlBase = "Users";
-  var $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
+  public string $urlBase = "Users";
+  public string $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "{$adiosOrAttributes->config['system_table_prefix']}_users";
