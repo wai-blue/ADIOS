@@ -1,29 +1,29 @@
-<h1>{{ params.title ?? "Default Title"  }}</h1>
+<h1>{{ params.title ?? "Default Title" }}</h1>
 <div class="row">
   <div class="col-md-6">
     {% for key, model in availC %}
-      {%  for k, card in model %}
+      {% for k, card in model %}
         {% if card.is_active and card.left %}
-      <div class="card shadow mb-2">
-        <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">
-            {% if card['params']['title'] is defined %} {{ card['params']['title'] }} {% else %} {{ k }}{% endif %}</h6>
-        </div>
-        <div class="card-body" id="card-{{ key }}-{{ loop.index0 }}">
-        </div>
-      </div>
+          <div class="card shadow mb-2">
+            <div class="card-header py-3">
+              <h6 class="m-0 font-weight-bold text-primary">
+                {% if card['params']['title'] is defined %} {{ card['params']['title'] }} {% else %} {{ k }}{% endif %}</h6>
+            </div>
+            <div class="card-body" id="card-{{ key }}-{{ loop.index0 }}">
+            </div>
+          </div>
 
-        <script>
-          params = JSON.parse(
+          <script>
+              params = JSON.parse(
                   Base64.decode('{{ card['params_encoded'] }}')
-          );
+              );
 
-          _ajax_update(
+              _ajax_update(
                   '{{ card['action'] }}',
                   params,
                   'card-{{ key }}-{{ loop.index0 }}'
-          );
-        </script>
+              );
+          </script>
         {% endif %}
       {% endfor %}
     {% endfor %}
@@ -33,7 +33,7 @@
   <div class="col-md-6">
 
     {% for key, model in availC %}
-      {%  for k, card in model %}
+      {% for k, card in model %}
         {% if card.is_active and not card.left %}
           <div class="card shadow mb-2">
             <div class="card-header py-3">
@@ -45,15 +45,15 @@
           </div>
 
           <script>
-            params = JSON.parse(
-                    Base64.decode('{{ card['params_encoded'] }}')
-            );
+              params = JSON.parse(
+                  Base64.decode('{{ card['params_encoded'] }}')
+              );
 
-            _ajax_update(
-                    '{{ card['action'] }}',
-                    params,
-                    'card-{{ key }}-{{ loop.index0 }}'
-            );
+              _ajax_update(
+                  '{{ card['action'] }}',
+                  params,
+                  'card-{{ key }}-{{ loop.index0 }}'
+              );
           </script>
         {% endif %}
       {% endfor %}
