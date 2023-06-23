@@ -24,6 +24,7 @@ class Chart extends \ADIOS\Core\View {
                           # requires:
                           # either data property or model with data_columns property
                           # either labels or label_column property
+      'function' => null, # count, sum, default
     ], $params);
 
     if (empty($this->params['datasets'])) exit("UI/Chart: Data not provided. Please specify datasets property.");
