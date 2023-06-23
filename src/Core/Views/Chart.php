@@ -60,9 +60,6 @@ class Chart extends \ADIOS\Core\View {
               ->get()
               ->toArray())[$dataset['label_column']['column']] ?? []);
 
-        # TODO: Replace the label if it is a foreign ID
-        foreach ($this->params['labels'] as &$label);
-
         # Determines the limit of the chart data, that needs to be fetched
         $limit = match ($dataset['function']) {
           'count' => $dataset['limit'] ?? 10,
@@ -78,52 +75,59 @@ class Chart extends \ADIOS\Core\View {
         foreach ($dataset['data_columns'] as $col_def) {
           $col = key($col_def); # retrieves the name of the data_column
 
-            # Gets the target model based on column specification
-            $dataset['data'] = $this->adios->getModel($dataset['model']);
+          # Gets the target model based on column specification
+          $dataset['data'] = $this->adios->getModel($dataset['model']);
 
-            # Determines whether there is a condition which exact models should be filtered out
-            if ($dataset['where'] != '') {
-              $dataset['data'] = $dataset['data']->where(...array_merge_recursive($dataset['where']));
-            }
+          # Determines whether there is a condition which exact models should be filtered out
+          if ($dataset['where'] != '') {
+            $dataset['data'] = $dataset['data']->where(...array_merge_recursive($dataset['where']));
+          }
 
-            # Determines the function of the supplied data
-            switch ($dataset['function']) {
-              # Counts all found rows, useful if there are more rows than labels
-              case 'count':
-                $data = [];
-                foreach($this->params['labels'] as $label_value) {
-                  $data[] = $dataset['data']
-                    ->where($dataset['label_column']['column'], "=", $label_value)
-                    ->limit($limit)
-                    ->count();
-                }
-                $dataset['data'] = $data;
-                break;
+          # Determines the function of the supplied data
+          switch ($dataset['function']) {
+            # Counts all found rows, useful if there are more rows than labels
+            case 'count':
+              $data = [];
+              foreach($this->params['labels'] as $label_value) {
+                $data[] = $dataset['data']
+                  ->where($dataset['label_column']['column'], "=", $label_value)
+                  ->limit($limit)
+                  ->count();
+              }
+              $dataset['data'] = $data;
+              break;
 
-              # Sums all found rows, useful if there are more rows than labels
-              case 'sum':
-                $data = [];
-                foreach($this->params['labels'] as $label_value) {
-                  $data[] = $dataset['data']
-                    ->where($dataset['label_column']['column'], "=", $label_value)
-                    ->limit($limit)
-                    ->sum($col);
-                }
-                $dataset['data'] = $data;
-                break;
+            # Sums all found rows, useful if there are more rows than labels
+            case 'sum':
+              $data = [];
+              foreach($this->params['labels'] as $label_value) {
+                $data[] = $dataset['data']
+                  ->where($dataset['label_column']['column'], "=", $label_value)
+                  ->limit($limit)
+                  ->sum($col);
+              }
+              $dataset['data'] = $data;
+              break;
 
-              # Target column in found rows is imported as data
-              default:
-                $dataset['data'] = $dataset['data']
-                  ->orderBy('id', 'desc')
-                  ->limit($limit);
+            # Target column in found rows is imported as data
+            default:
+              $dataset['data'] = $dataset['data']
+                ->orderBy('id', 'desc')
+                ->limit($limit);
 
-                $dataset['data'] = array_merge_recursive(...
-                  $dataset['data']
-                    ->select($col)
-                    ->get()
-                    ->toArray())[$col] ?? [];
-            }
+              $dataset['data'] = array_merge_recursive(...
+                $dataset['data']
+                  ->select($col)
+                  ->get()
+                  ->toArray())[$col] ?? [];
+          }
+        }
+
+        # Lastly, replace the label if it is a foreign ID
+        if ($dataset['label_column']['lookup']) {
+          foreach ($this->params['labels'] as &$label) {
+            $label = array_merge_recursive($this->adios->getModel($dataset['label_column']['model'])->select($dataset['label_column']['lookup'])->where('id', '=', $label)->get()->toArray())[0][$dataset['label_column']['lookup']];
+          }
         }
       }
     }
