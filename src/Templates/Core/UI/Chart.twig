@@ -1,24 +1,25 @@
+REVIEW PATO: SKus pouzit naprikald $this->adios-uid vygenerovanie uid pre komponentu
+Ak ju zavolam viac krat tak chyba lebo stale pouzivam iste ID
 <canvas id="chart-1"></canvas>
 
 <script>
+  var config = {
+    type: '{{ params.type }}',
+    data: {
+      labels: ['{{ params.labels|join("', '")|raw }}'],
+      datasets: {{ params.datasets|json_encode|raw }},
+    },
+    options: {
+      responsive: true,
+      title: {
+        display: true,
+        text: 'Chart.js Pie Chart'
+      },
+      legend: {
+        position: 'top',
+      }
+    },
+  };
 
-    var config = {
-        type: '{{ params.type }}',
-        data: {
-            labels: ['{{ params.labels|join("', '")|raw }}'],
-            datasets: {{ params.datasets|json_encode|raw }},
-        },
-        options: {
-            responsive: true,
-            title: {
-                display: true,
-                text: 'Chart.js Pie Chart'
-            },
-            legend: {
-                position: 'top',
-            }
-        },
-    };
-
-    new Chart(document.getElementById('chart-1').getContext('2d'), config);
+  new Chart(document.getElementById('chart-1').getContext('2d'), config);
 </script>

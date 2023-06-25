@@ -8,51 +8,38 @@ class Chart extends \ADIOS\Core\View {
   public string $twigTemplate = "Core/UI/Chart";
   private ?\ADIOS\Core\Model $model = null;
 
-  /**
-   * __construct
-   *
-   * @param  mixed $adios
-   * @param  mixed $params
-   * @return void
-   */
-  public function __construct(&$adios, $params = null) {
-    $this->adios = &$adios;
+  public function __construct(?\ADIOS\Core\Loader $adios, array $params = []) {
+    $this->adios = $adios;
 
     $this->params = parent::params_merge([
-      'type' => null,     # pie, bar, line, radar, bubble, doughnut, polarArea, radar, scatter
-      'datasets' => null, # array of datasets, for examples visit https://www.chartjs.org/docs/latest/charts
-                          # requires:
-                          # either data property or model with data_columns property
-                          # either labels or label_column property
-      'function' => null, # count, sum, default
+      'type' => null, # pie, bar, line, radar, bubble, doughnut, polarArea, radar, scatter
+      'datasets' => null,
+      'function' => null,
     ], $params);
 
-    if (empty($this->params['datasets'])) exit("UI/Chart: Data not provided. Please specify datasets property.");
+    if (empty($this->params['datasets'])) {
+      exit("UI/Chart: Data not provided. Please specify datasets property.");
+    }
 
-    # Iterates over all datasets
     foreach ($this->params['datasets'] as &$dataset) {
       if ($dataset['model'] == '' && $dataset['data'] == '') exit("UI/Chart: Data not provided. Please specify model or data properties in datasets.");
+      // REVIEW PATO: Snazime sa pouzivat camelCase takze: dataColumns, labelColumns ...
       if ($dataset['data_columns'] == '') exit("UI/Chart: Data not provided. Please specify data_columns property in datasets.");
       if ($dataset['label_column'] == '' && $dataset['labels'] == '') exit("UI/Chart: Labels not provided. Please specify label_column or labels properties in datasets.");
 
-      # If model isn't supplied, it is still possible that data property is provided
       if (isset($dataset['model'])) {
-        /* ------------ */
-        /* LABEL COLUMN */
-        /* ------------ */
+        // REVIEW PATO: Skus pouzivate lepsie nazvy premennych napriklad pouzi model, tmpModel, 
+        // kedze tu ziskam len instanciu modelu
+        $this->params['labels'] = $this->adios
+          ->getModel($dataset['model'])
+        ;
 
-        # Gets the target model based on column specification
-        $this->params['labels'] = $this
-          ->adios
-          ->getModel($dataset['model']);
-
-        # Determines whether there is a condition which exact models should be filtered out
         if ($dataset['where'] != '') {
           $this->params['labels'] = $this->params['labels']
-            ->where(...array_merge_recursive($dataset['where']));
+            ->where(...array_merge_recursive($dataset['where']))
+          ;
         }
 
-        # Gets the labels
         $this->params['labels'] = array_unique(
           array_merge_recursive(...
             $this
@@ -71,7 +58,6 @@ class Chart extends \ADIOS\Core\View {
         /* ------------ */
         /* DATA COLUMNS */
         /* ------------ */
-
         # Iterates over all data_columns
         foreach ($dataset['data_columns'] as $col_def) {
           $col = key($col_def); # retrieves the name of the data_column
@@ -89,12 +75,15 @@ class Chart extends \ADIOS\Core\View {
             # Counts all found rows, useful if there are more rows than labels
             case 'count':
               $data = [];
+
               foreach($this->params['labels'] as $label_value) {
                 $data[] = $dataset['data']
                   ->where($dataset['label_column']['column'], "=", $label_value)
                   ->limit($limit)
-                  ->count();
+                  ->count()
+                ;
               }
+
               $dataset['data'] = $data;
               break;
 
@@ -127,6 +116,7 @@ class Chart extends \ADIOS\Core\View {
         # Lastly, replace the label if it is a foreign ID
         if ($dataset['label_column']['lookup']) {
           foreach ($this->params['labels'] as &$label) {
+            # REVIEW PATO: spagety kod 
             $label = array_merge_recursive($this->adios->getModel($dataset['label_column']['model'])->select($dataset['label_column']['lookup'])->where('id', '=', $label)->get()->toArray())[0][$dataset['label_column']['lookup']];
           }
         }
@@ -135,11 +125,6 @@ class Chart extends \ADIOS\Core\View {
   }
 
   public function getTwigParams(): array {
-    return array_merge(
-      $this->params,
-      [
-        'ui' => $this->adios->ui
-      ]
-    );
+    return $this->params;
   }
 }
