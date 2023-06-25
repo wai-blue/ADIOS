@@ -82,8 +82,8 @@ Use class ```\ADIOS\Core\Model``` and a method ```columns()``` to define the str
 ```php
 class Customer extends \ADIOS\Core\Model {
 
-  var $sqlName = "customers";  // name of the table in the SQL
-  var $urlBase = "customers";  // URL at which the model's CRUD will be available
+  public string $sqlName = "customers";  // name of the table in the SQL
+  public string = "customers";  // URL at which the model's CRUD will be available
 
   public function columns($columns = []) {
     return parent::columns([

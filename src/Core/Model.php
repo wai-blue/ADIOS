@@ -43,17 +43,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   /**
    * Full name of the model. Useful for getModel() function
-   *
-   * @var mixed
    */
-  var $fullName = "";
+  public string $fullName = "";
 
   /**
    * Short name of the model. Useful for debugging purposes
-   *
-   * @var mixed
    */
-  var $shortName = "";
+  public string $shortName = "";
 
   /**
    * Reference to ADIOS object
@@ -64,64 +60,48 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   /**
    * Shorthand for "global table prefix"
-   *
-   * @var mixed
    */
-  var $gtp = "";
+  public ?string $gtp = "";
 
   /**
    * Name of the table in SQL database. Used together with global table prefix.
-   *
-   * @var mixed
    */
-  var $sqlName = "";
+  public string $sqlName = '';
 
   /**
    * URL base for management of the content of the table. If not empty, ADIOS
    * automatically creates URL addresses for listing the content, adding and
    * editing the content.
-   *
-   * @var mixed
    */
-  var $urlBase = "";
+  public string $urlBase = "";
 
-  var $crud = [];
+  public ?array $crud = [];
 
   /**
    * Readable title for the table listing.
-   *
-   * @var mixed
    */
-  var $tableTitle = "";
+  public string $tableTitle = "";
 
   /**
    * Readable title for the form when editing content.
-   *
-   * @var mixed
    */
-  var $formTitleForEditing = "";
+  public string $formTitleForEditing = "";
 
   /**
    * Readable title for the form when inserting content.
-   *
-   * @var mixed
    */
-  var $formTitleForInserting = "";
+  public string $formTitleForInserting = "";
 
   /**
    * SQL-compatible string used to render displayed value of the record when used
    * as a lookup.
-   *
-   * @var mixed
    */
-  var $lookupSqlValue = "";
+  public string $lookupSqlValue = "";
 
   /**
    * If set to TRUE, the SQL table will not contain the ID autoincrement column
-   *
-   * @var mixed
    */
-  var $isCrossTable = FALSE;
+  public bool $isCrossTable = FALSE;
 
   var $pdo;
   var $searchAction;
@@ -136,7 +116,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   private static $allItemsCache = NULL;
 
-  public $crossTableAssignments = [];
+  public ?array $crossTableAssignments = [];
   
   public ?string $addButtonText = null;
   public ?string $formSaveButtonText = null;
