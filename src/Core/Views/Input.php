@@ -135,7 +135,7 @@ class Input extends \ADIOS\Core\View {
         if (!empty($params['model'])) {
           $this->model = $adios->getModel($params['model']);
         }
-        
+
         if (empty($params['table']) && !empty($params['model'])) {
           $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
         }

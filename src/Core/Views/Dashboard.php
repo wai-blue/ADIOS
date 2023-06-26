@@ -14,16 +14,6 @@ class Dashboard extends \ADIOS\Core\View
 {
   public string $twigTemplate = "ADIOS/Templates/UI/Dashboard";
 
-  # TODO: Nepouziva sa
-  public function preRender(string $panel = ''): array
-  {
-    return [
-      'cfg' => $this->getUserDashboardConfig(),
-      'param2' => 'aoj',
-      'availableCards' => $this->getAvailableCards(),
-    ];
-  }
-
   public function getUserDashboardConfig() {
     if ($this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0'] == null || json_decode($this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0']) == null) {
       $this->initUserDashboardConfig();
@@ -68,6 +58,53 @@ class Dashboard extends \ADIOS\Core\View
     } else {
       return "card {$cardUid}";
     }
+  }
+
+  public function getSettingsInputs($availableCards): array {
+    $forms = [];
+
+    foreach ($availableCards as $card) {
+      $card_form = [];
+      $card_form[] = $this->addView(
+        "Input",
+        array_merge(
+          [
+            "type" => "varchar",
+            "value" => false,
+            "enum_values" => ['Right', 'Left'],
+            "title" => 'Column'
+          ],
+          ['required' => true]
+        )
+      )->render();
+
+      $card_form[] = $this->addView(
+        "Input",
+        array_merge(
+          [
+            "type" => "bool",
+            "value" => false,
+            "title" => 'Is active?'
+          ],
+          ['required' => true]
+        )
+      )->render();
+
+      $card_form[] = $this->addView(
+        "Input",
+        array_merge(
+          [
+            "type" => "int",
+            "value" => "999",
+            "title" => 'Order'
+          ],
+          ['required' => true]
+        )
+      )->render();
+      $forms[] = $card_form;
+    }
+
+    return $forms;
   }
 
 }
