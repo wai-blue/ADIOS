@@ -23,62 +23,54 @@ class Chart extends \ADIOS\Core\View {
 
     foreach ($this->params['datasets'] as &$dataset) {
       if ($dataset['model'] == '' && $dataset['data'] == '') exit("UI/Chart: Data not provided. Please specify model or data properties in datasets.");
-      // REVIEW PATO: Snazime sa pouzivat camelCase takze: dataColumns, labelColumns ...
-      if ($dataset['data_columns'] == '') exit("UI/Chart: Data not provided. Please specify data_columns property in datasets.");
-      if ($dataset['label_column'] == '' && $dataset['labels'] == '') exit("UI/Chart: Labels not provided. Please specify label_column or labels properties in datasets.");
+      if ($dataset['dataColumns'] == '') exit("UI/Chart: Data not provided. Please specify dataColumns property in datasets.");
+      if ($dataset['labelColumn'] == '' && $dataset['labels'] == '') exit("UI/Chart: Labels not provided. Please specify labelColumn or labels properties in datasets.");
 
       if (isset($dataset['model'])) {
-        // REVIEW PATO: Skus pouzivate lepsie nazvy premennych napriklad pouzi model, tmpModel, 
-        // kedze tu ziskam len instanciu modelu
-        $this->params['labels'] = $this->adios
+        # Label processing
+        $this->params['labelModel'] = $this->adios
           ->getModel($dataset['model'])
         ;
 
         if ($dataset['where'] != '') {
-          $this->params['labels'] = $this->params['labels']
+          $this->params['labelModel'] = $this->params['labelModel']
             ->where(...array_merge_recursive($dataset['where']))
           ;
         }
 
-        $this->params['labels'] = array_unique(
+        $this->params['labelModel'] = array_unique(
           array_merge_recursive(...
             $this
-              ->params['labels']
-              ->select($dataset['label_column']['column'])
+              ->params['labelModel']
+              ->select($dataset['labelColumn']['column'])
               ->get()
-              ->toArray())[$dataset['label_column']['column']] ?? []);
+              ->toArray())[$dataset['labelColumn']['column']] ?? []);
 
         # Determines the limit of the chart data, that needs to be fetched
         $limit = match ($dataset['function']) {
           'count' => $dataset['limit'] ?? 10,
-          default => count($this->params['labels']),
+          default => count($this->params['labelModel']),
         };
 
 
-        /* ------------ */
-        /* DATA COLUMNS */
-        /* ------------ */
-        # Iterates over all data_columns
-        foreach ($dataset['data_columns'] as $col_def) {
-          $col = key($col_def); # retrieves the name of the data_column
+        # Data processing
+        foreach ($dataset['dataColumns'] as $col_def) {
+          $col = key($col_def);
 
-          # Gets the target model based on column specification
           $dataset['data'] = $this->adios->getModel($dataset['model']);
 
-          # Determines whether there is a condition which exact models should be filtered out
           if ($dataset['where'] != '') {
             $dataset['data'] = $dataset['data']->where(...array_merge_recursive($dataset['where']));
           }
 
-          # Determines the function of the supplied data
           switch ($dataset['function']) {
             # Counts all found rows, useful if there are more rows than labels
             case 'count':
               $data = [];
 
-              foreach($this->params['labels'] as $label_value) {
+              foreach($this->params['labelModel'] as $label_value) {
                 $data[] = $dataset['data']
-                  ->where($dataset['label_column']['column'], "=", $label_value)
+                  ->where($dataset['labelColumn']['column'], "=", $label_value)
                   ->limit($limit)
                   ->count()
                 ;
@@ -90,9 +82,9 @@ class Chart extends \ADIOS\Core\View {
             # Sums all found rows, useful if there are more rows than labels
             case 'sum':
               $data = [];
-              foreach($this->params['labels'] as $label_value) {
+              foreach($this->params['labelModel'] as $label_value) {
                 $data[] = $dataset['data']
-                  ->where($dataset['label_column']['column'], "=", $label_value)
+                  ->where($dataset['labelColumn']['column'], "=", $label_value)
                   ->limit($limit)
                   ->sum($col);
               }
@@ -114,14 +106,23 @@ class Chart extends \ADIOS\Core\View {
         }
 
         # Lastly, replace the label if it is a foreign ID
-        if ($dataset['label_column']['lookup']) {
-          foreach ($this->params['labels'] as &$label) {
-            # REVIEW PATO: spagety kod 
-            $label = array_merge_recursive($this->adios->getModel($dataset['label_column']['model'])->select($dataset['label_column']['lookup'])->where('id', '=', $label)->get()->toArray())[0][$dataset['label_column']['lookup']];
+        if ($dataset['labelColumn']['lookup']) {
+          foreach ($this->params['labelModel'] as &$label) {
+            $labelModel = $this->adios->getModel($dataset['labelColumn']['model']);
+
+            $labelData = $labelModel
+              ->select($dataset['labelColumn']['lookup'])
+              ->where('id', '=', $label)
+              ->get()
+              ->toArray();
+
+            $label = $labelData[0][$dataset['labelColumn']['lookup']];
           }
         }
       }
     }
+
+    $this->params['uid'] = $this->adios->uid;
   }
 
   public function getTwigParams(): array {

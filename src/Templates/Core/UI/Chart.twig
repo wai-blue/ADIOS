@@ -1,12 +1,10 @@
-REVIEW PATO: SKus pouzit naprikald $this->adios-uid vygenerovanie uid pre komponentu
-Ak ju zavolam viac krat tak chyba lebo stale pouzivam iste ID
-<canvas id="chart-1"></canvas>
+<canvas id="{{ params.uid }}-chart-{{ params.type }}"></canvas>
 
 <script>
   var config = {
     type: '{{ params.type }}',
     data: {
-      labels: ['{{ params.labels|join("', '")|raw }}'],
+      labels: ['{{ params.labelModel|join("', '")|raw }}'],
       datasets: {{ params.datasets|json_encode|raw }},
     },
     options: {
@@ -21,5 +19,5 @@ Ak ju zavolam viac krat tak chyba lebo stale pouzivam iste ID
     },
   };
 
-  new Chart(document.getElementById('chart-1').getContext('2d'), config);
+  new Chart(document.getElementById('{{ params.uid }}-chart-{{ params.type }}').getContext('2d'), config);
 </script>
