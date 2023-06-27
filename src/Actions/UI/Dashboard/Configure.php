@@ -22,12 +22,23 @@ class Configure extends \ADIOS\Core\Action {
   function preRender(): array
   {
     $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios, $this->params);
-    $availableCards = array_merge($dashboard->getAvailableCards()[0]);
+    $availableCards = array_merge($dashboard->getAvailableCards()[0] ?? []);
     $forms = $dashboard->getSettingsInputs($availableCards);
+
+    $saveButton = $this->adios->view->addView(
+      "Button",
+      array_merge(
+        [
+          "type" => "save",
+        ]
+      )
+    )->render();
 
     return [
       'availableCards' => $availableCards,
-      'forms' =>  $forms
+      'forms' =>  $forms,
+      'saveButton' => $saveButton,
+      'uid' => $this->adios->uid
     ];
   }
 }

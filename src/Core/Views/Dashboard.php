@@ -65,14 +65,16 @@ class Dashboard extends \ADIOS\Core\View
 
     foreach ($availableCards as $card) {
       $card_form = [];
+      $card_key = array_search($card, $availableCards);
+      $config = json_decode($this->getUserDashboardConfig(), true)[0][$card_key];
+
       $card_form[] = $this->addView(
         "Input",
         array_merge(
           [
-            "type" => "varchar",
-            "value" => false,
-            "enum_values" => ['Right', 'Left'],
-            "title" => 'Column'
+            "type" => "bool",
+            "title" => 'Located left?',
+            'value' => $config['left']
           ],
           ['required' => true]
         )
@@ -83,8 +85,8 @@ class Dashboard extends \ADIOS\Core\View
         array_merge(
           [
             "type" => "bool",
-            "value" => false,
-            "title" => 'Is active?'
+            "title" => 'Is active?',
+            'value' => $config['is_active']
           ],
           ['required' => true]
         )
@@ -95,8 +97,8 @@ class Dashboard extends \ADIOS\Core\View
         array_merge(
           [
             "type" => "int",
-            "value" => "999",
-            "title" => 'Order'
+            "value" => $config['order'],
+            "title" => 'Order',
           ],
           ['required' => true]
         )

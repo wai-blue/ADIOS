@@ -1,19 +1,46 @@
 <h1>Dashboard configuration</h1>
 
-<div class="row">
-  <div class="col-md-6">
-    {% for key, card in availableCards  %}
-    <div class="card shadow mb-2">
-      <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">
-          {% if card['params']['title'] is defined %} {{ card['params']['title'] }} {% else %} aaa {% endif %}</h6>
-      </div>
-      <div class="card-body" id="card-{{ key }}-{{ loop.index0 }}">
-        {% for input in forms[loop.index0] %}
-          {{ input|raw }}
-        {% endfor %}
-      </div>
-    </div>
-{% endfor %}
-  </div>
+{# TODO: Translations #}
+
+<div class="d-inline-block mb-5">
+  {{ saveButton|raw }}
 </div>
+
+<form action="{# TODO: URL #}" id="dashboard-configuration-form">
+  <div class="row">
+    <div class="col-md-6">
+      {% for key, card in availableCards  %}
+      <div class="card shadow mb-2">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">
+            {% if card['params']['title'] is defined %} {{ card['params']['title'] }} {% else %} {{ key }} {% endif %}</h6>
+        </div>
+        <div class="card-body row" id="card-{{ key }}-{{ loop.index0 }}">
+          <div class="col">
+            <span>Left?</span> <br>
+            {{ forms[loop.index0][0]|raw }}
+          </div>
+          <div class="col">
+            <span>Is active?</span> <br>
+            {{ forms[loop.index0][1]|raw }}
+          </div>
+          <div class="col">
+            <span>Order</span> <br>
+            {{ forms[loop.index0][2]|raw }}
+          </div>
+        </div>
+      </div>
+  {% endfor %}
+    </div>
+  </div>
+</form>
+
+<script>
+
+  function {{ uid }}_save() {
+    const form = document.getElementById('dashboard-configuration-form');
+
+    form.submit();
+  }
+
+</script>
