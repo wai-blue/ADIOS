@@ -932,7 +932,7 @@ class MySQLi extends \ADIOS\Core\DB
       foreach ($table_columns as $col_name => $col_definition) {
         if (
           !$col_definition['virtual']
-          && in_array($col_definition['type'], ['lookup', 'int', 'bool', 'boolean', 'date'])
+          && in_array($col_definition['type'], ['lookup', 'int', 'bool', 'boolean', 'date', 'datetime'])
         ) {
           $sql .= "  index `{$col_name}` (`{$col_name}`),\n";
         }

@@ -296,9 +296,13 @@ class DB
 
       # Determines which columns are supposed to be unique
       foreach ($model->indexes() as $index) {
-        if ($index['type'] == 'unique') {
-          foreach ($index['columns'] as $col)
+        if (
+          $index['type'] == 'unique'
+          && count($index['columns']) == 1 # ignoring complex unique indexes
+        ) {
+          foreach ($index['columns'] as $col) {
             $unique[] = $col;
+          }
         }
       }
 
@@ -315,11 +319,16 @@ class DB
                   $keys = array_keys($col_definition['enum_values']);
                   $random_val = $keys[rand(0, count($keys) - 1)];
                 } else {
-                  $random_val = rand(0, 1000);
+                  $minValue = (float) ($col_definition['minValue'] ?? 0);
+                  $maxValue = (float) ($col_definition['maxValue'] ?? 1000);
+                  $random_val = rand($minValue, $maxValue);
                 }
               break;
               case "float":
-                $random_val = rand(0, 1000) / ($col_definition['decimals'] ?? 2);
+                $minValue = (float) ($col_definition['minValue'] ?? 0);
+                $maxValue = (float) ($col_definition['maxValue'] ?? 1000);
+                $decimals = $col_definition['decimals'] ?? 2;
+                $random_val = rand($minValue * $decimals, $maxValue * $decimals) / $decimals;
               break;
               case "time":
                 $random_val = rand(10, 20) . ":" . rand(10, 59);
@@ -406,12 +415,13 @@ class DB
             }
           }
 
-          # Adds the count of all rows in the table in front of the value if the column is supposed to be unique
+          # Adds the count of all rows in the table in front of the value
+          # if the column is supposed to be unique
           if (
-            in_array($col_name, $unique) 
-            && $col_definition['type'] != 'lookup' 
-            && $col_definition['type'] != 'datetime' 
-            && $col_definition['type'] != 'date' 
+            in_array($col_name, $unique)
+            && $col_definition['type'] != 'lookup'
+            && $col_definition['type'] != 'datetime'
+            && $col_definition['type'] != 'date'
             && $col_definition['type'] != 'time'
           ) {
             $random_val = count($model->getAll()) . $random_val;
@@ -421,8 +431,8 @@ class DB
 
             # Runs out after 86400 rows
             $random_val->setTime(
-              floor(count($model->getAll()) / 3600) % 24, 
-              floor(count($model->getAll()) / 60) % 60, 
+              floor(count($model->getAll()) / 3600) % 24,
+              floor(count($model->getAll()) / 60) % 60,
               count($model->getAll()) % 60
             ); 
             $random_val = $random_val->format("Y-m-d H:i:s");
@@ -433,17 +443,17 @@ class DB
           } else if (in_array($col_name, $unique) && $col_definition['type'] == 'time') {
             # Runs out after 86400 rows
             $random_val->setTime(
-              (count($model->getAll()) / 60 / 60) % 24, 
-              (count($model->getAll()) / 60) % 60, 
+              (count($model->getAll()) / 60 / 60) % 24,
+              (count($model->getAll()) / 60) % 60,
               count($model->getAll()) % 60
-            ); 
+            );
           }
 
           if ($random_val !== NULL) {
             if (
-              $col_definition['byte_size'] != NULL 
-              && !in_array($col_definition['type'], ['date', 'time', 'datetime']
-            )) {
+              $col_definition['byte_size'] != NULL
+              && in_array($col_definition['type'], ['varchar', 'text'])
+            ) {
               # Trims the size of the value to match the byte_size
               while (strlen(mb_convert_encoding($random_val, 'UTF-8')) > $col_definition['byte_size']) {
                 $random_val = mb_substr($random_val, 0, -1);
