@@ -16,8 +16,8 @@ namespace ADIOS\Core\Models;
  * @package DefaultModels
  */
 class Token extends \ADIOS\Core\Model {
-  var $sqlName = "";
-  var $lookupSqlValue = "{%TABLE%}.token";
+
+  public string $lookupSqlValue = "{%TABLE%}.token";
 
   public $tokenTypes = [];
 

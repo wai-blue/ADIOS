@@ -10,6 +10,10 @@
 
 namespace ADIOS\Core;
 
+use ADIOS\Core\DB\Query;
+use ADIOS\Core\Exceptions\DBDuplicateEntryException;
+use ADIOS\Core\Exceptions\DBException;
+
 class DB
 {
   protected float $lastQueryDurationSec;
@@ -286,7 +290,23 @@ class DB
   {
     $table = $model->getFullTableSqlName();
 
+    $unique = []; # Array of unique cols
+
     if (is_array($this->tables[$table])) {
+
+      # Determines which columns are supposed to be unique
+      foreach ($model->indexes() as $index) {
+        if (
+          $index['type'] == 'unique'
+          && count($index['columns']) == 1 # ignoring complex unique indexes
+        ) {
+          foreach ($index['columns'] as $col) {
+            $unique[] = $col;
+          }
+        }
+      }
+
+      # Generates a nice looking value for the column
       foreach ($this->tables[$table] as $col_name => $col_definition) {
         if ($col_name != "id" && !isset($data[$col_name])) {
           $random_val = NULL;
@@ -299,87 +319,147 @@ class DB
                   $keys = array_keys($col_definition['enum_values']);
                   $random_val = $keys[rand(0, count($keys) - 1)];
                 } else {
-                  $random_val = rand(0, 1000);
+                  $minValue = (float) ($col_definition['minValue'] ?? 0);
+                  $maxValue = (float) ($col_definition['maxValue'] ?? 1000);
+                  $random_val = rand($minValue, $maxValue);
                 }
-                break;
+              break;
               case "float":
-                $random_val = rand(0, 1000) / ($col_definition['decimals'] ?? 2);
-                break;
+                $minValue = (float) ($col_definition['minValue'] ?? 0);
+                $maxValue = (float) ($col_definition['maxValue'] ?? 1000);
+                $decimals = $col_definition['decimals'] ?? 2;
+                $random_val = rand($minValue * $decimals, $maxValue * $decimals) / $decimals;
+              break;
               case "time":
                 $random_val = rand(10, 20) . ":" . rand(10, 59);
-                break;
+              break;
               case "date":
                 $random_val = date("Y-m-d", time() - (3600 * 24 * 365) + rand(0, 3600 * 24 * 365));
-                break;
+              break;
               case "datetime":
                 $random_val = date("Y-m-d H:i:s", time() - (3600 * 24 * 365) + rand(0, 3600 * 24 * 365));
-                break;
+              break;
               case "boolean":
                 $random_val = (rand(0, 1) ? 1 : 0);
-                break;
+              break;
               case "text":
-                switch (rand(0, 5)) {
-                  case 0:
-                    $random_val = "Nunc ac sollicitudin ipsum. Vestibulum condimentum vitae justo quis bibendum. Fusce et scelerisque dui, eu placerat nisl. Proin ut efficitur velit, nec rutrum massa.";
-                    break;
-                  case 1:
-                    $random_val = "Integer ullamcorper lacus at nisi posuere posuere. Maecenas malesuada magna id fringilla sagittis. Nam sed turpis feugiat, placerat nisi et, gravida lacus. Curabitur porta elementum suscipit.";
-                    break;
-                  case 2:
-                    $random_val = "Praesent libero diam, vulputate sed varius eget, luctus a risus. Praesent sit amet neque commodo, varius nisl dignissim, tincidunt magna. Nunc tincidunt dignissim ligula, sit amet facilisis felis mollis vel.";
-                    break;
-                  case 3:
-                    $random_val = "Sed ut ligula luctus, ullamcorper felis nec, tristique lorem. Maecenas sit amet tincidunt enim.";
-                    break;
-                  case 4:
-                    $random_val = "Mauris blandit ligula massa, sit amet auctor risus viverra at. Cras rhoncus molestie malesuada. Sed facilisis blandit augue, eu suscipit lectus vehicula quis. Mauris efficitur elementum feugiat.";
-                    break;
-                  default:
-                    $random_val = "Nulla posuere dui sit amet elit efficitur iaculis. Cras elit ligula, feugiat vitae maximus quis, volutpat sit amet sapien. Vivamus varius magna fermentum dolor varius, vel scelerisque ante mollis.";
-                    break;
-                }
+                $randomTextValues = [
+                  "Nunc ac sollicitudin ipsum. Vestibulum condimentum vitae justo quis bibendum. Fusce et scelerisque dui, eu placerat nisl. Proin ut efficitur velit, nec rutrum massa.",
+                  "Integer ullamcorper lacus at nisi posuere posuere. Maecenas malesuada magna id fringilla sagittis. Nam sed turpis feugiat, placerat nisi et, gravida lacus. Curabitur porta elementum suscipit.",
+                  "Praesent libero diam, vulputate sed varius eget, luctus a risus. Praesent sit amet neque commodo, varius nisl dignissim, tincidunt magna. Nunc tincidunt dignissim ligula, sit amet facilisis felis mollis vel.",
+                  "Sed ut ligula luctus, ullamcorper felis nec, tristique lorem. Maecenas sit amet tincidunt enim.",
+                  "Mauris blandit ligula massa, sit amet auctor risus viverra at. Cras rhoncus molestie malesuada. Sed facilisis blandit augue, eu suscipit lectus vehicula quis. Mauris efficitur elementum feugiat.",
+                  "Nulla posuere dui sit amet elit efficitur iaculis. Cras elit ligula, feugiat vitae maximus quis, volutpat sit amet sapien. Vivamus varius magna fermentum dolor varius, vel scelerisque ante mollis."
+                ];
+
+                $random_val = $randomTextValues[rand(0, count($randomTextValues) - 1)];
+              break;
               case "varchar":
               case "password":
-                switch (rand(0, 5)) {
-                  case 0:
-                    $random_val = rand(0, 9) . " Nunc";
-                    break;
-                  case 1:
-                    $random_val = rand(0, 9) . " Efficitur";
-                    break;
-                  case 2:
-                    $random_val = rand(0, 9) . " Vulputate";
-                    break;
-                  case 3:
-                    $random_val = rand(0, 9) . " Ligula luctus";
-                    break;
-                  case 4:
-                    $random_val = rand(0, 9) . " Mauris";
-                    break;
-                  case 5:
-                    $random_val = rand(0, 9) . " Massa";
-                    break;
-                  case 6:
-                    $random_val = rand(0, 9) . " Auctor";
-                    break;
-                  case 7:
-                    $random_val = rand(0, 9) . " Molestie";
-                    break;
-                  case 8:
-                    $random_val = rand(0, 9) . " Malesuada";
-                    break;
-                  case 9:
-                    $random_val = rand(0, 9) . " Facilisis";
-                    break;
-                  case 10:
-                    $random_val = rand(0, 9) . " Augue";
-                    break;
+                $randomPasswordValues = [
+                  "Nunc",
+                  "Efficitur",
+                  "Vulputate",
+                  "Ligula luctus",
+                  "Mauris",
+                  "Massa",
+                  "Auctor",
+                  "Molestie",
+                  "Malesuada",
+                  "Facilisis",
+                  "Augue"
+                ];
+
+                $random_val = $randomPasswordValues[rand(0, count($randomPasswordValues) - 1)];
+              break;
+              case 'enum':
+                # TODO
+                //var_dump($col_definition['enum_values']); exit;
+                //$random_val = $col_definition['enum_values'];
+              break;
+              case 'lookup':
+                if (!isset($col_definition['model'])) {
+                  throw new \Exception("Model for lookup: {$col_name} is empty");
                 }
-                break;
+
+                $lookupModel = $this->adios->getModel($col_definition['model']);
+                if ($lookupModel == NULL) throw new \Exception("Model: {$col_definition['model']} not found");
+
+                $modelAllData = $lookupModel->select('id')
+                  ->get()
+                  ->toArray()
+                ;
+
+                if (empty($modelAllData) || in_array($col_name, $unique)) {
+                  if ($model->fullName == $lookupModel->fullName) break;
+
+                  try {
+                    $lookupModel->insertRandomRow();
+                  } catch (\Exception $e) {
+                    throw new \Exception($e->getMessage());
+                  }
+
+                  $modelAllData = $lookupModel->select('id')->get()->toArray();
+                }
+
+                $modelAllDataCount = count($modelAllData);
+                if ($modelAllDataCount == 0) break;
+
+                $rand = !in_array($col_name, $unique) 
+                  ? rand(0, count($modelAllData) - 1) 
+                  : $modelAllDataCount - 1
+                ;
+
+                $random_val = $modelAllData[$rand]['id'];
+              break;
             }
           }
 
+          # Adds the count of all rows in the table in front of the value
+          # if the column is supposed to be unique
+          if (
+            in_array($col_name, $unique)
+            && $col_definition['type'] != 'lookup'
+            && $col_definition['type'] != 'datetime'
+            && $col_definition['type'] != 'date'
+            && $col_definition['type'] != 'time'
+          ) {
+            $random_val = count($model->getAll()) . $random_val;
+          } else if (in_array($col_name, $unique) && $col_definition['type'] == 'datetime') {
+            $random_val = new \DateTime();
+            $random_val->setTimestamp(strtotime('-1 year') + rand(0, 3600 * 24 * 365));
+
+            # Runs out after 86400 rows
+            $random_val->setTime(
+              floor(count($model->getAll()) / 3600) % 24,
+              floor(count($model->getAll()) / 60) % 60,
+              count($model->getAll()) % 60
+            ); 
+            $random_val = $random_val->format("Y-m-d H:i:s");
+          } else if (in_array($col_name, $unique) && $col_definition['type'] == 'date') {
+            $random_val = new \DateTime();
+            $random_val->modify((rand(1, 2) == 2 ? '+' : '-') . count($model->getAll()) . ' days');
+            $random_val = $random_val->format('Y-m-d');
+          } else if (in_array($col_name, $unique) && $col_definition['type'] == 'time') {
+            # Runs out after 86400 rows
+            $random_val->setTime(
+              (count($model->getAll()) / 60 / 60) % 24,
+              (count($model->getAll()) / 60) % 60,
+              count($model->getAll()) % 60
+            );
+          }
+
           if ($random_val !== NULL) {
+            if (
+              $col_definition['byte_size'] != NULL
+              && in_array($col_definition['type'], ['varchar', 'text'])
+            ) {
+              # Trims the size of the value to match the byte_size
+              while (strlen(mb_convert_encoding($random_val, 'UTF-8')) > $col_definition['byte_size']) {
+                $random_val = mb_substr($random_val, 0, -1);
+              }
+            }
+
             $data[$col_name] = $random_val;
           }
         }

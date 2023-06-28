@@ -159,7 +159,8 @@ class Table extends \ADIOS\Core\View
       !empty($this->params['foreignKey'])
       && isset($this->columns[$this->params['foreignKey']])
     ) {
-      $this->columns[$this->params['foreignKey']]['show_column'] = FALSE;
+      $this->columns[$this->params['foreignKey']]['show_column'] = FALSE; // 2023-06-27 Deprecated
+      $this->columns[$this->params['foreignKey']]['showColumn'] = FALSE;
     }
 
     //
@@ -240,11 +241,20 @@ class Table extends \ADIOS\Core\View
   {
     $columns = $this->model->columns();
 
-    foreach ($this->params['columns'] ?? [] as $columnName => $columnParams) {
-      $columns[$columnName] = array_merge(
-        $columns[$columnName],
-        $columnParams
+    if (!empty($this->params['columns'])) {
+      foreach ($this->params['columns'] ?? [] as $columnName => $columnParams) {
+        $columns[$columnName] = array_merge(
+          (array) $columns[$columnName],
+          (array) $columnParams
+        );
+      }
+
+      $columnsOrder = array_merge(
+        array_keys($columns), 
+        array_keys($this->params['columns'])
       );
+
+      array_multisort(array_flip($columnsOrder), $columns);
     }
 
     return $columns;
@@ -684,7 +694,10 @@ class Table extends \ADIOS\Core\View
 
     if (_count($this->columns)) {
       foreach ($this->columns as $col_name => $col_def) {
-        if (!$col_def['show_column']) {
+        if (
+          !$col_def['show_column'] // 2023-06-27 Deprecated
+          && !$col_def['showColumn']
+        ) {
           unset($this->columns[$col_name]);
         }
       }

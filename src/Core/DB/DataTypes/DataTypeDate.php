@@ -24,10 +24,10 @@ class DataTypeDate extends \ADIOS\Core\DB\DataType
   public function get_sql_column_data_string($table_name, $col_name, $value, $params = []) {
     $dateStr = str_replace(' ', '', $value);
 
-    if (empty($dateStr) || strtotime($dateStr) == 0) {
+    if (empty($dateStr) || strtotime((string) $dateStr) == 0) {
       $sql = "`{$col_name}` = NULL";
     } else {
-      $dateStr = date('Y-m-d', strtotime($dateStr));
+      $dateStr = date('Y-m-d', strtotime((string) $dateStr));
 
       if (!preg_match('/^\d\d\d\d-\d\d-\d\d$/', $dateStr)) {
         $sql = "`{$col_name}` = NULL";
@@ -46,7 +46,7 @@ class DataTypeDate extends \ADIOS\Core\DB\DataType
       $format = $this->adios->locale->dateFormat();
     }
 
-    $ts = strtotime($value);
+    $ts = strtotime((string) $value);
     $html = (0 == $ts ? '' : date($format, $ts));
 
     return $html;

@@ -39,7 +39,7 @@ class DataTypeVarchar extends \ADIOS\Core\DB\DataType
   public function get_html_or_csv($value, $params = []) {
     $html = '';
 
-    $value = $params['export_csv'] ? $value : htmlspecialchars($value);
+    $value = $params['export_csv'] ? $value : htmlspecialchars((string) $value);
 
     if (is_array($params['col_definition']['enum_values'])) {
       $html = l($params['col_definition']['enum_values'][$value]);
