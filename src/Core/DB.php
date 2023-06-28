@@ -298,7 +298,7 @@ class DB
       foreach ($model->indexes() as $index) {
         if (
           $index['type'] == 'unique'
-          && count($index['columns']) == 1 # ignoring complex unique indexes
+          && count((array) $index['columns']) == 1 # ignoring complex unique indexes
         ) {
           foreach ($index['columns'] as $col) {
             $unique[] = $col;

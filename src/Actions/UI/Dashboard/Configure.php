@@ -21,6 +21,7 @@ class Configure extends \ADIOS\Core\Action {
 
   function preRender(): array {
     $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios, $this->params);
+
     $availableCards = array_merge($dashboard->getAvailableCards()[0] ?? []);
     $forms = $dashboard->getSettingsInputs($availableCards);
 
