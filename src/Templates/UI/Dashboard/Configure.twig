@@ -1,12 +1,13 @@
-<h1>Dashboard configuration</h1>
+<h1 class="pb-0">Dashboard configuration</h1>
 
 {# TODO: Translations #}
 
-<div class="d-inline-block mb-5">
+<div class="d-inline-block mb-5 mt-0">
   {{ saveButton|raw }}
 </div>
 
-<form action="{# TODO: URL #}" id="dashboard-configuration-form">
+{# TODO: Dynamic route #}
+<form action="/bladeerp/UI/Dashboard/SaveConfig" method="post" id="dashboard-configuration-form">
   <div class="row">
     <div class="col-md-6">
       {% for key, card in availableCards  %}
