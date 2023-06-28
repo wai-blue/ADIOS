@@ -14,17 +14,32 @@ class Dashboard extends \ADIOS\Core\View
 {
   public string $twigTemplate = "ADIOS/Templates/UI/Dashboard";
 
-  public function getUserDashboardConfig() {
-    if ($this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0'] == null || json_decode($this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0']) == null) {
-      $this->initUserDashboardConfig();
+  public function __construct($adios, array $params = []) {
+    $this->adios = $adios;
+
+    $this->params = parent::params_merge([
+    ], $params);
+
+    $this->params["availC"] = $this->getUserDashboardConfig();
+
+    foreach ($this->params['availC'] as &$i) {
+      foreach ($i as &$card) {
+        $card['params_encoded'] = base64_encode(json_encode($card['params']));
+      }
     }
-    return
-      $this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0']
-    ;
   }
 
-  public function initUserDashboardConfig(): void
-  {
+  public function getUserDashboardConfig(): array {
+    $userDashboardConfig = $this->adios->config['dashboard-'.$this->adios->userProfile['id'].'0'];
+
+    if ($userDashboardConfig == null || json_decode($userDashboardConfig) == null) {
+      $this->initUserDashboardConfig();
+    }
+
+    return json_decode($userDashboardConfig, TRUE);
+  }
+
+  public function initUserDashboardConfig(): void {
     $cards = $this->getAvailableCards();
 
     foreach ($cards as &$i) {
@@ -35,11 +50,10 @@ class Dashboard extends \ADIOS\Core\View
       }
     }
 
-    $this->adios->saveConfig([json_encode($cards)], 'dashboard-'.$this->adios->userProfile['id']);
+    $this->adios->saveConfig([json_encode($cards)], 'dashboard-' . $this->adios->userProfile['id']);
   }
 
-  public function getAvailableCards(): array
-  {
+  public function getAvailableCards(): array {
     $availableCards = [];
     foreach ($this->adios->models as $model) {
       if ($this->adios->getModel($model)->cards() != [])
@@ -51,8 +65,7 @@ class Dashboard extends \ADIOS\Core\View
   }
 
   // TODO: Nepouziva sa
-  public function getCardContent($cardUid): string
-  {
+  public function getCardContent($cardUid): string {
     if (empty($cardUid)) {
       return "No UID.";
     } else {
@@ -64,11 +77,13 @@ class Dashboard extends \ADIOS\Core\View
     $forms = [];
 
     foreach ($availableCards as $card) {
-      $card_form = [];
+      $cardForm = [];
       $card_key = array_search($card, $availableCards);
-      $config = json_decode($this->getUserDashboardConfig(), true)[0][$card_key];
 
-      $card_form[] = $this->addView(
+      $config = $this->getUserDashboardConfig();
+      if (!empty($config[0][$card_key])) $config = $config[0][$card_key];
+
+      $cardForm[] = $this->addView(
         "Input",
         array_merge(
           [
@@ -80,7 +95,7 @@ class Dashboard extends \ADIOS\Core\View
         )
       )->render();
 
-      $card_form[] = $this->addView(
+      $cardForm[] = $this->addView(
         "Input",
         array_merge(
           [
@@ -92,7 +107,7 @@ class Dashboard extends \ADIOS\Core\View
         )
       )->render();
 
-      $card_form[] = $this->addView(
+      $cardForm[] = $this->addView(
         "Input",
         array_merge(
           [
@@ -103,7 +118,8 @@ class Dashboard extends \ADIOS\Core\View
           ['required' => true]
         )
       )->render();
-      $forms[] = $card_form;
+      
+      $forms[] = $cardForm;
     }
 
     return $forms;
