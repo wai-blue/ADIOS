@@ -1,5 +1,7 @@
 <?php
 
+{{ builderInfo.php|raw }}
+
 // global
 $config['application_name']              = "{{ ConfigApp.applicationName }}";
 $config['session_salt']                  = "{{ ConfigApp.sessionSalt }}";
@@ -21,6 +23,9 @@ $config["brand"]["sidebar"]["title"]     = '{{ ConfigApp.brand.sidebar.title ?? 
 
 // widgets
 $config['widgets'] = {{ varExport(configWidgetsEnabled)|raw }};
+
+// web
+$config['web']['themeDir'] = realpath(__DIR__ . "/../src/Web/Theme");
 
 // misc
 $config['default_action'] = "{% if ConfigApp.defaultAction == "" %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}";

@@ -21,15 +21,14 @@ class LookupSearch extends \ADIOS\Core\Action {
     $windowUid = "{$tableUid}_lookup_select_window";
 
     $lookupModel = $this->adios->getModel($this->params['model']);
-
     $content = $this->adios->view->Table([
       "uid" => $tableUid,
       "model" => $this->params['model'],
-      "where" => $lookupModel->lookupSqlWhere(
+      "where" => $lookupModel->lookupWhere(
         $this->params['initiating_model'],
         $this->params['initiating_column'],
-        @json_decode($this->params['form_data'], TRUE) ?? [], // form_data
-        [],
+        @json_decode($this->params['form_data'], TRUE) ?? [], // formData
+        [], // params
       ),
       "list_type" => "lookup_select",
       "onclick" => "

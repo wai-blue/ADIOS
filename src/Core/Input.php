@@ -47,8 +47,9 @@ class Input {
    * @param  mixed $toLanguage
    * @return void
    */
-  public function translate($string) {
-    return $this->adios->translate($string, $this);
+  public function translate(string $string, array $vars = []): string
+  {
+    return $this->adios->translate($string, $vars, $this);
   }
 
   public function render() {

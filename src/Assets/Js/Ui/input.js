@@ -377,7 +377,7 @@ function ui_input_lookup_hide_results(uid) {
 
 function ui_input_lookup_set_value(uid, id, text) {
 
-  // ak input uz neexistuje, nerobi sa nic>
+  // ak input uz neexistuje, nerobi sa nic
   if (!($('#' + uid).length > 0)) return '';
 
   if (text == '' || typeof text == 'undefined') text = '';
@@ -523,8 +523,9 @@ function ui_input_lookup_detail(id, uid) {
   window_render(
     'UI/Form',
     {
-      model: $('#' + uid).attr('data-model'),
-      id: id,
+      'model': $('#' + uid).attr('data-model'),
+      'id': id,
+      'displayMode': 'window'
       // edit_form_type: 'lookup_form'
     },
     function (res) {
@@ -550,7 +551,14 @@ function ui_input_lookup_search(inputUid) {
 };
 
 function ui_input_lookup_add(uid) {
-  window_render('UI/Form', { table: $('#' + uid).attr('data-table'), id: -1, onaftersave: "ui_input_lookup_set_value('" + uid + "', data.inserted_id, '');" });
+  window_render(
+    'UI/Form',
+    {
+      table: $('#' + uid).attr('data-table'),
+      id: -1,
+      onaftersave: "ui_input_lookup_set_value('" + uid + "', data.inserted_id, '');"
+    }
+  );
 };
 
 function ui_input_table_collect_checkboxes(uid) {
@@ -604,7 +612,18 @@ function ui_input_table_add_value(uid, text) {
 };
 
 function ui_input_table_detail(id, uid) {
-  window_render('UI/Form', { table: $('#' + uid).attr('data-table'), id: id, edit_form_type: 'lookup_form' }, function (res) { ui_input_table_remove_item(uid, id); ui_input_lookup_set_value(uid, id, ''); });
+  window_render(
+    'UI/Form',
+    {
+      table: $('#' + uid).attr('data-table'),
+      id: id,
+      edit_form_type: 'lookup_form'
+    },
+    function (res) {
+      ui_input_table_remove_item(uid, id);
+      ui_input_lookup_set_value(uid, id, '');
+    }
+  );
 };
 
 // function ui_input_check_float_number(input, decimals){

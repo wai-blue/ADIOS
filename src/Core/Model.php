@@ -249,9 +249,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * @param  string $toLanguage Output language
    * @return string Translated string.
    */
-  public function translate($string)
+  public function translate(string $string, array $vars = []): string
   {
-    return $this->adios->translate($string, $this);
+    return $this->adios->translate($string, $vars, $this);
   }
 
   public function hasSqlTable()
@@ -1131,7 +1131,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
     foreach ($this->columns() as $colName => $colDefinition) {
       if ($colDefinition['required']) {
         if (empty($data[$colName])) {
-          throw new \ADIOS\Core\Exceptions\FormSaveException($this->translate("Invalid data."));
+          throw new \ADIOS\Core\Exceptions\FormSaveException(
+            $this->translate(
+              "`{{ colTitle }}` is required.",
+              [ 'colTitle' => $colDefinition['title'] ]
+            )
+          );
         }
       }
     }
@@ -1206,7 +1211,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       return $returnValue;
     } catch (\ADIOS\Core\Exceptions\FormSaveException $e) {
-      return $this->adios->renderHtmlWarning($e->getMessage());
+      return $this->adios->renderHtmlFatal($e->getMessage());
     }
   }
 

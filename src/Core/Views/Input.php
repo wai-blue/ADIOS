@@ -988,32 +988,41 @@ class Input extends \ADIOS\Core\View {
                 </div>
                 <div class='adios ui Input lookup_controls'>
                   ".($this->params['lookup_search_enabled'] && !$this->params['readonly'] ? "
-                    <span class='btn btn-light btn-sm' onclick=\"{$search_onclick}('{$this->params['uid']}')\">
-                      <i
-                        class='icon fas fa-search'
-                        title='".$this->translate('Search in list')."'
-                      ></i>
+                    <span
+                      class='btn btn-light btn-sm'
+                      title='".$this->translate('Search in list')."'
+                      onclick=\"
+                        {$search_onclick}('{$this->params['uid']}')
+                      \"
+                    >
+                      <i class='icon fas fa-search'></i>
                     </span>
                   " : "")."
                   ".($this->params['lookup_detail_enabled'] ? "
-                    <span class='btn btn-light btn-sm' onclick=\"{$detail_onclick}($('#{$this->params['uid']}').val(), '{$this->params['uid']}');\">
-                      <i
-                        id='{$this->params['uid']}_detail_button'
-                        style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;')."'
-                        class='icon fas fa-id-card'
-                        title='".$this->translate("Show details")."' 
-                      ></i>
+                    <span
+                      class='btn btn-light btn-sm'
+                      id='{$this->params['uid']}_detail_button'
+                      style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;')."'
+                      title='".$this->translate("Show details")."' 
+                      onclick=\"
+                        {$detail_onclick}($('#{$this->params['uid']}').val(), '{$this->params['uid']}');
+                      \"
+                    >
+                      <i class='icon fas fa-id-card'></i>
                     </span>
                   " : "")."
                   ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->adios->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='".l('Pridať')."' />" : '').'
                   '.(!$this->params['readonly'] ? "
-                    <span class='btn btn-light btn-sm' onclick=\"ui_input_lookup_set_value('{$this->params['uid']}', 0);\">
-                      <i
-                        id='{$this->params['uid']}_clear_button'
-                        style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;').";'
-                        class='icon fas fa-times'
-                        title='".$this->translate("Clear selection")."' 
-                      ></i>
+                    <span
+                      class='btn btn-light btn-sm'
+                      id='{$this->params['uid']}_clear_button'
+                      style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;').";'
+                      title='".$this->translate("Clear selection")."' 
+                      onclick=\"
+                        ui_input_lookup_set_value('{$this->params['uid']}', 0);
+                      \"
+                    >
+                      <i class='icon fas fa-times'></i>
                     </span>
                   " : '')."
                 </div>

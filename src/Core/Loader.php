@@ -91,6 +91,11 @@ spl_autoload_register(function ($class) {
         require($___ADIOSObject->config['dir']."/../tests/{$class}.php");
       }
 
+    } else if (preg_match('/ADIOS\/Web\/([\w\/]+)/', $class, $m)) {
+      $class = str_replace("ADIOS/Web/", "", $class);
+
+      require($___ADIOSObject->config['dir']."/Web/{$class}.php");
+
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
       include(__DIR__."/../{$m[1]}.php");
     }
@@ -142,6 +147,7 @@ class Loader
   public $userNotifications = NULL;
   public $permissions = NULL; // objekt triedy Permissions
   public $test = NULL;
+  public $web = NULL;
 
   public array $assetsUrlMap = [];
 
@@ -398,6 +404,11 @@ class Loader
       // object pre kontrolu permissions
       $this->permissions = new \ADIOS\Core\Permissions($this);
 
+      // inicializacia web renderera (byvala CASCADA)
+      if (is_array($this->config['web'])) {
+        $this->web = new \ADIOS\Core\Web\Loader($this, $this->config['web']);
+      }
+
       // timezone
       date_default_timezone_set($this->config['timezone']);
 
@@ -439,15 +450,15 @@ class Loader
                 $this->email->addTo($email);
                 $this->email->setSubject(
                   $config["application_name"].
-                  " - ".$this->translate("password reset", $this)
+                  " - ".$this->translate("password reset", [], $this)
                 );
                 $this->email->setHtmlMessage("
                   <h4>
                     {$config['application_name']}
-                    - ". $this->translate("password reset", $this)."
+                    - ". $this->translate("password reset", [], $this)."
                   </h4>
                   <p>"
-                    .$this->translate("To recover a forgotten password, click on the link below.", $this).
+                    .$this->translate("To recover a forgotten password, click on the link below.", [], $this).
                   "</p>
                   <a href='{$config['url']}/PasswordReset?token={$passwordResetToken}'>
                     {$config['url']}/PasswordReset?token={$passwordResetToken}
@@ -462,13 +473,13 @@ class Loader
             } else {
               $this->userPasswordReset["error"] = TRUE;
               $this->userPasswordReset["errorMessage"] =
-                $this->translate("The entered e-mail address does not exist.", $this)
+                $this->translate("The entered e-mail address does not exist.", [], $this)
               ;
             }
           } else {
             $this->userPasswordReset["error"] = TRUE;
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Email cannot be empty. Fill the email field.", $this)
+              $this->translate("Email cannot be empty. Fill the email field.", [], $this)
             ;
           }
         }
@@ -482,19 +493,19 @@ class Loader
 
           if ($newPassword == "") {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("New password cannot be empty.", $this)
+              $this->translate("New password cannot be empty.", [], $this)
             ;
           } else if ($newPassword2 == "") {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Repeated new password cannot be empty.", $this)
+              $this->translate("Repeated new password cannot be empty.", [], $this)
             ;
           } else if ($newPassword != $newPassword2) {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Entered passwords do not match.", $this)
+              $this->translate("Entered passwords do not match.", [], $this)
             ;
           } else if (strlen($newPassword) < 8) {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Minimum password length is 8 characters.", $this)
+              $this->translate("Minimum password length is 8 characters.", [], $this)
             ;
           } else {
             $this->userPasswordReset["error"] = FALSE;
@@ -601,7 +612,7 @@ class Loader
         $this->twig->addFunction(new \Twig\TwigFunction(
           'translate',
           function ($string) {
-            return $this->translate($string, $this->actionObject);
+            return $this->translate($string, [], $this->actionObject);
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
@@ -815,7 +826,7 @@ class Loader
     return $dictionary;
   }
 
-  public function translate($string, $object, $toLanguage = "") {
+  public function translate(string $string, array $vars, $object, $toLanguage = ""): string {
     if (empty($toLanguage)) {
       $toLanguage = $this->config['language'] ?? "en";
     }
@@ -838,10 +849,16 @@ class Loader
     //   }
 
     if (!isset($dictionary[$toLanguage][$string])) {
-      return $string;
+      $translated = $string;
     } else {
-      return $dictionary[$toLanguage][$string];
+      $translated = $dictionary[$toLanguage][$string];
     }
+
+    foreach ($vars as $varName => $varValue) {
+      $translated = str_replace('{{ ' . $varName . ' }}', $varValue, $translated);
+    }
+
+    return $translated;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1390,12 +1407,17 @@ class Loader
       ]);
     } else {
       return "
-        <div class='alert alert-danger' role='alert'>
+        <div class='alert alert-danger' role='alert' style='z-index:99999999'>
           ".($isHtml ? $message : hsc($message))."
         </div>
       ";
     }
   }
+
+  public function renderHtmlFatal($message) {
+    return $this->renderFatal($message, TRUE);
+  }
+
 
   public function renderExceptionWarningHtml($exception) {
 
@@ -1469,12 +1491,12 @@ class Loader
             <i class='fas fa-copy'></i>
           </div>
           <div style='margin-top:1em;margin-bottom:3em;text-align:center;color:red;'>
-            ".$this->translate($errorMessage, $this)."<br/>
+            ".$this->translate($errorMessage, [], $this)."<br/>
             <br/>
             <b>".join(", ", $invalidColumns)."</b>
           </div>
           <a href='javascript:void(0);' onclick='$(this).next(\"div\").slideDown();'>
-          ".$this->translate("Show more information", $this)."
+          ".$this->translate("Show more information", [], $this)."
           </a>
           <div style='display:none'>
             <div style='color:red;margin-bottom:1em;font-family:courier;font-size:8pt;max-height:10em;overflow:auto;'>
@@ -1985,10 +2007,10 @@ class Loader
     foreach ($this->config['available_languages'] as $language) {
       $js .= "
         adios_language_translations['{$language}'] = {
-          'Confirmation': '".ads($this->translate("Confirmation", $this, $language))."',
-          'OK, I understand': '".ads($this->translate("OK, I understand", $this, $language))."',
-          'Cancel': '".ads($this->translate("Cancel", $this, $language))."',
-          'Warning': '".ads($this->translate("Warning", $this, $language))."',
+          'Confirmation': '".ads($this->translate("Confirmation", [], $this, $language))."',
+          'OK, I understand': '".ads($this->translate("OK, I understand", [], $this, $language))."',
+          'Cancel': '".ads($this->translate("Cancel", [], $this, $language))."',
+          'Warning': '".ads($this->translate("Warning", [], $this, $language))."',
         };
       ";
     }

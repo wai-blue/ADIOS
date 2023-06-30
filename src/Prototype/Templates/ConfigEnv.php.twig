@@ -1,5 +1,7 @@
 <?php
 
+{{ builderInfo.php|raw }}
+
 define('GTP', "{{ ConfigEnv.db.globalTablePrefix }}");
 
 // db
@@ -12,6 +14,9 @@ $config["global_table_prefix"] = "{{ ConfigEnv.globalTablePrefix }}";
 // dirs & urls
 $config['rewrite_base']        = "{{ ConfigEnv.rewriteBase }}";
 $config["url"]                 = "{{ ConfigEnv.rootUrl }}";
+
+// web
+$config['web']['rewriteBase'] = '{{ ConfigEnv.rewriteBase }}web/';
 
 // misc
 $config['devel_mode'] = TRUE;

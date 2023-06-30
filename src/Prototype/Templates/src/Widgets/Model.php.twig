@@ -1,10 +1,12 @@
 <?php
 
-namespace {{ thisWidget.namespace }}\{{ thisWidget.class }}\Models;
+{{ builderInfo.php|raw }}
 
-class {{ thisModel.name }} extends \ADIOS\Core\Model {
+namespace {{ thisModel.namespace }};
 
-  use \{{ thisWidget.namespace }}\{{ thisWidget.class }}\Models\Callbacks\{{ thisModel.name }};
+class {{ thisModel.class }} extends \ADIOS\Core\Model {
+
+  use \{{ thisModel.namespace }}\Callbacks\{{ thisModel.class }};
 
   public ?string $addButtonText = "{{ thisModel.config.addButtonText|raw }}";
   public ?string $formAddButtonText = "{{ thisModel.config.formAddButtonText|raw }}";
