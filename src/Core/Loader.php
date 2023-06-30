@@ -405,7 +405,7 @@ class Loader
       $this->permissions = new \ADIOS\Core\Permissions($this);
 
       // inicializacia web renderera (byvala CASCADA)
-      if (is_array($this->config['web'])) {
+      if (isset($this->config['web']) && is_array($this->config['web'])) {
         $this->web = new \ADIOS\Core\Web\Loader($this, $this->config['web']);
       }
 
