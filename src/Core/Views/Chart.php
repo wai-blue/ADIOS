@@ -13,8 +13,7 @@ class Chart extends View
   public string $twigTemplate = "Core/UI/Chart";
   private ?Model $model = null;
 
-  public function __construct(?Loader $adios, array $params = [])
-  {
+  public function __construct(?Loader $adios, array $params = []) {
     $this->adios = $adios;
 
     $this->params = parent::params_merge([
@@ -48,21 +47,25 @@ class Chart extends View
         };
 
         $labelQuery = $this->adios
-          ->getModel($dataset['model']);
+          ->getModel($dataset['model'])
+        ;
 
         if ($dataset['where'] != '') {
           $labelQuery = $labelQuery
-            ->where(...array_merge_recursive($dataset['where']));
+            ->where(...array_merge_recursive($dataset['where']))
+          ;
         }
 
         $labelQuery = $labelQuery
           ->select($dataset['labelColumn']['column'])
-          ->get();
+          ->get()
+        ;
 
         $this->params['labelModel'] = array_unique(
           array_merge_recursive(
             ...$labelQuery->toArray()
-          )[$dataset['labelColumn']['column']] ?? []);
+          )[$dataset['labelColumn']['column']] ?? [])
+        ;
 
         # Fills in the value of the limit, if it could not be determined before
         if ($limit = -1) {
@@ -88,11 +91,12 @@ class Chart extends View
                 $data[] = $dataQuery
                   ->where($dataset['labelColumn']['column'], "=", $label_value)
                   ->limit($limit)
-                  ->count();
+                  ->count()
+                ;
               }
 
               $dataset['data'] = $data;
-              break;
+            break;
 
             # Sums all found rows, useful if there are more rows than labels
             case 'sum':
@@ -101,22 +105,25 @@ class Chart extends View
                 $data[] = $dataQuery
                   ->where($dataset['labelColumn']['column'], "=", $label_value)
                   ->limit($limit)
-                  ->sum($col);
+                  ->sum($col)
+                ;
               }
 
               $dataset['data'] = $data;
-              break;
+            break;
 
             # Target column in found rows is imported as data
             default:
               $dataQuery = $dataQuery
                 ->orderBy('id', 'desc')
-                ->limit($limit);
+                ->limit($limit)
+              ;
 
               $dataset['data'] = array_merge_recursive(...$dataQuery
                 ->select($col)
                 ->get()
-                ->toArray())[$col] ?? [];
+                ->toArray())[$col] ?? []
+              ;
           }
         }
 
@@ -129,7 +136,8 @@ class Chart extends View
               ->select($dataset['labelColumn']['lookup'])
               ->where('id', '=', $label)
               ->get()
-              ->toArray();
+              ->toArray()
+            ;
 
             $label = $labelData[0][$dataset['labelColumn']['lookup']];
           }
