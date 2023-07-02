@@ -49,9 +49,9 @@ class View {
    * @return void
    */
   public function __construct(
-   object $adios,
-   array $params = [],
-   ?\ADIOS\Core\View $parentView = NULL
+    ?\ADIOS\Core\Loader $adios = NULL,
+    array $params = [],
+    ?\ADIOS\Core\View $parentView = NULL
   ) {
     if (!isset($adios->viewsCounter)) {
       $adios->viewsCounter = 0;
