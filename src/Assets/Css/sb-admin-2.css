@@ -2231,7 +2231,7 @@ textarea.form-control {
   }
 }
 
-.btn {
+/* .btn {
   display: inline-block;
   font-weight: 400;
   color: #858796;
@@ -2248,7 +2248,7 @@ textarea.form-control {
   line-height: 1.5;
   border-radius: 0rem;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
+} */
 
 @media (prefers-reduced-motion: reduce) {
   .btn {
@@ -9588,6 +9588,7 @@ a:focus {
 
 #wrapper {
   display: flex;
+  min-height: 100vh;
 }
 
 #wrapper #content-wrapper {
@@ -10110,7 +10111,7 @@ a:focus {
 
 .sidebar {
   width: 6.5rem;
-  height: 100vh;
+  /* height: 100vh; */
   overflow: auto;
 }
 
@@ -11058,14 +11059,18 @@ form.user .btn-user {
 footer.sticky-footer {
   /* padding: 5px; */
   flex-shrink: 0;
-  height: 2em;
-  overflow: hidden;
+  /* height: 2em; */
+  /* overflow: hidden; */
+  position: fixed;
+  left: 0;
+  bottom: 0;
 }
 
 footer.sticky-footer .copyright {
   line-height: 1.5;
-  font-size: 7px;
-  padding: 5px;
+  font-size: 8px;
+  color: white;
+  padding: 2em;
 }
 
 body.sidebar-toggled footer.sticky-footer {

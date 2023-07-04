@@ -1,3 +1,7 @@
+.adios.ui.Title {
+  padding: 1em;
+}
+
 /* X-Small devices (portrait phones, less than 576px) */
 @media (max-width: 575.98px) {
   .adios.ui.Title .btn .text {

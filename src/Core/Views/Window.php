@@ -88,41 +88,31 @@ class Window extends \ADIOS\Core\View {
         <div class='modal-overlay'></div>
         <div class='header'>
           <div class='p-4 mb-4'>
-            <div class='row'>
-              <div class='col'>
+            <div class='row d-flex align-middle'>
+              <div class='col-6'>
                 " . $this->headerLeft->render() . "
               </div>
-              <div class='col'>
-                <div class='h4 mb-2 text-primary'>
-                  ".(empty($this->params['titleRaw'])
-                    ? hsc($this->params['title'])
-                    : $this->params['titleRaw']
-                  )."
-                </div>
+              <div class='col-3 text-primary text-center'>
+                ".(empty($this->params['titleRaw'])
+                  ? hsc($this->params['title'])
+                  : $this->params['titleRaw']
+                )."
                 ".(empty($this->params['subtitle']) ? "" : "
                   <div class='h6 mb-4'>
                     ".hsc($this->params['subtitle'])."
                   </div>
                 ")."
               </div>
-              <div class='col text-end'>
+              <div class='col-3 text-end'>
                 " . $this->headerRight->render() . "
               </div>
             </div>
           </div>
         </div>
         <div class='content'>
-          <div class='container-fluid'>
-            {$this->params['content']}
-          </div>
+          {$this->params['content']}
         </div>
       </div>
-
-      <script>
-        setTimeout(function() {
-          $('#{$this->params['uid']}').addClass('activated');
-        }, 0)
-      </script>
     ";
 
     return $html;

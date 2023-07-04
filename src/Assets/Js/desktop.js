@@ -25,7 +25,7 @@
     }
   }
 
-  function window_render(action, params, onclose) {
+  function window_render(action, params, onClose, options) {
     if (typeof params == 'undefined') params = {};
     if (typeof options == 'undefined') options = {};
 
@@ -33,28 +33,47 @@
 
     setTimeout(function() {
       _ajax_read(action, params, function(html) {
-        if (typeof options.onafter == 'function') options.onafter(action, params);
 
-        $('#adios_main_content').append(html);
+        // if (params.windowParams && params.windowParams.uid) {
+        //   $('#' + params.windowParams.uid).remove();
+        // }
 
-        if ($('#adios_main_content .adios.ui.Window').length == 1) {
-          desktop_main_box_history_push(
-            action,
-            params,
-            $('#adios_main_content').html(),
-            options
-          );
-        }
+        $('.adios.main-content .windows .windows-content').append(html);
 
-        windowId = $('#adios_main_content .adios.ui.Window')
+        windowId = $('.adios.ui.Window')
           .last()
           .attr('id')
         ;
 
+        let sameWindows = $('.adios.ui.Window[id="' + windowId + '"]');
+
+        if (sameWindows.length > 1) {
+          sameWindows.eq(0).remove();
+        }
+
+        if ($('.adios.ui.Window').length == 1) {
+          $('#' + windowId).addClass('inline');
+        } else {
+          $('#' + windowId).addClass('modal');
+        }
+
+        if (typeof options.onAfterRender == 'function') {
+          options.onAfterRender(windowId);
+        }
+
+        if ($('.adios.ui.Window').length == 1) {
+          desktop_main_box_history_push(
+            action,
+            params,
+            $('.adios.main-content').html(),
+            options
+          );
+        }
+
         ADIOS_windows[windowId] = {
           'action': action,
           'params': params,
-          'onclose': onclose,
+          'onclose': onClose,
         };
 
       });
@@ -86,7 +105,7 @@
       // okno bolo otvarane cez URL
       window.location.href = _APP_URL;
     } else {
-      if ($('#adios_main_content .adios.ui.Window').length == 1) {
+      if ($('.adios.main-content .adios.ui.Window').length == 1) {
         window.history.back();
       }
 
@@ -108,7 +127,7 @@
     if (typeof params == 'undefined') params = {};
     if (typeof options == 'undefined') options = {};
 
-    $('#adios_main_content').css('opacity', 0.5);
+    $('.adios.main-content').css('opacity', 0.5);
 
     if (options.type == 'POST') {
       let paramsObj = _ajax_params(params);

@@ -124,7 +124,10 @@ class Form extends \ADIOS\Core\View
     parent::__construct($adios, $params, $parentView);
 
     $this->params['id'] = (int) $this->params['id'];
-    $this->params['columns'] = $this->adios->db->tables[$this->params['table']];
+    $this->params['columns'] = parent::params_merge(
+      $this->adios->db->tables[$this->params['table']],
+      $this->params['columns'] ?? []
+    );
 
     $this->model->onFormBeforeInit($this);
     $this->params = $this->model->formParams($this->data, $this->params);

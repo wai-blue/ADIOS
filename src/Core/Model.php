@@ -571,6 +571,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "action" => $this->crud['edit']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
+          "windowParams" => [
+            "uid" => \ADIOS\Core\HelperFunctions::str2uid($this->fullName) . '_edit',
+          ],
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
         ])
@@ -582,6 +585,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "action" => $this->crud['add']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
+          "windowParams" => [
+            "uid" => \ADIOS\Core\HelperFunctions::str2uid($this->fullName) . '_add',
+            "modal" => TRUE,
+          ],
           "model" => $this->fullName,
           "id" => -1,
           "defaultValues" => $urlParams,

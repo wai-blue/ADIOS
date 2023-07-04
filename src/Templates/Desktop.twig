@@ -167,7 +167,7 @@
       <div id="content">
 
         <!-- Topbar -->
-        <nav class="navbar navbar-expand navbar-light bg-white topbar static-top shadow row">
+        <nav class="navbar navbar-expand navbar-light bg-white topbar static-top row">
           <div class="col col-10">
             {% if config.top_bar.custom.action != "" %}
               {{ adiosAction(config.top_bar.custom.action, config.top_bar.custom.action_params)|raw }}
@@ -273,28 +273,22 @@
         <!-- End of Topbar -->
 
         <!-- Begin Page Content -->
-        <div id='adios_main_content' class="container-fluid">
-          {% if desktopContentAction != "" %}
-            {{ adiosAction(desktopContentAction, desktopContentActionParams)|raw }}
-          {% endif %}
+        <div class="adios main-content">
+          <div class="desktop">
+            <div class="desktop-content">
+              {% if desktopContentAction != "" %}
+                {{ adiosAction(desktopContentAction, desktopContentActionParams)|raw }}
+              {% endif %}
+            </div>
+          </div>
+          <div class="windows">
+            <div class="windows-content"></div>
+          </div>
         </div>
         <!-- /.container-fluid -->
 
       </div>
       <!-- End of Main Content -->
-
-      <!-- Footer -->
-      <footer class="sticky-footer bg-white">
-        <div class="copyright my-auto">
-          Administration panel based on ADIOS framework. Created by <a href='https://www.wai.sk' target='_blank'>www.wai.sk</a>.<br/>
-          Credits: Twig, Bootstrap, FontAwesome, Vue.js, Quilljs, jQuery, Chart.js, DataTables and other 3rd-party libraries.
-
-          <div style='font-size:14px;color:red;position:fixed;right:1em;bottom:5px'>
-            Checked permission: {{ permissionForRequestedURI }}
-          </div>
-        </div>
-      </footer>
-      <!-- End of Footer -->
 
     </div>
     <!-- End of Content Wrapper -->

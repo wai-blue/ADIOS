@@ -128,6 +128,25 @@ class Loader {
     $this->twig->addExtension(new \Twig\Extension\DebugExtension());
     $this->twig->addExtension(new \Twig\Extension\StringLoaderExtension());
 
+    $this->twig->addFunction(new \Twig\TwigFunction(
+      'translate',
+      function ($string) {
+        return $this->adios->translate($string, []);
+      }
+    ));
+    $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
+      if (!is_array($params)) {
+        $params = [];
+      }
+      return $this->adios->view->create(
+        $view . (empty($uid) ? '' : '#' . $uid),
+        $params
+      )->render();
+    }));
+    $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
+      return $this->adios->renderAction($action, $params);
+    }));
+
     // set default twig params
     $this->setTwigParams([
       "rootUrl" => $this->rootUrl,

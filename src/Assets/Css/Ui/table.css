@@ -15,7 +15,7 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* height: 100%; */
   background-color: white;
   border-collapse: collapse;
   overflow-y: hidden;
@@ -26,6 +26,14 @@
 .adios.ui.Table.Container .Row {
   display: flex;
   align-items: stretch;
+}
+
+.adios.ui.Table.Container .Row.highlighted {
+  background: var(--cl-main) !important;
+}
+
+.adios.ui.Table.Container .Row.highlighted .Column {
+  color: white !important;
 }
 
 
@@ -71,10 +79,10 @@
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column {
   font-weight: bold;
-  border-bottom: 1px solid var(--cl-main);
-  /* padding: 3px; */
-  background: var(--cl-main);
-  color: white;
+  border-bottom: 1px solid var(--cl-gray-4);
+  padding: 0.66em;
+  background: var(--cl-gray-5);
+  color: #424242;
 }
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column:hover {
@@ -224,7 +232,7 @@
 /* Table.Container .Content */
 .adios.ui.Table.Container .Content {
   flex: 1 1 auto;
-  overflow-y: auto;
+  /* overflow-y: auto; */
 }
 
 .adios.ui.Table.Container .Content.empty {

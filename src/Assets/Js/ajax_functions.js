@@ -63,7 +63,7 @@ function _ajax_set_custom_param(param_name, param_value) {
 
 function _ajax_params(params, clean_for_history) {
   let tmp = {};
-  let params_obj = {};
+  let paramsObj = {};
 
   if (typeof params == 'string') {
     tmp = parseStr(params);
@@ -74,14 +74,14 @@ function _ajax_params(params, clean_for_history) {
   for (var i in tmp) {
     if (i != 'action' && i != '__C__') {
       if (!clean_for_history || (i != '__IS_AJAX__' && i != '__IS_WINDOW__')) {
-        params_obj[i] = (typeof tmp[i] === 'object' ? JSON.stringify(tmp[i]) : tmp[i].toString());
+        paramsObj[i] = tmp[i]; // (typeof tmp[i] === 'object' ? JSON.stringify(tmp[i]) : tmp[i].toString());
       }
     }
   }
 
   // console.log('_ajax_params', params, clean_for_history, params_obj);
 
-  return params_obj;
+  return paramsObj;
 }
 
 function _action_url(action, params, clean_for_history) {
@@ -321,7 +321,7 @@ function _ajax_sread(action, params, options) {
         'data': _ajax_post_data(params),
 
         success: options.success,
-        complete: function() { desktop_console_update(); }
+        // complete: function() { desktop_console_update(); }
       }).responseText
     );
   } catch (ex) {
@@ -367,12 +367,6 @@ function _ajax_supdate(action, params, selector, options) {
     };
   };
 
-  // if (selector == '#adios_main_content'){
-  //   // pocitadlo desktop zobrazeni - aby sa dalo spravit, ze sa na desktop nageneruje len posledna kliknuta akcia / ak niektora trva dlhsie ako predosla
-  //   document.adios_desktop_update_counter = document.adios_desktop_update_counter + 1 || 0;
-  //   var adios_desktop_update_counter = document.adios_desktop_update_counter;
-  // }
-
   try {
     var tmp_min_height = $(selector).css('minHeight');
 
@@ -384,56 +378,43 @@ function _ajax_supdate(action, params, selector, options) {
       if (options.async) {
         _ajax_read(action, params, function(data) {
 
-          // if (selector != '#adios_main_content' || document.adios_desktop_update_counter == adios_desktop_update_counter){
+          $(selector).css('minHeight', tmp_min_height).css('opacity', 1);
+          if (options.append) {
+            if (options.log_html_to_console){
+              var tmp = $.parseHTML(data);
+              if (typeof tmp[0] == 'object'){
+                console.log('AJAX WINDOW', $('<div></div>').append(tmp).html());
+              };
+            }else{
+              $(selector).append($.parseHTML(data));
+            }
+          } else {
+            // tieto 2 riadky zabezpecia, aby ak sa updatuje main box a zmizne scrollbar, tak sa zascrolluje hore
+            $(selector).html('');
+            useless_variable = $(document).height() - $(window).height();
+            $(selector).html($.parseHTML(data));
+          };
 
-            $(selector).css('minHeight', tmp_min_height).css('opacity', 1);
-            if (options.append) {
-              if (options.log_html_to_console){
-                var tmp = $.parseHTML(data);
-  //              $('#adios_console_content').append(tmp);
-                if (typeof tmp[0] == 'object'){
-                  console.log('AJAX WINDOW', $('<div></div>').append(tmp).html());
-                };
-              }else{
-                $(selector).append($.parseHTML(data));
-              }
-            } else {
-              // tieto 2 riadky zabezpecia, aby ak sa updatuje main box a zmizne scrollbar, tak sa zascrolluje hore
-              $(selector).html('');
-              useless_variable = $(document).height() - $(window).height();
-              $(selector).html($.parseHTML(data));
-            };
-
-            _ajax_update_dynamic_scripts(data);
-            $(selector).stop().css('opacity', 1);
-            if (typeof options.success == 'function') setTimeout(options.success, 100);
-
-          // }
-
-          // adios_loading_stop();
-
+          _ajax_update_dynamic_scripts(data);
+          $(selector).stop().css('opacity', 1);
+          if (typeof options.success == 'function') setTimeout(options.success, 100);
         });
       } else {
         _ajax_sread(action, params, { success: function(data) {
 
-          // if (selector != '#adios_main_content' || document.adios_desktop_update_counter == adios_desktop_update_counter){
+          $(selector).css('minHeight', tmp_min_height).css('opacity', 1);
+          if (options.append) {
+            $(selector).append($.parseHTML(data));
+          } else {
+            // tieto 2 riadky zabezpecia, aby ak sa updatuje main box a zmizne scrollbar, tak sa zascrolluje hore
+            $(selector).html('');
+            useless_variable = $(document).height() - $(window).height();
+            $(selector).html($.parseHTML(data));
+          };
 
-            $(selector).css('minHeight', tmp_min_height).css('opacity', 1);
-            if (options.append) {
-              $(selector).append($.parseHTML(data));
-            } else {
-              // tieto 2 riadky zabezpecia, aby ak sa updatuje main box a zmizne scrollbar, tak sa zascrolluje hore
-              $(selector).html('');
-              useless_variable = $(document).height() - $(window).height();
-              $(selector).html($.parseHTML(data));
-            };
-
-            _ajax_update_dynamic_scripts(data);
-            $(selector).stop().css('opacity', 1);
-            if (typeof options.success == 'function') setTimeout(options.success, 100);
-          // }
-
-          // adios_loading_stop();
+          _ajax_update_dynamic_scripts(data);
+          $(selector).stop().css('opacity', 1);
+          if (typeof options.success == 'function') setTimeout(options.success, 100);
         }});
       };
     }, 10);

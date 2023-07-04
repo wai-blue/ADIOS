@@ -190,7 +190,9 @@ class Table extends \ADIOS\Core\View
       }
 
       $this->params['buttons']['add']['onclick'] = "
-        window_render('" . $tmpUrl . "/add')
+        window_render(
+          '" . $tmpUrl . "/add'
+        )
       ";
     }
 
@@ -914,7 +916,9 @@ class Table extends \ADIOS\Core\View
           $onclick = $params['onclick'] ?: "
             window_render(
               '" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/edit'
-            )
+            );
+            $(this).closest('.Content').find('.Row').removeClass('highlighted');
+            $(this).closest('.Row').addClass('highlighted');
           ";
 
           $html .= "

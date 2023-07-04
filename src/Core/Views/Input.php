@@ -69,7 +69,7 @@ class Input extends \ADIOS\Core\View {
         ];
 
         $this->default_params = [
-            'table_column' => '',
+            'column' => '',
             'type' => '',
             'width' => '',
             'value' => '',
@@ -124,14 +124,6 @@ class Input extends \ADIOS\Core\View {
         }
 
 
-        // nacita parametre z tables a zmerguje s obdrzanymi
-        if ('' != $params['table_column']) {
-            $tmp_col = explode('.', $params['table_column']);
-            $params['default_table'] = $tmp_col[0];
-            $params['default_column'] = $tmp_col[1];
-            $params = parent::params_merge($this->adios->db->tables[$tmp_col[0]][$tmp_col[1]], $params);
-        }
-
         if (!empty($params['model'])) {
           $this->model = $adios->getModel($params['model']);
         }
@@ -140,8 +132,13 @@ class Input extends \ADIOS\Core\View {
           $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
         }
 
-        parent::__construct($adios, $params);
+        // nacita parametre z tables a zmerguje s obdrzanymi
+        if (!empty($params['column'])) {
+          $tmpColumns = $this->model->columns();
+          $params = parent::params_merge($params, $tmpColumns[$params['column']]);
+        }
 
+        parent::__construct($adios, $params);
         $this->addCssClass($this->params['type']);
     }
 
@@ -703,7 +700,7 @@ class Input extends \ADIOS\Core\View {
       if ('file' == $this->params['type']) {
           $default_src = $this->translate("No file uploaded");
           $file_src_base = "{$this->adios->config['url']}/File?f=";
-          // $upload_params = "type=file&table_column={$this->params['table_column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
+          // $upload_params = "type=file&column={$this->params['column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
           // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
 
           if ('' != $this->params['value']) {

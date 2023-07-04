@@ -109,8 +109,9 @@ class View {
     }
 
     if ($this->displayMode == 'window') {
-
-      $this->window = $this->adios->view->create('Window', []);
+      $this->window = $this->adios->view->create(
+        'Window' . ($this->params['windowParams']['uid'] == '' ? '' : '#' . $this->params['windowParams']['uid'])
+      );
       $this->window->addViewAsObject($this);
       $this->parentView = $this->window;
     }
@@ -430,6 +431,10 @@ class View {
             $this->window->setTitle($this->params['windowParams']['title']);
           }
           $this->window->addCssClass($this->params['windowParams']['cssClass'] ?? '');
+
+          if ($this->params['windowParams']['modal']) {
+            $this->window->addCssClass('modal');
+          }
         }
 
         $html = $this->window->render();

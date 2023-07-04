@@ -1,5 +1,10 @@
 /* ui form */
 
+.adios.ui.Form.table {
+   margin: 0 !important;
+  padding: 1em;
+}
+
 .adios.ui.Form.form_col {display:table-cell;vertical-align:top;}
 .adios.ui.Form.subtable {width:100%;display:table;}
 
@@ -85,7 +90,6 @@
 
 .badge-adios { font-size: 13px; vertical-align: middle; margin-bottom: 4px; margin-left: 5px; color: #fff; }
 
-.adios.ui.Form.table { margin: 0 !important; }
 
 @media screen and (max-width: 992px) { /* 992px = col-lg */
   .adios.ui.Form.table {display:block;}

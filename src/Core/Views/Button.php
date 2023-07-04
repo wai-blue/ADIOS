@@ -248,6 +248,7 @@ class Button extends \ADIOS\Core\View {
           href='".($this->href ?? "javascript:void(0);")."'
           id='".ads($this->uid)."'
           class='
+            adios ui Button
             btn
             ".($this->class == "" ? "btn-primary btn-icon-split" : $this->class)."
           '

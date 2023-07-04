@@ -1,15 +1,10 @@
 <style>
   #{{ uid }}_div {
-    display: grid;
     grid-template-areas:
       {% for layoutRow in view.layout %}
         '{{ layoutRow }}'
       {% endfor %}
     ;
-    gap: 0.25em;
-    {# height: 100vh; #}
-    padding: 5px;
-
     {{ view.style }}
   }
 
@@ -79,18 +74,14 @@
   {% endif %}
 
 
-  #{{ uid }}_div > div {
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 0.25em;
-    box-shadow: 0 0 3px #ccc;
-    overflow: auto;
-  }
-
   {% for areaName, areaParams in view.areas %}
     .{{ uid }}-area-{{ areaName }} { grid-area: {{ areaName }}; {{ areaParams.style }} }
   {% endfor %}
 </style>
 
-<div id='{{ uid }}_div'>
+<div
+  class='adios ui Grid'
+  id='{{ uid }}_div'
+>
   {{ params.html|raw }}
 </div>
