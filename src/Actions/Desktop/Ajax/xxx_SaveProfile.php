@@ -50,7 +50,7 @@ class SaveProfile extends \ADIOS\Core\Action {
     }
 
     $this->adios->db->updateRow(
-      "{$this->gtp}_{$this->adios->config['system_table_prefix']}_users",
+      (empty($this->gtp) ? '' : $this->gtp . '_')."users",
       [
         'name' => $this->params['name'],
         'surname' => $this->params['surname'],

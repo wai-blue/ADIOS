@@ -132,8 +132,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL)
   {
     $this->gtp = $adiosOrAttributes->gtp;
-    $this->fullTableSqlName = "{$this->gtp}_{$this->sqlName}";
-    $this->table = "{$this->gtp}_{$this->sqlName}"; // toto je kvoli Eloquentu
+    $this->fullTableSqlName = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;
+    $this->table = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName; // toto je kvoli Eloquentu
 
     if (!is_object($adiosOrAttributes)) {
       // v tomto pripade ide o volanie constructora z Eloquentu

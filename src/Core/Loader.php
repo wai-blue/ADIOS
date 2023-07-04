@@ -194,10 +194,6 @@ class Loader
 
     $this->srcDir = realpath(__DIR__."/..");
 
-    if (empty($this->config['system_table_prefix'])) {
-      $this->config['system_table_prefix'] = "adios";
-    }
-
     if (empty($this->config['session_salt'])) {
       $this->config['session_salt'] = rand(100000, 999999);
     }
@@ -1623,12 +1619,12 @@ class Loader
           $this->saveConfig($value, $tmpPath.'/');
         } else if ($value === NULL) {
           $this->db->query("
-            delete from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
+            delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
             where `path` like '".$this->db->escape($tmpPath)."%'
           ");
         } else {
           $this->db->query("
-            insert into `{$this->gtp}_{$this->config['system_table_prefix']}_config` set
+            insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
               `path` = '".$this->db->escape($tmpPath)."',
               `value` = '".$this->db->escape($value)."'
             on duplicate key update
@@ -1643,7 +1639,7 @@ class Loader
   public function saveConfigByPath(string $path, $value) {
     if (!empty($path)) {
       $this->db->query("
-        insert into `{$this->gtp}_{$this->config['system_table_prefix']}_config` set
+        insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
           `path` = '".$this->db->escape($path)."',
           `value` = '".$this->db->escape($value)."'
         on duplicate key update
@@ -1656,7 +1652,7 @@ class Loader
   public function deleteConfig($path) {
     if (!empty($path)) {
       $this->db->query("
-        delete from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
+        delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
         where `path` like '".$this->db->escape($path)."%'
       ");
     }
@@ -1667,7 +1663,7 @@ class Loader
       $queryOk = $this->db->query("
         select
           *
-        from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
+        from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
         order by id asc
       ");
 
@@ -1839,7 +1835,7 @@ class Loader
           // update last_login_time a last_login_ip
           $clientIp = $this->getClientIpAddress();
           $this->db->query("
-            UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
+            UPDATE ".(empty($this->gtp) ? '' : $this->gtp . '_')."users
             SET
               last_login_time = '".date('Y-m-d H:i:s')."',
               last_login_ip = '{$clientIp}',

@@ -2,7 +2,7 @@
 
 {{ builderInfo.php|raw }}
 
-define('GTP', "{{ ConfigEnv.db.globalTablePrefix }}");
+define('GTP', "{{ ConfigEnv.globalTablePrefix }}");
 
 // db
 $config["db_host"]             = "{{ ConfigEnv.db.host }}";

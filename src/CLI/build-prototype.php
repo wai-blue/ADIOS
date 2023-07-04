@@ -143,7 +143,7 @@ $builder->setConfigEnv([
     "password" => $dbPassword,
     "database" => $dbName,
   ],
-  "globalTablePrefix" => "app",
+  "globalTablePrefix" => "",
   "rewriteBase" => $rewriteBase,
   "rootUrl" => $rootUrl
 ]);

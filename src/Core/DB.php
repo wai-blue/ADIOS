@@ -242,7 +242,8 @@ class DB
 
   public function select(
     \ADIOS\Core\Model $model,
-    array $modifiers = []
+    array $modifiers = [],
+    string $tableAlias = ''
   ) : \ADIOS\Core\DB\Query
   {
     $query = new \ADIOS\Core\DB\Query(
@@ -250,6 +251,15 @@ class DB
       $model,
       \ADIOS\Core\DB\Query::select
     );
+
+    if (!empty($tableAlias)) {
+      $query->add([
+        \ADIOS\Core\DB\Query::selectModifier,
+        \ADIOS\Core\DB\Query::tableAlias,
+        $tableAlias
+      ]);
+    }
+
     foreach ($modifiers as $modifier) {
       $query->add([
         \ADIOS\Core\DB\Query::selectModifier,

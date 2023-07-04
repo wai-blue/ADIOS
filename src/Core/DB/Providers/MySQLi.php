@@ -475,7 +475,11 @@ class MySQLi extends \ADIOS\Core\DB
           $where[3]
         );
       } else {
-        $wheresArray[] = '`' . $where[1] . '` '. $where[2] . ' '. $this->typedSqlValue($where[3]);
+        if (strpos($where[1], '`') === FALSE) {
+          $wheresArray[] = '`' . $where[1] . '` '. $where[2] . ' '. $this->typedSqlValue($where[3]);
+        } else {
+          $wheresArray[] = $where[1] . ' '. $where[2] . ' '. $this->typedSqlValue($where[3]);
+        }
       }
     }
     foreach ($whereRaws as $whereRaw) {
@@ -659,6 +663,8 @@ class MySQLi extends \ADIOS\Core\DB
         $orderRaws = $query->getStatements(\ADIOS\Core\DB\Query::orderRaw);
         $limits = $query->getStatements(\ADIOS\Core\DB\Query::limit);
 
+        $tableAlias = '';
+
         // select modifiers
         $selectModifiersArray = [];
         foreach ($selectModifiers as $modifier) {
@@ -671,6 +677,9 @@ class MySQLi extends \ADIOS\Core\DB
             break;
             case \ADIOS\Core\DB\Query::distinctRow:
               $selectModifiersArray[] = 'DISTINCTROW';
+            break;
+            case \ADIOS\Core\DB\Query::tableAlias:
+              $tableAlias = $modifier[2];
             break;
           }
         }
@@ -733,6 +742,7 @@ class MySQLi extends \ADIOS\Core\DB
           'SELECT ' . join(' ', $selectModifiersArray) . ' '
             . join(', ', $columnsArray)
           . ' FROM `' . $model->getFullTableSqlName() . '`'
+          . (empty($tableAlias) ? '' : ' AS ' . $tableAlias)
           . ' ' . join(' ', $joinsArray)
           . (empty($where) ? '' : ' WHERE ' . $where)
           . (empty($having) ? '' : ' HAVING ' . $having)

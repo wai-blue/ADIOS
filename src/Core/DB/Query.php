@@ -32,6 +32,7 @@ class Query
   const countRows = 1;
   const distinct = 2;
   const distinctRow = 3;
+  const tableAlias = 4;
 
   // operators (for where and having)
   const equals = 1;
@@ -155,7 +156,7 @@ class Query
 
         $this->add([
           self::join,
-          $model->getFullTableSqlName(),
+          $tableAlias,
           $lookupModel->getFullTableSqlName(),
           $lookupTableAlias,
           $modelColumn
@@ -171,17 +172,27 @@ class Query
    */
   public function columns(array $columns = []): \ADIOS\Core\DB\Query
   {
+
+    $tableAlias = $this->model->getFullTableSqlName();
+
+    $selectModifiers = $this->getStatements(self::selectModifier);
+    foreach ($selectModifiers as $modifier) {
+      if ($modifier[1] == self::tableAlias) {
+        $tableAlias = $modifier[2];
+      }
+    }
+
     foreach ($columns as $column) {
       if ($column === self::allColumnsWithLookups) {
         $this->addColumnsFromModel(
           $this->model,
-          $this->model->getFullTableSqlName(),
+          $tableAlias,
           TRUE
         );
       } else if ($column === self::allColumnsWithoutLookups) {
         $this->addColumnsFromModel(
           $this->model,
-          $this->model->getFullTableSqlName(),
+          $tableAlias,
           FALSE
         );
       } else {

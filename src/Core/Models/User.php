@@ -22,7 +22,7 @@ class User extends \ADIOS\Core\Model {
   public string $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
-    $this->sqlName = "{$adiosOrAttributes->config['system_table_prefix']}_users";
+    $this->sqlName = "users";
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
     if (is_object($adiosOrAttributes)) {

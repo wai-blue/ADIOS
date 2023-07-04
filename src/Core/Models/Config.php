@@ -20,7 +20,7 @@ class Config extends \ADIOS\Core\Model {
   public string $urlBase = "Core/Config";
   
   public function __construct($adios) {
-    $this->sqlName = "{$adios->config['system_table_prefix']}_config";
+    $this->sqlName = "config";
     parent::__construct($adios);
   }
 

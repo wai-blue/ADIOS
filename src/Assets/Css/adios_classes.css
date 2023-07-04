@@ -4,7 +4,7 @@
   width: 13em;
   height: 3em;
   font-size: 0.8em;
-  z-index: 999999;
+  z-index: 99999999999;
   background: #faae20;
   padding: 0 1em;
   margin: 0px;
@@ -31,7 +31,7 @@
   overflow: auto;
   top: 0px !important;
   padding-left: 100px;
-  z-index: 999998;
+  z-index: 99999999998;
 }
 .xdebug-var-dump:hover > small:nth-child(1) {
   display: block;
