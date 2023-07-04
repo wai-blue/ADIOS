@@ -82,9 +82,9 @@
   margin: 0 !important;
 }
 
-.adios.ui.Form > .row > .col > .adios.ui.Tabs > .tab_contents {
+/* .adios.ui.Form > .row > .col > .adios.ui.Tabs > .tab_contents {
   height: calc(100vh - 15em) !important;
-}
+} */
 
 .adios.ui.Form.form_description { font-size: 0.8em; font-style: italic; color: orange; }
 

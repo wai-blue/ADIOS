@@ -123,7 +123,6 @@ class Input extends \ADIOS\Core\View {
           }
         }
 
-
         if (!empty($params['model'])) {
           $this->model = $adios->getModel($params['model']);
         }
@@ -135,7 +134,9 @@ class Input extends \ADIOS\Core\View {
         // nacita parametre z tables a zmerguje s obdrzanymi
         if (!empty($params['column'])) {
           $tmpColumns = $this->model->columns();
-          $params = parent::params_merge($params, $tmpColumns[$params['column']]);
+          $params['column'] = parent::params_merge($params, $tmpColumns[$params['column']]);
+        } else {
+          // $params['column'] = $this->model->columns();
         }
 
         parent::__construct($adios, $params);

@@ -20,7 +20,7 @@ spl_autoload_register(function ($class) {
 
   if (strpos($class, "ADIOS/") === FALSE) return;
 
-  $loaded = @include(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
+  $loaded = @include_once(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
 
   if (!$loaded) {
 
@@ -30,14 +30,14 @@ spl_autoload_register(function ($class) {
 
       // najprv skusim hladat core akciu
       $tmp = dirname(__FILE__)."/Actions/{$class}.php";
-      if (!@include($tmp)) {
+      if (!@include_once($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
         $widgetPath = explode("/", $class);
         $widgetName = array_pop($widgetPath);
         $widgetPath = join("/", $widgetPath);
 
-        if (!@include($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+        if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
           // ak ani widgetovska, skusim plugin
           $class = str_replace("Plugins/", "", $class);
           $pathLeft = "";
@@ -69,14 +69,14 @@ spl_autoload_register(function ($class) {
         throw new \Exception("ADIOS is not loaded.");
       }
 
-      if (!@include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
-        include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
+      if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
+        include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
       }
     } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
       foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
-        if (include("{$pluginFolder}/{$m[1]}/Main.php")) {
+        if (include_once("{$pluginFolder}/{$m[1]}/Main.php")) {
           break;
-        } else if (include("{$pluginFolder}/{$m[1]}.php")) {
+        } else if (include_once("{$pluginFolder}/{$m[1]}.php")) {
           break;
         }
       }
@@ -86,18 +86,18 @@ spl_autoload_register(function ($class) {
       $testFile = __DIR__."/../../tests/{$class}.php";
 
       if (is_file($testFile)) {
-        require($testFile);
+        include_once($testFile);
       } else {
-        require($___ADIOSObject->config['dir']."/../tests/{$class}.php");
+        include_once($___ADIOSObject->config['dir']."/../tests/{$class}.php");
       }
 
     } else if (preg_match('/ADIOS\/Web\/([\w\/]+)/', $class, $m)) {
       $class = str_replace("ADIOS/Web/", "", $class);
 
-      require($___ADIOSObject->config['dir']."/Web/{$class}.php");
+      include_once($___ADIOSObject->config['dir']."/Web/{$class}.php");
 
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
-      include(__DIR__."/../{$m[1]}.php");
+      include_once(__DIR__."/../{$m[1]}.php");
     }
   }
 });
@@ -1117,7 +1117,6 @@ class Loader
         // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
         // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
         // povodne $params['action'], cize requestovana URLka.
-
         foreach ($this->routing as $routePattern => $route) {
           if (preg_match($routePattern, $params['action'], $m)) {
             // povodnu $params['action'] nahradim novou $route['action']

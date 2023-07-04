@@ -488,9 +488,8 @@ class Form extends \ADIOS\Core\View
             foreach ($col['tabs'] as $tab_name => $rows) {
               $tabPages[] = [
                 'title' => $tab_name,
-                'content' => $this->renderRows($rows),
+                'content' => [ 'html' => $this->renderRows($rows) ],
               ];
-
             }
 
             $col_html .= $this->addView('Tabs', [

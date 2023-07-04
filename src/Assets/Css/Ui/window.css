@@ -14,10 +14,10 @@
 
 .adios.ui.Window.modal {
   position: fixed;
-  left: 10em;
-  top: 10em;
-  width: calc(100vw - 20em);
-  height: calc(100vh - 20em);
+  left: 5em;
+  top: 5em;
+  width: calc(100vw - 10em);
+  height: calc(100vh - 10em);
   overflow: auto;
   margin: auto;
   border-radius: 0.3em;
