@@ -43,7 +43,7 @@ class Input extends \ADIOS\Core\View {
     /*             */
     /* __construct */
     /*             */
-    public function __construct(&$adios, $params = null) {
+    public function __construct($adios, array $params = []) {
         $this->adios = $adios;
 
         $this->supported_events = [
@@ -678,19 +678,23 @@ class Input extends \ADIOS\Core\View {
                 ])->render()."
               </div>
               <div style='margin:1em'>
-                ".(new \ADIOS\Core\Views\Inputs\FileBrowser($this->adios, $this->params['uid'], [
-                  "mode" => "select",
-                  "value" => $this->params['value'],
-                  "subdir" => $this->params['subdir'],
-                  "onchange" => "
-                    $('#{$this->params['uid']}_image').attr(
-                      'src',
-                      '{$img_src_base}/' + file
-                    );
+                ".(new \ADIOS\Core\Views\Inputs\FileBrowser(
+                  $this->adios,
+                  [
+                    "uid" => $this->params['uid'],
+                    "mode" => "select",
+                    "value" => $this->params['value'],
+                    "subdir" => $this->params['subdir'],
+                    "onchange" => "
+                      $('#{$this->params['uid']}_image').attr(
+                        'src',
+                        '{$img_src_base}/' + file
+                      );
 
-                    $('#{$this->params['uid']}_browser').hide();
-                  ",
-                ]))->render()."
+                      $('#{$this->params['uid']}_browser').hide();
+                    ",
+                  ]
+                ))->render()."
               </div>
             </div>
           </div>
