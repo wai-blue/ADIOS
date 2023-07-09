@@ -3924,7 +3924,7 @@ input[type="button"].btn-block {
 }
 
 .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
-  border-color: #eaecf4 #eaecf4 #dddfeb;
+  border-color: var(--cl-main) transparent transparent;
 }
 
 .nav-tabs .nav-link.disabled {
@@ -3935,7 +3935,7 @@ input[type="button"].btn-block {
 
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
-  color: #6e707e;
+  color: var(--cl-main);
   background-color: #fff;
   border-color: var(--cl-main) #dddfeb #fff;
 }
