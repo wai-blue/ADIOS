@@ -261,8 +261,19 @@ h3 { padding-bottom: 0.5em; }
   flex: 1;
   /* overflow-x: auto; */
   display: none;
+  background: white;
 }
 
+.adios.main-content > .windows .adios.ui.Window.inline {
+  transition: 50ms;
+}
+.adios.main-content > .windows.update-in-progress .adios.ui.Window.inline {
+  width: 49.5vw;
+}
+
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .header {
+  background: #EEEEEE;
+}
 
 .ui-tooltip-content {
   font-size: 12px;

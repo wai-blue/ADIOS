@@ -31,6 +31,8 @@
 
     params.__IS_WINDOW__ = '1';
 
+    $('.adios.main-content .windows').addClass('update-in-progress');
+
     setTimeout(function() {
       _ajax_read(action, params, function(html) {
 
@@ -39,6 +41,7 @@
         // }
 
         $('.adios.main-content .windows').show();
+        $('.adios.main-content .windows').removeClass('update-in-progress');
 
         $('.adios.main-content .windows .windows-content').append(html);
 
