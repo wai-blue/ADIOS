@@ -271,7 +271,13 @@ h3 { padding-bottom: 0.5em; }
   width: 49.5vw;
 }
 
-.adios.main-content > .windows.update-in-progress .adios.ui.Window > .header {
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .header .btn {
+  opacity: 0.5;
+}
+
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .content input,
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .content textarea,
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .content select {
   background: #EEEEEE;
 }
 
