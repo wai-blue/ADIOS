@@ -1246,7 +1246,7 @@ class Loader
       // Dusan 31.5.2023: Tento sposob zapisu akcii je deprecated.
       $actionClassName = 'ADIOS\\Actions\\' . str_replace('/', '\\', $action);
 
-      $this->console->warning('Deprecated class name for action ' . $action . '.');
+      // $this->console->warning('[ADIOS] Deprecated class name for action ' . $action . '.');
     }
 
     return $actionClassName;

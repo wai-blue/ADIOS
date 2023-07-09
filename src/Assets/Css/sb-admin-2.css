@@ -9592,11 +9592,11 @@ a:focus {
 }
 
 #wrapper #content-wrapper {
-  background-color: #f8f9fc;
+  /* background-color: #f8f9fc; */
   width: 100%;
   overflow-x: hidden;
-  background-image: linear-gradient(45deg, #f8f9fc 25%, #fafafd 25%, #fafafd 50%, #f8f9fc 50%, #f8f9fc 75%, #fafafd 75%, #fafafd 100%);
-  background-size: 141.42px 141.42px;
+  /* background-image: linear-gradient(45deg, #f8f9fc 25%, #fafafd 25%, #fafafd 50%, #f8f9fc 50%, #f8f9fc 75%, #fafafd 75%, #fafafd 100%);
+  background-size: 141.42px 141.42px; */
 }
 
 #wrapper #content-wrapper #content {
