@@ -193,7 +193,7 @@ h3 { padding-bottom: 0.5em; }
 
 
 .adios_main_wrapper {display:flex;height:100%;}
-.adios_shortcuts {;width:50px;padding-top:40px;border-right:1px solid #EEEEEE;height:100vh;position:fixed;top:40px;transition: margin 0.3s;z-index:50;}
+.adios_shortcuts {width:50px;padding-top:40px;border-right:1px solid #EEEEEE;height:100vh;position:fixed;top:40px;transition: margin 0.3s;z-index:50;}
 .adios_shortcuts .responsive_header {display:none;}
 
 
@@ -244,6 +244,8 @@ h3 { padding-bottom: 0.5em; }
 
 .adios.main-content .desktop {
   width: 100%;
+  flex: 1;
+  overflow-x: auto;
 }
 
 .adios.main-content .desktop-content {
@@ -251,11 +253,18 @@ h3 { padding-bottom: 0.5em; }
   overflow-x: auto;
   box-shadow: 0 0 3px #ccc;
   border-radius: 0.25em;
+  min-height: calc(100vh - 7em);
+  display: flex;
+  flex-direction: column;
 }
 
-.adios.main-content .windows-content {
-  /* margin-left: 10em; */
+.adios.main-content .windows {
+  width: 100%;
+  flex: 1;
+  overflow-x: auto;
+  display: none;
 }
+
 
 .ui-tooltip-content {
   font-size: 12px;

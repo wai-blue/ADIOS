@@ -107,7 +107,7 @@ class Button extends \ADIOS\Core\View {
     $defParams = [];
     switch ($params['type'] ?? "") {
       case 'save':
-        $defParams['fa_icon'] = 'fas fa-download';
+        $defParams['fa_icon'] = 'fas fa-check';
         $defParams['text'] = $this->translate("Save");
         $defParams['class'] = "btn-success btn-icon-split {$params['class']}";
         $defParams['onclick'] = "{$this->adios->uid}_save()";
@@ -129,8 +129,8 @@ class Button extends \ADIOS\Core\View {
       break;
       case 'close':
         $defParams['fa_icon'] = 'fas fa-times';
-        $defParams['class'] = "btn-light btn-icon-split {$params['class']}";
-        $defParams['text'] = $this->translate("Close");
+        $defParams['class'] = "btn-light {$params['class']}";
+        $defParams['title'] = $this->translate("Close");
         $defParams['onclick'] = "{$this->adios->uid}_close()";
         unset($params['class']);
       break;
@@ -149,8 +149,8 @@ class Button extends \ADIOS\Core\View {
       break;
       case 'delete':
         $defParams['fa_icon'] = 'fas fa-trash-alt';
-        $defParams['class'] = "btn-danger btn-icon-split {$params['class']}";
-        $defParams['text'] = $this->translate("Delete");
+        $defParams['class'] = "text-danger {$params['class']}";
+        $defParams['title'] = $this->translate("Delete");
         $defParams['onclick'] = "{$this->adios->uid}_delete()";
         unset($params['class']);
       break;
@@ -219,7 +219,6 @@ class Button extends \ADIOS\Core\View {
             class='
               btn
               dropdown-toggle
-              ".($this->faIcon == "" ? "" : "btn-icon-split")."
               ".($this->class == "" ? "btn-primary" : $this->class)."
             '
             id='{$this->uid}_dropdown_menu_button'

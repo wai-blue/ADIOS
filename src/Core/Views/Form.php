@@ -52,7 +52,7 @@ class Form extends \ADIOS\Core\View
       'append_buttons' => [],
       'form_type' => 'window',
       'window_uid' => '',
-      'window_params' => [],
+      'windowParams' => [],
       'show_modal' => false,
       'width' => 700,
       'height' => '',
@@ -193,16 +193,6 @@ class Form extends \ADIOS\Core\View
       $this->saveButton = NULL;
     }
 
-    if ($this->params['show_close_button']) {
-      $this->params['close_button_params']['type'] = 'close';
-
-      if (empty($this->params['close_button_params']['onclick'])) {
-        $this->params['close_button_params']['onclick'] = "ui_form_close('{$this->params['uid']}');";
-      }
-
-      $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
-    }
-
     if ($this->params['show_delete_button']) {
       $this->params['delete_button_params']['type'] = 'delete';
 
@@ -221,7 +211,6 @@ class Form extends \ADIOS\Core\View
           );
         ";
       }
-      $this->params['delete_button_params']['style'] .= 'float:right;';
       $this->deleteButton = $this->addView('Button', $this->params['delete_button_params']);
     }
 
@@ -240,24 +229,24 @@ class Form extends \ADIOS\Core\View
         ";
       }
 
-      $this->params['copy_button_params']['style'] .= 'float:right;';
       $this->copyButton = $this->addView('Button', $this->params['copy_button_params']);
     }
 
-    if (empty($this->params['header'])) {
-      $this->params['window']['header'] = [
-        $this->closeButton,
-        $this->saveButton,
-        $this->deleteButton,
-        $this->copyButton
-      ];
+    $this->params['close_button_params']['type'] = 'close';
+
+    if (empty($this->params['close_button_params']['onclick'])) {
+      $this->params['close_button_params']['onclick'] = "ui_form_close('{$this->params['uid']}');";
     }
 
-    if ('' == $this->params['window_uid']) {
-      $this->params['window_uid'] = $this->params['uid'].'_form_window';
+    $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
+
+
+
+    if (empty($this->params['windowUid'])) {
+      $this->params['windowUid'] = $this->params['uid'].'_form_window';
     }
-    if ('' != $this->params['window_params']['uid']) {
-      $this->params['window_uid'] = $this->params['window_params']['uid'];
+    if (!empty($this->params['windowParams']['uid'])) {
+      $this->params['windowUid'] = $this->params['windowParams']['uid'];
     }
 
     if ($this->displayMode == 'desktop') {
@@ -629,12 +618,10 @@ class Form extends \ADIOS\Core\View
     ';
 
     if ($window !== NULL) {
+      $window->setCloseButton($this->closeButton);
       $window->setTitle($this->model->formTitleForEditing);
       $window->setHeaderLeft([
-        $this->closeButton,
-        $this->saveButton
-      ]);
-      $window->setHeaderRight([
+        $this->saveButton,
         $this->copyButton,
         $this->deleteButton
       ]);

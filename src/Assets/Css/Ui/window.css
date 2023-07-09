@@ -30,7 +30,7 @@
   left: 0px;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.33);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .adios.ui.Window.modal.height-1 { height: 12em; }
@@ -53,11 +53,11 @@
 
 .adios.ui.Window .header {
   z-index: 1;
-  height: 5em;
+  height: 7.5em;
   width: 100%;
-  background: white;
   position: relative;
 }
+
 
 
 .adios.ui.Window .content {
@@ -66,14 +66,13 @@
   margin: 0;
   padding: 1.12em;
   width: 100%;
-  height: calc(100% - 5em);
+  height: calc(100% - 7.5em);
   overflow: auto;
   box-shadow: -10px 0px 38px -17px rgba(0,0,0,0.5);
   position: relative;
 }
 
-.adios.ui.Window.modal:nth-of-type(2) > .header { position: absolute; }
-.adios.ui.Window.modal:nth-of-type(2) > .content { position: absolute; }
+.adios.ui.Window.modal .header { background: white; }
 
 .adios.ui.Window.modal:nth-of-type(2) > .content { margin-left: 0em; width: calc(100% - 0em); }
 .adios.ui.Window.modal:nth-of-type(3) > .content { margin-left: 1em; width: calc(100% - 1em); }

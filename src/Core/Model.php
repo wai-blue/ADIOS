@@ -629,6 +629,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
+          "displayMode" => "window",
+          "windowParams" => [
+            "modal" => TRUE,
+          ],
         ])
       ],
 

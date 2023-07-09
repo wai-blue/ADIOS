@@ -421,11 +421,11 @@ class View {
     return $this->applyDisplayMode((string) $html);
   }
 
-  public function applyDisplayMode(string $html) : string
+  public function applyDisplayMode(string $content) : string
   {
     switch ($this->displayMode) {
       case 'window':
-        $this->window->setContent($html);
+        $this->window->setContent($content);
         if (is_array($this->params['windowParams'])) {
           if (!empty($this->params['windowParams']['title'])) {
             $this->window->setTitle($this->params['windowParams']['title']);
@@ -442,11 +442,11 @@ class View {
       case 'desktop':
         $title = $this->addView('Title', ['title' => 'asdf']);
         // $html = $title->render() . $html;
-        $html = $html;
+        $html = $content;
       break;
       case 'inline':
       default:
-        $html = $html;
+        $html = $content;
       break;
     }
 

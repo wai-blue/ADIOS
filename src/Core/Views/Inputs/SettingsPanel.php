@@ -21,26 +21,26 @@ class SettingsPanel extends \ADIOS\Core\Views\Input {
     ";
 
     if (is_array($this->params['template']['tabs'])) {
-      $tab_pages = [];
+      $tabPages = [];
       foreach ($this->params['template']['tabs'] as $tab) {
-        $tab_html = "";
+        $tabHtml = "";
 
         foreach ($tab['items'] as $item) {
           if (empty($item)) continue;
 
           if (is_string($item)) {
-            $tab_html .= "
+            $tabHtml .= "
               <div class='adios ui Form subrow'>
                 {$item}
               </div>
             ";
           } else {
-            $item_html = "";
+            $itemHtml = "";
 
             if (isset($item['html'])) {
-              $item_html = $item['html'];
+              $itemHtml = $item['html'];
             } else {
-              $item_html = "
+              $itemHtml = "
                 <div class='adios ui Form form_input'>
                   ".$item['input']->render()."
                 </div>
@@ -51,25 +51,27 @@ class SettingsPanel extends \ADIOS\Core\Views\Input {
                 ")."
               ";
             }
-            $tab_html .= "
+            $tabHtml .= "
               <div class='adios ui Form subrow'>
                 <div class='adios ui Form form_title'>
                   {$item['title']}
                 </div>
-                {$item_html}
+                {$itemHtml}
               </div>
             ";
           }
         }
 
-        $tab_pages[] = [
+        $tabPages[] = [
           'title' => $tab['title'],
-          'content' => $tab_html,
+          'content' => [
+            'html' => $tabHtml
+          ],
         ];
       }
 
-      $html .= $this->addView('Tabs', ([
-        'tabs' => $tab_pages,
+      $html .= $this->addView('Tabs', [
+        'tabs' => $tabPages,
         'height' => "calc(100vh - 16em)",
       ])->render();
     }

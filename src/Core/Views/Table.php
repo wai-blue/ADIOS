@@ -541,7 +541,15 @@ class Table extends \ADIOS\Core\View
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-search",
             "text" => $this->translate("Search"),
-            "onclick" => "window_render('{$searchAction}');",
+            "onclick" => "
+              window_render(
+                '{$searchAction}',
+                {},
+                function(res) {
+                  ui_table_refresh_by_model('{$this->params['model']}');
+                }
+              );
+            ",
           ];
         }
 

@@ -25,7 +25,7 @@
     }
   }
 
-  function window_render(action, params, onClose, options) {
+  function window_render(action, params, onclose, options) {
     if (typeof params == 'undefined') params = {};
     if (typeof options == 'undefined') options = {};
 
@@ -37,6 +37,8 @@
         // if (params.windowParams && params.windowParams.uid) {
         //   $('#' + params.windowParams.uid).remove();
         // }
+
+        $('.adios.main-content .windows').show();
 
         $('.adios.main-content .windows .windows-content').append(html);
 
@@ -73,7 +75,7 @@
         ADIOS_windows[windowId] = {
           'action': action,
           'params': params,
-          'onclose': onClose,
+          'onclose': onclose,
         };
 
       });
@@ -81,17 +83,17 @@
     }, 0);
   };
 
-  function window_refresh(window_id) {
-    let win = $('#' + window_id);
+  function window_refresh(windowId) {
+    let win = $('#' + windowId);
 
     if (win.length > 0) {
       win
         .attr('id', win.attr('id') + '_TO_BE_REMOVED')
       ;
       window_render(
-        ADIOS_windows[window_id]['action'],
-        ADIOS_windows[window_id]['params'],
-        ADIOS_windows[window_id]['onclick'],
+        ADIOS_windows[windowId]['action'],
+        ADIOS_windows[windowId]['params'],
+        ADIOS_windows[windowId]['onclick'],
       );
 
       setTimeout(function() {
@@ -100,19 +102,24 @@
     }
   }
 
-  function window_close(window_id, oncloseParams) {
-    if (!ADIOS_windows[window_id]) {
+  function window_close(windowId, oncloseParams) {
+    if (!ADIOS_windows[windowId]) {
       // okno bolo otvarane cez URL
       window.location.href = _APP_URL;
     } else {
+
       if ($('.adios.main-content .adios.ui.Window').length == 1) {
         window.history.back();
       }
 
-      $('#'+window_id).remove();
+      $('#' + windowId).remove();
 
-      if (typeof ADIOS_windows[window_id]['onclose'] == 'function') {
-        ADIOS_windows[window_id]['onclose'](oncloseParams);
+      if ($('.adios.main-content .adios.ui.Window').length == 0) {
+        $('.adios.main-content .windows').hide();
+      }
+
+      if (typeof ADIOS_windows[windowId]['onclose'] == 'function') {
+        ADIOS_windows[windowId]['onclose'](oncloseParams);
       }
 
     }
@@ -193,7 +200,7 @@
         {
           'text': params.confirmButtonText,
           'fa_icon': 'fas fa-check',
-          'class': 'btn-primary ' + params.confirmButtonClass,
+          'class': 'btn-primary btn-icon-split ' + params.confirmButtonClass,
           'onclick': function() {
             if (typeof params.onConfirm == 'function') params.onConfirm();
             $(this).closest('.adios.ui.window').remove();
@@ -205,7 +212,7 @@
         params.buttons.push({
           'text': params.cancelButtonText,
           'fa_icon': 'fas fa-times',
-          'class': 'btn-secondary' + params.cancelButtonClass,
+          'class': 'btn-secondary btn-icon-split ' + params.cancelButtonClass,
           'onclick': function () {
             $(this).closest('.adios.ui.window').remove();
           }
@@ -217,7 +224,10 @@
     for (let i in params.buttons) {
       let button = params.buttons[i];
       buttonsHtml += '<button type="button" class="btn ' + button.class + '" btn-index="' + i + '">';
-      buttonsHtml += '<i class="' + button.fa_icon + ' mr-1"></i> ' + button.text;
+      buttonsHtml +=   '<span class="icon">';
+      buttonsHtml +=     '<i class="' + button.fa_icon + ' mr-1"></i>';
+      buttonsHtml +=   '</span>';
+      buttonsHtml +=   '<span class="text">' + button.text + '</span>';
       buttonsHtml += '</button>';
     }
 

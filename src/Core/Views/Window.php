@@ -15,7 +15,10 @@ class Window extends \ADIOS\Core\View {
   public \ADIOS\Core\View $headerLeft;
   public \ADIOS\Core\View $headerRight;
 
-  public function __construct($adios, $params = null) {
+  public ?\ADIOS\Core\Views\Button $closeButton = NULL;
+
+  public function __construct($adios, $params = null)
+  {
     $this->adios = $adios;
 
     $this->params = [
@@ -40,22 +43,32 @@ class Window extends \ADIOS\Core\View {
 
   }
 
-  public function setContent($content): \ADIOS\Core\View {
+  public function setContent($content): \ADIOS\Core\View
+  {
     $this->params['content'] = $content;
     return $this;
   }
 
-  public function setTitle(string $title): \ADIOS\Core\View {
+  public function setTitle(string $title): \ADIOS\Core\View
+  {
     $this->params['titleRaw'] = $title;
     return $this;
   }
 
-  public function setSubtitle(string $subtitle): \ADIOS\Core\View {
+  public function setSubtitle(string $subtitle): \ADIOS\Core\View
+  {
     $this->params['subtitle'] = $subtitle;
     return $this;
   }
 
-  public function setHeaderLeft(array $viewObjects = []): \ADIOS\Core\View {
+  public function setCloseButton(\ADIOS\Core\Views\Button $closeButton): \ADIOS\Core\View
+  {
+    $this->closeButton = $closeButton;
+    return $this;
+  }
+
+  public function setHeaderLeft(array $viewObjects = []): \ADIOS\Core\View
+  {
     $this->headerLeft->removeAllViews();
     foreach ($viewObjects as $viewObject) {
       if ($viewObject instanceof \ADIOS\Core\View) {
@@ -65,7 +78,8 @@ class Window extends \ADIOS\Core\View {
     return $this;
   }
 
-  public function setHeaderRight(array $viewObjects = []): \ADIOS\Core\View {
+  public function setHeaderRight(array $viewObjects = []): \ADIOS\Core\View
+  {
     $this->headerRight->removeAllViews();
     foreach ($viewObjects as $viewObject) {
       if ($viewObject instanceof \ADIOS\Core\View) {
@@ -87,12 +101,14 @@ class Window extends \ADIOS\Core\View {
       >
         <div class='modal-overlay'></div>
         <div class='header'>
+          ".($this->closeButton === NULL ? "" : "
+            <div class='float-right text-right'>
+              " . $this->closeButton->render() . "
+            </div>
+          ")."
           <div class='p-4 mb-4'>
-            <div class='row d-flex align-middle'>
-              <div class='col-6'>
-                " . $this->headerLeft->render() . "
-              </div>
-              <div class='col-3 text-primary text-center'>
+            <div class='row'>
+              <div class='col-10 h3 text-primary'>
                 ".(empty($this->params['titleRaw'])
                   ? hsc($this->params['title'])
                   : $this->params['titleRaw']
@@ -103,7 +119,12 @@ class Window extends \ADIOS\Core\View {
                   </div>
                 ")."
               </div>
-              <div class='col-3 text-end'>
+            </div>
+            <div class='row'>
+              <div class='col-6'>
+                " . $this->headerLeft->render() . "
+              </div>
+              <div class='col-6 text-right'>
                 " . $this->headerRight->render() . "
               </div>
             </div>

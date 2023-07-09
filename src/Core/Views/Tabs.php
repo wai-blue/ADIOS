@@ -98,7 +98,7 @@ class Tabs extends \ADIOS\Core\View {
         <div
           class='
             shadow-sm
-            tab_content
+            tab_content_wrapper
             ".($tabKey == 0 ? "active" : "")."
           '
           id='{$this->uid}_tab_content_{$tabKey}'
@@ -107,10 +107,10 @@ class Tabs extends \ADIOS\Core\View {
             $(this).addClass('active');
           \"
         >
-          <div class='tab_title_tag'>
+          <div class='tab_title_tag rounded-top'>
             ".hsc($tabParams['title'])."
           </div>
-          <div class='px-2'>
+          <div class='tab_content px-2'>
             {$tabContentHtml}
           </div>
         </div>
@@ -119,7 +119,7 @@ class Tabs extends \ADIOS\Core\View {
       $titles .= "
         <li class='nav-item'>
           <a
-            class='nav-link tab_title tab_title_{$tabKey} ".($i == 0 ? "active" : "")."'
+            class='nav-link rounded-top tab_title tab_title_{$tabKey} ".($i == 0 ? "active" : "")."'
             href='javascript:void(0);'
             onclick=\"
               ui_tabs_change_tab('{$this->uid}', '{$tabKey}');
