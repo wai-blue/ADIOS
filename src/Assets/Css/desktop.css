@@ -242,14 +242,13 @@ h3 { padding-bottom: 0.5em; }
   flex-direction: row;
 }
 
-.adios.main-content .desktop {
+.adios.main-content > .desktop {
   width: 100%;
-  flex: 1;
-  overflow-x: auto;
+  flex: 4;
+  /* overflow-x: auto; */
 }
 
-.adios.main-content .desktop-content {
-  width: 100%;
+.adios.main-content > .desktop > .desktop-content {
   overflow-x: auto;
   box-shadow: 0 0 3px #ccc;
   border-radius: 0.25em;
@@ -258,10 +257,9 @@ h3 { padding-bottom: 0.5em; }
   flex-direction: column;
 }
 
-.adios.main-content .windows {
-  width: 100%;
+.adios.main-content > .windows {
   flex: 1;
-  overflow-x: auto;
+  /* overflow-x: auto; */
   display: none;
 }
 

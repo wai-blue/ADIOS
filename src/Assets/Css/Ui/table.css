@@ -10,7 +10,7 @@
 
 /* Table.Container */
 .adios.ui.Table.Container {
-  flex: 1;
+  /* flex: 1; */
   /* margin-bottom: 1em; */
   padding: 0;
   display: flex;
@@ -18,8 +18,8 @@
   /* height: 100%; */
   background-color: white;
   border-collapse: collapse;
-  overflow-y: hidden;
-  user-select: none;
+  /* overflow-y: hidden; */
+  /* user-select: none; */
 }
 
 /* Table.Container .Row */
@@ -115,8 +115,8 @@
 
 .adios.ui.Table.Container .Header .Row.ColumnFilters {
   cursor: default;
-  white-space: nowrap;
-  background: #EEEEEE;
+  /* white-space: nowrap; */
+  /* background: #EEEEEE; */
   align-items: center;
 }
 
@@ -233,7 +233,7 @@
 
 /* Table.Container .Content */
 .adios.ui.Table.Container .Content {
-  flex: 1 1 auto;
+  /* flex: 1 1 auto; */
   /* overflow-y: auto; */
 }
 
@@ -255,8 +255,9 @@
 }
 
 .adios.ui.Table.Container .Content .Row .Column {
-  white-space: nowrap;
+  /* white-space: nowrap; */
   margin-right: 5px;
+  height: 1.7em;
 }
 
 .adios.ui.Table.Container .Content .Row .Column:hover {

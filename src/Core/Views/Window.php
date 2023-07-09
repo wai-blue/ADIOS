@@ -106,27 +106,25 @@ class Window extends \ADIOS\Core\View {
               " . $this->closeButton->render() . "
             </div>
           ")."
-          <div class='p-4 mb-4'>
-            <div class='row'>
-              <div class='col-10 h3 text-primary'>
-                ".(empty($this->params['titleRaw'])
-                  ? hsc($this->params['title'])
-                  : $this->params['titleRaw']
-                )."
-                ".(empty($this->params['subtitle']) ? "" : "
-                  <div class='h6 mb-4'>
-                    ".hsc($this->params['subtitle'])."
-                  </div>
-                ")."
-              </div>
+          <div class='row'>
+            <div class='col-10 h3 text-primary'>
+              ".(empty($this->params['titleRaw'])
+                ? hsc($this->params['title'])
+                : $this->params['titleRaw']
+              )."
+              ".(empty($this->params['subtitle']) ? "" : "
+                <div class='h6 mb-4'>
+                  ".hsc($this->params['subtitle'])."
+                </div>
+              ")."
             </div>
-            <div class='row'>
-              <div class='col-6'>
-                " . $this->headerLeft->render() . "
-              </div>
-              <div class='col-6 text-right'>
-                " . $this->headerRight->render() . "
-              </div>
+          </div>
+          <div class='row'>
+            <div class='col-6'>
+              " . $this->headerLeft->render() . "
+            </div>
+            <div class='col-6 text-right'>
+              " . $this->headerRight->render() . "
             </div>
           </div>
         </div>
