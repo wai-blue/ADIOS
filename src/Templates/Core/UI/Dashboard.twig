@@ -2,24 +2,26 @@
 
 <div class="row">
   <div class="col-md-6">
-    <div class="card card-body m-2">
+    <div class="card card-body m-2" id="draggableCards">
       {% for key, model in params.dashboardCards %}
         {% for k, card in model %}
           {% if card.is_active and card.left %}
-            <div class="card-body h-100" id="card-{{ key }}-{{ loop.index0 }}">
+            <div>
+              <div class="card-body h-100 draggable" id="card-{{ key }}-{{ loop.index0 }}">
+              </div>
+
+              <script>
+                  params = JSON.parse(
+                      Base64.decode('{{ card['params_encoded'] }}')
+                  );
+
+                  _ajax_update(
+                      '{{ card['action'] }}',
+                      params,
+                      'card-{{ key }}-{{ loop.index0 }}'
+                  );
+              </script>
             </div>
-
-            <script>
-              params = JSON.parse(
-                Base64.decode('{{ card['params_encoded'] }}')
-              );
-
-              _ajax_update(
-                '{{ card['action'] }}',
-                params,
-                'card-{{ key }}-{{ loop.index0 }}'
-              );
-            </script>
           {% endif %}
         {% endfor %}
       {% endfor %}
@@ -28,7 +30,7 @@
   <div class="col-md-6">
     <div class="card card-body m-2">
       Empty Dashboard Area 2
-    </div> 
+    </div>
   </div>
 </div>
 
@@ -41,7 +43,23 @@
   <div class="col-md-6">
     <div class="card card-body m-2">
       Empty Dashboard Area 4
-    </div> 
+    </div>
   </div>
 </div>
+
+<script>
+    const draggableContainer = document.getElementById("draggableCards");
+
+    const draggableSortable = new Draggable.Sortable(draggableContainer, {
+        draggable: `.draggable`,
+        mirror: {
+            constrainDimensions: true,
+        },
+        plugins: [],
+    });
+
+    draggableSortable.on('drag:start', () => {
+        console.log("started dragging");
+    });
+</script>
 

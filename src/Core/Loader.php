@@ -1220,7 +1220,7 @@ class Loader
     // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
     foreach ($this->widgets as $widgetName => $widgetData) {
       if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
-        $actionClassName = 
+        $actionClassName =
           '\\ADIOS\\Widgets\\'
           . $widgetName
           . '\\Actions\\'
@@ -1953,7 +1953,8 @@ class Loader
       dirname(__FILE__)."/../Assets/Js/jquery.multi-select.js",
       dirname(__FILE__)."/../Assets/Js/jquery.quicksearch.js",
       dirname(__FILE__)."/../Assets/Js/datatables.js",
-      dirname(__FILE__)."/../Assets/Js/jeditable.js"
+      dirname(__FILE__)."/../Assets/Js/jeditable.js",
+      dirname(__FILE__)."/../Assets/Js/draggable.js"
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
