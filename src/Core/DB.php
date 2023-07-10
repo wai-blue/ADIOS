@@ -308,7 +308,7 @@ class DB
       foreach ($model->indexes() as $index) {
         if (
           $index['type'] == 'unique'
-          && count(array_merge_recursive([$index['columns']])) == 1 # ignoring complex unique indexes
+          && count((array) $index['columns']) == 1
         ) {
           foreach ($index['columns'] as $col) {
             $unique[] = $col;
@@ -334,7 +334,7 @@ class DB
                   $random_val = rand($minValue, $maxValue);
                 }
               break;
-              case "double":
+              case "float":
                 $minValue = (float) ($col_definition['minValue'] ?? 0);
                 $maxValue = (float) ($col_definition['maxValue'] ?? 1000);
                 $decimals = $col_definition['decimals'] ?? 2;
