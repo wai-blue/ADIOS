@@ -26,7 +26,8 @@ class Token extends \ADIOS\Core\Model {
     parent::__construct($adios);
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       "type" => [
         "type" => "int",

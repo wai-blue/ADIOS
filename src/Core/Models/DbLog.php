@@ -22,7 +22,8 @@ class DbLog extends \ADIOS\Core\Model {
     parent::__construct($adios);
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       'ip' => ['type' => 'varchar', 'byte_size' => 35, 'title' => 'IP', 'show_column' => true],
       'action' => ['type' => 'varchar', 'byte_size' => 150, 'title' => 'Akcia', 'show_column' => true],

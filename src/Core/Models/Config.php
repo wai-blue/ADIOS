@@ -18,13 +18,14 @@ namespace ADIOS\Core\Models;
 class Config extends \ADIOS\Core\Model {
 
   public string $urlBase = "Core/Config";
-  
+
   public function __construct($adios) {
     $this->sqlName = "config";
     parent::__construct($adios);
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       'path' => [
         'type' => 'varchar',
