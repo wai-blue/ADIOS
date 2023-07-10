@@ -334,7 +334,7 @@ class DB
                   $random_val = rand($minValue, $maxValue);
                 }
               break;
-              case "float":
+              case "double":
                 $minValue = (float) ($col_definition['minValue'] ?? 0);
                 $maxValue = (float) ($col_definition['maxValue'] ?? 1000);
                 $decimals = $col_definition['decimals'] ?? 2;
