@@ -22,7 +22,7 @@ namespace ADIOS\Core\Web;
 //       }
 //     break;
 //   }
-  
+
 // });
 
 // Loader class
@@ -74,14 +74,14 @@ class Loader {
     // extract pageUrl
     if ($this->rewriteBase == "/") {
       $this->pageUrl = $_SERVER['REQUEST_URI'];
-    } elseif (strlen($this->rewriteBase) > strlen($_SERVER['REQUEST_URI'])) {
+    } elseif (strlen($this->rewriteBase) > strlen($_SERVER['REQUEST_URI'] ?? "")) {
       $this->pageUrl = "";
     } else {
       $this->pageUrl = str_replace(rtrim($this->rewriteBase, "/"), "", $_SERVER['REQUEST_URI']);
     }
 
-    if (strpos($_SERVER['REQUEST_URI'], "?") !== FALSE) {
-      $this->pageUrl = 
+    if (strpos($_SERVER['REQUEST_URI'] ?? "", "?") !== FALSE) {
+      $this->pageUrl =
         substr($this->pageUrl, 0,
           strpos($this->pageUrl, "?")
         )
@@ -120,7 +120,7 @@ class Loader {
     } else {
       $twigParams['cache'] = FALSE;
     }
-    
+
     $twigParams['debug'] = $this->config['twigDebugEnabled'] ?? FALSE;
 
     $twigLoader = new \Twig\Loader\FilesystemLoader($this->themeDir . '/Pages');
@@ -195,7 +195,7 @@ class Loader {
         $this->controllers[] = $controller;
       }
     }
-    
+
     return $this;
   }
 
@@ -231,7 +231,7 @@ class Loader {
 
   function redirectTo($pageUrl, $redirectType = NULL) {
     if ($redirectType == 301) {
-      header("HTTP/1.1 301 Moved Permanently"); 
+      header("HTTP/1.1 301 Moved Permanently");
     }
 
     header("Location: {$this->rewriteBase}{$pageUrl}");
