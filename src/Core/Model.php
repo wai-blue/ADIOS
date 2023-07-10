@@ -692,7 +692,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function columns(array $columns = []): array
   {
-
     $newColumns = [];
 
     if (!$this->isCrossTable) {
