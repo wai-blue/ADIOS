@@ -545,6 +545,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
   {
+    if (empty($urlBase)) return [];
+    
     $routing = [
 
       // Default

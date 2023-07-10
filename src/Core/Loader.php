@@ -517,7 +517,7 @@ class Loader
                 $newPassword
               );
 
-              header("Location: {$this->config['url']}");
+              header('Location: ' . $this->config['url']);
               exit();
             }
           }
@@ -567,7 +567,7 @@ class Loader
         )) {
           // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
           // nevyzadoval form resubmission
-          header("Location: {$this->config['url']}");
+              header('Location: ' . $this->config['url']);
           exit();
         } else {
           $this->userProfile = [];
@@ -1200,13 +1200,8 @@ class Loader
 
       return $this->renderAction($this->action, $params);
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      if ($this->isAjax()) {
-        echo $this->renderFatal($e->getMessage());
-        exit();
-      } else {
-        header('Location: ' . $this->config['url']);
-        exit;
-      }
+      echo $this->renderFatal($e->getMessage());
+      exit;
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();

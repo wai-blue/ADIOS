@@ -257,6 +257,11 @@ h3 { padding-bottom: 0.5em; }
   flex-direction: column;
 }
 
+.adios.main-content > .desktop > .desktop-content > h1 {
+  padding: 1em;
+}
+
+
 .adios.main-content > .windows {
   flex: 1;
   /* overflow-x: auto; */

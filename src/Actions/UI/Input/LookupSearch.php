@@ -40,15 +40,17 @@ class LookupSearch extends \ADIOS\Core\Action {
     $windowParams = [
       'uid' => $windowUid,
       'content' => $content->render(),
-      'header' => [
-        $this->adios->view->Button([
-          'type' => 'close',
-          'onclick' => "window_close('{$windowUid}');"
-        ]),
-      ],
-      'title' => $this->translate("Search in list"),
+      'title' => $this->translate("Select"),
     ];
 
-    return $this->adios->view->Window($windowParams)->render();
+    $window = $this->adios->view->Window($windowParams);
+    $window->setHeaderLeft([
+      $this->adios->view->Button([
+        'type' => 'close',
+        'onclick' => "window_close('{$windowUid}');"
+      ]),
+    ]);
+
+    return $window->render();
   }
 }

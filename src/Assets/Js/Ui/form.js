@@ -159,7 +159,7 @@
           }
 
           if ($('#'+uid).attr('data-form-type') == 'desktop'){
-            desktop_render('UI/Form', {form_type: 'desktop', table: data.table, id: _saved_id});
+            desktop_render('UI/Form', {formType: 'desktop', table: data.table, id: _saved_id});
           }else{
             window_render('UI/Form', {table: data.table, id: _saved_id});
           };

@@ -323,6 +323,21 @@ class Table extends \ADIOS\Core\View
       $having[] = [$tmpColumn, Q::columnFilter, $tmpFilter];
     }
 
+    if (!empty($this->params['fulltext'])) {
+      $havingFulltext = [
+        'logic' => Q::logicOr,
+        'statements' => [],
+      ];
+      foreach ($this->model->columns() as $modelColumn => $modelColumnParams) {
+        if (isset($modelColumnParams['model'])) {
+          $havingFulltext['statements'][] = [Q::having, $modelColumn . ':LOOKUP', Q::like, $this->params['fulltext']];
+        } else if (in_array($modelColumnParams['type'], ['varchar', 'text'])) {
+          $havingFulltext['statements'][] = [Q::having, $modelColumn, Q::like, $this->params['fulltext']];
+        }
+      }
+      $having[] = $havingFulltext;
+    }
+
     // query
     $query = $db->select($this->model, [Q::countRows])
       ->columns([Q::allColumnsWithLookups])
@@ -540,7 +555,7 @@ class Table extends \ADIOS\Core\View
 
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-search",
-            "text" => $this->translate("Search"),
+            "text" => $this->translate("Advanced search"),
             "onclick" => "
               window_render(
                 '{$searchAction}',
@@ -586,14 +601,35 @@ class Table extends \ADIOS\Core\View
           ];
         }
 
-        $titleButtons = [];
+        $titleLeftContent = [];
+        $titleRightContent = [];
 
         if ($this->params['showAddButton']) {
-          $titleButtons[] = $this->addView('Button', $this->params['buttons']['add']);
+          $titleLeftContent[] = $this->addView('Button', $this->params['buttons']['add']);
         }
 
+        // fulltext search
+        $titleRightContent[] = new \ADIOS\Core\Views\Html($this->adios, [
+          'html' => "
+            <input
+              type='input'
+              id='{$this->uid}_fulltext'
+              class='form-control p-2'
+              style='width:15em'
+              onkeypress='
+                if (event.keyCode == 13) {
+                  event.cancelBubble = true;
+                  ui_table_set_fulltext_search(\"{$params['uid']}\");
+                }
+              '
+              placeholder='".$this->translate("Press Enter to search...")."'
+              value='".ads($this->params['fulltext'])."'
+            />
+          ",
+        ]);
+
         if (_count($moreActionsButtonItems)) {
-          $titleButtons[] = $this->addView('Button', [
+          $titleRightContent[] = $this->addView('Button', [
             "fa_icon" => "fas fa-ellipsis-v",
             "title" => "",
             "onclick" => "window_render('{$searchAction}');",
@@ -602,12 +638,14 @@ class Table extends \ADIOS\Core\View
           ]);
         }
 
+
         if (
           !empty($titleButtons)
           || !empty($this->params['title'])
         ) {
           $html .= $this->addView('Title')
-            ->setLeftButtons($titleButtons)
+            ->setLeftContent($titleLeftContent)
+            ->setRightContent($titleRightContent)
             ->setTitle($this->params['title'])
             ->render()
           ;
@@ -687,7 +725,7 @@ class Table extends \ADIOS\Core\View
       $html .= "
         <div
           " . $this->main_params() . "
-          data-model='" . ads($this->params['model']) . "'
+          data-model='" . ads(strtolower($this->params['model'])) . "'
           data-refresh-action='" . ads($this->params['refreshAction']) . "'
           data-refresh-params='" . (empty($this->params['uid'])
         ? json_encode($this->params['_REQUEST'])

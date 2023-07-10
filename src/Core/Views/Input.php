@@ -956,36 +956,32 @@ class Input extends \ADIOS\Core\View {
                   data-initiating-column='{$this->params['initiating_column']}'
                   value='{$value}'
                   data-model='".hsc($this->params['model'])."'
-                  xxx-data-table='".hsc($this->params['table'])."'
-                  xxx-data-key='".hsc($this->params['key'])."'
-                  xxx-data-order='".hsc($this->params['order'])."'
-                  xxx-data-where='".hsc($this->params['where'])."'
-                  xxx-data-lookup-search-type='".hsc($this->params['lookup_search_type'])."'
-                  xxx-data-follow-lookups='".hsc($this->params['follow_lookups'])."'
                   onchange=\"{$onchange_hidden}\"
                 />
-                <input
-                  type='{$input_type}'
-                  name='{$this->params['uid']}_autocomplete_input'
-                  id='{$this->params['uid']}_autocomplete_input'
-                  class='col-md-9 px-1 ".join(' ', $this->classes)."'
-                  style='{$this->params['style']}'
-                  ".$this->generate_input_events().'
-                  value="'.htmlspecialchars($inputText).'"
-                  data-value="'.htmlspecialchars($inputText).'"
-                  title="'.htmlspecialchars($this->params['title']).'"
-                  placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
-                  {$this->params['html_attributes']}
-                  ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-                  autocomplete='off'
-                  onfocus='ui_input_lookup_onkeydown(event, \"{$this->params['uid']}\");'
-                />
-                <div
-                  class='adios ui Input lookup autocomplete shadow-sm col-md-9'
-                  style='display:none;'
-                  id='{$this->params['uid']}_result_div'
-                >
-                  <div id='{$this->params['uid']}_result_div_inner' class='innner' style='text-align:left;' >
+                <div class='".join(' ', $this->classes)."'>
+                  <input
+                    type='{$input_type}'
+                    name='{$this->params['uid']}_autocomplete_input'
+                    id='{$this->params['uid']}_autocomplete_input'
+                    class='px-1'
+                    style='{$this->params['style']}'
+                    ".$this->generate_input_events().'
+                    value="'.htmlspecialchars($inputText).'"
+                    data-value="'.htmlspecialchars($inputText).'"
+                    title="'.htmlspecialchars($this->params['title']).'"
+                    placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
+                    {$this->params['html_attributes']}
+                    ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+                    autocomplete='off'
+                    onfocus='ui_input_lookup_onkeydown(event, \"{$this->params['uid']}\");'
+                  />
+                  <div
+                    class='adios ui Input autocomplete shadow-sm'
+                    style='display:none;'
+                    id='{$this->params['uid']}_result_div'
+                  >
+                    <div id='{$this->params['uid']}_result_div_inner' class='inner shadow'>
+                    </div>
                   </div>
                 </div>
                 <div class='adios ui Input lookup_controls'>

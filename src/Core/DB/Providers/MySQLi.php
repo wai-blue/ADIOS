@@ -458,37 +458,58 @@ class MySQLi extends \ADIOS\Core\DB
    * 
    * @return string
    */
-  private function buildSqlWhere(\ADIOS\Core\DB\Query $query) : string
+  private function buildSqlWhere(\ADIOS\Core\DB\Query $query, ?array $wheres = NULL, string $logic = ''): string
   {
+
     $model = $query->getModel();
 
-    $wheres = $query->getStatements(\ADIOS\Core\DB\Query::where);
-    $whereRaws = $query->getStatements(\ADIOS\Core\DB\Query::whereRaw);
+    $whereRaws = [];
+
+    if ($wheres === NULL) {
+      $wheres = $query->getStatements(\ADIOS\Core\DB\Query::where);
+      $whereRaws = $query->getStatements(\ADIOS\Core\DB\Query::whereRaw);
+    }
+
+    if (!\ADIOS\Core\DB\Query::isValidLogic($logic)) $logic = \ADIOS\Core\DB\Query::logicAnd;
 
     // wheres and whereRaws
     $wheresArray = [];
     foreach ($wheres as $where) {
-      if ($where[2] === \ADIOS\Core\DB\Query::columnFilter) {
-        $wheresArray[] = $this->columnSqlFilter(
-          $model,
-          $where[1],
-          $where[3]
-        );
+      if (is_array($where['statements'])) {
+        $tmp = '(' . $this->buildSqlwhere($query, $where['statements'], $where['logic']) . ')';
+        $wheresArray[] = $tmp;
       } else {
-        if (strpos($where[1], '`') === FALSE) {
-          $wheresArray[] = '`' . $where[1] . '` '. $where[2] . ' '. $this->typedSqlValue($where[3]);
+        list($statementType, $column, $operator, $value) = $where;
+
+        if ($operator === \ADIOS\Core\DB\Query::columnFilter) {
+          $wheresArray[] = $this->columnSqlFilter(
+            $model,
+            $column,
+            $value
+          );
+        } else if ($operator === \ADIOS\Core\DB\Query::like) {
+          if (strpos($column, '`') === FALSE) {
+            $wheresArray[] = '`' . $column . '` like "%' . $this->escape($value) . '%"';
+          } else {
+            $wheresArray[] = $column . '  like "%' . $this->escape($value) . '%"';
+          }
         } else {
-          $wheresArray[] = $where[1] . ' '. $where[2] . ' '. $this->typedSqlValue($where[3]);
+          if (strpos($column, '`') === FALSE) {
+            $wheresArray[] = '`' . $column . '` '. $operator . ' ' . $this->typedSqlValue($value);
+          } else {
+            $wheresArray[] = $column . ' '. $operator . ' ' . $this->typedSqlValue($value);
+          }
         }
       }
     }
+
     foreach ($whereRaws as $whereRaw) {
       if (!empty($whereRaw[1])) {
         $wheresArray[] = $whereRaw[1];
       }
     }
 
-    return (count($wheresArray) == 0 ? '' : join(' AND ', $wheresArray));
+    return (count($wheresArray) == 0 ? '' : join(' ' . $logic . ' ', $wheresArray));
   }
 
   /**
@@ -496,33 +517,58 @@ class MySQLi extends \ADIOS\Core\DB
    * 
    * @return string
    */
-  private function buildSqlHaving(\ADIOS\Core\DB\Query $query) : string
+  private function buildSqlHaving(\ADIOS\Core\DB\Query $query, ?array $havings = NULL, string $logic = ''): string
   {
+
     $model = $query->getModel();
 
-    $havings = $query->getStatements(\ADIOS\Core\DB\Query::having);
-    $havingRaws = $query->getStatements(\ADIOS\Core\DB\Query::havingRaw);
+    $havingRaws = [];
+
+    if ($havings === NULL) {
+      $havings = $query->getStatements(\ADIOS\Core\DB\Query::having);
+      $havingRaws = $query->getStatements(\ADIOS\Core\DB\Query::havingRaw);
+    }
+
+    if (!\ADIOS\Core\DB\Query::isValidLogic($logic)) $logic = \ADIOS\Core\DB\Query::logicAnd;
 
     // havings and havingRaws
     $havingsArray = [];
     foreach ($havings as $having) {
-      if ($having[2] === \ADIOS\Core\DB\Query::columnFilter) {
-        $havingsArray[] = $this->columnSqlFilter(
-          $model,
-          $having[1],
-          $having[3]
-        );
+      if (is_array($having['statements'])) {
+        $tmp = '(' . $this->buildSqlHaving($query, $having['statements'], $having['logic']) . ')';
+        $havingsArray[] = $tmp;
       } else {
-        $havingsArray[] = '`' . $having[1] . '` '. $having[2] . ' '. $this->typedSqlValue($having[3]);
+        list($statementType, $column, $operator, $value) = $having;
+
+        if ($operator === \ADIOS\Core\DB\Query::columnFilter) {
+          $havingsArray[] = $this->columnSqlFilter(
+            $model,
+            $column,
+            $value
+          );
+        } else if ($operator === \ADIOS\Core\DB\Query::like) {
+          if (strpos($column, '`') === FALSE) {
+            $havingsArray[] = '`' . $column . '` like "%' . $this->escape($value) . '%"';
+          } else {
+            $havingsArray[] = $column . '  like "%' . $this->escape($value) . '%"';
+          }
+        } else {
+          if (strpos($column, '`') === FALSE) {
+            $havingsArray[] = '`' . $column . '` '. $operator . ' ' . $this->typedSqlValue($value);
+          } else {
+            $havingsArray[] = $column . ' '. $operator . ' ' . $this->typedSqlValue($value);
+          }
+        }
       }
     }
+
     foreach ($havingRaws as $havingRaw) {
       if (!empty($havingRaw[1])) {
         $havingsArray[] = $havingRaw[1];
       }
     }
 
-    return (count($havingsArray) == 0 ? '' : join(' AND ', $havingsArray));
+    return (count($havingsArray) == 0 ? '' : join(' ' . $logic . ' ', $havingsArray));
   }
 
 
