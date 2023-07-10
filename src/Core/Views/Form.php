@@ -241,13 +241,12 @@ class Form extends \ADIOS\Core\View
     $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
 
 
-
-    if (empty($this->params['windowUid'])) {
-      $this->params['windowUid'] = $this->params['uid'].'_form_window';
-    }
-    if (!empty($this->params['windowParams']['uid'])) {
-      $this->params['windowUid'] = $this->params['windowParams']['uid'];
-    }
+    // if (empty($this->params['windowParams']['uid'])) {
+    //   $this->params['windowParams']['uid'] = $this->params['uid'].'_form';
+    // }
+    // if (!empty($this->params['windowParams']['uid'])) {
+    //   $this->params['windowUid'] = $this->params['windowParams']['uid'];
+    // }
 
     if ($this->displayMode == 'desktop') {
       if (is_array($this->params['title_params']['left'])) {
@@ -312,14 +311,14 @@ class Form extends \ADIOS\Core\View
                 ".(empty($this->params['columns'][$row]['pattern']) ? "" : "has_pattern")."
               '
             >
-              <div class='adios ui Form form_title'>
+              <div class='input-title'>
                 ".hsc($this->params['columns'][$row]['title'])."
               </div>
-              <div class='adios ui Form form_input'>
+              <div class='input-content'>
                 ".$this->Input($row, $this->data, $this->params['model'])."
               </div>
               ".(empty($this->params['columns'][$row]['description']) ? "" : "
-                <div class='adios ui Form form_description'>
+                <div class='input-description'>
                   ".hsc($this->params['columns'][$row]['description'])."
                 </div>
               ")."
@@ -359,18 +358,18 @@ class Form extends \ADIOS\Core\View
           $html .= "
             <div class='adios ui Form subrow'>
               ".(empty($row['title']) ? "" : "
-                <div class='adios ui Form form_title {$row['class']}'>
+                <div class='input-title {$row['class']}'>
                   {$row['title']}
                 </div>
               ")."
               <div
-                class='adios ui Form form_input {$row['class']}'
+                class='input-content {$row['class']}'
                 style='{$row['style']}'
               >
                 {$inputHtml}
               </div>
               ".(empty($row['description']) ? "" : "
-                <div class='adios ui Form form_description'>
+                <div class='input-description'>
                   ".hsc($row['description'])."
                 </div>
               ")."
@@ -618,6 +617,10 @@ class Form extends \ADIOS\Core\View
     ';
 
     if ($window !== NULL) {
+      $window->setUid(
+        \ADIOS\Core\HelperFunctions::str2uid($this->model->fullName)
+        . ($this->params['id'] <= 0 ? '_add' : '_edit')
+      );
       $window->setCloseButton($this->closeButton);
       $window->setTitle($this->model->formTitleForEditing);
       $window->setHeaderLeft([

@@ -921,7 +921,7 @@ class Table extends \ADIOS\Core\View
             'row' => $val,
           ]);
 
-          $onclick = $params['onclick'] ?: "
+          $rowOnclick = $params['onclick'] ?: "
             window_render(
               '" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/edit'
             );
@@ -946,7 +946,7 @@ class Table extends \ADIOS\Core\View
                 let base64 = $(this).data('row-values-base64');
                 let rowValues = JSON.parse(Base64.decode(base64));
 
-                {$onclick}
+                {$rowOnclick}
               \"
             >
           ";

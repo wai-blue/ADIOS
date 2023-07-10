@@ -37,7 +37,7 @@ class LookupSearch extends \ADIOS\Core\Action {
       ",
     ]);
 
-    $window_params = [
+    $windowParams = [
       'uid' => $windowUid,
       'content' => $content->render(),
       'header' => [
@@ -49,6 +49,6 @@ class LookupSearch extends \ADIOS\Core\Action {
       'title' => $this->translate("Search in list"),
     ];
 
-    return $this->adios->view->Window($window_params)->render();
+    return $this->adios->view->Window($windowParams)->render();
   }
 }

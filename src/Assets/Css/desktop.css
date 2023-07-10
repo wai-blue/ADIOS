@@ -268,7 +268,7 @@ h3 { padding-bottom: 0.5em; }
   transition: 50ms;
 }
 .adios.main-content > .windows.update-in-progress .adios.ui.Window.inline {
-  width: 49.5vw;
+  width: 33vw;
 }
 
 .adios.main-content > .windows.update-in-progress .adios.ui.Window > .header .btn {
