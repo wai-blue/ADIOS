@@ -194,7 +194,7 @@ class TableSearch extends \ADIOS\Core\View {
     ";
 
     if ($this->window !== NULL) {
-      $this->window->setTitle($this->translate("Search in") . ": " . hsc($searchGroup));
+      $this->window->setTitle($this->translate("Advanced search") . ": " . hsc($searchGroup));
       $this->window->setCloseButton(
         new \ADIOS\Core\Views\Button($this->adios, [
           'type' => 'close',
@@ -203,8 +203,7 @@ class TableSearch extends \ADIOS\Core\View {
       );
       $this->window->setHeaderLeft([
         new \ADIOS\Core\Views\Button($this->adios, [
-          'type' => 'save',
-          'text' => $this->translate('Apply'),
+          'type' => 'apply',
           'onclick' => "{$this->uid}_search();",
         ]),
       ]);

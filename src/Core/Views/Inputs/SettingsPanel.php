@@ -41,11 +41,11 @@ class SettingsPanel extends \ADIOS\Core\Views\Input {
               $itemHtml = $item['html'];
             } else {
               $itemHtml = "
-                <div class='adios ui Form form_input'>
+                <div class='input-content'>
                   ".$item['input']->render()."
                 </div>
                 ".(empty($item['description']) ? "" : "
-                  <div class='adios ui Form form_description'>
+                  <div class='input-description'>
                     {$item['description']}
                   </div>
                 ")."
@@ -53,7 +53,7 @@ class SettingsPanel extends \ADIOS\Core\Views\Input {
             }
             $tabHtml .= "
               <div class='adios ui Form subrow'>
-                <div class='adios ui Form form_title'>
+                <div class='input-title'>
                   {$item['title']}
                 </div>
                 {$itemHtml}
@@ -89,14 +89,14 @@ class SettingsPanel extends \ADIOS\Core\Views\Input {
         } else {
           $html .= "
             <div class='adios ui Form subrow'>
-              <div class='adios ui Form form_title'>
+              <div class='input-title'>
                 {$item['title']}
               </div>
-              <div class='adios ui Form form_input'>
+              <div class='input-content'>
                 ".$item['input']->render()."
               </div>
               ".(empty($item['description']) ? "" : "
-                <div class='adios ui Form form_description'>
+                <div class='input-description'>
                   {$item['description']}
                 </div>
               ")."

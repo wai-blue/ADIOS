@@ -51,6 +51,8 @@
 
       // params.table = $('#' + uid).attr('data-table');
 
+      params['fulltext'] = $('#' + uid + '_fulltext').val();
+
       $('.' + uid + '_column_filter').each(function () {
         if ($(this).val() != '') {
           params['column_filter_' + $(this).attr('data-col-name')] = $(this).val();
@@ -84,8 +86,7 @@
 
   function ui_table_refresh_by_model(model, params) {
     if (typeof params == 'undefined') params = {};
-
-    $('.adios.ui.Table[data-model="' + model + '"]').each(function(){
+    $('.adios.ui.Table[data-model="' + model.toLowerCase() + '"]').each(function() {
       ui_table_refresh($(this).attr('id'), params);
     });
   };
@@ -93,6 +94,10 @@
   function ui_table_set_column_filter(uid) {
     ui_table_refresh(uid, { reset: '1' });
   };
+
+  function ui_table_set_fulltext_search(uid) {
+    ui_table_refresh(uid, { reset: '1' });
+  }
 
   function ui_table_show_page(uid, page){
     ui_table_refresh(uid, {page: page});

@@ -90,20 +90,34 @@
 textarea.adios.ui.Input {margin-bottom:0px;height:100px;}
 .ui-datepicker {z-index:999999 !important;}
 
-.adios.ui.Input.lookup_controls { margin-top: 5px; }
+.adios.ui.Input.lookup {
+  width: 80%;
+  display: inline-block;
+}
+
+.adios.ui.Input.lookup input {
+  width: 100%;
+}
+
+.adios.ui.Input.lookup_controls {
+  width: 20%;
+  display: inline-block;
+}
 
 .adios.ui.Input.autocomplete {
-  box-sizing: border-box;
-  border: 1px solid #C8CFE2;
   padding: 0px;
-  background: #FFFFFF;
+  position: relative;
+  height: 0px;
+  z-index: 1;
+}
+.adios.ui.Input.autocomplete div.inner {
   position: absolute;
   width: 100%;
-  z-index: 1;
-  overflow: auto;
-  max-height: 12em;
+  height: max-content;
+  box-sizing: border-box;
+  border: 1px solid #C8CFE2;
+  background: white;
 }
-.adios.ui.Input.autocomplete div.inner { padding: 0% 0%; width: 100%; height: 100%; }
 .adios.ui.Input.autocomplete a { padding: 3px; display: block; }
 .adios.ui.Input.autocomplete a:hover { background: #EEEEEE; text-decoration: none !important; color: black; }
 .adios.ui.Input.autocomplete a.active { background: var(--cl-main); text-decoration: none !important; color: white; }

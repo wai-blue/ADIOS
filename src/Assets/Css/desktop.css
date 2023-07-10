@@ -252,10 +252,15 @@ h3 { padding-bottom: 0.5em; }
   overflow-x: auto;
   box-shadow: 0 0 3px #ccc;
   border-radius: 0.25em;
-  min-height: calc(100vh - 7em);
+  /* min-height: calc(100vh - 7em); */
   display: flex;
   flex-direction: column;
 }
+
+.adios.main-content > .desktop > .desktop-content > h1 {
+  padding: 1em;
+}
+
 
 .adios.main-content > .windows {
   flex: 1;
@@ -268,7 +273,7 @@ h3 { padding-bottom: 0.5em; }
   transition: 50ms;
 }
 .adios.main-content > .windows.update-in-progress .adios.ui.Window.inline {
-  width: 49.5vw;
+  width: 33vw;
 }
 
 .adios.main-content > .windows.update-in-progress .adios.ui.Window > .header .btn {

@@ -81,26 +81,26 @@ class CSV extends \ADIOS\Core\Action {
 
       <div id='{$this->uid}_form' class='adios ui Form table'>
         <div class='adios ui Form subrow'>
-          <div class='adios ui Form form_title'>
+          <div class='input-title'>
             ".$this->translate("CSV file")."
           </div>
-          <div class='adios ui Form form_input'>
+          <div class='input-content'>
             ".$fileUploadInput->render()."
           </div>
         </div>
         <div class='adios ui Form subrow'>
-          <div class='adios ui Form form_title'>
+          <div class='input-title'>
             <label for='{$this->uid}_column_names_in_first_line'>".$this->translate("Column names are in the first line")."</label>
           </div>
-          <div class='adios ui Form form_input'>
+          <div class='input-content'>
             <input type='checkbox' id='{$this->uid}_column_names_in_first_line' checked onchange='{$this->uid}_previewCsv();'>
           </div>
         </div>
         <div class='adios ui Form subrow'>
-          <div class='adios ui Form form_title'>
+          <div class='input-title'>
             ".$this->translate("Separator")."
           </div>
-          <div class='adios ui Form form_input'>
+          <div class='input-content'>
             <select id='{$this->uid}_separator' onchange='{$this->uid}_previewCsv();'>
               <option value=','>,</option>
               <option value=';'>;</option>
@@ -109,10 +109,10 @@ class CSV extends \ADIOS\Core\Action {
           </div>
         </div>
         <div class='adios ui Form subrow'>
-          <div class='adios ui Form form_title'>
+          <div class='input-title'>
             ".$this->translate("Preview")."
           </div>
-          <div class='adios ui Form form_input'>
+          <div class='input-content'>
             <div id='{$this->uid}_preview_div'></div>
           </div>
         </div>

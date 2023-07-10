@@ -517,7 +517,7 @@ class Loader
                 $newPassword
               );
 
-              header("Location: {$this->config['url']}");
+              header('Location: ' . $this->config['url']);
               exit();
             }
           }
@@ -567,7 +567,7 @@ class Loader
         )) {
           // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
           // nevyzadoval form resubmission
-          header("Location: {$this->config['url']}");
+              header('Location: ' . $this->config['url']);
           exit();
         } else {
           $this->userProfile = [];
@@ -805,7 +805,6 @@ class Loader
     if (strlen($toLanguage) == 2) {
       if (empty($object->dictionaryFilename)) {
         $dictionaryFilename = strtr(get_class($object), "./\\", "---");
-        $dictionaryFilename = str_replace("ADIOS-", "", $dictionaryFilename);
       } else {
         $dictionaryFilename = $object->dictionaryFilename;
       }
@@ -846,6 +845,9 @@ class Loader
 
     if (!isset($dictionary[$toLanguage][$string])) {
       $translated = $string;
+      if ($this->getConfig('debugTranslations', FALSE)) {
+        $translated .= ' ' . get_class($object);
+      }
     } else {
       $translated = $dictionary[$toLanguage][$string];
     }
@@ -1200,13 +1202,8 @@ class Loader
 
       return $this->renderAction($this->action, $params);
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      if ($this->isAjax()) {
-        echo $this->renderFatal($e->getMessage());
-        exit();
-      } else {
-        header('Location: ' . $this->config['url']);
-        exit;
-      }
+      echo $this->renderFatal($e->getMessage());
+      exit;
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();

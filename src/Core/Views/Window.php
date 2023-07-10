@@ -36,11 +36,6 @@ class Window extends \ADIOS\Core\View {
     $this->headerLeft = new \ADIOS\Core\View($this->adios, $params, $this);
     $this->headerRight = new \ADIOS\Core\View($this->adios, $params, $this);
 
-    $this->headerLeft->addView('Button', [
-      "type" => "close",
-      "onclick" => "window_close('{$this->uid}');",
-    ]);
-
   }
 
   public function setContent($content): \ADIOS\Core\View
@@ -97,7 +92,7 @@ class Window extends \ADIOS\Core\View {
     $html = "
       <div
         class='".$this->getCssClassesString()."'
-        id='{$this->params['uid']}'
+        id='{$this->uid}'
       >
         <div class='modal-overlay'></div>
         <div class='header'>

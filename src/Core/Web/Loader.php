@@ -234,7 +234,7 @@ class Loader {
       header("HTTP/1.1 301 Moved Permanently");
     }
 
-    header("Location: {$this->rewriteBase}{$pageUrl}");
+    header('Location: ' . $this->rewriteBase . $pageUrl);
 
     exit();
   }

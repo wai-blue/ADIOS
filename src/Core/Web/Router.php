@@ -117,13 +117,13 @@ class Router {
       if (!empty($route['redirect'])) {
         switch ($route['redirect'][1]) {
           case 301:
-            header("HTTP/1.1 301 Moved Permanently");
-            header("Location: {$this->adios->web->config['rewriteBase']}{$route['redirect'][0]}");
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: ' . $this->adios->web->config['rewriteBase'] . $route['redirect'][0]);
             exit();
           break;
           case 302:
-            header("HTTP/1.1 302 Moved Temporarily");
-            header("Location: {$this->adios->web->config['rewriteBase']}{$route['redirect'][0]}");
+            header('HTTP/1.1 302 Moved Temporarily');
+            header('Location: ' . $this->adios->web->config['rewriteBase'] . $route['redirect'][0]);
             exit();
           break;
         }

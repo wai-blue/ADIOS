@@ -56,7 +56,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @var mixed
    */
-  var $adios;
+  public ?\ADIOS\Core\Loader $adios = NULL;
 
   /**
    * Shorthand for "global table prefix"
@@ -545,6 +545,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
   {
+    if (empty($urlBase)) return [];
+    
     $routing = [
 
       // Default
