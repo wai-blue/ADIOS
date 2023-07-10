@@ -10,23 +10,28 @@ class Query
   const update = 3;
   const delete = 4;
 
+  // logic operators
+  const logicAnd = 'and';
+  const logicOr = 'or';
+
   // columns enumerators
   const allColumnsWithLookups = 1;
   const allColumnsWithoutLookups = 2;
 
   // statement types
-  const selectModifier = 1;
-  const column = 2;
-  const join = 3;
-  const where = 4;
-  const whereRaw = 5;
-  const having = 6;
-  const havingRaw = 7;
-  const order = 8;
-  const orderRaw = 9;
-  const limit = 10;
-  const set = 11;
-  const setOnDuplicateKey = 12;
+  const selectModifier    = 1;
+  const column            = 2;
+  const join              = 3;
+  const where             = 4;
+  const whereRaw          = 5;
+  const having            = 6;
+
+  const havingRaw         = 8;
+  const order             = 9;
+  const orderRaw          = 10;
+  const limit             = 11;
+  const set               = 12;
+  const setOnDuplicateKey = 13;
 
   // select modifiers
   const countRows = 1;
@@ -36,7 +41,8 @@ class Query
 
   // operators (for where and having)
   const equals = 1;
-  const columnFilter = 2; // special type of operator
+  const like = 2;
+  const columnFilter = 3; // special type of operator
 
 
   // private properties
@@ -251,13 +257,15 @@ class Query
    */
   public function having(array $havings = []): \ADIOS\Core\DB\Query
   {
-    foreach ($havings as $having) {
-      $this->add([
-        self::having,
-        $having[0], // column name
-        $having[1], // operator
-        $having[2], // filter value
-      ]);
+    foreach ($havings as $logic => $having) {
+      array_unshift($having, self::having);
+      $this->add($having);
+      // [
+      //   $logic, // logic (and / or)
+      //   $having[0], // column name
+      //   $having[1], // operator
+      //   $having[2], // filter value
+      // ]);
     }
 
     return $this;
@@ -399,6 +407,13 @@ class Query
   public function countRowsFromLastSelect(): int
   {
     return 0;
+  }
+
+
+
+  public static function isValidLogic(string $logic): bool
+  {
+    return in_array($logic, [self::logicAnd, self::logicOr]);
   }
 
 }

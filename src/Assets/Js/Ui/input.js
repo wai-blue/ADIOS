@@ -526,7 +526,6 @@ function ui_input_lookup_detail(id, uid) {
       'model': $('#' + uid).attr('data-model'),
       'id': id,
       'displayMode': 'window'
-      // edit_form_type: 'lookup_form'
     },
     function (res) {
       ui_input_lookup_set_value(uid, id, '');
@@ -617,7 +616,6 @@ function ui_input_table_detail(id, uid) {
     {
       table: $('#' + uid).attr('data-table'),
       id: id,
-      edit_form_type: 'lookup_form'
     },
     function (res) {
       ui_input_table_remove_item(uid, id);

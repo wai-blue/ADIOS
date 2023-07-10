@@ -26,12 +26,12 @@
 .xdebug-var-dump:hover {
   background: #fff1d7;
   width: 100vw;
-  right: 0em;
+  left: 0em;
   height: 100vh;
   overflow: auto;
   top: 0px !important;
-  padding-left: 100px;
-  z-index: 99999999998;
+  padding-right: 20vw;
+  z-index: 1;
 }
 .xdebug-var-dump:hover > small:nth-child(1) {
   display: block;

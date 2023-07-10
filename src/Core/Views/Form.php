@@ -36,11 +36,9 @@ class Form extends \ADIOS\Core\View
       'id' => '-1',
       'title' => '',
       'formatter' => 'ui_form_formatter',
-      'columns_order' => [],
       'defaultValues' => [],
       'readonly' => false,
       'template' => [],
-      'template_callback' => '',
       'show_save_button' => true,
       'save_button_params' => [],
       'show_close_button' => true,
@@ -49,23 +47,12 @@ class Form extends \ADIOS\Core\View
       'delete_button_params' => [],
       'show_copy_button' => false,
       'copy_button_params' => [],
-      'append_buttons' => [],
-      'form_type' => 'window',
-      'window_uid' => '',
+      'formType' => 'window',
       'windowParams' => [],
-      'show_modal' => false,
       'width' => 700,
       'height' => '',
       'onclose' => '',
-      'hide_id_column' => true,
-      // 'save_action' => 'UI/Form/Save',
-      // 'delete_action' => 'UI/Form/Delete',
-      // 'copy_action' => 'UI/Table/Copy',
-      'do_not_close' => false, // DEPRECATED, je nahradeny parametrom reopen_after_save
-      'reopen_after_save' => $this->adios->getConfig(
-        "ui/form/reopen_after_save",
-        ((int) $params['id'] > 0 ? TRUE : FALSE)
-      ),
+      'reopenAfterSave' => FALSE,
       'onbeforesave' => '',
       'onaftersave' => '',
       'onbeforeclose' => '',
@@ -77,7 +64,6 @@ class Form extends \ADIOS\Core\View
       'onload' => '',
       'simple_insert' => false,
       'javascript' => '',
-      'windowCssClass' => '',
     ], $params);
 
     // nacitanie udajov
@@ -390,6 +376,13 @@ class Form extends \ADIOS\Core\View
   public function render(string $panel = ''): string
   {
     $window = $this->findParentView('Window');
+
+    if ($window !== NULL) {
+      $window->setUid(
+        \ADIOS\Core\HelperFunctions::str2uid($this->model->fullName)
+        . ($this->params['id'] <= 0 ? '_add' : '_edit')
+      );
+    }
     
     if (!_count($this->params['columns'])) {
       $this->adios->console->error("No columns provided: {$this->params['model']}");
@@ -525,10 +518,10 @@ class Form extends \ADIOS\Core\View
           data-model='{$this->params['model']}'
           data-model-url-base='".ads($this->model->getFullUrlBase($this->params))."'
           data-table='{$this->params['table']}'
-          data-reopen-after-save='{$this->params['reopen_after_save']}'
+          data-reopen-after-save='{$this->params['reopenAfterSave']}'
           data-do-not-close='{$this->params['do_not_close']}'
           data-window-uid='".($window === NULL ? "" : $window->uid)."'
-          data-form-type='{$this->params['form_type']}'
+          data-form-type='{$this->params['formType']}'
           data-is-ajax='".($this->params['__IS_AJAX__'] || $this->adios->isAjax() ? "1" : "0")."'
           data-is-in-window='".($window === NULL ? "0" : "1")."'
         >
@@ -617,10 +610,6 @@ class Form extends \ADIOS\Core\View
     ';
 
     if ($window !== NULL) {
-      $window->setUid(
-        \ADIOS\Core\HelperFunctions::str2uid($this->model->fullName)
-        . ($this->params['id'] <= 0 ? '_add' : '_edit')
-      );
       $window->setCloseButton($this->closeButton);
       $window->setTitle($this->model->formTitleForEditing);
       $window->setHeaderLeft([
