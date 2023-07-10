@@ -56,7 +56,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @var mixed
    */
-  var $adios;
+  public ?\ADIOS\Core\Loader $adios = NULL;
 
   /**
    * Shorthand for "global table prefix"

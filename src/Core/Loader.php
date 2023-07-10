@@ -805,7 +805,6 @@ class Loader
     if (strlen($toLanguage) == 2) {
       if (empty($object->dictionaryFilename)) {
         $dictionaryFilename = strtr(get_class($object), "./\\", "---");
-        $dictionaryFilename = str_replace("ADIOS-", "", $dictionaryFilename);
       } else {
         $dictionaryFilename = $object->dictionaryFilename;
       }
@@ -846,6 +845,9 @@ class Loader
 
     if (!isset($dictionary[$toLanguage][$string])) {
       $translated = $string;
+      if ($this->getConfig('debugTranslations', FALSE)) {
+        $translated .= ' ' . get_class($object);
+      }
     } else {
       $translated = $dictionary[$toLanguage][$string];
     }

@@ -252,7 +252,7 @@ h3 { padding-bottom: 0.5em; }
   overflow-x: auto;
   box-shadow: 0 0 3px #ccc;
   border-radius: 0.25em;
-  min-height: calc(100vh - 7em);
+  /* min-height: calc(100vh - 7em); */
   display: flex;
   flex-direction: column;
 }
