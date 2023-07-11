@@ -1333,15 +1333,16 @@ class Loader
           TRUE
         );
       } else {
-        $actionHtml = $this->renderFatal(
-          '<div style="margin-bottom:1em;">'
-            . get_class($e) . ': ' . $e->getMessage()
-          . '</div>'
-          . '<pre style="font-size:0.75em;font-family:Courier New">'
-            . $e->getTraceAsString()
-          . '</pre>',
-          TRUE
-        );
+        // $actionHtml = $this->renderFatal(
+        //   '<div style="margin-bottom:1em;">'
+        //     . get_class($e) . ': ' . $e->getMessage()
+        //   . '</div>'
+        //   . '<pre style="font-size:0.75em;font-family:Courier New">'
+        //     . $e->getTraceAsString()
+        //   . '</pre>',
+        //   TRUE
+        // );
+        $actionHtml = $this->renderFatal($this->renderExceptionHtml($e));
       }
     }
 
@@ -1411,35 +1412,50 @@ class Loader
   }
 
 
-  public function renderExceptionWarningHtml($exception) {
+  public function renderExceptionHtml($exception) {
 
     $traceLog = "";
     foreach ($exception->getTrace() as $item) {
       $traceLog .= "{$item['file']}:{$item['line']}\n";
     }
 
+    $errorMessage = $exception->getMessage();
+    $errorHash = md5(date("YmdHis").$errorMessage);
+
+    $errorDebugInfoHtml = "
+      <div class='adios exception debug'>
+        Error hash: {$errorHash} (see error log file for more information)<br/>
+        ".get_class($exception)."<br/>
+        Stack trace:<br/>
+        <div class='trace-log'>{$traceLog}</div>
+      </div>
+    ";
+
+    $showMoreInformationButton = "
+      <a href='javascript:void(0);' onclick='$(this).next(\"div\").show(); $(this).hide();'>
+        ".$this->translate("Show more information", [], $this)."
+      </a>
+    ";
+
+    $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
+
     switch (get_class($exception)) {
       case 'ADIOS\Core\Exceptions\DBException':
-        $errorMessage = $exception->getMessage();
-        $errorHash = md5(date("YmdHis").$errorMessage);
-        // $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
         $html = "
-          <div style='text-align:center;font-size:5em;color:red'>
-            🥴
-          </div>
-          <div style='margin-top:1em;margin-bottom:1em;'>
+          <div class='adios exception emoji'>🥴</div>
+          <div class='adios exception message'>
             Oops! Something went wrong with the database.
             See logs for more information or contact the support.<br/>
           </div>
-          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>{$errorMessage}</div>
-          <div style='color:gray;font-size:0.8em;'>
-            {$errorHash}<br/>
-            ".get_class($exception)."<br/>
-            <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
-            <div class='trace-log' style='display:none'>{$traceLog}</div>
+          <div class='adios exception message'>
+            {$errorMessage}
+          </div>
+          {$showMoreInformationButton}
+          <div style='display:none' class='adios exception more-information'>
+            {$errorDebugInfoHtml}
           </div>
         ";
-        break;
+      break;
       case 'Illuminate\Database\QueryException':
       case 'ADIOS\Core\Exceptions\DBDuplicateEntryException':
 
@@ -1464,6 +1480,9 @@ class Loader
           foreach ($indexes[$invalidIndex]['columns'] as $columnName) {
             $invalidColumns[] = $columns[$columnName]["title"];
           }
+        } else {
+          preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $dbError, $m);
+          $invalidColumns = [$m[2]];
         }
 
         switch ($errorNo) {
@@ -1479,50 +1498,38 @@ class Loader
         }
 
         $html = "
-          <div style='text-align:center;font-size:5em;color:red'>
-            <i class='fas fa-copy'></i>
-          </div>
-          <div style='margin-top:1em;margin-bottom:3em;text-align:center;color:red;'>
+          <div class='adios exception emoji'>🥴</div>
+          <div class='adios exception message'>
             ".$this->translate($errorMessage, [], $this)."<br/>
             <br/>
             <b>".join(", ", $invalidColumns)."</b>
           </div>
-          <a href='javascript:void(0);' onclick='$(this).next(\"div\").slideDown();'>
-          ".$this->translate("Show more information", [], $this)."
-          </a>
-          <div style='display:none'>
-            <div style='color:red;margin-bottom:1em;font-family:courier;font-size:8pt;max-height:10em;overflow:auto;'>
-              {$dbError}<br/>
-              {$dbQuery}<br/>
-              {$initiatingModelName}
-            </div>
-            <div style='color:gray;font-size:0.8em;'>
-              Error # {$errorNo}<br/>
-              ".get_class($exception)."<br/>
-              <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
-              <div class='trace-log' style='display:none'>{$traceLog}</div>
-            </div>
+          {$showMoreInformationButton}
+          <div style='display:none' class='adios exception more-information'>
+            {$dbError}
+            {$errorDebugInfoHtml}
           </div>
         ";
-        break;
+      break;
       default:
         $html = "
-          <div style='text-align:center;font-size:5em;color:red'>
-            🥴
-          </div>
-          <div style='margin-top:1em;margin-bottom:1em;'>
+          <div class='adios exception emoji'>🥴</div>
+          <div class='adios exception message'>
             Oops! Something went wrong.
             See logs for more information or contact the support.<br/>
           </div>
-          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>".$exception->getMessage()."</div>
-          <div style='color:gray'>
-            ".get_class($exception)."
+          <div class='adios exception message'>
+            ".$exception->getMessage()."
+          </div>
+          {$showMoreInformationButton}
+          <div style='display:none' class='adios exception more-information'>
+            {$errorDebugInfoHtml}
           </div>
         ";
-        break;
+      break;
     }
 
-    return $this->renderHtmlWarning($html);
+    return $html;//$this->renderHtmlWarning($html);
   }
 
   public function renderHtmlWarning($warning) {

@@ -68,7 +68,7 @@ class Loader {
       substr($this->rewriteBase, 0, 1) != "/"
       || substr($this->rewriteBase, -1) != "/"
     ) {
-      throw new \Exception("RewriteBase must start and end with a slash (/).");
+      throw new \Exception("RewriteBase for web must start and end with a slash (/).");
     }
 
     // extract pageUrl

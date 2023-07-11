@@ -93,6 +93,36 @@ h3 { padding-bottom: 0.5em; }
 
 #adios_window_loader {display:none;}
 
+.adios.exception.emoji {
+  text-align: center;
+  font-size: 5em;
+}
+
+.adios.exception.message {
+  color: red;
+  margin-bottom: 1em;
+  font-family: courier;
+  max-height: 10em;
+  padding: 1em;
+  overflow: auto;
+  text-align: center;
+}
+
+.adios.exception.more-information {
+  color: gray;
+  padding: 1em 0;
+}
+
+.adios.exception.debug {
+  color: gray;
+  font-size: 0.8em;
+  padding-top: 1em;
+}
+
+.adios.exception.debug .trace-log {
+  padding-left: 1em;
+}
+
 .adios_menu {width:100%;-webkit-backface-visibility:hidden;-webkit-overflow-scrolling: touch;height:40px;position:fixed;top:0px;left:0px;z-index:3000;display:none;}
 .adios_menu_controls {float:right;}
 .adios_menu_controls i.menu_icon {float:right;padding:5px;text-align:center;}

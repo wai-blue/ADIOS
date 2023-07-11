@@ -585,7 +585,7 @@ class MySQLi extends \ADIOS\Core\DB
    * @see insert_row
    * @see updateRow
    */
-  public function columnSqlValue($table, $colName, $data)
+  public function columnSqlValue($table, $colName, $data, $defaultValue = NULL)
   {
     $colType = $this->tables[$table][$colName]['type'];
     $value = $data[$colName];
@@ -598,20 +598,21 @@ class MySQLi extends \ADIOS\Core\DB
       $sql = "`{$colName}` = ({$value['sql']})";
     } else if (strpos((string) $value, "SQL:") === 0) {
       $sql = "`{$colName}` = (" . substr($value, 4) . ")";
-    } else if (
-      isset($this->columnTypes[$colType])
-      && isset($data[$colName])
-    ) {
-      $sql = $this->columnTypes[$colType]->get_sql_column_data_string(
-        $table,
-        $colName,
-        $data[$colName],
-        [
-          'null_value' => !$valueExists,
-          'dumping_data' => FALSE,
-          'data' => $data,
-        ]
-      );
+    } else if (isset($this->columnTypes[$colType])) {
+      if (isset($data[$colName])) {
+        $sql = $this->columnTypes[$colType]->get_sql_column_data_string(
+          $table,
+          $colName,
+          $data[$colName],
+          [
+            'null_value' => !$valueExists,
+            'dumping_data' => FALSE,
+            'data' => $data,
+          ]
+        );
+      } else if ($defaultValue !== NULL) {
+        $sql = "`{$colName}` = ".$defaultValue;
+      }
     }
 
     return (empty($sql) ? "" : "{$sql}, ");
@@ -641,13 +642,7 @@ class MySQLi extends \ADIOS\Core\DB
 
     foreach ($this->tables[$table] as $colName => $colDefinition) {
       if (!$colDefinition['virtual'] && $colName != '%%table_params%%') {
-        if ($data[$colName] !== NULL) {
-          $tmpSql = $this->columnSqlValue($table, $colName, $data);
-
-          $sql .= $tmpSql;
-        } else if (!empty($colDefinition['default_value'])) {
-          $sql .= $colDefinition['default_value'];
-        }
+        $sql .= $this->columnSqlValue($table, $colName, $data, $colDefinition['default_value']);
       }
     }
 

@@ -367,7 +367,7 @@ class Query
    */
   public function execute()
   {
-    $result = $this->db->query($this->buildSql());
+    $result = $this->db->query($this->buildSql(), $this->model);
 
     switch ($this->type) {
       case self::insert:
