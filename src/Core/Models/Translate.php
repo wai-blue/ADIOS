@@ -16,13 +16,14 @@ namespace ADIOS\Core\Models;
  * @package DefaultModels
  */
 class Translate extends \ADIOS\Core\Model {
-  
+
   public function __construct(&$adios) {
     $this->sqlName = "translate";
     parent::__construct($adios);
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       'hash' => ['type' => 'varchar', 'byte_size' => '32', 'title' => 'Hash'],
       'value' => ['type' => 'varchar', 'byte_size' => '255', 'title' => 'Text', 'show_column' => true],

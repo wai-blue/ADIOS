@@ -117,7 +117,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   private static $allItemsCache = NULL;
 
   public ?array $crossTableAssignments = [];
-  
+
   public ?string $addButtonText = null;
   public ?string $formSaveButtonText = null;
   public ?string $formAddButtonText = null;
@@ -292,7 +292,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   /**
-   * Installs the first version of the model into SQL database. Automaticaly creates indexes.
+   * Installs the first version of the model into SQL database. Automatically creates indexes.
    *
    * @return void
    */
@@ -690,11 +690,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
   //////////////////////////////////////////////////////////////////
   // definition of columns
 
-  public function columns(array $columns = [])
+  public function columns(array $columns = []): array
   {
+    $newColumns = [];
 
     if (!$this->isCrossTable) {
-      $columns['id'] = [
+      $newColumns['id'] = [
         'type' => 'int',
         'byte_size' => '8',
         'sql_definitions' => 'primary key auto_increment',
@@ -706,33 +707,35 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     // default column settings
     foreach ($columns as $colName => $colDefinition) {
+      $newColumns[$colName] = $colDefinition;
+
       if ($colDefinition["type"] == "char") {
         $this->adios->console->info("{$this->fullName}, {$colName}: char type is deprecated");
       }
 
       switch ($colDefinition["type"]) {
         case "int":
-          $columns[$colName]["byte_size"] = $columns[$colName]["byte_size"] ?? 8;
+          $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 8;
           break;
         case "float":
-          $columns[$colName]["byte_size"] = $columns[$colName]["byte_size"] ?? 14;
-          $columns[$colName]["decimals"] = $columns[$colName]["decimals"] ?? 2;
+          $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 14;
+          $newColumns[$colName]["decimals"] = $colDefinition["decimals"] ?? 2;
           break;
         case "varchar":
         case "password":
-          $columns[$colName]["byte_size"] = $columns[$colName]["byte_size"] ?? 255;
+          $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 255;
           break;
       }
     }
 
     $columns = $this->adios->dispatchEventToPlugins("onModelAfterColumns", [
       "model" => $this,
-      "columns" => $columns,
+      "columns" => $newColumns,
     ])["columns"];
 
-    $this->fillable = array_keys($columns);
+    $this->fillable = array_keys($newColumns);
 
-    return $columns;
+    return $newColumns;
   }
 
   public function columnNames()
@@ -760,7 +763,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param array $data
    * @param string $lookupKeyPrefix
-   * 
+   *
    * @return [type]
    */
   public function normalizeRowData(array $data, string $lookupKeyPrefix = "") {
@@ -1076,7 +1079,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onTableBeforeInit
    *
    * @param mixed $tableObject
-   * 
+   *
    * @return void
    */
   public function onTableBeforeInit($tableObject) : void
@@ -1087,7 +1090,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onTableAfterInit
    *
    * @param mixed $tableObject
-   * 
+   *
    * @return void
    */
   public function onTableAfterInit($tableObject) : void
@@ -1098,7 +1101,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onTableAfterDataLoaded
    *
    * @param mixed $tableObject
-   * 
+   *
    * @return void
    */
   public function onTableAfterDataLoaded($tableObject) : void
@@ -1112,18 +1115,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onFormBeforeInit
    *
    * @param mixed $formObject
-   * 
+   *
    * @return void
    */
   public function onFormBeforeInit($formObject) : void
   {
   }
-  
+
   /**
    * onFormAfterInit
    *
    * @param mixed $formObject
-   * 
+   *
    * @return void
    */
   public function onFormAfterInit($formObject) : void
@@ -1289,7 +1292,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onBeforeInsert
    *
    * @param mixed $data
-   * 
+   *
    * @return [type]
    */
   public function onBeforeInsert($data)
@@ -1304,7 +1307,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onModelBeforeUpdate
    *
    * @param mixed $data
-   * 
+   *
    * @return [type]
    */
   public function onBeforeUpdate($data)
@@ -1319,7 +1322,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * onBeforeSave
    *
    * @param mixed $data
-   * 
+   *
    * @return [type]
    */
   public function onBeforeSave($data)
@@ -1335,7 +1338,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    * @param mixed $returnValue
-   * 
+   *
    * @return [type]
    */
   public function onAfterInsert($data, $returnValue)
@@ -1352,7 +1355,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    * @param mixed $returnValue
-   * 
+   *
    * @return [type]
    */
   public function onAfterUpdate($data, $returnValue)
@@ -1363,13 +1366,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "returnValue" => $returnValue,
     ])["returnValue"];
   }
-  
+
   /**
    * onAfterSave
    *
    * @param mixed $data
    * @param mixed $returnValue
-   * 
+   *
    * @return [type]
    */
   public function onAfterSave($data, $returnValue)
@@ -1485,7 +1488,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if (empty($query->pdoCrossTables)) {
       $query->pdoCrossTables = [];
     }
-    
+
     $query->pdoCrossTables[] = [$crossTableModel, $foreignKey, $resultKey];
 
     return $this;

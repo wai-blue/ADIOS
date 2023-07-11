@@ -35,7 +35,8 @@ class User extends \ADIOS\Core\Model {
     }
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       'name' => [
         'type' => 'varchar',
@@ -186,7 +187,7 @@ class User extends \ADIOS\Core\Model {
         ],
       ];
     }
-    
+
     return $params;
   }
 
@@ -203,7 +204,7 @@ class User extends \ADIOS\Core\Model {
 
   public function generatePasswordResetToken($idUser, $tokenSalt) {
     return $this->generateToken(
-      $idUser, 
+      $idUser,
       $tokenSalt,
       self::TOKEN_TYPE_USER_FORGOT_PASSWORD
     );
@@ -217,7 +218,7 @@ class User extends \ADIOS\Core\Model {
       'id_token_reset_password', $tokenData['id']
       )->first()
     ;
-    
+
     if (!empty($userData)) {
       $userData = $userData->toArray();
     }
@@ -240,7 +241,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function updatePassword(int $idUser, string $password) {
-    return 
+    return
       self::where('id', $idUser)
       ->update(
         ["password" => password_hash($password, PASSWORD_DEFAULT)]
