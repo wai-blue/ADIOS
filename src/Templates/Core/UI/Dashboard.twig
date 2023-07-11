@@ -65,17 +65,12 @@
     function updateSettings() {
         const config = {{ params.dashboardCards|json_encode|raw }};
         config.data = dataConfiguration;
-        console.log(config);
 
         _ajax_read(
           "{{ params.saveAction }}",
           {
-
               configuration: config,
-          },
-          (res) => {
-              console.log('Configuration saved.');
-              console.log(res);
+              preset: {{ params.preset }}
           }
         );
     }
@@ -102,9 +97,7 @@
 
         deletedCards[cardName] = areaCards.find(item => item.action === cardName);
 
-        const cardsArray = dataConfiguration[originColumnIndex]['cards'];
-
-        dataConfiguration[originColumnIndex]['cards'] = cardsArray.filter((item, index) => {
+        dataConfiguration[originColumnIndex]['cards'] = areaCards.filter(item => {
             return item.action !== cardName
         });
     });

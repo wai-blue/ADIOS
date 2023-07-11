@@ -22,6 +22,7 @@ class Dashboard extends \ADIOS\Core\View
 
     $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
     $this->params["dashboardCards"] = $this->getUserDashboard();
+    $this->params['preset'] = $_GET['preset'] ?? 0;
 
     foreach ($this->params['dashboardCards']['data'] as &$area) {
       foreach ($area['cards'] as &$card) {
@@ -36,13 +37,13 @@ class Dashboard extends \ADIOS\Core\View
     $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . ($_GET['preset'] ?? 0) .'0']; #TODO: Odstranit nulu
 
     if (empty($userDashboard)) {
-      $userDashboard = $this->initDefaultDashboard();
+      $userDashboard = $this->initDefaultDashboard($_GET['preset'] ?? 0);
     }
 
     return json_decode($userDashboard, TRUE);
   }
 
-  public function initDefaultDashboard(): string
+  public function initDefaultDashboard($preset = 0): string
   {
     $areas = 5;
     $configuration = ['grid' => ['A B', 'C C', 'D E'] ];
@@ -54,11 +55,11 @@ class Dashboard extends \ADIOS\Core\View
     }
 
     $availableCards = $this->getAvailableCards()[0];
-    foreach ($availableCards as &$card) {
+    foreach ($availableCards as $card) {
       $configuration['data'][0]['cards'][] = json_decode(json_encode($card), true);
     }
 
-    $this->adios->saveConfig([json_encode($configuration)], 'dashboard-' . $this->adios->userProfile['id'] . '-' . '0');
+    $this->adios->saveConfig([json_encode($configuration)], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
     return json_encode($configuration);
   }
 
