@@ -298,7 +298,7 @@ class Form extends \ADIOS\Core\View
               '
             >
               <div class='input-title'>
-                ".hsc($this->params['columns'][$row]['title'])."
+                ".hsc($this->model->translate($this->params['columns'][$row]['title']))."
               </div>
               <div class='input-content'>
                 ".$this->Input($row, $this->data, $this->params['model'])."
@@ -468,7 +468,7 @@ class Form extends \ADIOS\Core\View
             // kazdy element predstavuje jeden tab vo formulari
             foreach ($col['tabs'] as $tab_name => $rows) {
               $tabPages[] = [
-                'title' => $tab_name,
+                'title' => $this->model->translate($tab_name),
                 'content' => [ 'html' => $this->renderRows($rows) ],
               ];
             }
@@ -611,7 +611,7 @@ class Form extends \ADIOS\Core\View
 
     if ($window !== NULL) {
       $window->setCloseButton($this->closeButton);
-      $window->setTitle($this->model->formTitleForEditing);
+      $window->setTitle($this->model->translate($this->model->formTitleForEditing));
       $window->setHeaderLeft([
         $this->saveButton,
         $this->copyButton,

@@ -105,7 +105,7 @@
               "
             >
               <i class="{{ shortcut.fa_icon }}"></i>
-              <span>{{ shortcut.title }}</span>
+              <span>{{ translate(shortcut.title, shortcut.___widgetClassName) }}</span>
             </a>
             {% if shortcut.sub is iterable %}
               <div
@@ -125,7 +125,7 @@
                       data-toggle="collapse" aria-expanded="false"
                     >
                       <i class="{{ sub.fa_icon }} mr-2"></i>
-                      {{ sub.title }}
+                      {{ translate(sub.title, shortcut.___widgetClassName) }}
                     </a>
                     {% if sub.sub is iterable %}
                       <div

@@ -607,8 +607,14 @@ class Loader
         $this->twig->addExtension(new \Twig\Extension\DebugExtension());
         $this->twig->addFunction(new \Twig\TwigFunction(
           'translate',
-          function ($string) {
-            return $this->translate($string, [], $this->actionObject);
+          function ($string, $objectClassName = "") {
+            if (!class_exists($objectClassName)) {
+              $object = $this->actionObject;
+            } else {
+              $object = new $objectClassName($this);
+            }
+
+            return $this->translate($string, [], $object);
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {

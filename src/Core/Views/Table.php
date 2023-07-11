@@ -792,7 +792,7 @@ class Table extends \ADIOS\Core\View
                 '
               " : "") . "
             >
-              " . nl2br(hsc($col_def['title'])) . "
+              " . nl2br(hsc($this->model->translate($col_def['title']))) . "
               " . ('' == $col_def['unit'] ? '' : '[' . hsc($col_def['unit']) . ']') . "
               <i class='fas fa-chevron-down order_desc'></i>
               <i class='fas fa-chevron-up order_asc'></i>
