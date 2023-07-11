@@ -25,7 +25,7 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
 {{ varExport(thisModel.config.crossTableAssignments, "    ")|raw }}
   ;
 
-  public function columns($columns = []): array
+  public function columns(array $columns = []): array
   {
     return parent::columns([
 {% for colName, colDefinition in thisModel.config.columns %}
