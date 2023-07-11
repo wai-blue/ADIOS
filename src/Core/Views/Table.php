@@ -646,7 +646,7 @@ class Table extends \ADIOS\Core\View
           $html .= $this->addView('Title')
             ->setLeftContent($titleLeftContent)
             ->setRightContent($titleRightContent)
-            ->setTitle($this->params['title'])
+            ->setTitle($this->model->translate($this->params['title']))
             ->render()
           ;
         }
