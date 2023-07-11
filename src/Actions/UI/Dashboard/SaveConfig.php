@@ -20,10 +20,7 @@ class SaveConfig extends \ADIOS\Core\Action {
 
   function render(): false|string
   {
-    foreach ($_POST as $key => $value) {
-      var_dump($key);
-      var_dump($value);
-    }
+    $this->adios->saveConfig([$_POST['configuration']], 'dashboard-' . $this->adios->userProfile['id'] . '-' . '0');
     return $this->adios->renderReturn('success');
   }
 }

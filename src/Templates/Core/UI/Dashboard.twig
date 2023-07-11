@@ -1,51 +1,91 @@
 <h1>{{ params.title ?? "Default Title" }}</h1>
 
-<div class="row">
-  <div class="col-md-6">
-    <div class="card card-body m-2 draggableCards">
-      {% for key, model in params.dashboardCards %}
-        {% for k, card in model %}
-          {% if card.is_active and card.left %}
-            <div>
-              <div class="card-body h-100 draggable" id="card-{{ key }}-{{ loop.index0 }}">
-              </div>
+{% set dataConfiguration = params.dashboardCards.data %}
+{% set gridConfiguration = params.dashboardCards.grid %}
 
+<script>
+    const dataConfiguration = {{ dataConfiguration|json_encode|raw }};
+</script>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;">
+  {% for rowKey, row in dataConfiguration %}
+      <div class="card card-body" style="grid-area: {{ row.key }};" id="draggableContainer-{{ row.key }}">
+          {% for card in row.cards %}
+              {# TODO: Lepsi identifikator ako card action #}
+              <div id="card-{{ card.action|replace({"/": "-"}) }}" class="draggable" style="z-index: 100;">
+              </div>
               <script>
                   params = JSON.parse(
-                      Base64.decode('{{ card['params_encoded'] }}')
+                    Base64.decode('{{ card['params_encoded'] }}')
                   );
 
                   _ajax_update(
-                      '{{ card['action'] }}',
-                      params,
-                      'card-{{ key }}-{{ loop.index0 }}'
+                    '{{ card['action'] }}',
+                    params,
+                    'card-{{ card.action|replace({"/": "-"}) }}'
                   );
               </script>
-            </div>
-          {% endif %}
-        {% endfor %}
-      {% endfor %}
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card card-body m-2 draggableCards">
-    </div>
-  </div>
+          {% endfor %}
+      </div>
+  {% endfor %}
 </div>
 
-<div class="row">
-  <div class="col-md-6">
-    <div class="card card-body m-2 draggableCards">
-    </div>
-  </div>
-  <div class="col-md-6">
-    <div class="card card-body m-2 draggableCards">
-    </div>
-  </div>
-</div>
+{#
+{% for key, model in params.dashboardCards %}
+  {% for k, card in model %}
+    {% if card.is_active %}
+      <div>
+        <script>
+            params = JSON.parse(
+                Base64.decode('{{ card['params_encoded'] }}')
+            );
+
+            _ajax_update(
+                '{{ card['action'] }}',
+                params,
+                'card-{{ key }}-{{ loop.index0 }}'
+            );
+
+            configuration[0].push('card-{{ key }}-{{ loop.index0 }}')
+        </script>
+      </div>
+    {% endif %}
+  {% endfor %}
+{% endfor %} #}
 
 <script>
-    const draggableContainers = Array.from(document.getElementsByClassName("draggableCards"));
+    function pushToIndex(array, item, index) {
+        array.splice(index, 0, item);
+
+        for (let i = index + 1; i < array.length; i ++) {
+            array.splice(i, 0, array.splice(i, 1)[0])
+        }
+    }
+
+    function updateSettings() {
+        const config = {{ params.dashboardCards|json_encode|raw }};
+        config.data = dataConfiguration;
+        console.log(config);
+
+        _ajax_read(
+          "{{ params.saveAction }}",
+          {
+
+              configuration: config,
+          },
+          (res) => {
+              console.log('Configuration saved.');
+              console.log(res);
+          }
+        );
+    }
+
+    const draggableContainers = [
+        {% for rowKey, row in dataConfiguration %}
+        document.getElementById('draggableContainer-{{ row.key }}'),
+        {% endfor %}
+    ];
+    const deletedCards = {};
 
     const draggableSortable = new Draggable.Sortable(draggableContainers, {
         draggable: `.draggable`,
@@ -55,8 +95,27 @@
         plugins: [],
     });
 
-    draggableSortable.on('drag:start', () => {
-        console.log("started dragging");
+    draggableSortable.on('drag:start', (e) => {
+        const originColumnIndex = e.sourceContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
+        const cardName = e.data.originalSource.id.replaceAll('card-', '').replaceAll('-', '/');
+        const areaCards = dataConfiguration[originColumnIndex]['cards'];
+
+        deletedCards[cardName] = areaCards.find(item => item.action === cardName);
+
+        const cardsArray = dataConfiguration[originColumnIndex]['cards'];
+
+        dataConfiguration[originColumnIndex]['cards'] = cardsArray.filter((item, index) => {
+            return item.action !== cardName
+        });
+    });
+
+    draggableSortable.on('sortable:stop', (e) => {
+        const targetColumnIndex = e.newContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
+        const cardName = e.data.dragEvent.data.originalSource.id.replaceAll('card-', '').replaceAll('-', '/');
+
+        pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardName], e.newIndex);
+
+        updateSettings();
     });
 </script>
 
