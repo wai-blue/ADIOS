@@ -20,7 +20,7 @@ class SaveConfig extends \ADIOS\Core\Action {
 
   function render(): false|string
   {
-    $this->adios->saveConfig([$_POST['configuration']], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $_POST['preset']);
-    return $this->adios->renderReturn('success');
+    # TODO: Maybe vulnerable against SQL Injection etc.? $_POST['configuration'] goes straight into database...
+    return $this->adios->view->Dashboard($this->params)->saveConfiguration($_POST['configuration'], $_POST['preset']);
   }
 }

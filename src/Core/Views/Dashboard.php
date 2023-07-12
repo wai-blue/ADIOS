@@ -25,6 +25,9 @@ class Dashboard extends \ADIOS\Core\View
     $this->params["dashboardConfiguration"] = $this->getUserDashboard();
     $this->params['preset'] = $_GET['preset'] ?? 0;
     $this->params['availablePresets'] = $this->getAvailablePresets();
+    $this->params['availableCards'] = $this->getAvailableCards();
+
+
 
     if (!in_array($this->params['preset'], $this->params['availablePresets'])) {
       $this->params['availablePresets'][] = $this->params['preset'];
@@ -67,6 +70,11 @@ class Dashboard extends \ADIOS\Core\View
 
     $this->adios->saveConfig([json_encode($configuration)], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
     return json_encode($configuration);
+  }
+
+  public function saveConfiguration($configuration, $preset): int {
+    $this->adios->saveConfig([$configuration], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
+    return 200;
   }
 
   public function getAvailableCards(): array {
