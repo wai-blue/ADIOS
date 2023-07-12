@@ -54,9 +54,9 @@
         || (tmp_textarea.length != 0 && tmp_textarea.val() == '')
       ) {
         $('#' + uid + ' .save_error_info').fadeIn();
-        setTimeout(function() {
-          $('#' + uid + ' .save_error_info').fadeOut();
-        }, 1000);
+        // setTimeout(function() {
+        //   $('#' + uid + ' .save_error_info').fadeOut();
+        // }, 1000);
         $(this).addClass('save_error');
         allowed = false;
       }

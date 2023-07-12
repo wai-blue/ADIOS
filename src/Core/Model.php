@@ -991,7 +991,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $formData = [],
     $params = [],
     $having = "TRUE"
-  ) : \ADIOS\Core\DB\Query
+  ): \ADIOS\Core\DB\Query
   {
     return $this->adios->db->select($this)
       ->columns([
@@ -1013,7 +1013,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $formData = [],
     $params = [],
     $having = "TRUE"
-  ) : string
+  ): string
   {
     return $this->lookupQuery(
       $initiatingModel,
@@ -1082,7 +1082,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onTableBeforeInit($tableObject) : void
+  public function onTableBeforeInit($tableObject): void
   {
   }
 
@@ -1093,7 +1093,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onTableAfterInit($tableObject) : void
+  public function onTableAfterInit($tableObject): void
   {
   }
 
@@ -1104,12 +1104,25 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onTableAfterDataLoaded($tableObject) : void
+  public function onTableAfterDataLoaded($tableObject): void
   {
   }
 
   //////////////////////////////////////////////////////////////////
   // UI/Form methods
+
+  public function columnValidate(string $column, $value): bool {
+    $valid = TRUE;
+
+    $colDefinition = $this->columns()[$column] ?? [];
+    $colType = $colDefinition['type'];
+
+    if ($this->adios->db->isRegisteredColumnType($colType)) {
+      $valid = $this->adios->db->columnTypes[$colType]->validate($value);
+    }
+
+    return $valid;
+  }
 
   /**
    * onFormBeforeInit
@@ -1118,7 +1131,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onFormBeforeInit($formObject) : void
+  public function onFormBeforeInit($formObject): void
   {
   }
 
@@ -1129,7 +1142,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onFormAfterInit($formObject) : void
+  public function onFormAfterInit($formObject): void
   {
   }
 
@@ -1144,17 +1157,26 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function formValidate($data)
   {
-    foreach ($this->columns() as $colName => $colDefinition) {
-      if ($colDefinition['required']) {
-        if (empty($data[$colName])) {
-          throw new \ADIOS\Core\Exceptions\FormSaveException(
-            $this->translate(
-              "`{{ colTitle }}` is required.",
-              [ 'colTitle' => $colDefinition['title'] ]
-            )
-          );
-        }
+    foreach ($this->columns() as $column => $colDefinition) {
+     if (!$this->columnValidate($column, $data[$column])) {
+        throw new \ADIOS\Core\Exceptions\FormSaveException(
+          $this->adios->translate(
+            "`{{ colTitle }}` contains invalid value.",
+            [ 'colTitle' => $colDefinition['title'] ]
+          )
+        );
+      } else if (
+        $colDefinition['required']
+        && !$this->columnValidate($column, $data[$column])
+      ) {
+        throw new \ADIOS\Core\Exceptions\FormSaveException(
+          $this->adios->translate(
+            "`{{ colTitle }}` is required.",
+            [ 'colTitle' => $colDefinition['title'] ]
+          )
+        );
       }
+
     }
 
     return $this->adios->dispatchEventToPlugins("onModelAfterFormValidate", [

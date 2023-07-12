@@ -298,7 +298,7 @@ class Form extends \ADIOS\Core\View
               '
             >
               <div class='input-title'>
-                ".hsc($this->model->translate($this->params['columns'][$row]['title']))."
+                ".hsc($this->model->translate($this->params['columns'][$row]['title'] ?? ''))."
               </div>
               <div class='input-content'>
                 ".$this->Input($row, $this->data, $this->params['model'])."

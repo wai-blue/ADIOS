@@ -22,13 +22,13 @@
 .adios.ui.Form .subrow:hover .input-content textarea,
 .adios.ui.Form .subrow:hover .input-content select { border-color: var(--cl-main); }
 .adios.ui.Form .subrow.save_error_info {
-  color: red;
-  position: fixed;
+  position: relative;
   top: 0px;
   left: 0px;
   padding: 1em;
   background:red;
-  color:white;
+  color: white;
+  margin-bottom: 1em;
 }
 .adios.ui.Form .subrow.required .input-title::after {
   content: '*';

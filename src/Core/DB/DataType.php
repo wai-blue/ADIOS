@@ -19,7 +19,8 @@ class DataType {
 
   public ?\ADIOS\Core\Loader $adios = null;
 
-  public function __construct($adios) {
+  public function __construct($adios)
+  {
     $this->adios = $adios;
   }
   
@@ -31,7 +32,9 @@ class DataType {
    * @param  array<string, mixed> $params Parameter of the column, e.g. default value.
    * @return string
    */
-  public function get_sql_create_string($table_name, $col_name, $params = []) { }
+  public function get_sql_create_string($table_name, $col_name, $params = [])
+  {
+  }
   
   /**
    * Returns the SQL-formatted string used in INSERT or UPDATE queries.
@@ -42,7 +45,9 @@ class DataType {
    * @param  array<string, mixed> $params Parameter of the column.
    * @return void
    */
-  public function get_sql_column_data_string($table_name, $col_name, $value, $params = []) { }
+  public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
+  {
+  }
   
   /**
    * Returns the HTML-formatted string of the given value.
@@ -52,7 +57,8 @@ class DataType {
    * @param  mixed $params Configuration of the HTML output (e.g. format of date string).
    * @return string HTML-formatted value.
    */
-  public function get_html($value, $params = []) {
+  public function get_html($value, $params = [])
+  {
     return hsc($value);
   }
 
@@ -64,7 +70,8 @@ class DataType {
    * @param  mixed $params Configuration of the HTML output (e.g. format of date string).
    * @return string CSV-formatted value.
    */
-  public function get_csv($value, $params = []) {
+  public function get_csv($value, $params = [])
+  {
     return $value;
   }
 
@@ -73,8 +80,14 @@ class DataType {
     return $this->adios->translate($string, $vars, $this);
   }
 
-  public function fromString(?string $value) {
+  public function fromString(?string $value)
+  {
     return $value;
+  }
+
+  public function validate($value): bool
+  {
+    return TRUE;
   }
   
 }

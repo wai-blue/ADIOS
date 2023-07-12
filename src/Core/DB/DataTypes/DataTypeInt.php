@@ -94,4 +94,9 @@ class DataTypeInt extends \ADIOS\Core\DB\DataType
   {
     return (int) $value;
   }
+
+  public function validate($value): bool
+  {
+    return empty($value) || is_numeric($value);
+  }
 }
