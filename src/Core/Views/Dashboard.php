@@ -20,7 +20,7 @@ class Dashboard extends \ADIOS\Core\View
     $this->params = parent::params_merge([
     ], $params);
 
-    $this->params['title'] = 'Dashboard';
+    $this->params['title'] = 'Dashboard'; # TODO: Localization
     $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
     $this->params["dashboardConfiguration"] = $this->getUserDashboard();
     $this->params['preset'] = $_GET['preset'] ?? 0;

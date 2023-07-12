@@ -21,38 +21,46 @@
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;">
   {% for areaKey, area in dataConfiguration %}
-      <div class="card card-body" style="grid-area: {{ area.key }};" id="draggableContainer-{{ area.key }}">
-          {% for card in area.cards %}
-              {# TODO: Lepsi identifikator ako card action #}
-              <div class="my-2 draggable" id="card-{{ card.action|replace({"/": "-"}) }}">
-                  <div class="px-3 py-2 text-primary bg-light font-weight-bold d-flex justify-content-between" style="border-bottom: 1px solid #e3e6f0;">
-                      <div class="">
-                          {{ card.params.title }}
+      <div class="card card-body" style="grid-area: {{ area.key }};">
+          <div style="min-height: 30px;" id="draggableContainer-{{ area.key }}">
+              {% for card in area.cards %}
+                  {# TODO: Lepsi identifikator ako card action #}
+                  <div class="my-2 draggable" id="card-{{ card.action|replace({"/": "-"}) }}" style="z-index: 100;">
+                      <div class="px-3 py-2 text-primary bg-light font-weight-bold d-flex justify-content-between" style="border-bottom: 1px solid #e3e6f0;">
+                          <div class="">
+                              {{ card.params.title }}
+                          </div>
+                          <div>
+                              <button type="button" class="close text-danger" aria-label="Close" onclick="deleteCard('card-{{ card.action|replace({"/": "-"}) }}')">
+                                  <span aria-hidden="true">&times;</span>
+                              </button>
+                          </div>
                       </div>
-                      <div>
-                          <button type="button" class="close text-danger" aria-label="Close" onclick="deleteCard('card-{{ card.action|replace({"/": "-"}) }}', '{{ area.key }}')">
-                              <span aria-hidden="true">&times;</span>
-                          </button>
+                      <div id="card-{{ card.action|replace({"/": "-"}) }}-body" class="px-4 py-3 border border-light rounded-bottom bg-white" style="cursor: pointer;">
                       </div>
                   </div>
-                  <div id="card-{{ card.action|replace({"/": "-"}) }}-body" class="px-4 py-3 border border-light rounded-bottom bg-white" style="cursor: pointer; z-index: 100;">
-                  </div>
-              </div>
-              <script>
-                  params = JSON.parse(
-                    Base64.decode('{{ card['params_encoded'] }}')
-                  );
+                  <script>
+                      params = JSON.parse(
+                        Base64.decode('{{ card['params_encoded'] }}')
+                      );
 
-                  _ajax_update(
-                    '{{ card['action'] }}',
-                    params,
-                    'card-{{ card.action|replace({"/": "-"}) }}-body'
-                  );
-              </script>
-          {% endfor %}
-          <div class="d-flex justify-content-center align-items-center">
-              {# TODO: By moving components, the button gets on top #}
-              <button type="button" class="btn btn-secondary btn-sm">Add new card</button>
+                      _ajax_update(
+                        '{{ card['action'] }}',
+                        params,
+                        'card-{{ card.action|replace({"/": "-"}) }}-body'
+                      );
+                  </script>
+              {% endfor %}
+          </div>
+          <div class="dropdown d-flex justify-content-center align-items-center">
+              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Dropdown button
+              </button>
+              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <a class="dropdown-item" href="#">Action</a>
+                  <a class="dropdown-item" href="#">Another action</a>
+                  <a class="dropdown-item" href="#">Something else here</a>
+              </div>
           </div>
       </div>
   {% endfor %}
@@ -103,13 +111,11 @@
         );
     }
 
-    function deleteCard(cardId, areaKey) {
+    function deleteCard(cardId) {
         const cardName = cardId.replaceAll('card-', '').replaceAll('-', '/');
-        const areaId = areaKey.charCodeAt(0) - 65;
-        const areaCards = dataConfiguration[areaId]['cards'];
 
-        dataConfiguration[areaId]['cards'] = areaCards.filter(item => {
-            return item.action !== cardName
+        dataConfiguration.forEach((area, areaIndex) => {
+            dataConfiguration[areaIndex]['cards'] = dataConfiguration[areaIndex]['cards'].filter(item => item.action !== cardName);
         });
 
         document.getElementById(cardId).remove();
