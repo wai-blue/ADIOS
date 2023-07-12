@@ -155,6 +155,7 @@ class Loader
   public array $actionStack = [];
 
   public string $dictionaryFilename = "Core-Loader";
+  public array $dictionary = [];
 
   public array $classFactories = [];
 
@@ -836,26 +837,38 @@ class Loader
       return $string;
     }
 
-    $dictionary = [];
+    if (empty($this->dictionary[$toLanguage])) {
+      $this->dictionary[$toLanguage] = [];
 
-    if (empty($object->dictionary[$toLanguage])) {
-      $dictionary[$toLanguage] = $this->loadDictionary($object, $toLanguage);
+      $dictionaryFiles = \ADIOS\Core\HelperFunctions::scanDirRecursively("{$this->config['dir']}/Lang");
+
+      foreach ($dictionaryFiles as $file) {
+        include("{$this->config['dir']}/Lang/{$file}");
+
+        $this->dictionary[$toLanguage] =  \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+          $this->dictionary[$toLanguage],
+          $dictionary
+        );
+      }
     }
 
-    // // $dictionary[$toLanguage] = $object->dictionary[$toLanguage] ?? [];
-    // if (get_class($object) == "ADIOS\\Widgets\\Orders\\Models\\Order") {
-    //   var_dump($string);
-    //   var_dump(get_class($object));
-    //   print_r($dictionary);exit;
-    //   }
+    $dictionary = $this->dictionary[$toLanguage] ?? [];
+    $objectClassName = get_class($object);
+    foreach (explode("\\", $objectClassName) as $namespaceItem) {
+      if (is_array($dictionary[$namespaceItem])) {
+        $dictionary = $dictionary[$namespaceItem];
+      } else {
+        break;
+      }
+    }
 
-    if (!isset($dictionary[$toLanguage][$string])) {
+    if (!isset($dictionary[$string])) {
       $translated = $string;
       if ($this->getConfig('debugTranslations', FALSE)) {
         $translated .= ' ' . get_class($object);
       }
     } else {
-      $translated = $dictionary[$toLanguage][$string];
+      $translated = $dictionary[$string];
     }
 
     foreach ($vars as $varName => $varValue) {

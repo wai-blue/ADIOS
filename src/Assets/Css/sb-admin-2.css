@@ -10191,7 +10191,7 @@ a:focus {
   color: white;
   text-decoration: none;
   border-radius: 0.2rem;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 .sidebar .nav-item .collapse .collapse-inner .collapse-item:hover,
