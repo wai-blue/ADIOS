@@ -132,42 +132,42 @@
     updateSettings(true);
   }
 
-    const draggableContainers = [
-      {% for areaIndex, area in dataConfiguration %}
-        document.getElementById('draggableContainer-{{ area.key }}'),
-      {% endfor %}
-    ];
+  const draggableContainers = [
+    {% for areaIndex, area in dataConfiguration %}
+      document.getElementById('draggableContainer-{{ area.key }}'),
+    {% endfor %}
+  ];
 
-    const deletedCards = {};
+  const deletedCards = {};
 
-    const draggableSortable = new Draggable.Sortable(draggableContainers, {
-      draggable: `.draggable`,
-      mirror: {
-        constrainDimensions: true,
-      },
-      plugins: [],
+  const draggableSortable = new Draggable.Sortable(draggableContainers, {
+    draggable: `.draggable`,
+    mirror: {
+      constrainDimensions: true,
+    },
+    plugins: [],
+  });
+
+  draggableSortable.on('drag:start', (e) => {
+    const originColumnIndex = e.sourceContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
+    const cardId = e.data.originalSource.id;
+    const cardAction = getCardAction(cardId);
+    const areaCards = dataConfiguration[originColumnIndex]['cards'];
+
+    deletedCards[cardId] = areaCards.find(item => item.action === cardAction);
+
+    dataConfiguration[originColumnIndex]['cards'] = areaCards.filter(item => {
+      return item.action !== cardAction
     });
+  });
 
-    draggableSortable.on('drag:start', (e) => {
-      const originColumnIndex = e.sourceContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
-      const cardId = e.data.originalSource.id;
-      const cardAction = getCardAction(cardId);
-      const areaCards = dataConfiguration[originColumnIndex]['cards'];
+  draggableSortable.on('sortable:stop', (e) => {
+    const targetColumnIndex = e.newContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
+    const cardId = e.data.dragEvent.data.originalSource.id;
 
-      deletedCards[cardId] = areaCards.find(item => item.action === cardAction);
+    pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardId], e.newIndex);
 
-      dataConfiguration[originColumnIndex]['cards'] = areaCards.filter(item => {
-        return item.action !== cardAction
-      });
-    });
-
-    draggableSortable.on('sortable:stop', (e) => {
-      const targetColumnIndex = e.newContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
-      const cardId = e.data.dragEvent.data.originalSource.id;
-
-      pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardId], e.newIndex);
-
-      updateSettings();
-    });
+    updateSettings();
+  });
 </script>
 

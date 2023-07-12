@@ -18,11 +18,11 @@ class Dashboard extends \ADIOS\Core\View
     $this->adios = $adios;
 
     $this->params = parent::params_merge([
+      'title' => 'Dashboard',
+      'saveAction' => '/UI/Dashboard/SaveConfig',
+      'addCardsAction' => '/UI/Dashboard/AddCards'
     ], $params);
 
-    $this->params['title'] = 'Dashboard'; # TODO: Localization
-    $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
-    $this->params['addCardsAction'] = '/UI/Dashboard/AddCards';
     $this->params['preset'] = (int) ($_GET['preset'] ?? 0); # TODO: If preset isn't specified, use the last used
     $this->params["dashboardConfiguration"] = $this->getUserDashboard($this->params['preset']);
     $this->params['availablePresets'] = $this->getAvailablePresets();
@@ -32,6 +32,7 @@ class Dashboard extends \ADIOS\Core\View
       $this->params['availablePresets'][] = $this->params['preset'];
     }
 
+    #TODO: presuvanie paramsov do component, pozriet ci sa neda lepsie vyriesit
     foreach ($this->params['dashboardConfiguration']['data'] as &$area) {
       foreach ($area['cards'] as &$card) {
         $card['params_encoded'] = base64_encode(json_encode($card['params']));
@@ -41,34 +42,40 @@ class Dashboard extends \ADIOS\Core\View
     }
   }
 
-  public function getUserDashboard($preset = 0): bool|string|array
+  public function getUserDashboard(int $preset = 0): array
   {
     if ($preset < 0) return $this->adios->renderReturn(400);
 
-    # TODO: Remove 0 at the end
-    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id'] . '-' . $preset . '0'];
+    $userDashboard = $this->adios->config['dashboard-' . $this->adios->userProfile['id'] . '-' . $preset . '0'];
 
-    if (empty($userDashboard)) {
-      $userDashboard = $this->initDefaultDashboard($_GET['preset'] ?? 0);
+    if (!empty($userDashboard)) {
+      $userDashboard = json_decode($userDashboard, TRUE);
+    } else {
+      $userDashboard = $this->initDefaultDashboard($preset);
     }
 
-    //return $userDashboard;
-    return json_decode($userDashboard, TRUE);
+    return $userDashboard;
   }
 
-  public function initDefaultDashboard($preset = 0): string
+  public function initDefaultDashboard(int $preset = 0): array
   {
     $areas = 5;
-    $configuration = ['grid' => ['A B', 'C C', 'D E'] ];
-    $configuration['data'] = array_fill(0, $areas, []);
+    $configuration = [
+      'grid' => ['A B', 'C C', 'D E'],
+      'data' => array_fill(0, $areas, [])
+    ];
 
     foreach ($configuration['data'] as $key => &$area) {
       $area['key'] = chr(((int) $key) + 65);
       $area['cards'] = [];
     }
 
-    $this->adios->saveConfig([json_encode($configuration)], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
-    return json_encode($configuration);
+    $this->adios->saveConfig(
+      [json_encode($configuration)], 
+      'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset
+    );
+
+    return $configuration;
   }
 
   public function addCardsToConfiguration(array $cards, int $preset, string $area): bool|string
@@ -88,10 +95,14 @@ class Dashboard extends \ADIOS\Core\View
     return $this->saveConfiguration(json_encode($userConfiguration), $preset);
   }
 
-  public function saveConfiguration($configuration, $preset): bool|string
+  public function saveConfiguration(string $configuration, int $preset = 0): string
   {
     # TODO: May be vulnerable against SQL Injection etc.? $_POST['configuration'] goes straight into database...
-    $this->adios->saveConfig([$configuration], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
+    $this->adios->saveConfig(
+      [$configuration], 
+      'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset
+    );
+
     return $this->adios->renderReturn(200);
   }
 
@@ -122,7 +133,7 @@ class Dashboard extends \ADIOS\Core\View
     $presets = [0];
 
     $i = 1;
-    while (!empty($this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . $i .'0'])) {
+    while (!empty($this->adios->config['dashboard-'.$this->adios->userProfile['id'] . '-' . $i . '0'])) {
       $presets[] = $i;
       $i++;
     }
@@ -186,12 +197,7 @@ class Dashboard extends \ADIOS\Core\View
   */
 
   public function getTwigParams(): array {
-    return array_merge(
-      $this->params,
-      [
-        'view' => $this->adios->view
-      ]
-    );
+    return $this->params;
   }
 
 }

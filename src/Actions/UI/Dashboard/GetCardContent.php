@@ -18,6 +18,7 @@ class GetCardContent extends \ADIOS\Core\Action {
 
   function render() {
     $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios);
+
     return $dashboard->getCardContent($this->params['uid'] ?? "");
   }
 }

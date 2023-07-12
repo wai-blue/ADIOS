@@ -20,6 +20,8 @@ class SaveConfig extends \ADIOS\Core\Action {
 
   function render(): bool|string
   {
-    return $this->adios->view->Dashboard($this->params)->saveConfiguration($_POST['configuration'], $_POST['preset']);
+    return $this->adios->view->Dashboard($this->params)
+      ->saveConfiguration($_POST['configuration'], $_POST['preset'])
+    ;
   }
 }
