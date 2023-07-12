@@ -68,11 +68,6 @@ class Dashboard extends \ADIOS\Core\View
       $area['cards'] = [];
     }
 
-    $availableCards = $this->getAvailableCards();
-    foreach ($availableCards as $card) {
-      $configuration['data'][0]['cards'][] = json_decode(json_encode($card), true);
-    }
-
     $this->adios->saveConfig([json_encode($configuration)], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
     return json_encode($configuration);
   }
