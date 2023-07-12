@@ -22,10 +22,11 @@ class Dashboard extends \ADIOS\Core\View
 
     $this->params['title'] = 'Dashboard'; # TODO: Localization
     $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
-    $this->params["dashboardConfiguration"] = $this->getUserDashboard();
+    $this->params['addCardsAction'] = '/UI/Dashboard/AddCards';
+    $this->params["dashboardConfiguration"] = $this->getUserDashboard($_GET['preset'] ?? 0);
     $this->params['preset'] = $_GET['preset'] ?? 0;
     $this->params['availablePresets'] = $this->getAvailablePresets();
-    $this->params['availableCards'] = $this->getAvailableCards();
+    $this->params['availableCards'] = $this->getAvailableCards($this->params['preset']);
 
 
 
@@ -42,8 +43,12 @@ class Dashboard extends \ADIOS\Core\View
     }
   }
 
-  public function getUserDashboard(): array {
-    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . ($_GET['preset'] ?? 0) .'0']; # TODO: Odstranit nulu
+  public function getUserDashboard($preset = 0): bool|string|array
+  {
+    if ($preset < 0)
+      return $this->adios->renderReturn(400);
+
+    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . $preset .'0']; # TODO: Odstranit nulu
 
     if (empty($userDashboard)) {
       $userDashboard = $this->initDefaultDashboard($_GET['preset'] ?? 0);
@@ -63,7 +68,7 @@ class Dashboard extends \ADIOS\Core\View
       $area['cards'] = [];
     }
 
-    $availableCards = $this->getAvailableCards()[0];
+    $availableCards = $this->getAvailableCards();
     foreach ($availableCards as $card) {
       $configuration['data'][0]['cards'][] = json_decode(json_encode($card), true);
     }
@@ -72,17 +77,47 @@ class Dashboard extends \ADIOS\Core\View
     return json_encode($configuration);
   }
 
-  public function saveConfiguration($configuration, $preset): int {
-    $this->adios->saveConfig([$configuration], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
-    return 200;
+  public function addCardsToConfiguration(array $cards, int $preset, string $area): bool|string
+  {
+    $userConfiguration = $this->getUserDashboard($preset);
+    $areaCards = $userConfiguration['data'][ord($area) - 65]['cards'];
+
+    $availableCards = $this->getAvailableCards();
+    foreach ($availableCards as $card) {
+      if (in_array($card['action'], $cards)) {
+        $areaCards[] = json_decode(json_encode($card), true);
+      }
+    }
+
+    $userConfiguration['data'][ord($area) - 65]['cards'] = $areaCards;
+
+    return $this->saveConfiguration(json_encode($userConfiguration), $preset);
   }
 
-  public function getAvailableCards(): array {
+  public function saveConfiguration($configuration, $preset): bool|string
+  {
+    # TODO: Maybe vulnerable against SQL Injection etc.? $_POST['configuration'] goes straight into database...
+    $this->adios->saveConfig([$configuration], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
+    return $this->adios->renderReturn(200);
+  }
+
+  public function getAvailableCards(int $preset = -1): array {
     $availableCards = [];
+    $usedCards = [];
+
+    if ($preset != -1) {
+      foreach($this->getUserDashboard($preset)['data'] as $area) {
+        foreach ($area['cards'] as $card) {
+          $usedCards[] = $card['action'];
+        }
+      }
+    }
 
     foreach ($this->adios->models as $model) {
-      if ($this->adios->getModel($model)->cards() != []) {
-        $availableCards[] = $this->adios->getModel($model)->cards();
+      foreach ($this->adios->getModel($model)->cards() as $card) {
+        if (!in_array($card['action'], $usedCards)) {
+          $availableCards[] = $card;
+        }
       }
     }
 

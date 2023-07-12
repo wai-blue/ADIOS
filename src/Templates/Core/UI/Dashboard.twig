@@ -20,18 +20,18 @@
 
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;">
-  {% for areaKey, area in dataConfiguration %}
+  {% for areaIndex, area in dataConfiguration %}
       <div class="card card-body" style="grid-area: {{ area.key }};">
           <div style="min-height: 30px;" id="draggableContainer-{{ area.key }}">
-              {% for card in area.cards %}
+              {% for cardKey, card in area.cards %}
                   {# TODO: Lepsi identifikator ako card action #}
-                  <div class="my-2 draggable" id="card-{{ card.action|replace({"/": "-"}) }}" style="z-index: 100;">
+                  <div class="my-2 draggable" id="card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}" style="z-index: 100;">
                       <div class="px-3 py-2 text-primary bg-light font-weight-bold d-flex justify-content-between" style="border-bottom: 1px solid #e3e6f0;">
                           <div class="">
                               {{ card.params.title }}
                           </div>
                           <div>
-                              <button type="button" class="close text-danger" aria-label="Close" onclick="deleteCard('card-{{ card.action|replace({"/": "-"}) }}')">
+                              <button type="button" class="close text-danger" aria-label="Close" onclick="deleteCard('card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}')">
                                   <span aria-hidden="true">&times;</span>
                               </button>
                           </div>
@@ -52,16 +52,18 @@
                   </script>
               {% endfor %}
           </div>
+          {% if params.availableCards|length != 0 %}
           <div class="dropdown d-flex justify-content-center align-items-center">
               <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Dropdown button
+                  Add new card
               </button>
               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <a class="dropdown-item" href="#">Something else here</a>
+                  {% for card in params.availableCards %}
+                  <button class="dropdown-item" onclick="addCard('{{ card.action }}', '{{ area.key }}')">{% if card.params.title %} {{ card.params.title }} {% else %} {{ card.action }} {% endif %}</button>
+                  {% endfor %}
               </div>
           </div>
+          {% endif %}
       </div>
   {% endfor %}
 </div>
@@ -90,6 +92,10 @@
 {% endfor %} #}
 
 <script>
+    function getCardAction(cardId) {
+        return cardId.split('_')[1].replaceAll('-', '/')
+    }
+
     function pushToIndex(array, item, index) {
         array.splice(index, 0, item);
 
@@ -98,7 +104,7 @@
         }
     }
 
-    function updateSettings() {
+    function updateSettings(reload = false) {
         const config = {{ params.dashboardConfiguration|json_encode|raw }};
         config.data = dataConfiguration;
 
@@ -107,24 +113,50 @@
           {
               configuration: config,
               preset: {{ params.preset }}
+          },
+          (res) => {
+              if (isNaN(res)) {
+                  alert(res);
+              } else if (reload === true) {
+                  location.reload();
+              }
+          }
+        );
+    }
+
+    function addCard(card, area) {
+
+        _ajax_read(
+          "{{ params.addCardsAction }}",
+          {
+              cards: JSON.stringify([ card ]),
+              preset: {{ params.preset }},
+              area: area
+          },
+          (res) => {
+              if (isNaN(res)) {
+                  alert(res);
+              } else {
+                  location.reload();
+              }
           }
         );
     }
 
     function deleteCard(cardId) {
-        const cardName = cardId.replaceAll('card-', '').replaceAll('-', '/');
+        const cardAction = getCardAction(cardId)
 
         dataConfiguration.forEach((area, areaIndex) => {
-            dataConfiguration[areaIndex]['cards'] = dataConfiguration[areaIndex]['cards'].filter(item => item.action !== cardName);
+            dataConfiguration[areaIndex]['cards'] = dataConfiguration[areaIndex]['cards'].filter(item => item.action !== cardAction);
         });
 
         document.getElementById(cardId).remove();
 
-        updateSettings();
+        updateSettings(true);
     }
 
     const draggableContainers = [
-        {% for areaKey, area in dataConfiguration %}
+        {% for areaIndex, area in dataConfiguration %}
         document.getElementById('draggableContainer-{{ area.key }}'),
         {% endfor %}
     ];
@@ -140,21 +172,23 @@
 
     draggableSortable.on('drag:start', (e) => {
         const originColumnIndex = e.sourceContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
-        const cardName = e.data.originalSource.id.replaceAll('card-', '').replaceAll('-', '/');
+        const cardId = e.data.originalSource.id;
+        const cardAction = getCardAction(cardId);
         const areaCards = dataConfiguration[originColumnIndex]['cards'];
 
-        deletedCards[cardName] = areaCards.find(item => item.action === cardName);
+        deletedCards[cardId] = areaCards.find(item => item.action === cardAction);
 
         dataConfiguration[originColumnIndex]['cards'] = areaCards.filter(item => {
-            return item.action !== cardName
+            return item.action !== cardAction
         });
     });
 
     draggableSortable.on('sortable:stop', (e) => {
         const targetColumnIndex = e.newContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
-        const cardName = e.data.dragEvent.data.originalSource.id.replaceAll('card-', '').replaceAll('-', '/');
+        const cardId = e.data.dragEvent.data.originalSource.id;
+        const cardAction = getCardAction(e.data.dragEvent.data.originalSource.id);
 
-        pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardName], e.newIndex);
+        pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardId], e.newIndex);
 
         updateSettings();
     });

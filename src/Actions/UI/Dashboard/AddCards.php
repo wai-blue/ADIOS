@@ -10,16 +10,13 @@
 
 namespace ADIOS\Actions\UI\Dashboard;
 
-use ADIOS\Core\Views\Input;
-use ADIOS\Core\Views\Inputs\CheckboxField;
-
 /**
  * @package UI\Actions
  */
-class SaveConfig extends \ADIOS\Core\Action {
+class AddCards extends \ADIOS\Core\Action {
 
   function render(): bool|string
   {
-    return $this->adios->view->Dashboard($this->params)->saveConfiguration($_POST['configuration'], $_POST['preset']);
+    return $this->adios->view->Dashboard($this->params)->addCardsToConfiguration(json_decode($_POST['cards']), $_POST['preset'], $_POST['area']);
   }
 }
