@@ -7,6 +7,18 @@
     const dataConfiguration = {{ dataConfiguration|json_encode|raw }};
 </script>
 
+<ul class="pagination">
+    {% for preset in params.availablePresets %}
+    <li class="page-item {% if params.preset == preset %} active {% endif %}">
+        <a class="page-link" href="?preset={{ preset }}">{{ preset + 1 }}</a>
+    </li>
+    {% endfor %}
+    <li class="page-item">
+        <a class="page-link" href="?preset={{ params.availablePresets|length }}">New preset</a>
+    </li>
+</ul>
+
+
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;">
   {% for rowKey, row in dataConfiguration %}
       <div class="card card-body" style="grid-area: {{ row.key }};" id="draggableContainer-{{ row.key }}">

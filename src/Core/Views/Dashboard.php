@@ -20,9 +20,15 @@ class Dashboard extends \ADIOS\Core\View
     $this->params = parent::params_merge([
     ], $params);
 
+    $this->params['title'] = 'Dashboard';
     $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
     $this->params["dashboardCards"] = $this->getUserDashboard();
     $this->params['preset'] = $_GET['preset'] ?? 0;
+    $this->params['availablePresets'] = $this->getAvailablePresets();
+
+    if (!in_array($this->params['preset'], $this->params['availablePresets'])) {
+      $this->params['availablePresets'][] = $this->params['preset'];
+    }
 
     foreach ($this->params['dashboardCards']['data'] as &$area) {
       foreach ($area['cards'] as &$card) {
@@ -34,7 +40,7 @@ class Dashboard extends \ADIOS\Core\View
   }
 
   public function getUserDashboard(): array {
-    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . ($_GET['preset'] ?? 0) .'0']; #TODO: Odstranit nulu
+    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . ($_GET['preset'] ?? 0) .'0']; # TODO: Odstranit nulu
 
     if (empty($userDashboard)) {
       $userDashboard = $this->initDefaultDashboard($_GET['preset'] ?? 0);
@@ -73,6 +79,18 @@ class Dashboard extends \ADIOS\Core\View
     }
 
     return $availableCards;
+  }
+
+  public function getAvailablePresets(): array {
+    $presets = [0];
+
+    $i = 1;
+    while (!empty($this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . $i .'0'])) {
+      $presets[] = $i;
+      $i++;
+    }
+
+    return $presets;
   }
 
   // TODO: Nepouziva sa
