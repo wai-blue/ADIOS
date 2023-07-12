@@ -24,7 +24,6 @@
       <div class="card card-body" style="grid-area: {{ area.key }};">
           <div style="min-height: 30px;" id="draggableContainer-{{ area.key }}">
               {% for cardKey, card in area.cards %}
-                  {# TODO: Lepsi identifikator ako card action #}
                   <div class="my-2 draggable" id="card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}" style="z-index: 100;">
                       <div class="px-3 py-2 text-primary bg-light font-weight-bold d-flex justify-content-between" style="border-bottom: 1px solid #e3e6f0;">
                           <div class="">
@@ -36,7 +35,7 @@
                               </button>
                           </div>
                       </div>
-                      <div id="card-{{ card.action|replace({"/": "-"}) }}-body" class="px-4 py-3 border border-light rounded-bottom bg-white" style="cursor: pointer;">
+                      <div id="card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}_body" class="px-4 py-3 border border-light rounded-bottom bg-white" style="cursor: pointer;">
                       </div>
                   </div>
                   <script>
@@ -47,7 +46,7 @@
                       _ajax_update(
                         '{{ card['action'] }}',
                         params,
-                        'card-{{ card.action|replace({"/": "-"}) }}-body'
+                        'card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}_body'
                       );
                   </script>
               {% endfor %}
@@ -67,29 +66,6 @@
       </div>
   {% endfor %}
 </div>
-
-{#
-{% for key, model in params.dashboardConfiguration %}
-  {% for k, card in model %}
-    {% if card.is_active %}
-      <div>
-        <script>
-            params = JSON.parse(
-                Base64.decode('{{ card['params_encoded'] }}')
-            );
-
-            _ajax_update(
-                '{{ card['action'] }}',
-                params,
-                'card-{{ key }}-{{ loop.index0 }}'
-            );
-
-            configuration[0].push('card-{{ key }}-{{ loop.index0 }}')
-        </script>
-      </div>
-    {% endif %}
-  {% endfor %}
-{% endfor %} #}
 
 <script>
     function getCardAction(cardId) {

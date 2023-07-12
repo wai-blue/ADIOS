@@ -23,8 +23,8 @@ class Dashboard extends \ADIOS\Core\View
     $this->params['title'] = 'Dashboard'; # TODO: Localization
     $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
     $this->params['addCardsAction'] = '/UI/Dashboard/AddCards';
-    $this->params["dashboardConfiguration"] = $this->getUserDashboard($_GET['preset'] ?? 0);
     $this->params['preset'] = $_GET['preset'] ?? 0; # TODO: If preset isn't specified, use the last used
+    $this->params["dashboardConfiguration"] = $this->getUserDashboard($this->params['preset']);
     $this->params['availablePresets'] = $this->getAvailablePresets();
     $this->params['availableCards'] = $this->getAvailableCards($this->params['preset']);
 
@@ -48,7 +48,8 @@ class Dashboard extends \ADIOS\Core\View
     if ($preset < 0)
       return $this->adios->renderReturn(400);
 
-    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . $preset .'0']; # TODO: Odstranit nulu
+    # TODO: Remove 0 at the end
+    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . $preset .'0'];
 
     if (empty($userDashboard)) {
       $userDashboard = $this->initDefaultDashboard($_GET['preset'] ?? 0);
@@ -91,7 +92,7 @@ class Dashboard extends \ADIOS\Core\View
 
   public function saveConfiguration($configuration, $preset): bool|string
   {
-    # TODO: Maybe vulnerable against SQL Injection etc.? $_POST['configuration'] goes straight into database...
+    # TODO: May be vulnerable against SQL Injection etc.? $_POST['configuration'] goes straight into database...
     $this->adios->saveConfig([$configuration], 'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset);
     return $this->adios->renderReturn(200);
   }
@@ -131,16 +132,9 @@ class Dashboard extends \ADIOS\Core\View
     return $presets;
   }
 
-  // TODO: Nepouziva sa
-  /*public function getCardContent($cardUid): string {
-    if (empty($cardUid)) {
-      return "No UID.";
-    } else {
-      return "card {$cardUid}";
-    }
-  }*/
-
-  public function getSettingsInputs($availableCards): array {
+  /*
+   * Unused for now
+   * public function getSettingsInputs($availableCards): array {
     $forms = [];
 
     foreach ($availableCards as $card) {
@@ -191,6 +185,7 @@ class Dashboard extends \ADIOS\Core\View
 
     return $forms;
   }
+  */
 
   public function getTwigParams(): array {
     return array_merge(
