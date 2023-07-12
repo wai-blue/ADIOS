@@ -23,7 +23,7 @@ class Dashboard extends \ADIOS\Core\View
     $this->params['title'] = 'Dashboard'; # TODO: Localization
     $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
     $this->params['addCardsAction'] = '/UI/Dashboard/AddCards';
-    $this->params['preset'] = $_GET['preset'] ?? 0; # TODO: If preset isn't specified, use the last used
+    $this->params['preset'] = (int) ($_GET['preset'] ?? 0); # TODO: If preset isn't specified, use the last used
     $this->params["dashboardConfiguration"] = $this->getUserDashboard($this->params['preset']);
     $this->params['availablePresets'] = $this->getAvailablePresets();
     $this->params['availableCards'] = $this->getAvailableCards($this->params['preset']);
