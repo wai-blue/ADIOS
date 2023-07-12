@@ -22,7 +22,7 @@ class Dashboard extends \ADIOS\Core\View
 
     $this->params['title'] = 'Dashboard';
     $this->params['saveAction'] = '/UI/Dashboard/SaveConfig';
-    $this->params["dashboardCards"] = $this->getUserDashboard();
+    $this->params["dashboardConfiguration"] = $this->getUserDashboard();
     $this->params['preset'] = $_GET['preset'] ?? 0;
     $this->params['availablePresets'] = $this->getAvailablePresets();
 
@@ -30,7 +30,7 @@ class Dashboard extends \ADIOS\Core\View
       $this->params['availablePresets'][] = $this->params['preset'];
     }
 
-    foreach ($this->params['dashboardCards']['data'] as &$area) {
+    foreach ($this->params['dashboardConfiguration']['data'] as &$area) {
       foreach ($area['cards'] as &$card) {
         $card['params_encoded'] = base64_encode(json_encode($card['params']));
       }

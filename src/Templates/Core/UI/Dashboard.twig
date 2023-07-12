@@ -1,7 +1,7 @@
 <h1>{{ params.title ?? "Default Title" }}</h1>
 
-{% set dataConfiguration = params.dashboardCards.data %}
-{% set gridConfiguration = params.dashboardCards.grid %}
+{% set dataConfiguration = params.dashboardConfiguration.data %}
+{% set gridConfiguration = params.dashboardConfiguration.grid %}
 
 <script>
     const dataConfiguration = {{ dataConfiguration|json_encode|raw }};
@@ -20,11 +20,23 @@
 
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;">
-  {% for rowKey, row in dataConfiguration %}
-      <div class="card card-body" style="grid-area: {{ row.key }};" id="draggableContainer-{{ row.key }}">
-          {% for card in row.cards %}
+  {% for areaKey, area in dataConfiguration %}
+      <div class="card card-body" style="grid-area: {{ area.key }};" id="draggableContainer-{{ area.key }}">
+          {% for card in area.cards %}
               {# TODO: Lepsi identifikator ako card action #}
-              <div id="card-{{ card.action|replace({"/": "-"}) }}" class="draggable" style="z-index: 100;">
+              <div class="my-2 draggable" id="card-{{ card.action|replace({"/": "-"}) }}">
+                  <div class="px-3 py-2 text-primary bg-light font-weight-bold d-flex justify-content-between" style="border-bottom: 1px solid #e3e6f0;">
+                      <div class="">
+                          {{ card.params.title }}
+                      </div>
+                      <div>
+                          <button type="button" class="close text-danger" aria-label="Close" onclick="deleteCard('card-{{ card.action|replace({"/": "-"}) }}', '{{ area.key }}')">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
+                      </div>
+                  </div>
+                  <div id="card-{{ card.action|replace({"/": "-"}) }}-body" class="px-4 py-3 border border-light rounded-bottom bg-white" style="cursor: pointer; z-index: 100;">
+                  </div>
               </div>
               <script>
                   params = JSON.parse(
@@ -34,16 +46,20 @@
                   _ajax_update(
                     '{{ card['action'] }}',
                     params,
-                    'card-{{ card.action|replace({"/": "-"}) }}'
+                    'card-{{ card.action|replace({"/": "-"}) }}-body'
                   );
               </script>
           {% endfor %}
+          <div class="d-flex justify-content-center align-items-center">
+              {# TODO: By moving components, the button gets on top #}
+              <button type="button" class="btn btn-secondary btn-sm">Add new card</button>
+          </div>
       </div>
   {% endfor %}
 </div>
 
 {#
-{% for key, model in params.dashboardCards %}
+{% for key, model in params.dashboardConfiguration %}
   {% for k, card in model %}
     {% if card.is_active %}
       <div>
@@ -75,7 +91,7 @@
     }
 
     function updateSettings() {
-        const config = {{ params.dashboardCards|json_encode|raw }};
+        const config = {{ params.dashboardConfiguration|json_encode|raw }};
         config.data = dataConfiguration;
 
         _ajax_read(
@@ -87,9 +103,23 @@
         );
     }
 
+    function deleteCard(cardId, areaKey) {
+        const cardName = cardId.replaceAll('card-', '').replaceAll('-', '/');
+        const areaId = areaKey.charCodeAt(0) - 65;
+        const areaCards = dataConfiguration[areaId]['cards'];
+
+        dataConfiguration[areaId]['cards'] = areaCards.filter(item => {
+            return item.action !== cardName
+        });
+
+        document.getElementById(cardId).remove();
+
+        updateSettings();
+    }
+
     const draggableContainers = [
-        {% for rowKey, row in dataConfiguration %}
-        document.getElementById('draggableContainer-{{ row.key }}'),
+        {% for areaKey, area in dataConfiguration %}
+        document.getElementById('draggableContainer-{{ area.key }}'),
         {% endfor %}
     ];
     const deletedCards = {};
