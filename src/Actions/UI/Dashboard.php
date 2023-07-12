@@ -16,8 +16,8 @@ namespace ADIOS\Actions\UI;
 class Dashboard extends \ADIOS\Core\Action {
 
   function render() {
-    if ((int) ($_GET['preset'] ?? 0) < 0)
-      return $this->adios->renderHtmlWarning(400);
+    if ((int) ($_GET['preset'] ?? 0) < 0) return $this->adios->renderHtmlWarning(400);
+
     return $this->adios->view->Dashboard($this->params)->render();
   }
 

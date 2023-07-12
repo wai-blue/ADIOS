@@ -4,168 +4,170 @@
 {% set gridConfiguration = params.dashboardConfiguration.grid %}
 
 <script>
-    const dataConfiguration = {{ dataConfiguration|json_encode|raw }};
+  const dataConfiguration = {{ dataConfiguration|json_encode|raw }};
 </script>
 
 <ul class="pagination">
-    {% for preset in params.availablePresets %}
+  {% for preset in params.availablePresets %}
     <li class="page-item {% if params.preset == preset %} active {% endif %}">
-        <a class="page-link" href="?preset={{ preset }}">{{ preset + 1 }}</a>
+      <a class="page-link" href="?preset={{ preset }}">{{ preset + 1 }}</a>
     </li>
-    {% endfor %}
-    <li class="page-item">
-        <a class="page-link" href="?preset={{ params.availablePresets|length }}">New preset</a>
-    </li>
-</ul>
+  {% endfor %}
 
+  <li class="page-item">
+    <a class="page-link" href="?preset={{ params.availablePresets|length }}">New preset</a>
+  </li>
+</ul>
 
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;">
   {% for areaIndex, area in dataConfiguration %}
-      <div class="card card-body" style="grid-area: {{ area.key }};">
-          <div style="min-height: 30px;" id="draggableContainer-{{ area.key }}">
-              {% for cardKey, card in area.cards %}
-                  <div class="my-2 draggable" id="card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}" style="z-index: 100;">
-                      <div class="px-3 py-2 text-primary bg-light font-weight-bold d-flex justify-content-between" style="border-bottom: 1px solid #e3e6f0;">
-                          <div class="">
-                              {{ card.params.title }}
-                          </div>
-                          <div>
-                              <button type="button" class="close text-danger" aria-label="Close" onclick="deleteCard('card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}')">
-                                  <span aria-hidden="true">&times;</span>
-                              </button>
-                          </div>
+    <div class="card card-body" style="grid-area: {{ area.key }};">
+      <div style="min-height: 30px;" id="draggableContainer-{{ area.key }}">
+          {% for cardKey, card in area.cards %}
+              <div class="my-2 draggable" id="card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}" style="z-index: 100;">
+                  <div class="px-3 py-2 text-primary bg-light font-weight-bold d-flex justify-content-between" style="border-bottom: 1px solid #e3e6f0;">
+                      <div class="">
+                          {{ card.params.title }}
                       </div>
-                      <div id="card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}_body" class="px-4 py-3 border border-light rounded-bottom bg-white" style="cursor: pointer;">
+                      <div>
+                          <button type="button" class="close text-danger" aria-label="Close" onclick="deleteCard('card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}')">
+                              <span aria-hidden="true">&times;</span>
+                          </button>
                       </div>
                   </div>
-                  <script>
-                      params = JSON.parse(
-                        Base64.decode('{{ card['params_encoded'] }}')
-                      );
-
-                      _ajax_update(
-                        '{{ card['action'] }}',
-                        params,
-                        'card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}_body'
-                      );
-                  </script>
-              {% endfor %}
-          </div>
-          {% if params.availableCards|length != 0 %}
-          <div class="dropdown d-flex justify-content-center align-items-center">
-              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Add new card
-              </button>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                  {% for card in params.availableCards %}
-                  <button class="dropdown-item" onclick="addCard('{{ card.action }}', '{{ area.key }}')">{% if card.params.title %} {{ card.params.title }} {% else %} {{ card.action }} {% endif %}</button>
-                  {% endfor %}
+                  <div id="card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}_body" class="px-4 py-3 border border-light rounded-bottom bg-white" style="cursor: pointer;">
+                  </div>
               </div>
-          </div>
-          {% endif %}
+              <script>
+                  params = JSON.parse(
+                    Base64.decode('{{ card['params_encoded'] }}')
+                  );
+
+                  _ajax_update(
+                    '{{ card['action'] }}',
+                    params,
+                    'card_{{ card.action|replace({"/": "-"}) }}_{{ area.key }}_{{ cardKey }}_body'
+                  );
+              </script>
+          {% endfor %}
       </div>
+      {% if params.availableCards|length != 0 %}
+        <div class="dropdown d-flex justify-content-center align-items-center">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Add new card
+          </button>
+          <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+            {% for card in params.availableCards %}
+              <button class="dropdown-item" onclick="addCard('{{ card.action }}', '{{ area.key }}')">
+                {% if card.params.title %} {{ card.params.title }} {% else %} {{ card.action }} {% endif %}
+              </button>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
   {% endfor %}
 </div>
 
 <script>
-    function getCardAction(cardId) {
-        return cardId.split('_')[1].replaceAll('-', '/')
+  function getCardAction(cardId) {
+    return cardId.split('_')[1].replaceAll('-', '/')
+  }
+
+  function pushToIndex(array, item, index) {
+    array.splice(index, 0, item);
+
+    for (let i = index + 1; i < array.length; i ++) {
+      array.splice(i, 0, array.splice(i, 1)[0])
     }
+  }
 
-    function pushToIndex(array, item, index) {
-        array.splice(index, 0, item);
+  function updateSettings(reload = false) {
+    const config = {{ params.dashboardConfiguration|json_encode|raw }};
+    config.data = dataConfiguration;
 
-        for (let i = index + 1; i < array.length; i ++) {
-            array.splice(i, 0, array.splice(i, 1)[0])
+    _ajax_read(
+      "{{ params.saveAction }}",
+      {
+        configuration: config,
+        preset: {{ params.preset }}
+      },
+      (res) => {
+        if (isNaN(res)) {
+          alert(res);
+        } else if (reload === true) {
+          location.reload();
         }
-    }
+      }
+    );
+  }
 
-    function updateSettings(reload = false) {
-        const config = {{ params.dashboardConfiguration|json_encode|raw }};
-        config.data = dataConfiguration;
+  function addCard(card, area) {
+    _ajax_read(
+      "{{ params.addCardsAction }}",
+      {
+        cards: JSON.stringify([ card ]),
+        preset: {{ params.preset }},
+        area: area
+      },
+      (res) => {
+        if (isNaN(res)) {
+          alert(res);
+        } else {
+          location.reload();
+        }
+      }
+    );
+  }
 
-        _ajax_read(
-          "{{ params.saveAction }}",
-          {
-              configuration: config,
-              preset: {{ params.preset }}
-          },
-          (res) => {
-              if (isNaN(res)) {
-                  alert(res);
-              } else if (reload === true) {
-                  location.reload();
-              }
-          }
-        );
-    }
+  function deleteCard(cardId) {
+    const cardAction = getCardAction(cardId)
 
-    function addCard(card, area) {
+    dataConfiguration.forEach((area, areaIndex) => {
+      dataConfiguration[areaIndex]['cards'] = dataConfiguration[areaIndex]['cards'].filter(item => item.action !== cardAction);
+    });
 
-        _ajax_read(
-          "{{ params.addCardsAction }}",
-          {
-              cards: JSON.stringify([ card ]),
-              preset: {{ params.preset }},
-              area: area
-          },
-          (res) => {
-              if (isNaN(res)) {
-                  alert(res);
-              } else {
-                  location.reload();
-              }
-          }
-        );
-    }
+    document.getElementById(cardId).remove();
 
-    function deleteCard(cardId) {
-        const cardAction = getCardAction(cardId)
-
-        dataConfiguration.forEach((area, areaIndex) => {
-            dataConfiguration[areaIndex]['cards'] = dataConfiguration[areaIndex]['cards'].filter(item => item.action !== cardAction);
-        });
-
-        document.getElementById(cardId).remove();
-
-        updateSettings(true);
-    }
+    updateSettings(true);
+  }
 
     const draggableContainers = [
-        {% for areaIndex, area in dataConfiguration %}
+      {% for areaIndex, area in dataConfiguration %}
         document.getElementById('draggableContainer-{{ area.key }}'),
-        {% endfor %}
+      {% endfor %}
     ];
+
     const deletedCards = {};
 
     const draggableSortable = new Draggable.Sortable(draggableContainers, {
-        draggable: `.draggable`,
-        mirror: {
-            constrainDimensions: true,
-        },
-        plugins: [],
+      draggable: `.draggable`,
+      mirror: {
+        constrainDimensions: true,
+      },
+      plugins: [],
     });
 
     draggableSortable.on('drag:start', (e) => {
-        const originColumnIndex = e.sourceContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
-        const cardId = e.data.originalSource.id;
-        const cardAction = getCardAction(cardId);
-        const areaCards = dataConfiguration[originColumnIndex]['cards'];
+      const originColumnIndex = e.sourceContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
+      const cardId = e.data.originalSource.id;
+      const cardAction = getCardAction(cardId);
+      const areaCards = dataConfiguration[originColumnIndex]['cards'];
 
-        deletedCards[cardId] = areaCards.find(item => item.action === cardAction);
+      deletedCards[cardId] = areaCards.find(item => item.action === cardAction);
 
-        dataConfiguration[originColumnIndex]['cards'] = areaCards.filter(item => {
-            return item.action !== cardAction
-        });
+      dataConfiguration[originColumnIndex]['cards'] = areaCards.filter(item => {
+        return item.action !== cardAction
+      });
     });
 
     draggableSortable.on('sortable:stop', (e) => {
-        const targetColumnIndex = e.newContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
-        const cardId = e.data.dragEvent.data.originalSource.id;
+      const targetColumnIndex = e.newContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
+      const cardId = e.data.dragEvent.data.originalSource.id;
 
-        pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardId], e.newIndex);
+      pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardId], e.newIndex);
 
-        updateSettings();
+      updateSettings();
     });
 </script>
 

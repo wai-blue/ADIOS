@@ -28,8 +28,6 @@ class Dashboard extends \ADIOS\Core\View
     $this->params['availablePresets'] = $this->getAvailablePresets();
     $this->params['availableCards'] = $this->getAvailableCards($this->params['preset']);
 
-
-
     if (!in_array($this->params['preset'], $this->params['availablePresets'])) {
       $this->params['availablePresets'][] = $this->params['preset'];
     }
@@ -45,16 +43,16 @@ class Dashboard extends \ADIOS\Core\View
 
   public function getUserDashboard($preset = 0): bool|string|array
   {
-    if ($preset < 0)
-      return $this->adios->renderReturn(400);
+    if ($preset < 0) return $this->adios->renderReturn(400);
 
     # TODO: Remove 0 at the end
-    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id']. '-' . $preset .'0'];
+    $userDashboard = $this->adios->config['dashboard-'.$this->adios->userProfile['id'] . '-' . $preset . '0'];
 
     if (empty($userDashboard)) {
       $userDashboard = $this->initDefaultDashboard($_GET['preset'] ?? 0);
     }
 
+    //return $userDashboard;
     return json_decode($userDashboard, TRUE);
   }
 
@@ -62,7 +60,7 @@ class Dashboard extends \ADIOS\Core\View
   {
     $areas = 5;
     $configuration = ['grid' => ['A B', 'C C', 'D E'] ];
-    $configuration['data'] = array_fill(0, $areas, array());
+    $configuration['data'] = array_fill(0, $areas, []);
 
     foreach ($configuration['data'] as $key => &$area) {
       $area['key'] = chr(((int) $key) + 65);
