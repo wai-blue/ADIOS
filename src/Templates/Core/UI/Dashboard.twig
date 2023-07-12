@@ -186,7 +186,6 @@
     draggableSortable.on('sortable:stop', (e) => {
         const targetColumnIndex = e.newContainer.id.toString().split('-')[1].charCodeAt(0) - 65;
         const cardId = e.data.dragEvent.data.originalSource.id;
-        const cardAction = getCardAction(e.data.dragEvent.data.originalSource.id);
 
         pushToIndex(dataConfiguration[targetColumnIndex]['cards'], deletedCards[cardId], e.newIndex);
 
