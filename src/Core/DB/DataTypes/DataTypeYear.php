@@ -72,4 +72,10 @@ class DataTypeYear extends \ADIOS\Core\DB\DataType
     {
         return $this->get_html_or_csv($value, $params);
     }
+
+
+    public function validate($value): bool
+    {
+        return (int) $value >= 0;
+    }
 }

@@ -43,7 +43,7 @@ class Input extends \ADIOS\Core\View {
     /*             */
     /* __construct */
     /*             */
-    public function __construct(&$adios, $params = null) {
+    public function __construct($adios, array $params = []) {
         $this->adios = $adios;
 
         $this->supported_events = [
@@ -69,7 +69,7 @@ class Input extends \ADIOS\Core\View {
         ];
 
         $this->default_params = [
-            'table_column' => '',
+            'column' => '',
             'type' => '',
             'width' => '',
             'value' => '',
@@ -123,15 +123,6 @@ class Input extends \ADIOS\Core\View {
           }
         }
 
-
-        // nacita parametre z tables a zmerguje s obdrzanymi
-        if ('' != $params['table_column']) {
-            $tmp_col = explode('.', $params['table_column']);
-            $params['default_table'] = $tmp_col[0];
-            $params['default_column'] = $tmp_col[1];
-            $params = parent::params_merge($this->adios->db->tables[$tmp_col[0]][$tmp_col[1]], $params);
-        }
-
         if (!empty($params['model'])) {
           $this->model = $adios->getModel($params['model']);
         }
@@ -140,8 +131,15 @@ class Input extends \ADIOS\Core\View {
           $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
         }
 
-        parent::__construct($adios, $params);
+        // nacita parametre z tables a zmerguje s obdrzanymi
+        if (!empty($params['column'])) {
+          $tmpColumns = $this->model->columns();
+          $params['column'] = parent::params_merge($params, $tmpColumns[$params['column']]);
+        } else {
+          // $params['column'] = $this->model->columns();
+        }
 
+        parent::__construct($adios, $params);
         $this->addCssClass($this->params['type']);
     }
 
@@ -680,19 +678,23 @@ class Input extends \ADIOS\Core\View {
                 ])->render()."
               </div>
               <div style='margin:1em'>
-                ".(new \ADIOS\Core\Views\Inputs\FileBrowser($this->adios, $this->params['uid'], [
-                  "mode" => "select",
-                  "value" => $this->params['value'],
-                  "subdir" => $this->params['subdir'],
-                  "onchange" => "
-                    $('#{$this->params['uid']}_image').attr(
-                      'src',
-                      '{$img_src_base}/' + file
-                    );
+                ".(new \ADIOS\Core\Views\Inputs\FileBrowser(
+                  $this->adios,
+                  [
+                    "uid" => $this->params['uid'],
+                    "mode" => "select",
+                    "value" => $this->params['value'],
+                    "subdir" => $this->params['subdir'],
+                    "onchange" => "
+                      $('#{$this->params['uid']}_image').attr(
+                        'src',
+                        '{$img_src_base}/' + file
+                      );
 
-                    $('#{$this->params['uid']}_browser').hide();
-                  ",
-                ]))->render()."
+                      $('#{$this->params['uid']}_browser').hide();
+                    ",
+                  ]
+                ))->render()."
               </div>
             </div>
           </div>
@@ -703,7 +705,7 @@ class Input extends \ADIOS\Core\View {
       if ('file' == $this->params['type']) {
           $default_src = $this->translate("No file uploaded");
           $file_src_base = "{$this->adios->config['url']}/File?f=";
-          // $upload_params = "type=file&table_column={$this->params['table_column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
+          // $upload_params = "type=file&column={$this->params['column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
           // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
 
           if ('' != $this->params['value']) {
@@ -954,66 +956,71 @@ class Input extends \ADIOS\Core\View {
                   data-initiating-column='{$this->params['initiating_column']}'
                   value='{$value}'
                   data-model='".hsc($this->params['model'])."'
-                  xxx-data-table='".hsc($this->params['table'])."'
-                  xxx-data-key='".hsc($this->params['key'])."'
-                  xxx-data-order='".hsc($this->params['order'])."'
-                  xxx-data-where='".hsc($this->params['where'])."'
-                  xxx-data-lookup-search-type='".hsc($this->params['lookup_search_type'])."'
-                  xxx-data-follow-lookups='".hsc($this->params['follow_lookups'])."'
                   onchange=\"{$onchange_hidden}\"
                 />
-                <input
-                  type='{$input_type}'
-                  name='{$this->params['uid']}_autocomplete_input'
-                  id='{$this->params['uid']}_autocomplete_input'
-                  class='col-md-9 px-1 ".join(' ', $this->classes)."'
-                  style='{$this->params['style']}'
-                  ".$this->generate_input_events().'
-                  value="'.htmlspecialchars($inputText).'"
-                  data-value="'.htmlspecialchars($inputText).'"
-                  title="'.htmlspecialchars($this->params['title']).'"
-                  placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
-                  {$this->params['html_attributes']}
-                  ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-                  autocomplete='off'
-                  onfocus='ui_input_lookup_onkeydown(event, \"{$this->params['uid']}\");'
-                />
-                <div
-                  class='adios ui Input lookup autocomplete shadow-sm col-md-9'
-                  style='display:none;'
-                  id='{$this->params['uid']}_result_div'
-                >
-                  <div id='{$this->params['uid']}_result_div_inner' class='innner' style='text-align:left;' >
+                <div class='".join(' ', $this->classes)."'>
+                  <input
+                    type='{$input_type}'
+                    name='{$this->params['uid']}_autocomplete_input'
+                    id='{$this->params['uid']}_autocomplete_input'
+                    class='px-1'
+                    style='{$this->params['style']}'
+                    ".$this->generate_input_events().'
+                    value="'.htmlspecialchars($inputText).'"
+                    data-value="'.htmlspecialchars($inputText).'"
+                    title="'.htmlspecialchars($this->params['title']).'"
+                    placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
+                    {$this->params['html_attributes']}
+                    ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+                    autocomplete='off'
+                    onfocus='ui_input_lookup_onkeydown(event, \"{$this->params['uid']}\");'
+                  />
+                  <div
+                    class='adios ui Input autocomplete shadow-sm'
+                    style='display:none;'
+                    id='{$this->params['uid']}_result_div'
+                  >
+                    <div id='{$this->params['uid']}_result_div_inner' class='inner shadow'>
+                    </div>
                   </div>
                 </div>
                 <div class='adios ui Input lookup_controls'>
                   ".($this->params['lookup_search_enabled'] && !$this->params['readonly'] ? "
-                    <span class='btn btn-light btn-sm' onclick=\"{$search_onclick}('{$this->params['uid']}')\">
-                      <i
-                        class='icon fas fa-search'
-                        title='".$this->translate('Search in list')."'
-                      ></i>
+                    <span
+                      class='btn btn-light btn-sm'
+                      title='".$this->translate('Search in list')."'
+                      onclick=\"
+                        {$search_onclick}('{$this->params['uid']}')
+                      \"
+                    >
+                      <i class='icon fas fa-search'></i>
                     </span>
                   " : "")."
                   ".($this->params['lookup_detail_enabled'] ? "
-                    <span class='btn btn-light btn-sm' onclick=\"{$detail_onclick}($('#{$this->params['uid']}').val(), '{$this->params['uid']}');\">
-                      <i
-                        id='{$this->params['uid']}_detail_button'
-                        style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;')."'
-                        class='icon fas fa-id-card'
-                        title='".$this->translate("Show details")."' 
-                      ></i>
+                    <span
+                      class='btn btn-light btn-sm'
+                      id='{$this->params['uid']}_detail_button'
+                      style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;')."'
+                      title='".$this->translate("Show details")."' 
+                      onclick=\"
+                        {$detail_onclick}($('#{$this->params['uid']}').val(), '{$this->params['uid']}');
+                      \"
+                    >
+                      <i class='icon fas fa-id-card'></i>
                     </span>
                   " : "")."
                   ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->adios->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='".l('Pridať')."' />" : '').'
                   '.(!$this->params['readonly'] ? "
-                    <span class='btn btn-light btn-sm' onclick=\"ui_input_lookup_set_value('{$this->params['uid']}', 0);\">
-                      <i
-                        id='{$this->params['uid']}_clear_button'
-                        style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;').";'
-                        class='icon fas fa-times'
-                        title='".$this->translate("Clear selection")."' 
-                      ></i>
+                    <span
+                      class='btn btn-light btn-sm'
+                      id='{$this->params['uid']}_clear_button'
+                      style='".($this->params['value'] > 0 && is_array($row) ? '' : 'display:none;').";'
+                      title='".$this->translate("Clear selection")."' 
+                      onclick=\"
+                        ui_input_lookup_set_value('{$this->params['uid']}', 0);
+                      \"
+                    >
+                      <i class='icon fas fa-times'></i>
                     </span>
                   " : '')."
                 </div>

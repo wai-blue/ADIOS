@@ -22,11 +22,12 @@ class Token extends \ADIOS\Core\Model {
   public $tokenTypes = [];
 
   public function __construct(&$adios) {
-    $this->sqlName = "{$adios->config['system_table_prefix']}_tokens";
+    $this->sqlName = "tokens";
     parent::__construct($adios);
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       "type" => [
         "type" => "int",

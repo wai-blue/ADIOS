@@ -15,7 +15,7 @@ namespace ADIOS\Actions\UI\Form;
  */
 class Save extends \ADIOS\Core\Action {
   public function render($params = []) {
-    $saveParams = json_decode($params['values'], TRUE);
+    $saveParams = $params['values'] ?? [];
     $saveParams['id'] = $params['id'];
 
     return $this->adios->getModel($params['model'])->formSave($saveParams);

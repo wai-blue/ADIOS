@@ -2231,7 +2231,7 @@ textarea.form-control {
   }
 }
 
-.btn {
+/* .btn {
   display: inline-block;
   font-weight: 400;
   color: #858796;
@@ -2248,7 +2248,7 @@ textarea.form-control {
   line-height: 1.5;
   border-radius: 0rem;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-}
+} */
 
 @media (prefers-reduced-motion: reduce) {
   .btn {
@@ -3924,7 +3924,7 @@ input[type="button"].btn-block {
 }
 
 .nav-tabs .nav-link:hover, .nav-tabs .nav-link:focus {
-  border-color: #eaecf4 #eaecf4 #dddfeb;
+  border-color: var(--cl-main) transparent transparent;
 }
 
 .nav-tabs .nav-link.disabled {
@@ -3935,7 +3935,7 @@ input[type="button"].btn-block {
 
 .nav-tabs .nav-link.active,
 .nav-tabs .nav-item.show .nav-link {
-  color: #6e707e;
+  color: var(--cl-main);
   background-color: #fff;
   border-color: var(--cl-main) #dddfeb #fff;
 }
@@ -9588,14 +9588,15 @@ a:focus {
 
 #wrapper {
   display: flex;
+  min-height: 100vh;
 }
 
 #wrapper #content-wrapper {
-  background-color: #f8f9fc;
+  /* background-color: #f8f9fc; */
   width: 100%;
   overflow-x: hidden;
-  background-image: linear-gradient(45deg, #f8f9fc 25%, #fafafd 25%, #fafafd 50%, #f8f9fc 50%, #f8f9fc 75%, #fafafd 75%, #fafafd 100%);
-  background-size: 141.42px 141.42px;
+  /* background-image: linear-gradient(45deg, #f8f9fc 25%, #fafafd 25%, #fafafd 50%, #f8f9fc 50%, #f8f9fc 75%, #fafafd 75%, #fafafd 100%);
+  background-size: 141.42px 141.42px; */
 }
 
 #wrapper #content-wrapper #content {
@@ -10110,7 +10111,7 @@ a:focus {
 
 .sidebar {
   width: 6.5rem;
-  height: 100vh;
+  /* height: 100vh; */
   overflow: auto;
 }
 
@@ -10190,7 +10191,7 @@ a:focus {
   color: white;
   text-decoration: none;
   border-radius: 0.2rem;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 .sidebar .nav-item .collapse .collapse-inner .collapse-item:hover,
@@ -11058,14 +11059,18 @@ form.user .btn-user {
 footer.sticky-footer {
   /* padding: 5px; */
   flex-shrink: 0;
-  height: 2em;
-  overflow: hidden;
+  /* height: 2em; */
+  /* overflow: hidden; */
+  position: fixed;
+  left: 0;
+  bottom: 0;
 }
 
 footer.sticky-footer .copyright {
   line-height: 1.5;
-  font-size: 7px;
-  padding: 5px;
+  font-size: 8px;
+  color: white;
+  padding: 2em;
 }
 
 body.sidebar-toggled footer.sticky-footer {

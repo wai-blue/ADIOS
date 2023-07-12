@@ -1,10 +1,12 @@
 <?php
 
-namespace {{ thisWidget.namespace }}\{{ thisWidget.class }}\Models;
+{{ builderInfo.php|raw }}
 
-class {{ thisModel.name }} extends \ADIOS\Core\Model {
+namespace {{ thisModel.namespace }};
 
-  use \{{ thisWidget.namespace }}\{{ thisWidget.class }}\Models\Callbacks\{{ thisModel.name }};
+class {{ thisModel.class }} extends \ADIOS\Core\Model {
+
+  use \{{ thisModel.namespace }}\Callbacks\{{ thisModel.class }};
 
   public ?string $addButtonText = "{{ thisModel.config.addButtonText|raw }}";
   public ?string $formAddButtonText = "{{ thisModel.config.formAddButtonText|raw }}";
@@ -12,7 +14,7 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
 
   public string $sqlName = "{{ thisModel.config.sqlName|raw }}";
   public string $urlBase = "{{ thisModel.config.urlBase|raw }}";
-  public ?array $crud = 
+  public ?array $crud =
 {{ varExport(thisModel.config.crud, "    ")|raw }}
   ;
   public string $tableTitle = "{{ thisModel.config.tableTitle|raw }}";
@@ -23,7 +25,8 @@ class {{ thisModel.name }} extends \ADIOS\Core\Model {
 {{ varExport(thisModel.config.crossTableAssignments, "    ")|raw }}
   ;
 
-  public function columns($columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
 {% for colName, colDefinition in thisModel.config.columns %}
       "{{ colName }}" =>

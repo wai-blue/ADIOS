@@ -25,7 +25,7 @@ class Tags extends \ADIOS\Core\Views\Input {
 
     $html = "<textarea id='{$this->uid}_tag'></textarea>";
     $html .= "<input type='hidden' name='{$this->uid}' id='{$this->uid}'>";
-    $html .= "<div style='display: none' id='{$this->uid}_desc' class='adios ui Form form_description'>".$this->translate("New tag will be created.")."</div>";
+    $html .= "<div style='display: none' id='{$this->uid}_desc' class='input-description'>".$this->translate("New tag will be created.")."</div>";
 
     $html .= "
       <script>

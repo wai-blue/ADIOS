@@ -33,7 +33,7 @@ class Widget {
     $this->fullName = str_replace("ADIOS\\Widgets\\", "", get_class($this));
     $this->shortName = end(explode("/", $this->name));
 
-    $this->adios = &$adios;
+    $this->adios = $adios;
     $this->params = $params;
     $this->gtp = $this->adios->gtp;
 
@@ -75,8 +75,9 @@ class Widget {
     ])["routing"];
   }
 
-  public function translate($string) {
-    return $this->adios->translate($string, $this);
+  public function translate(string $string, array $vars = []): string
+  {
+    return $this->adios->translate($string, $vars, $this);
   }
 
   public function install() {
@@ -99,6 +100,11 @@ class Widget {
     $this->adios->dispatchEventToPlugins("onWidgetAfterModelsLoaded", [
       "widget" => $this,
     ]);
+  }
+
+  public function addSidebarItem($item) {
+    $item['___widgetClassName'] = get_class($this);
+    $this->adios->config['desktop']['sidebarItems'][] = $item;
   }
 
 }

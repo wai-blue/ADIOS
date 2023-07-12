@@ -190,7 +190,9 @@ class Table extends \ADIOS\Core\View
       }
 
       $this->params['buttons']['add']['onclick'] = "
-        window_render('" . $tmpUrl . "/add')
+        window_render(
+          '" . $tmpUrl . "/add'
+        )
       ";
     }
 
@@ -319,6 +321,21 @@ class Table extends \ADIOS\Core\View
 
     foreach ($this->search as $tmpColumn => $tmpFilter) {
       $having[] = [$tmpColumn, Q::columnFilter, $tmpFilter];
+    }
+
+    if (!empty($this->params['fulltext'])) {
+      $havingFulltext = [
+        'logic' => Q::logicOr,
+        'statements' => [],
+      ];
+      foreach ($this->model->columns() as $modelColumn => $modelColumnParams) {
+        if (isset($modelColumnParams['model'])) {
+          $havingFulltext['statements'][] = [Q::having, $modelColumn . ':LOOKUP', Q::like, $this->params['fulltext']];
+        } else if (in_array($modelColumnParams['type'], ['varchar', 'text'])) {
+          $havingFulltext['statements'][] = [Q::having, $modelColumn, Q::like, $this->params['fulltext']];
+        }
+      }
+      $having[] = $havingFulltext;
     }
 
     // query
@@ -538,8 +555,16 @@ class Table extends \ADIOS\Core\View
 
           $moreActionsButtonItems[] = [
             "fa_icon" => "fas fa-search",
-            "text" => $this->translate("Search"),
-            "onclick" => "window_render('{$searchAction}');",
+            "text" => $this->translate("Advanced search"),
+            "onclick" => "
+              window_render(
+                '{$searchAction}',
+                {},
+                function(res) {
+                  ui_table_refresh_by_model('{$this->params['model']}');
+                }
+              );
+            ",
           ];
         }
 
@@ -576,14 +601,35 @@ class Table extends \ADIOS\Core\View
           ];
         }
 
-        $titleButtons = [];
+        $titleLeftContent = [];
+        $titleRightContent = [];
 
         if ($this->params['showAddButton']) {
-          $titleButtons[] = $this->addView('Button', $this->params['buttons']['add']);
+          $titleLeftContent[] = $this->addView('Button', $this->params['buttons']['add']);
         }
 
+        // fulltext search
+        $titleRightContent[] = new \ADIOS\Core\Views\Html($this->adios, [
+          'html' => "
+            <input
+              type='input'
+              id='{$this->uid}_fulltext'
+              class='form-control p-2'
+              style='width:15em'
+              onkeypress='
+                if (event.keyCode == 13) {
+                  event.cancelBubble = true;
+                  ui_table_set_fulltext_search(\"{$params['uid']}\");
+                }
+              '
+              placeholder='".$this->translate("Press Enter to search...")."'
+              value='".ads($this->params['fulltext'])."'
+            />
+          ",
+        ]);
+
         if (_count($moreActionsButtonItems)) {
-          $titleButtons[] = $this->addView('Button', [
+          $titleRightContent[] = $this->addView('Button', [
             "fa_icon" => "fas fa-ellipsis-v",
             "title" => "",
             "onclick" => "window_render('{$searchAction}');",
@@ -592,13 +638,15 @@ class Table extends \ADIOS\Core\View
           ]);
         }
 
+
         if (
           !empty($titleButtons)
           || !empty($this->params['title'])
         ) {
           $html .= $this->addView('Title')
-            ->setLeftButtons($titleButtons)
-            ->setTitle($this->params['title'])
+            ->setLeftContent($titleLeftContent)
+            ->setRightContent($titleRightContent)
+            ->setTitle($this->model->translate($this->params['title']))
             ->render()
           ;
         }
@@ -677,7 +725,7 @@ class Table extends \ADIOS\Core\View
       $html .= "
         <div
           " . $this->main_params() . "
-          data-model='" . ads($this->params['model']) . "'
+          data-model='" . ads(strtolower($this->params['model'])) . "'
           data-refresh-action='" . ads($this->params['refreshAction']) . "'
           data-refresh-params='" . (empty($this->params['uid'])
         ? json_encode($this->params['_REQUEST'])
@@ -744,7 +792,7 @@ class Table extends \ADIOS\Core\View
                 '
               " : "") . "
             >
-              " . nl2br(hsc($col_def['title'])) . "
+              " . nl2br(hsc($this->model->translate($col_def['title']))) . "
               " . ('' == $col_def['unit'] ? '' : '[' . hsc($col_def['unit']) . ']') . "
               <i class='fas fa-chevron-down order_desc'></i>
               <i class='fas fa-chevron-up order_asc'></i>
@@ -911,10 +959,12 @@ class Table extends \ADIOS\Core\View
             'row' => $val,
           ]);
 
-          $onclick = $params['onclick'] ?: "
+          $rowOnclick = $params['onclick'] ?: "
             window_render(
               '" . $this->model->getFullUrlBase(array_merge($params, $val)) . "/' + id + '/edit'
-            )
+            );
+            $(this).closest('.Content').find('.Row').removeClass('highlighted');
+            $(this).closest('.Row').addClass('highlighted');
           ";
 
           $html .= "
@@ -934,7 +984,7 @@ class Table extends \ADIOS\Core\View
                 let base64 = $(this).data('row-values-base64');
                 let rowValues = JSON.parse(Base64.decode(base64));
 
-                {$onclick}
+                {$rowOnclick}
               \"
             >
           ";

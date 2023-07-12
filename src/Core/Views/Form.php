@@ -36,11 +36,9 @@ class Form extends \ADIOS\Core\View
       'id' => '-1',
       'title' => '',
       'formatter' => 'ui_form_formatter',
-      'columns_order' => [],
       'defaultValues' => [],
       'readonly' => false,
       'template' => [],
-      'template_callback' => '',
       'show_save_button' => true,
       'save_button_params' => [],
       'show_close_button' => true,
@@ -49,23 +47,12 @@ class Form extends \ADIOS\Core\View
       'delete_button_params' => [],
       'show_copy_button' => false,
       'copy_button_params' => [],
-      'append_buttons' => [],
-      'form_type' => 'window',
-      'window_uid' => '',
-      'window_params' => [],
-      'show_modal' => false,
+      'formType' => 'window',
+      'windowParams' => [],
       'width' => 700,
       'height' => '',
       'onclose' => '',
-      'hide_id_column' => true,
-      // 'save_action' => 'UI/Form/Save',
-      // 'delete_action' => 'UI/Form/Delete',
-      // 'copy_action' => 'UI/Table/Copy',
-      'do_not_close' => false, // DEPRECATED, je nahradeny parametrom reopen_after_save
-      'reopen_after_save' => $this->adios->getConfig(
-        "ui/form/reopen_after_save",
-        ((int) $params['id'] > 0 ? TRUE : FALSE)
-      ),
+      'reopenAfterSave' => FALSE,
       'onbeforesave' => '',
       'onaftersave' => '',
       'onbeforeclose' => '',
@@ -77,7 +64,6 @@ class Form extends \ADIOS\Core\View
       'onload' => '',
       'simple_insert' => false,
       'javascript' => '',
-      'windowCssClass' => '',
     ], $params);
 
     // nacitanie udajov
@@ -124,7 +110,10 @@ class Form extends \ADIOS\Core\View
     parent::__construct($adios, $params, $parentView);
 
     $this->params['id'] = (int) $this->params['id'];
-    $this->params['columns'] = $this->adios->db->tables[$this->params['table']];
+    $this->params['columns'] = parent::params_merge(
+      $this->adios->db->tables[$this->params['table']],
+      $this->params['columns'] ?? []
+    );
 
     $this->model->onFormBeforeInit($this);
     $this->params = $this->model->formParams($this->data, $this->params);
@@ -190,16 +179,6 @@ class Form extends \ADIOS\Core\View
       $this->saveButton = NULL;
     }
 
-    if ($this->params['show_close_button']) {
-      $this->params['close_button_params']['type'] = 'close';
-
-      if (empty($this->params['close_button_params']['onclick'])) {
-        $this->params['close_button_params']['onclick'] = "ui_form_close('{$this->params['uid']}');";
-      }
-
-      $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
-    }
-
     if ($this->params['show_delete_button']) {
       $this->params['delete_button_params']['type'] = 'delete';
 
@@ -218,7 +197,6 @@ class Form extends \ADIOS\Core\View
           );
         ";
       }
-      $this->params['delete_button_params']['style'] .= 'float:right;';
       $this->deleteButton = $this->addView('Button', $this->params['delete_button_params']);
     }
 
@@ -237,25 +215,24 @@ class Form extends \ADIOS\Core\View
         ";
       }
 
-      $this->params['copy_button_params']['style'] .= 'float:right;';
       $this->copyButton = $this->addView('Button', $this->params['copy_button_params']);
     }
 
-    if (empty($this->params['header'])) {
-      $this->params['window']['header'] = [
-        $this->closeButton,
-        $this->saveButton,
-        $this->deleteButton,
-        $this->copyButton
-      ];
+    $this->params['close_button_params']['type'] = 'close';
+
+    if (empty($this->params['close_button_params']['onclick'])) {
+      $this->params['close_button_params']['onclick'] = "ui_form_close('{$this->params['uid']}');";
     }
 
-    if ('' == $this->params['window_uid']) {
-      $this->params['window_uid'] = $this->params['uid'].'_form_window';
-    }
-    if ('' != $this->params['window_params']['uid']) {
-      $this->params['window_uid'] = $this->params['window_params']['uid'];
-    }
+    $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
+
+
+    // if (empty($this->params['windowParams']['uid'])) {
+    //   $this->params['windowParams']['uid'] = $this->params['uid'].'_form';
+    // }
+    // if (!empty($this->params['windowParams']['uid'])) {
+    //   $this->params['windowUid'] = $this->params['windowParams']['uid'];
+    // }
 
     if ($this->displayMode == 'desktop') {
       if (is_array($this->params['title_params']['left'])) {
@@ -320,14 +297,14 @@ class Form extends \ADIOS\Core\View
                 ".(empty($this->params['columns'][$row]['pattern']) ? "" : "has_pattern")."
               '
             >
-              <div class='adios ui Form form_title'>
-                ".hsc($this->params['columns'][$row]['title'])."
+              <div class='input-title'>
+                ".hsc($this->model->translate($this->params['columns'][$row]['title'] ?? ''))."
               </div>
-              <div class='adios ui Form form_input'>
+              <div class='input-content'>
                 ".$this->Input($row, $this->data, $this->params['model'])."
               </div>
               ".(empty($this->params['columns'][$row]['description']) ? "" : "
-                <div class='adios ui Form form_description'>
+                <div class='input-description'>
                   ".hsc($this->params['columns'][$row]['description'])."
                 </div>
               ")."
@@ -367,18 +344,18 @@ class Form extends \ADIOS\Core\View
           $html .= "
             <div class='adios ui Form subrow'>
               ".(empty($row['title']) ? "" : "
-                <div class='adios ui Form form_title {$row['class']}'>
+                <div class='input-title {$row['class']}'>
                   {$row['title']}
                 </div>
               ")."
               <div
-                class='adios ui Form form_input {$row['class']}'
+                class='input-content {$row['class']}'
                 style='{$row['style']}'
               >
                 {$inputHtml}
               </div>
               ".(empty($row['description']) ? "" : "
-                <div class='adios ui Form form_description'>
+                <div class='input-description'>
                   ".hsc($row['description'])."
                 </div>
               ")."
@@ -400,6 +377,13 @@ class Form extends \ADIOS\Core\View
   {
     $window = $this->findParentView('Window');
 
+    if ($window !== NULL) {
+      $window->setUid(
+        \ADIOS\Core\HelperFunctions::str2uid($this->model->fullName)
+        . ($this->params['id'] <= 0 ? '_add' : '_edit')
+      );
+    }
+    
     if (!_count($this->params['columns'])) {
       $this->adios->console->error("No columns provided: {$this->params['model']}");
     }
@@ -484,10 +468,9 @@ class Form extends \ADIOS\Core\View
             // kazdy element predstavuje jeden tab vo formulari
             foreach ($col['tabs'] as $tab_name => $rows) {
               $tabPages[] = [
-                'title' => $tab_name,
-                'content' => $this->renderRows($rows),
+                'title' => $this->model->translate($tab_name),
+                'content' => [ 'html' => $this->renderRows($rows) ],
               ];
-
             }
 
             $col_html .= $this->addView('Tabs', [
@@ -535,10 +518,10 @@ class Form extends \ADIOS\Core\View
           data-model='{$this->params['model']}'
           data-model-url-base='".ads($this->model->getFullUrlBase($this->params))."'
           data-table='{$this->params['table']}'
-          data-reopen-after-save='{$this->params['reopen_after_save']}'
+          data-reopen-after-save='{$this->params['reopenAfterSave']}'
           data-do-not-close='{$this->params['do_not_close']}'
           data-window-uid='".($window === NULL ? "" : $window->uid)."'
-          data-form-type='{$this->params['form_type']}'
+          data-form-type='{$this->params['formType']}'
           data-is-ajax='".($this->params['__IS_AJAX__'] || $this->adios->isAjax() ? "1" : "0")."'
           data-is-in-window='".($window === NULL ? "0" : "1")."'
         >
@@ -627,12 +610,10 @@ class Form extends \ADIOS\Core\View
     ';
 
     if ($window !== NULL) {
-      $window->setTitle($this->model->formTitleForEditing);
+      $window->setCloseButton($this->closeButton);
+      $window->setTitle($this->model->translate($this->model->formTitleForEditing));
       $window->setHeaderLeft([
-        $this->closeButton,
-        $this->saveButton
-      ]);
-      $window->setHeaderRight([
+        $this->saveButton,
         $this->copyButton,
         $this->deleteButton
       ]);

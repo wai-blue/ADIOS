@@ -1,5 +1,7 @@
 <?php
 
+{{ builderInfo.php|raw }}
+
 require("src/Init.php");
 
 echo (new MyAdiosApp($config))->render();

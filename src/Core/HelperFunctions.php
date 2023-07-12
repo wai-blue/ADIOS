@@ -176,4 +176,31 @@ class HelperFunctions {
     }
     return $result;
   }
+
+  /**
+   * Funkcia slúži na rekurzívny merge viacúrovňových polí.
+   *
+   * @version 1
+   *
+   * @internal
+   * @param array $orig Pole pôvodných parametrov
+   * @param array $new Pole parametrov, ktoré aktualizujú a dopĺňajú $params
+   *
+   * @return array Zmergované výsledné pole
+   */
+  public static function arrayMergeRecursively(array $orig, array $new): array
+  {
+    foreach ($new as $key => $val) {
+      if (is_array($val)) {
+        $orig[$key] = self::arrayMergeRecursively(
+          $orig[$key] ?? [],
+          $val
+        );
+      } else {
+        $orig[$key] = $val;
+      }
+    }
+
+    return $orig;
+  }
 }

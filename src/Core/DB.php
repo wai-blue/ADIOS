@@ -242,7 +242,8 @@ class DB
 
   public function select(
     \ADIOS\Core\Model $model,
-    array $modifiers = []
+    array $modifiers = [],
+    string $tableAlias = ''
   ) : \ADIOS\Core\DB\Query
   {
     $query = new \ADIOS\Core\DB\Query(
@@ -250,6 +251,15 @@ class DB
       $model,
       \ADIOS\Core\DB\Query::select
     );
+
+    if (!empty($tableAlias)) {
+      $query->add([
+        \ADIOS\Core\DB\Query::selectModifier,
+        \ADIOS\Core\DB\Query::tableAlias,
+        $tableAlias
+      ]);
+    }
+
     foreach ($modifiers as $modifier) {
       $query->add([
         \ADIOS\Core\DB\Query::selectModifier,
@@ -298,7 +308,7 @@ class DB
       foreach ($model->indexes() as $index) {
         if (
           $index['type'] == 'unique'
-          && count((array) $index['columns']) == 1 # ignoring complex unique indexes
+          && count((array) $index['columns']) == 1
         ) {
           foreach ($index['columns'] as $col) {
             $unique[] = $col;
@@ -405,8 +415,8 @@ class DB
                 $modelAllDataCount = count($modelAllData);
                 if ($modelAllDataCount == 0) break;
 
-                $rand = !in_array($col_name, $unique) 
-                  ? rand(0, count($modelAllData) - 1) 
+                $rand = !in_array($col_name, $unique)
+                  ? rand(0, count($modelAllData) - 1)
                   : $modelAllDataCount - 1
                 ;
 
@@ -434,7 +444,7 @@ class DB
               floor(count($model->getAll()) / 3600) % 24,
               floor(count($model->getAll()) / 60) % 60,
               count($model->getAll()) % 60
-            ); 
+            );
             $random_val = $random_val->format("Y-m-d H:i:s");
           } else if (in_array($col_name, $unique) && $col_definition['type'] == 'date') {
             $random_val = new \DateTime();

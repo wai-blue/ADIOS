@@ -1,0 +1,23 @@
+<canvas id="{{ params.uid }}-chart-{{ params.type }}"></canvas>
+
+<script>
+  var config = {
+    type: '{{ params.type }}',
+    data: {
+      labels: ['{{ params.labelModel|join("', '")|raw }}'],
+      datasets: {{ params.datasets|json_encode|raw }},
+    },
+    options: {
+      responsive: true,
+      title: {
+        display: true,
+        text: 'Chart.js Pie Chart'
+      },
+      legend: {
+        position: 'top',
+      }
+    },
+  };
+
+  new Chart(document.getElementById('{{ params.uid }}-chart-{{ params.type }}').getContext('2d'), config);
+</script>

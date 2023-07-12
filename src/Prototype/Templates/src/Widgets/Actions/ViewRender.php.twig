@@ -1,12 +1,20 @@
 <?php
 
+{{ builderInfo.php|raw }}
+
 namespace {{ thisAction.namespace }};
 
 class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
+
   public function render() {
     $view = $this->adios->view->create(
       "{{ thisAction.config.view }}",
-{{ varExport(thisAction.config.params, "      ")|raw }}
+      array_merge(
+        [
+          'windowParams' => $this->params['windowParams'] ?? [],
+        ],
+{{ varExport(thisAction.config.params, "        ")|raw }}
+      )
     );
 
     return $view->render();

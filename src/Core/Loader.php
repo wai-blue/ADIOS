@@ -20,7 +20,7 @@ spl_autoload_register(function ($class) {
 
   if (strpos($class, "ADIOS/") === FALSE) return;
 
-  $loaded = @include(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
+  $loaded = @include_once(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
 
   if (!$loaded) {
 
@@ -30,14 +30,14 @@ spl_autoload_register(function ($class) {
 
       // najprv skusim hladat core akciu
       $tmp = dirname(__FILE__)."/Actions/{$class}.php";
-      if (!@include($tmp)) {
+      if (!@include_once($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
         $widgetPath = explode("/", $class);
         $widgetName = array_pop($widgetPath);
         $widgetPath = join("/", $widgetPath);
 
-        if (!@include($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+        if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
           // ak ani widgetovska, skusim plugin
           $class = str_replace("Plugins/", "", $class);
           $pathLeft = "";
@@ -69,14 +69,14 @@ spl_autoload_register(function ($class) {
         throw new \Exception("ADIOS is not loaded.");
       }
 
-      if (!@include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
-        include($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
+      if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
+        include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
       }
     } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
       foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
-        if (include("{$pluginFolder}/{$m[1]}/Main.php")) {
+        if (include_once("{$pluginFolder}/{$m[1]}/Main.php")) {
           break;
-        } else if (include("{$pluginFolder}/{$m[1]}.php")) {
+        } else if (include_once("{$pluginFolder}/{$m[1]}.php")) {
           break;
         }
       }
@@ -86,13 +86,18 @@ spl_autoload_register(function ($class) {
       $testFile = __DIR__."/../../tests/{$class}.php";
 
       if (is_file($testFile)) {
-        require($testFile);
+        include_once($testFile);
       } else {
-        require($___ADIOSObject->config['dir']."/../tests/{$class}.php");
+        include_once($___ADIOSObject->config['dir']."/../tests/{$class}.php");
       }
 
+    } else if (preg_match('/ADIOS\/Web\/([\w\/]+)/', $class, $m)) {
+      $class = str_replace("ADIOS/Web/", "", $class);
+
+      include_once($___ADIOSObject->config['dir']."/Web/{$class}.php");
+
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
-      include(__DIR__."/../{$m[1]}.php");
+      include_once(__DIR__."/../{$m[1]}.php");
     }
   }
 });
@@ -142,6 +147,7 @@ class Loader
   public $userNotifications = NULL;
   public $permissions = NULL; // objekt triedy Permissions
   public $test = NULL;
+  public $web = NULL;
 
   public array $assetsUrlMap = [];
 
@@ -149,6 +155,7 @@ class Loader
   public array $actionStack = [];
 
   public string $dictionaryFilename = "Core-Loader";
+  public array $dictionary = [];
 
   public array $classFactories = [];
 
@@ -187,10 +194,6 @@ class Loader
     if (empty($this->config['rewrite_base'])) $this->config['rewrite_base'] = "";
 
     $this->srcDir = realpath(__DIR__."/..");
-
-    if (empty($this->config['system_table_prefix'])) {
-      $this->config['system_table_prefix'] = "adios";
-    }
 
     if (empty($this->config['session_salt'])) {
       $this->config['session_salt'] = rand(100000, 999999);
@@ -398,6 +401,11 @@ class Loader
       // object pre kontrolu permissions
       $this->permissions = new \ADIOS\Core\Permissions($this);
 
+      // inicializacia web renderera (byvala CASCADA)
+      if (isset($this->config['web']) && is_array($this->config['web'])) {
+        $this->web = new \ADIOS\Core\Web\Loader($this, $this->config['web']);
+      }
+
       // timezone
       date_default_timezone_set($this->config['timezone']);
 
@@ -439,15 +447,15 @@ class Loader
                 $this->email->addTo($email);
                 $this->email->setSubject(
                   $config["application_name"].
-                  " - ".$this->translate("password reset", $this)
+                  " - ".$this->translate("password reset", [], $this)
                 );
                 $this->email->setHtmlMessage("
                   <h4>
                     {$config['application_name']}
-                    - ". $this->translate("password reset", $this)."
+                    - ". $this->translate("password reset", [], $this)."
                   </h4>
                   <p>"
-                    .$this->translate("To recover a forgotten password, click on the link below.", $this).
+                    .$this->translate("To recover a forgotten password, click on the link below.", [], $this).
                   "</p>
                   <a href='{$config['url']}/PasswordReset?token={$passwordResetToken}'>
                     {$config['url']}/PasswordReset?token={$passwordResetToken}
@@ -462,13 +470,13 @@ class Loader
             } else {
               $this->userPasswordReset["error"] = TRUE;
               $this->userPasswordReset["errorMessage"] =
-                $this->translate("The entered e-mail address does not exist.", $this)
+                $this->translate("The entered e-mail address does not exist.", [], $this)
               ;
             }
           } else {
             $this->userPasswordReset["error"] = TRUE;
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Email cannot be empty. Fill the email field.", $this)
+              $this->translate("Email cannot be empty. Fill the email field.", [], $this)
             ;
           }
         }
@@ -482,19 +490,19 @@ class Loader
 
           if ($newPassword == "") {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("New password cannot be empty.", $this)
+              $this->translate("New password cannot be empty.", [], $this)
             ;
           } else if ($newPassword2 == "") {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Repeated new password cannot be empty.", $this)
+              $this->translate("Repeated new password cannot be empty.", [], $this)
             ;
           } else if ($newPassword != $newPassword2) {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Entered passwords do not match.", $this)
+              $this->translate("Entered passwords do not match.", [], $this)
             ;
           } else if (strlen($newPassword) < 8) {
             $this->userPasswordReset["errorMessage"] =
-              $this->translate("Minimum password length is 8 characters.", $this)
+              $this->translate("Minimum password length is 8 characters.", [], $this)
             ;
           } else {
             $this->userPasswordReset["error"] = FALSE;
@@ -510,7 +518,7 @@ class Loader
                 $newPassword
               );
 
-              header("Location: {$this->config['url']}");
+              header('Location: ' . $this->config['url']);
               exit();
             }
           }
@@ -560,7 +568,7 @@ class Loader
         )) {
           // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
           // nevyzadoval form resubmission
-          header("Location: {$this->config['url']}");
+              header('Location: ' . $this->config['url']);
           exit();
         } else {
           $this->userProfile = [];
@@ -600,8 +608,14 @@ class Loader
         $this->twig->addExtension(new \Twig\Extension\DebugExtension());
         $this->twig->addFunction(new \Twig\TwigFunction(
           'translate',
-          function ($string) {
-            return $this->translate($string, $this->actionObject);
+          function ($string, $objectClassName = "") {
+            if (!class_exists($objectClassName)) {
+              $object = $this->actionObject;
+            } else {
+              $object = new $objectClassName($this);
+            }
+
+            return $this->translate($string, [], $object);
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
@@ -798,7 +812,6 @@ class Loader
     if (strlen($toLanguage) == 2) {
       if (empty($object->dictionaryFilename)) {
         $dictionaryFilename = strtr(get_class($object), "./\\", "---");
-        $dictionaryFilename = str_replace("ADIOS-", "", $dictionaryFilename);
       } else {
         $dictionaryFilename = $object->dictionaryFilename;
       }
@@ -815,7 +828,8 @@ class Loader
     return $dictionary;
   }
 
-  public function translate($string, $object, $toLanguage = "") {
+  public function translate(string $string, array $vars, $object = NULL, $toLanguage = ""): string {
+    if ($object === NULL) $object = $this;
     if (empty($toLanguage)) {
       $toLanguage = $this->config['language'] ?? "en";
     }
@@ -824,24 +838,45 @@ class Loader
       return $string;
     }
 
-    $dictionary = [];
+    if (empty($this->dictionary[$toLanguage])) {
+      $this->dictionary[$toLanguage] = [];
 
-    if (empty($object->dictionary[$toLanguage])) {
-      $dictionary[$toLanguage] = $this->loadDictionary($object, $toLanguage);
+      $dictionaryFiles = \ADIOS\Core\HelperFunctions::scanDirRecursively("{$this->config['dir']}/Lang");
+
+      foreach ($dictionaryFiles as $file) {
+        include("{$this->config['dir']}/Lang/{$file}");
+
+        $this->dictionary[$toLanguage] =  \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+          $this->dictionary[$toLanguage],
+          $dictionary
+        );
+      }
     }
 
-    // // $dictionary[$toLanguage] = $object->dictionary[$toLanguage] ?? [];
-    // if (get_class($object) == "ADIOS\\Widgets\\Orders\\Models\\Order") {
-    //   var_dump($string);
-    //   var_dump(get_class($object));
-    //   print_r($dictionary);exit;
-    //   }
+    $dictionary = $this->dictionary[$toLanguage] ?? [];
+    $objectClassName = get_class($object);
+    foreach (explode("\\", $objectClassName) as $namespaceItem) {
+      if (is_array($dictionary[$namespaceItem])) {
+        $dictionary = $dictionary[$namespaceItem];
+      } else {
+        break;
+      }
+    }
 
-    if (!isset($dictionary[$toLanguage][$string])) {
-      return $string;
+    if (!isset($dictionary[$string])) {
+      $translated = $string;
+      if ($this->getConfig('debugTranslations', FALSE)) {
+        $translated .= ' ' . get_class($object);
+      }
     } else {
-      return $dictionary[$toLanguage][$string];
+      $translated = $dictionary[$string];
     }
+
+    foreach ($vars as $varName => $varValue) {
+      $translated = str_replace('{{ ' . $varName . ' }}', $varValue, $translated);
+    }
+
+    return $translated;
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1104,7 +1139,6 @@ class Loader
         // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
         // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
         // povodne $params['action'], cize requestovana URLka.
-
         foreach ($this->routing as $routePattern => $route) {
           if (preg_match($routePattern, $params['action'], $m)) {
             // povodnu $params['action'] nahradim novou $route['action']
@@ -1188,13 +1222,8 @@ class Loader
 
       return $this->renderAction($this->action, $params);
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      if ($this->isAjax()) {
-        echo $this->renderFatal($e->getMessage());
-        exit();
-      } else {
-        header('Location: ' . $this->config['url']);
-        exit;
-      }
+      echo $this->renderFatal($e->getMessage());
+      exit;
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
@@ -1234,7 +1263,7 @@ class Loader
       // Dusan 31.5.2023: Tento sposob zapisu akcii je deprecated.
       $actionClassName = 'ADIOS\\Actions\\' . str_replace('/', '\\', $action);
 
-      $this->console->warning('Deprecated class name for action ' . $action . '.');
+      // $this->console->warning('[ADIOS] Deprecated class name for action ' . $action . '.');
     }
 
     return $actionClassName;
@@ -1324,15 +1353,16 @@ class Loader
           TRUE
         );
       } else {
-        $actionHtml = $this->renderFatal(
-          '<div style="margin-bottom:1em;">'
-            . get_class($e) . ': ' . $e->getMessage()
-          . '</div>'
-          . '<pre style="font-size:0.75em;font-family:Courier New">'
-            . $e->getTraceAsString()
-          . '</pre>',
-          TRUE
-        );
+        // $actionHtml = $this->renderFatal(
+        //   '<div style="margin-bottom:1em;">'
+        //     . get_class($e) . ': ' . $e->getMessage()
+        //   . '</div>'
+        //   . '<pre style="font-size:0.75em;font-family:Courier New">'
+        //     . $e->getTraceAsString()
+        //   . '</pre>',
+        //   TRUE
+        // );
+        $actionHtml = $this->renderFatal($this->renderExceptionHtml($e));
       }
     }
 
@@ -1390,42 +1420,62 @@ class Loader
       ]);
     } else {
       return "
-        <div class='alert alert-danger' role='alert'>
+        <div class='alert alert-danger' role='alert' style='z-index:99999999'>
           ".($isHtml ? $message : hsc($message))."
         </div>
       ";
     }
   }
 
-  public function renderExceptionWarningHtml($exception) {
+  public function renderHtmlFatal($message) {
+    return $this->renderFatal($message, TRUE);
+  }
+
+
+  public function renderExceptionHtml($exception) {
 
     $traceLog = "";
     foreach ($exception->getTrace() as $item) {
       $traceLog .= "{$item['file']}:{$item['line']}\n";
     }
 
+    $errorMessage = $exception->getMessage();
+    $errorHash = md5(date("YmdHis").$errorMessage);
+
+    $errorDebugInfoHtml = "
+      <div class='adios exception debug'>
+        Error hash: {$errorHash} (see error log file for more information)<br/>
+        ".get_class($exception)."<br/>
+        Stack trace:<br/>
+        <div class='trace-log'>{$traceLog}</div>
+      </div>
+    ";
+
+    $showMoreInformationButton = "
+      <a href='javascript:void(0);' onclick='$(this).next(\"div\").show(); $(this).hide();'>
+        ".$this->translate("Show more information", [], $this)."
+      </a>
+    ";
+
+    $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
+
     switch (get_class($exception)) {
       case 'ADIOS\Core\Exceptions\DBException':
-        $errorMessage = $exception->getMessage();
-        $errorHash = md5(date("YmdHis").$errorMessage);
-        // $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
         $html = "
-          <div style='text-align:center;font-size:5em;color:red'>
-            🥴
-          </div>
-          <div style='margin-top:1em;margin-bottom:1em;'>
+          <div class='adios exception emoji'>🥴</div>
+          <div class='adios exception message'>
             Oops! Something went wrong with the database.
             See logs for more information or contact the support.<br/>
           </div>
-          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>{$errorMessage}</div>
-          <div style='color:gray;font-size:0.8em;'>
-            {$errorHash}<br/>
-            ".get_class($exception)."<br/>
-            <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
-            <div class='trace-log' style='display:none'>{$traceLog}</div>
+          <div class='adios exception message'>
+            {$errorMessage}
+          </div>
+          {$showMoreInformationButton}
+          <div style='display:none' class='adios exception more-information'>
+            {$errorDebugInfoHtml}
           </div>
         ";
-        break;
+      break;
       case 'Illuminate\Database\QueryException':
       case 'ADIOS\Core\Exceptions\DBDuplicateEntryException':
 
@@ -1450,6 +1500,9 @@ class Loader
           foreach ($indexes[$invalidIndex]['columns'] as $columnName) {
             $invalidColumns[] = $columns[$columnName]["title"];
           }
+        } else {
+          preg_match("/Duplicate entry '(.*?)' for key '(.*?)'/", $dbError, $m);
+          $invalidColumns = [$m[2]];
         }
 
         switch ($errorNo) {
@@ -1465,50 +1518,38 @@ class Loader
         }
 
         $html = "
-          <div style='text-align:center;font-size:5em;color:red'>
-            <i class='fas fa-copy'></i>
-          </div>
-          <div style='margin-top:1em;margin-bottom:3em;text-align:center;color:red;'>
-            ".$this->translate($errorMessage, $this)."<br/>
+          <div class='adios exception emoji'>🥴</div>
+          <div class='adios exception message'>
+            ".$this->translate($errorMessage, [], $this)."<br/>
             <br/>
             <b>".join(", ", $invalidColumns)."</b>
           </div>
-          <a href='javascript:void(0);' onclick='$(this).next(\"div\").slideDown();'>
-          ".$this->translate("Show more information", $this)."
-          </a>
-          <div style='display:none'>
-            <div style='color:red;margin-bottom:1em;font-family:courier;font-size:8pt;max-height:10em;overflow:auto;'>
-              {$dbError}<br/>
-              {$dbQuery}<br/>
-              {$initiatingModelName}
-            </div>
-            <div style='color:gray;font-size:0.8em;'>
-              Error # {$errorNo}<br/>
-              ".get_class($exception)."<br/>
-              <a href='javascript:void(0);' onclick='$(this).closest(\"div\").find(\".trace-log\").show()'>Show/Hide trace log</a><br/>
-              <div class='trace-log' style='display:none'>{$traceLog}</div>
-            </div>
+          {$showMoreInformationButton}
+          <div style='display:none' class='adios exception more-information'>
+            {$dbError}
+            {$errorDebugInfoHtml}
           </div>
         ";
-        break;
+      break;
       default:
         $html = "
-          <div style='text-align:center;font-size:5em;color:red'>
-            🥴
-          </div>
-          <div style='margin-top:1em;margin-bottom:1em;'>
+          <div class='adios exception emoji'>🥴</div>
+          <div class='adios exception message'>
             Oops! Something went wrong.
             See logs for more information or contact the support.<br/>
           </div>
-          <div style='color:red;margin-bottom:1em;white-space:pre;font-family:courier;font-size:0.8em;overflow:auto;'>".$exception->getMessage()."</div>
-          <div style='color:gray'>
-            ".get_class($exception)."
+          <div class='adios exception message'>
+            ".$exception->getMessage()."
+          </div>
+          {$showMoreInformationButton}
+          <div style='display:none' class='adios exception more-information'>
+            {$errorDebugInfoHtml}
           </div>
         ";
-        break;
+      break;
     }
 
-    return $this->renderHtmlWarning($html);
+    return $html;//$this->renderHtmlWarning($html);
   }
 
   public function renderHtmlWarning($warning) {
@@ -1601,12 +1642,12 @@ class Loader
           $this->saveConfig($value, $tmpPath.'/');
         } else if ($value === NULL) {
           $this->db->query("
-            delete from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
+            delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
             where `path` like '".$this->db->escape($tmpPath)."%'
           ");
         } else {
           $this->db->query("
-            insert into `{$this->gtp}_{$this->config['system_table_prefix']}_config` set
+            insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
               `path` = '".$this->db->escape($tmpPath)."',
               `value` = '".$this->db->escape($value)."'
             on duplicate key update
@@ -1621,7 +1662,7 @@ class Loader
   public function saveConfigByPath(string $path, $value) {
     if (!empty($path)) {
       $this->db->query("
-        insert into `{$this->gtp}_{$this->config['system_table_prefix']}_config` set
+        insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
           `path` = '".$this->db->escape($path)."',
           `value` = '".$this->db->escape($value)."'
         on duplicate key update
@@ -1634,7 +1675,7 @@ class Loader
   public function deleteConfig($path) {
     if (!empty($path)) {
       $this->db->query("
-        delete from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
+        delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
         where `path` like '".$this->db->escape($path)."%'
       ");
     }
@@ -1645,7 +1686,7 @@ class Loader
       $queryOk = $this->db->query("
         select
           *
-        from `{$this->gtp}_{$this->config['system_table_prefix']}_config`
+        from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
         order by id asc
       ");
 
@@ -1817,7 +1858,7 @@ class Loader
           // update last_login_time a last_login_ip
           $clientIp = $this->getClientIpAddress();
           $this->db->query("
-            UPDATE {$this->gtp}_{$this->config['system_table_prefix']}_users
+            UPDATE ".(empty($this->gtp) ? '' : $this->gtp . '_')."users
             SET
               last_login_time = '".date('Y-m-d H:i:s')."',
               last_login_ip = '{$clientIp}',
@@ -1986,10 +2027,10 @@ class Loader
     foreach ($this->config['available_languages'] as $language) {
       $js .= "
         adios_language_translations['{$language}'] = {
-          'Confirmation': '".ads($this->translate("Confirmation", $this, $language))."',
-          'OK, I understand': '".ads($this->translate("OK, I understand", $this, $language))."',
-          'Cancel': '".ads($this->translate("Cancel", $this, $language))."',
-          'Warning': '".ads($this->translate("Warning", $this, $language))."',
+          'Confirmation': '".ads($this->translate("Confirmation", [], $this, $language))."',
+          'OK, I understand': '".ads($this->translate("OK, I understand", [], $this, $language))."',
+          'Cancel': '".ads($this->translate("Cancel", [], $this, $language))."',
+          'Warning': '".ads($this->translate("Warning", [], $this, $language))."',
         };
       ";
     }

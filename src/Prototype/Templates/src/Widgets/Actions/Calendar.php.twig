@@ -1,5 +1,7 @@
 <?php
 
+{{ builderInfo.php|raw }}
+
 namespace {{ thisAction.namespace }};
 
 class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
@@ -74,8 +76,8 @@ class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
                   $('.navbar').hide();
                   $('.fc-button').hide();
                   $('#calendar_filter').hide();
-                  $('#adios_main_content').css('padding', '0px');
-                  $('#adios_main_content').css('zoom', '0.55');
+                  $('.adios.main-content').css('padding', '0px');
+                  $('.adios.main-content').css('zoom', '0.55');
                   $('#fc-dom-1').append('<span id=\"personName\"> - " . $this->adios->userProfile['name'] . " " . $this->adios->userProfile['surname'] . "</p>');
                   window.print();
                   $('#accordionSidebar').show();
@@ -84,8 +86,8 @@ class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
                   $('.navbar').show();
                   $('.fc-button').show();
                   $('#calendar_filter').show();
-                  $('#adios_main_content').css('padding', '1.5rem');
-                  $('#adios_main_content').css('zoom', '1');
+                  $('.adios.main-content').css('padding', '1.5rem');
+                  $('.adios.main-content').css('zoom', '1');
                   $('#personName').hide();
                   $('#personName').remove();
                 }

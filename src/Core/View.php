@@ -14,23 +14,24 @@ class View {
   
   public ?\ADIOS\Core\Loader $adios = null;
 
-  var string $uid = "";
-  var bool $useSession = FALSE;
-  var array $params = [];
-  var string $fullName = "";
-  var string $shortName = "";
-  var array $classes = [];
-  var array $html = [];
-  var array $attrs = [];
+  protected string $uid = "";
 
-  var $displayMode = '';
+  public bool $useSession = FALSE;
+  public array $params = [];
+  public string $fullName = "";
+  public string $shortName = "";
+  public array $classes = [];
+  public array $html = [];
+  public array $attrs = [];
 
-  var $window = NULL;
+  public $displayMode = '';
+
+  public $window = NULL;
 
   public ?\ADIOS\Core\View $parentView = NULL;
   public array $childViews = [];
 
-  var string $twigTemplate = "";
+  public string $twigTemplate = "";
   
   /**
    * languageDictionary
@@ -49,9 +50,9 @@ class View {
    * @return void
    */
   public function __construct(
-   object $adios,
-   array $params = [],
-   ?\ADIOS\Core\View $parentView = NULL
+    ?\ADIOS\Core\Loader $adios = NULL,
+    array $params = [],
+    ?\ADIOS\Core\View $parentView = NULL
   ) {
     if (!isset($adios->viewsCounter)) {
       $adios->viewsCounter = 0;
@@ -109,8 +110,12 @@ class View {
     }
 
     if ($this->displayMode == 'window') {
-
-      $this->window = $this->adios->view->create('Window', []);
+      if (empty($this->params['windowParams']['uid'])) {
+        $this->params['windowParams']['uid'] = $this->uid . '_window';
+      }
+      $this->window = $this->adios->view->create(
+        'Window' . ($this->params['windowParams']['uid'] == '' ? '' : '#' . $this->params['windowParams']['uid'])
+      );
       $this->window->addViewAsObject($this);
       $this->parentView = $this->window;
     }
@@ -135,12 +140,20 @@ class View {
     }
   }
 
+  public function setUid(string $uid): \ADIOS\Core\View
+  {
+    $this->uid = $uid;
+    return $this;
+  }
 
-  public function saveParamsToSession(string $uid = "", $params = NULL) {
+
+  public function saveParamsToSession(string $uid = "", $params = NULL)
+  {
     $_SESSION[_ADIOS_ID]['views'][$uid ?? $this->uid] = is_array($params) ? $params : $this->params;
   }
   
-  public function loadParamsFromSession(string $uid = "") {
+  public function loadParamsFromSession(string $uid = "")
+  {
     $params = $_SESSION[_ADIOS_ID]['views'][$uid ?? $this->uid];
     $params["uid"] = $uid ?? $this->uid;
     return $params;
@@ -203,14 +216,16 @@ class View {
    * @param  mixed $toLanguage
    * @return void
    */
-  public function translate($string) {
-    return $this->adios->translate($string, $this);
+  public function translate(string $string, array $vars = []): string
+  {
+    return $this->adios->translate($string, $vars, $this);
   }
   
   /**
    * @internal
    */
-  public function add($subviews, $panel = 'default') {
+  public function add($subviews, $panel = 'default')
+  {
     if (is_array($subviews)) {
       foreach ($subviews as $subview) {
         $this->add($subview, $panel);
@@ -237,11 +252,11 @@ class View {
    * @param  mixed $params
    * @return void
    */
-  public function cadd($component_name, $params = null) {
-    $this->add($this->adios->view->create($component_name, $params));
+  // public function cadd($component_name, $params = null) {
+  //   $this->add($this->adios->view->create($component_name, $params));
 
-    return $this;
-  }
+  //   return $this;
+  // }
   
   /**
    * param
@@ -251,15 +266,15 @@ class View {
    * @param  mixed $param_value
    * @return void
    */
-  public function param($param_name, $param_value = null) {
-    if (null === $param_value) {
-      return $this->params[$param_name];
-    } else {
-      $this->params[$param_name] = $param_value;
-    }
+  // public function param($param_name, $param_value = null) {
+  //   if (null === $param_value) {
+  //     return $this->params[$param_name];
+  //   } else {
+  //     $this->params[$param_name] = $param_value;
+  //   }
 
-    return $this;
-  }
+  //   return $this;
+  // }
 
   /**
    * Funkcia slúži na rekurzívny merge viacúrovňových polí.
@@ -272,7 +287,8 @@ class View {
    *
    * @return array Zmergované výsledné pole
    */
-  public function params_merge($params, $update) {
+  public function params_merge($params, $update)
+  {
     if (!is_array($params)) {
       $params = [];
     }
@@ -301,7 +317,8 @@ class View {
    * @param  mixed $panel
    * @return void
    */
-  public function html($new_html = null, $panel = 'default') {
+  public function html($new_html = null, $panel = 'default')
+  {
     if (null === $new_html) {
       return $this->html[$panel];
     } else {
@@ -319,7 +336,8 @@ class View {
    * @param  mixed $event_js
    * @return void
    */
-  public function on($event_name, $event_js) {
+  public function on($event_name, $event_js)
+  {
     $this->params['on'][$event_name] .= $event_js;
 
     return $this;
@@ -332,41 +350,45 @@ class View {
    * @param  mixed $cssClass
    * @return void
    */
-  public function addCssClass(string $cssClass): \ADIOS\Core\View {
+  public function addCssClass(string $cssClass): \ADIOS\Core\View
+  {
     if (!empty($cssClass)) $this->classes[] = $cssClass;
     return $this;
   }
 
-  public function getCssClassesString(): string {
-    return join(" ", $this->classes);
-  }
-  
   /**
-   * remove_class
+   * removeCssClass
    *
    * @internal
-   * @param  mixed $class_name
+   * @param  mixed $cssClass
    * @return void
    */
-  public function remove_class($class_name) {
-    $tmp_classes = [];
-    foreach ($this->classes as $tmp_class) {
-      if ($tmp_class != $class_name) {
-        $tmp_classes[] = $tmp_class;
+  public function removeCssClass(string $cssClass): \ADIOS\Core\View
+  {
+    $tmpClasses = [];
+    foreach ($this->classes as $class) {
+      if ($class != $cssClass) {
+        $tmpClasses[] = $class;
       }
     }
-    $this->classes = $tmp_classes;
+    $this->classes = $tmpClasses;
 
     return $this;
   }
 
+  public function getCssClassesString(): string
+  {
+    return join(" ", $this->classes);
+  }
+  
   /**
    * Used to return values for TWIG renderer. Applies only in TWIG template of the action.
    *
    * @internal
    * @return array Array of parameters used in TWIG
    */
-  public function getTwigParams(): array {
+  public function getTwigParams(): array
+  {
     return [];
   }
   
@@ -419,16 +441,20 @@ class View {
     return $this->applyDisplayMode((string) $html);
   }
 
-  public function applyDisplayMode(string $html) : string
+  public function applyDisplayMode(string $content) : string
   {
     switch ($this->displayMode) {
       case 'window':
-        $this->window->setContent($html);
+        $this->window->setContent($content);
         if (is_array($this->params['windowParams'])) {
           if (!empty($this->params['windowParams']['title'])) {
             $this->window->setTitle($this->params['windowParams']['title']);
           }
           $this->window->addCssClass($this->params['windowParams']['cssClass'] ?? '');
+
+          if ($this->params['windowParams']['modal']) {
+            $this->window->addCssClass('modal');
+          }
         }
 
         $html = $this->window->render();
@@ -436,11 +462,11 @@ class View {
       case 'desktop':
         $title = $this->addView('Title', ['title' => 'asdf']);
         // $html = $title->render() . $html;
-        $html = $html;
+        $html = $content;
       break;
       case 'inline':
       default:
-        $html = $html;
+        $html = $content;
       break;
     }
 

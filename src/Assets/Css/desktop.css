@@ -93,6 +93,36 @@ h3 { padding-bottom: 0.5em; }
 
 #adios_window_loader {display:none;}
 
+.adios.exception.emoji {
+  text-align: center;
+  font-size: 5em;
+}
+
+.adios.exception.message {
+  color: red;
+  margin-bottom: 1em;
+  font-family: courier;
+  max-height: 10em;
+  padding: 1em;
+  overflow: auto;
+  text-align: center;
+}
+
+.adios.exception.more-information {
+  color: gray;
+  padding: 1em 0;
+}
+
+.adios.exception.debug {
+  color: gray;
+  font-size: 0.8em;
+  padding-top: 1em;
+}
+
+.adios.exception.debug .trace-log {
+  padding-left: 1em;
+}
+
 .adios_menu {width:100%;-webkit-backface-visibility:hidden;-webkit-overflow-scrolling: touch;height:40px;position:fixed;top:0px;left:0px;z-index:3000;display:none;}
 .adios_menu_controls {float:right;}
 .adios_menu_controls i.menu_icon {float:right;padding:5px;text-align:center;}
@@ -193,7 +223,7 @@ h3 { padding-bottom: 0.5em; }
 
 
 .adios_main_wrapper {display:flex;height:100%;}
-.adios_shortcuts {;width:50px;padding-top:40px;border-right:1px solid #EEEEEE;height:100vh;position:fixed;top:40px;transition: margin 0.3s;z-index:50;}
+.adios_shortcuts {width:50px;padding-top:40px;border-right:1px solid #EEEEEE;height:100vh;position:fixed;top:40px;transition: margin 0.3s;z-index:50;}
 .adios_shortcuts .responsive_header {display:none;}
 
 
@@ -232,12 +262,58 @@ h3 { padding-bottom: 0.5em; }
 .adios_main{margin-left:50px; transition: margin 0.3s;flex:1;margin-top:40px;display:flex;flex-direction:column;position:relative;}
 .adios_main_wrapper.hidden_shortcuts .adios_main {margin-left:0px;}
 
-#adios_main_content {
-  height: calc(100vh - 5em);
-  padding-top: 1em;
+.adios.main-content {
+  /* height: calc(100vh - 5em); */
+  /* padding-top: 1em; */
+  padding: 2em;
+
   overflow: auto;
   display: flex;
+  flex-direction: row;
+}
+
+.adios.main-content > .desktop {
+  width: 100%;
+  flex: 4;
+  /* overflow-x: auto; */
+}
+
+.adios.main-content > .desktop > .desktop-content {
+  overflow-x: auto;
+  box-shadow: 0 0 3px #ccc;
+  border-radius: 0.25em;
+  /* min-height: calc(100vh - 7em); */
+  display: flex;
   flex-direction: column;
+}
+
+.adios.main-content > .desktop > .desktop-content > h1 {
+  padding: 1em;
+}
+
+
+.adios.main-content > .windows {
+  flex: 1;
+  /* overflow-x: auto; */
+  display: none;
+  background: white;
+}
+
+.adios.main-content > .windows .adios.ui.Window.inline {
+  transition: 50ms;
+}
+.adios.main-content > .windows.update-in-progress .adios.ui.Window.inline {
+  width: 33vw;
+}
+
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .header .btn {
+  opacity: 0.5;
+}
+
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .content input,
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .content textarea,
+.adios.main-content > .windows.update-in-progress .adios.ui.Window > .content select {
+  background: #EEEEEE;
 }
 
 .ui-tooltip-content {

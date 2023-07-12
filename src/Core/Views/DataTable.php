@@ -8,15 +8,8 @@ class DataTable extends \ADIOS\Core\View {
   public string $twigTemplate = "Core/UI/DataTable";
   private ?\ADIOS\Core\Model $model = null;
 
-  /**
-   * __construct
-   *
-   * @param  mixed $adios
-   * @param  mixed $params
-   * @return void
-   */
-  public function __construct(&$adios, $params = null) {
-    $this->adios = &$adios;
+  public function __construct(?\ADIOS\Core\Loader $adios, array $params = []) {
+    $this->adios = $adios;
 
     $this->params = parent::params_merge([
       'datatableName' => null,

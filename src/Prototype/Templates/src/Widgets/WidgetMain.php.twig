@@ -1,12 +1,14 @@
 <?php
 
+{{ builderInfo.php|raw }}
+
 namespace {{ thisWidget.namespace }};
 
 class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
   public function init() {
     if ($this->adios->hasPermissionsForAction("{{ thisWidget.name }}")) {
 {% for itemTitle, itemConfig in thisWidget.config.sidebar %}
-      $this->adios->config['desktop']['sidebarItems'][] = [
+      $this->addSidebarItem([
         "fa_icon" => "fas {% if itemConfig.faIcon %}{{ itemConfig.faIcon }}{% else %}{{ thisWidget.config.faIcon }}{% endif %}",
         "title" => "{{ itemTitle }}",
 {% if itemConfig.url %}
@@ -22,7 +24,7 @@ class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
 {% endfor %}
         ],
 {% endif %}
-      ];
+      ]);
 {% endfor %}
     }
   }

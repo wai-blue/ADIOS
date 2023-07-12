@@ -19,13 +19,14 @@ class UserRole extends \ADIOS\Core\Model {
   const ADMINISTRATOR = 1;
 
   public string $lookupSqlValue = "{%TABLE%}.name";
-  
+
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
-    $this->sqlName = "{$adiosOrAttributes->config['system_table_prefix']}_roles";
+    $this->sqlName = "users_roles";
     parent::__construct($adiosOrAttributes);
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       'name' => [
         'type' => 'varchar',

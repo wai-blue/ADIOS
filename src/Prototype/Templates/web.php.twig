@@ -1,0 +1,14 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+require("src/Init.php");
+
+$adios = new MyAdiosApp($config);
+
+include(__DIR__ . '/src/Web/SiteMap.php');
+
+echo $adios->web
+  ->setRouter(new \ADIOS\Core\Web\Router($siteMap))
+  ->render()
+;

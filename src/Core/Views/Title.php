@@ -32,12 +32,24 @@ class Title extends \ADIOS\Core\View
 
   }
 
-  public function setLeftButtons(array $buttons = []): \ADIOS\Core\View
+  public function setLeftContent(array $views = []): \ADIOS\Core\View
   {
     $this->left->removeAllViews();
-    foreach ($buttons as $button) {
-      if ($button instanceof \ADIOS\Core\Views\Button) {
-        $this->left->addViewAsObject($button);
+    foreach ($views as $view) {
+      if ($view instanceof \ADIOS\Core\View) {
+        $this->left->addViewAsObject($view);
+      }
+    }
+
+    return $this;
+  }
+
+  public function setRightContent(array $views = []): \ADIOS\Core\View
+  {
+    $this->right->removeAllViews();
+    foreach ($views as $view) {
+      if ($view instanceof \ADIOS\Core\View) {
+        $this->right->addViewAsObject($view);
       }
     }
 
@@ -73,10 +85,10 @@ class Title extends \ADIOS\Core\View
           </div>
         ") . "
         <div class='row mb-3'>
-          <div class='col-lg-6 p-0'>
+          <div class='col-lg-6 p-0 d-flex' style='gap:0.5em'>
             {$leftHtml}
           </div>
-          <div class='col-lg-6 p-0 text-right'>
+          <div class='col-lg-6 p-0 d-flex justify-content-end' style='gap:0.5em'>
             {$rightHtml}
           </div>
         </div>

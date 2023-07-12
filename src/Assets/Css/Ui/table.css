@@ -10,22 +10,30 @@
 
 /* Table.Container */
 .adios.ui.Table.Container {
-  flex: 1;
+  /* flex: 1; */
   /* margin-bottom: 1em; */
   padding: 0;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /* height: 100%; */
   background-color: white;
   border-collapse: collapse;
-  overflow-y: hidden;
-  user-select: none;
+  /* overflow-y: hidden; */
+  /* user-select: none; */
 }
 
 /* Table.Container .Row */
 .adios.ui.Table.Container .Row {
   display: flex;
   align-items: stretch;
+}
+
+.adios.ui.Table.Container .Row.highlighted {
+  background: var(--cl-main) !important;
+}
+
+.adios.ui.Table.Container .Row.highlighted .Column {
+  color: white !important;
 }
 
 
@@ -71,10 +79,10 @@
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column {
   font-weight: bold;
-  border-bottom: 1px solid var(--cl-main);
-  /* padding: 3px; */
-  background: var(--cl-main);
-  color: white;
+  border-bottom: 1px solid var(--cl-gray-4);
+  padding: 0.66em;
+  background: var(--cl-gray-5);
+  color: #424242;
 }
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column:hover {
@@ -87,6 +95,7 @@
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column.asc_ordered {
   background: var(--cl-main);
+  color: white;
 }
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column.asc_ordered i.order_asc {
@@ -95,6 +104,7 @@
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column.desc_ordered {
   background: var(--cl-main);
+  color: white;
 }
 
 .adios.ui.Table.Container .Header .Row.ColumnNames .Column.desc_ordered i.order_desc {
@@ -105,8 +115,8 @@
 
 .adios.ui.Table.Container .Header .Row.ColumnFilters {
   cursor: default;
-  white-space: nowrap;
-  background: #EEEEEE;
+  /* white-space: nowrap; */
+  /* background: #EEEEEE; */
   align-items: center;
 }
 
@@ -223,8 +233,8 @@
 
 /* Table.Container .Content */
 .adios.ui.Table.Container .Content {
-  flex: 1 1 auto;
-  overflow-y: auto;
+  /* flex: 1 1 auto; */
+  /* overflow-y: auto; */
 }
 
 .adios.ui.Table.Container .Content.empty {
@@ -245,8 +255,9 @@
 }
 
 .adios.ui.Table.Container .Content .Row .Column {
-  white-space: nowrap;
+  /* white-space: nowrap; */
   margin-right: 5px;
+  height: 1.7em;
 }
 
 .adios.ui.Table.Container .Content .Row .Column:hover {

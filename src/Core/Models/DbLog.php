@@ -15,14 +15,15 @@ namespace ADIOS\Core\Models;
  *
  * @package DefaultModels
  */
-class LogDB extends \ADIOS\Core\Model {
+class DbLog extends \ADIOS\Core\Model {
 
   public function __construct(&$adios) {
-    $this->sqlName = "{$adios->config['system_table_prefix']}_db_log";
+    $this->sqlName = "db_log";
     parent::__construct($adios);
   }
 
-  public function columns(array $columns = []) {
+  public function columns(array $columns = []): array
+  {
     return parent::columns([
       'ip' => ['type' => 'varchar', 'byte_size' => 35, 'title' => 'IP', 'show_column' => true],
       'action' => ['type' => 'varchar', 'byte_size' => 150, 'title' => 'Akcia', 'show_column' => true],

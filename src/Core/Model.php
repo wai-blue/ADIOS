@@ -56,7 +56,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @var mixed
    */
-  var $adios;
+  public ?\ADIOS\Core\Loader $adios = NULL;
 
   /**
    * Shorthand for "global table prefix"
@@ -117,7 +117,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   private static $allItemsCache = NULL;
 
   public ?array $crossTableAssignments = [];
-  
+
   public ?string $addButtonText = null;
   public ?string $formSaveButtonText = null;
   public ?string $formAddButtonText = null;
@@ -132,8 +132,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL)
   {
     $this->gtp = $adiosOrAttributes->gtp;
-    $this->fullTableSqlName = "{$this->gtp}_{$this->sqlName}";
-    $this->table = "{$this->gtp}_{$this->sqlName}"; // toto je kvoli Eloquentu
+    $this->fullTableSqlName = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;
+    $this->table = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName; // toto je kvoli Eloquentu
 
     if (!is_object($adiosOrAttributes)) {
       // v tomto pripade ide o volanie constructora z Eloquentu
@@ -249,9 +249,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * @param  string $toLanguage Output language
    * @return string Translated string.
    */
-  public function translate($string)
+  public function translate(string $string, array $vars = []): string
   {
-    return $this->adios->translate($string, $this);
+    return $this->adios->translate($string, $vars, $this);
   }
 
   public function hasSqlTable()
@@ -292,7 +292,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   /**
-   * Installs the first version of the model into SQL database. Automaticaly creates indexes.
+   * Installs the first version of the model into SQL database. Automatically creates indexes.
    *
    * @return void
    */
@@ -545,6 +545,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
   {
+    if (empty($urlBase)) return [];
+    
     $routing = [
 
       // Default
@@ -571,6 +573,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "action" => $this->crud['edit']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
+          "windowParams" => [
+            "uid" => \ADIOS\Core\HelperFunctions::str2uid($this->fullName) . '_edit',
+          ],
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
         ])
@@ -582,6 +587,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "action" => $this->crud['add']['action'] ?? "UI/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
+          "windowParams" => [
+            "uid" => \ADIOS\Core\HelperFunctions::str2uid($this->fullName) . '_add',
+            "modal" => TRUE,
+          ],
           "model" => $this->fullName,
           "id" => -1,
           "defaultValues" => $urlParams,
@@ -622,6 +631,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
+          "displayMode" => "window",
+          "windowParams" => [
+            "modal" => TRUE,
+          ],
         ])
       ],
 
@@ -677,11 +690,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
   //////////////////////////////////////////////////////////////////
   // definition of columns
 
-  public function columns(array $columns = [])
+  public function columns(array $columns = []): array
   {
+    $newColumns = [];
 
     if (!$this->isCrossTable) {
-      $columns['id'] = [
+      $newColumns['id'] = [
         'type' => 'int',
         'byte_size' => '8',
         'sql_definitions' => 'primary key auto_increment',
@@ -693,33 +707,35 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     // default column settings
     foreach ($columns as $colName => $colDefinition) {
+      $newColumns[$colName] = $colDefinition;
+
       if ($colDefinition["type"] == "char") {
         $this->adios->console->info("{$this->fullName}, {$colName}: char type is deprecated");
       }
 
       switch ($colDefinition["type"]) {
         case "int":
-          $columns[$colName]["byte_size"] = $columns[$colName]["byte_size"] ?? 8;
+          $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 8;
           break;
         case "float":
-          $columns[$colName]["byte_size"] = $columns[$colName]["byte_size"] ?? 14;
-          $columns[$colName]["decimals"] = $columns[$colName]["decimals"] ?? 2;
+          $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 14;
+          $newColumns[$colName]["decimals"] = $colDefinition["decimals"] ?? 2;
           break;
         case "varchar":
         case "password":
-          $columns[$colName]["byte_size"] = $columns[$colName]["byte_size"] ?? 255;
+          $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 255;
           break;
       }
     }
 
     $columns = $this->adios->dispatchEventToPlugins("onModelAfterColumns", [
       "model" => $this,
-      "columns" => $columns,
+      "columns" => $newColumns,
     ])["columns"];
 
-    $this->fillable = array_keys($columns);
+    $this->fillable = array_keys($newColumns);
 
-    return $columns;
+    return $newColumns;
   }
 
   public function columnNames()
@@ -975,7 +991,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $formData = [],
     $params = [],
     $having = "TRUE"
-  ) : \ADIOS\Core\DB\Query
+  ): \ADIOS\Core\DB\Query
   {
     return $this->adios->db->select($this)
       ->columns([
@@ -997,7 +1013,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $formData = [],
     $params = [],
     $having = "TRUE"
-  ) : string
+  ): string
   {
     return $this->lookupQuery(
       $initiatingModel,
@@ -1066,7 +1082,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onTableBeforeInit($tableObject) : void
+  public function onTableBeforeInit($tableObject): void
   {
   }
 
@@ -1077,7 +1093,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onTableAfterInit($tableObject) : void
+  public function onTableAfterInit($tableObject): void
   {
   }
 
@@ -1088,12 +1104,25 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onTableAfterDataLoaded($tableObject) : void
+  public function onTableAfterDataLoaded($tableObject): void
   {
   }
 
   //////////////////////////////////////////////////////////////////
   // UI/Form methods
+
+  public function columnValidate(string $column, $value): bool {
+    $valid = TRUE;
+
+    $colDefinition = $this->columns()[$column] ?? [];
+    $colType = $colDefinition['type'];
+
+    if ($this->adios->db->isRegisteredColumnType($colType)) {
+      $valid = $this->adios->db->columnTypes[$colType]->validate($value);
+    }
+
+    return $valid;
+  }
 
   /**
    * onFormBeforeInit
@@ -1102,7 +1131,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onFormBeforeInit($formObject) : void
+  public function onFormBeforeInit($formObject): void
   {
   }
 
@@ -1113,7 +1142,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return void
    */
-  public function onFormAfterInit($formObject) : void
+  public function onFormAfterInit($formObject): void
   {
   }
 
@@ -1128,12 +1157,26 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function formValidate($data)
   {
-    foreach ($this->columns() as $colName => $colDefinition) {
-      if ($colDefinition['required']) {
-        if (empty($data[$colName])) {
-          throw new \ADIOS\Core\Exceptions\FormSaveException($this->translate("Invalid data."));
-        }
+    foreach ($this->columns() as $column => $colDefinition) {
+     if (!$this->columnValidate($column, $data[$column])) {
+        throw new \ADIOS\Core\Exceptions\FormSaveException(
+          $this->adios->translate(
+            "`{{ colTitle }}` contains invalid value.",
+            [ 'colTitle' => $colDefinition['title'] ]
+          )
+        );
+      } else if (
+        $colDefinition['required']
+        && !$this->columnValidate($column, $data[$column])
+      ) {
+        throw new \ADIOS\Core\Exceptions\FormSaveException(
+          $this->adios->translate(
+            "`{{ colTitle }}` is required.",
+            [ 'colTitle' => $colDefinition['title'] ]
+          )
+        );
       }
+
     }
 
     return $this->adios->dispatchEventToPlugins("onModelAfterFormValidate", [
@@ -1206,7 +1249,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       return $returnValue;
     } catch (\ADIOS\Core\Exceptions\FormSaveException $e) {
-      return $this->adios->renderHtmlWarning($e->getMessage());
+      return $this->adios->renderHtmlFatal($e->getMessage());
     }
   }
 

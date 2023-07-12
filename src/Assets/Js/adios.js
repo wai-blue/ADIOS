@@ -1,6 +1,10 @@
-var Adios = {
-  render: function(action, params) {
-    desktop_update(action, params);
+var ADIOS = {
+  renderDesktop: function(url, params) {
+    desktop_update(url, params);
+  },
+
+  renderWindow: function(url, params, options) {
+    window_render(url, params, options.onclose, options);
   }
 }
 

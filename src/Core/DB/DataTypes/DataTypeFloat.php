@@ -86,4 +86,9 @@ class DataTypeFloat extends \ADIOS\Core\DB\DataType
   {
     return (float) $value;
   }
+
+  public function validate($value): bool
+  {
+    return empty($value) || is_float($value);
+  }
 }

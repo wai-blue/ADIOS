@@ -21,15 +21,14 @@ class LookupSearch extends \ADIOS\Core\Action {
     $windowUid = "{$tableUid}_lookup_select_window";
 
     $lookupModel = $this->adios->getModel($this->params['model']);
-
     $content = $this->adios->view->Table([
       "uid" => $tableUid,
       "model" => $this->params['model'],
-      "where" => $lookupModel->lookupSqlWhere(
+      "where" => $lookupModel->lookupWhere(
         $this->params['initiating_model'],
         $this->params['initiating_column'],
-        @json_decode($this->params['form_data'], TRUE) ?? [], // form_data
-        [],
+        @json_decode($this->params['form_data'], TRUE) ?? [], // formData
+        [], // params
       ),
       "list_type" => "lookup_select",
       "onclick" => "
@@ -38,18 +37,20 @@ class LookupSearch extends \ADIOS\Core\Action {
       ",
     ]);
 
-    $window_params = [
+    $windowParams = [
       'uid' => $windowUid,
       'content' => $content->render(),
-      'header' => [
-        $this->adios->view->Button([
-          'type' => 'close',
-          'onclick' => "window_close('{$windowUid}');"
-        ]),
-      ],
-      'title' => $this->translate("Search in list"),
+      'title' => $this->translate("Select"),
     ];
 
-    return $this->adios->view->Window($window_params)->render();
+    $window = $this->adios->view->Window($windowParams);
+    $window->setHeaderLeft([
+      $this->adios->view->Button([
+        'type' => 'close',
+        'onclick' => "window_close('{$windowUid}');"
+      ]),
+    ]);
+
+    return $window->render();
   }
 }
