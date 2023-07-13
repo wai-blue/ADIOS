@@ -32,12 +32,7 @@ class Dashboard extends \ADIOS\Core\View
       $this->params['availablePresets'][] = $this->params['preset'];
     }
 
-    #TODO: presuvanie paramsov do component, pozriet ci sa neda lepsie vyriesit
     foreach ($this->params['dashboardConfiguration']['data'] as &$area) {
-      foreach ($area['cards'] as &$card) {
-        $card['params_encoded'] = base64_encode(json_encode($card['params']));
-      }
-
       $area['cards'] = array_values($area['cards'] ?? []);
     }
   }
