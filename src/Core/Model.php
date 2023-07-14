@@ -96,7 +96,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * SQL-compatible string used to render displayed value of the record when used
    * as a lookup.
    */
-  public string $lookupSqlValue = "";
+  public ?string $lookupSqlValue = NULL;
 
   /**
    * If set to TRUE, the SQL table will not contain the ID autoincrement column
@@ -1024,9 +1024,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
     )->buildSql();
   }
 
-  public function lookupSqlValue($tableAlias = NULL)
+  public function lookupSqlValue($tableAlias = NULL): string
   {
+    // $this->lookupSqlValue = ""
     $value = $this->lookupSqlValue ?? "concat('{$this->fullName}, id = ', {%TABLE%}.id)";
+    // echo(get_class($this)." - ".$value."<br/>");
 
     return ($tableAlias !== NULL
       ? str_replace('{%TABLE%}', "`{$tableAlias}`", $value)
@@ -1034,7 +1036,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     );
   }
 
-  public function tableParams($params, $table)
+  public function tableParams($params, $table): ?array
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
       "model" => $this,
@@ -1043,7 +1045,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["params"];
   }
 
-  public function tableRowCSSFormatter($data)
+  public function tableRowCSSFormatter($data): ?string
   {
     return $this->adios->dispatchEventToPlugins("onTableRowCSSFormatter", [
       "model" => $this,
@@ -1051,7 +1053,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["css"];
   }
 
-  public function tableCellCSSFormatter($data)
+  public function tableCellCSSFormatter($data): ?string
   {
     return $this->adios->dispatchEventToPlugins("onTableCellCSSFormatter", [
       "model" => $this,
@@ -1059,7 +1061,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["css"];
   }
 
-  public function tableCellHTMLFormatter($data)
+  public function tableCellHTMLFormatter($data): ?string
   {
     return $this->adios->dispatchEventToPlugins("onTableCellHTMLFormatter", [
       "model" => $this,
@@ -1067,7 +1069,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["html"];
   }
 
-  public function tableCellCSVFormatter($data)
+  public function tableCellCSVFormatter($data): ?string
   {
     return $this->adios->dispatchEventToPlugins("onTableCellCSVFormatter", [
       "model" => $this,
