@@ -15,6 +15,8 @@ namespace ADIOS\Actions\UI\Table;
  */
 class PrintPdf extends \ADIOS\Core\Action {
   public function render($params = []) {
+    var_dump(json_decode(base64_decode($params['params'])));
+
     $pdf = new \TCPDF();
     $pdf->AddPage();
     $pdf->Write(1, 'Hello world');

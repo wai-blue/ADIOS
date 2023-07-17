@@ -70,6 +70,7 @@ class Table extends \ADIOS\Core\View
       'showColumnsFilter' => true,
       'showControls' => true,
       'showAddButton' => true,
+      'showPrintButton' => true,
       'showSearchButton' => true,
       'showExportCsvButton' => true,
       'showImportCsvButton' => false,
@@ -136,7 +137,7 @@ class Table extends \ADIOS\Core\View
     $this->model->onTableBeforeInit($this);
 
     $this->params = $this->model->tableParams($this->params, $this);
-    
+
     $this->columns = $this->getColumns();
 
     $this->params['page'] = (int) $this->params['page'];
@@ -196,6 +197,20 @@ class Table extends \ADIOS\Core\View
       ";
     }
 
+    if (empty($this->params['buttons']['print']['onclick'])) {
+      $printButtonAction = $this->model->printButtonAction ?? "UI/Table/PrintPdf";
+
+      $this->params['buttons']['print']['onclick'] = "
+              let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
+              window_render(
+                '{$printButtonAction}',
+                { model: '" . ads($this->params['model']) . "',
+                 params: tmpTableParams
+                 }
+              );
+            ";
+    }
+
     // kontroly pre vylucenie nelogickosti parametrov
 
     if (!$this->params['showControls']) {
@@ -237,9 +252,17 @@ class Table extends \ADIOS\Core\View
     if ($this->model->addButtonText != null) {
       $this->params['buttons']['add']['text'] = $this->model->addButtonText;
     }
+
+    if (empty($this->params['buttons']['print']['type'])) {
+      $this->params['buttons']['print']['type'] = 'print';
+    }
+
+    if ($this->model->printButtonText != null) {
+      $this->params['buttons']['print']['text'] = $this->model->printButtonText;
+    }
   }
 
-  protected function getColumns(): array 
+  protected function getColumns(): array
   {
     $columns = $this->model->columns();
 
@@ -252,7 +275,7 @@ class Table extends \ADIOS\Core\View
       }
 
       $columnsOrder = array_merge(
-        array_keys($columns), 
+        array_keys($columns),
         array_keys($this->params['columns'])
       );
 
@@ -275,7 +298,7 @@ class Table extends \ADIOS\Core\View
     // where and whereRaw
     $whereRaw = "";
     $where = [];
-    
+
     if (is_string($this->params['where'])) {
       $whereRaw = (empty($this->params['where']) ? 'TRUE' : $this->params['where']);
 
@@ -463,7 +486,7 @@ class Table extends \ADIOS\Core\View
         'onclick' => "ui_table_show_page('{$this->params['uid']}', '1'); ",
         'disabled' => (1 == $this->params['page'] ? true : false)
       ]);
-      
+
       $this->paging->addView('Button', [
         'fa_icon' => 'fas fa-angle-left',
         'class' => 'btn-light btn-circle btn-sm',
@@ -606,6 +629,10 @@ class Table extends \ADIOS\Core\View
 
         if ($this->params['showAddButton']) {
           $titleLeftContent[] = $this->addView('Button', $this->params['buttons']['add']);
+        }
+
+        if ($this->params['showPrintButton']) {
+          $titleLeftContent[] = $this->addView('Button', $this->params['buttons']['print']);
         }
 
         // fulltext search
