@@ -19,8 +19,8 @@ use ADIOS\Core\Views\Inputs\CheckboxField;
 class Configure extends \ADIOS\Core\Action {
   public string $twigTemplate = "ADIOS/Templates/UI/Dashboard/Configure";
 
-  function preRender(): array {
-    $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios, $this->params);
+  function preRender() {
+    /*$dashboard = new \ADIOS\Core\Views\Dashboard($this->adios, $this->params);
 
     $availableCards = array_merge($dashboard->getAvailableCards()[0] ?? []);
     $forms = $dashboard->getSettingsInputs($availableCards);
@@ -39,6 +39,8 @@ class Configure extends \ADIOS\Core\Action {
       'forms' =>  $forms,
       'saveButton' => $saveButton,
       'uid' => $this->adios->uid
-    ];
+    ];*/
+
+    return [];
   }
 }
