@@ -10185,14 +10185,20 @@ a:focus {
 
 .sidebar .nav-item .collapse .collapse-inner .collapse-item,
 .sidebar .nav-item .collapsing .collapse-inner .collapse-item {
-  padding: 0.25em;
-  margin: 0.2rem 0.2rem 0.2rem 1.2rem;
+  padding: 0.25em 0.5em;
+  margin: 0 0.2rem 0 0.9rem;
   display: block;
   color: white;
   text-decoration: none;
   border-radius: 0.2rem;
   /* white-space: nowrap; */
 }
+
+.sidebar .nav-item .collapse .collapse-inner .collapse-item:nth-child(1),
+.sidebar .nav-item .collapsing .collapse-inner .collapse-item:nth-child(1) {
+  margin-top: 0.2em;
+}
+
 
 .sidebar .nav-item .collapse .collapse-inner .collapse-item:hover,
 .sidebar .nav-item .collapsing .collapse-inner .collapse-item:hover {
@@ -10475,7 +10481,7 @@ a:focus {
 .sidebar-dark .nav-item .nav-link {
   color: var(--cl-link);
   border-radius: 3px;
-  margin: 0.2em;
+  margin: 0.2em 0 0 0.2em;
   width: calc(100% - 0.4em);
 }
 

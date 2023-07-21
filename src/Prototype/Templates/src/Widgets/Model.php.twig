@@ -20,7 +20,8 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   public string $tableTitle = "{{ thisModel.config.tableTitle|raw }}";
   public string $formTitleForInserting = "{{ thisModel.config.formTitleForInserting|raw }}";
   public string $formTitleForEditing = "{{ thisModel.config.formTitleForEditing|raw }}";
-  public string $lookupSqlValue = "{{ thisModel.config.lookupSqlValue|raw }}";
+  {% if thisModel.config.lookupSqlValue %}public ?string $lookupSqlValue = "{{ thisModel.config.lookupSqlValue|raw }}";{% endif %}
+
   public ?array $crossTableAssignments =
 {{ varExport(thisModel.config.crossTableAssignments, "    ")|raw }}
   ;
