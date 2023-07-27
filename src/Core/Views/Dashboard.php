@@ -136,61 +136,6 @@ class Dashboard extends \ADIOS\Core\View
     return $presets;
   }
 
-  /*
-   * Unused for now
-   * public function getSettingsInputs($availableCards): array {
-    $forms = [];
-
-    foreach ($availableCards as $card) {
-      $cardForm = [];
-      $card_key = array_search($card, $availableCards);
-
-      $config = $this->getUserDashboard();
-      if (!empty($config[0][$card_key])) $config = $config[0][$card_key];
-
-      $cardForm[] = $this->addView(
-        "Input",
-        array_merge(
-          [
-            "type" => "bool",
-            "title" => 'Located left?',
-            'value' => $config['left']
-          ],
-          ['required' => true]
-        )
-      )->render();
-
-      $cardForm[] = $this->addView(
-        "Input",
-        array_merge(
-          [
-            "type" => "bool",
-            "title" => 'Is active?',
-            'value' => $config['is_active']
-          ],
-          ['required' => true]
-        )
-      )->render();
-
-      $cardForm[] = $this->addView(
-        "Input",
-        array_merge(
-          [
-            "type" => "int",
-            "value" => $config['order'],
-            "title" => 'Order',
-          ],
-          ['required' => true]
-        )
-      )->render();
-
-      $forms[] = $cardForm;
-    }
-
-    return $forms;
-  }
-  */
-
   public function getTwigParams(): array {
     return $this->params;
   }
