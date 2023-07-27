@@ -50,11 +50,10 @@ class Dashboard extends \ADIOS\Core\View
     return $userDashboard;
   }
 
-  public function initDefaultDashboard(int $preset = 0): string
+  public function initDefaultDashboard(int $preset = 0, int $areas = 5, array $grid = ['A B', 'C C', 'D E']): string
   {
-    $areas = 5;
     $configuration = [
-      'grid' => ['A B', 'C C', 'D E'],
+      'grid' => $grid,
       'data' => array_fill(0, $areas, [])
     ];
 

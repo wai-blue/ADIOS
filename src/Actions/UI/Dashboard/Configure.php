@@ -40,6 +40,7 @@ class Configure extends \ADIOS\Core\Action {
         $gridArea = implode(' ', $splitedAreas);
 
         $this->removeDataFromGrid($areaIndex);
+        $this->reOrderGrid($splitedAreasCount);
         break;
       }
     }
@@ -58,6 +59,29 @@ class Configure extends \ADIOS\Core\Action {
         'cards' => []
       ];
     }
+  }
+
+  private function getLastAreaKeyName(): string {
+    return (string) end($this->currentAreaKeyNames);
+  }
+
+  private function addRow() {
+    $lastAreaKeyName = $this->getLastAreaKeyName();
+
+    if (!empty($this->dashboardConfiguration['grid'])) {
+      $lastGridItem = reset($this->dashboardConfiguration['grid']);
+
+      $rowGridSize = strlen($lastGridItem);
+      $rowGridSize = $rowGridSize - substr_count($lastGridItem, ' ');
+
+      $keysToInsert = array_fill(0, $rowGridSize, ++$lastAreaKeyName);
+    } else {
+      $keysToInsert = ['A'];
+      $lastAreaKeyName = 'A';
+    }
+
+    $this->dashboardConfiguration['grid'][] = implode(' ', $keysToInsert);
+    $this->insertKeyToData($lastAreaKeyName);
   }
 
   private function reOrderGrid(int $gridAreaCount, ?string $addedAreKeyName = null): void {
@@ -168,6 +192,9 @@ class Configure extends \ADIOS\Core\Action {
             }
           }
         break;
+        case 'addRow':
+          $this->addRow();
+        break;
         case 'increase':
           foreach ($this->dashboardConfiguration['data'] as $areaIndex => $area) {
             if ($areaIndex == (int) $this->params['areaIndex']) {
@@ -190,6 +217,10 @@ class Configure extends \ADIOS\Core\Action {
         break;*/
         case 'restoreDefaultGrid':
           $defaultDashboard = $dashboard->initDefaultDashboard();
+          $this->dashboardConfiguration = json_decode($defaultDashboard, TRUE);
+        break;
+        case 'addEmptyGrid':
+          $defaultDashboard = $dashboard->initDefaultDashboard(0, 0, []);
           $this->dashboardConfiguration = json_decode($defaultDashboard, TRUE);
         break;
       }

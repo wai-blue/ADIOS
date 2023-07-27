@@ -19,7 +19,11 @@
       <button
         class="btn btn-primary"
         onclick="{{ uid }}_restore_default_grid()"
-      >Restore default grid</button>
+      ><i class="fas fa-tasks"></i> Restore default grid</button>
+      <button
+        class="btn btn-secondary"
+        onclick="{{ uid }}_add_empty_grid()"
+      ><i class="fas fa-hand-sparkles"></i> Add empty grid</button>
     </div>
   </div>
 {% endif %}
@@ -37,20 +41,20 @@
                 <div class="col-12 text-right m-0 p-0">
                   <div class="d-flex flex-row flex-row-reverse">
                     <button
-                      class="btn btn-sm btn-outline-danger m-1"
+                      class="btn btn-sm btn-danger m-1"
                       style="max-width: 32px;"
                       onclick="{{ uid }}_delete({{ areaIndex }})"
-                    >x</button>
+                    ><i class="fas fa-trash-alt"></i></button>
                     <button
-                      class="btn btn-sm btn-outline-primary m-1"
-                      style="max-width: 32px;"
-                      onclick="{{ uid }}_increase({{ areaIndex }})"
-                    >+</button>
-                    <button
-                      class="btn btn-sm btn-outline-info m-1"
+                      class="btn btn-sm btn-secondary m-1"
                       style="max-width: 32px;"
                       onclick="{{ uid }}_add({{ areaIndex }})"
-                    >-</button>
+                    ><i class="fas fa-minus"></i></button>
+                    <button
+                      class="btn btn-sm btn-primary m-1"
+                      style="max-width: 32px;"
+                      onclick="{{ uid }}_increase({{ areaIndex }})"
+                    ><i class="fas fa-plus"></i></button>
                   </div>
                 </div>
               </div>
@@ -68,6 +72,15 @@
         </div>
       </div>
     {% endfor %}
+  </div>
+
+  <div class="row mb-5 mt-3">
+    <div class="col-12 text-center">
+      <button
+        class="btn btn-sm btn-primary m-1"
+        onclick="{{ uid }}_add_row()"
+      ><i class="fas fa-plus"></i> Add new row</button>
+    </div>
   </div>
 </div>
 
@@ -109,6 +122,18 @@
     );
   }
 
+  function {{ uid }}_add_row() {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'addRow',
+        refresh: true,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
+
   function {{ uid }}_increase(areaIndex) {
     _ajax_update(
       "UI/Dashboard/Configure",
@@ -140,6 +165,18 @@
       "UI/Dashboard/Configure",
       {
         configurationAction: 'restoreDefaultGrid',
+        refresh: true,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
+
+  function {{ uid }}_add_empty_grid() {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'addEmptyGrid',
         refresh: true,
         preset: 0
       },
