@@ -201,14 +201,22 @@ class Table extends \ADIOS\Core\View
       $printButtonAction = $this->model->printButtonAction ?? "UI/Table/PrintPdf";
 
       $this->params['buttons']['print']['onclick'] = "
-              let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
+              let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params));
               window_render(
                 '{$printButtonAction}',
                 { model: '" . ads($this->params['model']) . "',
                  params: tmpTableParams
                  }
+              );";
+
+      /*
+       *               window_render(
+                '{$printButtonAction}',
+                { model: '" . ads($this->params['model']) . "',
+                 params: tmpTableParams
+                 }
               );
-            ";
+       */
     }
 
     // kontroly pre vylucenie nelogickosti parametrov
