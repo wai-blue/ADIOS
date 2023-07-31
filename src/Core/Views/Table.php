@@ -202,17 +202,24 @@ class Table extends \ADIOS\Core\View
 
       $this->params['buttons']['print']['onclick'] = "
               let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params));
-              window_render(
+              _ajax_read(
                 '{$printButtonAction}',
-                { model: '" . ads($this->params['model']) . "',
-                 params: tmpTableParams
-                 }
-              );";
+                {
+                  model: '" . base64_encode(json_encode($this->params)) . "',
+                  params: tmpTableParams
+                },
+                (res) => {
+                  const downloadLink = document.createElement('a');
+                  downloadLink.href = 'data:application/octet-stream;base64,' + res;
+                  downloadLink.download = new Date().toLocaleDateString('en-UK') + '_{$this->params['table']}.pdf';
+                  downloadLink.click();
+                }
+              )";
 
       /*
        *               window_render(
                 '{$printButtonAction}',
-                { model: '" . ads($this->params['model']) . "',
+                { model: '" . base64_encode(json_encode($this->params)) . "',
                  params: tmpTableParams
                  }
               );

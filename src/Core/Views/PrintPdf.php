@@ -17,7 +17,15 @@ class PrintPdf extends \ADIOS\Core\View
 
   public function __construct($adios, $params = null)
   {
-    $pdf = new PDF('P', 'mm', 'A4', true, 'UTF-8', tableTitle: 'BladeERP');
+    $options = json_decode(base64_decode($params['model']));
+    $model = $adios->getModel($options->model);
+    $columns = $model->columns();
+    $data = $model->get()->toArray();
+
+    $hiddenColumns = [];
+
+    $pdf = new PDF('L', 'mm', 'A4', true, 'UTF-8', tableTitle: $options->title);
+    $pdf->SetPageOrientation('L');
     $pdf->setHeaderMargin(10);
     $pdf->setMargins(10, 20, 10);
     $pdf->AddPage();
@@ -25,10 +33,33 @@ class PrintPdf extends \ADIOS\Core\View
     $pdf->setHeaderData($ln='', $lw=0, $ht='', $hs='<table cellspacing="0" cellpadding="1" border="1"><tr><td rowspan="3">test</td><td>test</td></tr></table>', $tc=array(0,0,0), $lc=array(0,0,0));
 
     $pdf->SetCreator('BladeERP');
-    $pdf->SetTitle('TCPDF Example 003');
-    $pdf->SetSubject('TCPDF Tutorial');
+    $pdf->SetTitle($options->table);
+    $pdf->SetSubject('BladeERP Export');
 
-    $pdf->WriteHtml(base64_decode($params['params']), true, false, true, false);
+    $html = '
+     <table>
+      <tr>';
+    foreach ($columns as $key => $col) {
+      if ($col['show_column'] || $col['showColumn']) {
+        $html .= '<th>' . $col['title'] . '</th>';
+      } else {
+        $hiddenColumns[] = $key;
+      }
+    }
+    $html .= '</tr>';
+    foreach($data as $row) {
+      $html .= '<tr>';
+      foreach ($row as $key => $col) {
+        if (in_array($key, $hiddenColumns)) continue;
+        $html .= '<td>';
+        $html .= $col;
+        $html .= '</td>';
+      }
+      $html .= '</tr>';
+    }
+    $html .= '</table>';
+
+    $pdf->WriteHtml($html, true, false, true, false);
     $this->pdf = $pdf->Output('hello_world.pdf', 'S');
   }
   /**
@@ -39,12 +70,8 @@ class PrintPdf extends \ADIOS\Core\View
    */
   public function render(string $panel = ''): string
   {
-    $result = "<iframe width='100%' id='iframe' height='100%' src='data:application/pdf;base64," . base64_encode($this->pdf) . "'></iframe>";
-    /*$result .= "<script>";
-    $result .= "const pdfFrame = document.getElementById('iframe');";
-    $result .= "pdfFrame.contentWindow.print()";
-    $result .= "</script>";*/
-    return $result;
+    // width='800px' height='500px' id='iframe' src='data:application/octet-stream;headers=filename%3Dprint.pdf;base64," . base64_encode($this->pdf) . "'
+    return base64_encode($this->pdf);
   }
 
 }
@@ -60,6 +87,6 @@ class PDF extends \TCPDF {
 
   public function Header() {
     $this->SetFont('helvetica', 'B', 20);
-    $this->Cell(0, 15, '<< ' . $this->tableTitle . ' >>', 0, false, 'L', 0, '', 0, false, 'M', 'M');
+    $this->Cell(0, 15, 'BladeERP >> ' . $this->tableTitle, 0, false, 'L', 0, '', 0, false, 'M', 'M');
   }
 }
