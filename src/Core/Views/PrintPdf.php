@@ -17,11 +17,18 @@ class PrintPdf extends \ADIOS\Core\View
 
   public function __construct($adios, $params = null)
   {
-    $options = json_decode(base64_decode($params['model']));
+
+    $options = json_decode(base64_decode($params['modelParams']));
+    $tableParams = json_decode(base64_decode($params['tableParams']));
     $model = $adios->getModel($options->model);
     $columns = $model->columns();
-    $data = $model->get()->toArray();
 
+    if ($tableParams->orderBy != '') {
+      $order = explode(" ", $tableParams->orderBy);
+      $model = $model->orderBy($order[0], $order[1]);
+    }
+
+    $data = $model->get()->toArray();
     $hiddenColumns = [];
 
     $pdf = new PDF('L', 'mm', 'A4', true, 'UTF-8', tableTitle: $options->title);
@@ -37,11 +44,37 @@ class PrintPdf extends \ADIOS\Core\View
     $pdf->SetSubject('BladeERP Export');
 
     $html = '
-     <table>
+    <style>
+      table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+        border: 1px solid gray;
+      }
+      
+      td {
+        text-align: left;
+        padding: 8px;
+      }
+      
+      th {
+        background-color: #f0f0f0;
+        color: #424242;
+        font-weight: bolder;
+      }
+      .blue {
+        background-color: #536b9f;
+        color: white;
+      }
+    </style>
+    <table>
       <tr>';
     foreach ($columns as $key => $col) {
       if ($col['show_column'] || $col['showColumn']) {
-        $html .= '<th>' . $col['title'] . '</th>';
+        if ($tableParams->orderBy != '' && explode(" ", $tableParams->orderBy)[0] == $key) {
+          $html .= '<th class="blue">' . $col['title'] . ' ' . (explode(" ", $tableParams->orderBy)[1] == 'asc' ? 'ASC' : 'DESC') .'</th>';
+        }
+        $html .= '<th>' . $col['title'] .'</th>';
       } else {
         $hiddenColumns[] = $key;
       }

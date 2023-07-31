@@ -201,12 +201,12 @@ class Table extends \ADIOS\Core\View
       $printButtonAction = $this->model->printButtonAction ?? "UI/Table/PrintPdf";
 
       $this->params['buttons']['print']['onclick'] = "
-              let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params));
+              let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['" . $this->uid . "']));
               _ajax_read(
                 '{$printButtonAction}',
                 {
-                  model: '" . base64_encode(json_encode($this->params)) . "',
-                  params: tmpTableParams
+                  modelParams: '" . base64_encode(json_encode($this->params)) . "',
+                  tableParams: tmpTableParams
                 },
                 (res) => {
                   const downloadLink = document.createElement('a');
