@@ -13,40 +13,35 @@ namespace ADIOS\Core\Views;
 class PrintPdf extends \ADIOS\Core\View
 {
 
-  public string $pdf = '';
+  public PDF $pdf;
+  public string $pdfOutput = '';
+  public array $hiddenColumns = [];
 
   public function __construct($adios, $params = null)
   {
+    $modelParams = json_decode(base64_decode($params['modelParams']));
+    $tableParams = json_decode(base64_decode($params['tableParams']), TRUE);
+    $orderBy = $params['orderBy'];
 
-    $options = json_decode(base64_decode($params['modelParams']));
-    $tableParams = json_decode(base64_decode($params['tableParams']));
-    $model = $adios->getModel($options->model);
+    $model = $adios->getModel($modelParams->model);
     $columns = $model->columns();
+    $uiTable = new \ADIOS\Core\Views\Table($adios, $tableParams);
+    $data = $uiTable->data;
 
-    if ($tableParams->orderBy != '') {
-      $order = explode(" ", $tableParams->orderBy);
-      $model = $model->orderBy($order[0], $order[1]);
-    }
+    $this->pdf = new PDF('L', 'mm', 'A4', true, tableTitle: $modelParams->title);
+    $this->pdf->SetPageOrientation('L');
+    $this->pdf->setHeaderMargin(10);
+    $this->pdf->setMargins(10, 20, 10);
+    $this->pdf->AddPage();
+    $this->pdf->SetFont('dejavusans', '', 12);
 
-    $data = $model->get()->toArray();
-    $hiddenColumns = [];
+    $this->pdf->SetCreator('BladeERP');
+    $this->pdf->SetTitle($modelParams->table);
+    $this->pdf->SetSubject('BladeERP Export');
 
-    $pdf = new PDF('L', 'mm', 'A4', true, 'UTF-8', tableTitle: $options->title);
-    $pdf->SetPageOrientation('L');
-    $pdf->setHeaderMargin(10);
-    $pdf->setMargins(10, 20, 10);
-    $pdf->AddPage();
-
-    $pdf->setHeaderData($ln='', $lw=0, $ht='', $hs='<table cellspacing="0" cellpadding="1" border="1"><tr><td rowspan="3">test</td><td>test</td></tr></table>', $tc=array(0,0,0), $lc=array(0,0,0));
-
-    $pdf->SetCreator('BladeERP');
-    $pdf->SetTitle($options->table);
-    $pdf->SetSubject('BladeERP Export');
-
-    $html = '
+    $styles = '
     <style>
       table {
-        font-family: arial, sans-serif;
         border-collapse: collapse;
         width: 100%;
         border: 1px solid gray;
@@ -55,10 +50,11 @@ class PrintPdf extends \ADIOS\Core\View
       td {
         text-align: left;
         padding: 8px;
+        border-top: 1px solid gray;
       }
       
       th {
-        background-color: #f0f0f0;
+        background-color: #f1f1f1;
         color: #424242;
         font-weight: bolder;
       }
@@ -66,59 +62,92 @@ class PrintPdf extends \ADIOS\Core\View
         background-color: #536b9f;
         color: white;
       }
-    </style>
-    <table>
+    </style>';
+
+    $html = $styles;
+    $html .= '<table>
       <tr>';
-    foreach ($columns as $key => $col) {
-      if ($col['show_column'] || $col['showColumn']) {
-        if ($tableParams->orderBy != '' && explode(" ", $tableParams->orderBy)[0] == $key) {
-          $html .= '<th class="blue">' . $col['title'] . ' ' . (explode(" ", $tableParams->orderBy)[1] == 'asc' ? 'ASC' : 'DESC') .'</th>';
-        }
-        $html .= '<th>' . $col['title'] .'</th>';
-      } else {
-        $hiddenColumns[] = $key;
-      }
-    }
+    $html .= $this->renderHeader($columns, $orderBy);
     $html .= '</tr>';
-    foreach($data as $row) {
+
+    $i = 0;
+    $itemsPerPage = 30; # more rows don't fit
+    foreach ($data as $row) {
+      if ($i == $itemsPerPage) {  # Adds a new page with new table header
+        $i = 0;
+        $html .= '</table>';
+        $this->pdf->WriteHtml($html, true, false, true, false);
+
+        $this->pdf->AddPage();
+        $html = $styles;
+        $html .= '<table> <tr>';
+        $html .= $this->renderHeader($columns, $orderBy);
+        $html .= '</tr>';
+      }
       $html .= '<tr>';
-      foreach ($row as $key => $col) {
-        if (in_array($key, $hiddenColumns)) continue;
-        $html .= '<td>';
-        $html .= $col;
-        $html .= '</td>';
+      foreach ($row as $colName => $colValue) {
+        if (!in_array(explode(":", $colName)[0], $this->hiddenColumns) && isset($columns[$colName])) {
+          $html .= '<td>';
+          $html .= match ($columns[$colName]["type"]) {
+            'lookup' => $row[$colName . ':LOOKUP'],
+            'bool', 'boolean' => ($colValue ? '<span style="color: green">True</span>' : '<span style="color: red">False</span>'),
+            default => $colValue,
+          };
+          $html .= '</td>';
+        }
       }
       $html .= '</tr>';
+      $i++;
     }
     $html .= '</table>';
 
-    $pdf->WriteHtml($html, true, false, true, false);
-    $this->pdf = $pdf->Output('hello_world.pdf', 'S');
+    $this->pdf->WriteHtml($html, true, false, true, false);
+    $this->pdfOutput = $this->pdf->Output($modelParams->table . '.pdf', 'S');
   }
+
+  public function renderHeader($columns, $orderBy): string
+  {
+    $header = '';
+    foreach ($columns as $key => $col) {
+      if ($col['show_column'] || $col['showColumn']) {
+        if ($orderBy != '' && explode(" ", $orderBy)[0] == $key) {
+          $header .= '<th class="blue">' . (explode(" ", $orderBy)[1] == 'asc' ? '▲' : '▼') . " " . $col['title'] . '</th>';
+        } else {
+          $header .= '<th>' . $col['title'] . '</th>';
+        }
+      } else {
+        $this->hiddenColumns[] = explode(":", $key)[0];
+      }
+    }
+    return $header;
+  }
+
   /**
    * render
    *
-   * @param  mixed $panel
+   * @param mixed $panel
    * @return void
    */
   public function render(string $panel = ''): string
   {
-    // width='800px' height='500px' id='iframe' src='data:application/octet-stream;headers=filename%3Dprint.pdf;base64," . base64_encode($this->pdf) . "'
-    return base64_encode($this->pdf);
+    return base64_encode($this->pdfOutput);
   }
 
 }
 
-class PDF extends \TCPDF {
+class PDF extends \TCPDF
+{
 
   public string $tableTitle;
 
-  public function __construct($orientation='P', $unit='mm', $format='A4', $unicode=true, $encoding='UTF-8', $diskcache=false, $pdfa=false, $tableTitle='') {
+  public function __construct($orientation = 'L', $unit = 'mm', $format = 'A4', $unicode = true, $encoding = 'UTF-8', $diskcache = false, $pdfa = false, $tableTitle = '')
+  {
     $this->tableTitle = $tableTitle;
     parent::__construct();
   }
 
-  public function Header() {
+  public function Header()
+  {
     $this->SetFont('helvetica', 'B', 20);
     $this->Cell(0, 15, 'BladeERP >> ' . $this->tableTitle, 0, false, 'L', 0, '', 0, false, 'M', 'M');
   }
