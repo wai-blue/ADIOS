@@ -115,7 +115,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param mixed $value
-   * 
+   *
    * @return string
    */
   public function typedSqlValue($value): string
@@ -134,7 +134,7 @@ class MySQLi extends \ADIOS\Core\DB
    * @param mixed $columnName
    * @param mixed $filterValue
    * @param null $column
-   * 
+   *
    * @return [type]
    */
   private function columnSqlFilter($model, $columnName, $filterValue, $column = NULL)
@@ -455,7 +455,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param \ADIOS\Core\DB\Query $query
-   * 
+   *
    * @return string
    */
   private function buildSqlWhere(\ADIOS\Core\DB\Query $query, ?array $wheres = NULL, string $logic = ''): string
@@ -514,7 +514,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param \ADIOS\Core\DB\Query $query
-   * 
+   *
    * @return string
    */
   private function buildSqlHaving(\ADIOS\Core\DB\Query $query, ?array $havings = NULL, string $logic = ''): string
@@ -687,7 +687,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param \ADIOS\Core\DB\Query $query
-   * 
+   *
    * @return string
    */
   public function buildSql(\ADIOS\Core\DB\Query $query) : string
@@ -743,7 +743,7 @@ class MySQLi extends \ADIOS\Core\DB
         // joins
         $joinsArray = [];
         foreach ($joins as $join) {
-          $joinsArray[] = 
+          $joinsArray[] =
             'LEFT JOIN `' . $join[2] . '` as `' . $join[3] . '`'
             . ' ON `' .  $join[3] . '`.`id` = `' . $join[1] . '`.`' . $join[4] . '`';
         }
@@ -761,7 +761,7 @@ class MySQLi extends \ADIOS\Core\DB
           $order[1] = trim($order[1]);
           $order[1] = '`' . implode('`.`', explode(".", str_replace('`', '', $order[1]))) . '`';
 
-          $order[2] = strtoupper($order[2]);
+          $order[2] = strtoupper($order[2] ?? '');
 
           if (!in_array($order[2], ['ASC', 'DESC'])) continue;
 
@@ -832,7 +832,7 @@ class MySQLi extends \ADIOS\Core\DB
 
         $where = $this->buildSqlWhere($query);
 
-        $sql = 
+        $sql =
           'UPDATE `' . $sqlTableName . '` SET '
           . $this->updateRowQuery($sqlTableName, $data)
           . (empty($where) ? '' : ' WHERE ' . $where)
@@ -845,7 +845,7 @@ class MySQLi extends \ADIOS\Core\DB
 
         $where = $this->buildSqlWhere($query);
 
-        $sql = 
+        $sql =
           'DELETE FROM `' . $sqlTableName . '`'
           . (empty($where) ? '' : ' WHERE ' . $where)
         ;
@@ -1096,7 +1096,7 @@ class MySQLi extends \ADIOS\Core\DB
   //  * @param mixed $col_type
   //  * @param mixed $value
   //  * @param array $params
-  //  * 
+  //  *
   //  * @return [type]
   //  */
   // public function filter($col_name, $col_type, $value, $params = [])
