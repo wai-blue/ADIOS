@@ -1,6 +1,5 @@
   var ui_table_params = {};
   let ui_table_order_by = '';
-  let ui_table_items_per_page = -1;
 
   function ui_table_settings_click(uid){
 
@@ -106,7 +105,6 @@
   };
 
   function ui_table_change_items_per_page(uid, count){
-    ui_table_items_per_page = count;
     ui_table_refresh(uid, {itemsPerPage: count});
   }
 
