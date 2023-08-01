@@ -151,4 +151,10 @@ class PDF extends \TCPDF
     $this->SetFont('helvetica', 'B', 20);
     $this->Cell(0, 15, 'BladeERP >> ' . $this->tableTitle, 0, false, 'L', 0, '', 0, false, 'M', 'M');
   }
+
+  public function Footer() {
+    $this->SetY(-15); // Move the pointer to the bottom of the page
+    $this->SetFont('helvetica', 'I', 8); // Set font for the footer
+    $this->Cell(0, 10, 'Page ' . $this->getAliasNumPage() . ' / ' . $this->getAliasNbPages(), 0, 0, 'C'); // Add the page number
+  }
 }
