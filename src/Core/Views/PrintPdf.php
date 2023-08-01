@@ -91,6 +91,7 @@ class PrintPdf extends \ADIOS\Core\View
           $html .= match ($columns[$colName]["type"]) {
             'lookup' => $row[$colName . ':LOOKUP'],
             'bool', 'boolean' => ($colValue ? '<span style="color: green">True</span>' : '<span style="color: red">False</span>'),
+            'int' => (isset($columns[$colName]['enum_values']) ? $columns[$colName]['enum_values'][$colValue] : $colValue),
             default => $colValue,
           };
           $html .= '</td>';
