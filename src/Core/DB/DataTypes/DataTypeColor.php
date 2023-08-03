@@ -49,9 +49,8 @@ class DataTypeColor extends \ADIOS\Core\DB\DataType
         ";
       } else {
         return "
-          <input type='text' id='{$name}' value='".ads($value)."' style='width:80px' onchange='{$name}_onchange();'>
-          <span id='{$name}_selected_div' style='width:12px;height:12px;display:inline-block'>&nbsp;</span>
-          <br/>
+          <input type='color' id='{$name}' value='".ads($value)."' style='width:80px' onchange='{$name}_onchange();'>
+
           <div class='{$name}_div' farba='#CC0000'>&nbsp;</div>
           <div class='{$name}_div' farba='#FB940B'>&nbsp;</div>
           <div class='{$name}_div' farba='#FFFF00'>&nbsp;</div>
@@ -65,11 +64,6 @@ class DataTypeColor extends \ADIOS\Core\DB\DataType
           <div class='{$name}_div' farba='#000000'>&nbsp;</div>
           <div class='{$name}_div' farba='#885418'>&nbsp;</div>
           <script>
-            function {$name}_onchange() {
-              $('#{$name}_selected_div').css('background', $('#{$name}').val());
-            }
-            {$name}_onchange();
-
             $('.{$name}_div').each(function() {
               $(this).css({'background': $(this).attr('farba'), 'cursor': 'pointer', 'width': '12px', 'height': '12px', 'border': '2px solid white', 'display': 'inline-block'});
               $(this).click(function() {
