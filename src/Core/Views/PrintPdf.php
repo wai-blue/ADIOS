@@ -40,33 +40,33 @@ class PrintPdf extends \ADIOS\Core\View
     $this->pdf->SetSubject('BladeERP Export');
 
     $styles = '
-    <style>
-      table {
-        border-collapse: collapse;
-        width: 100%;
-        border: 1px solid gray;
-      }
-      
-      td {
-        text-align: left;
-        padding: 8px;
-        border-top: 1px solid gray;
-      }
-      
-      th {
-        background-color: #f1f1f1;
-        color: #424242;
-        font-weight: bolder;
-      }
-      .blue {
-        background-color: #536b9f;
-        color: white;
-      }
-    </style>';
+      <style>
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          border: 1px solid gray;
+        }
+        
+        td {
+          text-align: left;
+          padding: 8px;
+          border-top: 1px solid gray;
+        }
+        
+        th {
+          background-color: #f1f1f1;
+          color: #424242;
+          font-weight: bolder;
+        }
+        .blue {
+          background-color: #536b9f;
+          color: white;
+        }
+      </style>
+    ';
 
     $html = $styles;
-    $html .= '<table>
-      <tr>';
+    $html .= '<table><tr>';
     $html .= $this->renderHeader($columns, $orderBy);
     $html .= '</tr>';
 
@@ -84,22 +84,41 @@ class PrintPdf extends \ADIOS\Core\View
         $html .= $this->renderHeader($columns, $orderBy);
         $html .= '</tr>';
       }
+
       $html .= '<tr>';
+
       foreach ($row as $colName => $colValue) {
         if (!in_array(explode(":", $colName)[0], $this->hiddenColumns) && isset($columns[$colName])) {
           $html .= '<td>';
+
           $html .= match ($columns[$colName]["type"]) {
             'lookup' => $row[$colName . ':LOOKUP'],
-            'bool', 'boolean' => ($colValue ? '<span style="color: green">True</span>' : '<span style="color: red">False</span>'),
-            'int' => (isset($columns[$colName]['enum_values']) ? $columns[$colName]['enum_values'][$colValue] : $colValue),
+            'bool', 'boolean' => ($colValue 
+              ? '<span style="color: green">True</span>' 
+              : '<span style="color: red">False</span>'
+            ),
+            'int' => (isset($columns[$colName]['enum_values']) 
+              ? $columns[$colName]['enum_values'][$colValue] 
+              : $colValue
+            ),
+            'date', 'datetime' => $adios->db->columnTypes[$columns[$colName]["type"]]->get_html(
+              $row[$colName],
+              [
+                'col_name' => $colName,
+                'col_definition' => $columns[$colName],
+                'row' => $colValue,
+              ]
+            ),
             default => $colValue,
           };
+
           $html .= '</td>';
         }
       }
       $html .= '</tr>';
       $i++;
     }
+
     $html .= '</table>';
 
     $this->pdf->WriteHtml($html, true, false, true, false);
@@ -112,7 +131,9 @@ class PrintPdf extends \ADIOS\Core\View
     foreach ($columns as $key => $col) {
       if ($col['show_column'] || $col['showColumn']) {
         if ($orderBy != '' && explode(" ", $orderBy)[0] == $key) {
-          $header .= '<th class="blue">' . (explode(" ", $orderBy)[1] == 'asc' ? '▲' : '▼') . " " . $col['title'] . '</th>';
+          $header .= '<th class="blue">' . (explode(" ", $orderBy)[1] == 'asc' ? '▲' : '▼') 
+            . " " . $col['title'] . '</th>'
+          ;
         } else {
           $header .= '<th>' . $col['title'] . '</th>';
         }
@@ -120,6 +141,7 @@ class PrintPdf extends \ADIOS\Core\View
         $this->hiddenColumns[] = explode(":", $key)[0];
       }
     }
+
     return $header;
   }
 

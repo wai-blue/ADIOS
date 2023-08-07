@@ -145,6 +145,7 @@ class MySQLi extends \ADIOS\Core\DB
 
     $type = $column['type'];
     $s = explode(',', $filterValue);
+
     if (
       ($type == 'int' && _count($column['enum_values']))
       || in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password', 'lookup'])
@@ -153,7 +154,15 @@ class MySQLi extends \ADIOS\Core\DB
         $w = [];
         $s = [];
         foreach ($column['enum_values'] as $evk => $evv) {
-          if (stripos($evv, $filterValue) !== FALSE) {
+          // PATO fix 07-08-2023 
+          // Ak intangible a tangible (ak som vybral tangible tak vyhodnotilo nespravne 
+          // /lebo inTANGIBLE je to iste slovo)
+          /*if (stripos($evv, $filterValue) !== FALSE) {
+            $w[] = (string)$evk;
+            $s[] = (string)$evk;
+          }*/
+
+          if ($evv == $filterValue) {
             $w[] = (string)$evk;
             $s[] = (string)$evk;
           }
@@ -217,7 +226,8 @@ class MySQLi extends \ADIOS\Core\DB
       }
 
       if ($type == 'int' && _count($column['enum_values'])) {
-        $return = " `{$columnName}_enum_value` like '%" . $this->escape(trim($s)) . "%'";
+        $return = " `{$columnName}` IN (\"" . implode('","', $s) . "\")";
+        //$return = " `{$columnName}_enum_value` like '%" . $this->escape(trim($s)) . "%'";
       } else if ($type == 'varchar' && _count($column['enum_values'])) {
         $return = " `{$columnName}` IN (\"" . implode('","', $w) . "\")";
       } else if (in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password'])) {
