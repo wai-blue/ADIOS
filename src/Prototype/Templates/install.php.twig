@@ -13,8 +13,8 @@ try {
   $myAdiosApp->install();
 
   // user roles and users
-  $userModel = $myAdiosApp->getModel("Core/Models/User");
-  $userRoleModel = $myAdiosApp->getModel("Core/Models/UserRole");
+  $userModel = $myAdiosApp->getModel("ADIOS/Core/Models/User");
+  $userRoleModel = $myAdiosApp->getModel("ADIOS/Core/Models/UserRole");
 
   $idRole = $userRoleModel->insertRow(["name" => "Administrator"]);
 

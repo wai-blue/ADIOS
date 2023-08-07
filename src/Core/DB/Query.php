@@ -143,7 +143,7 @@ class Query
         $followLookups
         && isset($modelColumnParams['model'])
       ) {
-        $lookupModelClass = '\\ADIOS\\' . str_replace('/', '\\', $modelColumnParams['model']);
+        $lookupModelClass = str_replace('/', '\\', $modelColumnParams['model']);
         $lookupModel = new $lookupModelClass($this->adios);
         $lookupTableAlias = $modelColumn . ':LOOKUP';
 

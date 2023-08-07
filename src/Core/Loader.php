@@ -18,7 +18,7 @@ spl_autoload_register(function ($class) {
   $class = str_replace("\\", "/", $class);
   $class = trim($class, "/");
 
-  if (strpos($class, "ADIOS/") === FALSE) return;
+  // if (strpos($class, "ADIOS/") === FALSE) return;
 
   $loaded = @include_once(dirname(__FILE__) . "/" . str_replace("ADIOS/", "", $class) . ".php");
 
@@ -100,7 +100,14 @@ spl_autoload_register(function ($class) {
       include_once(__DIR__ . "/../{$m[1]}.php");
 
     } else if (preg_match('/App\/([\w\/]+)/', $class, $m)) {
-      include_once($___ADIOSObject->config['dir'] . "/../{$m[1]}.php");
+      $fname1 = $___ADIOSObject->config['dir'] . "/{$m[1]}/Main.php";
+      $fname2 = $___ADIOSObject->config['dir'] . "/{$m[1]}.php";
+      
+      if (is_file($fname1)) {
+        include($fname1);
+      } else if (is_file($fname2)) {
+        include($fname2);
+      }
     }
   }
 });
@@ -311,11 +318,11 @@ class Loader
 
       // inicializacia core modelov
 
-      $this->registerModel("Core/Models/Config");
-      $this->registerModel("Core/Models/Translate");
-      $this->registerModel("Core/Models/User");
-      $this->registerModel("Core/Models/UserRole");
-      $this->registerModel("Core/Models/Token");
+      $this->registerModel("ADIOS/Core/Models/Config");
+      $this->registerModel("ADIOS/Core/Models/Translate");
+      $this->registerModel("ADIOS/Core/Models/User");
+      $this->registerModel("ADIOS/Core/Models/UserRole");
+      $this->registerModel("ADIOS/Core/Models/Token");
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
 
@@ -418,7 +425,7 @@ class Loader
           $email = isset($_POST["email"]) ? $_POST["email"] : "";
 
           if ($email != "") {
-            $userModel = $this->getModel("Core/Models/User");
+            $userModel = $this->getModel("ADIOS/Core/Models/User");
             $userData = $userModel->getByEmail($email);
 
             if (!empty($userData)) {
@@ -510,7 +517,7 @@ class Loader
           } else {
             $this->userPasswordReset["error"] = FALSE;
 
-            $userModel = $this->getModel("Core/Models/User");
+            $userModel = $this->getModel("ADIOS/Core/Models/User");
             $userData = $userModel->validateToken($_GET["token"], true);
 
             if ($userData) {
@@ -531,7 +538,7 @@ class Loader
         if ($this->forceUserLogout) unset($_SESSION[_ADIOS_ID]['userProfile']);
 
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
-          $adiosUserModel = $this->getModel("Core/Models/User");
+          $adiosUserModel = $this->getModel("ADIOS/Core/Models/User");
           // $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           // $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
@@ -684,7 +691,7 @@ class Loader
   public function addWidget($widgetName) {
     if (!isset($this->widgets[$widgetName])) {
       try {
-        $widgetClassName = "\\ADIOS\\Widgets\\".str_replace("/", "\\", $widgetName);
+        $widgetClassName = "\\App\\Widgets\\".str_replace("/", "\\", $widgetName);
         if (!class_exists($widgetClassName)) {
           throw new \Exception("Widget {$widgetName} not found.");
         }
@@ -721,14 +728,21 @@ class Loader
   }
 
   public function getModelClassName($modelName) {
-    return "\\ADIOS\\".str_replace("/", "\\", $modelName);
+  // var_dump($modelName);
+    // if (strpos($modelName, "Widgets") === 0) {
+    //   return "\\App\\".str_replace("/", "\\", $modelName);
+    // } else {
+    //   return "\\ADIOS\\".str_replace("/", "\\", $modelName);
+    // }
+
+    return str_replace("/", "\\", $modelName);
   }
 
   /**
    * Returns the object of the model referenced by $modelName.
    * The returned object is cached into modelObjects property.
    *
-   * @param  string $modelName Reference of the model. E.g. 'Core/Models/User'.
+   * @param  string $modelName Reference of the model. E.g. 'ADIOS/Core/Models/User'.
    * @throws \ADIOS\Core\Exception If $modelName is not available.
    * @return object Instantiated object of the model.
    */
@@ -1090,7 +1104,7 @@ class Loader
    */
   public function render($params = []) {
     if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedURI, $m)) {
-      $cronClassName = str_replace("/", "\\", "/ADIOS/Widgets/{$m[0]}");
+      $cronClassName = str_replace("/", "\\", "/App/Widgets/{$m[0]}");
 
       if (class_exists($cronClassName)) {
         (new $cronClassName($this))->run();
@@ -1253,7 +1267,7 @@ class Loader
     foreach ($this->widgets as $widgetName => $widgetData) {
       if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
         $actionClassName =
-          '\\ADIOS\\Widgets\\'
+          '\\App\\Widgets\\'
           . $widgetName
           . '\\Actions\\'
           . substr($action, strlen($widgetName) + 1)
@@ -1831,7 +1845,7 @@ class Loader
     }
 
     if (!empty($login)) {
-      $adiosUserModel = $this->getModel("Core/Models/User");
+      $adiosUserModel = $this->getModel("ADIOS/Core/Models/User");
       $this->db->query("
         select
           *

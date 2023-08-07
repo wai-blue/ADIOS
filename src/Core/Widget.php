@@ -29,8 +29,8 @@ class Widget {
   public array $models = [];
 
   function __construct($adios, $params = []) {
-    $this->name = str_replace("ADIOS\\Widgets\\", "", get_class($this));
-    $this->fullName = str_replace("ADIOS\\Widgets\\", "", get_class($this));
+    $this->name = str_replace("App\\Widgets\\", "", get_class($this));
+    $this->fullName = str_replace("App\\Widgets\\", "", get_class($this));
     $this->shortName = end(explode("/", $this->name));
 
     $this->adios = $adios;
@@ -92,7 +92,7 @@ class Widget {
       foreach (scandir($dir) as $file) {
         if (is_file("{$dir}/{$file}")) {
           $tmpModelName = str_replace(".php", "", $file);
-          $this->adios->registerModel("Widgets/{$this->name}/Models/{$tmpModelName}");
+          $this->adios->registerModel("App/Widgets/{$this->name}/Models/{$tmpModelName}");
         }
       }
     }

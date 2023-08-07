@@ -291,7 +291,7 @@ class Builder {
     foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
       $this->log('Building widget ' . $widgetName);
 
-      $widgetNamespace = 'ADIOS\Widgets';
+      $widgetNamespace = 'App\Widgets';
       $widgetClassName = '';
 
       if (strpos($widgetName, '/') !== FALSE) {

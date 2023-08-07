@@ -27,7 +27,7 @@ class User extends \ADIOS\Core\Model {
 
     if (is_object($adiosOrAttributes)) {
       $this->tableTitle = $this->translate("Users");
-      $tokenModel = $adiosOrAttributes->getModel("Core/Models/Token");
+      $tokenModel = $adiosOrAttributes->getModel("ADIOS/Core/Models/Token");
 
       if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
         $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
@@ -67,7 +67,7 @@ class User extends \ADIOS\Core\Model {
       'id_role' => [
         'type' => 'lookup',
         'title' => $this->translate('Role'),
-        'model' => "Core/Models/UserRole",
+        'model' => "ADIOS/Core/Models/UserRole",
         'show_column' => true,
         'input_style' => 'select'
       ],
@@ -109,7 +109,7 @@ class User extends \ADIOS\Core\Model {
       ],
       'id_token_reset_password' => [
         'type' => 'lookup',
-        'model' => "Core/Models/Token",
+        'model' => "ADIOS/Core/Models/Token",
         'title' => $this->translate('Reset password token'),
         'show_column' => FALSE,
         'readonly' => TRUE,
@@ -154,7 +154,7 @@ class User extends \ADIOS\Core\Model {
       '/^MyProfile$/' => [
         "action" => "UI/Form",
         "params" => [
-          "model" => "Core/Models/User",
+          "model" => "ADIOS/Core/Models/User",
           "myProfileView" => TRUE,
           "id" => $this->adios->userProfile['id'],
         ]
@@ -192,7 +192,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function generateToken($idUser, $tokenSalt, $tokenType) {
-    $tokenModel = $this->adios->getModel("Core/Models/Token");
+    $tokenModel = $this->adios->getModel("ADIOS/Core/Models/Token");
     $token = $tokenModel->generateToken($tokenSalt, $tokenType);
 
     $this->updateRow([
@@ -211,7 +211,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function validateToken($token, $deleteAfterValidation = TRUE) {
-    $tokenModel = $this->adios->getModel("Core/Models/Token");
+    $tokenModel = $this->adios->getModel("ADIOS/Core/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
     $userData = $this->where(

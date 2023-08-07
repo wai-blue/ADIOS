@@ -468,8 +468,15 @@ class Table extends \ADIOS\Core\View
       for ($i = 1; $i <= $this->pagesCount; ++$i) {
         if ($i == $this->params['page']) {
           $this->paging->addView('Html', ["html" => "
-            />
-            <script>
+              <input
+                type='text'
+                value='{$this->params['page']}'
+                class='paging_input'
+                id='{$this->params['uid']}_paging_bottom_input'
+                onchange=\"ui_table_show_page('{$this->params['uid']}', this.value);\"
+                onkeypress=\"if (event.keyCode == 13) { ui_table_show_page('{$this->params['uid']}', this.value); } \"
+                onclick='this.select();' />
+              <script>
               draggable_int_input(
                 '{$this->params['uid']}_paging_bottom_input',
                 { min_val: 1, max_val: {$this->pagesCount} }
