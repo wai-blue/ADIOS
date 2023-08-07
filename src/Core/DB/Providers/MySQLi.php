@@ -768,7 +768,7 @@ class MySQLi extends \ADIOS\Core\DB
           $ordersArray[] = $order[1] . ' ' . $order[2];
         }
         foreach ($orderRaws as $orderRaw) {
-          $orderArray[] = $orderRaw[1];
+          $ordersArray[] = $orderRaw[1];
         }
 
         // limit
@@ -787,7 +787,7 @@ class MySQLi extends \ADIOS\Core\DB
           . ' ' . join(' ', $joinsArray)
           . (empty($where) ? '' : ' WHERE ' . $where)
           . (empty($having) ? '' : ' HAVING ' . $having)
-          . (count($ordersArray) == 0 ? '' : ' ORDER BY ' . join(' AND ', $ordersArray))
+          . (count($ordersArray) == 0 ? '' : ' ORDER BY ' . join(', ', $ordersArray))
           . $limitSql
         ;
 
@@ -982,10 +982,11 @@ class MySQLi extends \ADIOS\Core\DB
       // indexy
       foreach ($table_columns as $col_name => $col_definition) {
         if (
-          !$col_definition['virtual']
+          $col_name != 'id'
+          && !$col_definition['virtual']
           && in_array($col_definition['type'], ['lookup', 'int', 'bool', 'boolean', 'date', 'datetime'])
         ) {
-          $sql .= "  index `{$col_name}` (`{$col_name}`),\n";
+          $sql .= " index `{$col_name}` (`{$col_name}`),\n";
         }
       }
 
