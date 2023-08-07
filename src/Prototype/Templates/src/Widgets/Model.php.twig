@@ -47,6 +47,16 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
     ]);
   }
 
+public function cards($cards = []) {
+    return parent::cards([
+{% for cardName, cardDefinition in thisModel.config.cards %}
+    "{{ cardName }}" =>
+    {{ varExport(cardDefinition, "        ")|raw }}
+    ,
+{% endfor %}
+]);
+}
+
 {% if (thisModel.config.formParams) %}
   public function formParams($data, $params) {
     $id = (int) $data["id"];

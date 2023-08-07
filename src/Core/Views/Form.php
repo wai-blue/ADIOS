@@ -147,12 +147,12 @@ class Form extends \ADIOS\Core\View
     }
 
     // default button params
-    
+
     if ($this->params['id'] <= 0) {
       $this->params['show_delete_button'] = FALSE;
       $this->params['show_copy_button'] = FALSE;
     }
-    
+
     if ($this->params['readonly']) {
       $this->params['show_save_button'] = FALSE;
       $this->params['show_delete_button'] = FALSE;
@@ -267,7 +267,7 @@ class Form extends \ADIOS\Core\View
     if (!empty($rows['action'])) {
       // ak je definovana akcia, generuje akciu s parametrami
       $tmpAction = $rows['action'];
-      
+
       $tmpActionParams = $rows['params'];
       $tmpActionParams['form_uid'] = $this->params['uid'];
       $tmpActionParams['form_data'] = $this->data;
@@ -530,7 +530,7 @@ class Form extends \ADIOS\Core\View
       ";
 
     }
-    
+
     if (is_callable($this->params['formatter'])) {
       $html .= $this->params['formatter']('after_html', $this, []);
     }

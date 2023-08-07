@@ -1264,11 +1264,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       $returnValue = $this->deleteRow($id);
 
-      $returnValue = $this->adios->dispatchEventToPlugins("onModelAfterDelete", [
+      $returnValue = $this->adios->dispatchEventToPlugins([
         "model" => $this,
         "data" => $data,
         "returnValue" => $returnValue,
-      ])["returnValue"];
+      ], "onModelAfterDelete")["returnValue"];
 
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
@@ -1279,6 +1279,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   //////////////////////////////////////////////////////////////////
   // UI/Cards methods
+
+  public function cards(array $cards = [])
+  {
+    return $this->adios->dispatchEventToPlugins("onModelAfterCards", [
+      "model" => $this,
+      "cards" => $cards,
+    ])["cards"];
+  }
 
   public function cardsParams($params)
   {

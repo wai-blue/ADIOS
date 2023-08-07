@@ -20,7 +20,7 @@ spl_autoload_register(function ($class) {
 
   if (strpos($class, "ADIOS/") === FALSE) return;
 
-  $loaded = @include_once(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
+  $loaded = @include_once(dirname(__FILE__) . "/" . str_replace("ADIOS/", "", $class) . ".php");
 
   if (!$loaded) {
 
@@ -29,7 +29,7 @@ spl_autoload_register(function ($class) {
       $class = str_replace("ADIOS/Actions/", "", $class);
 
       // najprv skusim hladat core akciu
-      $tmp = dirname(__FILE__)."/Actions/{$class}.php";
+      $tmp = dirname(__FILE__) . "/Actions/{$class}.php";
       if (!@include_once($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
@@ -37,13 +37,13 @@ spl_autoload_register(function ($class) {
         $widgetName = array_pop($widgetPath);
         $widgetPath = join("/", $widgetPath);
 
-        if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+        if (!@include_once($___ADIOSObject->config['dir'] . "/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
           // ak ani widgetovska, skusim plugin
           $class = str_replace("Plugins/", "", $class);
           $pathLeft = "";
           $pathRight = "";
           foreach (explode("/", $class) as $pathPart) {
-            $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
+            $pathLeft .= ($pathLeft == "" ? "" : "/") . $pathPart;
             $pathRight = str_replace("{$pathLeft}/", "", $class);
 
             $included = FALSE;
@@ -69,8 +69,8 @@ spl_autoload_register(function ($class) {
         throw new \Exception("ADIOS is not loaded.");
       }
 
-      if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
-        include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
+      if (!@include_once($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}/Main.php")) {
+        include_once($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}.php");
       }
     } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
       foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
@@ -83,21 +83,24 @@ spl_autoload_register(function ($class) {
     } else if (preg_match('/ADIOS\/Tests\/([\w\/]+)/', $class, $m)) {
       $class = str_replace("ADIOS/Tests/", "", $class);
 
-      $testFile = __DIR__."/../../tests/{$class}.php";
+      $testFile = __DIR__ . "/../../tests/{$class}.php";
 
       if (is_file($testFile)) {
         include_once($testFile);
       } else {
-        include_once($___ADIOSObject->config['dir']."/../tests/{$class}.php");
+        include_once($___ADIOSObject->config['dir'] . "/../tests/{$class}.php");
       }
 
     } else if (preg_match('/ADIOS\/Web\/([\w\/]+)/', $class, $m)) {
       $class = str_replace("ADIOS/Web/", "", $class);
 
-      include_once($___ADIOSObject->config['dir']."/Web/{$class}.php");
+      include_once($___ADIOSObject->config['dir'] . "/Web/{$class}.php");
 
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
-      include_once(__DIR__."/../{$m[1]}.php");
+      include_once(__DIR__ . "/../{$m[1]}.php");
+
+    } else if (preg_match('/App\/([\w\/]+)/', $class, $m)) {
+      include_once($___ADIOSObject->config['dir'] . "/../{$m[1]}.php");
     }
   }
 });
@@ -1249,7 +1252,7 @@ class Loader
     // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
     foreach ($this->widgets as $widgetName => $widgetData) {
       if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
-        $actionClassName = 
+        $actionClassName =
           '\\ADIOS\\Widgets\\'
           . $widgetName
           . '\\Actions\\'
@@ -1994,7 +1997,8 @@ class Loader
       dirname(__FILE__)."/../Assets/Js/jquery.multi-select.js",
       dirname(__FILE__)."/../Assets/Js/jquery.quicksearch.js",
       dirname(__FILE__)."/../Assets/Js/datatables.js",
-      dirname(__FILE__)."/../Assets/Js/jeditable.js"
+      dirname(__FILE__)."/../Assets/Js/jeditable.js",
+      dirname(__FILE__)."/../Assets/Js/draggable.js"
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
