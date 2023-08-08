@@ -578,8 +578,10 @@ class Loader
         )) {
           // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
           // nevyzadoval form resubmission
-              header('Location: ' . $this->config['url']);
-          exit();
+
+          // Dusan 8.8.2013: toto sposobovalo TOO_MANY_REDIRECTS, docasne vypnute
+          // header('Location: ' . $this->config['url']);
+          // exit();
         } else {
           $this->userProfile = [];
           $this->userLogged = FALSE;
