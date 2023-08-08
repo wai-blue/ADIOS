@@ -48,7 +48,11 @@ class Token extends \ADIOS\Core\Model {
     return parent::indexes([
       "uid" => [
         "type" => "index",
-        "columns" => ["token"],
+        "columns" => [
+          "token" => [
+            "order" => "asc",
+          ],
+        ],
       ],
     ]);
   }

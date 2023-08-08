@@ -46,7 +46,11 @@ class Config extends \ADIOS\Core\Model {
     return parent::indexes([
       "path" => [
         "type" => "unique",
-        "columns" => ["path"],
+        "columns" => [
+          "path" => [
+            "order" => "asc",
+          ],
+        ],
       ],
     ]);
   }

@@ -308,25 +308,36 @@ class Model extends \Illuminate\Database\Eloquent\Model
           $indexOrConstraintName = md5(json_encode($indexDef) . uniqid());
         }
 
+        $tmpColumns = "";
+
+        foreach ($indexDef['columns'] as $tmpKey => $tmpValue) {
+          if (!is_numeric($tmpKey)) {
+            // v tomto pripade je nazov stlpca v kluci a vo value mozu byt dalsie nastavenia
+            $tmpColumnName = $tmpKey;
+            $tmpOrder = strtolower($tmpValue['order'] ?? 'asc');
+            if (!in_array($tmpOrder, ['asc', 'desc'])) {
+              $tmpOrder = 'asc';
+            }
+          } else {
+            $tmpColumnName = $tmpValue;
+            $tmpOrder = '';
+          }
+
+          $tmpColumns .=
+            ($tmpColumns == '' ? '' : ', ')
+            . '`' . $tmpColumnName . '`'
+            . (empty($tmpOrder) ? '' : ' '.$tmpOrder)
+          ;
+        }
+
         switch ($indexDef["type"]) {
           case "index":
-            $tmpColumns = "";
-            foreach ($indexDef['columns'] as $tmpColumnName) {
-              $tmpColumns .= ($tmpColumns == "" ? "" : ", ") . "`{$tmpColumnName}`";
-            }
-
             $this->adios->db->query("
               alter table `" . $this->getFullTableSqlName() . "`
               add index `{$indexOrConstraintName}` ({$tmpColumns})
             ");
             break;
           case "unique":
-            $tmpColumns = "";
-
-            foreach ($indexDef['columns'] as $tmpColumnName) {
-              $tmpColumns .= ($tmpColumns == "" ? "" : ", ") . "`{$tmpColumnName}`";
-            }
-
             $this->adios->db->query("
               alter table `" . $this->getFullTableSqlName() . "`
               add constraint `{$indexOrConstraintName}` unique ({$tmpColumns})
