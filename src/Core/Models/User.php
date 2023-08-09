@@ -124,7 +124,7 @@ class User extends \ADIOS\Core\Model {
     return [
       0 => [], // upgrade to version 0 is the same as installation
       1 => [
-        "ALTER TABLE `{$this->getFullTableSqlName()}` RENAME COLUMN `active` TO `is_active`;",
+        "ALTER TABLE `{$this->getFullTableSqlName()}` CHANGE  `active` `is_active` tinyint(1);",
         "
           ALTER TABLE `{$this->getFullTableSqlName()}`
           ADD column `phone_number` varchar(255) DEFAULT '' after `email`

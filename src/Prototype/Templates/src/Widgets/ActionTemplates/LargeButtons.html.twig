@@ -1,9 +1,8 @@
-
 {{ builderInfo.html|raw }}
 
-<h1>{{ title }}</h1>
+<h1>{{ params.title }}</h1>
 <div class='row p-4'>
-  {% for button in buttons %}
+  {% for button in params.buttons %}
     <div class='col-2 m-4'>
       <a
         class='btn btn-primary btn-lg d-block p-4'

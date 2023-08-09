@@ -139,7 +139,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // v tomto pripade ide o volanie constructora z Eloquentu
       return parent::__construct($adiosOrAttributes ?? []);
     } else {
-      $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
+      $this->fullName = str_replace("\\", "/", get_class($this));
       $this->shortName = end(explode("/", $this->fullName));
       $this->adios = $adiosOrAttributes;
 
@@ -865,6 +865,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     unset($data['id']);
 
+    return $this->adios->db->insert($this)
+      ->set($data)
+      ->execute()
+    ;
+  }
+
+  public function insertRowWithId($data)
+  {
     return $this->adios->db->insert($this)
       ->set($data)
       ->execute()

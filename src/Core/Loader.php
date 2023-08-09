@@ -630,18 +630,24 @@ class Loader
             return $this->translate($string, [], $object);
           }
         ));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
-          if (!is_array($params)) {
-            $params = [];
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'adiosView',
+          function ($uid, $view, $params) {
+            if (!is_array($params)) {
+              $params = [];
+            }
+            return $this->view->create(
+              $view . (empty($uid) ? '' : '#' . $uid),
+              $params
+            )->render();
           }
-          return $this->view->create(
-            $view . (empty($uid) ? '' : '#' . $uid),
-            $params
-          )->render();
-        }));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
-          return $this->renderAction($action, $params);
-        }));
+        ));
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'adiosAction',
+          function ($action, $params = []) {
+            return $this->renderAction($action, $params);
+          }
+        ));
 
         // inicializacia UI wrappera
         // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\View::class;
@@ -1134,26 +1140,6 @@ class Loader
       }
 
 
-      // Kontrola permissions, krok 1
-      // Tu sa permissions kontroluju na zaklade REQUEST_URI, cize na zaklade routingu
-
-      $permissionForRequestedURI = "";
-      foreach ($this->routing as $routePattern => $route) {
-        if (preg_match((string) $routePattern, (string) $params['action'], $m)) {
-          $permissionForRequestedURI = $route['permission'];
-        }
-      }
-
-      if (
-        !empty($permissionForRequestedURI)
-        && !$this->permissions->has($permissionForRequestedURI)
-      ) {
-        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
-      }
-
-      // TODO: Docasne. Ked bude fungovat, vymazat.
-      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
-
       if (!empty($params['action'])) {
         // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
         // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
@@ -1229,6 +1215,28 @@ class Loader
       if (empty($this->action)) {
         $this->action = "Desktop";
       }
+
+      // Kontrola permissions
+
+      $permissionForRequestedURI = "";
+      foreach ($this->routing as $routePattern => $route) {
+        if (preg_match((string) $routePattern, $this->action, $m)) {
+          $permissionForRequestedURI = $route['permission'];
+        }
+      }
+
+      if (
+        !empty($permissionForRequestedURI)
+        && !$this->permissions->has($permissionForRequestedURI)
+      ) {
+        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
+      }
+
+      // TODO: Docasne. Ked bude fungovat, vymazat.
+      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
+
+
+      // All OK, rendering content...
 
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
