@@ -1268,13 +1268,17 @@ class Loader
 
   public function getActionClassName(string $action) : string {
 
-    // If the action contains the dash (-), it must be converted to camelCase first
-    $action = str_replace(' ', '', ucwords(str_replace('-', ' ', $action)));
+    $actionPathParts = [];
+    foreach (explode("/", $action) as $actionPathPart) {
+      // convert-dash-string-toCamelCase
+      $actionPathParts[] = str_replace(' ', '', ucwords(str_replace('-', ' ', $actionPathPart)));
+    }
+    $action = join("/", $actionPathParts);
 
     $actionClassName = '';
 
     // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
-    foreach ($this->widgets as $widgetName => $widgetData) {
+    foreach (array_keys($this->widgets) as $widgetName) {
       if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
         $actionClassName =
           '\\App\\Widgets\\'
