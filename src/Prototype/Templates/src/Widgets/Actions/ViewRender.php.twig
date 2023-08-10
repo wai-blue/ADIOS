@@ -8,7 +8,7 @@ class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
 
   public function render() {
     $view = $this->adios->view->create(
-      "{{ thisAction.config.view }}",
+      '{{ thisAction.config.view }}',
       array_merge(
         [
           'windowParams' => $this->params['windowParams'] ?? [],
