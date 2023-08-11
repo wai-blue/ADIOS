@@ -172,16 +172,16 @@ class View {
 
     $viewClassName = str_replace('/', '\\', $viewClassName);
 
-    if (strpos($viewClassName, '\\') !== 0) {
-      $viewClassName = '\\' . $viewClassName;
-    }
-
     if (!class_exists($viewClassName)) {
       if (empty($viewClassName)) {
         $viewClassName = "\\ADIOS\\Core\\View";
       } else {
         $viewClassName = "\\ADIOS\\Core\\Views\\{$viewClassName}";
       }
+    }
+
+    if (strpos($viewClassName, '\\') !== 0) {
+      $viewClassName = '\\' . $viewClassName;
     }
 
     return new $viewClassName(
