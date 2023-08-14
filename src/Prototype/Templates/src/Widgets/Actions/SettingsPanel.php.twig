@@ -8,20 +8,20 @@ namespace {{ thisAction.namespace }};
 class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
   public function render() {
     return $this->adios->renderAction("UI/SettingsPanel", [
-      "settings_group" => "sales",
-      "title" => "{{ thisAction.config.title }}",
-      "template" => [
-        "items" => [
+      'settings_group' => 'sales',
+      'title' => '{{ thisAction.config.title }}',
+      'template' => [
+        'items' => [
 {% for item in thisAction.config.items %}
           [
-            "title" => "{{ item.title }}",
+            'title' => '{{ item.title }}',
 {% if item.input is iterable %}
-            "input" => $this->adios->view->Input(json_decode('{{ item.input|json_encode|raw }}', TRUE)),
+            'input' => $this->adios->view->Input(json_decode('{{ item.input|json_encode|raw }}', TRUE)),
 {% endif %}
 {% if item.button is iterable %}
-            "input" => $this->adios->view->Button(json_decode('{{ item.button|json_encode|raw }}', TRUE)),
+            'input' => $this->adios->view->Button(json_decode('{{ item.button|json_encode|raw }}', TRUE)),
 {% endif %}
-            "description" => "{{ item.descriptiopn }}",
+            'description' => '{{ item.descriptiopn }}',
           ],
 {% endfor %}
         ],

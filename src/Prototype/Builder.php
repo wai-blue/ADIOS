@@ -291,7 +291,7 @@ class Builder {
     foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
       $this->log('Building widget ' . $widgetName);
 
-      $widgetNamespace = 'ADIOS\Widgets';
+      $widgetNamespace = 'App\Widgets';
       $widgetClassName = '';
 
       if (strpos($widgetName, '/') !== FALSE) {
@@ -440,10 +440,9 @@ class Builder {
           );
 
           if (!empty($actionHtmlFileTemplate)) {
-            $this->renderFile(
-              $widgetRootDir . '/Templates/' . $actionName . '.twig',
+            $this->copyFile(
               $actionHtmlFileTemplate,
-              $tmpActionParams
+              $widgetRootDir . '/Templates/' . $actionName . '.twig'
             );
           }
         }

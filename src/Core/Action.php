@@ -161,11 +161,13 @@ class Action {
     $twigParams['userNotifications'] = $this->adios->userNotifications->getAsHtml();
 
     try {
+      $tmpTemplate = empty($this->twigTemplate)
+        ? str_replace("\\Actions\\", "\\Templates\\", static::class)
+        : $this->twigTemplate
+      ;
+
       return $this->adios->twig->render(
-        empty($this->twigTemplate)
-          ? str_replace("\\Actions\\", "\\Templates\\", static::class)
-          : $this->twigTemplate
-        ,
+        $tmpTemplate,
         $twigParams
       );
     } catch (\Twig\Error\RuntimeError $e) {

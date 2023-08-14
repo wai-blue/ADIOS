@@ -1,5 +1,5 @@
   var ui_table_params = {};
- 
+  let ui_table_order_by = '';
 
   function ui_table_settings_click(uid){
 
@@ -69,6 +69,7 @@
       params.refresh = 1;
 
       ui_table_params[uid] = params;
+      ui_table_order_by = (params['orderBy'] !== undefined ? params['orderBy'] : ui_table_order_by);
 
       _ajax_update(action, params, uid);
     }

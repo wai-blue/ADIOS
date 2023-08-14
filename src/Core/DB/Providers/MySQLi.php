@@ -115,7 +115,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param mixed $value
-   * 
+   *
    * @return string
    */
   public function typedSqlValue($value): string
@@ -134,7 +134,7 @@ class MySQLi extends \ADIOS\Core\DB
    * @param mixed $columnName
    * @param mixed $filterValue
    * @param null $column
-   * 
+   *
    * @return [type]
    */
   private function columnSqlFilter($model, $columnName, $filterValue, $column = NULL)
@@ -145,6 +145,7 @@ class MySQLi extends \ADIOS\Core\DB
 
     $type = $column['type'];
     $s = explode(',', $filterValue);
+
     if (
       ($type == 'int' && _count($column['enum_values']))
       || in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password', 'lookup'])
@@ -153,7 +154,15 @@ class MySQLi extends \ADIOS\Core\DB
         $w = [];
         $s = [];
         foreach ($column['enum_values'] as $evk => $evv) {
-          if (stripos($evv, $filterValue) !== FALSE) {
+          // PATO fix 07-08-2023 
+          // Ak intangible a tangible (ak som vybral tangible tak vyhodnotilo nespravne 
+          // /lebo inTANGIBLE je to iste slovo)
+          /*if (stripos($evv, $filterValue) !== FALSE) {
+            $w[] = (string)$evk;
+            $s[] = (string)$evk;
+          }*/
+
+          if ($evv == $filterValue) {
             $w[] = (string)$evk;
             $s[] = (string)$evk;
           }
@@ -217,7 +226,8 @@ class MySQLi extends \ADIOS\Core\DB
       }
 
       if ($type == 'int' && _count($column['enum_values'])) {
-        $return = " `{$columnName}_enum_value` like '%" . $this->escape(trim($s)) . "%'";
+        $return = " `{$columnName}` IN (\"" . implode('","', $s) . "\")";
+        //$return = " `{$columnName}_enum_value` like '%" . $this->escape(trim($s)) . "%'";
       } else if ($type == 'varchar' && _count($column['enum_values'])) {
         $return = " `{$columnName}` IN (\"" . implode('","', $w) . "\")";
       } else if (in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password'])) {
@@ -455,7 +465,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param \ADIOS\Core\DB\Query $query
-   * 
+   *
    * @return string
    */
   private function buildSqlWhere(\ADIOS\Core\DB\Query $query, ?array $wheres = NULL, string $logic = ''): string
@@ -514,7 +524,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param \ADIOS\Core\DB\Query $query
-   * 
+   *
    * @return string
    */
   private function buildSqlHaving(\ADIOS\Core\DB\Query $query, ?array $havings = NULL, string $logic = ''): string
@@ -687,7 +697,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   /**
    * @param \ADIOS\Core\DB\Query $query
-   * 
+   *
    * @return string
    */
   public function buildSql(\ADIOS\Core\DB\Query $query) : string
@@ -743,7 +753,7 @@ class MySQLi extends \ADIOS\Core\DB
         // joins
         $joinsArray = [];
         foreach ($joins as $join) {
-          $joinsArray[] = 
+          $joinsArray[] =
             'LEFT JOIN `' . $join[2] . '` as `' . $join[3] . '`'
             . ' ON `' .  $join[3] . '`.`id` = `' . $join[1] . '`.`' . $join[4] . '`';
         }
@@ -761,14 +771,14 @@ class MySQLi extends \ADIOS\Core\DB
           $order[1] = trim($order[1]);
           $order[1] = '`' . implode('`.`', explode(".", str_replace('`', '', $order[1]))) . '`';
 
-          $order[2] = strtoupper($order[2]);
+          $order[2] = strtoupper($order[2] ?? '');
 
           if (!in_array($order[2], ['ASC', 'DESC'])) continue;
 
           $ordersArray[] = $order[1] . ' ' . $order[2];
         }
         foreach ($orderRaws as $orderRaw) {
-          $orderArray[] = $orderRaw[1];
+          $ordersArray[] = $orderRaw[1];
         }
 
         // limit
@@ -787,7 +797,7 @@ class MySQLi extends \ADIOS\Core\DB
           . ' ' . join(' ', $joinsArray)
           . (empty($where) ? '' : ' WHERE ' . $where)
           . (empty($having) ? '' : ' HAVING ' . $having)
-          . (count($ordersArray) == 0 ? '' : ' ORDER BY ' . join(' AND ', $ordersArray))
+          . (count($ordersArray) == 0 ? '' : ' ORDER BY ' . join(', ', $ordersArray))
           . $limitSql
         ;
 
@@ -832,7 +842,7 @@ class MySQLi extends \ADIOS\Core\DB
 
         $where = $this->buildSqlWhere($query);
 
-        $sql = 
+        $sql =
           'UPDATE `' . $sqlTableName . '` SET '
           . $this->updateRowQuery($sqlTableName, $data)
           . (empty($where) ? '' : ' WHERE ' . $where)
@@ -845,7 +855,7 @@ class MySQLi extends \ADIOS\Core\DB
 
         $where = $this->buildSqlWhere($query);
 
-        $sql = 
+        $sql =
           'DELETE FROM `' . $sqlTableName . '`'
           . (empty($where) ? '' : ' WHERE ' . $where)
         ;
@@ -982,10 +992,11 @@ class MySQLi extends \ADIOS\Core\DB
       // indexy
       foreach ($table_columns as $col_name => $col_definition) {
         if (
-          !$col_definition['virtual']
+          $col_name != 'id'
+          && !$col_definition['virtual']
           && in_array($col_definition['type'], ['lookup', 'int', 'bool', 'boolean', 'date', 'datetime'])
         ) {
-          $sql .= "  index `{$col_name}` (`{$col_name}`),\n";
+          $sql .= " index `{$col_name}` (`{$col_name}`),\n";
         }
       }
 
@@ -1096,7 +1107,7 @@ class MySQLi extends \ADIOS\Core\DB
   //  * @param mixed $col_type
   //  * @param mixed $value
   //  * @param array $params
-  //  * 
+  //  *
   //  * @return [type]
   //  */
   // public function filter($col_name, $col_type, $value, $params = [])

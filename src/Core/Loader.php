@@ -18,9 +18,9 @@ spl_autoload_register(function ($class) {
   $class = str_replace("\\", "/", $class);
   $class = trim($class, "/");
 
-  if (strpos($class, "ADIOS/") === FALSE) return;
+  // if (strpos($class, "ADIOS/") === FALSE) return;
 
-  $loaded = @include_once(dirname(__FILE__)."/".str_replace("ADIOS/", "", $class).".php");
+  $loaded = @include_once(dirname(__FILE__) . "/" . str_replace("ADIOS/", "", $class) . ".php");
 
   if (!$loaded) {
 
@@ -29,7 +29,7 @@ spl_autoload_register(function ($class) {
       $class = str_replace("ADIOS/Actions/", "", $class);
 
       // najprv skusim hladat core akciu
-      $tmp = dirname(__FILE__)."/Actions/{$class}.php";
+      $tmp = dirname(__FILE__) . "/Actions/{$class}.php";
       if (!@include_once($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
@@ -37,13 +37,13 @@ spl_autoload_register(function ($class) {
         $widgetName = array_pop($widgetPath);
         $widgetPath = join("/", $widgetPath);
 
-        if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+        if (!@include_once($___ADIOSObject->config['dir'] . "/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
           // ak ani widgetovska, skusim plugin
           $class = str_replace("Plugins/", "", $class);
           $pathLeft = "";
           $pathRight = "";
           foreach (explode("/", $class) as $pathPart) {
-            $pathLeft .= ($pathLeft == "" ? "" : "/").$pathPart;
+            $pathLeft .= ($pathLeft == "" ? "" : "/") . $pathPart;
             $pathRight = str_replace("{$pathLeft}/", "", $class);
 
             $included = FALSE;
@@ -69,8 +69,8 @@ spl_autoload_register(function ($class) {
         throw new \Exception("ADIOS is not loaded.");
       }
 
-      if (!@include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}/Main.php")) {
-        include_once($___ADIOSObject->config['dir']."/Widgets/{$m[1]}.php");
+      if (!@include_once($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}/Main.php")) {
+        include_once($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}.php");
       }
     } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
       foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
@@ -83,21 +83,31 @@ spl_autoload_register(function ($class) {
     } else if (preg_match('/ADIOS\/Tests\/([\w\/]+)/', $class, $m)) {
       $class = str_replace("ADIOS/Tests/", "", $class);
 
-      $testFile = __DIR__."/../../tests/{$class}.php";
+      $testFile = __DIR__ . "/../../tests/{$class}.php";
 
       if (is_file($testFile)) {
         include_once($testFile);
       } else {
-        include_once($___ADIOSObject->config['dir']."/../tests/{$class}.php");
+        include_once($___ADIOSObject->config['dir'] . "/../tests/{$class}.php");
       }
 
     } else if (preg_match('/ADIOS\/Web\/([\w\/]+)/', $class, $m)) {
       $class = str_replace("ADIOS/Web/", "", $class);
 
-      include_once($___ADIOSObject->config['dir']."/Web/{$class}.php");
+      include_once($___ADIOSObject->config['dir'] . "/Web/{$class}.php");
 
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
-      include_once(__DIR__."/../{$m[1]}.php");
+      include_once(__DIR__ . "/../{$m[1]}.php");
+
+    } else if (preg_match('/App\/([\w\/]+)/', $class, $m)) {
+      $fname1 = $___ADIOSObject->config['dir'] . "/{$m[1]}/Main.php";
+      $fname2 = $___ADIOSObject->config['dir'] . "/{$m[1]}.php";
+      
+      if (is_file($fname1)) {
+        include($fname1);
+      } else if (is_file($fname2)) {
+        include($fname2);
+      }
     }
   }
 });
@@ -308,11 +318,11 @@ class Loader
 
       // inicializacia core modelov
 
-      $this->registerModel("Core/Models/Config");
-      $this->registerModel("Core/Models/Translate");
-      $this->registerModel("Core/Models/User");
-      $this->registerModel("Core/Models/UserRole");
-      $this->registerModel("Core/Models/Token");
+      $this->registerModel("ADIOS/Core/Models/Config");
+      $this->registerModel("ADIOS/Core/Models/Translate");
+      $this->registerModel("ADIOS/Core/Models/User");
+      $this->registerModel("ADIOS/Core/Models/UserRole");
+      $this->registerModel("ADIOS/Core/Models/Token");
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
 
@@ -415,7 +425,7 @@ class Loader
           $email = isset($_POST["email"]) ? $_POST["email"] : "";
 
           if ($email != "") {
-            $userModel = $this->getModel("Core/Models/User");
+            $userModel = $this->getModel("ADIOS/Core/Models/User");
             $userData = $userModel->getByEmail($email);
 
             if (!empty($userData)) {
@@ -507,7 +517,7 @@ class Loader
           } else {
             $this->userPasswordReset["error"] = FALSE;
 
-            $userModel = $this->getModel("Core/Models/User");
+            $userModel = $this->getModel("ADIOS/Core/Models/User");
             $userData = $userModel->validateToken($_GET["token"], true);
 
             if ($userData) {
@@ -528,7 +538,7 @@ class Loader
         if ($this->forceUserLogout) unset($_SESSION[_ADIOS_ID]['userProfile']);
 
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
-          $adiosUserModel = $this->getModel("Core/Models/User");
+          $adiosUserModel = $this->getModel("ADIOS/Core/Models/User");
           // $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
           // $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
 
@@ -568,8 +578,10 @@ class Loader
         )) {
           // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
           // nevyzadoval form resubmission
-              header('Location: ' . $this->config['url']);
-          exit();
+
+          // Dusan 8.8.2013: toto sposobovalo TOO_MANY_REDIRECTS, docasne vypnute
+          // header('Location: ' . $this->config['url']);
+          // exit();
         } else {
           $this->userProfile = [];
           $this->userLogged = FALSE;
@@ -618,18 +630,24 @@ class Loader
             return $this->translate($string, [], $object);
           }
         ));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
-          if (!is_array($params)) {
-            $params = [];
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'adiosView',
+          function ($uid, $view, $params) {
+            if (!is_array($params)) {
+              $params = [];
+            }
+            return $this->view->create(
+              $view . (empty($uid) ? '' : '#' . $uid),
+              $params
+            )->render();
           }
-          return $this->view->create(
-            $view . (empty($uid) ? '' : '#' . $uid),
-            $params
-          )->render();
-        }));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
-          return $this->renderAction($action, $params);
-        }));
+        ));
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'adiosAction',
+          function ($action, $params = []) {
+            return $this->renderAction($action, $params);
+          }
+        ));
 
         // inicializacia UI wrappera
         // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\View::class;
@@ -681,7 +699,7 @@ class Loader
   public function addWidget($widgetName) {
     if (!isset($this->widgets[$widgetName])) {
       try {
-        $widgetClassName = "\\ADIOS\\Widgets\\".str_replace("/", "\\", $widgetName);
+        $widgetClassName = "\\App\\Widgets\\".str_replace("/", "\\", $widgetName);
         if (!class_exists($widgetClassName)) {
           throw new \Exception("Widget {$widgetName} not found.");
         }
@@ -718,14 +736,21 @@ class Loader
   }
 
   public function getModelClassName($modelName) {
-    return "\\ADIOS\\".str_replace("/", "\\", $modelName);
+  // var_dump($modelName);
+    // if (strpos($modelName, "Widgets") === 0) {
+    //   return "\\App\\".str_replace("/", "\\", $modelName);
+    // } else {
+    //   return "\\ADIOS\\".str_replace("/", "\\", $modelName);
+    // }
+
+    return str_replace("/", "\\", $modelName);
   }
 
   /**
    * Returns the object of the model referenced by $modelName.
    * The returned object is cached into modelObjects property.
    *
-   * @param  string $modelName Reference of the model. E.g. 'Core/Models/User'.
+   * @param  string $modelName Reference of the model. E.g. 'ADIOS/Core/Models/User'.
    * @throws \ADIOS\Core\Exception If $modelName is not available.
    * @return object Instantiated object of the model.
    */
@@ -1087,7 +1112,7 @@ class Loader
    */
   public function render($params = []) {
     if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedURI, $m)) {
-      $cronClassName = str_replace("/", "\\", "/ADIOS/Widgets/{$m[0]}");
+      $cronClassName = str_replace("/", "\\", "/App/Widgets/{$m[0]}");
 
       if (class_exists($cronClassName)) {
         (new $cronClassName($this))->run();
@@ -1114,26 +1139,6 @@ class Loader
         $params = $_REQUEST;
       }
 
-
-      // Kontrola permissions, krok 1
-      // Tu sa permissions kontroluju na zaklade REQUEST_URI, cize na zaklade routingu
-
-      $permissionForRequestedURI = "";
-      foreach ($this->routing as $routePattern => $route) {
-        if (preg_match((string) $routePattern, (string) $params['action'], $m)) {
-          $permissionForRequestedURI = $route['permission'];
-        }
-      }
-
-      if (
-        !empty($permissionForRequestedURI)
-        && !$this->permissions->has($permissionForRequestedURI)
-      ) {
-        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
-      }
-
-      // TODO: Docasne. Ked bude fungovat, vymazat.
-      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
 
       if (!empty($params['action'])) {
         // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
@@ -1211,6 +1216,28 @@ class Loader
         $this->action = "Desktop";
       }
 
+      // Kontrola permissions
+
+      $permissionForRequestedURI = "";
+      foreach ($this->routing as $routePattern => $route) {
+        if (preg_match((string) $routePattern, $this->action, $m)) {
+          $permissionForRequestedURI = $route['permission'];
+        }
+      }
+
+      if (
+        !empty($permissionForRequestedURI)
+        && !$this->permissions->has($permissionForRequestedURI)
+      ) {
+        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
+      }
+
+      // TODO: Docasne. Ked bude fungovat, vymazat.
+      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
+
+
+      // All OK, rendering content...
+
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
         $uid = $this->getUid($params['id']);
@@ -1241,16 +1268,20 @@ class Loader
 
   public function getActionClassName(string $action) : string {
 
-    // If the action contains the dash (-), it must be converted to camelCase first
-    $action = str_replace(' ', '', ucwords(str_replace('-', ' ', $action)));
+    $actionPathParts = [];
+    foreach (explode("/", $action) as $actionPathPart) {
+      // convert-dash-string-toCamelCase
+      $actionPathParts[] = str_replace(' ', '', ucwords(str_replace('-', ' ', $actionPathPart)));
+    }
+    $action = join("/", $actionPathParts);
 
     $actionClassName = '';
 
     // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
-    foreach ($this->widgets as $widgetName => $widgetData) {
+    foreach (array_keys($this->widgets) as $widgetName) {
       if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
         $actionClassName =
-          '\\ADIOS\\Widgets\\'
+          '\\App\\Widgets\\'
           . $widgetName
           . '\\Actions\\'
           . substr($action, strlen($widgetName) + 1)
@@ -1828,7 +1859,7 @@ class Loader
     }
 
     if (!empty($login)) {
-      $adiosUserModel = $this->getModel("Core/Models/User");
+      $adiosUserModel = $this->getModel("ADIOS/Core/Models/User");
       $this->db->query("
         select
           *

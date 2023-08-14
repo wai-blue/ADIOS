@@ -26,7 +26,7 @@ class PasswordReset extends \ADIOS\Core\Action {
 
     if ($token != NULL) {
       try {
-        $userModel = $this->adios->getModel("Core/Models/User");
+        $userModel = $this->adios->getModel("ADIOS/Core/Models/User");
         $userModel->validateToken($token, false);
         $tokenStatus = "success";
       } catch (\ADIOS\Core\Exceptions\InvalidToken $e) {

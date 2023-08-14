@@ -17,7 +17,7 @@ namespace ADIOS\Core\Views;
  * @package UI\Elements
  */
 class Button extends \ADIOS\Core\View {
-  
+
   /**
    * Type of the button. Determines default configuration.
    * Possible values: 'save', 'search', 'apply', 'close', 'copy', 'add', 'delete', 'cancel', 'confirm'.
@@ -25,62 +25,62 @@ class Button extends \ADIOS\Core\View {
    * @var string
    */
   public $type = "";
-  
+
   /**
    * DOM element's ID.
    *
    * @var string
    */
   // public $id = "";
-  
+
   /**
    * If not empty, will be used as href attribute. Otherwise will href attribute be set to javascript:void(0).
    *
    * @var string
    */
   public $href = "";
-  
+
   /**
    * FontAwesome icon in the form of a CSS class name. E.g. 'fas fa-home'.
    *
    * @var string
    */
   public $faIcon = "";
-  
+
   /**
    * Text on the button, sanitized by htmlspecialchars().
    *
    * @var string
    */
   public $text = "";
-  
+
   /**
    * Text on the button, not processed. If set, the text property is ignored.
    *
    * @var string
    */
   public $textRaw = "";
-  
+
   /**
    * Additional CSS classes of the button.
    *
    * @var string
    */
   public $class = "";
-  
+
   /**
    * onClick functionality used as an inline Javascript.
    *
    * @var string
    */
   public $onClick = "";
-    
+
   /**
    * A <i>title</i> attribute of the button.
    *
    * @var string
    */
-  public $title = "";  
+  public $title = "";
 
   /**
    * CSS styling in the form of inline style.
@@ -164,6 +164,12 @@ class Button extends \ADIOS\Core\View {
         $defParams['fa_icon'] = 'app/ok.png';
         $defParams['text'] = $this->translate("Confirm");
         $defParams['onclick'] = "{$this->adios->uid}_confirm()";
+        unset($params['class']);
+      case 'print':
+        $defParams['fa_icon'] = 'fas fa-print';
+        $defParams['text'] = $this->translate("Print");
+        $defParams['onclick'] = "{$this->adios->uid}_print()";
+        $defParams['class'] = "btn-info btn-icon-split {$params['class']}";
         unset($params['class']);
       break;
     }

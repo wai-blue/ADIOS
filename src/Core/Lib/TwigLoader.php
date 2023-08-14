@@ -26,8 +26,8 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $action = substr($templateName, strpos($templateName, "/") + 1);
 
       $templateFile = $this->adios->widgetsDir."/{$widget}/Templates/{$action}.twig";
-    } else if (strpos($templateName, "ADIOS/Widgets/") === 0) {
-      $templateName = str_replace('ADIOS/Widgets/', '', $templateName);
+    } else if (strpos($templateName, "App/Widgets/") === 0) {
+      $templateName = str_replace('App/Widgets/', '', $templateName);
 
       foreach ($this->adios->widgets as $widgetName => $widgetData) {
         if (strpos(strtolower($templateName), strtolower($widgetName)) === 0) {
