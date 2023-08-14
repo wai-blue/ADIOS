@@ -1268,16 +1268,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $id = (int) $id;
 
     try {
-      $data = $this->onBeforeDelete($id);
-
+      $this->onBeforeDelete($id);
       $returnValue = $this->deleteRow($id);
-
-      $returnValue = $this->adios->dispatchEventToPlugins([
-        "model" => $this,
-        "data" => $data,
-        "returnValue" => $returnValue,
-      ], "onModelAfterDelete")["returnValue"];
-
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
     } catch (\ADIOS\Core\Exceptions\FormDeleteException $e) {
@@ -1333,9 +1325,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    *
-   * @return [type]
+   * @return array
    */
-  public function onBeforeInsert($data)
+  public function onBeforeInsert($data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeInsert", [
       "model" => $this,
@@ -1348,9 +1340,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    *
-   * @return [type]
+   * @return array
    */
-  public function onBeforeUpdate($data)
+  public function onBeforeUpdate($data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeUpdate", [
       "model" => $this,
@@ -1365,7 +1357,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onBeforeSave($data)
+  public function onBeforeSave($data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
       "model" => $this,
@@ -1426,20 +1418,20 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
 
 
-  public function onBeforeDelete(int $id)
+  public function onBeforeDelete(int $id): int
   {
-    return $this->adios->dispatchEventToPlugins("onModelBeforeDelete", [
-      "model" => $this,
-      "id" => $id,
-    ])["id"];
+    return $this->adios->dispatchEventToPlugins('onModelBeforeDelete', [
+      'model' => $this,
+      'id' => $id,
+    ])['id'];
   }
 
-  public function onAfterDelete(int $id)
+  public function onAfterDelete(int $id): int
   {
-    return $this->adios->dispatchEventToPlugins("onModelAfterDelete", [
-      "model" => $this,
-      "id" => $id,
-    ])["id"];
+    return $this->adios->dispatchEventToPlugins('onModelAfterDelete', [
+      'model' => $this,
+      'id' => $id,
+    ])['id'];
   }
 
 
