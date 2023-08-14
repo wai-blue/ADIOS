@@ -193,27 +193,6 @@ class Table extends \ADIOS\Core\View
       ";
     }
 
-    if (empty($this->params['buttons']['print']['onclick'])) {
-      $printButtonAction = $this->model->printButtonAction ?? "UI/Table/PrintPdf";
-
-      $this->params['buttons']['print']['onclick'] = "
-        let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
-        _ajax_read(
-          '{$printButtonAction}',
-          {
-            modelParams: '" . base64_encode(json_encode($this->params)) . "',
-            tableParams: tmpTableParams,
-            orderBy: ui_table_order_by
-          },
-          (res) => {
-            const downloadLink = document.createElement('a');
-            downloadLink.href = 'data:application/octet-stream;base64,' + res;
-            downloadLink.download = new Date().toLocaleDateString('en-UK') + '_{$this->params['table']}.pdf';
-            downloadLink.click();
-          }
-        )";
-    }
-
     // kontroly pre vylucenie nelogickosti parametrov
 
     if (!$this->params['showControls']) {
@@ -254,14 +233,6 @@ class Table extends \ADIOS\Core\View
 
     if ($this->model->addButtonText != null) {
       $this->params['buttons']['add']['text'] = $this->model->addButtonText;
-    }
-
-    if (empty($this->params['buttons']['print']['type'])) {
-      $this->params['buttons']['print']['type'] = 'print';
-    }
-
-    if ($this->model->printButtonText != null) {
-      $this->params['buttons']['print']['text'] = $this->model->printButtonText;
     }
   }
 
@@ -569,6 +540,32 @@ class Table extends \ADIOS\Core\View
           ];
         }
 
+        if ($this->params['showPrintButton']) {
+          $printButtonAction = $this->model->printButtonAction ?? "UI/Table/PrintPdf";
+
+          $moreActionsButtonItems[] = [
+            "fa_icon" => "fas fa-print",
+            "text" => $this->translate('Print'),
+            "onclick" => "
+              let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
+              _ajax_read(
+                '{$printButtonAction}',
+                {
+                  modelParams: '" . base64_encode(json_encode($this->params)) . "',
+                  tableParams: tmpTableParams,
+                  orderBy: ui_table_order_by
+                },
+                (res) => {
+                  const downloadLink = document.createElement('a');
+                  downloadLink.href = 'data:application/octet-stream;base64,' + res;
+                  downloadLink.download = new Date().toLocaleDateString('en-UK') + '_{$this->params['table']}.pdf';
+                  downloadLink.click();
+                }
+              )
+            ",
+          ];
+        }
+
         if ($this->params['showImportCsvButton']) {
           $importCsvAction = $this->model->importCsvAction ?? $this->model->getFullUrlBase($params) . "/Import/CSV";
 
@@ -590,10 +587,6 @@ class Table extends \ADIOS\Core\View
 
         if ($this->params['showAddButton']) {
           $titleLeftContent[] = $this->addView('Button', $this->params['buttons']['add']);
-        }
-
-        if ($this->params['showPrintButton']) {
-          $titleLeftContent[] = $this->addView('Button', $this->params['buttons']['print']);
         }
 
         // fulltext search
