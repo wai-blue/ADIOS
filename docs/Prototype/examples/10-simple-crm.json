@@ -72,7 +72,7 @@
                     "Bids": {
                       "action": "UI/Table",
                       "params": {
-                        "model": "Widgets/CustomersAndBids/Models/Bid",
+                        "model": "App/Widgets/CustomersAndBids/Models/Bid",
                         "foreignKey": "id_customer"
                       }
                     }
@@ -104,7 +104,7 @@
             "id_customer": {
               "type": "lookup",
               "title": "Customer",
-              "model": "Widgets/CustomersAndBids/Models/Customer",
+              "model": "App/Widgets/CustomersAndBids/Models/Customer",
               "show_column": true
             },
             "title": {
@@ -131,7 +131,7 @@
       },
       "actions": {
         "Main": {
-          "phpTemplate": "Calendar",
+          "phpTemplate": "Calendar"
         }
       }
     },
