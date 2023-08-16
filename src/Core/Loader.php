@@ -578,8 +578,10 @@ class Loader
         )) {
           // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
           // nevyzadoval form resubmission
-              header('Location: ' . $this->config['url']);
-          exit();
+
+          // Dusan 8.8.2013: toto sposobovalo TOO_MANY_REDIRECTS, docasne vypnute
+          // header('Location: ' . $this->config['url']);
+          // exit();
         } else {
           $this->userProfile = [];
           $this->userLogged = FALSE;
@@ -628,18 +630,24 @@ class Loader
             return $this->translate($string, [], $object);
           }
         ));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
-          if (!is_array($params)) {
-            $params = [];
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'adiosView',
+          function ($uid, $view, $params) {
+            if (!is_array($params)) {
+              $params = [];
+            }
+            return $this->view->create(
+              $view . (empty($uid) ? '' : '#' . $uid),
+              $params
+            )->render();
           }
-          return $this->view->create(
-            $view . (empty($uid) ? '' : '#' . $uid),
-            $params
-          )->render();
-        }));
-        $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
-          return $this->renderAction($action, $params);
-        }));
+        ));
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'adiosAction',
+          function ($action, $params = []) {
+            return $this->renderAction($action, $params);
+          }
+        ));
 
         // inicializacia UI wrappera
         // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\View::class;
@@ -721,20 +729,20 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // MODELS
 
-  public function registerModel($modelName) {
+  public function registerModel($modelName): void
+  {
     if (!in_array($modelName, $this->models)) {
       $this->models[] = $modelName;
     }
   }
 
-  public function getModelClassName($modelName) {
-  // var_dump($modelName);
-    // if (strpos($modelName, "Widgets") === 0) {
-    //   return "\\App\\".str_replace("/", "\\", $modelName);
-    // } else {
-    //   return "\\ADIOS\\".str_replace("/", "\\", $modelName);
-    // }
+  public function getModelNames(): array
+  {
+    return $this->models;
+  }
 
+  public function getModelClassName($modelName): string
+  {
     return str_replace("/", "\\", $modelName);
   }
 
@@ -1132,26 +1140,6 @@ class Loader
       }
 
 
-      // Kontrola permissions, krok 1
-      // Tu sa permissions kontroluju na zaklade REQUEST_URI, cize na zaklade routingu
-
-      $permissionForRequestedURI = "";
-      foreach ($this->routing as $routePattern => $route) {
-        if (preg_match((string) $routePattern, (string) $params['action'], $m)) {
-          $permissionForRequestedURI = $route['permission'];
-        }
-      }
-
-      if (
-        !empty($permissionForRequestedURI)
-        && !$this->permissions->has($permissionForRequestedURI)
-      ) {
-        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
-      }
-
-      // TODO: Docasne. Ked bude fungovat, vymazat.
-      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
-
       if (!empty($params['action'])) {
         // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
         // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
@@ -1228,6 +1216,28 @@ class Loader
         $this->action = "Desktop";
       }
 
+      // Kontrola permissions
+
+      $permissionForRequestedURI = "";
+      foreach ($this->routing as $routePattern => $route) {
+        if (preg_match((string) $routePattern, $this->action, $m)) {
+          $permissionForRequestedURI = $route['permission'];
+        }
+      }
+
+      if (
+        !empty($permissionForRequestedURI)
+        && !$this->permissions->has($permissionForRequestedURI)
+      ) {
+        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
+      }
+
+      // TODO: Docasne. Ked bude fungovat, vymazat.
+      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
+
+
+      // All OK, rendering content...
+
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
         $uid = $this->getUid($params['id']);
@@ -1258,13 +1268,17 @@ class Loader
 
   public function getActionClassName(string $action) : string {
 
-    // If the action contains the dash (-), it must be converted to camelCase first
-    $action = str_replace(' ', '', ucwords(str_replace('-', ' ', $action)));
+    $actionPathParts = [];
+    foreach (explode("/", $action) as $actionPathPart) {
+      // convert-dash-string-toCamelCase
+      $actionPathParts[] = str_replace(' ', '', ucwords(str_replace('-', ' ', $actionPathPart)));
+    }
+    $action = join("/", $actionPathParts);
 
     $actionClassName = '';
 
     // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
-    foreach ($this->widgets as $widgetName => $widgetData) {
+    foreach (array_keys($this->widgets) as $widgetName) {
       if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
         $actionClassName =
           '\\App\\Widgets\\'

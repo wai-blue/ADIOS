@@ -213,6 +213,8 @@ class Builder {
       break;
     }
 
+    if (!is_array($prototype)) $prototype = [];
+
     return $prototype;
   }
 
@@ -440,10 +442,9 @@ class Builder {
           );
 
           if (!empty($actionHtmlFileTemplate)) {
-            $this->renderFile(
-              $widgetRootDir . '/Templates/' . $actionName . '.twig',
+            $this->copyFile(
               $actionHtmlFileTemplate,
-              $tmpActionParams
+              $widgetRootDir . '/Templates/' . $actionName . '.twig'
             );
           }
         }

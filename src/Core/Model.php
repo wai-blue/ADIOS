@@ -139,7 +139,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // v tomto pripade ide o volanie constructora z Eloquentu
       return parent::__construct($adiosOrAttributes ?? []);
     } else {
-      $this->fullName = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
+      $this->fullName = str_replace("\\", "/", get_class($this));
       $this->shortName = end(explode("/", $this->fullName));
       $this->adios = $adiosOrAttributes;
 
@@ -882,6 +882,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ;
   }
 
+  public function insertRowWithId($data)
+  {
+    return $this->adios->db->insert($this)
+      ->set($data)
+      ->execute()
+    ;
+  }
+
   public function insertOrUpdateRow($data)
   {
     unset($data['id']);
@@ -1271,16 +1279,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $id = (int) $id;
 
     try {
-      $data = $this->onBeforeDelete($id);
-
+      $this->onBeforeDelete($id);
       $returnValue = $this->deleteRow($id);
-
-      $returnValue = $this->adios->dispatchEventToPlugins([
-        "model" => $this,
-        "data" => $data,
-        "returnValue" => $returnValue,
-      ], "onModelAfterDelete")["returnValue"];
-
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
     } catch (\ADIOS\Core\Exceptions\FormDeleteException $e) {
@@ -1336,9 +1336,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    *
-   * @return [type]
+   * @return array
    */
-  public function onBeforeInsert($data)
+  public function onBeforeInsert(array $data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeInsert", [
       "model" => $this,
@@ -1351,9 +1351,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @param mixed $data
    *
-   * @return [type]
+   * @return array
    */
-  public function onBeforeUpdate($data)
+  public function onBeforeUpdate(array $data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeUpdate", [
       "model" => $this,
@@ -1368,7 +1368,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onBeforeSave($data)
+  public function onBeforeSave(array $data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
       "model" => $this,
@@ -1384,7 +1384,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onAfterInsert($data, $returnValue)
+  public function onAfterInsert(array $data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterInsert", [
       "model" => $this,
@@ -1401,7 +1401,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onAfterUpdate($data, $returnValue)
+  public function onAfterUpdate(array $data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterUpdate", [
       "model" => $this,
@@ -1418,7 +1418,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onAfterSave($data, $returnValue)
+  public function onAfterSave(array $data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterSave", [
       "model" => $this,
@@ -1429,20 +1429,20 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
 
 
-  public function onBeforeDelete(int $id)
+  public function onBeforeDelete(int $id): int
   {
-    return $this->adios->dispatchEventToPlugins("onModelBeforeDelete", [
-      "model" => $this,
-      "id" => $id,
-    ])["id"];
+    return $this->adios->dispatchEventToPlugins('onModelBeforeDelete', [
+      'model' => $this,
+      'id' => $id,
+    ])['id'];
   }
 
-  public function onAfterDelete(int $id)
+  public function onAfterDelete(int $id): int
   {
-    return $this->adios->dispatchEventToPlugins("onModelAfterDelete", [
-      "model" => $this,
-      "id" => $id,
-    ])["id"];
+    return $this->adios->dispatchEventToPlugins('onModelAfterDelete', [
+      'model' => $this,
+      'id' => $id,
+    ])['id'];
   }
 
 

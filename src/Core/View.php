@@ -170,10 +170,18 @@ class View {
       $params['uid'] = $uid;
     }
 
-    if (empty($viewClassName)) {
-      $viewClassName = "\\ADIOS\\Core\\View";
-    } else {
-      $viewClassName = "\\ADIOS\\Core\\Views\\{$viewClassName}";
+    $viewClassName = str_replace('/', '\\', $viewClassName);
+
+    if (!class_exists($viewClassName)) {
+      if (empty($viewClassName)) {
+        $viewClassName = "\\ADIOS\\Core\\View";
+      } else {
+        $viewClassName = "\\ADIOS\\Core\\Views\\{$viewClassName}";
+      }
+    }
+
+    if (strpos($viewClassName, '\\') !== 0) {
+      $viewClassName = '\\' . $viewClassName;
     }
 
     return new $viewClassName(
