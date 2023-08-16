@@ -149,7 +149,8 @@ class Action {
    * @throws \Twig\Error\RuntimeError
    * @throws \Twig\Error\LoaderError
    */
-  public function render() {
+  public function render()
+  {
     $twigParams = array_merge($this->params, $this->preRender());
 
     $twigParams["uid"] = $this->adios->uid;
