@@ -46,7 +46,7 @@
 </ul>
 
 <div
-  style="display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;"
+  style="display: grid; grid-template-rows: auto; grid-template-areas: '{{ gridConfiguration|join("' '")|raw }}'; grid-gap: 10px;"
 >
   {% for areaIndex, area in dataConfiguration %}
     <div class="card card-body m-3 p-0" style="grid-area: {{ area.key }};">

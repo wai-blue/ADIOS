@@ -1,47 +1,187 @@
-<h1 class="pb-0">Dashboard configuration</h1>
+{% if not refresh %}
+  <h1 class="pb-0">Dashboard configuration</h1>
 
-{# TODO: Translations #}
-
-<div class="d-inline-block mb-5 mt-0">
-  {{ saveButton|raw }}
-</div>
-
-{# TODO: Dynamic route #}
-<form action="/bladeerp/UI/Dashboard/SaveConfig" method="post" id="dashboard-configuration-form">
   <div class="row">
-    <div class="col-md-6">
-      {% for key, card in availableCards  %}
-        <div class="card shadow mb-2">
-          <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">
-              {% if card['params']['title'] is defined %} {{ card['params']['title'] }} {% else %} {{ key }} {% endif %}</h6>
-          </div>
-          <div class="card-body row" id="card-{{ key }}-{{ loop.index0 }}">
-            <div class="col">
-              <span>Left?</span> <br>
-              {{ forms[loop.index0][0]|raw }}
-            </div>
-            <div class="col">
-              <span>Is active?</span> <br>
-              {{ forms[loop.index0][1]|raw }}
-            </div>
-            <div class="col">
-              <span>Order</span> <br>
-              {{ forms[loop.index0][2]|raw }}
+    <div class="col-9">
+      <ul class="pagination ml-3">
+        {% for preset in availablePresets %}
+          <li class="page-item {% if params.preset == preset %} active {% endif %}">
+            <a class="page-link" href="?preset={{ preset }}">{{ preset + 1 }}</a>
+          </li>
+        {% endfor %}
+
+        <li class="page-item">
+          <a class="page-link" href="?preset={{ params.availablePresets|length }}"><i class="fas fa-plus"></i> Add</a>
+        </li>
+      </ul>
+    </div>
+    <div class="col-3 text-right">
+      <button
+        class="btn btn-primary"
+        onclick="{{ uid }}_restore_default_grid()"
+      ><i class="fas fa-tasks"></i> Restore default grid</button>
+      <button
+        class="btn btn-secondary"
+        onclick="{{ uid }}_add_empty_grid()"
+      ><i class="fas fa-hand-sparkles"></i> Add empty grid</button>
+    </div>
+  </div>
+{% endif %}
+
+<div id="{{ uid }}-grid-configuration">
+  <div
+    style="display: grid; grid-template-rows: auto; grid-template-areas: '{{ dashboardConfiguration.grid|join("' '")|raw }}'; grid-gap: 10px;"
+  >
+    {% for areaIndex, area in dashboardConfiguration.data %}
+      <div class="row" style="grid-area: {{ area.key }};">
+        <div class="col-11">
+          <div class="card card-body m-3 p-0" >
+            <div id="dashboard-area-{{ area.key }}">
+              <div class="row">
+                <div class="col-12 text-right m-0 p-0">
+                  <div class="d-flex flex-row flex-row-reverse">
+                    <button
+                      class="btn btn-sm btn-danger m-1"
+                      style="max-width: 32px;"
+                      onclick="{{ uid }}_delete({{ areaIndex }})"
+                    ><i class="fas fa-trash-alt"></i></button>
+                    <button
+                      class="btn btn-sm btn-secondary m-1"
+                      style="max-width: 32px;"
+                      onclick="{{ uid }}_add({{ areaIndex }})"
+                    ><i class="fas fa-minus"></i></button>
+                    <button
+                      class="btn btn-sm btn-primary m-1"
+                      style="max-width: 32px;"
+                      onclick="{{ uid }}_increase({{ areaIndex }})"
+                    ><i class="fas fa-plus"></i></button>
+                  </div>
+                </div>
+              </div>
+              <h1 class="text-center">{{ area.key }}</h1>
             </div>
           </div>
         </div>
-      {% endfor %}
+        <div class="col-1 text-center d-flex flex-column justify-content-center">
+          <span
+            class="configure-button"
+            onclick="{{ uid }}_add({{ areaIndex }})"
+          >
+          +
+          </span>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="row mb-5 mt-3">
+    <div class="col-12 text-center">
+      <button
+        class="btn btn-sm btn-primary m-1"
+        onclick="{{ uid }}_add_row()"
+      ><i class="fas fa-plus"></i> Add new row</button>
     </div>
   </div>
-</form>
+</div>
+
+<style>
+.configure-button {
+  color: #858796;
+  font-size: 25px;
+  cursor: pointer;
+}
+.configure-button:hover {
+  color: #e78b00;
+}
+</style>
 
 <script>
-
-  function {{ uid }}_save() {
-    const form = document.getElementById('dashboard-configuration-form');
-
-    form.submit();
+  function {{ uid }}_delete(areaIndex) {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'delete',
+        refresh: true,
+        areaIndexToDelete: areaIndex,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
   }
 
+  function {{ uid }}_add(areaIndex) {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'add',
+        refresh: true,
+        areaIndex: areaIndex,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
+
+  function {{ uid }}_add_row() {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'addRow',
+        refresh: true,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
+
+  function {{ uid }}_increase(areaIndex) {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'increase',
+        refresh: true,
+        areaIndex: areaIndex,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
+
+  function {{ uid }}_decrease(areaIndex) {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'decrease',
+        refresh: true,
+        areaIndex: areaIndex,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
+
+  function {{ uid }}_restore_default_grid() {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'restoreDefaultGrid',
+        refresh: true,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
+
+  function {{ uid }}_add_empty_grid() {
+    _ajax_update(
+      "UI/Dashboard/Configure",
+      {
+        configurationAction: 'addEmptyGrid',
+        refresh: true,
+        preset: 0
+      },
+      "{{ uid }}-grid-configuration"
+    );
+  }
 </script>
+
