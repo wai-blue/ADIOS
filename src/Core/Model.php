@@ -1327,7 +1327,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return array
    */
-  public function onBeforeInsert($data): array
+  public function onBeforeInsert(array $data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeInsert", [
       "model" => $this,
@@ -1342,7 +1342,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return array
    */
-  public function onBeforeUpdate($data): array
+  public function onBeforeUpdate(array $data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeUpdate", [
       "model" => $this,
@@ -1357,7 +1357,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onBeforeSave($data): array
+  public function onBeforeSave(array $data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
       "model" => $this,
@@ -1373,7 +1373,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onAfterInsert($data, $returnValue)
+  public function onAfterInsert(array $data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterInsert", [
       "model" => $this,
@@ -1390,7 +1390,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onAfterUpdate($data, $returnValue)
+  public function onAfterUpdate(array $data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterUpdate", [
       "model" => $this,
@@ -1407,7 +1407,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function onAfterSave($data, $returnValue)
+  public function onAfterSave(array $data, $returnValue)
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterSave", [
       "model" => $this,

@@ -729,20 +729,20 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // MODELS
 
-  public function registerModel($modelName) {
+  public function registerModel($modelName): void
+  {
     if (!in_array($modelName, $this->models)) {
       $this->models[] = $modelName;
     }
   }
 
-  public function getModelClassName($modelName) {
-  // var_dump($modelName);
-    // if (strpos($modelName, "Widgets") === 0) {
-    //   return "\\App\\".str_replace("/", "\\", $modelName);
-    // } else {
-    //   return "\\ADIOS\\".str_replace("/", "\\", $modelName);
-    // }
+  public function getModelNames(): array
+  {
+    return $this->models;
+  }
 
+  public function getModelClassName($modelName): string
+  {
     return str_replace("/", "\\", $modelName);
   }
 

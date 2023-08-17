@@ -23,45 +23,58 @@ trait {{ thisModel.class }} {
 
   /* onBeforeInsert */
   /*
-  public function onBeforeInsert($data) {
+  public function onBeforeInsert(array $data): array {
     return $data;
   }
   */
 
   /* onBeforeUpdate */
   /*
-  public function onBeforeUpdate($data) {
+  public function onBeforeUpdate(array $data): array {
     return $data;
   }
   */
 
   /* onBeforeSave */
   /*
-  public function onBeforeSave($data) {
+  public function onBeforeSave(array $data): array {
     return $data;
   }
   */
 
+  /* onBeforeDelete */
+  /*
+  public function onBeforeDelete(int $id): int {
+    return $id;
+  }
+  */
 
+
+  /* onAfterDelete */
+  /*
+  public function onAfterDelete(int $id): int {
+    return $id;
+  }
+  */
 
   /* onAfterInsert */
   /*
-  public function onAfterInsert($data, $returnValue) {
-    return $data;
+  public function onAfterInsert(array $data, $returnValue) {
+    return $returnValue;
   }
   */
 
   /* onAfterUpdate */
   /*
-  public function onAfterUpdate($data, $returnValue) {
-    return $data;
+  public function onAfterUpdate(array $data, $returnValue) {
+    return $returnValue;
   }
   */
 
   /* onAfterSave */
   /*
-  public function onAfterSave($data, $returnValue) {
-    return $data;
+  public function onAfterSave(array $data, $returnValue) {
+    return $returnValue;
   }
   */
 

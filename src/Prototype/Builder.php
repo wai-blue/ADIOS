@@ -213,6 +213,8 @@ class Builder {
       break;
     }
 
+    if (!is_array($prototype)) $prototype = [];
+
     return $prototype;
   }
 

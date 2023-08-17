@@ -21,6 +21,10 @@ class User extends \ADIOS\Core\Model {
   public string $urlBase = "Users";
   public ?string $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
 
+  public string $tableTitle = "Users";
+  public string $formTitleForInserting = "New user";
+  public string $formTitleForEditing = "User";
+
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "users";
     parent::__construct($adiosOrAttributes, $eloquentQuery);
