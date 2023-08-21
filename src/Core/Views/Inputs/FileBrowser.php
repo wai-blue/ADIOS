@@ -181,7 +181,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
 
             <div class='operation-buttons'>
               ".$this->addView('Button', [
-                "fa_icon" => "fas fa-folder-plus",
+                "faIcon" => "fas fa-folder-plus",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split",
                 "text" => $this->translate("Create folder"),
                 "onclick" => "
@@ -228,18 +228,18 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
               ])->render()."
 
               ".$this->addView('Button', [
-                "fa_icon" => "fas fa-file-upload",
+                "faIcon" => "fas fa-file-upload",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split",
                 "text" => $this->translate("Upload file"),
                 "onclick" => "$('#{$this->uid}_{{ dirId }}_file_input').click();",
               ])->render()."
 
               ".$this->addView('Button', [
-                "fa_icon" => "fas fa-ellipsis-v",
+                "faIcon" => "fas fa-ellipsis-v",
                 "class" => "btn-new btn btn-sm btn-light btn-icon-split btn-more-operations",
                 "dropdown" => [
                   [
-                    "fa_icon" => "fas fa-font",
+                    "faIcon" => "fas fa-font",
                     "text" => "Rename folder",
                     "onclick" => "
                       let newFolderName = prompt('The name of the new folder');
@@ -271,7 +271,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
                     ",
                   ],
                   [
-                    "fa_icon" => "fas fa-trash",
+                    "faIcon" => "fas fa-trash",
                     "text" => "Delete folder",
                     "onclick" => "
                       if (confirm('Are you sure you want to delete the folder?')) {
@@ -307,7 +307,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
 
         <div class='template btn-folder-up'>
           ".$this->addView('Button', [
-            "fa_icon" => "fas fa-reply",
+            "faIcon" => "fas fa-reply",
             "text" => "..",
             "class" => "btn btn-folder btn-sm btn-light btn-icon-split mb-1",
             "title" => "Go up",
@@ -318,7 +318,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
         <div class='template btn-folder'>
           ".$this->addView('Button', [
             "uid" => "{{ btnUid }}",
-            "fa_icon" => "{{ icon }}",
+            "faIcon" => "{{ icon }}",
             "text" => "{{ text }}",
             "class" => "btn btn-folder btn-sm btn-primary btn-icon-split mb-1",
             "title" => "{{ file }}",
@@ -335,7 +335,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
         <div class='template btn-file'>
           ".$this->addView('Button', [
             "uid" => "{{ btnUid }}",
-            "fa_icon" => "{{ icon }}",
+            "faIcon" => "{{ icon }}",
             "class" => "btn btn-file btn-sm btn-light btn-icon-split mb-1",
             "textRaw" => "{{ text }} <div class='filesize'>{{ filesize }} MB</div>",
             "title" => "{{ file }}",

@@ -107,66 +107,66 @@ class Button extends \ADIOS\Core\View {
     $defParams = [];
     switch ($params['type'] ?? "") {
       case 'save':
-        $defParams['fa_icon'] = 'fas fa-check';
+        $defParams['faIcon'] = 'fas fa-check';
         $defParams['text'] = $this->translate("Save");
         $defParams['class'] = "btn-success btn-icon-split {$params['class']}";
         $defParams['onclick'] = "{$this->adios->uid}_save()";
         unset($params['class']);
       break;
       case 'search':
-        $defParams['fa_icon'] = 'fas fa-search';
+        $defParams['faIcon'] = 'fas fa-search';
         $defParams['text'] = $this->translate("Search");
         $defParams['class'] = "btn-light btn-icon-split {$params['class']}";
         $defParams['onclick'] = "{$this->adios->uid}_search()";
         unset($params['class']);
       break;
       case 'apply':
-        $defParams['fa_icon'] = 'fas fa-check';
+        $defParams['faIcon'] = 'fas fa-check';
         $defParams['text'] = $this->translate("Apply");
         $defParams['class'] = "btn-success btn-icon-split {$params['class']}";
         $defParams['onclick'] = "{$this->adios->uid}_apply()";
         unset($params['class']);
       break;
       case 'close':
-        $defParams['fa_icon'] = 'fas fa-times';
+        $defParams['faIcon'] = 'fas fa-times';
         $defParams['class'] = "btn-light {$params['class']}";
         $defParams['title'] = $this->translate("Close");
         $defParams['onclick'] = "{$this->adios->uid}_close()";
         unset($params['class']);
       break;
       case 'copy':
-        $defParams['fa_icon'] = 'fas fa-copy';
+        $defParams['faIcon'] = 'fas fa-copy';
         $defParams['class'] = "btn-secondary btn-icon-split {$params['class']}";
         $defParams['text'] = $this->translate("Copy");
         $defParams['onclick'] = "{$this->adios->uid}_copy()";
         unset($params['class']);
       break;
       case 'add':
-        $defParams['fa_icon'] = 'fas fa-plus';
+        $defParams['faIcon'] = 'fas fa-plus';
         $defParams['text'] = $this->translate("Add");
         $defParams['onclick'] = "{$this->adios->uid}_add()";
         unset($params['class']);
       break;
       case 'delete':
-        $defParams['fa_icon'] = 'fas fa-trash-alt';
+        $defParams['faIcon'] = 'fas fa-trash-alt';
         $defParams['class'] = "text-danger {$params['class']}";
         $defParams['title'] = $this->translate("Delete");
         $defParams['onclick'] = "{$this->adios->uid}_delete()";
         unset($params['class']);
       break;
       case 'cancel':
-        $defParams['fa_icon'] = 'app/x-mark-3.png';
+        $defParams['faIcon'] = 'app/x-mark-3.png';
         $defParams['text'] = $this->translate("Cancel");
         $defParams['onclick'] = "{$this->adios->uid}_cancel()";
         unset($params['class']);
       break;
       case 'confirm':
-        $defParams['fa_icon'] = 'app/ok.png';
+        $defParams['faIcon'] = 'app/ok.png';
         $defParams['text'] = $this->translate("Confirm");
         $defParams['onclick'] = "{$this->adios->uid}_confirm()";
         unset($params['class']);
       case 'print':
-        $defParams['fa_icon'] = 'fas fa-print';
+        $defParams['faIcon'] = 'fas fa-print';
         $defParams['text'] = $this->translate("Print");
         $defParams['onclick'] = "{$this->adios->uid}_print()";
         $defParams['class'] = "btn-info btn-icon-split {$params['class']}";
@@ -180,7 +180,7 @@ class Button extends \ADIOS\Core\View {
 
     // $this->id = $this->params['id'];
     $this->href = $this->params['href'];
-    $this->faIcon = $this->params['fa_icon'];
+    $this->faIcon = $this->params['faIcon'];
     $this->text = $this->params['text'];
     $this->textRaw = $this->params['textRaw'];
     $this->title = $this->params['title'];
@@ -196,8 +196,8 @@ class Button extends \ADIOS\Core\View {
     if (_count($this->params['dropdown'])) {
       $dropdowns_html = "";
       foreach ($this->params['dropdown'] as $dropdown) {
-        if ($dropdown['fa_icon'] != '') {
-          $tmp_icon = "<i class='{$dropdown['fa_icon']} mr-2'></i>";
+        if ($dropdown['faIcon'] != '') {
+          $tmp_icon = "<i class='{$dropdown['faIcon']} mr-2'></i>";
         } else {
           $tmp_icon = "";
         }

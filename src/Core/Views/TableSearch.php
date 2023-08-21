@@ -80,7 +80,7 @@ class TableSearch extends \ADIOS\Core\View {
                 'text' => $this->translate('Save this search'),
                 'onclick' => "{$this->uid}_save_search();",
                 'class' => 'btn-light',
-                'fa_icon' => 'fas fa-save',
+                'faIcon' => 'fas fa-save',
               ]))->render()."
             </div>
             <div class='col-12'>

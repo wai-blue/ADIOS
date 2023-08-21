@@ -20,12 +20,12 @@ class Tree extends \ADIOS\Core\Input
   public function itemDropdownButton($text, $hasSubItems)
   {
     return $this->addView('Button', [
-      "fa_icon" => "fas fa-angle-" . ($hasSubItems ? "down" : "right"),
+      "faIcon" => "fas fa-angle-" . ($hasSubItems ? "down" : "right"),
       "text" => $text,
       "class" => "item btn btn-sm btn-secondary btn-icon-split my-1",
       "dropdown" => [
         [
-          "fa_icon" => "fas fa-pencil-alt",
+          "faIcon" => "fas fa-pencil-alt",
           "text" => $this->translate("Edit"),
           "onclick" => "
             let li = $(this).closest('li');
@@ -43,7 +43,7 @@ class Tree extends \ADIOS\Core\Input
           ",
         ],
         [
-          "fa_icon" => "fas fa-level-up-alt",
+          "faIcon" => "fas fa-level-up-alt",
           "text" => $this->translate("Move level up"),
           "onclick" => "
             var src = $(this).closest('li');
@@ -59,7 +59,7 @@ class Tree extends \ADIOS\Core\Input
           ",
         ],
         [
-          "fa_icon" => "fas fa-level-down-alt",
+          "faIcon" => "fas fa-level-down-alt",
           "text" => $this->translate("Move level down"),
           "onclick" => "
             var src = $(this).closest('li');
@@ -73,7 +73,7 @@ class Tree extends \ADIOS\Core\Input
           ",
         ],
         [
-          "fa_icon" => "fas fa-trash",
+          "faIcon" => "fas fa-trash",
           "text" => $this->translate("Select for deletion"),
           "onclick" => "
             let li = $(this).closest('li');
@@ -85,7 +85,7 @@ class Tree extends \ADIOS\Core\Input
           ",
         ],
         [
-          "fa_icon" => "fas fa-trash-restore",
+          "faIcon" => "fas fa-trash-restore",
           "text" => $this->translate("Unselect from deletion"),
           "onclick" => "
             let li = $(this).closest('li');
@@ -130,7 +130,7 @@ class Tree extends \ADIOS\Core\Input
         </li>
         <li>
           " . $this->addView('Button', [
-      "fa_icon" => "fas fa-plus",
+      "faIcon" => "fas fa-plus",
       "text" => $this->translate("Add"),
       "class" => "item btn btn-sm btn-light btn-icon-split my-1",
       "onclick" => "
