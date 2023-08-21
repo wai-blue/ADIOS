@@ -23,28 +23,40 @@ class Configure extends \ADIOS\Core\Action {
 
   private bool $areaKeyNameReseted = false;
 
+  /**
+   * Remove AREA from user dashboard data
+   */
   private function removeDataFromGrid(int $areaIndex): void {
     unset($this->dashboardConfiguration['data'][$areaIndex]);
   }
 
+  /**
+   *  Remove AREA GRID keys 
+   */
+  private function removeGridAreas(array $splitedAreas, string $areaKeyName): array {
+    foreach ($splitedAreas as $index => $areaName) {
+      if ($areaName === $areaKeyName) {
+        unset($splitedAreas[$index]);
+      }
+    }
+
+    return $splitedAreas;
+}
+
+  /**
+   * Remove AREA KEY from user dashboard grid settings
+   */
   private function removeAreaFromGrid(string $areaKeyName, int $areaIndex): void {
-    foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
+    foreach ($this->dashboardConfiguration['grid'] as $gridAreaIndex =>  &$gridArea) {
       if (str_contains($gridArea, $areaKeyName)) {
         $splitedAreas = explode(' ', $gridArea);
-        $areaToRemoveIndex = array_search($areaKeyName, $splitedAreas);
-        $splitedAreasCount = count($splitedAreas);
+        $splitedAreas = $this->removeGridAreas($splitedAreas, $areaKeyName);
 
-        if ($areaToRemoveIndex == ($splitedAreasCount - 1)) {
-          $newIndex = $areaToRemoveIndex - 1;
+        if (!empty($splitedAreas)) {
+          $gridArea = implode(' ', $splitedAreas);
         } else {
-          $newIndex = $areaToRemoveIndex + 1;
+          unset($this->dashboardConfiguration['grid'][$gridAreaIndex]);
         }
-
-        $splitedAreas[$areaToRemoveIndex] = $splitedAreas[$newIndex];
-        $gridArea = implode(' ', $splitedAreas);
-
-        //$this->removeDataFromGrid($areaIndex);
-        $this->correctAreaKeysNames($splitedAreasCount, $areaKeyName);
         break;
       }
     }
@@ -113,47 +125,65 @@ class Configure extends \ADIOS\Core\Action {
 
       $gridArea = implode(' ', $splitedAreas);
     }
+  } 
+
+  private function getLongestGridAreaSize(): int {
+    $longestGridAreaSize = 0;
+    foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
+      $splitedAreasCount = count(explode(' ', $gridArea));
+
+      if ($splitedAreasCount > $longestGridAreaSize) {
+        $longestGridAreaSize = $splitedAreasCount;
+      }
+    }
+
+    return $longestGridAreaSize;
   }
 
-  private function correctAreaKeysNames(int $gridAreaCount, string $startFromKeyName): void {
-    $incrementAreaNames = false;
+  private function reOrderGrid2(): void {
+    $longestGridAreaSize = $this->getLongestGridAreaSize();
 
     foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
       $splitedAreas = explode(' ', $gridArea);
+      $splitedAreasCount = count($splitedAreas);
 
-      $reseted = false;
-      //$this->areaKeyNameReseted = false;
-      $lastChecked = null;
+      if ($splitedAreasCount < $longestGridAreaSize) {
+        $lastChar = end($splitedAreas);
+
+        for ($i=0;$i<($longestGridAreaSize - $splitedAreasCount);$i++) {
+          $splitedAreas[] = $lastChar;
+        }
+      }
+
+      $gridArea = implode(' ', $splitedAreas);
+    }
+  }
+
+  private function correctGridAreaNames() {
+    $nextChar = 'A';
+    foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
+      $splitedAreas = explode(' ', $gridArea);
+      //$lastChar = 
+      foreach ($splitedAreas as &$areaName) {
+        if ($areaName != $nextChar) {
+          $areaName = $nextChar;
+        }
+      }
+
+      $gridArea = implode(' ', $splitedAreas);
+    }
+  }
+
+  private function correctAreaKeysNames(int $gridAreaCount, string $startFromKeyName = 'A'): void {
+    foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
+      $splitedAreas = explode(' ', $gridArea);
+
       foreach ($splitedAreas as &$areaKeyName) {
         if ($areaKeyName <= $startFromKeyName) continue;
 
         $areaKeyName = $startFromKeyName;
         //$startFromKeyName = ++$areaKeyName;
       }
-
-      //$startFromKeyName = $lastChecked; 
-      //$lastChecked = null;
-  var_dump("last: " . $lastChecked);
-      //$startFromKeyName = $lastAreaKeyName;
-      if ($reseted) {
-        //$this->areaKeyNameReseted = true;
-        //++$startFromKeyName;
-        //var_dump("new start: " . $startFromKeyName);
-      }
-      
-      //if ($this->areaKeyNameReseted)
-     /*if (
-        !$incrementAreaNames 
-        && $addedAreaKeyName != null 
-        && in_array($addedAreaKeyName, $splitedAreas)
-      ) {
-        $incrementAreaNames = true;
-        $currentAreaIndex = array_search($addedAreaKeyName , $splitedAreas);
-        $this->insertKeyToData($addedAreaKeyName);
-        $this->incrementAreaNames($splitedAreas, $currentAreaIndex);
-      } else if ($incrementAreaNames) {
-        $this->incrementAreaNames($splitedAreas);
-      }*/
 
       if (count($splitedAreas) != $gridAreaCount) {
         $splitedAreas[] = end($splitedAreas);
@@ -244,6 +274,9 @@ class Configure extends \ADIOS\Core\Action {
           foreach ($this->dashboardConfiguration['data'] as $areaIndex => $area) {
             if ($areaIndex == (int) $this->params['areaIndexToDelete']) {
               $this->removeAreaFromGrid($area['key'], $areaIndex);
+              $this->removeDataFromGrid($areaIndex);
+              $this->reOrderGrid2();
+              $this->correctGridAreaNames();
               break;
             }
           }
@@ -290,6 +323,7 @@ class Configure extends \ADIOS\Core\Action {
       }
     }
 var_dump($this->dashboardConfiguration['grid']);
+//var_dump($this->dashboardConfiguration['data']);
     $dashboard->saveConfiguration(
       json_encode($this->dashboardConfiguration),
       0
