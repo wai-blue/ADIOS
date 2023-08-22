@@ -36,7 +36,7 @@ class DbLog extends \ADIOS\Core\Model {
       'data' => ['type' => 'text', 'interface' => 'plain_text', 'title' => 'Údaje'],
       'error' => ['type' => 'text', 'interface' => 'plain_text', 'title' => 'Chyba'],
       'query' => ['type' => 'text', 'interface' => 'plain_text', 'title' => 'Požiadavka'],
-      'duration' => ['type' => 'float', 'decimals' => '4', 'title' => 'Trvanie', 'show_column' => true],
+      'duration' => ['type' => 'decimal', 'decimals' => '4', 'title' => 'Trvanie', 'show_column' => true],
     ]);
   }
 }

@@ -421,7 +421,7 @@ class Input extends \ADIOS\Core\View {
         || ($this->params['type'] == 'text' && 'single_line' == $this->params['interface'])
         || in_array(
           $this->params['type'],
-          ['color', 'date', 'datetime', 'timestamp', 'float', 'year', 'time']
+          ['color', 'date', 'datetime', 'timestamp', 'float', 'decimal', 'year', 'time']
         )
       ) {
 
@@ -454,7 +454,10 @@ class Input extends \ADIOS\Core\View {
           }
 
           /* float */
-          if ('float' == $this->params['type']) {
+          if (
+            $this->params['type'] == 'float'
+            || $this->params['type'] == 'decimal'
+          ) {
             if (!($this->params['decimals'] > 0)) {
               $this->params['decimals'] = 2;
             }
