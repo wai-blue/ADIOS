@@ -90,8 +90,9 @@
         {% endfor %}
       </div>
       <div
-        class="dropdown d-flex justify-content-center align-items-center {% if area.cards|length != 0 %} hidden {% endif %} {% if params.availableCards|length == 0 %} hidden-sufficient {% endif %}"
+        class="dropdown d-flex justify-content-center align-items-center {% if area.cards|length != 0 %} hidden {% endif %}"
         id="addCards-{{ area.key }}"
+        {% if params.availableCards|length == 0 %} disabled {% endif %}
       >
         <button 
           class="btn btn-primary dropdown-toggle m-5" 
@@ -102,7 +103,11 @@
         >
           Add new card
         </button>
-        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+        <div class="dropdown-menu text-center" aria-labelledby="dropdownMenuButton">
+          {% if params.availableCards|length == 0 %}
+            {{ translate('Nothing available') }}
+          {% endif %}
+
           {% for card in params.availableCards %}
             <button class="dropdown-item" onclick="addCard('{{ card.action }}', '{{ area.key }}')">
               {% if card.params.title %} {{ card.params.title }} {% else %} {{ card.action }} {% endif %}

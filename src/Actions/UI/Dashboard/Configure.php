@@ -21,13 +21,23 @@ class Configure extends \ADIOS\Core\Action {
 
   private string $lastChangedAreaKeyName = '';
 
-  private bool $areaKeyNameReseted = false;
-
   /**
    * Remove AREA from user dashboard data
    */
   private function removeDataFromGrid(int $areaIndex): void {
     unset($this->dashboardConfiguration['data'][$areaIndex]);
+  }
+
+  /**
+   * Replace AREA name in user dashboard data
+   */
+  private function replaceDataFromGrid(string $replace, string $new): void {
+    foreach ($this->dashboardConfiguration['data'] as &$data) {
+      if ($data['key'] == $replace) {
+        $data['key'] = $new;
+        break;
+      }
+    }
   }
 
   /**
@@ -41,7 +51,7 @@ class Configure extends \ADIOS\Core\Action {
     }
 
     return $splitedAreas;
-}
+  }
 
   /**
    * Remove AREA KEY from user dashboard grid settings
@@ -159,14 +169,21 @@ class Configure extends \ADIOS\Core\Action {
     }
   }
 
-  private function correctGridAreaNames() {
-    $nextChar = 'A';
+  /**
+   * Function that fixes area names from A
+   */
+  private function correctGridAreaNames(string $currentChar): void {
     foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
       $splitedAreas = explode(' ', $gridArea);
-      //$lastChar = 
+
       foreach ($splitedAreas as &$areaName) {
-        if ($areaName != $nextChar) {
-          $areaName = $nextChar;
+        if (ord($areaName) - ord($currentChar) > 1) {
+          $currentChar = ++$currentChar;
+          $this->replaceDataFromGrid($areaName, $currentChar);
+          $areaName = $currentChar;
+        } else if (ord($areaName) - ord($currentChar) == 1) {
+          $this->replaceDataFromGrid($areaName, $currentChar);
+          $areaName = $currentChar;
         }
       }
 
@@ -174,42 +191,18 @@ class Configure extends \ADIOS\Core\Action {
     }
   }
 
-  private function correctAreaKeysNames(int $gridAreaCount, string $startFromKeyName = 'A'): void {
-    foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
-      $splitedAreas = explode(' ', $gridArea);
-
-      foreach ($splitedAreas as &$areaKeyName) {
-        if ($areaKeyName <= $startFromKeyName) continue;
-
-        $areaKeyName = $startFromKeyName;
-        //$startFromKeyName = ++$areaKeyName;
-      }
-
-      if (count($splitedAreas) != $gridAreaCount) {
-        $splitedAreas[] = end($splitedAreas);
-      }
-
-      $gridArea = implode(' ', $splitedAreas);
-    }
-  }
-
   private function incrementAreaNames(array &$splitedAreas, ?string $skipFromAreaIndex = null): void {
-    // /$lastArea = "";
     foreach ($splitedAreas as $areaIndex => &$area) {
       if (
         $skipFromAreaIndex != null 
         && ($areaIndex <= $skipFromAreaIndex)
-        //|| $this->lastChangedAreaKeyName == $area
       ) {
         continue;
       }
       
       $area++;
-
       $this->insertKeyToData($area);
     }
-
-    //$this->lastChangedAreaKeyName = $lastArea;
   }
 
   private function increaseAreaInGrid(string $areaKeyName, int $areaIndex) {
@@ -223,23 +216,6 @@ class Configure extends \ADIOS\Core\Action {
         $gridAreaCount = count($splitedAreas);
 
         $this->reOrderGrid($gridAreaCount);
-        break;
-      }
-    }
-  }
-
-  private function addAreaToGrid(string $areaKeyName, int $areaIndex) {
-    foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
-      if (str_contains($gridArea, $areaKeyName)) {
-        $splitedAreas = explode(' ', $gridArea);
-
-        array_splice($splitedAreas, $areaIndex + 1, 0, ++$areaKeyName);
-        $gridArea = implode(' ', $splitedAreas);
-        $gridAreaCount = count($splitedAreas);
-      
-        $this->lastChangedAreaKeyName = $areaKeyName;
-        $this->lastChangedAreaKeyName++;
-        $this->reOrderGrid($gridAreaCount, $areaKeyName);
         break;
       }
     }
@@ -261,6 +237,23 @@ class Configure extends \ADIOS\Core\Action {
     }
   }*/
 
+  private function addAreaToGrid(string $areaKeyName, int $areaIndex) {
+    foreach ($this->dashboardConfiguration['grid'] as &$gridArea) {
+      if (str_contains($gridArea, $areaKeyName)) {
+        $splitedAreas = explode(' ', $gridArea);
+
+        array_splice($splitedAreas, $areaIndex + 1, 0, ++$areaKeyName);
+        $gridArea = implode(' ', $splitedAreas);
+        $gridAreaCount = count($splitedAreas);
+      
+        $this->lastChangedAreaKeyName = $areaKeyName;
+        $this->lastChangedAreaKeyName++;
+        $this->reOrderGrid($gridAreaCount, $areaKeyName);
+        break;
+      }
+    }
+  }
+
   function preRender() {
     $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios, $this->params);
 
@@ -276,7 +269,7 @@ class Configure extends \ADIOS\Core\Action {
               $this->removeAreaFromGrid($area['key'], $areaIndex);
               $this->removeDataFromGrid($areaIndex);
               $this->reOrderGrid2();
-              $this->correctGridAreaNames();
+              $this->correctGridAreaNames($area['key']);
               break;
             }
           }
@@ -304,10 +297,6 @@ class Configure extends \ADIOS\Core\Action {
           foreach ($this->dashboardConfiguration['data'] as $areaIndex => $area) {
             if ($areaIndex == (int) $this->params['areaIndex']) {
               $this->decreaseAreaInGrid($area['key'], $areaIndex);
-              $dashboard->saveConfiguration(
-                json_encode($this->dashboardConfiguration),
-                0
-              );
               break;
             }
           }
@@ -322,8 +311,7 @@ class Configure extends \ADIOS\Core\Action {
         break;
       }
     }
-var_dump($this->dashboardConfiguration['grid']);
-//var_dump($this->dashboardConfiguration['data']);
+
     $dashboard->saveConfiguration(
       json_encode($this->dashboardConfiguration),
       0
