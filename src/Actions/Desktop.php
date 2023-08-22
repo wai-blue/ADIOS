@@ -28,7 +28,7 @@ class Desktop extends \ADIOS\Core\Action {
     $settingsMenuItems = [];
 
     $settingsMenuItems[] = [
-      "fa_icon" => "fas fa-user",
+      "faIcon" => "fas fa-user",
       "text" => $this->translate("My profile"),
       "onclick" => "
         window_render(
@@ -44,13 +44,13 @@ class Desktop extends \ADIOS\Core\Action {
     ];
 
     $settingsMenuItems[] = [
-      "fa_icon" => "fas fa-window-restore",
+      "faIcon" => "fas fa-window-restore",
       "text" => $this->translate("Open new tab"),
       "onclick" => "window.open('{$this->adios->config['url']}');",
     ];
 
     $settingsMenuItems[] = [
-      "fa_icon" => "fas fa-bolt",
+      "faIcon" => "fas fa-bolt",
       "text" => $this->translate("Restart"),
       "onclick" => "
         if (window.location.href.indexOf('restart=1') == '-1') {
@@ -66,7 +66,7 @@ class Desktop extends \ADIOS\Core\Action {
     ];
 
     $settingsLogoutItems = [
-      "fa_icon" => "fas fa-sign-out-alt",
+      "faIcon" => "fas fa-sign-out-alt",
       "text" => $this->translate("Log out"),
       "consent" => $this->translate("Are you sure to log out?"),
       "not_logout" => $this->translate("Do not logout"),
@@ -78,12 +78,12 @@ class Desktop extends \ADIOS\Core\Action {
     if ($this->adios->config['devel_mode']) {
       // $develMenuItems[] = [
       //   "text" => $this->translate("Show console"),
-      //   "fa_icon" => "fas fa-terminal",
+      //   "faIcon" => "fas fa-terminal",
       //   "onclick" => "desktop_show_console();",
       // ];
       /*$develMenuItems[] = [
         "text" => $this->translate("Examples of UI"),
-        "fa_icon" => "fas fa-hammer",
+        "faIcon" => "fas fa-hammer",
         "onclick" => "desktop_render('SkinSamples');",
       ];*/
     }

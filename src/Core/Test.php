@@ -73,8 +73,12 @@ class Test
 
       $this->log("Received value: ".json_encode($assertionValue));
       $this->log("Expected value: ".($expectedValue == "[CLOSURE]" ? "[CLOSURE]" : json_encode($expectedValue)));
+
+      throw new \ADIOS\Core\Exceptions\TestAssertionFailed($e);
     } catch (\Exception $e) {
       $this->log("Test '".get_class($this)."' failed with exception '".get_class($e)."' and message '{$e->getMessage()}'");
+
+      throw new \Exception($e);
     }
   }
 

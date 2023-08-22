@@ -423,14 +423,14 @@ class Table extends \ADIOS\Core\View
 
     if ($this->params['showPaging']) {
       $this->paging->addView('Button', [
-        'fa_icon' => 'fas fa-angle-double-left',
+        'faIcon' => 'fas fa-angle-double-left',
         'class' => 'btn-light btn-circle btn-sm',
         'onclick' => "ui_table_show_page('{$this->params['uid']}', '1'); ",
         'disabled' => (1 == $this->params['page'] ? true : false)
       ]);
 
       $this->paging->addView('Button', [
-        'fa_icon' => 'fas fa-angle-left',
+        'faIcon' => 'fas fa-angle-left',
         'class' => 'btn-light btn-circle btn-sm',
         'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] - 1) . "'); ",
         'disabled' => (1 == $this->params['page'] ? true : false)
@@ -475,13 +475,13 @@ class Table extends \ADIOS\Core\View
       }
 
       $this->paging->addView('Button', [
-        'fa_icon' => 'fas fa-angle-right',
+        'faIcon' => 'fas fa-angle-right',
         'class' => 'btn-light btn-circle btn-sm',
         'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->params['page'] + 1) . "'); ",
         'disabled' => ($this->params['page'] == $this->pagesCount || 0 == $this->allRowsCount ? true : false)
       ]);
       $this->paging->addView('Button', [
-        'fa_icon' => 'fas fa-angle-double-right',
+        'faIcon' => 'fas fa-angle-double-right',
         'class' => 'btn-light btn-circle btn-sm',
         'onclick' => "ui_table_show_page('{$this->params['uid']}', '" . ($this->pagesCount) . "'); ",
         'disabled' => ($this->params['page'] == $this->pagesCount || 0 == $this->allRowsCount ? true : false)
@@ -509,7 +509,7 @@ class Table extends \ADIOS\Core\View
           $searchAction = $this->model->searchAction ?? $this->model->getFullUrlBase($params) . "/search";
 
           $moreActionsButtonItems[] = [
-            "fa_icon" => "fas fa-search",
+            "faIcon" => "fas fa-search",
             "text" => $this->translate("Advanced search"),
             "onclick" => "
               window_render(
@@ -527,7 +527,7 @@ class Table extends \ADIOS\Core\View
           $exportCsvAction = $this->model->exportCsvAction ?? $this->model->getFullUrlBase($params) . "/Export/CSV";
 
           $moreActionsButtonItems[] = [
-            "fa_icon" => "fas fa-file-export",
+            "faIcon" => "fas fa-file-export",
             "text" => $this->translate("Export to CSV"),
             "onclick" => "
               let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
@@ -544,7 +544,7 @@ class Table extends \ADIOS\Core\View
           $printButtonAction = $this->model->printButtonAction ?? "UI/Table/PrintPdf";
 
           $moreActionsButtonItems[] = [
-            "fa_icon" => "fas fa-print",
+            "faIcon" => "fas fa-print",
             "text" => $this->translate('Print'),
             "onclick" => "
               let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
@@ -570,7 +570,7 @@ class Table extends \ADIOS\Core\View
           $importCsvAction = $this->model->importCsvAction ?? $this->model->getFullUrlBase($params) . "/Import/CSV";
 
           $moreActionsButtonItems[] = [
-            "fa_icon" => "fas fa-file-import",
+            "faIcon" => "fas fa-file-import",
             "text" => $this->translate("Import from CSV"),
             "onclick" => "
               let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
@@ -611,7 +611,7 @@ class Table extends \ADIOS\Core\View
 
         if (_count($moreActionsButtonItems)) {
           $titleRightContent[] = $this->addView('Button', [
-            "fa_icon" => "fas fa-ellipsis-v",
+            "faIcon" => "fas fa-ellipsis-v",
             "title" => "",
             "onclick" => "window_render('{$searchAction}');",
             "dropdown" => $moreActionsButtonItems,
@@ -1027,7 +1027,7 @@ class Table extends \ADIOS\Core\View
                 </select>
 
                 " . $this->addView('Button', [
-            'fa_icon' => 'fas fa-sync-alt',
+            'faIcon' => 'fas fa-sync-alt',
             'class' => 'btn-light btn-circle btn-sm',
             'title' => "Refresh",
             'onclick' => "ui_table_refresh('{$this->params['uid']}');",

@@ -1055,7 +1055,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     );
   }
 
-  public function tableParams($params, $table): ?array
+  public function tableParams($params, $table): array
   {
     return $this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
       "model" => $this,
@@ -1064,7 +1064,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["params"];
   }
 
-  public function tableRowCSSFormatter($data): ?string
+  public function tableRowCSSFormatter($data): string
   {
     return $this->adios->dispatchEventToPlugins("onTableRowCSSFormatter", [
       "model" => $this,
@@ -1072,7 +1072,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["css"];
   }
 
-  public function tableCellCSSFormatter($data): ?string
+  public function tableCellCSSFormatter($data): string
   {
     return $this->adios->dispatchEventToPlugins("onTableCellCSSFormatter", [
       "model" => $this,
@@ -1080,7 +1080,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["css"];
   }
 
-  public function tableCellHTMLFormatter($data): ?string
+  public function tableCellHTMLFormatter($data): string
   {
     return $this->adios->dispatchEventToPlugins("onTableCellHTMLFormatter", [
       "model" => $this,
@@ -1088,7 +1088,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["html"];
   }
 
-  public function tableCellCSVFormatter($data): ?string
+  public function tableCellCSVFormatter($data): string
   {
     return $this->adios->dispatchEventToPlugins("onTableCellCSVFormatter", [
       "model" => $this,

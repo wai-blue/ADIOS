@@ -131,7 +131,7 @@ class CSV extends \ADIOS\Core\Action {
         'onclick' => "{$this->uid}_close();",
       ]),
       $this->adios->view->button([
-        'fa_icon' => 'fas fa-file-alt',
+        'faIcon' => 'fas fa-file-alt',
         'text' => $this->translate("Download CSV file template"),
         'onclick' => "{$this->uid}_downloadTemplate();",
       ]),

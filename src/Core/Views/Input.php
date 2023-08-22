@@ -669,7 +669,7 @@ class Input extends \ADIOS\Core\View {
             >
               <div>
                 ".$this->addView('Button', [
-                  "fa_icon" => "fas fa-times",
+                  "faIcon" => "fas fa-times",
                   "text" => $this->translate("Close files and media browser"),
                   "class" => "btn btn-secondary btn-icon-split",
                   "onclick" => "
@@ -783,7 +783,7 @@ class Input extends \ADIOS\Core\View {
                       $this->addView('Button', [
                         'uid' => $this->params['uid'].'_file_input_browser_button',
                         'onclick' => "ui_input_ftp_browser('{$this->params['uid']}', 'file');",
-                        'fa_icon' => 'fas fa-search',
+                        'faIcon' => 'fas fa-search',
                         'text' => $this->translate("Browse in uploaded files"),
                         'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
                       ])->render()
@@ -792,7 +792,7 @@ class Input extends \ADIOS\Core\View {
                       $this->addView('Button', [
                         'uid' => $this->params['uid'].'_file_input_download_button',
                         'onclick' => "ui_input_file_download('{$this->params['uid']}', '".$this->translate("Enter URL address")."');",
-                        'fa_icon' => 'fas fa-download',
+                        'faIcon' => 'fas fa-download',
                         'title' => $this->translate('Download'),
                         'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
                       ])->render()
@@ -801,7 +801,7 @@ class Input extends \ADIOS\Core\View {
                       $this->addView('Button', [
                         'uid' => $this->params['uid'].'_file_input_open_button',
                         'onclick' => "ui_input_file_open('{$this->params['uid']}');",
-                        'fa_icon' => 'fas fa-eye',
+                        'faIcon' => 'fas fa-eye',
                         'title' => $this->translate('Preview'),
                         'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
                         'style' => (empty($this->params['value']) ? 'display:none;' : '')
@@ -811,7 +811,7 @@ class Input extends \ADIOS\Core\View {
                       $this->addView('Button', [
                         'uid' => $this->params['uid'].'_file_input_delete_button',
                         'onclick' => "ui_input_file_remove('{$this->params['uid']}');",
-                        'fa_icon' => 'fas fa-trash-alt',
+                        'faIcon' => 'fas fa-trash-alt',
                         'title' => $this->translate('Clear'),
                         'class' => "float-left mr-1 btn-danger btn-sm btn-icon-split",
                         'style' => (empty($this->params['value']) ? 'display:none;' : '')
