@@ -20,7 +20,12 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
         $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
         $width = min(max((int) $params['byte_size'], 1), 65);
         $decimals = min(min(max((int) $params['decimals'], 0), 30), $width);
-        $sqlDataType = "decimal";
+
+        $sqlDataType = ($params['sql_data_type'] ?? "decimal");
+
+        if (!in_array($sqlDataType, ["double", "float", "decimal", "numeric"])) {
+            $sqlDataType = "decimal";
+        }
 
         return "`{$col_name}` {$sqlDataType}($width, $decimals) {$params['sql_definitions']}";
     }

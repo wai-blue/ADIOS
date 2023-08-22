@@ -806,6 +806,7 @@ class Table extends \ADIOS\Core\View
               $input_type = 'text';
               break;
             case 'float':
+            case 'decimal':
             case 'int':
               if (_count($col_def['enum_values'])) {
                 $input_type = 'select';
@@ -978,7 +979,7 @@ class Table extends \ADIOS\Core\View
               'html' => $cellHtml,
             ]);
 
-            if ((in_array($colDef['type'], ['int', 'float']) && !is_array($colDef['enum_values']))) {
+            if ((in_array($colDef['type'], ['int', 'float', 'decimal']) && !is_array($colDef['enum_values']))) {
               $alignClass = 'align_right';
             } else {
               $alignClass = 'align_left';

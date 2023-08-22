@@ -240,7 +240,11 @@ class MySQLi extends \ADIOS\Core\DB
         }
       }
 
-      if ('float' == $type || ('int' == $type && !_count($column['enum_values']))) {
+      if (
+        $type == 'float'
+        || $type == 'decimal'
+        || ('int' == $type && !_count($column['enum_values']))
+      ) {
         $s = trim(str_replace(',', '.', $s));
         $s = str_replace(' ', '', $s);
 
