@@ -1066,7 +1066,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function tableRowCSSFormatter($data): string
   {
-    return $this->adios->dispatchEventToPlugins("onTableRowCSSFormatter", [
+    return (string) $this->adios->dispatchEventToPlugins("onTableRowCSSFormatter", [
       "model" => $this,
       "data" => $data,
     ])["data"]["css"];
@@ -1074,7 +1074,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function tableCellCSSFormatter($data): string
   {
-    return $this->adios->dispatchEventToPlugins("onTableCellCSSFormatter", [
+    return (string) $this->adios->dispatchEventToPlugins("onTableCellCSSFormatter", [
       "model" => $this,
       "data" => $data,
     ])["data"]["css"];
@@ -1082,7 +1082,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function tableCellHTMLFormatter($data): string
   {
-    return $this->adios->dispatchEventToPlugins("onTableCellHTMLFormatter", [
+    return (string) $this->adios->dispatchEventToPlugins("onTableCellHTMLFormatter", [
       "model" => $this,
       "data" => $data,
     ])["data"]["html"];
@@ -1090,7 +1090,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function tableCellCSVFormatter($data): string
   {
-    return $this->adios->dispatchEventToPlugins("onTableCellCSVFormatter", [
+    return (string) $this->adios->dispatchEventToPlugins("onTableCellCSVFormatter", [
       "model" => $this,
       "data" => $data,
     ])["data"]["csv"];
