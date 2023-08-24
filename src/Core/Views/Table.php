@@ -52,6 +52,8 @@ class Table extends \ADIOS\Core\View
 
     // defaultne parametre
     $params = parent::params_merge([
+      'model' => '',
+      'uid' => '',
       'title' => '',
       'tag' => '',
       'page' => 1,
@@ -81,6 +83,8 @@ class Table extends \ADIOS\Core\View
 
       'columnsOrder' => [],
       'form_data' => [],
+
+      'readonly' => false
     ], $params);
 
     if (empty($params['model'])) {
