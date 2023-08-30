@@ -32,9 +32,11 @@ class Form extends \ADIOS\Core\View
     // defaultne parametre
 
     $params = parent::params_merge([
+      'model' => '',
       'table' => '',
       'id' => '-1',
       'title' => '',
+      'title_params' => [],
       'formatter' => 'ui_form_formatter',
       'defaultValues' => [],
       'readonly' => false,
@@ -50,20 +52,12 @@ class Form extends \ADIOS\Core\View
       'formType' => 'window',
       'windowParams' => [],
       'width' => 700,
-      'height' => '',
+      'height' => 0,
       'onclose' => '',
       'reopenAfterSave' => FALSE,
-      'onbeforesave' => '',
-      'onaftersave' => '',
-      'onbeforeclose' => '',
-      'onafterclose' => '',
-      'onbeforedelete' => '',
-      'onafterdelete' => '',
-      'onbeforecopy' => '',
-      'onaftercopy' => '',
       'onload' => '',
-      'simple_insert' => false,
       'javascript' => '',
+      'displayMode' => 'window'
     ], $params);
 
     // nacitanie udajov
@@ -254,6 +248,7 @@ class Form extends \ADIOS\Core\View
       if ('' == $this->params['title_params']['center']) {
         $this->params['title_params']['center'] = $this->params['title'];
       }
+
       $this->add($this->addView('Button', $this->params['title_params']), 'title');
     }
 
@@ -433,7 +428,7 @@ class Form extends \ADIOS\Core\View
       ];
 
     }
-
+//var_Dump($this->params['template']); exit;
     if (_count($this->params['columns'])) {
 
       // renderovanie template
@@ -535,71 +530,12 @@ class Form extends \ADIOS\Core\View
       $html .= $this->params['formatter']('after_html', $this, []);
     }
 
-    $this->params['onclose'] = $this->params['form_onclose'].$this->params['onclose'];
+    // DEPRECATED
+    //$this->params['onclose'] = $this->params['form_onclose'].$this->params['onclose'];
 
     $html .= "
       <script>
-
-        function {$this->params['uid']}_onbeforesave(uid, data, params){
-          var allowed = true;
-          {$this->params['onbeforesave']}
-          return {data: data, allowed: allowed}
-        }
-        function {$this->params['uid']}_onaftersave(uid, data, params){
-          {$this->params['onaftersave']}
-
-          ".($this->params['simple_insert'] ?
-          "var re_render_params = $.parseJSON(decodeURIComponent('".rawurlencode(json_encode($_REQUEST))."'));
-          re_render_params['simple_insert'] = 0;
-          re_render_params.id = data.inserted_id;
-          re_render_params.after_simple_insert = 1;
-          window_render('{$this->adios->action}', re_render_params);" : '')."
-          return {}
-        }
-
-        function {$this->params['uid']}_onbeforedelete(uid, data, params){
-          var allowed = true;
-          {$this->params['onbeforedelete']}
-          return {data: data, allowed: allowed}
-        }
-        function {$this->params['uid']}_onafterdelete(uid, data, params){
-          {$this->params['onafterdelete']}
-          return {}
-        }
-
-        function {$this->params['uid']}_onbeforeclose(uid, data, params){
-          var allowed = true;
-          {$this->params['onbeforeclose']}
-          return {data: data, allowed: allowed}
-        }
-        function {$this->params['uid']}_onafterclose(uid, data, params){
-          {$this->params['onafterclose']}
-          return {}
-        }
-
-        function {$this->params['uid']}_onbeforecopy(uid, data, params){
-          var allowed = true;
-          {$this->params['onbeforecopy']}
-          return {data: data, allowed: allowed}
-        }
-        function {$this->params['uid']}_onaftercopy(uid, data, params){
-          {$this->params['onaftercopy']}
-          return {}
-        }
-
-        ".('' != $this->params['onclose'] ?
-          "function {$this->params['uid']}_ondesktopclose(uid, data, params){
-          {$this->params['onclose']}
-          return {}
-          }" : '').'
-
-        '.('' != $this->params['onclose'] ?
-          "function {$this->params['uid']}_onclose(uid, data, params){
-          {$this->params['onclose']}
-          return {}
-          }" : '').'
-
-        '.$this->params['javascript']."
+        ".$this->params['javascript']."
 
         $(document).ready(function(){
           var uid = '{$this->params['uid']}';
