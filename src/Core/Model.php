@@ -1301,7 +1301,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $returnValue = $this->deleteRow($id);
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\RecordDelete $e) {
+    } catch (\ADIOS\Core\Exceptions\RecordDeleteException $e) {
       return $this->adios->renderHtmlWarning($e->getMessage());
     }
   }
