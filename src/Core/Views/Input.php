@@ -369,7 +369,7 @@ class Input extends \ADIOS\Core\View {
             id='{$this->params['uid']}'
             data-is-adios-input='1'
             value=''
-          /> <!-- toto tu je iba preto, aby do saveRecord() presli inputy '_1' a '_2' -->
+          /> <!-- toto tu je iba preto, aby do recordSave() presli inputy '_1' a '_2' -->
           <input
             type='password'
             id='{$this->params['uid']}_1'

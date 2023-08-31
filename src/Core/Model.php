@@ -103,15 +103,20 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public bool $isCrossTable = FALSE;
 
+  /**
+   * If set to TRUE, the SQL table will contain the `record_info` column of type JSON
+   */
+  public bool $storeRecordInfo = FALSE;
+
   var $pdo;
   var $searchAction;
 
   /**
-   * Property used to store original data when save() method is called
+   * Property used to store original data when recordSave() method is called
    *
    * @var mixed
    */
-  var $saveRecordOriginalData = NULL;
+  var $recordSaveOriginalData = NULL;
   protected string $fullTableSqlName = "";
 
   private static $allItemsCache = NULL;
@@ -716,6 +721,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ];
     }
 
+    if ($this->storeRecordInfo) {
+      $newColumns['record_info'] = [
+        'type' => 'json',
+        'title' => 'Record information',
+      ];
+    }
+
     // default column settings
     foreach ($columns as $colName => $colDefinition) {
       $newColumns[$colName] = $colDefinition;
@@ -1176,11 +1188,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["params"];
   }
 
-  public function validateRecord($data)
+  public function recordValidate($data)
   {
     foreach ($this->columns() as $column => $colDefinition) {
      if (!$this->columnValidate($column, $data[$column])) {
-        throw new \ADIOS\Core\Exceptions\SaveRecordException(
+        throw new \ADIOS\Core\Exceptions\RecordSaveException(
           $this->adios->translate(
             "`{{ colTitle }}` contains invalid value.",
             [ 'colTitle' => $colDefinition['title'] ]
@@ -1190,7 +1202,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $colDefinition['required']
         && !$this->columnValidate($column, $data[$column])
       ) {
-        throw new \ADIOS\Core\Exceptions\SaveRecordException(
+        throw new \ADIOS\Core\Exceptions\RecordSaveException(
           $this->adios->translate(
             "`{{ colTitle }}` is required.",
             [ 'colTitle' => $colDefinition['title'] ]
@@ -1200,24 +1212,26 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     }
 
-    return $this->adios->dispatchEventToPlugins("onModelAfterValidateRecord", [
+    return $this->adios->dispatchEventToPlugins("onModelAfterRecordValidate", [
       "model" => $this,
       "data" => $data,
     ])["params"];
   }
 
-  public function saveRecord($data)
+  public function recordSave($data)
   {
 
     // REVIEW: implementovat ukladanie inputov zapisanych takto: id_com_contact_person:LOOKUP:title_before
     // TO BE IMPLEMENTED: vyvstalo ako nova funkcionalita pocas telefonatu s JG 31.8.
 
+    // TO BE IMPLEMENTED: udaj record_info
+
     try {
       $id = (int) $data['id'];
 
-      $this->saveRecordOriginalData = $data;
+      $this->recordSaveOriginalData = $data;
 
-      $this->validateRecord($data);
+      $this->recordValidate($data);
 
       if ($id <= 0) {
         $data = $this->onBeforeInsert($data);
@@ -1273,12 +1287,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $returnValue = $this->onAfterSave($data, $returnValue);
 
       return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\SaveRecordException $e) {
+    } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
       return $this->adios->renderHtmlFatal($e->getMessage());
     }
   }
 
-  public function deleteRecord(int $id)
+  public function recordDelete(int $id)
   {
     $id = (int) $id;
 
@@ -1287,7 +1301,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $returnValue = $this->deleteRow($id);
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\DeleteRecordException $e) {
+    } catch (\ADIOS\Core\Exceptions\RecordDelete $e) {
       return $this->adios->renderHtmlWarning($e->getMessage());
     }
   }

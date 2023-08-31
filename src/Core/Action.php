@@ -24,6 +24,11 @@ class Action {
    * Array of parameters (arguments) passed to the action
    */
   protected array $params;
+
+  /**
+   * TRUE/FALSE array with permissions for the user role
+   */
+  public static array $permissionsByUserRole = [];
   
   /**
    * Language dictionary for strings used in the action's output
@@ -65,10 +70,10 @@ class Action {
   public string $myRootFolder = "";
   public string $twigTemplate = "";
 
-  function __construct(&$adios, $params = []) {
+  function __construct($adios, $params = []) {
     $this->name = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
     $this->shortName = end(explode("/", $this->name));
-    $this->adios = &$adios;
+    $this->adios = $adios;
     $this->params = $params;
     $this->uid = $this->adios->uid;
     $this->gtp = $this->adios->gtp;

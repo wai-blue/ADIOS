@@ -103,18 +103,7 @@ class Table extends \ADIOS\Core\View
             ]
           ],
       */
-      'rowButtons' => [
-        [
-          'text' => 'Activate',
-          'onclick' => 'alert(window);',
-          'cssStyle' => 'color:var(--indigo);'
-        ],
-        [
-          'text' => 'Open external',
-          'onclick' => '... any javascript code ...',
-          'cssClass' => 'btn-info'
-        ]
-      ],
+      'rowButtons' => [],
 
       'buttons' => [],
 
@@ -821,7 +810,7 @@ class Table extends \ADIOS\Core\View
         }
 
         if (_count($this->params['rowButtons'])) {
-          $html .= "<div class='Column'>.</div>";
+          $html .= "<div class='Column'></div>";
         }
 
         // koniec headeru
@@ -969,7 +958,7 @@ class Table extends \ADIOS\Core\View
         }
 
         if (_count($this->params['rowButtons'])) {
-          $html .= "<div class='Column'>.</div>";
+          $html .= "<div class='Column'></div>";
         }
 
         // koniec filtra
