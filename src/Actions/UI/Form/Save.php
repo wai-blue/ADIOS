@@ -18,7 +18,10 @@ class Save extends \ADIOS\Core\Action {
     $saveParams = $params['values'] ?? [];
     $saveParams['id'] = $params['id'];
 
-    return $this->adios->getModel($params['model'])->formSave($saveParams);
+    return
+      $this->adios->getModel($params['model'])
+      ->saveRecord($saveParams)
+    ;
 
   }
 }

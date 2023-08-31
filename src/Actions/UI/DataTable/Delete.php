@@ -22,7 +22,7 @@ class Delete extends \ADIOS\Core\Action {
       $tmpModel = $this->adios->getModel($sessionParams['model']);
 
       if (is_numeric($this->params['id'])) {
-        return $tmpModel->formDelete($this->params['id']);
+        return $tmpModel->deleteRecord($this->params['id']);
       } else {
         throw new \ADIOS\Core\Exceptions\GeneralException("Nothing to delete.");
       }

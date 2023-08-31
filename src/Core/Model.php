@@ -107,11 +107,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   var $searchAction;
 
   /**
-   * Property used to store original data when formSave() method is called
+   * Property used to store original data when save() method is called
    *
    * @var mixed
    */
-  var $formSaveOriginalData = NULL;
+  var $saveRecordOriginalData = NULL;
   protected string $fullTableSqlName = "";
 
   private static $allItemsCache = NULL;
@@ -1176,11 +1176,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["params"];
   }
 
-  public function formValidate($data)
+  public function validateRecord($data)
   {
     foreach ($this->columns() as $column => $colDefinition) {
      if (!$this->columnValidate($column, $data[$column])) {
-        throw new \ADIOS\Core\Exceptions\FormSaveException(
+        throw new \ADIOS\Core\Exceptions\SaveRecordException(
           $this->adios->translate(
             "`{{ colTitle }}` contains invalid value.",
             [ 'colTitle' => $colDefinition['title'] ]
@@ -1190,7 +1190,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $colDefinition['required']
         && !$this->columnValidate($column, $data[$column])
       ) {
-        throw new \ADIOS\Core\Exceptions\FormSaveException(
+        throw new \ADIOS\Core\Exceptions\SaveRecordException(
           $this->adios->translate(
             "`{{ colTitle }}` is required.",
             [ 'colTitle' => $colDefinition['title'] ]
@@ -1200,20 +1200,24 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     }
 
-    return $this->adios->dispatchEventToPlugins("onModelAfterFormValidate", [
+    return $this->adios->dispatchEventToPlugins("onModelAfterValidateRecord", [
       "model" => $this,
       "data" => $data,
     ])["params"];
   }
 
-  public function formSave($data)
+  public function saveRecord($data)
   {
+
+    // REVIEW: implementovat ukladanie inputov zapisanych takto: id_com_contact_person:LOOKUP:title_before
+    // TO BE IMPLEMENTED: vyvstalo ako nova funkcionalita pocas telefonatu s JG 31.8.
+
     try {
       $id = (int) $data['id'];
 
-      $this->formSaveOriginalData = $data;
+      $this->saveRecordOriginalData = $data;
 
-      $this->formValidate($data);
+      $this->validateRecord($data);
 
       if ($id <= 0) {
         $data = $this->onBeforeInsert($data);
@@ -1269,12 +1273,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $returnValue = $this->onAfterSave($data, $returnValue);
 
       return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\FormSaveException $e) {
+    } catch (\ADIOS\Core\Exceptions\SaveRecordException $e) {
       return $this->adios->renderHtmlFatal($e->getMessage());
     }
   }
 
-  public function formDelete(int $id)
+  public function deleteRecord(int $id)
   {
     $id = (int) $id;
 
@@ -1283,7 +1287,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $returnValue = $this->deleteRow($id);
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\FormDeleteException $e) {
+    } catch (\ADIOS\Core\Exceptions\DeleteRecordException $e) {
       return $this->adios->renderHtmlWarning($e->getMessage());
     }
   }

@@ -50,38 +50,74 @@ class Table extends \ADIOS\Core\View
       );
     }
 
-    // defaultne parametre
+    // default view parameters
+    // 2023-08-27 columnsOrder renamed to columnsDisplayOrder
+    // 2023-08-27 allow_order_modification renamed to allowOrderModification
+
     $params = parent::params_merge([
       'model' => '',
       'uid' => '',
       'title' => '',
       'tag' => '',
-      'page' => 1,
 
       'where' => '',
       'having' => '',
       'orderBy' => '',
+
+      'page' => 1,
       'itemsPerPage' => 25,
 
-      'refreshAction' => 'UI/Table',
+      'columnsDisplayOrder' => [],
+      'showColumnTitles' => true,
+      'showColumnsFilter' => true,
+      'allowOrderModification' => true,
 
+      'refreshAction' => 'UI/Table',
       'onclick' => '',
 
       'showTitle' => true,
       'showPaging' => true,
-      'showColumnTitles' => true,
-      'showColumnsFilter' => true,
       'showControls' => true,
       'showAddButton' => true,
       'showPrintButton' => true,
       'showSearchButton' => true,
       'showExportCsvButton' => true,
       'showImportCsvButton' => false,
-      'allow_order_modification' => true,
+
+      /*
+        rowButtons, TO BE IMPLEMENTED: vyvstalo ako nova funkcionalita pocas telefonatu s JG 31.8.
+        Priklad:
+          'rowButtons' => [
+            [
+              'text' => 'Activate',
+              'onclick' => 'console.log(row);', // `row` obsahuje udaje zobrazovaneho riadku
+              'href' => '', // nepovinne, ak nie je zadane, pouzije sa javascript:void()
+              'target' => '', // nepovinne
+              'cssClass' => 'btn-danger', // nepovinne
+              'cssStyle' => 'color:var(--indigo);', // nepovinne
+            ],
+            [
+              'text' => 'Open external',
+              'onclick' => '... any javascript code ...',
+              'cssClass' => 'btn-info'
+            ]
+          ],
+      */
+      'rowButtons' => [
+        [
+          'text' => 'Activate',
+          'onclick' => 'alert(window);',
+          'cssStyle' => 'color:var(--indigo);'
+        ],
+        [
+          'text' => 'Open external',
+          'onclick' => '... any javascript code ...',
+          'cssClass' => 'btn-info'
+        ]
+      ],
 
       'buttons' => [],
 
-      'columnsOrder' => [],
       'form_data' => [],
 
       'readonly' => false
@@ -143,9 +179,9 @@ class Table extends \ADIOS\Core\View
     $this->params['page'] = (int)$this->params['page'];
     $this->params['itemsPerPage'] = (int)$this->params['itemsPerPage'];
 
-    if (_count($this->params['columnsOrder'])) {
+    if (_count($this->params['columnsDisplayOrder'])) {
       $tmp_columns = [];
-      foreach ($this->params['columnsOrder'] as $col_name) {
+      foreach ($this->params['columnsDisplayOrder'] as $col_name) {
         $tmp_columns[$col_name] = $this->columns[$col_name];
       }
       foreach ($this->columns as $col_name => $col_definition) {
@@ -744,7 +780,7 @@ class Table extends \ADIOS\Core\View
         $html .= "<div class='Row ColumnNames'>";
 
         foreach ($this->columns as $col_name => $col_def) {
-          if ($params['allow_order_modification']) {
+          if ($params['allowOrderModification']) {
             $new_ordering = "$col_name asc";
             $order_class = 'unordered';
 
@@ -765,7 +801,7 @@ class Table extends \ADIOS\Core\View
           $html .= "
             <div
               class='Column {$col_def['css_class']} {$order_class}'
-              " . ($params['allow_order_modification'] ? "
+              " . ($params['allowOrderModification'] ? "
                 onclick='
                   ui_table_refresh(
                     \"{$params['uid']}\",
@@ -784,8 +820,12 @@ class Table extends \ADIOS\Core\View
           ";
         }
 
+        if (_count($this->params['rowButtons'])) {
+          $html .= "<div class='Column'>.</div>";
+        }
+
         // koniec headeru
-        $html .= '  </div>';
+        $html .= '</div>';
       }
 
       // filtrovaci riadok
@@ -928,6 +968,10 @@ class Table extends \ADIOS\Core\View
             ";
         }
 
+        if (_count($this->params['rowButtons'])) {
+          $html .= "<div class='Column'>.</div>";
+        }
+
         // koniec filtra
         $html .= '</div>';
       }
@@ -1002,6 +1046,29 @@ class Table extends \ADIOS\Core\View
               </div>
             ";
           }
+
+          if (_count($this->params['rowButtons'])) {
+            $html .= "<div class='Column'>";
+            foreach ($this->params['rowButtons'] as $rowButton) {
+              $html .= "
+                <a
+                  href='" . ($rowButton['href'] ?? "javascript:void(0)") . "'
+                  onclick='
+                    event.cancelBubble = true;
+                    let rowValuesBase64 = $(this).closest(\".Row\").data(\"row-values-base64\");
+                    let row = JSON.parse(Base64.decode(rowValuesBase64));
+
+                    " . ($rowButton['onclick'] ?? "") . "
+                  '
+                  ".(empty($rowButton['cssStyle']) ? "" : "style='" . ads($rowButton['cssStyle']) . "'")."
+                  ".(empty($rowButton['cssClass']) ? "" : "class='" . ads($rowButton['cssClass']) . "'")."
+                  ".(empty($rowButton['target']) ? "" : "target='" . ads($rowButton['target']) . "'")."
+                >" . hsc($rowButton['text']) . "</a>
+              ";
+            }
+            $html .= "</div>";
+          }
+
 
           $html .= '</div>';
         }

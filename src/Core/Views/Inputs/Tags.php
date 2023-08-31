@@ -17,6 +17,7 @@ class Tags extends \ADIOS\Core\Views\Input {
     $model = $this->adios->getModel($this->params['model']);
     $options = $model->getAll();
 
+    // REVIEW: Derave. Keby v databaze bol javascript, tak sa dostane do `source: [{$allTagsAutocomplete}]` - vid nizsie.
     $allTags = [];
     foreach ($options as $option) {
       $allTags[] = strtolower(ads($option["tag"]));
@@ -30,7 +31,7 @@ class Tags extends \ADIOS\Core\Views\Input {
     $html .= "
       <script>
         $('#{$this->uid}_tag').tagEditor({
-          initialTags: {$this->params["initialTags"]},
+          initialTags: ".json_encode(json_decode($this->params["initialTags"], TRUE)).",
           autocomplete: {
               delay: 0,
               position: { collision: 'flip' },

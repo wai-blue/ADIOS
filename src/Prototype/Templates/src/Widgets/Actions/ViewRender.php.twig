@@ -7,16 +7,27 @@ namespace {{ thisAction.namespace }};
 class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
 
   public function render() {
-    $view = $this->adios->view->create(
-      '{{ thisAction.config.view }}',
-      array_merge(
-        [
-          'windowParams' => $this->params['windowParams'] ?? [],
-        ],
-{{ varExport(thisAction.config.params, "        ")|raw }}
-      )
+
+    // basic configuration
+    $view = '{{ thisAction.config.view }}';
+
+    $defaultViewParams = array_merge(
+      [
+        'windowParams' => $this->params['windowParams'] ?? [],
+      ],
+{{ varExport(thisAction.config.params, "      ")|raw }}
     );
 
-    return $view->render();
+    // post-processing of the default view parameters
+    $viewParams = $defaultViewParams;
+
+    // create view object
+    $viewObject = $this->adios->view->create(
+      $view,
+      $viewParams
+    );
+
+    // render view
+    return $viewObject->render();
   }
 }

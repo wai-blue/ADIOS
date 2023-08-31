@@ -254,7 +254,10 @@ class Input extends \ADIOS\Core\View {
       }
 
       /* text (plain text) */
-      if ('text' == $this->params['type'] && ('' == $this->params['interface'] || 'plain_text' == $this->params['interface'] || 'text' == $this->params['interface'])) {
+      if (
+        ('text' == $this->params['type'] && ('' == $this->params['interface'] || 'plain_text' == $this->params['interface'] || 'text' == $this->params['interface']))
+        || $this->params['type'] == 'json'
+      ) {
         $html .= "
           <textarea
             id='{$this->params['uid']}'
@@ -366,7 +369,7 @@ class Input extends \ADIOS\Core\View {
             id='{$this->params['uid']}'
             data-is-adios-input='1'
             value=''
-          /> <!-- toto tu je iba preto, aby do formSave() presli inputy '_1' a '_2' -->
+          /> <!-- toto tu je iba preto, aby do saveRecord() presli inputy '_1' a '_2' -->
           <input
             type='password'
             id='{$this->params['uid']}_1'
