@@ -17,6 +17,7 @@
 
 
 .adios.ui.Form .subrow .input-title { color: var(--cl-main); }
+.adios.ui.Form .subrow .group-title { color: var(--cl-main); font-weight: bold; margin-top: 1em; }
 
 .adios.ui.Form .subrow:hover .input-content input,
 .adios.ui.Form .subrow:hover .input-content textarea,

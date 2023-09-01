@@ -68,6 +68,18 @@ class Table extends \ADIOS\Core\View
       'itemsPerPage' => 25,
 
       'columnsDisplayOrder' => [],
+
+      /*
+        showColumns: If not empty, the columns from this array will be shown
+        Example: [
+          'first_name',
+          'middle_name',
+          'last_name',
+          'age'
+        ]
+      */
+      'showColumns' => [],
+
       'showColumnTitles' => true,
       'showColumnsFilter' => true,
       'allowOrderModification' => true,
@@ -85,23 +97,22 @@ class Table extends \ADIOS\Core\View
       'showImportCsvButton' => false,
 
       /*
-        rowButtons, TO BE IMPLEMENTED: vyvstalo ako nova funkcionalita pocas telefonatu s JG 31.8.
-        Priklad:
-          'rowButtons' => [
-            [
-              'text' => 'Activate',
-              'onclick' => 'console.log(row);', // `row` obsahuje udaje zobrazovaneho riadku
-              'href' => '', // nepovinne, ak nie je zadane, pouzije sa javascript:void()
-              'target' => '', // nepovinne
-              'cssClass' => 'btn-danger', // nepovinne
-              'cssStyle' => 'color:var(--indigo);', // nepovinne
-            ],
-            [
-              'text' => 'Open external',
-              'onclick' => '... any javascript code ...',
-              'cssClass' => 'btn-info'
-            ]
+        rowButtons: What action buttons to show for each row
+        Example: [
+          [
+            'text' => 'Activate',
+            'onclick' => 'console.log(row);', // `row` obsahuje udaje zobrazovaneho riadku
+            'href' => '', // nepovinne, ak nie je zadane, pouzije sa javascript:void()
+            'target' => '', // nepovinne
+            'cssClass' => 'btn-danger', // nepovinne
+            'cssStyle' => 'color:var(--indigo);', // nepovinne
           ],
+          [
+            'text' => 'Open external',
+            'onclick' => '... any javascript code ...',
+            'cssClass' => 'btn-info'
+          ]
+        ];
       */
       'rowButtons' => [],
 
@@ -164,6 +175,18 @@ class Table extends \ADIOS\Core\View
     $this->params = $this->model->tableParams($this->params, $this);
 
     $this->columns = $this->getColumns();
+
+    if (_count($this->params['showColumns']) > 0) {
+      foreach ($this->columns as $key => $value) {
+        $this->columns[$key]['showColumn'] = FALSE;
+      }
+
+      foreach ($this->params['showColumns'] as $value) {
+        if (isset($this->columns[$value])) {
+          $this->columns[$value]['showColumn'] = TRUE;
+        }
+      }
+    }
 
     $this->params['page'] = (int)$this->params['page'];
     $this->params['itemsPerPage'] = (int)$this->params['itemsPerPage'];

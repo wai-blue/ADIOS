@@ -265,25 +265,149 @@ class Form extends \ADIOS\Core\View
     $this->model->onFormAfterInit($this);
   }
 
-  // renderRows
-  function renderRows($rows) {
+  public function renderItem($item) {
     $html = "";
 
-    if (!empty($rows['action'])) {
-      // ak je definovana akcia, generuje akciu s parametrami
-      $tmpAction = $rows['action'];
+    if (is_string($item)) {
+      $inputHtml = "";
 
-      $tmpActionParams = $rows['params'];
+      if (strpos($item, ":LOOKUP:") === FALSE) {
+
+        $title = $this->model->translate($this->params['columns'][$item]['title'] ?? '');
+        $description = $this->model->translate($this->params['columns'][$item]['description'] ?? '');
+
+        $inputHtml = $this->Input(
+          $item,
+          $item,
+          $this->data[$item],
+          $this->params['columns'][$item] ?? [],
+          $this->data,
+          $this->params['model']
+        );
+      } else {
+        [$columnName, $lookupColumnName] = explode(":LOOKUP:", $item);
+        $lookupModelName = $this->params['columns'][$columnName]['model'] ?? '';
+        if (!empty($lookupModelName)) {
+          $lookupModel = $this->adios->getModel($lookupModelName);
+          $lookupColumn = $lookupModel->columns()[$lookupColumnName] ?? [];
+
+          $title = 
+            $this->model->translate($this->params['columns'][$columnName]['title'] ?? '')
+            . ' » '
+            . $this->model->translate($lookupColumn['title'] ?? '')
+          ;
+          $description = $this->model->translate($lookupColumn['description'] ?? '');
+
+          $inputHtml = $this->Input(
+            $item,
+            $lookupColumnName,
+            $this->lookupData[$columnName][$lookupColumnName],
+            $lookupColumn,
+            $this->lookupData[$columnName],
+            $this->params['model']
+          );
+        }
+      }
+
+      $html .= "
+        <div
+          class='
+            adios ui Form subrow
+            ".($this->params['columns'][$item]['required'] ? "required" : "")."
+            ".(empty($this->params['columns'][$item]['pattern']) ? "" : "has_pattern")."
+          '
+        >
+          <div class='input-title'>
+            ".hsc($title)."
+          </div>
+          <div class='input-content'>
+            {$inputHtml}
+          </div>
+          ".(empty($description) ? "" : "
+            <div class='input-description'>
+              ".hsc($description)."
+            </div>
+          ")."
+        </div>
+      ";
+    } else if (is_string($item['html'])) {
+      $html .= "
+        <div class='adios ui Form subrow'>
+          {$item['html']}
+        </div>
+      ";
+
+    } else if (is_string($item['action'])) {
+      $html .= "
+        <div class='adios ui Form subrow'>
+          ".$this->adios->renderAction($item['action'], $item['params'])."
+        </div>
+      ";
+
+    } else if (isset($item['input'])) {
+      $inputHtml = "";
+
+      if (is_string($item['input'])) {
+        $inputHtml = $item['input'];
+      } else if (is_array($item['input'])) {
+        $inputClass = $item['input']['class'];
+
+        $inputParams = $item['input']['params'];
+        $inputParams['form_uid'] = $this->params['uid'];
+        $inputParams['form_data'] = $this->data;
+        $inputParams['initiating_model'] = $this->params['model'];
+
+        $inputHtml = (new $inputClass(
+          $this->adios,
+          "{$this->params['uid']}_{$item['input']['uid']}",
+          $inputParams
+        ))->render();
+      }
+
+      $html .= "
+        <div class='adios ui Form subrow'>
+          ".(empty($item['title']) ? "" : "
+            <div class='input-title {$item['class']}'>
+              {$item['title']}
+            </div>
+          ")."
+          <div
+            class='input-content {$item['class']}'
+            style='{$item['style']}'
+          >
+            {$inputHtml}
+          </div>
+          ".(empty($item['description']) ? "" : "
+            <div class='input-description'>
+              ".hsc($item['description'])."
+            </div>
+          ")."
+        </div>
+      ";
+    }
+
+    return $html;
+  }
+
+  // renderItems
+  function renderItems($items) {
+    $html = "";
+
+    if (!empty($items['action'])) {
+      // ak je definovana akcia, generuje akciu s parametrami
+      $tmpAction = $items['action'];
+
+      $tmpActionParams = $items['params'];
       $tmpActionParams['form_uid'] = $this->params['uid'];
       $tmpActionParams['form_data'] = $this->data;
       $tmpActionParams['initiating_model'] = $this->params['model'];
 
       $html = $this->adios->renderAction($tmpAction, $tmpActionParams);
-    } else if (is_callable($rows['template'])) {
+    } else if (is_callable($items['template'])) {
       // template je definovany ako anonymna funkcia
-      $html = $rows['template']($this->params['columns'], $this);
-    } else if (is_string($rows)) {
-      $html = $rows;
+      $html = $items['template']($this->params['columns'], $this);
+    } else if (is_string($items)) {
+      $html = $items;
     } else {
       $html = "
         <div class='".$this->getCssClassesString()." form-wrapper'>
@@ -292,116 +416,18 @@ class Form extends \ADIOS\Core\View
               ".$this->translate("Some of the required fields are empty.")."
             </div>
       ";
-      foreach ($rows as $row) {
-        if (is_string($row)) {
-          $inputHtml = "";
-
-          if (strpos($row, ":LOOKUP:") === FALSE) {
-
-            $title = $this->model->translate($this->params['columns'][$row]['title'] ?? '');
-            $description = $this->model->translate($this->params['columns'][$row]['description'] ?? '');
-
-            $inputHtml = $this->Input(
-              $row,
-              $row,
-              $this->data[$row],
-              $this->params['columns'][$row] ?? [],
-              $this->data,
-              $this->params['model']
-            );
-          } else {
-            [$columnName, $lookupColumnName] = explode(":LOOKUP:", $row);
-            $lookupModelName = $this->params['columns'][$columnName]['model'] ?? '';
-            if (!empty($lookupModelName)) {
-              $lookupModel = $this->adios->getModel($lookupModelName);
-              $lookupColumn = $lookupModel->columns()[$lookupColumnName] ?? [];
-
-              $title = $this->model->translate($lookupColumn['title'] ?? '');
-              $description = $this->model->translate($lookupColumn['description'] ?? '');
-
-              $inputHtml = $this->Input(
-                $row,
-                $lookupColumnName,
-                $this->lookupData[$columnName][$lookupColumnName],
-                $lookupColumn,
-                $this->lookupData[$columnName],
-                $this->params['model']
-              );
-            }
-          }
-
-          $html .= "
-            <div
-              class='
-                adios ui Form subrow
-                ".($this->params['columns'][$row]['required'] ? "required" : "")."
-                ".(empty($this->params['columns'][$row]['pattern']) ? "" : "has_pattern")."
-              '
-            >
-              <div class='input-title'>
-                ".hsc($title)."
-              </div>
-              <div class='input-content'>
-                {$inputHtml}
-              </div>
-              ".(empty($description) ? "" : "
-                <div class='input-description'>
-                  ".hsc($description)."
-                </div>
-              ")."
-            </div>
-          ";
-        } else if (is_string($row['html'])) {
+      foreach ($items as $item) {
+        if (isset($item['group']['title'])) {
           $html .= "
             <div class='adios ui Form subrow'>
-              {$row['html']}
-            </div>
-          ";
-        } else if (is_string($row['action'])) {
-          $html .= "
-            <div class='adios ui Form subrow'>
-              ".$this->adios->renderAction($row['action'], $row['params'])."
-            </div>
-          ";
-        } else if (isset($row['input'])) {
-          $inputHtml = "";
-
-          if (is_string($row['input'])) {
-            $inputHtml = $row['input'];
-          } else if (is_array($row['input'])) {
-            $inputClass = $row['input']['class'];
-
-            $inputParams = $row['input']['params'];
-            $inputParams['form_uid'] = $this->params['uid'];
-            $inputParams['form_data'] = $this->data;
-            $inputParams['initiating_model'] = $this->params['model'];
-
-            $inputHtml = (new $inputClass(
-              $this->adios,
-              "{$this->params['uid']}_{$row['input']['uid']}",
-              $inputParams
-            ))->render();
-          }
-          $html .= "
-            <div class='adios ui Form subrow'>
-              ".(empty($row['title']) ? "" : "
-                <div class='input-title {$row['class']}'>
-                  {$row['title']}
-                </div>
-              ")."
-              <div
-                class='input-content {$row['class']}'
-                style='{$row['style']}'
-              >
-                {$inputHtml}
+              <div class='group-title'>
+                ".hsc($item['group']['title'])."
               </div>
-              ".(empty($row['description']) ? "" : "
-                <div class='input-description'>
-                  ".hsc($row['description'])."
-                </div>
-              ")."
             </div>
           ";
+          $html .= $this->renderItems($item['group']['items']);
+        } else {
+          $html .= $this->renderItem($item);
         }
       }
       $html .= "
@@ -496,16 +522,16 @@ class Form extends \ADIOS\Core\View
 
           if (is_string($col)) {
             $col_html .= $col;
-          } else if (!empty($col['rows'])) {
-            $col_html .= $this->renderRows($col['rows']);
+          } else if (!empty($col['items'])) {
+            $col_html .= $this->renderItems($col['items']);
           } else if (is_array($col['tabs'])) {
             $tabPages = [];
 
             // kazdy element predstavuje jeden tab vo formulari
-            foreach ($col['tabs'] as $tab_name => $rows) {
+            foreach ($col['tabs'] as $tab_name => $items) {
               $tabPages[] = [
                 'title' => $this->model->translate($tab_name),
-                'content' => [ 'html' => $this->renderRows($rows) ],
+                'content' => [ 'html' => $this->renderItems($items) ],
               ];
             }
 
@@ -519,11 +545,11 @@ class Form extends \ADIOS\Core\View
           } else if (is_string($col['html'])) {
             $col_html .= $col['html'];
           } else if (is_array($col['content'])) {
-            foreach ($col['content'] as $element) {
-              if (is_string($element)) {
-                $col_html .= $element;
+            foreach ($col['content'] as $item) {
+              if (is_string($item)) {
+                $col_html .= $item;
               } else {
-                $col_html .= $element->render();
+                $col_html .= $item->render();
               }
             }
           }

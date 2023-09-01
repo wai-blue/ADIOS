@@ -716,7 +716,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'byte_size' => '8',
         'sql_definitions' => 'primary key auto_increment',
         'title' => 'ID',
-        'only_display' => 'yes',
+        'readonly' => 'yes',
         'class' => 'primary-key'
       ];
     }

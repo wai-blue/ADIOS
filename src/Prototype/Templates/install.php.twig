@@ -34,8 +34,21 @@ try {
   echo $e->getMessage();
 }
 
+$errors = $myAdiosApp->console->getErrors();
+if (count($errors) > 0) {
+  echo "ADIOS app installation failed. Following errors occured during the installation.\n";
+  echo "\n";
+  foreach ($errors as $error) {
+    echo $error[0] . "\n";
+    echo $error[1]['exception'] . "\n";
+    echo "\n";
+  }
+
+  exit(1);
+}
+
 if (php_sapi_name() == "cli") {
-  echo "SUCCESS: Default database was succesfully installed.\n";
+  echo "ADIOS app installation was successful.\n";
 } else {
   echo "
     <html>
