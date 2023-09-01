@@ -37,110 +37,87 @@ class Input extends \ADIOS\Core\View {
 
   public ?\ADIOS\Core\Model $model;
 
-    public array $supported_events = [];
     public array $default_params = [];
 
     /*             */
     /* __construct */
     /*             */
     public function __construct($adios, array $params = []) {
-        $this->adios = $adios;
+      $this->adios = $adios;
 
-        $this->supported_events = [
-            'onclick',
-            'ondblclick',
-            'onmousedown',
-            'onmouseenter',
-            'onmouseleave',
-            'onmousemove',
-            'onmouseover',
-            'onmouseout',
-            'onmouseup',
-            'onkeydown',
-            'onkeypress',
-            'onkeyup',
-            'onblur',
-            'onchange',
-            'onfocus',
-            'onfocusin',
-            'onfocusout',
-            'oninput',
-            'onselect',
-        ];
+      $this->default_params = [
+        'column' => '',
+        'type' => '',
+        'width' => '',
+        'value' => '',
+        'html_attributes' => '',
+        'placeholder' => '',
+        'readonly' => false,
+        'default_color_value' => '#000000',
+        'default_date_value' => '',
+        'max_date' => '',
+        'min_date' => '',
+        'enum_values' => '',
+        'decimals' => 2,
+        'interface' => '',
+        'editor' => [],
+        'rename_file' => true,
+        // 'subdir' => 'upload',
+        'show_file_browser' => true,
+        'show_download_url_button' => true,
+        'show_open_button' => true,
+        'show_delete_button' => true,
+        'where' => '',
+        'follow_lookups' => true,
+        'order' => '',
+        'table' => '',
+        'not_selected_text' => '',
+        'lookup_auto_limit' => 100,
+        'input_style' => '',
+        'lookup_detail_enabled' => true,
+        'lookup_detail_onclick' => '',
+        'lookup_search_enabled' => true,
+        'lookup_search_onclick' => '',
+        'lookup_add_enabled' => false,
+        'lookup_add_onclick' => '',
+        'gc_function' => '',
+        'table_checkboxes_cols' => '',
+        'text_onchange' => '',
+        'help' => '',
+        'unit' => '',
+        'table_related_column' => '',
+        'parent_column' => '',
+        'translate_value' => false,
+        'lookup_search_type' => '',
+        'hide_selected_text_option' => false,
+        'show_lookup_not_selected_option' => true,
+        'disabled' => false,
+    ];
 
-        $this->default_params = [
-            'column' => '',
-            'type' => '',
-            'width' => '',
-            'value' => '',
-            'html_attributes' => '',
-            'placeholder' => '',
-            'readonly' => false,
-            'default_color_value' => '#000000',
-            'default_date_value' => '',
-            'max_date' => '',
-            'min_date' => '',
-            'enum_values' => '',
-            'decimals' => 2,
-            'interface' => '',
-            'editor' => [],
-            'rename_file' => true,
-            // 'subdir' => 'upload',
-            'show_file_browser' => true,
-            'show_download_url_button' => true,
-            'show_open_button' => true,
-            'show_delete_button' => true,
-            'where' => '',
-            'follow_lookups' => true,
-            'order' => '',
-            'table' => '',
-            'not_selected_text' => '',
-            'lookup_auto_limit' => 100,
-            'input_style' => '',
-            'lookup_detail_enabled' => true,
-            'lookup_detail_onclick' => '',
-            'lookup_search_enabled' => true,
-            'lookup_search_onclick' => '',
-            'lookup_add_enabled' => false,
-            'lookup_add_onclick' => '',
-            'gc_function' => '',
-            'table_checkboxes_cols' => '',
-            'text_onchange' => '',
-            'help' => '',
-            'unit' => '',
-            'table_related_column' => '',
-            'parent_column' => '',
-            'translate_value' => false,
-            'lookup_search_type' => '',
-            'hide_selected_text_option' => false,
-            'show_lookup_not_selected_option' => true,
-            'disabled' => false,
-        ];
-
-        foreach ($this->default_params as $param_name => $param_value) {
-          if (!isset($params[$param_name])) {
-            $params[$param_name] = $param_value;
-          }
+      foreach ($this->default_params as $param_name => $param_value) {
+        if (!isset($params[$param_name])) {
+          $params[$param_name] = $param_value;
         }
+      }
 
-        if (!empty($params['model'])) {
-          $this->model = $adios->getModel($params['model']);
-        }
+      if (!empty($params['model'])) {
+        $this->model = $adios->getModel($params['model']);
+      }
 
-        if (empty($params['table']) && !empty($params['model'])) {
-          $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
-        }
+      if (empty($params['table']) && !empty($params['model'])) {
+        $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
+      }
 
-        // nacita parametre z tables a zmerguje s obdrzanymi
-        if (!empty($params['column'])) {
-          $tmpColumns = $this->model->columns();
-          $params['column'] = parent::params_merge($params, $tmpColumns[$params['column']]);
-        } else {
-          // $params['column'] = $this->model->columns();
-        }
+      // nacita parametre z tables a zmerguje s obdrzanymi
+      if (!empty($params['column'])) {
+        $tmpColumns = $this->model->columns();
+        $params['column'] = parent::params_merge($params, $tmpColumns[$params['column']]);
+      } else {
+        // $params['column'] = $this->model->columns();
+      }
 
-        parent::__construct($adios, $params);
-        $this->addCssClass($this->params['type']);
+      parent::__construct($adios, $params);
+      $this->addCssClass($this->params['type']);
     }
 
     /*        */
@@ -1043,38 +1020,37 @@ class Input extends \ADIOS\Core\View {
     /* generate_input_events */
     /*                       */
     public function generate_input_events() {
+
+      $supported_events = [
+        'onclick',
+        'ondblclick',
+        'onmousedown',
+        'onmouseenter',
+        'onmouseleave',
+        'onmousemove',
+        'onmouseover',
+        'onmouseout',
+        'onmouseup',
+        'onkeydown',
+        'onkeypress',
+        'onkeyup',
+        'onblur',
+        'onchange',
+        'onfocus',
+        'onfocusin',
+        'onfocusout',
+        'oninput',
+        'onselect',
+      ];
+
       $events = "";
-      foreach ($this->supported_events as $event) {
+      foreach ($supported_events as $event) {
         if ('' != $this->params[$event]) {
           $events .= " $event=\"{$this->params[$event]}\" ";
         }
       }
 
-        return $events;
+      return $events;
     }
 
-    /*            */
-    /* order_tree */
-    /*            */
-    // public function order_tree($data, $id)
-    // {
-    //     ++$this->order_tree_level;
-    //     if (_count($data)) {
-    //         foreach ($data as $key => $val) {
-    //             if ($val[$this->params['parent_column']] + 0 == $id) {
-    //                 $val['order_tree_level'] = $this->order_tree_level;
-    //                 $res[$val['id']] = $val;
-    //                 $sub = $this->order_tree($data, $val['id']);
-    //                 if (_count($sub)) {
-    //                     foreach ($sub as $k => $v) {
-    //                         $res[$v['id']] = $v;
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     --$this->order_tree_level;
-
-    //     return $res;
-    // }
 }

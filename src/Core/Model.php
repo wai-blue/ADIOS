@@ -1221,9 +1221,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function recordSave($data)
   {
 
-    // REVIEW: implementovat ukladanie inputov zapisanych takto: id_com_contact_person:LOOKUP:title_before
-    // TO BE IMPLEMENTED: vyvstalo ako nova funkcionalita pocas telefonatu s JG 31.8.
-
     // TO BE IMPLEMENTED: udaj record_info
 
     try {
@@ -1231,16 +1228,55 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       $this->recordSaveOriginalData = $data;
 
-      $this->recordValidate($data);
+      // extract data for this model and data for lookup models
 
-      if ($id <= 0) {
-        $data = $this->onBeforeInsert($data);
-      } else {
-        $data = $this->onBeforeUpdate($data);
+      $dataForThisModel = [];
+      $dataForLookupModels = [];
+      foreach ($data as $key => $value) {
+        if (strpos($key, ":LOOKUP:") === FALSE) {
+          $dataForThisModel[$key] = $value;
+        } else {
+          [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
+          $dataForLookupModels[$columnName][$lookupColumnName] = $value;
+        }
       }
 
-      $data = $this->onBeforeSave($data);
+      // save data for lookup models first (and create records, if necessary)
 
+      foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
+        $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? '';
+        if (empty($lookupColumnName)) continue;
+
+        $lookupModel = $this->adios->getModel($lookupModelName);
+
+        $lookupModel->recordValidate($lookupData);
+
+        if ($data[$lookupColumnName] <= 0) {
+          $lookupData = $lookupModel->onBeforeInsert($lookupData);
+        } else {
+          $lookupData = $lookupModel->onBeforeUpdate($lookupData);
+        }
+
+        $lookupData = $this->onBeforeSave($lookupData);
+
+        if ($data[$lookupColumnName] <= 0) {
+          $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
+        } else {
+          $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
+        }
+      }
+
+      // save data for this model
+
+      $this->recordValidate($dataForThisModel);
+
+      if ($id <= 0) {
+        $dataForThisModel = $this->onBeforeInsert($dataForThisModel);
+      } else {
+        $dataForThisModel = $this->onBeforeUpdate($dataForThisModel);
+      }
+
+      $dataForThisModel = $this->onBeforeSave($dataForThisModel);
 
       if ($id <= 0) {
         $returnValue = $this->insertRow($data);
@@ -1249,6 +1285,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $returnValue = $this->updateRow($data, $id);
       }
 
+
+      // save cross-table-alignments
       foreach ($this->crossTableAssignments as $ctaName => $ctaParams) {
         if (!isset($data[$ctaName])) continue;
 

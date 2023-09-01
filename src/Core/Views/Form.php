@@ -14,6 +14,7 @@ class Form extends \ADIOS\Core\View
 {
   public $model = NULL;
   public array $data = [];
+  public array $lookupData = [];
 
   public $gtp;
   public ?\ADIOS\Core\View $closeButton = NULL;
@@ -68,6 +69,15 @@ class Form extends \ADIOS\Core\View
 
     $this->model = $this->adios->getModel($params['model']);
     $this->data = (array) $this->model->getById((int) $params['id']);
+
+    foreach ($this->model->columns() as $colName => $colDefinition) {
+      if (!isset($this->data[$colName])) continue;
+
+      if ($colDefinition['type'] == 'lookup') {
+        $lookupModel = $this->adios->getModel($colDefinition['model']);
+        $this->lookupData[$colName] = $lookupModel->getById($this->data[$colName]);
+      }
+    }
 
     $params['table'] = $this->model->getFullTableSqlName();
 
@@ -284,6 +294,42 @@ class Form extends \ADIOS\Core\View
       ";
       foreach ($rows as $row) {
         if (is_string($row)) {
+          $inputHtml = "";
+
+          if (strpos($row, ":LOOKUP:") === FALSE) {
+
+            $title = $this->model->translate($this->params['columns'][$row]['title'] ?? '');
+            $description = $this->model->translate($this->params['columns'][$row]['description'] ?? '');
+
+            $inputHtml = $this->Input(
+              $row,
+              $row,
+              $this->data[$row],
+              $this->params['columns'][$row] ?? [],
+              $this->data,
+              $this->params['model']
+            );
+          } else {
+            [$columnName, $lookupColumnName] = explode(":LOOKUP:", $row);
+            $lookupModelName = $this->params['columns'][$columnName]['model'] ?? '';
+            if (!empty($lookupModelName)) {
+              $lookupModel = $this->adios->getModel($lookupModelName);
+              $lookupColumn = $lookupModel->columns()[$lookupColumnName] ?? [];
+
+              $title = $this->model->translate($lookupColumn['title'] ?? '');
+              $description = $this->model->translate($lookupColumn['description'] ?? '');
+
+              $inputHtml = $this->Input(
+                $row,
+                $lookupColumnName,
+                $this->lookupData[$columnName][$lookupColumnName],
+                $lookupColumn,
+                $this->lookupData[$columnName],
+                $this->params['model']
+              );
+            }
+          }
+
           $html .= "
             <div
               class='
@@ -293,14 +339,14 @@ class Form extends \ADIOS\Core\View
               '
             >
               <div class='input-title'>
-                ".hsc($this->model->translate($this->params['columns'][$row]['title'] ?? ''))."
+                ".hsc($title)."
               </div>
               <div class='input-content'>
-                ".$this->Input($row, $this->data, $this->params['model'])."
+                {$inputHtml}
               </div>
-              ".(empty($this->params['columns'][$row]['description']) ? "" : "
+              ".(empty($description) ? "" : "
                 <div class='input-description'>
-                  ".hsc($this->params['columns'][$row]['description'])."
+                  ".hsc($description)."
                 </div>
               ")."
             </div>
@@ -406,11 +452,6 @@ class Form extends \ADIOS\Core\View
       }
       if ($this->params['readonly']) {
         $this->params['columns'][$col_name]['readonly'] = true;
-      }
-      if ('' !== $this->data[$col_name] && _count($this->data) && isset($this->data[$col_name])) {
-        if (!$col_def['no_view_permissions']) {
-          $this->params['columns'][$col_name]['value'] = $this->data[$col_name];
-        }
       }
       if ($col_def['virtual'] || 'none' == $col_def['type'] || 'virtual' == $col_def['type']) {
         unset($this->params['columns'][$col_name]);
@@ -558,17 +599,25 @@ class Form extends \ADIOS\Core\View
     return $this->applyDisplayMode((string) $html);
   }
 
-  public function Input($colName, $formData = NULL, $initiatingModel = NULL) {
+  public function Input(
+    $inputId,
+    $colName,
+    $value,
+    $colDefinition,
+    $formData = NULL,
+    $initiatingModel = NULL
+  ) {
     return $this->addView('Input',
       array_merge(
         [
-          'uid' => $this->params['uid'].'_'.$colName,
+          'uid' => $this->params['uid'].'_'.$inputId,
           'form_uid' => $this->params['uid'],
           'form_data' => $formData,
           'initiating_column' => $colName,
           'initiating_model' => $initiatingModel,
+          'value' => $value,
         ],
-        $this->params['columns'][trim($colName)] ?? []
+        $colDefinition
       )
     )->render();
   }
