@@ -27,7 +27,6 @@ class Tabs extends \ADIOS\Core\View {
     $contents = "";
     $titles = "";
 
-    $i = 0;
     foreach ($this->tabs as $tabKey => $tabParams) {
       $tabContentHtml = "";
 
@@ -96,30 +95,17 @@ class Tabs extends \ADIOS\Core\View {
 
       $contents .= "
         <div
-          class='
-            shadow-sm
-            tab_content_wrapper
-            ".($tabKey == 0 ? "active" : "")."
-          '
           id='{$this->uid}_tab_content_{$tabKey}'
-          onclick=\"
-            $(this).closest('.tab_contents').find('.tab_content').removeClass('active');
-            $(this).addClass('active');
-          \"
+          class='tab_content px-2 ".($tabKey == 0 ? "active" : "")."'
         >
-          <div class='tab_title_tag rounded-top'>
-            ".hsc($tabParams['title'])."
-          </div>
-          <div class='tab_content px-2'>
-            {$tabContentHtml}
-          </div>
+          {$tabContentHtml}
         </div>
       ";
 
       $titles .= "
         <li class='nav-item'>
           <a
-            class='nav-link rounded-top tab_title tab_title_{$tabKey} ".($i == 0 ? "active" : "")."'
+            class='nav-link rounded-top tab_title tab_title_{$tabKey} ".($tabKey == 0 ? "active" : "")."'
             href='javascript:void(0);'
             onclick=\"
               ui_tabs_change_tab('{$this->uid}', '{$tabKey}');
@@ -131,33 +117,14 @@ class Tabs extends \ADIOS\Core\View {
         </li>
       ";
 
-      $i++;
     }
 
     $html = "
-      <div
-        id='{$this->uid}'
-        class='" . $this->getCssClassesString() . "'
-      >
+      <div id='{$this->uid}' class='" . $this->getCssClassesString() . "'>
         <ul class='nav nav-tabs'>
           {$titles}
         </ul>
-        <div
-          class='tab_contents'
-          onscroll=\"
-            let st = $(this).scrollTop();
-            let tab = 0;
-
-            $(this).find('.tab_content').each(function() {
-              if ($(this).position().top < 200) {
-                tab++;
-              }
-            });
-
-            $('#{$this->uid} .tab_title').removeClass('active');
-            $('#{$this->uid} .tab_title_' + (tab - 1)).addClass('active');
-          \"
-        >
+        <div class='tab_contents'>
           {$contents}
         </div>
       </div>

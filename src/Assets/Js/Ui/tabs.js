@@ -2,26 +2,13 @@
   function ui_tabs_change_tab(uid, tab) {
     let scrollTo = $('#' + uid + '_tab_content_' + tab);
     let container = $('#' + uid + ' .tab_contents');
+    let tabs = $(scrollTo).closest('.adios.ui.Tabs');
 
-    container.find('.tab_title_tag').removeClass('active');
-    scrollTo.find('.tab_title_tag').addClass('active');
+    tabs.find('.tab_title').removeClass('active');
+    tabs.find('.tab_title_' + tab).addClass('active');
 
-    setTimeout(function () {
-      scrollTo.find('.tab_title_tag').removeClass('active');
-    }, 500);
-
-    container.animate({
-      scrollTop:
-        scrollTo.offset().top
-        - parseInt(scrollTo.css('margin-top'))
-        - container.offset().top + container.scrollTop()
-    }, 300, function() {
-      $('#'+uid+' .tab_title').blur().removeClass('active').removeClass('active');
-      $('#'+uid+' .tab_title_'+tab).addClass('active');
-
-      container.find('.tab_content').removeClass('active');
-      scrollTo.addClass('active');
-    });
+    container.find('.tab_content').removeClass('active');
+    scrollTo.addClass('active');
   };
 
   function ui_tab_load_content(el_id, action, params){

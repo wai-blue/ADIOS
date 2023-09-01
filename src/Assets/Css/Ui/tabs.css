@@ -8,7 +8,6 @@
 .adios.ui.Tabs .tab_titles .tab_title.active img, .adios.ui.Tabs .tab_titles .tab_title:hover img {opacity: 1;}
 .adios.ui.Tabs .tab_titles .tab_title.icon img {margin-right:0px;left:0px;}
 
-.adios.ui.Tabs .tab_contents {position:relative;overflow:auto;}
 .adios.ui.Tabs.border_bottom .tab_contents {border-bottom: 1px solid #E0E0E0;margin-bottom:15px;}
 .adios.ui.Tabs .tab_contents .hidden {display:none;}
 .adios.ui.Tabs .tab_content {
@@ -17,23 +16,14 @@
   border-right: 1px solid #EEEEEE;
   border-bottom: 1px solid #EEEEEE;
   padding: 1em 0;
+  display: none;
   /* margin: 1em 1em 2em 0em; */
 }
-.adios.ui.Tabs .tab_content:hover, .adios.ui.Tabs .tab_content.active { border-color: var(--cl-main); }
+.adios.ui.Tabs .tab_content.active {
+  display: block;
+}
 .adios.ui.Tabs .tab_content .h3 { font-size: 1.3em; }
 .adios.ui.Tabs .tab_content .btn { font-size: 0.75em; }
-.adios.ui.Tabs .tab_content_wrapper .tab_title_tag { 
-  background: #EEEEEE;
-  color: #888888;
-  padding: 0.5em;
-  margin-top: 1em;
-  transition: 200ms;
-}
-
-.adios.ui.Tabs .tab_content_wrapper:hover .tab_title_tag,
-.adios.ui.Tabs .tab_content_wrapper.active .tab_title_tag,
-.adios.ui.Tabs .tab_content_wrapper .tab_title_tag.active { background-color: var(--cl-main); color: white; }
-
 .adios.ui.Tabs .tab_content.padding {padding:15px;}
 
 @media screen and (max-device-width: 900px) {

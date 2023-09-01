@@ -489,7 +489,7 @@ class Form extends \ADIOS\Core\View
       $this->params['template'] = [
         "columns" => [
           [
-            "rows" => array_keys($this->params['columns']),
+            "items" => array_keys($this->params['columns']),
           ],
         ],
       ];
