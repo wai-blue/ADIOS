@@ -30,6 +30,8 @@ class Grid extends \ADIOS\Core\View {
       "layoutSm" => [],
       "layoutMd" => [],
       "layoutLg" => [],
+      "layoutXl" => [],
+      "layoutXXl" => [],
       "areas" => []
     ], $params);
 
