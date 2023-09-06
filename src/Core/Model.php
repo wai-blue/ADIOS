@@ -609,7 +609,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
           ],
           "model" => $this->fullName,
           "id" => -1,
-          "defaultValues" => $urlParams,
         ])
       ],
 

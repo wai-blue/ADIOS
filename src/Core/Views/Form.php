@@ -87,7 +87,7 @@ class Form extends \ADIOS\Core\View
 
     if (empty($params['title'])) {
       $tmpFormTitle = ($params['id'] <= 0 ? $this->model->formTitleForInserting : $this->model->formTitleForEditing);
-      if (empty($tmpFormTitle)){
+      if (empty($tmpFormTitle)) {
         $this->params['title'] = "{$this->params['model']}: ".($this->params['id'] == -1
           ? "Nový záznam"
           : "Upraviť záznam č. {$this->params['id']}"
@@ -417,7 +417,17 @@ class Form extends \ADIOS\Core\View
             </div>
       ";
       foreach ($items as $item) {
-        if (isset($item['group']['title'])) {
+        if (!empty($item['view'])) {
+          // ak je definovane view, generuje view s parametrami
+          $tmpView = $item['view'];
+
+          $tmpViewParams = $item['params'];
+          $tmpViewParams['form_uid'] = $this->params['uid'];
+          $tmpViewParams['form_data'] = $this->data;
+          $tmpViewParams['initiating_model'] = $this->params['model'];
+
+          $html .= $this->adios->view->create($tmpView, $tmpViewParams)->render();
+        } else if (isset($item['group']['title'])) {
           $html .= "
             <div class='adios ui Form subrow'>
               <div class='group-title'>
@@ -465,9 +475,6 @@ class Form extends \ADIOS\Core\View
 
       $this->params['columns'][$col_name]['row_id'] = $this->data['id'];
 
-      // andy test - mozno sposobi problemy v o forme, ale riesi moznost zmenit enum_values v ui formularu cez objekt - inak by dochadzalo k opatovnemu merge enum_values v input komponente
-      // nahradene specialitkou pre table input - vid if nizsie
-      //if ($this->params['table'] != '') $this->params['columns'][$col_name]['table_column'] = $this->params['table'].".".$col_name;
       if ('table' == $col_def['type']) {
         if ('' != $col_def['child_table']) {
           $this->params['columns'][$col_name]['default_table'] = $col_def['child_table'];
@@ -495,7 +502,7 @@ class Form extends \ADIOS\Core\View
       ];
 
     }
-//var_Dump($this->params['template']); exit;
+
     if (_count($this->params['columns'])) {
 
       // renderovanie template
@@ -515,7 +522,6 @@ class Form extends \ADIOS\Core\View
         } else {
           $col_class = "col-lg-2";
         }
-
         foreach ($this->params['template']['columns'] as $col) {
 
           $col_html = "<div class='col col-sm-12 ".($col["class"] ?? $col_class." pl-0")."'>";
@@ -523,6 +529,7 @@ class Form extends \ADIOS\Core\View
           if (is_string($col)) {
             $col_html .= $col;
           } else if (!empty($col['items'])) {
+
             $col_html .= $this->renderItems($col['items']);
           } else if (is_array($col['tabs'])) {
             $tabPages = [];
@@ -614,7 +621,7 @@ class Form extends \ADIOS\Core\View
 
     if ($window !== NULL) {
       $window->setCloseButton($this->closeButton);
-      $window->setTitle($this->model->translate($this->model->formTitleForEditing));
+      $window->setTitle($this->model->translate($this->params['title']));
       $window->setHeaderLeft([
         $this->saveButton,
         $this->copyButton,

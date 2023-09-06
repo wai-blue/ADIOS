@@ -96,6 +96,9 @@ class Table extends \ADIOS\Core\View
       'showExportCsvButton' => true,
       'showImportCsvButton' => false,
 
+      /* defaultValuesForNewRecords: list of values to be forwarded to the Form when adding new record */
+      'defaultValuesForNewRecords' => [],
+
       /*
         rowButtons: What action buttons to show for each row
         Example: [
@@ -176,15 +179,17 @@ class Table extends \ADIOS\Core\View
 
     $this->columns = $this->getColumns();
 
-    if (_count($this->params['showColumns']) > 0) {
-      foreach ($this->columns as $key => $value) {
-        $this->columns[$key]['showColumn'] = FALSE;
-      }
+    if (_count($this->params['showColumns']) == 0) {
+      $this->params['showColumns'] = ['id'];
+    }
 
-      foreach ($this->params['showColumns'] as $value) {
-        if (isset($this->columns[$value])) {
-          $this->columns[$value]['showColumn'] = TRUE;
-        }
+    foreach ($this->columns as $key => $value) {
+      $this->columns[$key]['showColumn'] = FALSE;
+    }
+
+    foreach ($this->params['showColumns'] as $value) {
+      if (isset($this->columns[$value])) {
+        $this->columns[$value]['showColumn'] = TRUE;
       }
     }
 
@@ -240,7 +245,12 @@ class Table extends \ADIOS\Core\View
 
       $this->params['buttons']['add']['onclick'] = "
         window_render(
-          '" . $tmpUrl . "/add'
+          '" . $tmpUrl . "/add',
+          {
+            defaultValues: JSON.parse(
+              Base64.decode('" . base64_encode(json_encode($this->params['defaultValuesForNewRecords'])) . "')
+            )
+          }
         )
       ";
     }
