@@ -154,8 +154,8 @@ class MySQLi extends \ADIOS\Core\DB
         $w = [];
         $s = [];
         foreach ($column['enum_values'] as $evk => $evv) {
-          // PATO fix 07-08-2023 
-          // Ak intangible a tangible (ak som vybral tangible tak vyhodnotilo nespravne 
+          // PATO fix 07-08-2023
+          // Ak intangible a tangible (ak som vybral tangible tak vyhodnotilo nespravne
           // /lebo inTANGIBLE je to iste slovo)
           /*if (stripos($evv, $filterValue) !== FALSE) {
             $w[] = (string)$evk;
@@ -987,6 +987,9 @@ class MySQLi extends \ADIOS\Core\DB
         if (isset($this->columnTypes[$col_type]) && !$col_definition['virtual']) {
           $tmp = $this->columnTypes[$col_type]
             ->get_sql_create_string($table_name, $col_name, $col_definition);
+          if ($col_definition['required'] || $col_type == 'lookup') {
+            $tmp .= 'NOT NULL';
+          }
           if (!empty($tmp)) {
             $sql .= "  {$tmp},\n";
           }
@@ -1007,9 +1010,6 @@ class MySQLi extends \ADIOS\Core\DB
       $sql = substr($sql, 0, -2) . ")";
 
       $sql .= " ENGINE = " . ($table_params['engine'] ?? "InnoDB") . ";;\n";
-
-
-
       if ($only_sql_command) {
         return $sql;
       } else {

@@ -10,14 +10,17 @@
 
 namespace ADIOS\Core\DB\DataTypes;
 
+use ADIOS\Core\DB\DataType;
+
 /**
  * @package DataTypes
  */
-class DataTypeInt extends \ADIOS\Core\DB\DataType
+class DataTypeInt extends DataType
 {
   public function get_sql_create_string($table_name, $col_name, $params = [])
   {
-    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
+    $params['sql_definitions'] = '' != trim((string)$params['sql_definitions']) || $params['required'] ? $params['sql_definitions'] : ' default null ';
+    $params['sql_definitions'] ??= '';
 
     return "`$col_name` int({$params['byte_size']}) {$params['sql_definitions']}";
   }
@@ -38,13 +41,18 @@ class DataTypeInt extends \ADIOS\Core\DB\DataType
       $sql = "$col_name=NULL";
     } else {
       if (is_numeric($value) && '' != $value) {
-        $sql = "$col_name='".($params['escape_string'] ? $this->adios->db->escape($value + 0) : $value + 0)."'";
+        $sql = "$col_name='" . ($params['escape_string'] ? $this->adios->db->escape($value + 0) : $value + 0) . "'";
       } else {
         $sql = "$col_name=null";
       }
     }
 
     return $sql;
+  }
+
+  public function get_html($value, $params = [])
+  {
+    return $this->get_html_or_csv($value, $params);
   }
 
   public function get_html_or_csv($value, $params = [])
@@ -64,7 +72,7 @@ class DataTypeInt extends \ADIOS\Core\DB\DataType
         ['input_column_settings_enum_translation' => true]
       );
     } else {
-      $value_number = number_format((int) strip_tags($value) + 0, 0, '', ' ');
+      $value_number = number_format((int)strip_tags($value) + 0, 0, '', ' ');
 
       if ('' == $params['col_definition']['format']) {
         $value = $value_number;
@@ -80,11 +88,6 @@ class DataTypeInt extends \ADIOS\Core\DB\DataType
     return $html;
   }
 
-  public function get_html($value, $params = [])
-  {
-    return $this->get_html_or_csv($value, $params);
-  }
-
   public function get_csv($value, $params = [])
   {
     return $this->get_html_or_csv($value, $params);
@@ -92,7 +95,7 @@ class DataTypeInt extends \ADIOS\Core\DB\DataType
 
   public function fromString(?string $value)
   {
-    return (int) $value;
+    return (int)$value;
   }
 
   public function validate($value): bool

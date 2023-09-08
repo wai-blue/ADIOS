@@ -17,7 +17,8 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
 {
   public function get_sql_create_string($table_name, $col_name, $params = [])
   {
-    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default null ';
+    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) || $params['required'] ? $params['sql_definitions'] : ' default null ';
+    $params['sql_definitions'] ??= '';
     $width = min(max((int) $params['byte_size'], 1), 65);
     $decimals = min(min(max((int) $params['decimals'], 0), 30), $width);
 
