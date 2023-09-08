@@ -161,20 +161,8 @@ class Input extends \ADIOS\Core\View {
         $this->params['type'] == 'bool'
         || $this->params['type'] == 'boolean'
       ) {
-        // hodnota
-        if ('bool' == $this->params['type']) {
-          if (1 === $this->params['value'] || true === $this->params['value'] || 'Y' === $this->params['value']) {
-            $this->params['value'] = 'Y';
-          } else {
-            $this->params['value'] = 'N';
-          }
-          $true_val = 'Y';
-        } else {
-          if (0 != $this->params['value']) {
-            $this->params['value'] = 1;
-          }
-          $true_val = '1';
-        }
+        $inputValue = $this->params['value'] != '' 
+          ? $this->params['value'] : $this->params['defaultValue'];
 
         $html = "
           <input
@@ -184,9 +172,9 @@ class Input extends \ADIOS\Core\View {
             data-is-adios-input='1'
             class='ui_input_type_boolean ".join(' ', $this->classes)."'
             ".$this->generate_input_events().'
-            '.($this->params['value'] == $true_val ? "checked='checked'" : '')."
+            '.($inputValue == 1 ? "checked='checked'" : '')."
             {$this->params['html_attributes']}
-            value='{$true_val}'
+            value='{$this->params['value']}'
             ".($this->params['readonly'] ? "disabled='disabled'" : '')."
           />
 

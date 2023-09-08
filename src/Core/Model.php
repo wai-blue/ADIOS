@@ -738,15 +738,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
       switch ($colDefinition["type"]) {
         case "int":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 8;
-          break;
+        break;
         case "float":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 14;
           $newColumns[$colName]["decimals"] = $colDefinition["decimals"] ?? 2;
-          break;
+        break;
         case "varchar":
         case "password":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 255;
-          break;
+        break;
       }
     }
 
