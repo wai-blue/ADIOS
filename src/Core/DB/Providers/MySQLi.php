@@ -987,7 +987,7 @@ class MySQLi extends \ADIOS\Core\DB
         if (isset($this->columnTypes[$col_type]) && !$col_definition['virtual']) {
           $tmp = $this->columnTypes[$col_type]
             ->get_sql_create_string($table_name, $col_name, $col_definition);
-          if ($col_definition['required'] || $col_type == 'lookup') {
+          if ($col_definition['required']) {
             $tmp .= 'NOT NULL';
           }
           if (!empty($tmp)) {
