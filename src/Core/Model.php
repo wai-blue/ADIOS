@@ -112,7 +112,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   var $searchAction;
 
   /**
-   * Property used to store original data when recordSave() method is called
+   * Property used to store original data when recordSave() method is calledmodel
    *
    * @var mixed
    */
@@ -1220,8 +1220,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function recordSave($data)
   {
 
-    // TO BE IMPLEMENTED: udaj record_info
-
     try {
       $id = (int) $data['id'];
 
@@ -1399,6 +1397,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeInsert(array $data): array
   {
+    if ($this->storeRecordInfo) $data['record_info'] = $this->getDefaultRecordInfoData();
+
     return $this->adios->dispatchEventToPlugins("onModelBeforeInsert", [
       "model" => $this,
       "data" => $data,
@@ -1444,7 +1444,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onGetRecordInfo(array $data): array
   {
-    var_dump($data); exit;
     $data['record_info'] = json_encode($data['record_info']);
 
     return $this->adios->dispatchEventToPlugins("onModelGetRecordInfo", [
@@ -1676,5 +1675,40 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $rows = $query->fetchAll(\PDO::FETCH_COLUMN, 0);
 
     return count($rows);
+  }
+
+  public function getDefaultRecordInfoData(): array {
+    return [  
+      'id_created_by' => [
+        'type' => 'lookup',
+        'title' => 'Created By',
+        'model' => 'ADIOS/Core/Models/User',
+        'foreignKeyOnUpdate' => 'CASCADE',
+        'foreignKeyOnDelete' => 'CASCADE',
+        'required' => true,
+        'showColumn' => true,
+      ],
+      'create_datetime' => [
+        'title' => 'Created Datetime',
+        'type' => 'datetime',
+        'required' => true,
+        'showColumn' => true,
+      ], 
+      'id_updated_by' => [
+        'type' => 'lookup',
+        'title' => 'Updated By',
+        'model' => 'ADIOS/Core/Models/User',
+        'foreignKeyOnUpdate' => 'CASCADE',
+        'foreignKeyOnDelete' => 'CASCADE',
+        'required' => true,
+        'showColumn' => true
+      ],
+      'update_datetime' => [
+        'title' => 'Updated Datetime',
+        'type' => 'datetime',
+        'required' => true,
+        'showColumn' => true
+      ]
+    ];  
   }
 }
