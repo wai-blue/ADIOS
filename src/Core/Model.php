@@ -1277,6 +1277,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       $dataForThisModel = $this->onBeforeSave($dataForThisModel);
 
+      if ($this->storeRecordInfo) {
+        $dataForThisModel = $this->onGetRecordInfo($dataForThisModel);
+      }
+
       if ($id <= 0) {
         $returnValue = $this->insertRow($data);
         $data['id'] = (int) $returnValue;
@@ -1426,6 +1430,24 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function onBeforeSave(array $data): array
   {
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
+      "model" => $this,
+      "data" => $data,
+    ])["data"];
+  }
+
+  /**
+   * onGetRecordInfo
+   *
+   * @param mixed $data
+   *
+   * @return array
+   */
+  public function onGetRecordInfo(array $data): array
+  {
+    var_dump($data); exit;
+    $data['record_info'] = json_encode($data['record_info']);
+
+    return $this->adios->dispatchEventToPlugins("onModelGetRecordInfo", [
       "model" => $this,
       "data" => $data,
     ])["data"];
