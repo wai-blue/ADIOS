@@ -177,8 +177,8 @@ class Input extends \ADIOS\Core\View {
 
       /* varchar / int (s enum_values) */
       if (
-        in_array($this->params['type'], ['int', 'varchar'])
-        && is_array($this->params['enum_values'])
+        !empty($this->params['enum_values'])
+        && in_array($this->params['type'], ['int', 'varchar'])
       ) {
         $html = "
           <select
