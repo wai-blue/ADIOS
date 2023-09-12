@@ -1275,15 +1275,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       $dataForThisModel = $this->onBeforeSave($dataForThisModel);
 
-      if ($this->storeRecordInfo) {
-        $dataForThisModel = $this->onGetRecordInfo($dataForThisModel);
-      }
-
       if ($id <= 0) {
-        $returnValue = $this->insertRow($data);
+        $returnValue = $this->insertRow($dataForThisModel);
         $data['id'] = (int) $returnValue;
       } else {
-        $returnValue = $this->updateRow($data, $id);
+        $returnValue = $this->updateRow($dataForThisModel, $id);
       }
 
 
@@ -1414,6 +1410,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeUpdate(array $data): array
   {
+    if ($this->storeRecordInfo) $data = $this->updateRecordInfoData($data);
+
     return $this->adios->dispatchEventToPlugins("onModelBeforeUpdate", [
       "model" => $this,
       "data" => $data,
@@ -1429,6 +1427,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeSave(array $data): array
   {
+    if ($this->storeRecordInfo) $data['record_info'] = json_encode($data['record_info']);
+
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
       "model" => $this,
       "data" => $data,
@@ -1472,7 +1472,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onModelAfterUpdate
    *
-   * @param mixed $data
+   * mixed $data
    * @param mixed $returnValue
    *
    * @return [type]
@@ -1685,14 +1685,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'model' => 'ADIOS/Core/Models/User',
         'foreignKeyOnUpdate' => 'CASCADE',
         'foreignKeyOnDelete' => 'CASCADE',
-        'required' => true,
-        'showColumn' => true,
+        'value' => $this->adios->userProfile['id'],
+        'readonly' => true
       ],
       'create_datetime' => [
         'title' => 'Created Datetime',
         'type' => 'datetime',
-        'required' => true,
-        'showColumn' => true,
+        'value' => date('Y-m-d H:i:s'),
+        'readonly' => true
       ], 
       'id_updated_by' => [
         'type' => 'lookup',
@@ -1700,15 +1700,24 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'model' => 'ADIOS/Core/Models/User',
         'foreignKeyOnUpdate' => 'CASCADE',
         'foreignKeyOnDelete' => 'CASCADE',
-        'required' => true,
-        'showColumn' => true
+        'value' => null,
+        'readonly' => true
       ],
       'update_datetime' => [
         'title' => 'Updated Datetime',
         'type' => 'datetime',
-        'required' => true,
-        'showColumn' => true
+        'value' => date('Y-m-d H:i:s'),
+        'readonly' => true
       ]
     ];  
+  }
+
+  public function updateRecordInfoData(array $data): array {
+    $recordInfo = json_decode($data['record_info'], true);
+    $recordInfo['id_updated_at']['value'] = $this->adios->userProfile['id'];
+    $recordInfo['update_datetime']['value'] = date('Y-m-d H:i:s');
+    $data['record_info'] = $recordInfo;
+
+    return $data;
   }
 }
