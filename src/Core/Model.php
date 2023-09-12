@@ -1688,7 +1688,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'value' => $this->adios->userProfile['id'],
         'readonly' => true
       ],
-      'create_datetime' => [
+      'create_at' => [
         'title' => 'Created Datetime',
         'type' => 'datetime',
         'value' => date('Y-m-d H:i:s'),
@@ -1703,7 +1703,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'value' => null,
         'readonly' => true
       ],
-      'update_datetime' => [
+      'updated_at' => [
         'title' => 'Updated Datetime',
         'type' => 'datetime',
         'value' => date('Y-m-d H:i:s'),
@@ -1714,8 +1714,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function updateRecordInfoData(array $data): array {
     $recordInfo = json_decode($data['record_info'], true);
-    $recordInfo['id_updated_at']['value'] = $this->adios->userProfile['id'];
-    $recordInfo['update_datetime']['value'] = date('Y-m-d H:i:s');
+    $recordInfo['id_updated_by']['value'] = $this->adios->userProfile['id'];
+    $recordInfo['updated_at']['value'] = date('Y-m-d H:i:s');
     $data['record_info'] = $recordInfo;
 
     return $data;
