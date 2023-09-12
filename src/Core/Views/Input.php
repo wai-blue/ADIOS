@@ -115,7 +115,6 @@ class Input extends \ADIOS\Core\View {
     /*        */
     public function render(string $render_panel = ''): string
     {
-
       $html = '';
 
       if (!empty($this->params['input'])) {
@@ -213,19 +212,46 @@ class Input extends \ADIOS\Core\View {
         ('text' == $this->params['type'] && ('' == $this->params['interface'] || 'plain_text' == $this->params['interface'] || 'text' == $this->params['interface']))
         || $this->params['type'] == 'json'
       ) {
-        $html .= "
-          <textarea
-            id='{$this->params['uid']}'
-            name='{$this->params['uid']}'
-            data-is-adios-input='1'
-            ".$this->main_params().'
-            '.$this->generate_input_events().'
-            title="'.htmlspecialchars($this->params['title']).'"
-            placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
-            {$this->params['html_attributes']}
-            ".($this->params['readonly'] ? "disabled='disabled'" : '').'
-          >'.htmlspecialchars($this->params['value']).'</textarea>
-        ';
+
+        if ($this->params['initiating_column'] == 'record_info') {
+          $inputs = json_decode($this->params['form_data']['record_info'], true);
+
+          foreach($inputs as $input) {
+            $html .= "
+              <div class='adios ui Form subrow'>
+                ".(empty($input['title']) ? "" : "
+                  <div class='input-title'>
+                    <small class='text-muted'>{$input['title']}</small>
+                  </div>
+                ")."
+                <div
+                  class='input-content'
+                >
+                   " . (new Input($this->adios, $input))->render() . "  
+                </div>
+                ".(empty($item['description']) ? "" : "
+                  <div class='input-description'>
+                    ".hsc($item['description'])."
+                  </div>
+                ")."
+              </div>"
+            ;
+          }
+        } else {
+          $html .= "
+            <textarea
+              id='{$this->params['uid']}'
+              name='{$this->params['uid']}'
+              data-is-adios-input='1'
+              ".$this->main_params().'
+              '.$this->generate_input_events().'
+              title="'.htmlspecialchars($this->params['title']).'"
+              placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
+              {$this->params['html_attributes']}
+              ".($this->params['readonly'] ? "disabled='disabled'" : '').'
+            >'.htmlspecialchars($this->params['value']).'</textarea>
+          ';
+        }
       }
 
       /* text (json editor) */

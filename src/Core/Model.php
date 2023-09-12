@@ -723,7 +723,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if ($this->storeRecordInfo) {
       $newColumns['record_info'] = [
         'type' => 'json',
-        'title' => 'Record information',
+        'title' => 'Record Information',
       ];
     }
 
@@ -1689,10 +1689,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'readonly' => true
       ],
       'create_at' => [
-        'title' => 'Created Datetime',
+        'title' => 'Created At',
         'type' => 'datetime',
         'value' => date('Y-m-d H:i:s'),
-        'readonly' => true
+        'readonly' => true,
       ], 
       'id_updated_by' => [
         'type' => 'lookup',
@@ -1704,16 +1704,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'readonly' => true
       ],
       'updated_at' => [
-        'title' => 'Updated Datetime',
+        'title' => 'Updated At',
         'type' => 'datetime',
-        'value' => date('Y-m-d H:i:s'),
+        'value' => null,
         'readonly' => true
       ]
     ];  
   }
 
   public function updateRecordInfoData(array $data): array {
-    $recordInfo = json_decode($data['record_info'], true);
+    $tmpData = $this->find($data['id']);
+    $recordInfo = json_decode($tmpData->record_info, true);
     $recordInfo['id_updated_by']['value'] = $this->adios->userProfile['id'];
     $recordInfo['updated_at']['value'] = date('Y-m-d H:i:s');
     $data['record_info'] = $recordInfo;
