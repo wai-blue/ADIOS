@@ -19,7 +19,7 @@ class DataType {
 
   public ?\ADIOS\Core\Loader $adios = null;
 
-  protected mixed $defaultValue = null;
+  protected $defaultValue = null;
 
   public function __construct($adios)
   {
