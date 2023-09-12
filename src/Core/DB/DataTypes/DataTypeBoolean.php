@@ -30,7 +30,7 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
   
-  protected mixed $defaultValue = 0;
+  protected ?mixed $defaultValue = 0;
 
   public function get_sql_create_string($table_name, $col_name, $params = []) {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 
