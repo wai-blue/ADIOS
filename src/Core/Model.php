@@ -121,7 +121,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   private static $allItemsCache = NULL;
 
-  public ?array $crossTableAssignments = [];
+  public ?array $junctions = [];
 
   public ?string $addButtonText = null;
   public ?string $formSaveButtonText = null;
@@ -1286,30 +1286,30 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
 
       // save cross-table-alignments
-      foreach ($this->crossTableAssignments as $ctaName => $ctaParams) {
-        if (!isset($data[$ctaName])) continue;
+      foreach ($this->junctions as $jName => $jParams) {
+        if (!isset($data[$jName])) continue;
 
-        $assignments = @json_decode($data[$ctaName], TRUE);
+        $assignments = @json_decode($data[$jName], TRUE);
 
         if (is_array($assignments)) {
-          $assignmentModel = $this->adios->getModel($ctaParams["assignmentModel"]);
+          $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
 
           foreach ($assignments as $assignment) {
             $this->adios->db->query("
-              insert into `{$assignmentModel->getFullTableSqlName()}` (
-                `{$ctaParams['masterKeyColumn']}`,
-                `{$ctaParams['optionKeyColumn']}`
+              insert into `{$junctionModel->getFullTableSqlName()}` (
+                `{$jParams['masterKeyColumn']}`,
+                `{$jParams['optionKeyColumn']}`
               ) values (
                 {$id},
                 '" . $this->adios->db->escape($assignment) . "'
               )
-              on duplicate key update `{$ctaParams['masterKeyColumn']}` = {$id}
+              on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
             ");
           }
 
-          $assignmentModel
-            ->where($ctaParams['masterKeyColumn'], $id)
-            ->whereNotIn($ctaParams['optionKeyColumn'], $assignments)
+          $junctionModel
+            ->where($jParams['masterKeyColumn'], $id)
+            ->whereNotIn($jParams['optionKeyColumn'], $assignments)
             ->delete();
         }
       }

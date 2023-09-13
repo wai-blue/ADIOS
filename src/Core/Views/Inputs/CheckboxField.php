@@ -19,15 +19,15 @@ class CheckboxField extends \ADIOS\Core\Views\Input {
       $this->uid = $this->params['crossTableAssignment'];
 
       $initiatingModel = $this->adios->getModel($this->params['initiating_model']);
-      $cta = $initiatingModel->crossTableAssignments[$this->params['crossTableAssignment']];
+      $cta = $initiatingModel->junctions[$this->params['junctions']];
 
-      $assignmentModel = $this->adios->getModel($cta['assignmentModel']);
+      $junctionModel = $this->adios->getModel($cta['junctionModel']);
       $masterKeyColumn = $cta['masterKeyColumn'];
       $optionKeyColumn = $cta['optionKeyColumn'];
       $options = $this->adios->getModel($cta['optionsModel'])->getEnumValues();
 
     } else { // 2023-01-20 DEPRECATED
-      $assignmentModel = $this->adios->getModel($this->params['model']);
+      $junctionModel = $this->adios->getModel($this->params['model']);
       $masterKeyColumn = $this->params['key_column'] ?? "";
       $optionKeyColumn = $this->params['assignment_column'] ?? $this->params['value_column'] ?? "";
       $options = $this->params['values'];
@@ -47,13 +47,13 @@ class CheckboxField extends \ADIOS\Core\Views\Input {
       case 6: $bootstrapColumnSize = 2; break;
     }
     
-    $columns = $assignmentModel->columns();
+    $columns = $junctionModel->columns();
 
-    if (empty($assignmentModel) || !is_array($columns)) {
+    if (empty($junctionModel) || !is_array($columns)) {
       throw new \ADIOS\Core\Exceptions\GeneralException("CheckboxField Input: Error #1");
     }
 
-    $assignmentsRaw = $this->adios->db->select($assignmentModel)
+    $assignmentsRaw = $this->adios->db->select($junctionModel)
       ->columns(\ADIOS\Core\DB\Query::allColumnsWithLookups)
       ->where([
         [$masterKeyColumn, '=', $keyValue]

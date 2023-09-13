@@ -22,8 +22,8 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   public string $formTitleForEditing = "{{ thisModel.config.formTitleForEditing|raw }}";
   {% if thisModel.config.lookupSqlValue %}public ?string $lookupSqlValue = "{{ thisModel.config.lookupSqlValue|raw }}";{% endif %}
 
-  public ?array $crossTableAssignments =
-{{ varExport(thisModel.config.crossTableAssignments, "    ")|raw }}
+  public ?array $junctions =
+{{ varExport(thisModel.config.junctions, "    ")|raw }}
   ;
 
   public function columns(array $columns = []): array
