@@ -92,7 +92,7 @@ class DataType {
     return TRUE;
   }
   
-  public function getDefaultValue(array $params): mixed {
+  public function getDefaultValue(array $params) {
     return $params['defaultValue'] ?? $this->defaultValue;
   }  
 }
