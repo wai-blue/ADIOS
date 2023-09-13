@@ -29,13 +29,29 @@ namespace ADIOS\Core\DB\DataTypes;
  * @package DataTypes
  */
 class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
+  
+  protected $defaultValue = 0;
+
   public function get_sql_create_string($table_name, $col_name, $params = []) {
-    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' NOT NULL default 0 ';
-    return "`{$col_name}` boolean {$params['sql_definitions']}";
+    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 
+      ? $params['sql_definitions'] 
+      : " default " . (int) $this->getDefaultValue($params);
+
+    return "`$col_name` int(1) {$params['sql_definitions']} NOT NULL";
   }
 
-  public function get_sql_column_data_string($table, $colName, $value, $params = []) {
-    return "`{$colName}` = ".((bool) $value ? 1 : 0);
+  public function get_sql_column_data_string($tableName, $colName, $value, $params = []) {
+    return "`{$colName}` = " . (int) $value . ""; 
+  }
+
+  public function get_html_or_csv($value, $params = []) {
+    if ((int) $value == 1) {
+      $html = $this->translate("Yes");
+    } else {
+      $html = $this->translate("No");
+    }
+
+    return $html;
   }
 
   /**

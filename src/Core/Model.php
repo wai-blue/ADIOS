@@ -112,7 +112,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   var $searchAction;
 
   /**
-   * Property used to store original data when recordSave() method is called
+   * Property used to store original data when recordSave() method is calledmodel
    *
    * @var mixed
    */
@@ -121,7 +121,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   private static $allItemsCache = NULL;
 
-  public ?array $crossTableAssignments = [];
+  public ?array $junctions = [];
 
   public ?string $addButtonText = null;
   public ?string $formSaveButtonText = null;
@@ -723,7 +723,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if ($this->storeRecordInfo) {
       $newColumns['record_info'] = [
         'type' => 'json',
-        'title' => 'Record information',
+        'title' => 'Record Information',
       ];
     }
 
@@ -738,15 +738,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
       switch ($colDefinition["type"]) {
         case "int":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 8;
-          break;
+        break;
         case "float":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 14;
           $newColumns[$colName]["decimals"] = $colDefinition["decimals"] ?? 2;
-          break;
+        break;
         case "varchar":
         case "password":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 255;
-          break;
+        break;
       }
     }
 
@@ -1220,8 +1220,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function recordSave($data)
   {
 
-    // TO BE IMPLEMENTED: udaj record_info
-
     try {
       $id = (int) $data['id'];
 
@@ -1278,38 +1276,38 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $dataForThisModel = $this->onBeforeSave($dataForThisModel);
 
       if ($id <= 0) {
-        $returnValue = $this->insertRow($data);
+        $returnValue = $this->insertRow($dataForThisModel);
         $data['id'] = (int) $returnValue;
       } else {
-        $returnValue = $this->updateRow($data, $id);
+        $returnValue = $this->updateRow($dataForThisModel, $id);
       }
 
 
       // save cross-table-alignments
-      foreach ($this->crossTableAssignments as $ctaName => $ctaParams) {
-        if (!isset($data[$ctaName])) continue;
+      foreach ($this->junctions as $jName => $jParams) {
+        if (!isset($data[$jName])) continue;
 
-        $assignments = @json_decode($data[$ctaName], TRUE);
+        $assignments = @json_decode($data[$jName], TRUE);
 
         if (is_array($assignments)) {
-          $assignmentModel = $this->adios->getModel($ctaParams["assignmentModel"]);
+          $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
 
           foreach ($assignments as $assignment) {
             $this->adios->db->query("
-              insert into `{$assignmentModel->getFullTableSqlName()}` (
-                `{$ctaParams['masterKeyColumn']}`,
-                `{$ctaParams['optionKeyColumn']}`
+              insert into `{$junctionModel->getFullTableSqlName()}` (
+                `{$jParams['masterKeyColumn']}`,
+                `{$jParams['optionKeyColumn']}`
               ) values (
                 {$id},
                 '" . $this->adios->db->escape($assignment) . "'
               )
-              on duplicate key update `{$ctaParams['masterKeyColumn']}` = {$id}
+              on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
             ");
           }
 
-          $assignmentModel
-            ->where($ctaParams['masterKeyColumn'], $id)
-            ->whereNotIn($ctaParams['optionKeyColumn'], $assignments)
+          $junctionModel
+            ->where($jParams['masterKeyColumn'], $id)
+            ->whereNotIn($jParams['optionKeyColumn'], $assignments)
             ->delete();
         }
       }
@@ -1395,6 +1393,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeInsert(array $data): array
   {
+    if ($this->storeRecordInfo) $data['record_info'] = $this->getDefaultRecordInfoData();
+
     return $this->adios->dispatchEventToPlugins("onModelBeforeInsert", [
       "model" => $this,
       "data" => $data,
@@ -1410,6 +1410,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeUpdate(array $data): array
   {
+    if ($this->storeRecordInfo) $data = $this->updateRecordInfoData($data);
+
     return $this->adios->dispatchEventToPlugins("onModelBeforeUpdate", [
       "model" => $this,
       "data" => $data,
@@ -1425,7 +1427,26 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeSave(array $data): array
   {
+    if ($this->storeRecordInfo) $data['record_info'] = json_encode($data['record_info']);
+
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
+      "model" => $this,
+      "data" => $data,
+    ])["data"];
+  }
+
+  /**
+   * onGetRecordInfo
+   *
+   * @param mixed $data
+   *
+   * @return array
+   */
+  public function onGetRecordInfo(array $data): array
+  {
+    $data['record_info'] = json_encode($data['record_info']);
+
+    return $this->adios->dispatchEventToPlugins("onModelGetRecordInfo", [
       "model" => $this,
       "data" => $data,
     ])["data"];
@@ -1451,7 +1472,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onModelAfterUpdate
    *
-   * @param mixed $data
+   * mixed $data
    * @param mixed $returnValue
    *
    * @return [type]
@@ -1654,5 +1675,50 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $rows = $query->fetchAll(\PDO::FETCH_COLUMN, 0);
 
     return count($rows);
+  }
+
+  public function getDefaultRecordInfoData(): array {
+    return [  
+      'id_created_by' => [
+        'type' => 'lookup',
+        'title' => 'Created By',
+        'model' => 'ADIOS/Core/Models/User',
+        'foreignKeyOnUpdate' => 'CASCADE',
+        'foreignKeyOnDelete' => 'CASCADE',
+        'value' => $this->adios->userProfile['id'],
+        'readonly' => true
+      ],
+      'create_at' => [
+        'title' => 'Created At',
+        'type' => 'datetime',
+        'value' => date('Y-m-d H:i:s'),
+        'readonly' => true,
+      ], 
+      'id_updated_by' => [
+        'type' => 'lookup',
+        'title' => 'Updated By',
+        'model' => 'ADIOS/Core/Models/User',
+        'foreignKeyOnUpdate' => 'CASCADE',
+        'foreignKeyOnDelete' => 'CASCADE',
+        'value' => null,
+        'readonly' => true
+      ],
+      'updated_at' => [
+        'title' => 'Updated At',
+        'type' => 'datetime',
+        'value' => null,
+        'readonly' => true
+      ]
+    ];  
+  }
+
+  public function updateRecordInfoData(array $data): array {
+    $tmpData = $this->find($data['id']);
+    $recordInfo = json_decode($tmpData->record_info, true);
+    $recordInfo['id_updated_by']['value'] = $this->adios->userProfile['id'];
+    $recordInfo['updated_at']['value'] = date('Y-m-d H:i:s');
+    $data['record_info'] = $recordInfo;
+
+    return $data;
   }
 }

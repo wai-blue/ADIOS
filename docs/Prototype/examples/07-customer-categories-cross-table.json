@@ -43,9 +43,9 @@
           "formTitleForInserting": "New customer",
           "formTitleForEditing": "Edit customer",
           "lookupSqlValue": "{%TABLE%}.name",
-          "crossTableAssignments": {
+          "junctions": {
             "CustomerHasCategory": {
-              "assignmentModel": "Widgets/Customers/Models/CustomerHasCategory",
+              "junctionModel": "Widgets/Customers/Models/CustomerHasCategory",
               "optionsModel": "Widgets/Customers/Models/CustomerCategory",
               "masterKeyColumn": "id_customer",
               "optionKeyColumn": "id_customer_category"

@@ -14,14 +14,23 @@ class Tags extends \ADIOS\Core\Views\Input {
 
   public function render(string $panel = ''): string
   {
-    $model = $this->adios->getModel($this->params['model']);
-    $options = $model->getAll();
+    $params = parent::params_merge([
+      'model' => '',
+      'initialTags' => '[""]' 
+    ], $this->params);
 
-    // REVIEW: Derave. Keby v databaze bol javascript, tak sa dostane do `source: [{$allTagsAutocomplete}]` - vid nizsie.
-    $allTags = [];
-    foreach ($options as $option) {
-      $allTags[] = strtolower(ads($option["tag"]));
+    $model = $this->adios->getModel($params['model']);
+    $data = $model->getAll();
+
+    if (!array_key_exists('tag', $model->columns())) {
+      exit($this->translate("Column named [tag] does not exists for the model {$params['model']}"));
     }
+
+    $allTags = [];
+    foreach ($data as $item) {
+      $allTags[] = strtolower(ads($item["tag"]));
+    }
+
     $allTagsAutocomplete = "'" . implode("','", $allTags). "'";
 
     $html = "<textarea id='{$this->uid}_tag'></textarea>";
@@ -31,7 +40,7 @@ class Tags extends \ADIOS\Core\Views\Input {
     $html .= "
       <script>
         $('#{$this->uid}_tag').tagEditor({
-          initialTags: ".json_encode(json_decode($this->params["initialTags"], TRUE)).",
+          initialTags: ".json_encode(json_decode($params["initialTags"], TRUE)).",
           autocomplete: {
               delay: 0,
               position: { collision: 'flip' },

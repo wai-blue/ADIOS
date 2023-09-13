@@ -46,34 +46,32 @@ class Input extends \ADIOS\Core\View {
       $this->adios = $adios;
 
       $this->default_params = [
+        'model' => '',
         'column' => '',
         'type' => '',
-        'width' => '',
         'value' => '',
         'html_attributes' => '',
         'placeholder' => '',
         'readonly' => false,
-        'default_color_value' => '#000000',
         'default_date_value' => '',
         'max_date' => '',
         'min_date' => '',
-        'enum_values' => '',
+        'enum_values' => [],
         'decimals' => 2,
         'interface' => '',
-        'editor' => [],
-        'rename_file' => true,
+        //'rename_file' => true,
         // 'subdir' => 'upload',
         'show_file_browser' => true,
         'show_download_url_button' => true,
         'show_open_button' => true,
         'show_delete_button' => true,
-        'where' => '',
-        'follow_lookups' => true,
-        'order' => '',
         'table' => '',
         'not_selected_text' => '',
-        'lookup_auto_limit' => 100,
         'input_style' => '',
+        'max' => 100,
+        'min' => 1,
+        'step' => 2,
+        'onchange' => "",
         'lookup_detail_enabled' => true,
         'lookup_detail_onclick' => '',
         'lookup_search_enabled' => true,
@@ -81,16 +79,8 @@ class Input extends \ADIOS\Core\View {
         'lookup_add_enabled' => false,
         'lookup_add_onclick' => '',
         'gc_function' => '',
-        'table_checkboxes_cols' => '',
-        'text_onchange' => '',
-        'help' => '',
         'unit' => '',
-        'table_related_column' => '',
-        'parent_column' => '',
         'translate_value' => false,
-        'lookup_search_type' => '',
-        'hide_selected_text_option' => false,
-        'show_lookup_not_selected_option' => true,
         'disabled' => false,
     ];
 
@@ -125,7 +115,6 @@ class Input extends \ADIOS\Core\View {
     /*        */
     public function render(string $render_panel = ''): string
     {
-
       $html = '';
 
       if (!empty($this->params['input'])) {
@@ -161,20 +150,8 @@ class Input extends \ADIOS\Core\View {
         $this->params['type'] == 'bool'
         || $this->params['type'] == 'boolean'
       ) {
-        // hodnota
-        if ('bool' == $this->params['type']) {
-          if (1 === $this->params['value'] || true === $this->params['value'] || 'Y' === $this->params['value']) {
-            $this->params['value'] = 'Y';
-          } else {
-            $this->params['value'] = 'N';
-          }
-          $true_val = 'Y';
-        } else {
-          if (0 != $this->params['value']) {
-            $this->params['value'] = 1;
-          }
-          $true_val = '1';
-        }
+        $inputValue = $this->params['value'] != '' 
+          ? $this->params['value'] : $this->params['defaultValue'];
 
         $html = "
           <input
@@ -184,9 +161,9 @@ class Input extends \ADIOS\Core\View {
             data-is-adios-input='1'
             class='ui_input_type_boolean ".join(' ', $this->classes)."'
             ".$this->generate_input_events().'
-            '.($this->params['value'] == $true_val ? "checked='checked'" : '')."
+            '.($inputValue == 1 ? "checked='checked'" : '')."
             {$this->params['html_attributes']}
-            value='{$true_val}'
+            value='{$this->params['value']}'
             ".($this->params['readonly'] ? "disabled='disabled'" : '')."
           />
 
@@ -199,8 +176,8 @@ class Input extends \ADIOS\Core\View {
 
       /* varchar / int (s enum_values) */
       if (
-        in_array($this->params['type'], ['int', 'varchar'])
-        && is_array($this->params['enum_values'])
+        !empty($this->params['enum_values'])
+        && in_array($this->params['type'], ['int', 'varchar'])
       ) {
         $html = "
           <select
@@ -235,19 +212,46 @@ class Input extends \ADIOS\Core\View {
         ('text' == $this->params['type'] && ('' == $this->params['interface'] || 'plain_text' == $this->params['interface'] || 'text' == $this->params['interface']))
         || $this->params['type'] == 'json'
       ) {
-        $html .= "
-          <textarea
-            id='{$this->params['uid']}'
-            name='{$this->params['uid']}'
-            data-is-adios-input='1'
-            ".$this->main_params().'
-            '.$this->generate_input_events().'
-            title="'.htmlspecialchars($this->params['title']).'"
-            placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
-            {$this->params['html_attributes']}
-            ".($this->params['readonly'] ? "disabled='disabled'" : '').'
-          >'.htmlspecialchars($this->params['value']).'</textarea>
-        ';
+
+        if ($this->params['initiating_column'] == 'record_info') {
+          $inputs = json_decode($this->params['form_data']['record_info'], true);
+
+          foreach($inputs as $input) {
+            $html .= "
+              <div class='adios ui Form subrow'>
+                ".(empty($input['title']) ? "" : "
+                  <div class='input-title'>
+                    <small class='text-muted'>{$input['title']}</small>
+                  </div>
+                ")."
+                <div
+                  class='input-content'
+                >
+                   " . (new Input($this->adios, $input))->render() . "  
+                </div>
+                ".(empty($item['description']) ? "" : "
+                  <div class='input-description'>
+                    ".hsc($item['description'])."
+                  </div>
+                ")."
+              </div>"
+            ;
+          }
+        } else {
+          $html .= "
+            <textarea
+              id='{$this->params['uid']}'
+              name='{$this->params['uid']}'
+              data-is-adios-input='1'
+              ".$this->main_params().'
+              '.$this->generate_input_events().'
+              title="'.htmlspecialchars($this->params['title']).'"
+              placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
+              {$this->params['html_attributes']}
+              ".($this->params['readonly'] ? "disabled='disabled'" : '').'
+            >'.htmlspecialchars($this->params['value']).'</textarea>
+          ';
+        }
       }
 
       /* text (json editor) */

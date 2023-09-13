@@ -19,6 +19,8 @@ class DataType {
 
   public ?\ADIOS\Core\Loader $adios = null;
 
+  protected $defaultValue = null;
+
   public function __construct($adios)
   {
     $this->adios = $adios;
@@ -90,5 +92,8 @@ class DataType {
     return TRUE;
   }
   
+  public function getDefaultValue(array $params) {
+    return $params['defaultValue'] ?? $this->defaultValue;
+  }  
 }
 
