@@ -1393,7 +1393,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeInsert(array $data): array
   {
-    if ($this->storeRecordInfo) $data['record_info'] = $this->getDefaultRecordInfoData();
+    if ($this->storeRecordInfo) {
+      $data['record_info'] = $this->getNewRecordInfo();
+      $data['record_info'] = $this->setRecordInfoCreated($data['record_info']);
+    }
 
     return $this->adios->dispatchEventToPlugins("onModelBeforeInsert", [
       "model" => $this,
@@ -1410,7 +1413,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function onBeforeUpdate(array $data): array
   {
-    if ($this->storeRecordInfo) $data = $this->updateRecordInfoData($data);
+    if ($this->storeRecordInfo) {
+      $data['record_info'] = $this->setRecordInfoUpdated($data);
+    }
 
     return $this->adios->dispatchEventToPlugins("onModelBeforeUpdate", [
       "model" => $this,
@@ -1430,23 +1435,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if ($this->storeRecordInfo) $data['record_info'] = json_encode($data['record_info']);
 
     return $this->adios->dispatchEventToPlugins("onModelBeforeSave", [
-      "model" => $this,
-      "data" => $data,
-    ])["data"];
-  }
-
-  /**
-   * onGetRecordInfo
-   *
-   * @param mixed $data
-   *
-   * @return array
-   */
-  public function onGetRecordInfo(array $data): array
-  {
-    $data['record_info'] = json_encode($data['record_info']);
-
-    return $this->adios->dispatchEventToPlugins("onModelGetRecordInfo", [
       "model" => $this,
       "data" => $data,
     ])["data"];
@@ -1677,7 +1665,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return count($rows);
   }
 
-  public function getDefaultRecordInfoData(): array {
+  public function getNewRecordInfo(): array {
     return [  
       'id_created_by' => [
         'type' => 'lookup',
@@ -1685,13 +1673,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'model' => 'ADIOS/Core/Models/User',
         'foreignKeyOnUpdate' => 'CASCADE',
         'foreignKeyOnDelete' => 'CASCADE',
-        'value' => $this->adios->userProfile['id'],
+        'value' => null,
         'readonly' => true
       ],
-      'create_at' => [
+      'created_at' => [
         'title' => 'Created At',
         'type' => 'datetime',
-        'value' => date('Y-m-d H:i:s'),
+        'value' => null, 
         'readonly' => true,
       ], 
       'id_updated_by' => [
@@ -1712,13 +1700,20 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ];  
   }
 
-  public function updateRecordInfoData(array $data): array {
+  public function setRecordInfoCreated(array $recordInfo): array {
+    $recordInfo['id_created_by']['value'] = $this->adios->userProfile['id'];
+    $recordInfo['created_at']['value'] = date('Y-m-d H:i:s');
+
+    return $recordInfo;
+  }
+
+  public function setRecordInfoUpdated(array $data): array {
     $tmpData = $this->find($data['id']);
     $recordInfo = json_decode($tmpData->record_info, true);
+
     $recordInfo['id_updated_by']['value'] = $this->adios->userProfile['id'];
     $recordInfo['updated_at']['value'] = date('Y-m-d H:i:s');
-    $data['record_info'] = $recordInfo;
 
-    return $data;
+    return $recordInfo;
   }
 }
