@@ -14,7 +14,7 @@ namespace ADIOS\Core\Views;
  * Renders input element (or elements) for a specific data type.
  *
  * Supported data types are:
- *   * Char, Varchar, Int or Float (renders either *input* or *select* if enumValues are not empty)
+ *   * Varchar, Int or Float (renders either *input* or *select* if enumValues are not empty)
  *   * Text (renders *textarea*)
  *   * Password (renders *input type='password'*)
  *   * Date or DateTime (renders *input* with date/datetime picker)
@@ -49,8 +49,11 @@ class Input extends \ADIOS\Core\View {
         'model' => '',
         'column' => '',
         'type' => '',
+        'uid' => '',
         'value' => '',
+        'title' => '',
         'html_attributes' => '',
+        'input' => '',
         'placeholder' => '',
         'readonly' => false,
         'default_date_value' => '',
@@ -59,12 +62,15 @@ class Input extends \ADIOS\Core\View {
         'enum_values' => [],
         'decimals' => 2,
         'interface' => '',
+        'pattern' => '',
+        'schema' => '',
         //'rename_file' => true,
-        // 'subdir' => 'upload',
         'show_file_browser' => true,
         'show_download_url_button' => true,
         'show_open_button' => true,
         'show_delete_button' => true,
+        'subdir' => '',
+        'rename_pattern' => '',
         'table' => '',
         'not_selected_text' => '',
         'input_style' => '',
@@ -78,6 +84,10 @@ class Input extends \ADIOS\Core\View {
         'lookup_search_onclick' => '',
         'lookup_add_enabled' => false,
         'lookup_add_onclick' => '',
+        'initiating_model' => '',
+        'initiating_column' => '',
+        'form_uid' => '',
+        'form_data' => '',
         'gc_function' => '',
         'unit' => '',
         'translate_value' => false,
