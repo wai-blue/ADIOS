@@ -988,6 +988,8 @@ class MySQLi extends \ADIOS\Core\DB
           $tmp = $this->columnTypes[$col_type]
             ->get_sql_create_string($table_name, $col_name, $col_definition);
 
+          // REVIEW DD: Tato uprava ma ist do DataTypeBool.php a DataTypeBoolean.php
+          // (pripadne nejake defaultne spravanie implementovat do DataType.php
           if (!in_array($col_type, ['bool', 'boolean'])) {
             if ($col_definition['required']) {
               $tmp .= 'NOT NULL';

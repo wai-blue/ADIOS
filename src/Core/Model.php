@@ -1394,6 +1394,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function onBeforeInsert(array $data): array
   {
     if ($this->storeRecordInfo) {
+      // REVIEW DD: Tato uprava nie je podla toho, ako sme si to vysvetlili.
+      // Mixujes dohromady $data a $columns.
+      // T.j. do $data['record_info'] nemoze ist konfiguracia inputov - su to $data.
       $data['record_info'] = $this->getNewRecordInfo();
       $data['record_info'] = $this->setRecordInfoCreated($data['record_info']);
     }
