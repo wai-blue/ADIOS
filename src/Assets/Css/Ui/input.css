@@ -90,8 +90,13 @@
 textarea.adios.ui.Input {margin-bottom:0px;height:100px;}
 .ui-datepicker {z-index:999999 !important;}
 
+.adios.ui.Input.inline {
+  display: inline-block !important;
+  width: auto !important;
+}
+
 .adios.ui.Input.lookup {
-  width: 80%;
+  width: 100%;
   display: inline-block;
 }
 

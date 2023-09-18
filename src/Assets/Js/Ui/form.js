@@ -26,8 +26,8 @@
     };
 
     $('#' + uid + ' .save_error_info').hide();
-    $('#' + uid + ' .subrow').removeClass('save_error');
-    $('#' + uid + ' .subrow.has_pattern').each(function () {
+    $('#' + uid + ' .item').removeClass('save_error');
+    $('#' + uid + ' .item.has_pattern').each(function () {
       let tmp_input = $(this).find('.input-content input');
       let tmp_select = $(this).find('.input-content select');
       let tmp_textarea = $(this).find('.input-content textarea');
@@ -43,7 +43,7 @@
       }
     });
 
-    $('#' + uid + ' .subrow.required').each(function() {
+    $('#' + uid + ' .item.required').each(function() {
       let tmp_input = $(this).find('.input-content input[data-is-adios-input="1"]');
       let tmp_select = $(this).find('.input-content select[data-is-adios-input="1"]');
       let tmp_textarea = $(this).find('.input-content textarea[data-is-adios-input="1"]');

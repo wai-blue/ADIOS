@@ -498,7 +498,7 @@ class View {
     return "
       id='{$this->params['uid']}'
       class='".join(' ', $this->classes)."'
-      style='{$this->params['style']}'
+      style='{$this->params['cssStyle']}'
       {$adios_disabled_attribute}
     ";
   }

@@ -12,3 +12,12 @@
   overflow: auto;
   border-radius: 0.25em;
 }
+
+.adios.ui.Grid.no-area-borders > div {
+  border: none;
+}
+
+.adios.ui.Grid.no-area-borders > div.area-bordered {
+  border: 1px solid #EEEEEE !important;
+  border-radius: 0.25em !important;
+}

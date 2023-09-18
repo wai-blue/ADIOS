@@ -179,17 +179,15 @@ class Table extends \ADIOS\Core\View
 
     $this->columns = $this->getColumns();
 
-    if (_count($this->params['showColumns']) == 0) {
-      $this->params['showColumns'] = ['id'];
-    }
+    if (_count($this->params['showColumns']) > 0) {
+      foreach ($this->columns as $key => $value) {
+        $this->columns[$key]['showColumn'] = FALSE;
+      }
 
-    foreach ($this->columns as $key => $value) {
-      $this->columns[$key]['showColumn'] = FALSE;
-    }
-
-    foreach ($this->params['showColumns'] as $value) {
-      if (isset($this->columns[$value])) {
-        $this->columns[$value]['showColumn'] = TRUE;
+      foreach ($this->params['showColumns'] as $value) {
+        if (isset($this->columns[$value])) {
+          $this->columns[$value]['showColumn'] = TRUE;
+        }
       }
     }
 

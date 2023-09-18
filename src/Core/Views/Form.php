@@ -273,17 +273,31 @@ class Form extends \ADIOS\Core\View
 
       if (strpos($item, ":LOOKUP:") === FALSE) {
 
-        $title = $this->model->translate($this->params['columns'][$item]['title'] ?? '');
-        $description = $this->model->translate($this->params['columns'][$item]['description'] ?? '');
+        $allItems = explode("+", $item);
+        $firstItem = trim(reset($allItems));
 
-        $inputHtml = $this->Input(
-          $item,
-          $item,
-          $this->data[$item],
-          $this->params['columns'][$item] ?? [],
-          $this->data,
-          $this->params['model']
-        );
+        $title = $this->model->translate($this->params['columns'][$firstItem]['title'] ?? '');
+        $description = $this->model->translate($this->params['columns'][$firstItem]['description'] ?? '');
+
+        $inputHtml = "";
+
+        foreach ($allItems as $tmpItem) {
+          $tmpItem = trim($tmpItem);
+          $tmpItemColDefinition = $this->params['columns'][$tmpItem] ?? [];
+
+          if (count($allItems) > 1) {
+            $tmpItemColDefinition['cssClass'] .= ' inline';
+          }
+
+          $inputHtml .= $this->Input(
+            $tmpItem,
+            $tmpItem,
+            $this->data[$tmpItem],
+            $tmpItemColDefinition,
+            $this->data,
+            $this->params['model']
+          );
+        }
       } else {
         [$columnName, $lookupColumnName] = explode(":LOOKUP:", $item);
         $lookupModelName = $this->params['columns'][$columnName]['model'] ?? '';
@@ -312,7 +326,7 @@ class Form extends \ADIOS\Core\View
       $html .= "
         <div
           class='
-            adios ui Form subrow
+            adios ui Form item
             ".($this->params['columns'][$item]['required'] ? "required" : "")."
             ".(empty($this->params['columns'][$item]['pattern']) ? "" : "has_pattern")."
           '
@@ -332,15 +346,30 @@ class Form extends \ADIOS\Core\View
       ";
     } else if (is_string($item['html'])) {
       $html .= "
-        <div class='adios ui Form subrow'>
+        <div class='adios ui Form item'>
           {$item['html']}
         </div>
       ";
 
     } else if (is_string($item['action'])) {
       $html .= "
-        <div class='adios ui Form subrow'>
+        <div class='adios ui Form item'>
           ".$this->adios->renderAction($item['action'], $item['params'])."
+        </div>
+      ";
+
+    } else if (is_string($item['view'])) {
+
+      $tmpView = $item['view'];
+
+      $tmpViewParams = $item['params'];
+      $tmpViewParams['form_uid'] = $this->params['uid'];
+      $tmpViewParams['form_data'] = $this->data;
+      $tmpViewParams['initiating_model'] = $this->params['model'];
+
+      $html .= "
+        <div class='adios ui Form item'>
+          ".$this->adios->view->create($tmpView, $tmpViewParams)->render()."
         </div>
       ";
 
@@ -365,7 +394,7 @@ class Form extends \ADIOS\Core\View
       }
 
       $html .= "
-        <div class='adios ui Form subrow'>
+        <div class='adios ui Form item'>
           ".(empty($item['title']) ? "" : "
             <div class='input-title {$item['class']}'>
               {$item['title']}
@@ -412,7 +441,7 @@ class Form extends \ADIOS\Core\View
       $html = "
         <div class='".$this->getCssClassesString()." form-wrapper'>
           <div class='adios ui Form table'>
-            <div class='adios ui Form subrow save_error_info' style='display:none'>
+            <div class='adios ui Form item save_error_info' style='display:none'>
               ".$this->translate("Some of the required fields are empty.")."
             </div>
       ";
@@ -429,7 +458,7 @@ class Form extends \ADIOS\Core\View
           $html .= $this->adios->view->create($tmpView, $tmpViewParams)->render();
         } else if (isset($item['group']['title'])) {
           $html .= "
-            <div class='adios ui Form subrow'>
+            <div class='adios ui Form item'>
               <div class='group-title'>
                 ".hsc($item['group']['title'])."
               </div>
@@ -491,114 +520,129 @@ class Form extends \ADIOS\Core\View
       }
     }
 
-    // params['template']
-    if (empty($this->params['template'])) {
-      $this->params['template'] = [
-        "columns" => [
-          [
-            "items" => array_keys($this->params['columns']),
+    // params['grid']
+    if (!empty($this->params['grid'])) {
+      $gridParams = $this->params['grid'];
+
+      foreach ($gridParams['areas'] as $areaName => $areaParams) {
+        $gridParams['areas'][$areaName]['html'] = $this->renderItem($areaParams['item']);
+      }
+
+      $grid = new \ADIOS\Core\Views\Grid($this->adios, $gridParams);
+
+      $contentHtml = $grid->render();
+    } else {
+
+      // params['template']
+      if (empty($this->params['template'])) {
+        $this->params['template'] = [
+          "columns" => [
+            [
+              "items" => array_keys($this->params['columns']),
+            ],
           ],
-        ],
-      ];
-
-    }
-
-    if (_count($this->params['columns'])) {
-
-      // renderovanie template
-
-      if (is_callable($this->params['template'])) {
-
-        // cely template definovany ako anonymna funkcia vracajuca HTML
-        $form_content_html = $this->params['template']($this->params['columns'], $this);
-
-      } else {
-
-        $cols_html = [];
-        $cols_count = count($this->params['template']['columns']);
-
-        if ($cols_count <= 6) {
-          $col_class = "col-lg-".round(12 / $cols_count);
-        } else {
-          $col_class = "col-lg-2";
-        }
-        foreach ($this->params['template']['columns'] as $col) {
-
-          $col_html = "<div class='col col-sm-12 ".($col["class"] ?? $col_class." pl-0")."'>";
-
-          if (is_string($col)) {
-            $col_html .= $col;
-          } else if (!empty($col['items'])) {
-
-            $col_html .= $this->renderItems($col['items']);
-          } else if (is_array($col['tabs'])) {
-            $tabPages = [];
-
-            // kazdy element predstavuje jeden tab vo formulari
-            foreach ($col['tabs'] as $tab_name => $items) {
-              $tabPages[] = [
-                'title' => $this->model->translate($tab_name),
-                'content' => [ 'html' => $this->renderItems($items) ],
-              ];
-            }
-
-            $col_html .= $this->addView('Tabs', [
-              'padding' => false,
-              'tabs' => $tabPages
-            ])->render();
-
-          } else if (is_string($col['action'])) {
-            $col_html .= $this->adios->renderAction($col['action'], $col['params']);
-          } else if (is_string($col['html'])) {
-            $col_html .= $col['html'];
-          } else if (is_array($col['content'])) {
-            foreach ($col['content'] as $item) {
-              if (is_string($item)) {
-                $col_html .= $item;
-              } else {
-                $col_html .= $item->render();
-              }
-            }
-          }
-
-          $col_html .= "</div>";
-
-          $cols_html[] = $col_html;
-        }
-
-        //////////////////////////////
-        // FORM_CONTENT_HTML
-
-        $form_content_html = "
-          <div class='row'>
-            ".join("", $cols_html)."
-          </div>
-        ";
+        ];
 
       }
 
-      $html .= '
-        <div
-          '.$this->main_params()."
-          data-save-action='{$this->params['save_action']}'
-          data-delete-action='{$this->params['delete_action']}'
-          data-copy-action='{$this->params['copy_action']}'
-          data-id='{$this->params['id']}'
-          data-model='{$this->params['model']}'
-          data-model-url-base='".ads($this->model->getFullUrlBase($this->params))."'
-          data-table='{$this->params['table']}'
-          data-reopen-after-save='{$this->params['reopenAfterSave']}'
-          data-do-not-close='{$this->params['do_not_close']}'
-          data-window-uid='".($window === NULL ? "" : $window->uid)."'
-          data-form-type='{$this->params['formType']}'
-          data-is-ajax='".($this->params['__IS_AJAX__'] || $this->adios->isAjax() ? "1" : "0")."'
-          data-is-in-window='".($window === NULL ? "0" : "1")."'
-        >
-          {$form_content_html}
-        </div>
-      ";
+      if (_count($this->params['columns'])) {
 
+        // renderovanie template
+
+        if (is_callable($this->params['template'])) {
+
+          // cely template definovany ako anonymna funkcia vracajuca HTML
+          $contentHtml = $this->params['template']($this->params['columns'], $this);
+
+        } else {
+
+          $cols_html = [];
+          $cols_count = count($this->params['template']['columns']);
+
+          if ($cols_count <= 6) {
+            $col_class = "col-lg-".round(12 / $cols_count);
+          } else {
+            $col_class = "col-lg-2";
+          }
+          foreach ($this->params['template']['columns'] as $col) {
+
+            $col_html = "<div class='col col-sm-12 ".($col["class"] ?? $col_class." pl-0")."'>";
+
+            if (is_string($col)) {
+              $col_html .= $col;
+            } else if (!empty($col['items'])) {
+
+              $col_html .= $this->renderItems($col['items']);
+            } else if (is_array($col['tabs'])) {
+              $tabPages = [];
+
+              // kazdy element predstavuje jeden tab vo formulari
+              foreach ($col['tabs'] as $tab_name => $items) {
+                $tabPages[] = [
+                  'title' => $this->model->translate($tab_name),
+                  'content' => [ 'html' => $this->renderItems($items) ],
+                ];
+              }
+
+              $col_html .= $this->addView('Tabs', [
+                'padding' => false,
+                'tabs' => $tabPages
+              ])->render();
+
+            } else if (is_string($col['action'])) {
+              $col_html .= $this->adios->renderAction($col['action'], $col['params']);
+            } else if (is_string($col['html'])) {
+              $col_html .= $col['html'];
+            } else if (is_array($col['content'])) {
+              foreach ($col['content'] as $item) {
+                if (is_string($item)) {
+                  $col_html .= $item;
+                } else {
+                  $col_html .= $item->render();
+                }
+              }
+            }
+
+            $col_html .= "</div>";
+
+            $cols_html[] = $col_html;
+          }
+
+          //////////////////////////////
+          // contentHtml
+
+          $contentHtml = "
+            <div class='row'>
+              ".join("", $cols_html)."
+            </div>
+          ";
+
+        }
+
+      }
     }
+
+    $html .= '
+      <div
+        '.$this->main_params()."
+        data-save-action='{$this->params['save_action']}'
+        data-delete-action='{$this->params['delete_action']}'
+        data-copy-action='{$this->params['copy_action']}'
+        data-id='{$this->params['id']}'
+        data-model='{$this->params['model']}'
+        data-model-url-base='".ads($this->model->getFullUrlBase($this->params))."'
+        data-table='{$this->params['table']}'
+        data-reopen-after-save='{$this->params['reopenAfterSave']}'
+        data-do-not-close='{$this->params['do_not_close']}'
+        data-window-uid='".($window === NULL ? "" : $window->uid)."'
+        data-form-type='{$this->params['formType']}'
+        data-is-ajax='".($this->params['__IS_AJAX__'] || $this->adios->isAjax() ? "1" : "0")."'
+        data-is-in-window='".($window === NULL ? "0" : "1")."'
+      >
+        {$contentHtml}
+      </div>
+    ";
+
 
     if (is_callable($this->params['formatter'])) {
       $html .= $this->params['formatter']('after_html', $this, []);

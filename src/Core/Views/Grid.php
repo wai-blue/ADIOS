@@ -31,7 +31,7 @@ class Grid extends \ADIOS\Core\View {
       "layoutMd" => [],
       "layoutLg" => [],
       "layoutXl" => [],
-      "layoutXXl" => [],
+      "layoutXxl" => [],
       "areas" => []
     ], $params);
 
@@ -45,6 +45,7 @@ class Grid extends \ADIOS\Core\View {
       $html .= "
         <div
           class='{$this->uid}-area-{$areaName} ".($areaParams['cssClass'] ?? '')."'
+          ".(empty($areaParams['cssStyle']) ? "" : "style='{$areaParams['cssStyle']}'")."
         >
       ";
 

@@ -11,18 +11,18 @@
 .adios.ui.Form.inline .table {
   display: flex;
 }
-.adios.ui.Form.inline .subrow {
+.adios.ui.Form.inline .item {
   margin-right: 0.5em;
 }
 
 
-.adios.ui.Form .subrow .input-title { color: var(--cl-main); }
-.adios.ui.Form .subrow .group-title { color: var(--cl-main); font-weight: bold; margin-top: 1em; }
+.adios.ui.Form .item .input-title { color: var(--cl-main); }
+.adios.ui.Form .item .group-title { color: var(--cl-main); font-weight: bold; margin-top: 1em; }
 
-.adios.ui.Form .subrow:hover .input-content input,
-.adios.ui.Form .subrow:hover .input-content textarea,
-.adios.ui.Form .subrow:hover .input-content select { border-color: var(--cl-main); }
-.adios.ui.Form .subrow.save_error_info {
+.adios.ui.Form .item:hover .input-content input,
+.adios.ui.Form .item:hover .input-content textarea,
+.adios.ui.Form .item:hover .input-content select { border-color: var(--cl-main); }
+.adios.ui.Form .item.save_error_info {
   position: relative;
   top: 0px;
   left: 0px;
@@ -31,11 +31,11 @@
   color: white;
   margin-bottom: 1em;
 }
-.adios.ui.Form .subrow.required .input-title::after {
+.adios.ui.Form .item.required .input-title::after {
   content: '*';
   color: red;
 }
-.adios.ui.Form .subrow.save_error {
+.adios.ui.Form .item.save_error {
   color: red;
   background: rgba(255,0,0,0.05);
   padding: 0.5em;
@@ -111,8 +111,8 @@
 
 @media screen and (max-width: 480px) {
   .adios.ui.Form.subtable {display:block;}
-  .adios.ui.Form.subrow {display:block;}
-  .adios.ui.Form.subrow {display:block;}
+  .adios.ui.Form.item {display:block;}
+  .adios.ui.Form.item {display:block;}
   .adios.ui.Form .input-title {display:block;text-align:left;}
   .adios.ui.Form .input-content {display:block;padding-bottom:10px;}
 }
