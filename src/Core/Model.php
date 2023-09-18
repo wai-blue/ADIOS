@@ -1187,6 +1187,20 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["params"];
   }
 
+  public function onFormChange($column, $data)
+  {
+    return [];
+
+    // example return:
+    // return [
+    //   'column_1' => ['value' => 'newColumnValue'],
+    //   'column_2' => ['inputHtml' => 'newInputHtml'],
+    //   'column_3' => ['alert' => 'This is just an alert.'],
+    //   'column_4' => ['warning' => 'Something is not correct.'],
+    //   'column_4' => ['fatal' => 'Ouch. Fatal error!'],
+    // ];
+  }
+
   public function recordValidate($data)
   {
     foreach ($this->columns() as $column => $colDefinition) {

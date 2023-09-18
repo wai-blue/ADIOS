@@ -684,6 +684,16 @@ class Form extends \ADIOS\Core\View
     $formData = NULL,
     $initiatingModel = NULL
   ) {
+    if (!is_array($colDefinition)) $colDefinition = [];
+    
+    if (empty($colDefinition['onchange'])) {
+      $colDefinition['onchange'] = '';
+    }
+
+    $colDefinition['onchange'] .= "
+      ui_form_change('{$this->params['uid']}', '{$colName}');
+    ";
+
     return $this->addView('Input',
       array_merge(
         [

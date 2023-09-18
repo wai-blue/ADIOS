@@ -268,6 +268,30 @@
     }
   };
 
+  function _warning(message) {
+    _alert(
+      message,
+      {
+        title: 'Warning',
+        titleClass: 'bg-warning text-white',
+        contentClass: 'text-warning',
+        confirmButtonClass: 'btn-warning',
+      }
+    );
+  }
+
+  function _fatal(message) {
+    _alert(
+      message,
+      {
+        title: 'Fatal error',
+        titleClass: 'bg-danger text-white',
+        contentClass: 'text-danger',
+        confirmButtonClass: 'btn-danger',
+      }
+    );
+  }
+
   function _confirm(text, params, callback) {
     params.title = params.title ?? _TRANSLATIONS['Confirmation'];
     params.onConfirm = callback;
