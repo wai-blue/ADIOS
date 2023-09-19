@@ -188,7 +188,7 @@
     params.resizable = params.resizable ?? false;
     params.modal = params.modal ?? true;
     params.width = params.width ?? 450;
-    params.title = params.title ?? _TRANSLATIONS['Warning'];
+    params.title = (params.title ?? _TRANSLATIONS['Information']) ?? 'Information';
     params.titleClass = params.titleClass ?? '';
     params.contentClass = params.contentClass ?? '';
     params.confirmButtonText = params.confirmButtonText ?? _TRANSLATIONS['OK, I understand'];

@@ -208,7 +208,7 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
             _warning(resJson.content);
           break;
           case 'FATAL':
-            fatal(resJson.content);
+            _fatal(resJson.content);
           break;
           case 'SUCCESS':
           default:

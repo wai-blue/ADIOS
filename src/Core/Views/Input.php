@@ -210,9 +210,25 @@ class Input extends \ADIOS\Core\View {
       /* text (plain text) */
       if (
         ('text' == $this->params['type'] && ('' == $this->params['interface'] || 'plain_text' == $this->params['interface'] || 'text' == $this->params['interface']))
-        || $this->params['type'] == 'json'
       ) {
 
+        $html .= "
+          <textarea
+            id='{$this->params['uid']}'
+            name='{$this->params['uid']}'
+            data-is-adios-input='1'
+            ".$this->main_params().'
+            '.$this->generate_input_events().'
+            title="'.htmlspecialchars($this->params['title']).'"
+            placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
+            {$this->params['html_attributes']}
+            ".($this->params['readonly'] ? "disabled='disabled'" : '').'
+          >'.htmlspecialchars($this->params['value']).'</textarea>
+        ';
+      }
+
+      /* json */
+      if ('json' == $this->params['type']) {
         if ($this->params['initiating_column'] == 'record_info') {
           $inputs = json_decode($this->params['form_data']['record_info'], true);
 
@@ -238,68 +254,61 @@ class Input extends \ADIOS\Core\View {
             ;
           }
         } else {
-          $html .= "
-            <textarea
-              id='{$this->params['uid']}'
-              name='{$this->params['uid']}'
-              data-is-adios-input='1'
-              ".$this->main_params().'
-              '.$this->generate_input_events().'
-              title="'.htmlspecialchars($this->params['title']).'"
-              placeholder="'.htmlspecialchars($this->params['placeholder'])."\"
-              {$this->params['html_attributes']}
-              ".($this->params['readonly'] ? "disabled='disabled'" : '').'
-            >'.htmlspecialchars($this->params['value']).'</textarea>
-          ';
+          $jsonEditor = new \ADIOS\Core\Views\Inputs\JsonEditor(
+            $this->adios,
+            [
+              'uid' => $this->params['uid'],
+              'value' => $this->params['value'],
+              'schema' => $this->params['schema'],
+            ]
+          );
+
+          $html .= $jsonEditor->render();
+          // $html .= "
+          //   <div class='row'>
+          //     <div class='col-lg-8'>
+          //       <div id='{$this->params['uid']}_editor'></div>
+          //     </div>
+          //     <div class='col-lg-4'>
+          //       <textarea
+          //         name='{$this->params['uid']}'
+          //         data-is-adios-input='1'
+          //         ".$this->main_params()."
+          //         style='font-size:0.8em;background:#EEEEEE;height:2em;opacity:0.5'
+          //       >".htmlspecialchars($this->params['value'])."</textarea>
+          //     </div>
+          //   </div>
+          //   <script>
+          //     var {$this->params['uid']}_editorOptions = {
+          //       schema: ".json_encode($this->params['schema']).",
+          //       theme: 'bootstrap4',
+          //       disable_collapse: true,
+          //       disable_edit_json: true,
+          //       disable_properties: true,
+          //     }
+
+          //     ".(empty($this->params['value']) ? "" : "
+          //       {$this->params['uid']}_editorOptions.startval =
+          //         ".json_encode(json_decode($this->params['value'], TRUE))."
+          //       ;
+          //     ")."
+
+          //     var editor = new JSONEditor(
+          //       document.getElementById('{$this->params['uid']}_editor'),
+          //       {$this->params['uid']}_editorOptions
+          //     );
+
+          //     editor.on('change', function() {
+          //       document.getElementById('{$this->params['uid']}').value = JSON.stringify(editor.getValue());
+          //     });
+
+          //   </script>
+          //   <style>
+          //     #{$this->params['uid']}_editor h3.card-title { display: none !important; }
+          //     #{$this->params['uid']}_editor span.btn-group.je-object__controls { display: none !important; }
+          //   </style>
+          // ";
         }
-      }
-
-      /* text (json editor) */
-      if ('text' == $this->params['type'] && $this->params['interface'] == 'json_editor') {
-        $html .= "
-          <div class='row'>
-            <div class='col-lg-8'>
-              <div id='{$this->params['uid']}_editor'></div>
-            </div>
-            <div class='col-lg-4'>
-              <textarea
-                name='{$this->params['uid']}'
-                data-is-adios-input='1'
-                ".$this->main_params()."
-                style='font-size:0.8em;background:#EEEEEE;height:2em;opacity:0.5'
-              >".htmlspecialchars($this->params['value'])."</textarea>
-            </div>
-          </div>
-          <script>
-            var {$this->params['uid']}_editorOptions = {
-              schema: ".json_encode($this->params['schema']).",
-              theme: 'bootstrap4',
-              disable_collapse: true,
-              disable_edit_json: true,
-              disable_properties: true,
-            }
-
-            ".(empty($this->params['value']) ? "" : "
-              {$this->params['uid']}_editorOptions.startval =
-                ".json_encode(json_decode($this->params['value'], TRUE))."
-              ;
-            ")."
-
-            var editor = new JSONEditor(
-              document.getElementById('{$this->params['uid']}_editor'),
-              {$this->params['uid']}_editorOptions
-            );
-
-            editor.on('change', function() {
-              document.getElementById('{$this->params['uid']}').value = JSON.stringify(editor.getValue());
-            });
-
-          </script>
-          <style>
-            #{$this->params['uid']}_editor h3.card-title { display: none !important; }
-            #{$this->params['uid']}_editor span.btn-group.je-object__controls { display: none !important; }
-          </style>
-        ";
       }
 
       /* text (editor) */
@@ -656,7 +665,7 @@ class Input extends \ADIOS\Core\View {
                 
               '
             >
-              <div>
+              <div class='p-4'>
                 ".$this->addView('Button', [
                   "faIcon" => "fas fa-times",
                   "text" => $this->translate("Close files and media browser"),
