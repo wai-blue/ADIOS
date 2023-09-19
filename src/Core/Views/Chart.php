@@ -143,6 +143,9 @@ class Chart extends View
           }
         }
       }
+      if ($this->params['labelModel'] == '') {
+        $this->params['labelModel'] = $dataset['labels'];
+      }
     }
 
     $this->params['uid'] = $this->adios->uid;
