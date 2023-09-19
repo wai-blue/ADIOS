@@ -18,7 +18,12 @@ namespace ADIOS\Core\Models;
 class UserRole extends \ADIOS\Core\Model {
   const ADMINISTRATOR = 1;
 
+  public string $urlBase = "user-roles";
   public ?string $lookupSqlValue = "{%TABLE%}.name";
+
+  public string $tableTitle = "User roles";
+  public string $formTitleForInserting = "New user role";
+  public string $formTitleForEditing = "User role";
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "users_roles";

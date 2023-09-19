@@ -17,7 +17,7 @@ namespace ADIOS\Core\Models;
  */
 class Config extends \ADIOS\Core\Model {
 
-  public string $urlBase = "Core/Config";
+  public string $urlBase = "core/config";
   public string $tableTitle = "Configuration";
   public string $formTitleForInserting = "New configuration parameter";
   public string $formTitleForEditing = "Configuration parameter";

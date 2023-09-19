@@ -12,6 +12,7 @@ class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
     $view = '{{ thisAction.config.view }}';
 
     $defaultViewParams = array_merge(
+      $this->params,
       [
         'windowParams' => $this->params['windowParams'] ?? [],
       ],

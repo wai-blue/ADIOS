@@ -21,6 +21,80 @@ class Tabs extends \ADIOS\Core\View {
     $this->tabs = $this->params['tabs'] ?? [];
   }
 
+  public function renderTabContent($tabKey, $tabContent): string
+  {
+    $tabContentHtml = "";
+
+    if (!empty($tabContent['view'])) {
+      $tabContentHtml = $this->addView(
+        $tabContent['view'],
+        $tabContent['params'] ?? []
+      )->render();
+    } else if (!empty($tabContent['action'])) {
+      $tabContentHtml = "
+        <div
+          id='{$this->uid}_tab_{$tabKey}_content_div'
+          style='width:100%'
+        >
+          <div style='
+            width:100%;
+            height:100%;
+            text-align:center;
+            padding: 1em;
+          '>
+            <style>
+              .{$this->uid}_spinner {
+                display:inline-block;
+                color: var(--cl-main);
+                width: 50px;
+                height: 50px;
+                top: 50%;
+                left: 50%;
+                border-radius: 50%;
+                border: 5px solid #EEEEEE;
+                border-top-color: var(--cl-main);
+                animation: {$this->uid}_rotateSpinner 1200ms cubic-bezier(0.66, 0.41, 0.31, 0.56) infinite;
+              }
+
+              @keyframes {$this->uid}_rotateSpinner {
+                to {
+                  transform: rotate(360deg);
+                }
+              }
+            </style>
+
+            Loading...<br/>
+            <br/>
+            <div style='margin:auto'>
+              <div class='{$this->uid}_spinner'>:</div>
+            </div>
+          </div>
+        </div>
+        <script>
+          setTimeout(function() {
+            let params = JSON.parse(
+              Base64.decode('" . base64_encode(json_encode($tabContent['params'])) . "')
+            );
+
+            _ajax_update(
+              '{$tabContent['action']}',
+              params,
+              '{$this->uid}_tab_{$tabKey}_content_div'
+            );
+          }, ".rand(200, 600).");
+        </script>
+      ";
+    } else if (!empty($tabContent['html'])) {
+      $tabContentHtml = $tabContent['html'];
+    } else if (is_array($tabContent)) {
+      foreach ($tabContent as $item) {
+        $tabContentHtml .= $this->renderTabContent($tabKey, $item);
+      }
+    }
+
+    return $tabContentHtml;
+  }
+
   public function render(string $panel = ''): string
   {
 
@@ -28,70 +102,7 @@ class Tabs extends \ADIOS\Core\View {
     $titles = "";
 
     foreach ($this->tabs as $tabKey => $tabParams) {
-      $tabContentHtml = "";
-
-      if (!empty($tabParams['content']['view'])) {
-        $tabContentHtml = $this->addView(
-          $tabParams['content']['view'],
-          $tabParams['content']['params'] ?? []
-        )->render();
-      } else if (!empty($tabParams['content']['action'])) {
-        $tabContentHtml = "
-          <div
-            id='{$this->uid}_tab_{$tabKey}_content_div'
-            style='width:100%'
-          >
-            <div style='
-              width:100%;
-              height:100%;
-              text-align:center;
-              padding: 1em;
-            '>
-              <style>
-                .{$this->uid}_spinner {
-                  display:inline-block;
-                  color: var(--cl-main);
-                  width: 50px;
-                  height: 50px;
-                  top: 50%;
-                  left: 50%;
-                  border-radius: 50%;
-                  border: 5px solid #EEEEEE;
-                  border-top-color: var(--cl-main);
-                  animation: {$this->uid}_rotateSpinner 1200ms cubic-bezier(0.66, 0.41, 0.31, 0.56) infinite;
-                }
-
-                @keyframes {$this->uid}_rotateSpinner {
-                  to {
-                    transform: rotate(360deg);
-                  }
-                }
-              </style>
-
-              Loading...<br/>
-              <br/>
-              <div style='margin:auto'>
-                <div class='{$this->uid}_spinner'>:</div>
-              </div>
-            </div>
-          </div>
-          <script>
-            setTimeout(function() {
-              let params = JSON.parse(
-                Base64.decode('" . base64_encode(json_encode($tabParams['content']['params'])) . "')
-              );
-
-              _ajax_update(
-                '{$tabParams['content']['action']}',
-                params,
-                '{$this->uid}_tab_{$tabKey}_content_div'
-              );
-            }, ".rand(200, 600).");
-          </script>
-        ";
-      } else if (!empty($tabParams['content']['html'])) {
-        $tabContentHtml = $tabParams['content']['html'];
-      }
+      $tabContentHtml = $this->renderTabContent($tabKey, $tabParams['content']);
 
       $contents .= "
         <div

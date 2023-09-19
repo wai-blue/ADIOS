@@ -1,0 +1,19 @@
+:root {
+  --cl-main: #59aad3;
+  --cl-altr: #beaa62;
+  --cl-href: #43809f;
+  --cl-hove: #43809f;
+
+  --cl-text-1: #212121;
+  --cl-text-2: #616161;
+
+  --cl-icon-1: #59aad3;
+  --cl-icon-2: yellow;
+
+  --cl-bckg-1: #59aad3;
+  --cl-bckg-2: #43809f;
+
+  --cl-green: #4CAF50;
+
+  --cl-link: #FFFFFF;
+}

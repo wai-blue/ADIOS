@@ -18,7 +18,7 @@ namespace ADIOS\Core\Models;
 class User extends \ADIOS\Core\Model {
   const TOKEN_TYPE_USER_FORGOT_PASSWORD = 551155;
 
-  public string $urlBase = "Users";
+  public string $urlBase = "users";
   public ?string $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
 
   public string $tableTitle = "Users";
@@ -45,12 +45,20 @@ class User extends \ADIOS\Core\Model {
       'name' => [
         'type' => 'varchar',
         'title' => $this->translate('Given name'),
-        'show_column' => true
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
       ],
       'surname' => [
         'type' => 'varchar',
         'title' => $this->translate('Family name'),
-        'show_column' => true
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
       ],
       'login' => [
         'type' => 'varchar',
@@ -72,7 +80,11 @@ class User extends \ADIOS\Core\Model {
         'type' => 'lookup',
         'title' => $this->translate('Role'),
         'model' => "ADIOS/Core/Models/UserRole",
-        'show_column' => true,
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
         'input_style' => 'select'
       ],
       'photo' => [
@@ -85,37 +97,61 @@ class User extends \ADIOS\Core\Model {
       'is_active' => [
         'type' => 'boolean',
         'title' => $this->translate('Active'),
-        'show_column' => true
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
       ],
       'last_login_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last login'),
-        'show_column' => FALSE,
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
         'readonly' => TRUE,
       ],
       'last_login_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last login IP'),
-        'show_column' => FALSE,
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
         'readonly' => TRUE,
       ],
       'last_access_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last access'),
-        'show_column' => FALSE,
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
         'readonly' => TRUE,
       ],
       'last_access_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last access IP'),
-        'show_column' => FALSE,
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
         'readonly' => TRUE,
       ],
       'id_token_reset_password' => [
         'type' => 'lookup',
         'model' => "ADIOS/Core/Models/Token",
         'title' => $this->translate('Reset password token'),
-        'show_column' => FALSE,
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+        ],
         'readonly' => TRUE,
       ]
     ]);

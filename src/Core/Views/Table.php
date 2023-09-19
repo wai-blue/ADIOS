@@ -126,6 +126,7 @@ class Table extends \ADIOS\Core\View
       'readonly' => false
     ], $params);
 
+
     if (empty($params['model'])) {
       throw new \Exception("UI/Table: Don't know what model to work with.");
     }
@@ -181,12 +182,12 @@ class Table extends \ADIOS\Core\View
 
     if (_count($this->params['showColumns']) > 0) {
       foreach ($this->columns as $key => $value) {
-        $this->columns[$key]['showColumn'] = FALSE;
+        $this->columns[$key]['viewParams']['Table']['showColumn'] = FALSE;
       }
 
       foreach ($this->params['showColumns'] as $value) {
         if (isset($this->columns[$value])) {
-          $this->columns[$value]['showColumn'] = TRUE;
+          $this->columns[$value]['viewParams']['Table']['showColumn'] = TRUE;
         }
       }
     }
@@ -211,8 +212,7 @@ class Table extends \ADIOS\Core\View
       !empty($this->params['foreignKey'])
       && isset($this->columns[$this->params['foreignKey']])
     ) {
-      $this->columns[$this->params['foreignKey']]['show_column'] = FALSE; // 2023-06-27 Deprecated
-      $this->columns[$this->params['foreignKey']]['showColumn'] = FALSE;
+      $this->columns[$this->params['foreignKey']]['viewParams']['Table']['showColumn'] = FALSE;
     }
 
     //
@@ -782,10 +782,7 @@ class Table extends \ADIOS\Core\View
 
     if (_count($this->columns)) {
       foreach ($this->columns as $col_name => $col_def) {
-        if (
-          !$col_def['show_column'] // 2023-06-27 Deprecated
-          && !$col_def['showColumn']
-        ) {
+        if (!$col_def['viewParams']['Table']['showColumn']) {
           unset($this->columns[$col_name]);
         }
       }
@@ -820,7 +817,7 @@ class Table extends \ADIOS\Core\View
 
           $html .= "
             <div
-              class='Column {$col_def['css_class']} {$order_class}'
+              class='Column {$order_class}'
               " . ($params['allowOrderModification'] ? "
                 onclick='
                   ui_table_refresh(
@@ -1061,7 +1058,7 @@ class Table extends \ADIOS\Core\View
             ]);
 
             $html .= "
-              <div class='Column {$colDef['css_class']} {$alignClass}' style='{$cellStyle}'>
+              <div class='Column {$colDef['viewParams']['Table']['cssClass']} {$alignClass}' style='{$cellStyle}'>
                 {$cellHtml}
               </div>
             ";

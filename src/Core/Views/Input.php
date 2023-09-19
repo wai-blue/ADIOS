@@ -619,7 +619,9 @@ class Input extends \ADIOS\Core\View {
         }
 
         $html = "
-          <div class='adios ui Input ui_input_type_image'>
+          <div
+            class='adios ui Input ui_input_type_image'
+          >
             <img
               src='{$img_src}'
               id='{$this->params['uid']}_image'

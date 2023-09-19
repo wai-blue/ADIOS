@@ -32,7 +32,7 @@ class Form extends \ADIOS\Core\View
 
     // defaultne parametre
 
-    $params = parent::params_merge([
+    $params = array_replace_recursive([
       'model' => '',
       'table' => '',
       'id' => '-1',
@@ -361,8 +361,7 @@ class Form extends \ADIOS\Core\View
     } else if (is_string($item['view'])) {
 
       $tmpView = $item['view'];
-
-      $tmpViewParams = $item['params'];
+      $tmpViewParams = $this->_renderItemsRecursively($item['params']);
       $tmpViewParams['form_uid'] = $this->params['uid'];
       $tmpViewParams['form_data'] = $this->data;
       $tmpViewParams['initiating_model'] = $this->params['model'];
@@ -478,6 +477,23 @@ class Form extends \ADIOS\Core\View
     return $html;
   }
 
+  private function _renderItemsRecursively(array $array): array
+  {
+    if (isset($array['item'])) {
+      $array['html'] = $this->renderItem($array['item']);
+      unset($array['item']);
+    }
+
+    foreach ($array as $key => $item) {
+      if (is_array($item)) {
+        $array[$key] = $this->_renderItemsRecursively($array[$key]);
+      }
+    }
+
+    return $array;
+  }
+
+
   // render
   public function render(string $panel = ''): string
   {
@@ -520,17 +536,12 @@ class Form extends \ADIOS\Core\View
       }
     }
 
-    // params['grid']
-    if (!empty($this->params['grid'])) {
-      $gridParams = $this->params['grid'];
+    // params['content']
+    if (!empty($this->params['content'])) {
+      $tmpView = $this->params['content']['view'];
+      $tmpViewParams = $this->_renderItemsRecursively($this->params['content']['params']);
 
-      foreach ($gridParams['areas'] as $areaName => $areaParams) {
-        $gridParams['areas'][$areaName]['html'] = $this->renderItem($areaParams['item']);
-      }
-
-      $grid = new \ADIOS\Core\Views\Grid($this->adios, $gridParams);
-
-      $contentHtml = $grid->render();
+      $contentHtml = $this->adios->view->create($tmpView, $tmpViewParams)->render();
     } else {
 
       // params['template']

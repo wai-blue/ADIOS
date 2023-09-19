@@ -16,7 +16,7 @@
 }
 
 
-.adios.ui.Form .item .input-title { color: var(--cl-main); }
+.adios.ui.Form .item .input-title { color: var(--cl-main); font-size: 0.75em; }
 .adios.ui.Form .item .group-title { color: var(--cl-main); font-weight: bold; margin-top: 1em; }
 
 .adios.ui.Form .item:hover .input-content input,
@@ -74,7 +74,7 @@
 .adios.ui.Form .input-content input[type=text],
 .adios.ui.Form .input-content input[type=password] {
   height: auto;
-  width: 75%;
+  width: 100%;
 }
 
 .adios.ui.Form .input-content textarea {
