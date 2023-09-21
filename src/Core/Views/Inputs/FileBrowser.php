@@ -94,11 +94,12 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
       <input
         id='{$this->uid}'
         disabled
-        style='display:none;width:100%;margin-bottom:1em'
+        style='width:100%;margin-bottom:1em'
         value='".ads($this->params['value'])."'
         placeholder='Select file...'
         onchange=\"
-          let file = $(this).val();
+          let file = $(this).val().replace(/^\\/+/, '');
+          $(this).val(file);
           {$this->params['onchange']}
         \"
       />

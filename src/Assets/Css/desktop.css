@@ -299,9 +299,6 @@ h3 { padding-bottom: 0.5em; }
   background: white;
 }
 
-.adios.main-content > .windows .adios.ui.Window.inline {
-  transition: 50ms;
-}
 .adios.main-content > .windows.update-in-progress .adios.ui.Window.inline {
   width: 33vw;
 }

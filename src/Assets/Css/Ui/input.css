@@ -34,7 +34,8 @@
 .adios.ui.Input.ui_input_type_hour:hover, .adios.ui.Input.ui_input_type_minute:hover, .adios.ui.Input.ui_input_type_second:hover {opacity:1}
 .adios.ui.Input.ui_input_type_hour:focus, .adios.ui.Input.ui_input_type_minute:focus, .adios.ui.Input.ui_input_type_second:focus {opacity:1}
 
-.adios.ui.Input.ui_input_type_image {
+.adios.ui.Input.ui_input_type_image,
+.adios.ui.Input.ui_input_type_file {
   padding-bottom: 1em;
 }
 

@@ -74,7 +74,7 @@
       options.onAfterRender(windowId);
     }
 
-    if ($('.adios.ui.Window').length == 1) {
+    if ($('.adios.ui.Window').length == 1 && action != '') {
       desktop_main_box_history_push(
         action,
         params,

@@ -1,14 +1,14 @@
 <style>
   #{{ uid }}_div {
     grid-template-areas:
-      {% for layoutRow in view.layout %}
-        '{{ layoutRow }}'
+      {% for areaName, areaParams in view.areas %}
+        '{{ areaName }}'
       {% endfor %}
     ;
     {{ view.style }}
   }
 
-  {% if layoutSm %}
+  {% if view.layoutSm is iterable %}
     /* Small devices (landscape phones, 576px and up) */
     @media (min-width: 576px) {
       #{{ uid }}_div {
@@ -21,7 +21,7 @@
     }
   {% endif %}
 
-  {% if layoutMd %}
+  {% if view.layoutMd is iterable %}
     /* Medium devices (tablets, 768px and up) */
     @media (min-width: 768px) {
       #{{ uid }}_div {
@@ -34,7 +34,7 @@
     }
   {% endif %}
 
-  {% if layoutLg %}
+  {% if view.layoutLg is iterable %}
     /* Large devices (desktops, 992px and up) */
     @media (min-width: 992px) {
       #{{ uid }}_div {
@@ -47,7 +47,7 @@
     }
   {% endif %}
 
-  {% if layoutXl %}
+  {% if view.layoutXl is iterable %}
     /* X-Large devices (large desktops, 1200px and up) */
     @media (min-width: 1200px) {
       #{{ uid }}_div {
@@ -60,7 +60,7 @@
     }
   {% endif %}
 
-  {% if layoutXXl %}
+  {% if view.layoutXxl is iterable %}
     /* XX-Large devices (larger desktops, 1400px and up) */
     @media (min-width: 1400px) {
       #{{ uid }}_div {

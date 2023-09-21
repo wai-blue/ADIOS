@@ -4,6 +4,8 @@ namespace ADIOS\Core\Views;
 
 /**
  * Renders a layout based on HTML grid configuration.
+ * Rendering is responsive, using the bootstrap logic.
+ * Default layout is 'all areas in one row'.
  *
  * Example code to render layout:
  *
@@ -25,8 +27,7 @@ class Grid extends \ADIOS\Core\View {
   public function __construct($adios, ?array $params = null) {
     $this->adios = $adios;
 
-    $this->params = parent::params_merge([
-      "layout" => [],
+    $this->params = array_replace_recursive([
       "layoutSm" => [],
       "layoutMd" => [],
       "layoutLg" => [],
