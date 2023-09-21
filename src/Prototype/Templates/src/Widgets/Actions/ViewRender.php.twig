@@ -16,7 +16,7 @@ class {{ thisAction.class }} extends \ADIOS\Core\Widget\Action {
       [
         'windowParams' => $this->params['windowParams'] ?? [],
       ],
-{{ varExport(thisAction.config.params, "      ")|raw }}
+{{ varExport(thisAction.config.params, "      ")|raw }} ?? []
     );
 
     // post-processing of the default view parameters

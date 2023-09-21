@@ -43,48 +43,52 @@
         $('.adios.main-content .windows').show();
         $('.adios.main-content .windows').removeClass('update-in-progress');
 
-        $('.adios.main-content .windows .windows-content').append(html);
-
-        windowId = $('.adios.ui.Window')
-          .last()
-          .attr('id')
-        ;
-
-        let sameWindows = $('.adios.ui.Window[id="' + windowId + '"]');
-
-        if (sameWindows.length > 1) {
-          sameWindows.eq(0).remove();
-        }
-
-        if ($('.adios.ui.Window').length == 1) {
-          $('#' + windowId).addClass('inline');
-        } else {
-          $('#' + windowId).addClass('modal');
-        }
-
-        if (typeof options.onAfterRender == 'function') {
-          options.onAfterRender(windowId);
-        }
-
-        if ($('.adios.ui.Window').length == 1) {
-          desktop_main_box_history_push(
-            action,
-            params,
-            $('.adios.main-content').html(),
-            options
-          );
-        }
-
-        ADIOS_windows[windowId] = {
-          'action': action,
-          'params': params,
-          'onclose': onclose,
-        };
+        window_post_render(html, action, params, options);
 
       });
 
     }, 0);
-  };
+  }
+
+  function window_post_render(html, action, params, options) {
+    $('.adios.main-content .windows .windows-content').append(html);
+
+    windowId = $('.adios.ui.Window')
+      .last()
+      .attr('id')
+    ;
+
+    let sameWindows = $('.adios.ui.Window[id="' + windowId + '"]');
+
+    if (sameWindows.length > 1) {
+      sameWindows.eq(0).remove();
+    }
+
+    if ($('.adios.ui.Window').length == 1) {
+      $('#' + windowId).addClass('inline');
+    } else {
+      $('#' + windowId).addClass('modal');
+    }
+
+    if (typeof options.onAfterRender == 'function') {
+      options.onAfterRender(windowId);
+    }
+
+    if ($('.adios.ui.Window').length == 1) {
+      desktop_main_box_history_push(
+        action,
+        params,
+        $('.adios.main-content').html(),
+        options
+      );
+    }
+
+    ADIOS_windows[windowId] = {
+      'action': action,
+      'params': params,
+      'onclose': onclose,
+    };
+  }
 
   function window_refresh(windowId) {
     let win = $('#' + windowId);
@@ -149,8 +153,6 @@
       }
       formHtml += '</form>';
 
-      console.log(_APP_URL + '/' + _action_url(action, {}, true));
-      console.log(formHtml);
       $(formHtml).appendTo('body').submit();
     } else {
       window.location.href = _APP_URL + '/' + _action_url(action, params, true);

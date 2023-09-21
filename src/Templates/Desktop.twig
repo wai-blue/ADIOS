@@ -274,15 +274,15 @@
 
         <!-- Begin Page Content -->
         <div class="adios main-content">
+          <div class="windows">
+            <div class="windows-content"></div>
+          </div>
           <div class="desktop">
             <div class="desktop-content">
               {% if desktopContentAction != "" %}
                 {{ adiosAction(desktopContentAction, desktopContentActionParams)|raw }}
               {% endif %}
             </div>
-          </div>
-          <div class="windows">
-            <div class="windows-content"></div>
           </div>
         </div>
         <!-- /.container-fluid -->

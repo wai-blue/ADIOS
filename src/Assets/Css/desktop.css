@@ -268,7 +268,7 @@ h3 { padding-bottom: 0.5em; }
   padding: 2em;
 
   overflow: auto;
-  display: flex;
+  /* display: flex; */
   flex-direction: row;
 }
 
@@ -295,7 +295,7 @@ h3 { padding-bottom: 0.5em; }
 .adios.main-content > .windows {
   flex: 1;
   /* overflow-x: auto; */
-  display: none;
+  /* display: none; */
   background: white;
 }
 
