@@ -701,135 +701,241 @@ class Input extends \ADIOS\Core\View {
 
       /* file */
       if ('file' == $this->params['type']) {
-          $default_src = $this->translate("No file uploaded");
-          $file_src_base = "{$this->adios->config['url']}/File?f=";
-          // $upload_params = "type=file&column={$this->params['column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
-          // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
+        if ('' != $this->params['value']) {
+          $file_href = "{$this->adios->config['files_url']}/".ads($this->params['value']);
+        } else {
+          $file_href = "";
+        }
 
-          if ('' != $this->params['value']) {
-            $file_short_name = end(explode('/', $this->params['value']));
-            if (strlen($file_short_name) > 75) {
-              $file_short_name = substr($file_short_name, 0, 75).'...';
-            }
-          } else {
-            $file_short_name = $default_src;
-          }
+        $html = "
+          <div
+            class='adios ui Input ui_input_type_file'
+          >
+            ".$this->addView('Button', [
+              'uid' => $this->params['uid'].'_btn_upload',
+              'onclick' => "$('#{$this->params['uid']}_browser').show(100);",
+              'faIcon' => 'fas fa-upload',
+              'title' => $this->translate('Upload'),
+              'class' => "mr-1 btn-primary btn-sm btn-icon-split",
+            ])->render()."
 
-          $html = "
+            <a
+              href='{$file_href}'
+              id='{$this->params['uid']}_href'
+              class='adios ui Input'
+              onclick=''
+              target=_blank
+            >".hsc($this->params['value'])."</a>
+
+            ".$this->addView('Button', [
+              'uid' => $this->params['uid'].'_btn_clear',
+              'onclick' => "
+                $('#{$this->params['uid']}').val('');
+                $('#{$this->params['uid']}_href').text('');
+                $('#{$this->params['uid']}_btn_clear').hide();
+              ",
+              'faIcon' => 'fas fa-trash-alt',
+              'title' => $this->translate('Clear'),
+              'class' => "mr-1 btn-danger btn-sm btn-icon-split",
+              'style' => (empty($this->params['value']) ? 'display:none;' : '')
+            ])->render()."
+
+          </div>
+
+          <div
+            id='{$this->params['uid']}_browser'
+            style='
+              position: fixed;
+              left: 0;
+              top: 0;
+              width: 100%;
+              height: 100%;
+              background: #FFFFFF80;
+              display: none;
+            '
+          >
             <div
-              onmouseover='$(\"#{$this->params['uid']}_operations\").css({opacity: 1});'
-              onmouseleave='$(\"#{$this->params['uid']}_operations\").css({opacity: 0});'
+              class='shadow'
+              style='
+                position: fixed;
+                right: 0px;
+                top: 0px;
+                width: 85%;
+                height: 100%;
+                z-index: 1;
+                background: white;
+                
+              '
             >
-              <input
-                type='hidden'
-                id='{$this->params['uid']}'
-                name='{$this->params['uid']}'
-                data-is-adios-input='1'
-                ".$this->main_params().'
-                '.$this->generate_input_events().'
-                value="'.ads($this->params['value'])."\"
-                {$this->params['html_attributes']}
-                data-src-real-base=\"".ads($this->adios->config['files_url']).'"
-                data-src-base="'.ads($file_src_base).'"
-                data-default-txt="'.ads($default_src).'"
-                data-subdir="'.ads($this->params['subdir']).'"
-                data-rename-pattern="'.ads($this->params['rename_pattern']).'"
-                '.($this->params['readonly'] ? "disabled='disabled'" : '')."
-              />
-              
-              <div style='float:left'>
-                <form id='{$this->params['uid']}_file_form' enctype='multipart/form-data'>
-                  <input
-                    ".($this->params['readonly'] ? "disabled='disabled'" : '')."
-                    type='file'
-                    style='display:none;'
-                    name='{$this->params['uid']}_file_input'
-                    id='{$this->params['uid']}_file_input'
-                    onchange='
-                      ui_input_upload_file(\"{$this->params['uid']}\");
-                    '
-                  />
-                  <label for='{$this->params['uid']}_file_input'>
-                    <span
-                      class='adios ui Input file_upload_div'
-                      id='{$this->params['uid']}_file'
-                      ".($this->params['readonly'] && '' != $this->params['value'] ? "
-                        onclick=\"
-                          ui_input_file_open('{$this->params['uid']}');
-                        \"
-                      " : '')."
-                      title='".($this->params['readonly'] ? '' : $this->translate("Drag and drop file here or click to find it on a computer."))."'
-                    >
-                      {$file_short_name}
-                    </span>
-                    <span class='ml-1'>
-                      <div class='btn float-left ml-1 btn-primary btn-sm btn-icon-split'>
-                        <span class='icon'><i class='fas fa-window-restore'></i></span>
-                        <span class='text'>".$this->translate("Find on this computer")."</span>
-                      </div>
-                    </span>
-                  </label>
-                </form>
-                <div class='adios ui Input file_info_div' id='{$this->params['uid']}_info_div'>
-                  ".$this->translate('Uploading file. Please wait.')."
-                </div>
+              <div class='p-4'>
+                ".$this->addView('Button', [
+                  "faIcon" => "fas fa-times",
+                  "text" => $this->translate("Close files and media browser"),
+                  "class" => "btn btn-secondary btn-icon-split",
+                  "onclick" => "
+                    $('#{$this->params['uid']}_browser').hide();
+                  ",
+                ])->render()."
               </div>
+              <div style='margin:1em'>
+                ".(new \ADIOS\Core\Views\Inputs\FileBrowser(
+                  $this->adios,
+                  [
+                    "uid" => $this->params['uid'],
+                    "mode" => "select",
+                    "value" => $this->params['value'],
+                    "subdir" => $this->params['subdir'],
+                    "onchange" => "
+                      $('#{$this->params['uid']}_href')
+                        .attr(
+                          'href',
+                          '{$this->adios->config['files_url']}/' + file
+                        )
+                        .text(file)
+                      ;
 
-              ".(!$this->params['readonly'] ? "
-                  <div class='adios ui file_operations_div' id='{$this->params['uid']}_operations' style='opacity:0;float:left;'>
-                    ".(FALSE && $this->params['show_file_browser'] ?
-                      $this->addView('Button', [
-                        'uid' => $this->params['uid'].'_file_input_browser_button',
-                        'onclick' => "ui_input_ftp_browser('{$this->params['uid']}', 'file');",
-                        'faIcon' => 'fas fa-search',
-                        'text' => $this->translate("Browse in uploaded files"),
-                        'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
-                      ])->render()
-                    : '').
-                    (FALSE && $this->params['show_download_url_button'] ?
-                      $this->addView('Button', [
-                        'uid' => $this->params['uid'].'_file_input_download_button',
-                        'onclick' => "ui_input_file_download('{$this->params['uid']}', '".$this->translate("Enter URL address")."');",
-                        'faIcon' => 'fas fa-download',
-                        'title' => $this->translate('Download'),
-                        'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
-                      ])->render()
-                    : '').
-                    ($this->params['show_open_button'] ?
-                      $this->addView('Button', [
-                        'uid' => $this->params['uid'].'_file_input_open_button',
-                        'onclick' => "ui_input_file_open('{$this->params['uid']}');",
-                        'faIcon' => 'fas fa-eye',
-                        'title' => $this->translate('Preview'),
-                        'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
-                        'style' => (empty($this->params['value']) ? 'display:none;' : '')
-                      ])->render()
-                    : '').
-                    ($this->params['show_delete_button'] ?
-                      $this->addView('Button', [
-                        'uid' => $this->params['uid'].'_file_input_delete_button',
-                        'onclick' => "ui_input_file_remove('{$this->params['uid']}');",
-                        'faIcon' => 'fas fa-trash-alt',
-                        'title' => $this->translate('Clear'),
-                        'class' => "float-left mr-1 btn-danger btn-sm btn-icon-split",
-                        'style' => (empty($this->params['value']) ? 'display:none;' : '')
-                      ])->render()
-                    : '')."
-                  </div>
-              " : "")."
+                      $('#{$this->params['uid']}_browser').hide();
+                      $('#{$this->params['uid']}_btn_clear').show();
+                    ",
+                  ]
+                ))->render()."
+              </div>
             </div>
-
-            <div style='clear:both'></div>
-
-            ".(!$this->params['readonly'] ? "
-              <script>
-                $(document).ready(function(){
-                  ui_input_activate_drop('{$this->params['uid']}');
-                });
-              </script>
-            " : "")."
-          ";
+          </div>
+        ";
       }
+
+      /* file */
+      // if ('x-file' == $this->params['type']) {
+      //     $default_src = $this->translate("No file uploaded");
+      //     $file_src_base = "{$this->adios->config['url']}/File?f=";
+      //     // $upload_params = "type=file&column={$this->params['column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
+      //     // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
+
+      //     if ('' != $this->params['value']) {
+      //       $file_short_name = end(explode('/', $this->params['value']));
+      //       if (strlen($file_short_name) > 75) {
+      //         $file_short_name = substr($file_short_name, 0, 75).'...';
+      //       }
+      //     } else {
+      //       $file_short_name = $default_src;
+      //     }
+
+      //     $html = "
+      //       <div
+      //         onmouseover='$(\"#{$this->params['uid']}_operations\").css({opacity: 1});'
+      //         onmouseleave='$(\"#{$this->params['uid']}_operations\").css({opacity: 0});'
+      //       >
+      //         <input
+      //           type='hidden'
+      //           id='{$this->params['uid']}'
+      //           name='{$this->params['uid']}'
+      //           data-is-adios-input='1'
+      //           ".$this->main_params().'
+      //           '.$this->generate_input_events().'
+      //           value="'.ads($this->params['value'])."\"
+      //           {$this->params['html_attributes']}
+      //           data-src-real-base=\"".ads($this->adios->config['files_url']).'"
+      //           data-src-base="'.ads($file_src_base).'"
+      //           data-default-txt="'.ads($default_src).'"
+      //           data-subdir="'.ads($this->params['subdir']).'"
+      //           data-rename-pattern="'.ads($this->params['rename_pattern']).'"
+      //           '.($this->params['readonly'] ? "disabled='disabled'" : '')."
+      //         />
+              
+      //         <div style='float:left'>
+      //           <form id='{$this->params['uid']}_file_form' enctype='multipart/form-data'>
+      //             <input
+      //               ".($this->params['readonly'] ? "disabled='disabled'" : '')."
+      //               type='file'
+      //               style='display:none;'
+      //               name='{$this->params['uid']}_file_input'
+      //               id='{$this->params['uid']}_file_input'
+      //               onchange='
+      //                 ui_input_upload_file(\"{$this->params['uid']}\");
+      //               '
+      //             />
+      //             <label for='{$this->params['uid']}_file_input'>
+      //               <span
+      //                 class='adios ui Input file_upload_div'
+      //                 id='{$this->params['uid']}_file'
+      //                 ".($this->params['readonly'] && '' != $this->params['value'] ? "
+      //                   onclick=\"
+      //                     ui_input_file_open('{$this->params['uid']}');
+      //                   \"
+      //                 " : '')."
+      //                 title='".($this->params['readonly'] ? '' : $this->translate("Drag and drop file here or click to find it on a computer."))."'
+      //               >
+      //                 {$file_short_name}
+      //               </span>
+      //               <span class='ml-1'>
+      //                 <div class='btn float-left ml-1 btn-primary btn-sm btn-icon-split'>
+      //                   <span class='icon'><i class='fas fa-window-restore'></i></span>
+      //                   <span class='text'>".$this->translate("Find on this computer")."</span>
+      //                 </div>
+      //               </span>
+      //             </label>
+      //           </form>
+      //           <div class='adios ui Input file_info_div' id='{$this->params['uid']}_info_div'>
+      //             ".$this->translate('Uploading file. Please wait.')."
+      //           </div>
+      //         </div>
+
+      //         ".(!$this->params['readonly'] ? "
+      //             <div class='adios ui file_operations_div' id='{$this->params['uid']}_operations' style='opacity:0;float:left;'>
+      //               ".(FALSE && $this->params['show_file_browser'] ?
+      //                 $this->addView('Button', [
+      //                   'uid' => $this->params['uid'].'_file_input_browser_button',
+      //                   'onclick' => "ui_input_ftp_browser('{$this->params['uid']}', 'file');",
+      //                   'faIcon' => 'fas fa-search',
+      //                   'text' => $this->translate("Browse in uploaded files"),
+      //                   'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
+      //                 ])->render()
+      //               : '').
+      //               (FALSE && $this->params['show_download_url_button'] ?
+      //                 $this->addView('Button', [
+      //                   'uid' => $this->params['uid'].'_file_input_download_button',
+      //                   'onclick' => "ui_input_file_download('{$this->params['uid']}', '".$this->translate("Enter URL address")."');",
+      //                   'faIcon' => 'fas fa-download',
+      //                   'title' => $this->translate('Download'),
+      //                   'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
+      //                 ])->render()
+      //               : '').
+      //               ($this->params['show_open_button'] ?
+      //                 $this->addView('Button', [
+      //                   'uid' => $this->params['uid'].'_file_input_open_button',
+      //                   'onclick' => "ui_input_file_open('{$this->params['uid']}');",
+      //                   'faIcon' => 'fas fa-eye',
+      //                   'title' => $this->translate('Preview'),
+      //                   'class' => "float-left mr-1 btn-secondary btn-sm btn-icon-split",
+      //                   'style' => (empty($this->params['value']) ? 'display:none;' : '')
+      //                 ])->render()
+      //               : '').
+      //               ($this->params['show_delete_button'] ?
+      //                 $this->addView('Button', [
+      //                   'uid' => $this->params['uid'].'_file_input_delete_button',
+      //                   'onclick' => "ui_input_file_remove('{$this->params['uid']}');",
+      //                   'faIcon' => 'fas fa-trash-alt',
+      //                   'title' => $this->translate('Clear'),
+      //                   'class' => "float-left mr-1 btn-danger btn-sm btn-icon-split",
+      //                   'style' => (empty($this->params['value']) ? 'display:none;' : '')
+      //                 ])->render()
+      //               : '')."
+      //             </div>
+      //         " : "")."
+      //       </div>
+
+      //       <div style='clear:both'></div>
+
+      //       ".(!$this->params['readonly'] ? "
+      //         <script>
+      //           $(document).ready(function(){
+      //             ui_input_activate_drop('{$this->params['uid']}');
+      //           });
+      //         </script>
+      //       " : "")."
+      //     ";
+      // }
 
       /* lookup */
       if ('lookup' == $this->params['type']) {

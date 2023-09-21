@@ -261,10 +261,10 @@
 }
 
 .adios.ui.Table.Container .Content .Row .Column:hover {
-  overflow: visible;
+  /* overflow: visible; */
   background: #ffffff60;
-  padding-left: 3px;
-  padding-right: 3px;
+  /* padding-left: 3px;
+  padding-right: 3px; */
 }
 
 /* Table.Container .Footer */
