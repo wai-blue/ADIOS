@@ -817,7 +817,7 @@ class Table extends \ADIOS\Core\View
 
           $html .= "
             <div
-              class='Column {$order_class}'
+              class='cell {$order_class}'
               " . ($params['allowOrderModification'] ? "
                 onclick='
                   ui_table_refresh(
@@ -838,7 +838,7 @@ class Table extends \ADIOS\Core\View
         }
 
         if (_count($this->params['rowButtons'])) {
-          $html .= "<div class='Column'></div>";
+          $html .= "<div class='cell'></div>";
         }
 
         // koniec headeru
@@ -979,14 +979,14 @@ class Table extends \ADIOS\Core\View
           }
 
           $html .= "
-              <div class='Column {$col_def['css_class']} {$input_type}'>
+              <div class='cell {$col_def['css_class']} {$input_type}'>
                 {$filter_input}
               </div>
             ";
         }
 
         if (_count($this->params['rowButtons'])) {
-          $html .= "<div class='Column'></div>";
+          $html .= "<div class='cell'></div>";
         }
 
         // koniec filtra
@@ -1058,14 +1058,14 @@ class Table extends \ADIOS\Core\View
             ]);
 
             $html .= "
-              <div class='Column {$colDef['viewParams']['Table']['cssClass']} {$alignClass}' style='{$cellStyle}'>
+              <div class='cell {$colDef['viewParams']['Table']['cssClass']} {$alignClass}' style='{$cellStyle}'>
                 {$cellHtml}
               </div>
             ";
           }
 
           if (_count($this->params['rowButtons'])) {
-            $html .= "<div class='Column'>";
+            $html .= "<div class='cell'>";
             foreach ($this->params['rowButtons'] as $rowButton) {
               $html .= "
                 <a
@@ -1097,13 +1097,13 @@ class Table extends \ADIOS\Core\View
         $html .= "
           <div class='adios ui Table Footer'>
             <div class='Row'>
-              <div class='Column count'>
+              <div class='cell count'>
                 {$this->allRowsCount} " . $this->translate("items total") . "
               </div>
-              <div class='Column paging'>
+              <div class='cell paging'>
                 " . $this->paging->render() . "
               </div>
-              <div class='Column settings'>
+              <div class='cell settings'>
                 <select
                   id='{$this->params['uid']}_table_count'
                   onchange='ui_table_change_items_per_page(\"{$this->params['uid']}\", this.value);'
@@ -1161,8 +1161,8 @@ class Table extends \ADIOS\Core\View
    */
   public function getCellHtml($columnName, $columnDefinition, $rowValues)
   {
-    if (!empty($col_def['input']) && is_string($col_def['input'])) {
-      $inputClassName = "\\ADIOS\\" . str_replace("/", "\\", $col_def['input']);
+    if (!empty($columnDefinition['input']) && is_string($columnDefinition['input'])) {
+      $inputClassName = "\\ADIOS\\" . str_replace("/", "\\", $columnDefinition['input']);
       $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
       $cellHtml = $tmpInput->formatValueToHtml();
     } else if ($this->adios->db->isRegisteredColumnType($columnDefinition['type'])) {
@@ -1177,6 +1177,10 @@ class Table extends \ADIOS\Core\View
     } else {
       $cellHtml = $rowValues[$columnName];
     }
+
+    $cellHtml = trim($cellHtml);
+    
+    if (empty($cellHtml)) $cellHtml = "<span class='empty-cell'>—</span>";
 
     return $cellHtml;
   }
