@@ -173,7 +173,6 @@ class Table extends \ADIOS\Core\View
 
     parent::__construct($adios, $params);
 
-
     $this->model->onTableBeforeInit($this);
 
     $this->params = $this->model->tableParams($this->params, $this);
@@ -181,15 +180,19 @@ class Table extends \ADIOS\Core\View
     $this->columns = $this->getColumns();
 
     if (_count($this->params['showColumns']) > 0) {
-      foreach ($this->columns as $key => $value) {
-        $this->columns[$key]['viewParams']['Table']['showColumn'] = FALSE;
-      }
+      //foreach ($this->columns as $key => $value) {
+      //  $this->columns[$key]['viewParams']['Table']['showColumn'] = FALSE;
+      //}
 
+      $columns = [];
       foreach ($this->params['showColumns'] as $value) {
         if (isset($this->columns[$value])) {
-          $this->columns[$value]['viewParams']['Table']['showColumn'] = TRUE;
+          $columns[$value] = $this->columns[$value];
+          $columns[$value]['viewParams']['Table']['showColumn'] = TRUE;
         }
       }
+
+      $this->columns = $columns;
     }
 
     $this->params['page'] = (int)$this->params['page'];
@@ -418,7 +421,7 @@ class Table extends \ADIOS\Core\View
     if ($this->params['page'] * $this->params['itemsPerPage'] > $this->allRowsCount) {
       $this->params['page'] = floor($this->allRowsCount / $this->params['itemsPerPage']) + 1;
     }
-
+//var_dump($this->params['rowButtons']);
     // onTableAfterDataLoaded
     $this->model->onTableAfterDataLoaded($this);
   }
@@ -678,7 +681,6 @@ class Table extends \ADIOS\Core\View
             "class" => "btn-light",
           ]);
         }
-
 
         if (
           !empty($titleButtons)
