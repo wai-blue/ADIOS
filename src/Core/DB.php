@@ -364,6 +364,16 @@ class DB
 
                 $random_val = $randomTextValues[rand(0, count($randomTextValues) - 1)];
               break;
+              case "json":
+                if (isset($col_definition['required']) && $col_definition['required'] == true) {
+                  $random_val = '{}';
+                  break;
+                }
+
+                if ($col_name == 'record_info') {
+                  $random_val = json_encode($model->getNewRecordInfo());
+                }
+              break;
               case "varchar":
               case "password":
                 $randomPasswordValues = [
@@ -388,6 +398,11 @@ class DB
                 //$random_val = $col_definition['enum_values'];
               break;
               case 'lookup':
+                if (!isset($col_definition['required']) || $col_definition['required'] == false) {
+                  $random_val = null;
+                  break;
+                }
+
                 if (!isset($col_definition['model'])) {
                   throw new \Exception("Model for lookup: {$col_name} is empty");
                 }

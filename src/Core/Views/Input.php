@@ -140,6 +140,8 @@ class Input extends \ADIOS\Core\View {
           return $html;
       }
 
+      // TODO: ak $dataType->getInputHtml() nevrati NULL, tak return $inputHtml;
+
       // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ui_form_get_values
       if ($this->params['disabled']) {
           $adios_disabled_attribute = "adios-do-not-serialize='1'";
@@ -408,13 +410,14 @@ class Input extends \ADIOS\Core\View {
       /* int (bez enum_values), year */
       /* float */
       /* text (single_line) */
+      /* MapPoint */
       if (
         ($this->params['type'] == 'varchar' && !_count($this->params['enum_values']))
         || ($this->params['type'] == 'int' && !_count($this->params['enum_values']))
         || ($this->params['type'] == 'text' && 'single_line' == $this->params['interface'])
         || in_array(
           $this->params['type'],
-          ['color', 'date', 'datetime', 'timestamp', 'float', 'decimal', 'year', 'time']
+          ['color', 'date', 'datetime', 'timestamp', 'float', 'decimal', 'year', 'time', 'MapPoint']
         )
       ) {
 

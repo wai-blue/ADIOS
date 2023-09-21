@@ -65,6 +65,18 @@ class DataType {
   }
 
   /**
+   * Returns the HTML-formatted string of the input for this data type.
+   * Used in Core/Input view to to render inputs.
+   *
+   * @param  mixed $params Input parameters.
+   * @return string HTML-formatted input.
+   */
+  public function getInputHtml(array $params = []): ?string
+  {
+    return NULL;
+  }
+
+  /**
    * Returns the CSV-formatted string of the given value.
    * Used in UI/Table element for CSV exports.
    *
