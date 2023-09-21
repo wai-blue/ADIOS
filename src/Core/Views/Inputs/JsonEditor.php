@@ -35,7 +35,7 @@ class JsonEditor extends \ADIOS\Core\Views\Input {
         <script>
           var {$this->params['uid']}_editor = {
             element: document.getElementById('{$this->params['uid']}_editor'),
-            value: JSON.parse(Base64.decode('".base64_encode($valueSanitized)."')),
+            value: JSON.parse(Base64.decode('".base64_encode($valueSanitized)."')) ?? {},
 
             options: {
               schema: JSON.parse(Base64.decode('".base64_encode(json_encode($this->params['schema']))."')),

@@ -15,12 +15,12 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypeTable extends \ADIOS\Core\DB\DataType
 {
-    public function get_sql_create_string($table_name, $col_name, $params = [])
+    public function sqlCreateString($table_name, $col_name, $params = [])
     {
         return '';
     }
 
-    public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
+    public function sqlValueString($table_name, $col_name, $value, $params = [])
     {
         return '';
     }
@@ -30,18 +30,18 @@ class DataTypeTable extends \ADIOS\Core\DB\DataType
         return '';
     }
 
-    public function get_html_or_csv($value, $params = [])
+    private function _toHtmlOrCsv($value, $params = [])
     {
         return '';
     }
 
-    public function get_html($value, $params = [])
+    public function toHtml($value, $params = [])
     {
-        return $this->get_html_or_csv($value, $params);
+        return $this->_toHtmlOrCsv($value, $params);
     }
 
-    public function get_csv($value, $params = [])
+    public function toCsv($value, $params = [])
     {
-        return $this->get_html_or_csv($value, $params);
+        return $this->_toHtmlOrCsv($value, $params);
     }
 }

@@ -16,7 +16,7 @@ namespace ADIOS\Core\DB\DataTypes;
 class DataTypeLookup extends \ADIOS\Core\DB\DataType
 {
 
-  public function get_sql_create_string($table_name, $col_name, $params = [])
+  public function sqlCreateString($table_name, $col_name, $params = [])
   {
     $col_def = $this->adios->db->tables[$table_name][$col_name];
 
@@ -29,7 +29,7 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     return "`{$col_name}` ".('' == $params['sql_type'] ? 'int(8)' : $params['sql_type'])." {$params['sql_definitions']}";
   }
 
-  public function get_sql_column_data_string($table, $colName, $value, $params = []) {
+  public function sqlValueString($table, $colName, $value, $params = []) {
     $colDefinition = $this->adios->db->tables[$table][$colName];
 
     $params = _put_default_params_values($params, [
@@ -78,20 +78,20 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     }
   }
 
-  public function get_html_or_csv($value, $params = [])
+  private function _toHtmlOrCsv($value, $params = [])
   {
     $html = $params['row']["{$params['col_name']}:LOOKUP"] ?? "";
     return $params['export_csv'] ? $html : htmlspecialchars($html);
   }
 
-  public function get_html($value, $params = [])
+  public function toHtml($value, $params = [])
   {
-    return $this->get_html_or_csv($value, $params);
+    return $this->_toHtmlOrCsv($value, $params);
   }
 
-  public function get_csv($value, $params = [])
+  public function toCsv($value, $params = [])
   {
-    return $this->get_html_or_csv($value, $params);
+    return $this->_toHtmlOrCsv($value, $params);
   }
 
   public function fromString(?string $value)

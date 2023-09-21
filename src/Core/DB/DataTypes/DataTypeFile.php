@@ -17,14 +17,14 @@ define('DELETE_FILE', 'delete_file');
  */
 class DataTypeFile extends \ADIOS\Core\DB\DataType
 {
-  public function get_sql_create_string($table_name, $col_name, $params = [])
+  public function sqlCreateString($table_name, $col_name, $params = [])
   {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
 
     return "`$col_name` varchar(255) {$params['sql_definitions']}";
   }
 
-  public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
+  public function sqlValueString($table_name, $col_name, $value, $params = [])
   {
     if ($value == DELETE_FILE) {
       $sql = "`{$col_name}` = ''";
@@ -39,7 +39,7 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
     return $sql;
   }
 
-  public function get_html($value, $params = [])
+  public function toHtml($value, $params = [])
   {
     $html = '';
 
@@ -57,7 +57,7 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
     return $html;
   }
 
-  public function get_csv($value, $params = [])
+  public function toCsv($value, $params = [])
   {
     return "{$this->adios->config['url']}/File?f=/{$value}";
   }

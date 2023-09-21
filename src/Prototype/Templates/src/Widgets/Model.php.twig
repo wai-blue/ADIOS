@@ -6,7 +6,9 @@ namespace {{ thisModel.namespace }};
 
 class {{ thisModel.class }} extends \ADIOS\Core\Model {
 
+{% if _prototypeBuilder.hasCallbacks %}
   use \{{ thisModel.namespace }}\Callbacks\{{ thisModel.class }};
+{% endif %}
 
   public ?string $addButtonText = "{{ thisModel.config.addButtonText|raw }}";
   public ?string $formAddButtonText = "{{ thisModel.config.formAddButtonText|raw }}";

@@ -342,9 +342,12 @@ class Builder {
 
       if (is_array($widgetConfig['models'] ?? NULL)) {
         $this->createFolder($widgetRootDir . '/Models');
-        $this->createFolder($widgetRootDir . '/Models/Callbacks');
 
         foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
+
+          $modelPrototypeBuilderConfig = $modelConfig['_prototypeBuilder'];
+          unset($modelConfig['_prototypeBuilder']);
+
           $tmpModelParams = array_merge(
             $this->prototype,
             [
@@ -357,8 +360,9 @@ class Builder {
               'thisModel' => [
                 'namespace' => $widgetNamespace . '\\' . $widgetClassName . '\Models',
                 'class' => $modelName,
-                'config' => $modelConfig
-              ]
+                'config' => $modelConfig,
+              ],
+              '_prototypeBuilder' => $modelPrototypeBuilderConfig,
             ]
           );
 
@@ -368,11 +372,14 @@ class Builder {
             $tmpModelParams
           );
 
-          $this->renderFile(
-            $widgetRootDir . '/Models/Callbacks/' . $modelName . '.php',
-            'src/Widgets/ModelCallbacks.php.twig',
-            $tmpModelParams
-          );
+          if ($modelPrototypeBuilderConfig['hasCallbacks'] ?? FALSE) {
+            $this->createFolder($widgetRootDir . '/Models/Callbacks');
+            $this->renderFile(
+              $widgetRootDir . '/Models/Callbacks/' . $modelName . '.php',
+              'src/Widgets/ModelCallbacks.php.twig',
+              $tmpModelParams
+            );
+          }
         }
       }
 

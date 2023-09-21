@@ -37,7 +37,7 @@ spl_autoload_register(function ($class) {
         $widgetName = array_pop($widgetPath);
         $widgetPath = join("/", $widgetPath);
 
-        if (!@include_once($___ADIOSObject->config['dir'] . "/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+        if (!@include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
           // ak ani widgetovska, skusim plugin
           $class = str_replace("Plugins/", "", $class);
           $pathLeft = "";
@@ -69,8 +69,8 @@ spl_autoload_register(function ($class) {
         throw new \Exception("ADIOS is not loaded.");
       }
 
-      if (!@include_once($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}/Main.php")) {
-        include_once($___ADIOSObject->config['dir'] . "/Widgets/{$m[1]}.php");
+      if (!@include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$m[1]}/Main.php")) {
+        include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$m[1]}.php");
       }
     } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
       foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
@@ -88,20 +88,20 @@ spl_autoload_register(function ($class) {
       if (is_file($testFile)) {
         include_once($testFile);
       } else {
-        include_once($___ADIOSObject->config['dir'] . "/../tests/{$class}.php");
+        include_once($___ADIOSObject->config['src_dir'] . "/../tests/{$class}.php");
       }
 
     } else if (preg_match('/ADIOS\/Web\/([\w\/]+)/', $class, $m)) {
       $class = str_replace("ADIOS/Web/", "", $class);
 
-      include_once($___ADIOSObject->config['dir'] . "/Web/{$class}.php");
+      include_once($___ADIOSObject->config['src_dir'] . "/Web/{$class}.php");
 
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
       include_once(__DIR__ . "/../{$m[1]}.php");
 
     } else if (preg_match('/App\/([\w\/]+)/', $class, $m)) {
-      $fname1 = $___ADIOSObject->config['dir'] . "/{$m[1]}/Main.php";
-      $fname2 = $___ADIOSObject->config['dir'] . "/{$m[1]}.php";
+      $fname1 = $___ADIOSObject->config['src_dir'] . "/{$m[1]}/Main.php";
+      $fname2 = $___ADIOSObject->config['src_dir'] . "/{$m[1]}.php";
       
       if (is_file($fname1)) {
         include($fname1);
@@ -831,7 +831,7 @@ class Loader
     }
 
     if (empty($dictionaryFolder)) {
-      $dictionaryFolder = "{$this->config['dir']}/Lang";
+      $dictionaryFolder = "{$this->config['src_dir']}/Lang";
     }
 
     if (strlen($toLanguage) == 2) {
@@ -866,10 +866,10 @@ class Loader
     if (empty($this->dictionary[$toLanguage])) {
       $this->dictionary[$toLanguage] = [];
 
-      $dictionaryFiles = \ADIOS\Core\HelperFunctions::scanDirRecursively("{$this->config['dir']}/Lang");
+      $dictionaryFiles = \ADIOS\Core\HelperFunctions::scanDirRecursively("{$this->config['src_dir']}/Lang");
 
       foreach ($dictionaryFiles as $file) {
-        include("{$this->config['dir']}/Lang/{$file}");
+        include("{$this->config['src_dir']}/Lang/{$file}");
 
         $this->dictionary[$toLanguage] =  \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
           $this->dictionary[$toLanguage],

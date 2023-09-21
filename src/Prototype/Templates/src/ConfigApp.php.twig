@@ -3,41 +3,42 @@
 {{ builderInfo.php|raw }}
 
 // global
-$config['application_name']              = "{{ ConfigApp.applicationName }}";
-$config['session_salt']                  = "{{ ConfigApp.sessionSalt }}";
+$config['application_name']              = '{{ ConfigApp.applicationName }}';
+$config['session_salt']                  = '{{ ConfigApp.sessionSalt }}';
 
 // dirs & urls
-$config["dir"]                           = realpath(__DIR__ . "/../src");
-$config["log_dir"]                       = realpath(__DIR__ . "/../log");
-$config["tmp_dir"]                       = realpath(__DIR__ . "/../tmp");
-$config["widgets_dir"]                   = realpath(__DIR__ . "/../src/Widgets");
-$config['files_dir']                     = realpath(__DIR__ . "/../upload");
-$config['files_url']                     = "//" . $_SERVER['HTTP_HOST'] . $config['rewrite_base'] . "upload";
+$config['dir']                           = realpath(__DIR__ . '/..');
+$config['src_dir']                       = realpath(__DIR__ . '/../src');
+$config['log_dir']                       = realpath(__DIR__ . '/../log');
+$config['tmp_dir']                       = realpath(__DIR__ . '/../tmp');
+$config['widgets_dir']                   = realpath(__DIR__ . '/../src/Widgets');
+{# $config['files_dir']                     = realpath(__DIR__ . '/../upload'); #}
+$config['files_url']                     = '//' . $_SERVER['HTTP_HOST'] . $config['rewrite_base'] . 'upload';
 
 // brand
-$config["brand"]["title"]                = "{{ ConfigApp.applicationName }}";
-$config["brand"]["favicon"]              = $config["url"] . '/src/Assets/images/favicon.png';
-$config["brand"]["login"]["splash"]      = $config["url"] . '/src/Assets/images/{{ ConfigApp.brand.loginScreenImage ?? 'login-screen.jpg' }}';
-$config["brand"]["sidebar"]["icon"]      = $config["url"] . '/src/Assets/images/{{ ConfigApp.brand.sidebar.icon ?? 'logo.png' }}';
-$config["brand"]["sidebar"]["title"]     = '{{ ConfigApp.brand.sidebar.title ?? "" }}';
+$config['brand']['title']                = '{{ ConfigApp.applicationName }}';
+$config['brand']['favicon']              = $config['url'] . '/src/Assets/images/favicon.png';
+$config['brand']['login']['splash']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.loginScreenImage ?? 'login-screen.jpg' }}';
+$config['brand']['sidebar']['icon']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.sidebar.icon ?? 'logo.png' }}';
+$config['brand']['sidebar']['title']     = '{{ ConfigApp.brand.sidebar.title ?? '' }}';
 
 // widgets
 $config['widgets'] = {{ varExport(configWidgetsEnabled)|raw }};
 
 // web
-$config['web']['themeDir'] = realpath(__DIR__ . "/../src/Web/Theme");
+$config['web']['themeDir'] = realpath(__DIR__ . '/../src/Web/Theme');
 
 // misc
-$config['default_action'] = "{% if ConfigApp.defaultAction == "" %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}";
-$config['available_languages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}["sk"]{% endif %};
-{% if ConfigApp.skin %}$config["skin"] = "{{ ConfigApp.skin }}";{% endif %}
+$config['default_action'] = '{% if ConfigApp.defaultAction == '' %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}';
+$config['available_languages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}['sk']{% endif %};
+$config['skin'] = '{{ ConfigApp.skin ?? blue }}';
 
 {% if ConfigApp.smtp %}
 // SMTP server
-$config['smtp_host'] = "{{ ConfigApp.smtp.host }}";
-$config['smtp_port'] = "{{ ConfigApp.smtp.port }}";
-$config['smtp_login'] = "{{ ConfigApp.smtp.login }}";
-$config['smtp_password'] = "{{ ConfigApp.smtp.password }}";
-$config['smtp_protocol'] = "{{ ConfigApp.smtp.protocol }}";
-$config['smtp_from'] = "{{ ConfigApp.smtp.from }}";
+$config['smtp_host'] = '{{ ConfigApp.smtp.host }}';
+$config['smtp_port'] = '{{ ConfigApp.smtp.port }}';
+$config['smtp_login'] = '{{ ConfigApp.smtp.login }}';
+$config['smtp_password'] = '{{ ConfigApp.smtp.password }}';
+$config['smtp_protocol'] = '{{ ConfigApp.smtp.protocol }}';
+$config['smtp_from'] = '{{ ConfigApp.smtp.from }}';
 {% endif %}

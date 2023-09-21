@@ -22,7 +22,7 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypeText extends \ADIOS\Core\DB\DataType
 {
-  public function get_sql_create_string($table_name, $col_name, $params = [])
+  public function sqlCreateString($table_name, $col_name, $params = [])
   {
     $sqlDataType = ($params['sql_data_type'] ?? "text");
 
@@ -33,7 +33,7 @@ class DataTypeText extends \ADIOS\Core\DB\DataType
     return "`{$col_name}` {$sqlDataType} " . ($params['sql_definitions'] ?? "");
   }
 
-  public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
+  public function sqlValueString($table_name, $col_name, $value, $params = [])
   {
     $params = _put_default_params_values($params, [
       'null_value' => false,
@@ -50,7 +50,7 @@ class DataTypeText extends \ADIOS\Core\DB\DataType
     return $sql;
   }
 
-  public function get_html($value, $params = [])
+  public function toHtml($value, $params = [])
   {
     $value = 'yes' == $params['col_definition']['wa_list_no_html_convert'] ? $value : strip_tags($value);
     $html = mb_substr($value, 0, ($params['col_definition']['wa_list_char_length'] ? $params['col_definition']['wa_list_char_length'] : 80), 'utf-8');

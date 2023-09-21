@@ -15,7 +15,7 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypeEnum extends \ADIOS\Core\DB\DataType
 {
-    public function get_sql_create_string($table_name, $col_name, $params = [])
+    public function sqlCreateString($table_name, $col_name, $params = [])
     {
       $sql = "`$col_name` ENUM(";
       $e_vals = $params['enum_values'];
@@ -29,7 +29,7 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
       return $sql;
     }
 
-    public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
+    public function sqlValueString($table_name, $col_name, $value, $params = [])
     {
       $e_vals = explode(',', $this->adios->db->tables[$table_name][$col_name]['enum_values']);
       if (in_array($value, $e_vals)) {
@@ -41,7 +41,7 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
       return $sql;
     }
 
-    public function get_html_or_csv($value, $params = [])
+    private function _toHtmlOrCsv($value, $params = [])
     {
       $html = '';
 
@@ -54,12 +54,12 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
       return $html;
     }
 
-    public function get_html($value, $params = [])
+    public function toHtml($value, $params = [])
     {
-      return $this->get_html_or_csv($value, $params);
+      return $this->_toHtmlOrCsv($value, $params);
     }
 
-    public function get_csv($value, $params = [])
+    public function toCsv($value, $params = [])
     {
       return $value;
     }

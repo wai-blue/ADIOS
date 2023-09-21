@@ -18,7 +18,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
 
   protected $defaultValue = 0;
 
-  public function get_sql_create_string($table_name, $col_name, $params = [])
+  public function sqlCreateString($table_name, $col_name, $params = [])
   {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : 'default ' . (float) $this->getDefaultValue($params) . ' ';
     $params['sql_definitions'] ??= '';
@@ -35,7 +35,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
     return "`{$col_name}` {$sqlDataType}($width, $decimals) {$params['sql_definitions']}";
   }
 
-  public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
+  public function sqlValueString($table_name, $col_name, $value, $params = [])
   {
     $params = _put_default_params_values($params, [
       'null_value' => false,
@@ -60,7 +60,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
     }
   }
 
-  public function get_html($value, $params = [])
+  public function toHtml($value, $params = [])
   {
     $html = '';
 
@@ -83,7 +83,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
     return $html;
   }
 
-  public function get_csv($value, $params = [])
+  public function toCsv($value, $params = [])
   {
     return str_replace('.', ',', strip_tags($value + 0));
   }

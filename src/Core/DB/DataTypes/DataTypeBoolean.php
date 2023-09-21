@@ -32,7 +32,7 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
   
   protected $defaultValue = 0;
 
-  public function get_sql_create_string($table_name, $col_name, $params = []) {
+  public function sqlCreateString($table_name, $col_name, $params = []) {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 
       ? $params['sql_definitions'] 
       : " default " . (int) $this->getDefaultValue($params);
@@ -40,11 +40,11 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
     return "`$col_name` int(1) {$params['sql_definitions']} NOT NULL";
   }
 
-  public function get_sql_column_data_string($tableName, $colName, $value, $params = []) {
+  public function sqlValueString($tableName, $colName, $value, $params = []) {
     return "`{$colName}` = " . (int) $value . ""; 
   }
 
-  public function get_html_or_csv($value, $params = []) {
+  private function _toHtmlOrCsv($value, $params = []) {
     if ((int) $value == 1) {
       $html = $this->translate("Yes");
     } else {
@@ -57,7 +57,7 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
   /**
    * @internal
    */
-  public function get_html($value, $params = []) {
+  public function toHtml($value, $params = []) {
     if ((int) $value !== 0) {
       $html = "<i class='fas fa-check-circle' style='color:#4caf50' title='".$this->translate("Yes")."'></i>";
     } else {
@@ -67,7 +67,7 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
     return "<div style='text-align:center'>{$html}</div>";
   }
 
-  public function get_csv($value, $params = []) {
+  public function toCsv($value, $params = []) {
     return (int) $value;
   }
 

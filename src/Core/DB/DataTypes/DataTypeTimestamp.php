@@ -15,14 +15,14 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypeTimestamp extends \ADIOS\Core\DB\DataType
 {
-    public function get_sql_create_string($table_name, $col_name, $params = [])
+    public function sqlCreateString($table_name, $col_name, $params = [])
     {
         $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default CURRENT_TIMESTAMP ';
 
         return "`$col_name` timestamp {$params['sql_definitions']}";
     }
 
-    public function get_sql_column_data_string($table_name, $col_name, $value, $params = [])
+    public function sqlValueString($table_name, $col_name, $value, $params = [])
     {
         $params = _put_default_params_values($params, [
             'null_value' => false,
@@ -51,7 +51,7 @@ class DataTypeTimestamp extends \ADIOS\Core\DB\DataType
         return $sql;
     }
 
-    public function get_html_or_csv($value, $params = [])
+    private function _toHtmlOrCsv($value, $params = [])
     {
         if (isset($params['col_definition']['format'])) {
             $format = $params['col_definition']['format'];
@@ -66,13 +66,13 @@ class DataTypeTimestamp extends \ADIOS\Core\DB\DataType
         return $html;
     }
 
-    public function get_html($value, $params = [])
+    public function toHtml($value, $params = [])
     {
-        return $this->get_html_or_csv($value, $params);
+        return $this->_toHtmlOrCsv($value, $params);
     }
 
-    public function get_csv($value, $params = [])
+    public function toCsv($value, $params = [])
     {
-        return $this->get_html_or_csv($value, $params);
+        return $this->_toHtmlOrCsv($value, $params);
     }
 }
