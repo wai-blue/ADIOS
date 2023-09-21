@@ -15,14 +15,14 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypePassword extends \ADIOS\Core\DB\DataType
 {
-    public function get_sql_create_string($table_name, $col_name, $params = [])
+    public function sqlCreateString($table_name, $col_name, $params = [])
     {
         $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
 
         return "`$col_name` varchar({$params['byte_size']}) {$params['sql_definitions']}";
     }
 
-    public function get_sql_column_data_string($table_name, $col_name, $value, $params = []) {
+    public function sqlValueString($table_name, $col_name, $value, $params = []) {
       $params = _put_default_params_values($params, [
         'null_value' => false,
         'dumping_data' => false,
@@ -43,11 +43,11 @@ class DataTypePassword extends \ADIOS\Core\DB\DataType
       return $sql;
     }
 
-    public function get_html($value, $params = []) {
+    public function toHtml($value, $params = []) {
       return "...".substr(hsc($value), 8, 8)."...";
     }
 
-    public function get_csv($value, $params = []) {
+    public function toCsv($value, $params = []) {
       return '';
     }
 }

@@ -441,7 +441,7 @@ class Table extends \ADIOS\Core\View
       if (!empty($columnDefinition['enum_values'])) {
         $cellCsv = $columnDefinition['enum_values'][$rowValues[$columnName]];
       } else {
-        $cellCsv = $this->adios->db->columnTypes[$columnDefinition['type']]->get_csv(
+        $cellCsv = $this->adios->db->columnTypes[$columnDefinition['type']]->toCsv(
           $rowValues[$columnName],
           [
             'col_name' => $columnName,
@@ -1166,7 +1166,7 @@ class Table extends \ADIOS\Core\View
       $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
       $cellHtml = $tmpInput->formatValueToHtml();
     } else if ($this->adios->db->isRegisteredColumnType($columnDefinition['type'])) {
-      $cellHtml = $this->adios->db->columnTypes[$columnDefinition['type']]->get_html(
+      $cellHtml = $this->adios->db->columnTypes[$columnDefinition['type']]->toHtml(
         $rowValues[$columnName],
         [
           'col_name' => $columnName,

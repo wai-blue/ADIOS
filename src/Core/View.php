@@ -11,6 +11,10 @@
 namespace ADIOS\Core;
 
 class View {
+
+  const DISPLAY_MODE_WINDOW = 'window';
+  const DISPLAY_MODE_DESKTOP = 'desktop';
+  const DISPLAY_MODE_INLINE = 'inline';
   
   public ?\ADIOS\Core\Loader $adios = null;
 
@@ -449,16 +453,35 @@ class View {
     return $this->applyDisplayMode((string) $html);
   }
 
-  public function applyDisplayMode(string $content) : string
+  public function applyDisplayMode(string $content, string $displayMode = '') : string
   {
-    switch ($this->displayMode) {
-      case 'window':
+    if (empty($displayMode)) $displayMode = $this->displayMode;
+
+    switch ($displayMode) {
+      case self::DISPLAY_MODE_WINDOW:
+        if (!$this->window instanceof \ADIOS\Core\Views\Window) {
+          $this->window = new \ADIOS\Core\Views\Window($this->adios, []);
+          $this->window->setTitle('Window Title');
+          $this->window->setCloseButton(
+            $this->create('Button', [
+              'type' => 'close',
+              'onclick' => "
+                window_close('{$this->window->uid}');
+              ",
+            ])
+          );
+        }
+
         $this->window->setContent($content);
         if (is_array($this->params['windowParams'])) {
           if (!empty($this->params['windowParams']['title'])) {
             $this->window->setTitle($this->params['windowParams']['title']);
           }
           $this->window->addCssClass($this->params['windowParams']['cssClass'] ?? '');
+
+          if ($this->params['windowParams']['fullscreen']) {
+            $this->window->addCssClass('fullscreen');
+          }
 
           if ($this->params['windowParams']['modal']) {
             $this->window->addCssClass('modal');
@@ -467,12 +490,10 @@ class View {
 
         $html = $this->window->render();
       break;
-      case 'desktop':
-        $title = $this->addView('Title', ['title' => 'asdf']);
-        // $html = $title->render() . $html;
+      case self::DISPLAY_MODE_DESKTOP:
         $html = $content;
       break;
-      case 'inline':
+      case self::DISPLAY_MODE_INLINE:
       default:
         $html = $content;
       break;

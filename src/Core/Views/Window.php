@@ -127,6 +127,9 @@ class Window extends \ADIOS\Core\View {
           {$this->params['content']}
         </div>
       </div>
+      <script>
+        window_post_render($('#{$this->uid}'), '', {}, {});
+      </script>
     ";
 
     return $html;

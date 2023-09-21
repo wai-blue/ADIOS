@@ -16,13 +16,13 @@ namespace ADIOS\Core\DB\DataTypes;
 class DataTypeDate extends \ADIOS\Core\DB\DataType
 {
 
-  public function get_sql_create_string($table_name, $col_name, $params = []) {
+  public function sqlCreateString($table_name, $col_name, $params = []) {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) || $params['required'] ? $params['sql_definitions'] : ' default null ';
     $params['sql_definitions'] ??= '';
     return "`{$col_name}` date {$params['sql_definitions']}";
   }
 
-  public function get_sql_column_data_string($table_name, $col_name, $value, $params = []) {
+  public function sqlValueString($table_name, $col_name, $value, $params = []) {
     $dateStr = str_replace(' ', '', $value);
 
     if (empty($dateStr) || strtotime((string) $dateStr) == 0) {
@@ -40,7 +40,7 @@ class DataTypeDate extends \ADIOS\Core\DB\DataType
     return $sql;
   }
 
-  public function get_html_or_csv($value, $params = []) {
+  private function _toHtmlOrCsv($value, $params = []) {
     if (!empty($params['col_definition']['format'])) {
       $format = $params['col_definition']['format'];
     } else {
@@ -53,11 +53,11 @@ class DataTypeDate extends \ADIOS\Core\DB\DataType
     return $html;
   }
 
-  public function get_html($value, $params = []) {
-    return $this->get_html_or_csv($value, $params);
+  public function toHtml($value, $params = []) {
+    return $this->_toHtmlOrCsv($value, $params);
   }
 
-  public function get_csv($value, $params = []) {
-    return $this->get_html_or_csv($value, $params);
+  public function toCsv($value, $params = []) {
+    return $this->_toHtmlOrCsv($value, $params);
   }
 }

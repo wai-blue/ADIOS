@@ -614,7 +614,7 @@ class MySQLi extends \ADIOS\Core\DB
       $sql = "`{$colName}` = (" . substr($value, 4) . ")";
     } else if (isset($this->columnTypes[$colType])) {
       if (isset($data[$colName])) {
-        $sql = $this->columnTypes[$colType]->get_sql_column_data_string(
+        $sql = $this->columnTypes[$colType]->sqlValueString(
           $table,
           $colName,
           $data[$colName],
@@ -986,7 +986,7 @@ class MySQLi extends \ADIOS\Core\DB
 
         if (isset($this->columnTypes[$col_type]) && !$col_definition['virtual']) {
           $tmp = $this->columnTypes[$col_type]
-            ->get_sql_create_string($table_name, $col_name, $col_definition);
+            ->sqlCreateString($table_name, $col_name, $col_definition);
 
           // REVIEW DD: Tato uprava ma ist do DataTypeBool.php a DataTypeBoolean.php
           // (pripadne nejake defaultne spravanie implementovat do DataType.php

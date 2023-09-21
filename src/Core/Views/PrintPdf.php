@@ -101,7 +101,7 @@ class PrintPdf extends \ADIOS\Core\View
               ? $columns[$colName]['enum_values'][$colValue] 
               : $colValue
             ),
-            'date', 'datetime' => $adios->db->columnTypes[$columns[$colName]["type"]]->get_html(
+            'date', 'datetime' => $adios->db->columnTypes[$columns[$colName]["type"]]->toHtml(
               $row[$colName],
               [
                 'col_name' => $colName,

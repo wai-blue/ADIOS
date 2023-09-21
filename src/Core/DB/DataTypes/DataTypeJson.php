@@ -22,11 +22,11 @@ namespace ADIOS\Core\DB\DataTypes;
  */
 class DataTypeJson extends \ADIOS\Core\DB\DataType
 {
-  public function get_sql_create_string($table_name, $col_name, $params = []) {
+  public function sqlCreateString($table_name, $col_name, $params = []) {
     return "`{$col_name}` json ".($params['sql_definitions'] ?? "");
   }
 
-  public function get_sql_column_data_string($table_name, $col_name, $value, $params = []) {
+  public function sqlValueString($table_name, $col_name, $value, $params = []) {
     $params = _put_default_params_values($params, [
       'null_value' => false,
       'dumping_data' => false,
@@ -42,13 +42,30 @@ class DataTypeJson extends \ADIOS\Core\DB\DataType
     return $sql;
   }
 
-  public function get_html($value, $params = []) {
-    $value = 'yes' == $params['col_definition']['wa_list_no_html_convert'] ? $value : strip_tags($value);
-    $html = mb_substr($value, 0, ($params['col_definition']['wa_list_char_length'] ? $params['col_definition']['wa_list_char_length'] : 80), 'utf-8');
-    if (strlen($html) < strlen($value)) {
-        $html .= '...';
+  public function columnDefinitionPostProcess(array $colDef): array
+  {
+    if (
+      isset($colDef['schemaFileJson'])
+      && strpos($colDef['schemaFileJson'], '..') === FALSE
+    ) {
+      $schemaFileJson =
+        $this->adios->config['dir']
+        . '/'
+        . $colDef['schemaFileJson']
+      ;
+
+      $colDef['schema'] = json_decode(file_get_contents($schemaFileJson), TRUE);
     }
-    $html = ($html);
+
+    return $colDef;
+  }
+
+  public function toHtml($value, $params = []) {
+    $html = "
+      <pre>
+        ".json_decode(json_encode($value), JSON_PRETTY_PRINT)."
+      </pre>
+    ";
 
     return $html;
   }
