@@ -11,24 +11,25 @@
 namespace ADIOS\Core\Views\Inputs;
 
 class Tags extends \ADIOS\Core\Views\Input {
-
+  
   public function render(string $panel = ''): string
   {
     $params = parent::params_merge([
       'model' => '',
+      'tagColumn' => 'tag',
       'initialTags' => '[""]' 
     ], $this->params);
 
     $model = $this->adios->getModel($params['model']);
     $data = $model->getAll();
 
-    if (!array_key_exists('tag', $model->columns())) {
-      exit($this->translate("Column named [tag] does not exists for the model {$params['model']}"));
+    if (!array_key_exists($params['tagColumn'], $model->columns())) {
+      exit($this->translate("Column named [{$params['tagColumn']}] does not exists for the model {$params['model']}"));
     }
 
     $allTags = [];
     foreach ($data as $item) {
-      $allTags[] = strtolower(ads($item["tag"]));
+      $allTags[] = strtolower(ads($item[$params['tagColumn']]));
     }
 
     $allTagsAutocomplete = "'" . implode("','", $allTags). "'";
