@@ -68,13 +68,13 @@ class ButtonPanel extends \ADIOS\Core\View {
   {
     $html = "
       ".(empty($this->params['title']) ? "" : "<div class='h3 text-primary mb-0 p-4'>".hsc($this->params['title'])."</div>")."
-      <div class='row p-4'>
+      <div class='row'>
     ";
 
     foreach ($this->params['columns'] as $column) {
       $columnHtml = "
-        <div class='col-md-6'>
-          <div class='card shadow mb-2'>
+        <div class='".hsc($column['cssClass'])."'>
+          <div class='card shadow-sm mb-2'>
             ".(empty($column['title']) ? "" : "
               <div class='card-header py-3'>
                 <div class='m-0 font-weight-bold text-primary'>".hsc($column['title'])."</div>
@@ -87,8 +87,8 @@ class ButtonPanel extends \ADIOS\Core\View {
         foreach ($column['buttons'] as $button) {
           $columnHtml .= "
             <div class='row py-2'>
-              <div class='col-3 align-self-center'>".$this->adios->view->create('Button', $button)->render()."</div>
-              <div class='col-9 align-self-center'>".hsc($button['hint'])."</div>
+              <div class='col-md-3 align-self-center'>".$this->adios->view->create('Button', $button)->render()."</div>
+              <div class='col-md-9 align-self-center'>".hsc($button['hint'])."</div>
             </div>
           ";
         }

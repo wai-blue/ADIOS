@@ -106,52 +106,27 @@ class User extends \ADIOS\Core\Model {
       'last_login_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last login'),
-        'viewParams' => [
-          'Table' => [
-            'showColumn' => true
-          ],
-        ],
         'readonly' => TRUE,
       ],
       'last_login_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last login IP'),
-        'viewParams' => [
-          'Table' => [
-            'showColumn' => true
-          ],
-        ],
         'readonly' => TRUE,
       ],
       'last_access_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last access'),
-        'viewParams' => [
-          'Table' => [
-            'showColumn' => true
-          ],
-        ],
         'readonly' => TRUE,
       ],
       'last_access_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last access IP'),
-        'viewParams' => [
-          'Table' => [
-            'showColumn' => true
-          ],
-        ],
         'readonly' => TRUE,
       ],
       'id_token_reset_password' => [
         'type' => 'lookup',
         'model' => "ADIOS/Core/Models/Token",
         'title' => $this->translate('Reset password token'),
-        'viewParams' => [
-          'Table' => [
-            'showColumn' => true
-          ],
-        ],
         'readonly' => TRUE,
       ]
     ]);

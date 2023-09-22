@@ -469,12 +469,9 @@ class Table extends \ADIOS\Core\View
    */
   public function render(string $panel = ''): string
   {
-    $html = "";
-    $this->addCssClass('Container');
+    $html = '';
 
-    if (!in_array("UI/Form", $this->adios->actionStack)) {
-      $this->addCssClass('shadow');
-    }
+    $this->addCssClass('Container');
 
     if (!$this->params['__IS_WINDOW__']) {
       $this->addCssClass('desktop');
@@ -552,6 +549,8 @@ class Table extends \ADIOS\Core\View
 
 
     if (!$this->params['refresh']) {
+      $html .= "<div class='shadow-sm m-1'>";
+
       if (_count($this->params)) {
         $tmp = json_encode($this->params);
         if (!empty($tmp)) {
@@ -690,6 +689,7 @@ class Table extends \ADIOS\Core\View
             ->setLeftContent($titleLeftContent)
             ->setRightContent($titleRightContent)
             ->setTitle($this->model->translate($this->params['title']))
+            ->addCssClass('p-4')
             ->render();
         }
       }
@@ -733,7 +733,7 @@ class Table extends \ADIOS\Core\View
         }
 
         $html .= "
-          <div class='card shadow mb-4'>
+          <div class='card shadow-sm mb-4'>
             <a class='card-header py-3'>
               <h6 class='m-0 font-weight-bold text-primary'>
                 <i class='fas fa-filter mr-2'></i>
@@ -1131,23 +1131,11 @@ class Table extends \ADIOS\Core\View
 
     // koniec obsahu
     if (!$this->params['refresh']) {
-      $html .= '</div>';
+      $html .= '
+          </div>
+        </div>
+      ';
     }
-
-    // if ($this->params['__IS_WINDOW__']) {
-    //   $html = $this->adios->view->Window(
-    //     [
-    //       'uid' => "{$this->uid}_window",
-    //       'content' => $html,
-    //       'header' => [
-    //         $this->addView('Button', ["text" => $this->translate("Close"), "type" => "close", "onclick" => "ui_form_close('{$this->uid}_window');"]),
-    //       ],
-    //       'title' => " ",
-    //     ]
-    //   )->render();
-    // } else {
-    //   //
-    // }
 
     return HelperFunctions::minifyHtml($html);
   }

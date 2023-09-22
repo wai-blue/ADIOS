@@ -133,6 +133,12 @@
 
   }
 
+  function window_close_all() {
+    for (windowId in ADIOS_windows) {
+      window_close(windowId);
+    }
+  }
+
   function desktop_update(action, params, options) {
     desktop_render(action, params, options);
   };

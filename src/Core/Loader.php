@@ -121,7 +121,7 @@ class Loader
 
   public string $version = "";
   public string $gtp = "";
-  public string $requestedURI = "";
+  public string $requestedUri = "";
   public string $requestedAction = "";
   public string $action = "";
   public string $uid = "";
@@ -227,9 +227,9 @@ class Loader
 
     // ak requestuje nejaky Asset (css, js, image, font), tak ho vyplujem a skoncim
     if ($this->config['rewrite_base'] == "/") {
-      $this->requestedURI = ltrim($this->config['request_uri'], "/");
+      $this->requestedUri = ltrim($this->config['request_uri'], "/");
     } else {
-      $this->requestedURI = str_replace($this->config['rewrite_base'], "", $this->config['request_uri']);
+      $this->requestedUri = str_replace($this->config['rewrite_base'], "", $this->config['request_uri']);
     }
 
     $this->assetsUrlMap["adios/assets/css/"] = __DIR__."/../Assets/Css/";
@@ -912,7 +912,7 @@ class Loader
     $headerExpires = "Expires: ".gmdate("D, d M Y H:i:s", time() + $cachingTime)." GMT";
     $headerCacheControl = "Cache-Control: max-age={$cachingTime}";
 
-    if ($this->requestedURI == "adios/cache.css") {
+    if ($this->requestedUri == "adios/cache.css") {
       $cssCache = $this->renderCSSCache();
 
       header("Content-type: text/css");
@@ -924,7 +924,7 @@ class Loader
       echo $cssCache;
 
       exit();
-    } else if ($this->requestedURI == "adios/cache.js") {
+    } else if ($this->requestedUri == "adios/cache.js") {
       $jsCache = $this->renderJSCache();
       $cachingTime = 3600;
 
@@ -939,15 +939,15 @@ class Loader
       exit();
     } else {
       foreach ($this->assetsUrlMap as $urlPart => $mapping) {
-        if (preg_match('/^'.str_replace("/", "\\/", $urlPart).'/', $this->requestedURI, $m)) {
+        if (preg_match('/^'.str_replace("/", "\\/", $urlPart).'/', $this->requestedUri, $m)) {
 
           if ($mapping instanceof \Closure) {
-            $sourceFile = $mapping($this, $this->requestedURI);
+            $sourceFile = $mapping($this, $this->requestedUri);
           } else {
-            $sourceFile = $mapping.str_replace($urlPart, "", $this->requestedURI);
+            $sourceFile = $mapping.str_replace($urlPart, "", $this->requestedUri);
           }
 
-          $ext = strtolower(pathinfo($this->requestedURI, PATHINFO_EXTENSION));
+          $ext = strtolower(pathinfo($this->requestedUri, PATHINFO_EXTENSION));
 
           switch ($ext) {
             case "css":
@@ -1111,13 +1111,13 @@ class Loader
    * @return string Rendered content.
    */
   public function render($params = []) {
-    if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedURI, $m)) {
+    if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedUri, $m)) {
       $cronClassName = str_replace("/", "\\", "/App/Widgets/{$m[0]}");
 
       if (class_exists($cronClassName)) {
         (new $cronClassName($this))->run();
       } else {
-        echo "Unknown cron '{$this->requestedURI}'.";
+        echo "Unknown cron '{$this->requestedUri}'.";
       }
 
       exit();
@@ -1218,22 +1218,22 @@ class Loader
 
       // Kontrola permissions
 
-      $permissionForRequestedURI = "";
+      $permissionForrequestedUri = "";
       foreach ($this->routing as $routePattern => $route) {
         if (preg_match((string) $routePattern, $this->action, $m)) {
-          $permissionForRequestedURI = $route['permission'];
+          $permissionForrequestedUri = $route['permission'];
         }
       }
 
       if (
-        !empty($permissionForRequestedURI)
-        && !$this->permissions->has($permissionForRequestedURI)
+        !empty($permissionForrequestedUri)
+        && !$this->permissions->has($permissionForrequestedUri)
       ) {
-        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedURI}).");
+        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForrequestedUri}).");
       }
 
       // TODO: Docasne. Ked bude fungovat, vymazat.
-      $params['permissionForRequestedURI'] = $permissionForRequestedURI;
+      $params['permissionForrequestedUri'] = $permissionForrequestedUri;
 
 
       // All OK, rendering content...
@@ -1255,7 +1255,7 @@ class Loader
       $lines = [];
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
       if ($this->config['debug']) {
-        $lines[] = "Requested URI = {$this->requestedURI}";
+        $lines[] = "Requested URI = {$this->requestedUri}";
         $lines[] = "Rewrite base = {$this->config['rewrite_base']}";
         $lines[] = "SERVER.REQUEST_URI = {$this->config['request_uri']}";
       }
