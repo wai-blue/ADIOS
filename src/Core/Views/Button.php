@@ -14,6 +14,24 @@ namespace ADIOS\Core\Views;
  *   ]);
  * ```
  *
+ * or
+
+ * ```php
+ *   $adios->view->create('Button', [
+ *     "type" => "close",
+ *     "url" => "url_relative_to_apps_root_url",
+ *   ]);
+ * ```
+ *
+ * or
+
+ * ```php
+ *   $adios->view->create('Button', [
+ *     "type" => "close",
+ *     "href" => "any_url_to_open",
+ *   ]);
+ * ```
+ *
  * @package UI\Elements
  */
 class Button extends \ADIOS\Core\View {
@@ -32,6 +50,13 @@ class Button extends \ADIOS\Core\View {
    * @var string
    */
   // public $id = "";
+
+  /**
+   * If not empty, the href will be set to ROOT_URL + url.
+   *
+   * @var string
+   */
+  public $url = "";
 
   /**
    * If not empty, will be used as href attribute. Otherwise will href attribute be set to javascript:void(0).
@@ -69,11 +94,11 @@ class Button extends \ADIOS\Core\View {
   public $class = "";
 
   /**
-   * onClick functionality used as an inline Javascript.
+   * Onclick functionality used as an inline Javascript.
    *
    * @var string
    */
-  public $onClick = "";
+  public $onclick = "";
 
   /**
    * A <i>title</i> attribute of the button.
@@ -178,16 +203,20 @@ class Button extends \ADIOS\Core\View {
 
     parent::__construct($adios, $this->params);
 
-    // $this->id = $this->params['id'];
-    $this->href = $this->params['href'];
     $this->faIcon = $this->params['faIcon'];
     $this->text = $this->params['text'];
     $this->textRaw = $this->params['textRaw'];
     $this->title = $this->params['title'];
     $this->class = $this->params['class'];
-    $this->onClick = $this->params['onclick'];
+    $this->onclick = $this->params['onclick'];
     $this->style = $this->params['style'];
     $this->disabled = $this->params['disabled'];
+
+    if (!empty($this->params['url'])) {
+      $this->href = $this->adios->config['url'] . '/' . $this->params['url'];
+    } else {
+      $this->href = $this->params['href'] ?? 'javascript:void(0);';
+    }
 
   }
 
@@ -234,9 +263,11 @@ class Button extends \ADIOS\Core\View {
             aria-expanded='false'
             {$this->params['html_attributes']}
           >
-            <span class='icon'>
-              <i class='{$this->faIcon}'></i>
-            </span>
+            ".(empty($this->faIcon) ? "" : "
+              <span class='icon'>
+                <i class='{$this->faIcon}'></i>
+              </span>
+            ")."
             ".(empty($this->text) && empty($this->textRaw)
               ? ""
               : "<span class='text'>".(empty($this->textRaw) ? hsc($this->text) : $this->textRaw)."</span>"
@@ -258,7 +289,7 @@ class Button extends \ADIOS\Core\View {
             ".($this->class == "" ? "btn-primary btn-icon-split" : $this->class)."
           '
           style='{$this->style}'
-          ".(empty($this->onClick)
+          ".(empty($this->onclick)
             ? ""
             : "
             onclick=\"
@@ -266,7 +297,7 @@ class Button extends \ADIOS\Core\View {
               ".($this->params['cancel_bubble'] ? 'event.cancelBubble = true;' : '')."
 
               if (!_this.hasClass('disabled')) {
-                {$this->onClick}
+                {$this->onclick}
               }
 
               _this.addClass('disabled');
@@ -281,9 +312,11 @@ class Button extends \ADIOS\Core\View {
           title='".ads($this->title)."'
           {$this->params['html_attributes']}
         >
-          <span class='icon'>
-            <i class='{$this->faIcon}'></i>
-          </span>
+          ".(empty($this->faIcon) ? "" : "
+            <span class='icon'>
+              <i class='{$this->faIcon}'></i>
+            </span>
+          ")."
           ".(empty($this->text) && empty($this->textRaw)
             ? ""
             : "<span class='text'>".(empty($this->textRaw) ? hsc($this->text) : $this->textRaw)."</span>"

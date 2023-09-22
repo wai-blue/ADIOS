@@ -1592,17 +1592,18 @@ class Loader
    * implement hook for the event. The hook must return either modified event
    * data of FALSE. Returning FALSE in the hook terminates the event propagation.
    *
-   * @param  string $event Name of the event to propagate.
+   * @param  string $eventName Name of the event to propagate.
    * @param  array $eventData Data of the event. Each event has its own specific structure of the data.
    * @throws \ADIOS\Core\Exception When plugin's hook returns invalid value.
    * @return array<string, mixed> Event data modified by plugins which implement the hook.
    */
-  public function dispatchEventToPlugins($event, $eventData = []) {
+  public function dispatchEventToPlugins(string $eventName, array $eventData = []): array
+  {
     foreach ($this->pluginObjects as $plugin) {
-      if (method_exists($plugin, $event)) {
-        $eventData = $plugin->$event($eventData);
+      if (method_exists($plugin, $eventName)) {
+        $eventData = $plugin->$eventName($eventData);
         if (!is_array($eventData) && $eventData !== FALSE) {
-          throw new \ADIOS\Core\Exceptions\GeneralException("Plugin {$plugin->name}, event {$event}: No value returned. Either forward \$event or return FALSE.");
+          throw new \ADIOS\Core\Exceptions\GeneralException("Plugin {$plugin->name}, event {$eventName}: No value returned. Either forward \$event or return FALSE.");
         }
 
         if ($eventData === FALSE) {

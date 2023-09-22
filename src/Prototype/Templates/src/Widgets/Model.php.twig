@@ -61,8 +61,12 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
     ]);
   }
 
-{% if (thisModel.config.formParams) %}
-  public function formParams($data, $params) {
+{% if (thisModel.config.onFormParams) %}
+  public function onFormParams(\ADIOS\Core\Views\Form $formObject): array
+  {
+    $data = $formObject->data;
+    $params = $formObject->params;
+
     $id = (int) $data["id"];
 
     if ($id <= 0) {

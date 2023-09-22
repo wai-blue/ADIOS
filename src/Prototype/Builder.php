@@ -345,7 +345,7 @@ class Builder {
 
         foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
 
-          $modelPrototypeBuilderConfig = $modelConfig['_prototypeBuilder'];
+          $modelPrototypeBuilderConfig = $modelConfig['_prototypeBuilder'] ?? [];
           unset($modelConfig['_prototypeBuilder']);
 
           $tmpModelParams = array_merge(
