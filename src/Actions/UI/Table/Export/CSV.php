@@ -49,8 +49,7 @@ class CSV extends \ADIOS\Core\Action {
         foreach ($row as $colName => $colValue) {
           if (isset($columns[$colName])) {
             $cellCsv = $uiTable->getCellCsv($colName, $columns[$colName], $row);
-            $cellCsv = $model->tableCellCSVFormatter([
-              'table' => $uiTable,
+            $cellCsv = $model->onTableCellCsvFormatter($uiTable, [
               'column' => $colName,
               'row' => $row,
               'csv' => $cellCsv,

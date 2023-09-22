@@ -208,7 +208,9 @@ class User extends \ADIOS\Core\Model {
     return ($user === NULL ? [] : $user->toArray());
   }
 
-  public function formParams($data, $params) {
+  public function onFormParams(\ADIOS\Core\Views\Form $formObject, array $params): array
+  {
+
     if ($params["myProfileView"]) {
       $params['show_delete_button'] = FALSE;
       $params['template'] = [
@@ -228,7 +230,7 @@ class User extends \ADIOS\Core\Model {
       ];
     }
 
-    return $params;
+    return (array) $params;
   }
 
   public function generateToken($idUser, $tokenSalt, $tokenType) {

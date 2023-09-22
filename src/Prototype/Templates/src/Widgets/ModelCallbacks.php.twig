@@ -23,28 +23,36 @@ trait {{ thisModel.class }} {
 
   /* onBeforeInsert */
   /*
-  public function onBeforeInsert(array $data): array {
+  public function onBeforeInsert(array $data): array
+  {
+    $data = (array) parent::onBeforeInsert($data);
     return $data;
   }
   */
 
   /* onBeforeUpdate */
   /*
-  public function onBeforeUpdate(array $data): array {
+  public function onBeforeUpdate(array $data): array
+  {
+    $data = (array) parent::onBeforeUpdate($data);
     return $data;
   }
   */
 
   /* onBeforeSave */
   /*
-  public function onBeforeSave(array $data): array {
+  public function onBeforeSave(array $data): array
+  {
+    $data = (array) parent::onBeforeSave($data);
     return $data;
   }
   */
 
   /* onBeforeDelete */
   /*
-  public function onBeforeDelete(int $id): int {
+  public function onBeforeDelete(int $id): int
+  {
+    $id = (int) parent::onBeforeSave($id);
     return $id;
   }
   */
@@ -52,28 +60,36 @@ trait {{ thisModel.class }} {
 
   /* onAfterDelete */
   /*
-  public function onAfterDelete(int $id): int {
+  public function onAfterDelete(int $id): int
+  {
+    $id = (int) parent::onBeforeSave($id);
     return $id;
   }
   */
 
   /* onAfterInsert */
   /*
-  public function onAfterInsert(array $data, $returnValue) {
+  public function onAfterInsert(array $data, $returnValue)
+  {
+    $returnValue = parent::onAfterInsert($data, $returnValue);
     return $returnValue;
   }
   */
 
   /* onAfterUpdate */
   /*
-  public function onAfterUpdate(array $data, $returnValue) {
+  public function onAfterUpdate(array $data, $returnValue)
+  {
+    $returnValue = parent::onAfterUpdate($data, $returnValue);
     return $returnValue;
   }
   */
 
   /* onAfterSave */
   /*
-  public function onAfterSave(array $data, $returnValue) {
+  public function onAfterSave(array $data, $returnValue)
+  {
+    $returnValue = parent::onAfterSave($data, $returnValue);
     return $returnValue;
   }
   */
@@ -85,24 +101,80 @@ trait {{ thisModel.class }} {
    *
    ** *********************************************/
 
+  /* onTableParams */
+  /*
+  public function onTableParams(\ADIOS\Core\Views\Table $tableObject, array $params): array
+  {
+    return (array) parent::onTableParams($tableObject, $params);
+  }
+  */
+
+  /* onTableRowParams */
+  /*
+  public function onTableRowParams(\ADIOS\Core\Views\Table $tableObject, array $params): array
+  {
+    return (array) parent::onTableRowParams($tableObject, $params);
+  }
+  */
+
+  /* onTableRowCssFormatter */
+  /*
+  public function onTableRowCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  {
+    return (string) parent::onTableRowCssFormatter($tableObject, $data);
+  }
+  */
+
+  /* onTableCellCssFormatter */
+  /*
+  public function onTableCellCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  {
+    return (string) parent::onTableCellCssFormatter($tableObject, $data);
+  }
+  */
+
+  /* onTableCellHtmlFormatter */
+  /*
+  public function onTableCellHtmlFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  {
+    return (string) parent::onTableCellHtmlFormatter($tableObject, $data);
+  }
+  */
+
+  /* onTableCellCsvFormatter */
+  /*
+  public function onTableCellCsvFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  {
+    return (string) parent::onTableCellCsvFormatter($tableObject, $data);
+  }
+  */
+
+
+
+
+
+
   /* onTableBeforeInit */
   /*
-  public function onTableBeforeInit($tableObject) : void
+  public function onTableBeforeInit(\ADIOS\Core\Views\Table $tableObject): void
   {
+    parent::onTableBeforeInit($tableObject);
   }
   */
 
   /* onTableAfterInit */
   /*
-  public function onTableAfterInit($tableObject) : void
+  public function onTableAfterInit(\ADIOS\Core\Views\Table $tableObject): void
   {
+    parent::onTableAfterInit($tableObject);
   }
   */
 
   /* onTableAfterDataLoaded */
   /*
-  public function onTableAfterDataLoaded($tableObject) : void
+  public function onTableAfterDataLoaded(\ADIOS\Core\Views\Table $tableObject): void
   {
+    parent::onTableAfterDataLoaded($tableObject);
   }
   */
 
@@ -115,15 +187,17 @@ trait {{ thisModel.class }} {
 
   /* onFormBeforeInit */
   /*
-  public function onFormBeforeInit($formObject) : void
+  public function onFormBeforeInit(\ADIOS\Core\Views\Form $formObject): void
   {
+    parent::onFormBeforeInit($tableObject);
   }
   */
 
   /* onFormAfterInit */
   /*
-  public function onFormAfterInit($formObject) : void
+  public function onFormAfterInit(\ADIOS\Core\Views\Form $formObject): void
   {
+    parent::onFormAfterInit($tableObject);
   }
   */
 

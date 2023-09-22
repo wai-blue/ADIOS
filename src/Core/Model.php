@@ -1073,43 +1073,65 @@ class Model extends \Illuminate\Database\Eloquent\Model
     );
   }
 
-  public function tableParams($params, $table): array
+  /**
+   * onTableParams
+   *
+   * @param \ADIOS\Core\Views\Table $tableObject
+   *
+   * @return array Modified table params
+   */
+  public function onTableParams(\ADIOS\Core\Views\Table $tableObject, array $params): array
   {
-    return $this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
-      "model" => $this,
+    return (array) $this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
+      "tableObject" => $tableObject,
       "params" => $params,
-      "table" => $table,
     ])["params"];
   }
 
-  public function tableRowCSSFormatter($data): string
+  /**
+   * onTableRowParams
+   *
+   * @param \ADIOS\Core\Views\Table $tableObject
+   *
+   * @return array Modified row params
+   */
+  public function onTableRowParams(\ADIOS\Core\Views\Table $tableObject, array $params): array
   {
-    return (string) $this->adios->dispatchEventToPlugins("onTableRowCSSFormatter", [
-      "model" => $this,
+    return (array) $this->adios->dispatchEventToPlugins("onModelAfterTableRowParams", [
+      "tableObject" => $tableObject,
+      "params" => $params,
+    ])["params"];
+  }
+
+
+  public function onTableRowCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  {
+    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableRowCssFormatter", [
+      "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["css"];
   }
 
-  public function tableCellCSSFormatter($data): string
+  public function onTableCellCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
   {
-    return (string) $this->adios->dispatchEventToPlugins("onTableCellCSSFormatter", [
-      "model" => $this,
+    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellCssFormatter", [
+      "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["css"];
   }
 
-  public function tableCellHTMLFormatter($data): string
+  public function onTableCellHtmlFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
   {
-    return (string) $this->adios->dispatchEventToPlugins("onTableCellHTMLFormatter", [
-      "model" => $this,
+    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellHtmlFormatter", [
+      "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["html"];
   }
 
-  public function tableCellCSVFormatter($data): string
+  public function onTableCellCsvFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
   {
-    return (string) $this->adios->dispatchEventToPlugins("onTableCellCSVFormatter", [
-      "model" => $this,
+    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellCsvFormatter", [
+      "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["csv"];
   }
@@ -1117,34 +1139,43 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableBeforeInit
    *
-   * @param mixed $tableObject
+   * @param \ADIOS\Core\Views\Table $tableObject
    *
    * @return void
    */
-  public function onTableBeforeInit($tableObject): void
+  public function onTableBeforeInit(\ADIOS\Core\Views\Table $tableObject): void
   {
+    $this->adios->dispatchEventToPlugins("onModelAfterTableBeforeInit", [
+      "tableObject" => $tableObject,
+    ]);
   }
 
   /**
    * onTableAfterInit
    *
-   * @param mixed $tableObject
+   * @param \ADIOS\Core\Views\Table $tableObject
    *
    * @return void
    */
-  public function onTableAfterInit($tableObject): void
+  public function onTableAfterInit(\ADIOS\Core\Views\Table $tableObject): void
   {
+    $this->adios->dispatchEventToPlugins("onModelAfterTableAfterInit", [
+      "tableObject" => $tableObject,
+    ]);
   }
 
   /**
    * onTableAfterDataLoaded
    *
-   * @param mixed $tableObject
+   * @param \ADIOS\Core\Views\Table $tableObject
    *
    * @return void
    */
-  public function onTableAfterDataLoaded($tableObject): void
+  public function onTableAfterDataLoaded(\ADIOS\Core\Views\Table $tableObject): void
   {
+    $this->adios->dispatchEventToPlugins("onModelAfterTableAfterDataLoaded", [
+      "tableObject" => $tableObject,
+    ]);
   }
 
   //////////////////////////////////////////////////////////////////
@@ -1185,11 +1216,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
   }
 
-  public function formParams($data, $params)
+  public function onFormParams(\ADIOS\Core\Views\Form $formObject, array $params): array
   {
-    return $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
-      "model" => $this,
-      "data" => $data,
+    return (array) $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
+      "formObject" => $formObject,
       "params" => $params,
     ])["params"];
   }

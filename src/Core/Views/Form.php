@@ -120,7 +120,7 @@ class Form extends \ADIOS\Core\View
     );
 
     $this->model->onFormBeforeInit($this);
-    $this->params = $this->model->formParams($this->data, $this->params);
+    $this->params = $this->model->onFormParams($this, $this->params);
 
     unset($this->params['columns']['id']);
 

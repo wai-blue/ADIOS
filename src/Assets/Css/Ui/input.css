@@ -104,7 +104,7 @@ textarea.adios.ui.Input {margin-bottom:0px;height:100px;}
 }
 
 .adios.ui.Input.lookup {
-  width: 100%;
+  max-width: 100%;
   display: inline-block;
 }
 
