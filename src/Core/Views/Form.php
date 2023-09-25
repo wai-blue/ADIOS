@@ -334,14 +334,14 @@ class Form extends \ADIOS\Core\View
           <div class='input-title'>
             ".hsc($title)."
           </div>
-          <div class='input-content'>
-            {$inputHtml}
-          </div>
           ".(empty($description) ? "" : "
             <div class='input-description'>
               ".hsc($description)."
             </div>
           ")."
+          <div class='input-content'>
+            {$inputHtml}
+          </div>
         </div>
       ";
     } else if (is_string($item['html'])) {
@@ -399,16 +399,16 @@ class Form extends \ADIOS\Core\View
               {$item['title']}
             </div>
           ")."
+          ".(empty($item['description']) ? "" : "
+            <div class='input-description'>
+              ".hsc($item['description'])."
+            </div>
           <div
             class='input-content {$item['class']}'
             style='{$item['style']}'
           >
             {$inputHtml}
           </div>
-          ".(empty($item['description']) ? "" : "
-            <div class='input-description'>
-              ".hsc($item['description'])."
-            </div>
           ")."
         </div>
       ";

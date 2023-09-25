@@ -14,11 +14,13 @@ class JsonEditor extends \ADIOS\Core\Views\Input {
 
   public function __construct($adios, array $params = [])
   {
-    $this->params = array_replace_recursive([
+    $params = array_replace_recursive([
       'uid' => '',
       'schema' => [],
       'value' => '{}', // JSON string
     ], $params);
+
+    if (!is_array($params['schema'])) $params['schema'] = [];
 
     parent::__construct($adios, $params);
   }

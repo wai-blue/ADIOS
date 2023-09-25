@@ -240,16 +240,16 @@ class Input extends \ADIOS\Core\View {
                     <small class='text-muted'>{$input['title']}</small>
                   </div>
                 ")."
-                <div
-                  class='input-content'
-                >
-                   " . (new Input($this->adios, $input))->render() . "  
-                </div>
                 ".(empty($item['description']) ? "" : "
                   <div class='input-description'>
                     ".hsc($item['description'])."
                   </div>
                 ")."
+                <div
+                  class='input-content'
+                >
+                   " . (new Input($this->adios, $input))->render() . "  
+                </div>
               </div>"
             ;
           }
