@@ -47,7 +47,7 @@ class CSV extends \ADIOS\Core\Action {
           warningText += '".$this->translate("Continue with import?")."';
 
           if (confirm(warningText)) {
-            let data = ui_form_get_values('{$this->uid}_form', '{$this->uid}_');
+            let data = ADIOS_form.get_values('{$this->uid}_form', '{$this->uid}_');
             data.model = '{$model}';
             window_render(
               '{$modelObject->urlBase}/Import/CSV/Import',

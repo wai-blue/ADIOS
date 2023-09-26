@@ -148,7 +148,7 @@ class Loader
   public $userProfile = NULL;
   public array $userPasswordReset = [];
 
-  public $db = NULL;
+  public ?\ADIOS\Core\DB $db = NULL;
   public $twig = NULL;
   public $ui = NULL;
   public $console = NULL;
@@ -1488,7 +1488,7 @@ class Loader
       </a>
     ";
 
-    $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
+    // $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
 
     switch (get_class($exception)) {
       case 'ADIOS\Core\Exceptions\DBException':

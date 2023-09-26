@@ -27,7 +27,7 @@ class SettingsPanel extends \ADIOS\Core\View {
       <script>
         function {$this->uid}_save() {
           let data = {
-            'values': JSON.stringify(ui_form_get_values('{$this->uid}_form', '{$this->uid}_')),
+            'values': JSON.stringify(ADIOS_form.get_values('{$this->uid}_form', '{$this->uid}_')),
             '__settings_group': '".ads($this->params['settings_group'])."',
           };
 

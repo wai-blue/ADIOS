@@ -95,6 +95,7 @@ class Table extends \ADIOS\Core\View
       'showSearchButton' => true,
       'showExportCsvButton' => true,
       'showImportCsvButton' => false,
+      'showFulltextSearch' => true,
 
       /* defaultValuesForNewRecords: list of values to be forwarded to the Form when adding new record */
       'defaultValuesForNewRecords' => [],
@@ -651,24 +652,26 @@ class Table extends \ADIOS\Core\View
         }
 
         // fulltext search
-        $titleRightContent[] = new Html($this->adios, [
-          'html' => "
-            <input
-              type='input'
-              id='{$this->uid}_fulltext'
-              class='form-control p-2'
-              style='width:15em'
-              onkeypress='
-                if (event.keyCode == 13) {
-                  event.cancelBubble = true;
-                  ui_table_set_fulltext_search(\"{$this->params['uid']}\");
-                }
-              '
-              placeholder='" . $this->translate("Press Enter to search...") . "'
-              value='" . ads($this->params['fulltext']) . "'
-            />
-          ",
-        ]);
+        if ($this->params['showFulltextSearch']) {
+          $titleRightContent[] = new Html($this->adios, [
+            'html' => "
+              <input
+                type='input'
+                id='{$this->uid}_fulltext'
+                class='form-control p-2'
+                style='width:15em'
+                onkeypress='
+                  if (event.keyCode == 13) {
+                    event.cancelBubble = true;
+                    ui_table_set_fulltext_search(\"{$this->params['uid']}\");
+                  }
+                '
+                placeholder='" . $this->translate("Press Enter to search...") . "'
+                value='" . ads($this->params['fulltext']) . "'
+              />
+            ",
+          ]);
+        }
 
         if (_count($moreActionsButtonItems)) {
           $titleRightContent[] = $this->addView('Button', [

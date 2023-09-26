@@ -86,17 +86,17 @@ class MySQLi extends \ADIOS\Core\DB
     return (int) reset($this->fetchRaw('SELECT FOUND_ROWS() as FOUND_ROWS'))['FOUND_ROWS'];
   }
 
-  public function startTransaction()
+  public function startTransaction(): void
   {
     $this->query('start transaction');
   }
 
-  public function commit()
+  public function commit(): void
   {
     $this->query('commit');
   }
 
-  public function rollback()
+  public function rollback(): void
   {
     $this->query('rollback');
   }
