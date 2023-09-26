@@ -1095,11 +1095,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return array Modified row params
    */
-  public function onTableRowParams(\ADIOS\Core\Views\Table $tableObject, array $params): array
+  public function onTableRowParams(\ADIOS\Core\Views\Table $tableObject, array $params, array $data): array
   {
     return (array) $this->adios->dispatchEventToPlugins("onModelAfterTableRowParams", [
       "tableObject" => $tableObject,
       "params" => $params,
+      "data" => $data
     ])["params"];
   }
 

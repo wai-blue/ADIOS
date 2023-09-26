@@ -1002,11 +1002,8 @@ class Table extends \ADIOS\Core\View
 
       // zaznamy tabulky
       if (_count($this->data)) {
-
         foreach ($this->data as $row) {
-
-          $rowParams = $this->model->onTableRowParams($this, $this->params);
-
+          $rowParams = $this->model->onTableRowParams($this, $this->params, $row);
           $rowCss = $this->model->onTableRowCssFormatter($this, $row);
 
           $rowOnclick = $rowParams['onclick'] ?: "
@@ -1068,7 +1065,15 @@ class Table extends \ADIOS\Core\View
 
           if (_count($rowParams['rowButtons'])) {
             $rowHtml .= "<div class='cell'>";
+
             foreach ($rowParams['rowButtons'] as $rowButton) {
+              if ($rowButton['action']) {
+                $action = [
+                  'url' => ads($rowButton['action']['href'] ?? ''),
+                  'params' => json_encode($rowButton['params'] ?? [])
+                ];
+              }
+
               $rowHtml .= "
                 <a
                   href='" . ($rowButton['href'] ?? "javascript:void(0)") . "'
@@ -1077,6 +1082,7 @@ class Table extends \ADIOS\Core\View
                     let rowValuesBase64 = $(this).closest(\".Row\").data(\"row-values-base64\");
                     let row = JSON.parse(Base64.decode(rowValuesBase64));
 
+                    " . (isset($action) ? "_ajax_read(\"{$action['url']}\", {$action['params']})" : "") . "
                     " . ($rowButton['onclick'] ?? "") . "
                   '
                   ".(empty($rowButton['cssStyle']) ? "" : "style='" . ads($rowButton['cssStyle']) . "'")."
