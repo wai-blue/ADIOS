@@ -43,15 +43,18 @@
         $('.adios.main-content .windows').show();
         $('.adios.main-content .windows').removeClass('update-in-progress');
 
-        window_post_render(html, action, params, options);
+        $('.adios.main-content .windows .windows-content').append(html);
+        // window_post_render(html, action, params, options);
 
       });
 
     }, 0);
   }
 
-  function window_post_render(html, action, params, options) {
-    $('.adios.main-content .windows .windows-content').append(html);
+  function window_post_render(html, action, url, params, options) {
+  // console.log(url);
+  // alert('a');
+    // $('.adios.main-content .windows .windows-content').append(html);
 
     windowId = $('.adios.ui.Window')
       .last()
@@ -74,9 +77,9 @@
       options.onAfterRender(windowId);
     }
 
-    if ($('.adios.ui.Window').length == 1 && action != '') {
+    if ($('.adios.ui.Window').length == 1 && url != '') {
       desktop_main_box_history_push(
-        action,
+        url,
         params,
         $('.adios.main-content').html(),
         options
@@ -85,6 +88,7 @@
 
     ADIOS_windows[windowId] = {
       'action': action,
+      'url': url,
       'params': params,
       'onclose': onclose,
     };
@@ -131,6 +135,12 @@
 
     }
 
+  }
+
+  function window_close_all() {
+    for (windowId in ADIOS_windows) {
+      window_close(windowId);
+    }
   }
 
   function desktop_update(action, params, options) {

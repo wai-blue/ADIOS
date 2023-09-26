@@ -292,6 +292,28 @@ class DB
 
 
 
+
+  public function startTransaction(): void
+  {
+    // To be overriden by the provider.
+  }
+
+  public function commit(): void
+  {
+    // To be overriden by the provider.
+  }
+
+  public function rollback(): void
+  {
+    // To be overriden by the provider.
+  }
+
+  public function countRowsFromLastSelect(): int
+  {
+    return 0; // To be overriden by the provider.
+  }
+
+
   public function getRandomColumnValues(
     \ADIOS\Core\Model $model,
     $data = [],

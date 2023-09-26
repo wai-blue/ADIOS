@@ -95,6 +95,7 @@ class Table extends \ADIOS\Core\View
       'showSearchButton' => true,
       'showExportCsvButton' => true,
       'showImportCsvButton' => false,
+      'showFulltextSearch' => true,
 
       /* defaultValuesForNewRecords: list of values to be forwarded to the Form when adding new record */
       'defaultValuesForNewRecords' => [],
@@ -472,12 +473,9 @@ class Table extends \ADIOS\Core\View
    */
   public function render(string $panel = ''): string
   {
-    $html = "";
-    $this->addCssClass('Container');
+    $html = '';
 
-    if (!in_array("UI/Form", $this->adios->actionStack)) {
-      $this->addCssClass('shadow');
-    }
+    $this->addCssClass('Container');
 
     if (!$this->params['__IS_WINDOW__']) {
       $this->addCssClass('desktop');
@@ -555,6 +553,8 @@ class Table extends \ADIOS\Core\View
 
 
     if (!$this->params['refresh']) {
+      $html .= "<div class='shadow-sm m-1'>";
+
       if (_count($this->params)) {
         $tmp = json_encode($this->params);
         if (!empty($tmp)) {
@@ -655,24 +655,26 @@ class Table extends \ADIOS\Core\View
         }
 
         // fulltext search
-        $titleRightContent[] = new Html($this->adios, [
-          'html' => "
-            <input
-              type='input'
-              id='{$this->uid}_fulltext'
-              class='form-control p-2'
-              style='width:15em'
-              onkeypress='
-                if (event.keyCode == 13) {
-                  event.cancelBubble = true;
-                  ui_table_set_fulltext_search(\"{$this->params['uid']}\");
-                }
-              '
-              placeholder='" . $this->translate("Press Enter to search...") . "'
-              value='" . ads($this->params['fulltext']) . "'
-            />
-          ",
-        ]);
+        if ($this->params['showFulltextSearch']) {
+          $titleRightContent[] = new Html($this->adios, [
+            'html' => "
+              <input
+                type='input'
+                id='{$this->uid}_fulltext'
+                class='form-control p-2'
+                style='width:15em'
+                onkeypress='
+                  if (event.keyCode == 13) {
+                    event.cancelBubble = true;
+                    ui_table_set_fulltext_search(\"{$this->params['uid']}\");
+                  }
+                '
+                placeholder='" . $this->translate("Press Enter to search...") . "'
+                value='" . ads($this->params['fulltext']) . "'
+              />
+            ",
+          ]);
+        }
 
         if (_count($moreActionsButtonItems)) {
           $titleRightContent[] = $this->addView('Button', [
@@ -692,6 +694,7 @@ class Table extends \ADIOS\Core\View
             ->setLeftContent($titleLeftContent)
             ->setRightContent($titleRightContent)
             ->setTitle($this->model->translate($this->params['title']))
+            ->addCssClass('p-4')
             ->render();
         }
       }
@@ -735,7 +738,7 @@ class Table extends \ADIOS\Core\View
         }
 
         $html .= "
-          <div class='card shadow mb-4'>
+          <div class='card shadow-sm mb-4'>
             <a class='card-header py-3'>
               <h6 class='m-0 font-weight-bold text-primary'>
                 <i class='fas fa-filter mr-2'></i>
@@ -1139,23 +1142,11 @@ class Table extends \ADIOS\Core\View
 
     // koniec obsahu
     if (!$this->params['refresh']) {
-      $html .= '</div>';
+      $html .= '
+          </div>
+        </div>
+      ';
     }
-
-    // if ($this->params['__IS_WINDOW__']) {
-    //   $html = $this->adios->view->Window(
-    //     [
-    //       'uid' => "{$this->uid}_window",
-    //       'content' => $html,
-    //       'header' => [
-    //         $this->addView('Button', ["text" => $this->translate("Close"), "type" => "close", "onclick" => "ui_form_close('{$this->uid}_window');"]),
-    //       ],
-    //       'title' => " ",
-    //     ]
-    //   )->render();
-    // } else {
-    //   //
-    // }
 
     return HelperFunctions::minifyHtml($html);
   }

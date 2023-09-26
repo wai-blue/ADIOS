@@ -19,7 +19,11 @@ class OnChange extends \ADIOS\Core\Action {
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
-      return $tmpModel->onFormChange($this->params['column'], $this->params['formData']);
+      return $tmpModel->onFormChange(
+        $this->params['column'],
+        $this->params['formUid'],
+        $this->params['formData']
+      );
 
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       return $e->getMessage();

@@ -1016,7 +1016,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $params = []
   )
   {
-    return ['input_lookup_value', 'asc'];
+    return [ ['input_lookup_value', 'asc'] ];
   }
 
   // $initiatingModel = model formulara, v ramci ktoreho je lookup generovany
@@ -1030,14 +1030,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $having = "TRUE"
   ): \ADIOS\Core\DB\Query
   {
+    $where = $params['where'] ?? $this->lookupWhere($initiatingModel, $initiatingColumn, $formData, $params);
+    $order = $params['order'] ?? $this->lookupOrder($initiatingModel, $initiatingColumn, $formData, $params);
+
     return $this->adios->db->select($this)
       ->columns([
         [ 'id', 'id' ],
         [ $this->lookupSqlValue($this->fullTableSqlName), 'input_lookup_value' ]
       ])
-      ->where($this->lookupWhere($initiatingModel, $initiatingColumn, $formData, $params))
+      ->where($where)
       ->havingRaw($having)
-      ->order($this->lookupOrder($initiatingModel, $initiatingColumn, $formData, $params))
+      ->order($order)
     ;
   }
 
@@ -1225,14 +1228,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["params"];
   }
 
-  public function onFormChange($column, $data)
+  public function onFormChange(string $column, string $formUid, array $data): array
   {
     return [];
 
     // example return:
     // return [
     //   'column_1' => ['value' => 'newColumnValue'],
-    //   'column_2' => ['inputHtml' => 'newInputHtml'],
+    //   'column_2' => ['inputHtml' => 'newInputHtml', 'inputCssClass' => 'newInputCssClass'],
     //   'column_3' => ['alert' => 'This is just an alert.'],
     //   'column_4' => ['warning' => 'Something is not correct.'],
     //   'column_4' => ['fatal' => 'Ouch. Fatal error!'],

@@ -16,7 +16,11 @@
 }
 
 
-.adios.ui.Form .item .input-title { color: var(--cl-main); font-size: 0.75em; }
+.adios.ui.Form .item .input-title {
+  color: var(--cl-main);
+  font-size: 0.75em;
+  display: inline-block;
+}
 .adios.ui.Form .item .group-title { color: var(--cl-main); font-weight: bold; margin-top: 1em; }
 
 .adios.ui.Form .item:hover .input-content input,
@@ -90,7 +94,15 @@
   height: calc(100vh - 15em) !important;
 } */
 
-.adios.ui.Form .input-description { font-size: 0.8em; font-style: italic; color: orange; }
+.adios.ui.Form .input-description {
+  font-size: 0.8em;
+  color: #888888;
+  cursor: help;
+  float: right;
+}
+.adios.ui.Form .input-description::before {
+  content: '🛈';
+}
 
 .badge-adios { font-size: 13px; vertical-align: middle; margin-bottom: 4px; margin-left: 5px; color: #fff; }
 

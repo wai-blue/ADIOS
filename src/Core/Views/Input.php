@@ -101,7 +101,7 @@ class Input extends \ADIOS\Core\View {
       // nacita parametre z tables a zmerguje s obdrzanymi
       if (!empty($params['column'])) {
         $tmpColumns = $this->model->columns();
-        $params['column'] = parent::params_merge($params, $tmpColumns[$params['column']]);
+        $params = array_replace_recursive($params, $tmpColumns[$params['column']]);
       } else {
         // $params['column'] = $this->model->columns();
       }
@@ -140,9 +140,7 @@ class Input extends \ADIOS\Core\View {
           return $html;
       }
 
-      // TODO: ak $dataType->getInputHtml() nevrati NULL, tak return $inputHtml;
-
-      // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ui_form_get_values
+      // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ADIOS_form.get_values
       if ($this->params['disabled']) {
           $adios_disabled_attribute = "adios-do-not-serialize='1'";
       }
@@ -242,16 +240,16 @@ class Input extends \ADIOS\Core\View {
                     <small class='text-muted'>{$input['title']}</small>
                   </div>
                 ")."
-                <div
-                  class='input-content'
-                >
-                   " . (new Input($this->adios, $input))->render() . "  
-                </div>
                 ".(empty($item['description']) ? "" : "
                   <div class='input-description'>
                     ".hsc($item['description'])."
                   </div>
                 ")."
+                <div
+                  class='input-content'
+                >
+                   " . (new Input($this->adios, $input))->render() . "  
+                </div>
               </div>"
             ;
           }
@@ -502,7 +500,7 @@ class Input extends \ADIOS\Core\View {
                 title=\"".htmlspecialchars($this->params['title'])."\"
                 placeholder=\"".htmlspecialchars($tmp_placeholder)."\"
                 {$this->params['html_attributes']}
-                onkeypress='if (event.keyCode == 13) { ui_form_save(\"{$this->params['form_uid']}\"); }'
+                onkeypress='if (event.keyCode == 13) { ADIOS_form.save(\"{$this->params['form_uid']}\"); }'
                 ".($this->params['readonly'] ? "disabled='disabled'" : '')."
               />
 

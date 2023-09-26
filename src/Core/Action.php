@@ -161,6 +161,7 @@ class Action {
     $twigParams["uid"] = $this->adios->uid;
     $twigParams["gtp"] = $this->adios->gtp;
     $twigParams["config"] = $this->adios->config;
+    $twigParams["requestedUri"] = $this->adios->requestedUri;
     $twigParams["user"] = $this->adios->userProfile;
     $twigParams["locale"] = $this->adios->locale->getAll();
     $twigParams["dictionary"] = $this->dictionary;

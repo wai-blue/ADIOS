@@ -180,8 +180,8 @@
   };
 
   function ui_table_insert_row(uid){
-    var data = ui_form_get_values(uid+'_insert_row_form');
-    $('.'+uid+'_insert_row_button').attr('disabled', 'disabled');
+    var data = ADIOS_form.get_values(uid + '_insert_row_form');
+    $('.' + uid + '_insert_row_button').attr('disabled', 'disabled');
     var action = 'UI/Form/Save';
     data.table = $('#'+uid).attr('data-table');
     _ajax_read(action, data, function(_saved_id){

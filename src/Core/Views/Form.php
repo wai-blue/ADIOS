@@ -174,7 +174,7 @@ class Form extends \ADIOS\Core\View
       }
 
       if (empty($this->params['save_button_params']['onclick'])) {
-        $this->params['save_button_params']['onclick'] = "ui_form_save('{$this->params['uid']}', {}, this);";
+        $this->params['save_button_params']['onclick'] = "ADIOS_form.save('{$this->params['uid']}', {}, this);";
       }
 
       $this->params['save_button_params']['class'] = "btn-save";
@@ -197,7 +197,7 @@ class Form extends \ADIOS\Core\View
               'confirmButtonText': '".$this->translate('Yes, delete the record')."',
               'cancelButtonText': '".$this->translate('Do not delete')."',
             },
-            function() { ui_form_delete('{$this->params['uid']}') }
+            function() { ADIOS_form.delete('{$this->params['uid']}') }
           );
         ";
       }
@@ -213,7 +213,7 @@ class Form extends \ADIOS\Core\View
             '".$this->translate("Are you sure to delete this record?")."',
             {},
             function() {
-              ui_form_copy('{$this->params['uid']}')
+              ADIOS_form.copy('{$this->params['uid']}')
             }
           );
         ";
@@ -225,7 +225,7 @@ class Form extends \ADIOS\Core\View
     $this->params['close_button_params']['type'] = 'close';
 
     if (empty($this->params['close_button_params']['onclick'])) {
-      $this->params['close_button_params']['onclick'] = "ui_form_close('{$this->params['uid']}');";
+      $this->params['close_button_params']['onclick'] = "ADIOS_form.close('{$this->params['uid']}');";
     }
 
     $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
@@ -334,14 +334,14 @@ class Form extends \ADIOS\Core\View
           <div class='input-title'>
             ".hsc($title)."
           </div>
-          <div class='input-content'>
-            {$inputHtml}
-          </div>
           ".(empty($description) ? "" : "
             <div class='input-description'>
               ".hsc($description)."
             </div>
           ")."
+          <div class='input-content'>
+            {$inputHtml}
+          </div>
         </div>
       ";
     } else if (is_string($item['html'])) {
@@ -399,16 +399,16 @@ class Form extends \ADIOS\Core\View
               {$item['title']}
             </div>
           ")."
+          ".(empty($item['description']) ? "" : "
+            <div class='input-description'>
+              ".hsc($item['description'])."
+            </div>
           <div
             class='input-content {$item['class']}'
             style='{$item['style']}'
           >
             {$inputHtml}
           </div>
-          ".(empty($item['description']) ? "" : "
-            <div class='input-description'>
-              ".hsc($item['description'])."
-            </div>
           ")."
         </div>
       ";
@@ -702,7 +702,7 @@ class Form extends \ADIOS\Core\View
     }
 
     $colDefinition['onchange'] .= "
-      ui_form_change('{$this->params['uid']}', '{$colName}');
+      ADIOS_form.change('{$this->params['uid']}', '{$colName}');
     ";
 
     return $this->addView('Input',

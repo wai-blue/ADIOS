@@ -265,7 +265,7 @@ h3 { padding-bottom: 0.5em; }
 .adios.main-content {
   /* height: calc(100vh - 5em); */
   /* padding-top: 1em; */
-  padding: 2em;
+  padding: 1.35em;
 
   overflow: auto;
   /* display: flex; */
@@ -280,7 +280,7 @@ h3 { padding-bottom: 0.5em; }
 
 .adios.main-content > .desktop > .desktop-content {
   overflow-x: auto;
-  box-shadow: 0 0 3px #ccc;
+  /* box-shadow: 0 0 3px #ccc; */
   border-radius: 0.25em;
   /* min-height: calc(100vh - 7em); */
   display: flex;
@@ -300,7 +300,7 @@ h3 { padding-bottom: 0.5em; }
 }
 
 .adios.main-content > .windows.update-in-progress .adios.ui.Window.inline {
-  width: 33vw;
+  /* width: 33vw; */
 }
 
 .adios.main-content > .windows.update-in-progress .adios.ui.Window > .header .btn {
@@ -310,7 +310,7 @@ h3 { padding-bottom: 0.5em; }
 .adios.main-content > .windows.update-in-progress .adios.ui.Window > .content input,
 .adios.main-content > .windows.update-in-progress .adios.ui.Window > .content textarea,
 .adios.main-content > .windows.update-in-progress .adios.ui.Window > .content select {
-  background: #EEEEEE;
+  background: #F0F0F0;
 }
 
 .ui-tooltip-content {

@@ -128,7 +128,13 @@ class Window extends \ADIOS\Core\View {
         </div>
       </div>
       <script>
-        window_post_render($('#{$this->uid}'), '', {}, {});
+        window_post_render(
+          $('#{$this->uid}'),
+          '".ads($this->adios->action)."',
+          '".ads($this->adios->requestedUri)."',
+          {},
+          {}
+        );
       </script>
     ";
 

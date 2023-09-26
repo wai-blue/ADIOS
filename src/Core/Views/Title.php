@@ -20,6 +20,10 @@ class Title extends \ADIOS\Core\View
   public function __construct($adios, $params = NULL)
   {
 
+    $params = array_replace_recursive([
+      'title' => '',
+    ], $params);
+
     parent::__construct($adios, $params);
 
     if ($this->params['fixed']) {
@@ -29,6 +33,10 @@ class Title extends \ADIOS\Core\View
     $this->left = $this->addView();
     $this->center = $this->addView();
     $this->right = $this->addView();
+
+    if (!empty($this->params['title'])) {
+      $this->setTitle($this->params['title']);
+    }
 
   }
 
@@ -74,9 +82,9 @@ class Title extends \ADIOS\Core\View
     $rightHtml = $this->right->render();
 
     return "
-      <div class='adios ui Title'>
+      <div class='".$this->getCssClassesString()."'>
         " . (empty($centerHtml) ? "" : "
-          <div class='row mb-3'>
+          <div class='row'>
             <div class='col-lg-12 p-0'>
               <div class='h3 text-primary mb-0'>
                 {$centerHtml}
@@ -84,14 +92,16 @@ class Title extends \ADIOS\Core\View
             </div>
           </div>
         ") . "
-        <div class='row mb-3'>
-          <div class='col-lg-6 p-0 d-flex' style='gap:0.5em'>
-            {$leftHtml}
+        " . (strlen($leftHtml . $rightHtml) == 0 ? "" : "
+          <div class='row mt-3'>
+            <div class='col-lg-6 p-0 d-flex' style='gap:0.5em'>
+              {$leftHtml}
+            </div>
+            <div class='col-lg-6 p-0 d-flex justify-content-end' style='gap:0.5em'>
+              {$rightHtml}
+            </div>
           </div>
-          <div class='col-lg-6 p-0 d-flex justify-content-end' style='gap:0.5em'>
-            {$rightHtml}
-          </div>
-        </div>
+        ")."
       </div>
     ";
   }

@@ -124,6 +124,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
               style='visibility:hidden;'
               name='{$this->uid}_{{ dirId }}_file_input'
               id='{$this->uid}_{{ dirId }}_file_input'
+              adios-do-not-serialize='1'
               onchange=\"
                 let fileInput = $('#{$this->uid}_{{ dirId }}_file_input');
                 let folderPath = {$this->uid}_getCurrentFolderPath();
