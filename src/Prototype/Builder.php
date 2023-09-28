@@ -456,6 +456,10 @@ class Builder {
           }
         }
       }
+
+      if (!empty($widgetConfig['javascript'])) {
+        file_put_contents($this->outputFolder . '/' . $widgetRootDir . '/main.js', $widgetConfig['javascript']);
+      }
     }
   }
 

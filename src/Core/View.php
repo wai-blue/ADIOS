@@ -509,7 +509,7 @@ class View {
    * @return void
    */
   public function main_params() {
-    // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ADIOS_form.get_values
+    // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ADIOS.views.Form.get_values
     if ('m_ui_input' == get_class($this)) {
       if ($this->params['disabled']) {
         $adios_disabled_attribute = "adios-do-not-serialize='1'";

@@ -104,7 +104,7 @@ class DB
     return isset($this->columnTypes[$column_type]);
   }
 
-  public function addTable($tableName, $columns, $isCrossTable = FALSE)
+  public function addTable($tableName, $columns, $isJunctionTable = FALSE)
   {
     $this->tables[$tableName] = $columns;
   }

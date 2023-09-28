@@ -102,7 +102,7 @@ class TableSearch extends \ADIOS\Core\View {
 
       <script>
         function {$this->uid}_get_search_string() {
-          let values = JSON.stringify(ADIOS_form.get_values('{$this->uid}_settings_panel_form', '{$this->uid}_'));
+          let values = JSON.stringify(ADIOS.views.Form.get_values('{$this->uid}_settings_panel_form', '{$this->uid}_'));
           return Base64.encode(values);
         }
 

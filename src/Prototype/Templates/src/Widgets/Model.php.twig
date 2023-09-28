@@ -10,6 +10,8 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   use \{{ thisModel.namespace }}\Callbacks\{{ thisModel.class }};
 {% endif %}
 
+  public bool $isJunctionTable = {{ thisModel.config.isJunctionTable ? 'TRUE' : 'FALSE' }};
+
   public ?string $addButtonText = "{{ thisModel.config.addButtonText|raw }}";
   public ?string $formAddButtonText = "{{ thisModel.config.formAddButtonText|raw }}";
   public ?string $formSaveButtonText = "{{ thisModel.config.formSaveButtonText|raw }}";

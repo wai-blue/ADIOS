@@ -101,7 +101,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * If set to TRUE, the SQL table will not contain the ID autoincrement column
    */
-  public bool $isCrossTable = FALSE;
+  public bool $isJunctionTable = FALSE;
 
   /**
    * If set to TRUE, the SQL table will contain the `record_info` column of type JSON
@@ -170,7 +170,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $this->adios->db->addTable(
         $this->fullTableSqlName,
         $this->columns(),
-        $this->isCrossTable
+        $this->isJunctionTable
       );
     }
 
@@ -709,7 +709,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     $newColumns = [];
 
-    if (!$this->isCrossTable) {
+    if (!$this->isJunctionTable) {
       $newColumns['id'] = [
         'type' => 'int',
         'byte_size' => '8',

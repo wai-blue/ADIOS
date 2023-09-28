@@ -153,9 +153,9 @@ class Table extends \ADIOS\Core\View
       $params['page'] = 1;
     }
 
-    if ($this->model->isCrossTable) {
+    if ($this->model->isJunctionTable) {
       $params['onclick'] = "";
-      $params['showAddButton'] = FALSE;
+      // $params['showAddButton'] = FALSE;
     }
 
     $paramsToSession = $params;
@@ -687,8 +687,8 @@ class Table extends \ADIOS\Core\View
         }
 
         if (
-          !empty($titleButtons)
-          || !empty($this->params['title'])
+          !empty($titleLeftContent)
+          || !empty($titleLeftContent)
         ) {
           $html .= $this->addView('Title')
             ->setLeftContent($titleLeftContent)

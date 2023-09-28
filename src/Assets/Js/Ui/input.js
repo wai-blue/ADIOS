@@ -298,7 +298,7 @@ function ui_input_lookup_onkeydown(event, uid) {
 
           let params = '';
           let form_uid = $('#' + uid).attr('data-form-uid');
-          let form_data = (form_uid == '' ? {} : ADIOS_form.get_values(form_uid));
+          let form_data = (form_uid == '' ? {} : ADIOS.views.Form.get_values(form_uid));
 
           params += '&model=' + encodeURIComponent($('#' + uid).attr('data-model'));
           params += '&initiating_model=' + encodeURIComponent($('#' + uid).attr('data-initiating-model'))
@@ -534,7 +534,7 @@ function ui_input_lookup_detail(id, uid) {
 };
 
 function ui_input_lookup_search(inputUid) {
-  let form_data = ADIOS_form.get_values($('#' + inputUid).attr('data-form-uid'));
+  let form_data = ADIOS.views.Form.get_values($('#' + inputUid).attr('data-form-uid'));
 
   window_render(
     'UI/Input/LookupSearch',

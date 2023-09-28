@@ -140,7 +140,7 @@ class Input extends \ADIOS\Core\View {
           return $html;
       }
 
-      // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ADIOS_form.get_values
+      // pre inputy, ktore su disabled sa nastavi tento parameter, aby sa nedostali do udajov selectovanych cez ADIOS.views.Form.get_values
       if ($this->params['disabled']) {
           $adios_disabled_attribute = "adios-do-not-serialize='1'";
       }
@@ -500,7 +500,7 @@ class Input extends \ADIOS\Core\View {
                 title=\"".htmlspecialchars($this->params['title'])."\"
                 placeholder=\"".htmlspecialchars($tmp_placeholder)."\"
                 {$this->params['html_attributes']}
-                onkeypress='if (event.keyCode == 13) { ADIOS_form.save(\"{$this->params['form_uid']}\"); }'
+                onkeypress='if (event.keyCode == 13) { ADIOS.views.Form.save(\"{$this->params['form_uid']}\"); }'
                 ".($this->params['readonly'] ? "disabled='disabled'" : '')."
               />
 

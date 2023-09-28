@@ -1,3 +1,8 @@
+var App = {
+  Widgets: {
+  }
+}
+
 var ADIOS = {
   renderDesktop: function(url, params) {
     desktop_update(url, params);
@@ -5,6 +10,9 @@ var ADIOS = {
 
   renderWindow: function(url, params, options) {
     window_render(url, params, options.onclose, options);
+  },
+
+  views: {
   }
 }
 
