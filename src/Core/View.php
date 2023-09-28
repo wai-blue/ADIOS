@@ -401,7 +401,7 @@ class View {
    */
   public function getTwigParams(): array
   {
-    return [];
+    return $this->params;
   }
   
   /**

@@ -720,13 +720,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ];
     }
 
-    if ($this->storeRecordInfo) {
-      $newColumns['record_info'] = [
-        'type' => 'json',
-        'title' => 'Record Information',
-      ];
-    }
-
     // default column settings
     foreach ($columns as $colName => $colDefinition) {
       $newColumns[$colName] = $colDefinition;
@@ -748,6 +741,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 255;
         break;
       }
+    }
+
+    if ($this->storeRecordInfo) {
+      $newColumns['record_info'] = [
+        'type' => 'json',
+        'title' => 'Record Information',
+      ];
     }
 
     foreach ($newColumns as $colName => $colDef) {
