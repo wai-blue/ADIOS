@@ -127,11 +127,10 @@ class Table extends \ADIOS\Core\View
       'readonly' => false
     ], $params);
 
-
     if (empty($params['model'])) {
       throw new \Exception("UI/Table: Don't know what model to work with.");
     }
-
+  
     $this->model = $this->adios->getModel($params['model']);
     $params['table'] = $this->model->getFullTableSqlName();
 
@@ -426,7 +425,7 @@ class Table extends \ADIOS\Core\View
     if ($this->params['page'] * $this->params['itemsPerPage'] > $this->allRowsCount) {
       $this->params['page'] = floor($this->allRowsCount / $this->params['itemsPerPage']) + 1;
     }
-//var_dump($this->params['rowButtons']);
+    
     // onTableAfterDataLoaded
     $this->model->onTableAfterDataLoaded($this);
   }
@@ -650,9 +649,12 @@ class Table extends \ADIOS\Core\View
         $titleLeftContent = [];
         $titleRightContent = [];
 
-        if ($this->params['showAddButton']) {
-          $titleLeftContent[] = $this->addView('Button', $this->params['buttons']['add']);
+        foreach ($this->params['buttons'] as $buttonKey => $buttonParams) {
+          if ($buttonKey == 'add' && !$this->params['showAddButton']) continue; 
+          $titleLeftContent[] = $this->addView('Button', $this->params['buttons'][$buttonKey]);
         }
+        
+        $titleLeftContent = array_reverse($titleLeftContent);
 
         // fulltext search
         if ($this->params['showFulltextSearch']) {
