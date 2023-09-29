@@ -180,7 +180,7 @@
   };
 
   function ui_table_insert_row(uid){
-    var data = ADIOS_form.get_values(uid + '_insert_row_form');
+    var data = ADIOS.views.Form.get_values(uid + '_insert_row_form');
     $('.' + uid + '_insert_row_button').attr('disabled', 'disabled');
     var action = 'UI/Form/Save';
     data.table = $('#'+uid).attr('data-table');

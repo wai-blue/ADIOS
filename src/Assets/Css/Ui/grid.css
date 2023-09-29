@@ -8,13 +8,12 @@
   background-color: rgba(255, 255, 255, 0.8);
   /* margin-bottom: 1.12em; */
   /* box-shadow: 0 0 3px #ccc; */
-  border: 1px solid #EEEEEE;
   overflow: auto;
   border-radius: 0.25em;
 }
 
-.adios.ui.Grid.no-area-borders > div {
-  border: none;
+.adios.ui.Grid.bordered > div {
+  border: 1px solid #EEEEEE;
 }
 
 .adios.ui.Grid.no-area-borders > div.area-bordered {

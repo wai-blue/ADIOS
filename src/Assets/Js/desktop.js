@@ -123,6 +123,7 @@
         window.history.back();
       }
 
+      $('#' + windowId).find('a.--onclose-href').trigger('click');
       $('#' + windowId).remove();
 
       if ($('.adios.main-content .adios.ui.Window').length == 0) {

@@ -38,6 +38,12 @@ class Window extends \ADIOS\Core\View {
 
   }
 
+  public function setOnclose(string $onclose): \ADIOS\Core\View
+  {
+    $this->params['onclose'] = $onclose;
+    return $this;
+  }
+
   public function setContent($content): \ADIOS\Core\View
   {
     $this->params['content'] = $content;
@@ -94,6 +100,12 @@ class Window extends \ADIOS\Core\View {
         class='".$this->getCssClassesString()."'
         id='{$this->uid}'
       >
+        <a
+          href='javascript:void(0)'
+          class='--onclose-href'
+          onclick='{$this->params['onclose']}'
+          style='display:none'
+        ></a>
         <div class='modal-overlay'></div>
         <div class='header'>
           ".($this->closeButton === NULL ? "" : "

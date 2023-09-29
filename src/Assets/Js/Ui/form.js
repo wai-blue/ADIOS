@@ -1,4 +1,4 @@
-let ADIOS_form = {
+ADIOS.views.Form = {
 
   change: function(uid, column) {
     let params = {};
@@ -6,7 +6,7 @@ let ADIOS_form = {
     params.model = $('#' + uid).attr('data-model');
     params.column = column;
     params.formUid = uid;
-    params.formData = ADIOS_form.get_values(uid);
+    params.formData = ADIOS.views.Form.get_values(uid);
     // params.formInputUids = {};
 
     // console.log(params.formData);
@@ -76,7 +76,7 @@ let ADIOS_form = {
     data.table = $('#'+uid).attr('data-table');
     data.model = $('#' + uid).attr('data-model');
     data.modelUrlBase = $('#' + uid).attr('data-model-url-base');
-    data.values = ADIOS_form.get_values(uid);
+    data.values = ADIOS.views.Form.get_values(uid);
 
     var allowed = true;
 
@@ -150,7 +150,7 @@ let ADIOS_form = {
             window[uid + '_onaftersave'](uid, data, {});
           }
 
-          ADIOS_form.close(uid);
+          ADIOS.views.Form.close(uid);
 
           if (reopen_after_save) {
             window_render(data.modelUrlBase + '/' + data.id + '/edit');
@@ -191,7 +191,7 @@ let ADIOS_form = {
           window[func_name](uid, data, {});
         }
 
-        ADIOS_form.close(uid);
+        ADIOS.views.Form.close(uid);
 
       }
     });
@@ -253,7 +253,7 @@ let ADIOS_form = {
     data.id = $('#' + uid).attr('data-id');
     data.table = $('#' + uid).attr('data-table');
     data.model = $('#' + uid).attr('data-model');
-    data.values = ADIOS_form.get_values(uid);
+    data.values = ADIOS.views.Form.get_values(uid);
 
     var allowed = true;
 

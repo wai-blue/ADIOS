@@ -174,7 +174,7 @@ class Form extends \ADIOS\Core\View
       }
 
       if (empty($this->params['save_button_params']['onclick'])) {
-        $this->params['save_button_params']['onclick'] = "ADIOS_form.save('{$this->params['uid']}', {}, this);";
+        $this->params['save_button_params']['onclick'] = "ADIOS.views.Form.save('{$this->params['uid']}', {}, this);";
       }
 
       $this->params['save_button_params']['class'] = "btn-save";
@@ -197,7 +197,7 @@ class Form extends \ADIOS\Core\View
               'confirmButtonText': '".$this->translate('Yes, delete the record')."',
               'cancelButtonText': '".$this->translate('Do not delete')."',
             },
-            function() { ADIOS_form.delete('{$this->params['uid']}') }
+            function() { ADIOS.views.Form.delete('{$this->params['uid']}') }
           );
         ";
       }
@@ -213,7 +213,7 @@ class Form extends \ADIOS\Core\View
             '".$this->translate("Are you sure to delete this record?")."',
             {},
             function() {
-              ADIOS_form.copy('{$this->params['uid']}')
+              ADIOS.views.Form.copy('{$this->params['uid']}')
             }
           );
         ";
@@ -223,9 +223,9 @@ class Form extends \ADIOS\Core\View
     }
 
     $this->params['close_button_params']['type'] = 'close';
-
+    
     if (empty($this->params['close_button_params']['onclick'])) {
-      $this->params['close_button_params']['onclick'] = "ADIOS_form.close('{$this->params['uid']}');";
+      $this->params['close_button_params']['onclick'] = "ADIOS.views.Form.close('{$this->params['uid']}');";
     }
 
     $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
@@ -659,9 +659,6 @@ class Form extends \ADIOS\Core\View
       $html .= $this->params['formatter']('after_html', $this, []);
     }
 
-    // DEPRECATED
-    //$this->params['onclose'] = $this->params['form_onclose'].$this->params['onclose'];
-
     $html .= "
       <script>
         ".$this->params['javascript']."
@@ -676,6 +673,7 @@ class Form extends \ADIOS\Core\View
 
     if ($window !== NULL) {
       $window->setCloseButton($this->closeButton);
+      $window->setOnclose($this->params['onclose']);
       $window->setTitle($this->model->translate($this->params['title']));
       $window->setHeaderLeft([
         $this->saveButton,
@@ -702,7 +700,7 @@ class Form extends \ADIOS\Core\View
     }
 
     $colDefinition['onchange'] .= "
-      ADIOS_form.change('{$this->params['uid']}', '{$colName}');
+      ADIOS.views.Form.change('{$this->params['uid']}', '{$colName}');
     ";
 
     return $this->addView('Input',

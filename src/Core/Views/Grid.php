@@ -45,7 +45,8 @@ class Grid extends \ADIOS\Core\View {
     foreach ($this->params['areas'] as $areaName => $areaParams) {
       $html .= "
         <div
-          class='{$this->uid}-area-{$areaName} ".($areaParams['cssClass'] ?? '')."'
+          class='area {$this->uid}-area-{$areaName} ".($areaParams['cssClass'] ?? '')."'
+          data-area='{$areaName}'
           ".(empty($areaParams['cssStyle']) ? "" : "style='{$areaParams['cssStyle']}'")."
         >
       ";

@@ -1,0 +1,48 @@
+.adios.ui.Tree {
+  list-style: none;
+}
+
+.adios.ui.Tree li.node ul {
+  margin-left: 1em;
+  margin-bottom: 1em;
+  border-left: 1px dashed #DDDDDD;
+  padding-left: 1em;
+}
+
+.adios.ui.Tree li.node .item {
+  display: flex;
+  align-items: center;
+  margin: 0.2em 0;
+}
+
+.adios.ui.Tree li.node .item .expand-collapse-btn {
+  width: 3em;
+}
+
+.adios.ui.Tree li.node .item .title {
+  cursor: default;
+}
+
+.adios.ui.Tree li.node .item .title.clickable {
+  cursor: pointer;
+}
+
+.adios.ui.Tree li.node .item .title.clickable:hover {
+  background: var(--light);
+}
+
+.adios.ui.Tree li.node .btn-secondary .icon {
+  width: 2em;
+}
+
+.adios.ui.Tree li.node.to-delete .btn {
+  opacity: 0.3;
+}
+
+.adios.ui.Tree li.node.to-delete ul {
+  display: none;
+}
+
+.adios.ui.Tree li.node .handle:hover {
+  background: #DDDDDD;
+}
