@@ -752,6 +752,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     foreach ($newColumns as $colName => $colDef) {
       $colObject = $this->adios->db->columnTypes[$colDef['type']];
+
       if ($colObject instanceof \ADIOS\Core\Db\DataType) {
         $newColumns[$colName] = $colObject->columnDefinitionPostProcess($colDef);
       }

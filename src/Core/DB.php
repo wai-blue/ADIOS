@@ -94,7 +94,9 @@ class DB
 
     if (class_exists($class)) {
       $tmp = str_replace("DataType", "", $column_type);
-      $tmp = strtolower($tmp);
+      
+      // Type to lower if is not custom
+      if (!in_array($tmp, ['MapPoint'])) $tmp = strtolower($tmp);
       $this->columnTypes[$tmp] = new $class($this->adios);
     }
   }
