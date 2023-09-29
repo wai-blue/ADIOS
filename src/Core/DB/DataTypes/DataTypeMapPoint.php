@@ -30,7 +30,6 @@ class DataTypeMapPoint extends \ADIOS\Core\DB\DataType
   {
     $colDef['type'] = 'json';
     $colDef['schema'] = [
-      'type' => 'Object',
       'properties' => [
         'latitude' => [
           'title' => 'Latitude',
