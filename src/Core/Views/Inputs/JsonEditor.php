@@ -18,6 +18,8 @@ class JsonEditor extends \ADIOS\Core\Views\Input {
       'uid' => '',
       'schema' => [],
       'value' => '{}', // JSON string
+      'disableEditJson' => FALSE,
+      'disableProperties' => FALSE,
     ], $params);
 
     if (!is_array($params['schema'])) $params['schema'] = [];
@@ -43,8 +45,8 @@ class JsonEditor extends \ADIOS\Core\Views\Input {
               schema: JSON.parse(Base64.decode('".base64_encode(json_encode($this->params['schema']))."')),
               theme: 'bootstrap4',
               // disable_collapse: true,
-              disable_edit_json: true,
-              disable_properties: true,
+              disable_edit_json: ".($this->params['disableEditJson'] ? "true" : "false").",
+              disable_properties: ".($this->params['disableProperties'] ? "true" : "false").",
               // use_default_values: false,
               // required_by_default: true,
               remove_empty_properties: true,
