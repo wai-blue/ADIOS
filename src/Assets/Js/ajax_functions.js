@@ -72,7 +72,7 @@ function _ajax_params(params, clean_for_history) {
   }
 
   for (var i in tmp) {
-    if (i != 'action' && i != '__C__') {
+    if (i != 'controller' && i != '__C__') {
       if (!clean_for_history || (i != '__IS_AJAX__' && i != '__IS_WINDOW__')) {
         paramsObj[i] = tmp[i]; // (typeof tmp[i] === 'object' ? JSON.stringify(tmp[i]) : tmp[i].toString());
       }
@@ -84,7 +84,7 @@ function _ajax_params(params, clean_for_history) {
   return paramsObj;
 }
 
-function _action_url(action, params, clean_for_history) {
+function _controller_url(controller, params, clean_for_history) {
   if (typeof params == 'undefined') params = '';
 
   var params_obj = _ajax_params(params, clean_for_history);
@@ -94,14 +94,14 @@ function _action_url(action, params, clean_for_history) {
   };
 
   // btoa() pri niektorych znakoch nefunguje
-  // let url = action + (params_str == '' ? '' : '?' + params_str + '&__C__=' + btoa(JSON.stringify(params_obj)));
-  let url = action + (params_str == '' ? '' : '?' + params_str);
+  // let url = controller + (params_str == '' ? '' : '?' + params_str + '&__C__=' + btoa(JSON.stringify(params_obj)));
+  let url = controller + (params_str == '' ? '' : '?' + params_str);
 
   return url;
 }
 
-function _ajax_action_url(action, params) {
-  return _action_url(action, params) + '&__IS_AJAX__=1';
+function _ajax_controller_url(controller, params) {
+  return _controller_url(controller, params) + '&__IS_AJAX__=1';
 }
 
 function _ajax_post_data(params) {
@@ -117,16 +117,16 @@ function _ajax_post_data(params) {
   return postData;
 }
 
-function _ajax_load(action, params, onsuccess){
+function _ajax_load(controller, params, onsuccess){
   if (typeof params == 'undefined') params = new Object;
   if (typeof onsuccess == 'undefined') onsuccess = function(){};
   params.adios_ajax_json_call = 1;
 
   if (onsuccess == "synchronous"){
-    res = _ajax_sread(action, params);
+    res = _ajax_sread(controller, params);
     res = _ajax_check_json_format(res);
   }else{
-    _ajax_read(action, params, function(res){
+    _ajax_read(controller, params, function(res){
       res = _ajax_check_json_format(res);
       onsuccess(res);
     });
@@ -181,14 +181,14 @@ function _ajax_check_result(res, use_alert = true){
   }
 }
 
-function _ajax_read(action, params, onsuccess, onreadystatechange) {
+function _ajax_read(controller, params, onsuccess, onreadystatechange) {
   $.ajax({
     // 'type': 'GET',
-    // 'url': _APP_URL + '/' + _ajax_action_url(action, params),
+    // 'url': _APP_URL + '/' + _ajax_controller_url(controller, params),
     // 'data': data,
 
     'type': 'POST',
-    'url': _APP_URL + '/' + action,
+    'url': _APP_URL + '/' + controller,
     'data': _ajax_post_data(params),
 
     'success': function(res) {
@@ -219,7 +219,7 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
         }
       }
 
-      // if (action != 'Desktop/Ajax/GetConsoleAndNotificationsContent') {
+      // if (controller != 'Desktop/Ajax/GetConsoleAndNotificationsContent') {
       //   desktop_console_update();
       // }
     },
@@ -237,7 +237,7 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
         onresult(null);
       }
 
-      // if (action != 'Desktop/Ajax/GetConsoleAndNotificationsContent'){
+      // if (controller != 'Desktop/Ajax/GetConsoleAndNotificationsContent'){
       //   if (e.status == 0) _alert('Failed to connect to server.');
       //   else _alert('Server error: ' + e.status);
       //   desktop_console_update();
@@ -246,13 +246,13 @@ function _ajax_read(action, params, onsuccess, onreadystatechange) {
   });
 };
 
-function _ajax_read_json(action, params, onsuccess, onwarning, onfatal) {
+function _ajax_read_json(controller, params, onsuccess, onwarning, onfatal) {
   $.ajax({
     // 'type': 'GET',
-    // 'url': _APP_URL + '/' + _ajax_action_url(action, params),
+    // 'url': _APP_URL + '/' + _ajax_controller_url(controller, params),
 
     'type': 'POST',
-    'url': _APP_URL + '/' + action,
+    'url': _APP_URL + '/' + controller,
     'data': _ajax_post_data(params),
 
     'dataType': 'json',
@@ -284,7 +284,7 @@ function _ajax_read_json(action, params, onsuccess, onwarning, onfatal) {
 var _ajax_sread_ret_val = {};
 var _ajax_sread_use_async = false;
 
-function _ajax_sread(action, params, options) {
+function _ajax_sread(controller, params, options) {
   if (typeof options == 'undefined') options = new Object;
 
   if (_ajax_sread_use_async) {
@@ -298,10 +298,10 @@ function _ajax_sread(action, params, options) {
         async: false,
 
         // type: 'GET',
-        // url: _APP_URL + '/' + _ajax_action_url(action, params),
+        // url: _APP_URL + '/' + _ajax_controller_url(controller, params),
 
         'type': 'POST',
-        'url': _APP_URL + '/' + action,
+        'url': _APP_URL + '/' + controller,
         'data': _ajax_post_data(params),
 
         success: options.success,
@@ -320,21 +320,21 @@ function _ajax_sread(action, params, options) {
 ////////////////////////////////////////////////////////////////////////
 // _ajax_supdate
 
-function _ajax_update(action, params, selector, options) {
+function _ajax_update(controller, params, selector, options) {
   if (typeof options == 'undefined') options = new Object;
   options.async = true;
   options.append = false;
-  _ajax_supdate(action, params, selector, options);
+  _ajax_supdate(controller, params, selector, options);
 };
 
-function _ajax_append(action, params, selector, options) {
+function _ajax_append(controller, params, selector, options) {
   if (typeof options == 'undefined') options = new Object;
   options.async = true;
   options.append = true;
-  _ajax_supdate(action, params, selector, options);
+  _ajax_supdate(controller, params, selector, options);
 };
 
-function _ajax_supdate(action, params, selector, options) {
+function _ajax_supdate(controller, params, selector, options) {
   if (typeof options == 'undefined') options = new Object;
   if (typeof options.user_message == 'undefined') options.user_message = '';
   if (typeof options.progress_bar == 'undefined') options.progress_bar = true;
@@ -360,7 +360,7 @@ function _ajax_supdate(action, params, selector, options) {
 
     setTimeout(function() {
       if (options.async) {
-        _ajax_read(action, params, function(data) {
+        _ajax_read(controller, params, function(data) {
 
           $(selector).css('minHeight', tmp_min_height).css('opacity', 1);
           if (options.append) {
@@ -384,7 +384,7 @@ function _ajax_supdate(action, params, selector, options) {
           if (typeof options.success == 'function') setTimeout(options.success, 100);
         });
       } else {
-        _ajax_sread(action, params, { success: function(data) {
+        _ajax_sread(controller, params, { success: function(data) {
 
           $(selector).css('minHeight', tmp_min_height).css('opacity', 1);
           if (options.append) {
@@ -410,8 +410,8 @@ function _ajax_supdate(action, params, selector, options) {
   };
 };
 
-function _file_download(action, params, options) {
-  params.action = action;
+function _file_download(controller, params, options) {
+  params.controller = controller;
   if (typeof options == 'undefined') options = new Object;
   query = '?adios_force_download_header=1&'
   $.each(params, function(i,n) {

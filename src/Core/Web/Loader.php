@@ -143,8 +143,8 @@ class Loader {
         $params
       )->render();
     }));
-    $this->twig->addFunction(new \Twig\TwigFunction('adiosAction', function ($action, $params = []) {
-      return $this->adios->renderAction($action, $params);
+    $this->twig->addFunction(new \Twig\TwigFunction('adiosRender', function ($action, $params = []) {
+      return $this->adios->render($action, $params);
     }));
 
     // set default twig params

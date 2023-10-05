@@ -1,0 +1,34 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace {{ thisController.namespace }};
+
+class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
+
+  public function prepareView() {
+
+    // basic configuration
+    $view = '{{ thisController.config.view }}';
+
+    $defaultViewParams = array_merge(
+      $this->params,
+      [
+        'windowParams' => $this->params['windowParams'] ?? [],
+      ],
+{{ varExport(thisController.config.params, "      ")|raw }} ?? []
+    );
+
+    // post-processing of the default view parameters
+    $viewParams = $defaultViewParams;
+
+    // create view object
+    $viewObject = $this->adios->view->create(
+      $view,
+      $viewParams
+    );
+
+    // render view
+    return $viewObject;
+  }
+}

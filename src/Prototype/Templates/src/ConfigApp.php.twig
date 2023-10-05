@@ -30,7 +30,7 @@ $config['widgets'] = {{ varExport(configWidgetsEnabled)|raw }};
 $config['web']['themeDir'] = realpath(__DIR__ . '/../src/Web/Theme');
 
 // misc
-$config['default_action'] = '{% if ConfigApp.defaultAction == '' %}Desktop{% else %}{{ ConfigApp.defaultAction }}{% endif %}';
+$config['defaultController'] = '{% if ConfigApp.defaultController == '' %}Desktop{% else %}{{ ConfigApp.defaultController }}{% endif %}';
 $config['available_languages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}['sk']{% endif %};
 $config['skin'] = '{{ ConfigApp.skin ?? blue }}';
 

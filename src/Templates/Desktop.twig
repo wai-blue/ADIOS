@@ -172,8 +172,8 @@
         <!-- Topbar -->
         <nav class="navbar navbar-expand navbar-light bg-white topbar static-top row shadow">
           <div class="col col-10">
-            {% if config.top_bar.custom.action != "" %}
-              {{ adiosAction(config.top_bar.custom.action, config.top_bar.custom.action_params)|raw }}
+            {% if config.top_bar.custom.controller != "" %}
+              {{ adiosRender(config.top_bar.custom.controller, config.top_bar.custom.controller_params)|raw }}
             {% else %}
               {{ config.application_name }}
             {% endif %}
@@ -282,9 +282,20 @@
           </div>
           <div class="desktop">
             <div class="desktop-content">
-              {% if desktopContentAction != "" %}
-                {{ adiosAction(desktopContentAction, desktopContentActionParams)|raw }}
-              {% endif %}
+              {# {% if desktopContentController != "" %}
+                <script>
+                  _ajax_update(
+                    '{{ desktopContentController }}',
+                    {},
+                    '.desktop-content'
+                  );
+                </script>
+              {% endif %} #}
+              {# {% if desktopContentController != "" %}
+                {{ adiosRender(desktopContentController, desktopContentControllerParams)|raw }}
+              {% endif %} #}
+
+              {{ contentHtml|raw }}
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 namespace ADIOS\Core\Plugin;
 
-class Action extends \ADIOS\Core\Action {
+class Action extends \ADIOS\Core\Controller {
   function __construct(&$adios, $params = []) {
     $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 

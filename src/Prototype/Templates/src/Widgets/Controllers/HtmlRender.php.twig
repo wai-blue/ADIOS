@@ -1,0 +1,11 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace {{ thisController.namespace }};
+
+class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
+  public function render() {
+    return {{ varExport(thisController.config.html)|raw }};
+  }
+}

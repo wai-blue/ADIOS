@@ -383,48 +383,48 @@ class Builder {
         }
       }
 
-      if (is_array($widgetConfig['actions'] ?? NULL)) {
-        $this->createFolder($widgetRootDir . '/Actions');
+      if (is_array($widgetConfig['controllers'] ?? NULL)) {
+        $this->createFolder($widgetRootDir . '/Controllers');
         $this->createFolder($widgetRootDir . '/Templates');
 
-        foreach ($widgetConfig['actions'] as $actionName => $actionConfig) {
-          if (isset($actionConfig['phpTemplate'])) {
-            $actionPhpFileTemplate = 'src/Widgets/Actions/' . $actionConfig['phpTemplate'] . '.php.twig';
-            $actionHtmlFileTemplate = '';
+        foreach ($widgetConfig['controllers'] as $controllerName => $controllerConfig) {
+          if (isset($controllerConfig['phpTemplate'])) {
+            $controllerPhpFileTemplate = 'src/Widgets/Controllers/' . $controllerConfig['phpTemplate'] . '.php.twig';
+            $controllerHtmlFileTemplate = '';
           } else {
-            $actionPhpFileTemplate = 'src/Widgets/ActionWithTemplate.php.twig';
-            $actionHtmlFileTemplate = 'src/Widgets/ActionTemplates/' . $actionConfig['template'] . '.html.twig';
+            $controllerPhpFileTemplate = 'src/Widgets/ControllerWithTemplate.php.twig';
+            $controllerHtmlFileTemplate = 'src/Widgets/ControllerTemplates/' . $controllerConfig['template'] . '.html.twig';
           }
 
-          $tmpActionConfig = $actionConfig;
-          unset($tmpActionConfig['template']);
-          unset($tmpActionConfig['phpTemplate']);
+          $tmpControllerConfig = $controllerConfig;
+          unset($tmpControllerConfig['template']);
+          unset($tmpControllerConfig['phpTemplate']);
 
-          $actionNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Actions';
-          $actionClassName = str_replace('/', '\\', $actionName);
+          $controllerNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Controllers';
+          $controllerClassName = str_replace('/', '\\', $controllerName);
 
-          if (strpos($actionName, '/') !== FALSE) {
-            $actionRootDir = $widgetRootDir . '/Actions';
+          if (strpos($controllerName, '/') !== FALSE) {
+            $controllerRootDir = $widgetRootDir . '/Controllers';
 
-            $tmpDirs = explode('/', $actionName);
+            $tmpDirs = explode('/', $controllerName);
             
-            $actionClassName = end($tmpDirs);
+            $controllerClassName = end($tmpDirs);
 
             foreach ($tmpDirs as $level => $tmpDir) {
-              $actionRootDir .= '/' . $tmpDir;
+              $controllerRootDir .= '/' . $tmpDir;
 
               if ($level != count($tmpDirs) - 1) {
-                $actionNamespace .= '\\' . $tmpDir;
-                $this->createFolder($actionRootDir);
+                $controllerNamespace .= '\\' . $tmpDir;
+                $this->createFolder($controllerRootDir);
               }
 
             }
           } else {
-            $actionClassName = $actionName;
+            $controllerClassName = $controllerName;
           }
 
 
-          $tmpActionParams = array_merge(
+          $tmpControllerParams = array_merge(
             $this->prototype,
             [
               'thisWidget' => [
@@ -433,25 +433,25 @@ class Builder {
                 'class' => $widgetClassName,
                 'config' => $widgetConfig
               ],
-              'thisAction' => [
-                'name' => $actionName,
-                'namespace' => $actionNamespace,
-                'class' => $actionClassName,
-                'config' => $tmpActionConfig
+              'thisController' => [
+                'name' => $controllerName,
+                'namespace' => $controllerNamespace,
+                'class' => $controllerClassName,
+                'config' => $tmpControllerConfig
               ]
             ]
           );
 
           $this->renderFile(
-            $widgetRootDir . '/Actions/' . $actionName . '.php',
-            $actionPhpFileTemplate,
-            $tmpActionParams
+            $widgetRootDir . '/Controllers/' . $controllerName . '.php',
+            $controllerPhpFileTemplate,
+            $tmpControllerParams
           );
 
-          if (!empty($actionHtmlFileTemplate)) {
+          if (!empty($controllerHtmlFileTemplate)) {
             $this->copyFile(
-              $actionHtmlFileTemplate,
-              $widgetRootDir . '/Templates/' . $actionName . '.twig'
+              $controllerHtmlFileTemplate,
+              $widgetRootDir . '/Templates/' . $controllerName . '.twig'
             );
           }
         }

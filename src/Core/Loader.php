@@ -24,12 +24,12 @@ spl_autoload_register(function ($class) {
 
   if (!$loaded) {
 
-    if (strpos($class, "ADIOS/Actions") === 0) {
+    if (strpos($class, "ADIOS/Controllers") === 0) {
 
-      $class = str_replace("ADIOS/Actions/", "", $class);
+      $class = str_replace("ADIOS/Controllers/", "", $class);
 
       // najprv skusim hladat core akciu
-      $tmp = dirname(__FILE__) . "/Actions/{$class}.php";
+      $tmp = dirname(__FILE__) . "/Controllers/{$class}.php";
       if (!@include_once($tmp)) {
         // ak sa nepodari, hladam widgetovsku akciu
 
@@ -37,7 +37,7 @@ spl_autoload_register(function ($class) {
         $widgetName = array_pop($widgetPath);
         $widgetPath = join("/", $widgetPath);
 
-        if (!@include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$widgetPath}/Actions/{$widgetName}.php")) {
+        if (!@include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$widgetPath}/Controllers/{$widgetName}.php")) {
           // ak ani widgetovska, skusim plugin
           $class = str_replace("Plugins/", "", $class);
           $pathLeft = "";
@@ -49,7 +49,7 @@ spl_autoload_register(function ($class) {
             $included = FALSE;
 
             foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
-              $file = "{$pluginFolder}/{$pathLeft}/Actions/{$pathRight}.php";
+              $file = "{$pluginFolder}/{$pathLeft}/Controllers/{$pathRight}.php";
               if (is_file($file)) {
                 include($file);
                 $included = TRUE;
@@ -122,12 +122,12 @@ class Loader
   public string $version = "";
   public string $gtp = "";
   public string $requestedUri = "";
-  public string $requestedAction = "";
-  public string $action = "";
+  public string $requestedController = "";
+  public string $controller = "";
   public string $uid = "";
   public string $srcDir = "";
 
-  public $actionObject;
+  public $controllerObject;
 
   public bool $logged = FALSE;
 
@@ -161,8 +161,8 @@ class Loader
 
   public array $assetsUrlMap = [];
 
-  public int $actionNestingLevel = 0;
-  public array $actionStack = [];
+  public int $controllerNestingLevel = 0;
+  public array $controllerStack = [];
 
   public string $dictionaryFilename = "Core-Loader";
   public array $dictionary = [];
@@ -171,8 +171,7 @@ class Loader
 
   public bool $forceUserLogout = FALSE;
 
-  public string $desktopContentAction = "";
-  public array $desktopContentActionParams = [];
+  public string $desktopContentController = "";
 
   public string $widgetsDir = "";
 
@@ -196,7 +195,7 @@ class Loader
     $this->version = file_get_contents(__DIR__."/../version.txt");
 
     $this->gtp = $this->config['global_table_prefix'] ?? "";
-    $this->requestedAction = $_REQUEST['action'] ?? "";
+    $this->requestedController = $_REQUEST['controller'] ?? "";
     $this->forceUserLogout = $forceUserLogout;
 
     if (empty($this->config['dir'])) $this->config['dir'] = "";
@@ -307,11 +306,11 @@ class Loader
         // Spustaju sa tu, aby sa setrili zdroje.
 
         if (
-          !empty($this->requestedAction)
-          && in_array($this->requestedAction, ['Image', 'File'])
+          !empty($this->requestedController)
+          && in_array($this->requestedController, ['Image', 'File'])
         ) {
           $this->finalizeConfig();
-          include "{$this->requestedAction}.php";
+          include "{$this->requestedController}.php";
           die();
         }
       }
@@ -473,7 +472,8 @@ class Loader
                 ");
                 $this->email->send();
               } catch (\Exception $e) {
-                var_dump($e->getMessage()); exit();
+                var_dump($e->getMessage());
+                exit();
               }
 
               $this->userPasswordReset["success"] = TRUE;
@@ -622,7 +622,7 @@ class Loader
           'translate',
           function ($string, $objectClassName = "") {
             if (!class_exists($objectClassName)) {
-              $object = $this->actionObject;
+              $object = $this->controllerObject;
             } else {
               $object = new $objectClassName($this);
             }
@@ -643,9 +643,9 @@ class Loader
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction(
-          'adiosAction',
-          function ($action, $params = []) {
-            return $this->renderAction($action, $params);
+          'adiosRender',
+          function ($controller, $params = []) {
+            return $this->render($controller, $params);
           }
         ));
 
@@ -670,8 +670,8 @@ class Loader
     return isset($_REQUEST['__IS_AJAX__']) && $_REQUEST['__IS_AJAX__'] == "1";
   }
 
-  public function isNestedAction() {
-    return ($this->actionNestingLevel > 2);
+  public function isNestedController() {
+    return ($this->controllerNestingLevel > 2);
   }
 
   public function isWindow() {
@@ -1094,23 +1094,24 @@ class Loader
   }
 
   // funkcia render() zabezpecuje:
-  //   - routing podla a) (ne)prihlaseny user, b) $this->requestedAction, c) $_REQUEST['__IS_AJAX__']
+  //   - routing podla a) (ne)prihlaseny user, b) $this->requestedController, c) $_REQUEST['__IS_AJAX__']
   //   - kontrolu requestu podla $_REQUEST['c']
   //   - vygenerovanie UID
   //   - renderovanie naroutovanej akcie
 
   /**
    * Renders the requested content. It can be the (1) whole desktop with complete <html>
-   * content; (2) the HTML of an action requested dynamically using AJAX; or (3) a JSON
+   * content; (2) the HTML of a controller requested dynamically using AJAX; or (3) a JSON
    * string requested dynamically using AJAX and further processed in Javascript.
    *
-   * @param  mixed $params Parameters (a.k.a. arguments) of the requested action.
-   * @throws \ADIOS\Core\Exception When no action is specified or requested action is unknown.
-   * @throws \ADIOS\Core\Exception When running in CLI and requested action is blocked for the CLI.
-   * @throws \ADIOS\Core\Exception When running in SAPI and requested action is blocked for the SAPI.
+   * @param  mixed $params Parameters (a.k.a. arguments) of the requested controller.
+   * @throws \ADIOS\Core\Exception When no controller is specified or requested controller is unknown.
+   * @throws \ADIOS\Core\Exception When running in CLI and requested controller is blocked for the CLI.
+   * @throws \ADIOS\Core\Exception When running in SAPI and requested controller is blocked for the SAPI.
    * @return string Rendered content.
    */
-  public function render($params = []) {
+  public function render(string $controller = '', array $params = []) {
+
     if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedUri, $m)) {
       $cronClassName = str_replace("/", "\\", "/App/Widgets/{$m[0]}");
 
@@ -1125,29 +1126,29 @@ class Loader
 
     try {
 
-      // cache vytvaram az v tomto momente, t.j. iba pri F5 refresh
-      // aby sa pri kazdom AJAX requeste zbytocne nevytvarala
-      // $this->rebuildCache();
-
-      if (php_sapi_name() === 'cli') {
-        $params = @json_decode($_SERVER['argv'][2] ?? "", TRUE);
-        if (!is_array($params)) { // toto nastane v pripade, ked $_SERVER['argv'] nie je JSON string
-          $params = $_SERVER['argv'];
+      if (empty($controller)) {
+        if (php_sapi_name() === 'cli') {
+          $params = @json_decode($_SERVER['argv'][2] ?? "", TRUE);
+          if (!is_array($params)) { // toto nastane v pripade, ked $_SERVER['argv'] nie je JSON string
+            $params = $_SERVER['argv'];
+          }
+          $controller = $_SERVER['argv'][1] ?? "";
+        } else {
+          $controller = $_REQUEST['controller'];
+          $params = $_REQUEST;
+          unset($params['controller']);
         }
-        $params['action'] = $_SERVER['argv'][1] ?? "";
-      } else {
-        $params = $_REQUEST;
       }
 
+      if (!empty($controller)) {
+        // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim controller a params.
+        // Ak pre $params['controller'] neexistuje vhodny routing, nemenim nic - pouzije sa
+        // povodne $params['controller'], cize requestovana URLka.
 
-      if (!empty($params['action'])) {
-        // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim action a params.
-        // Ak pre $params['action'] neexistuje vhodny routing, nemenim nic - pouzije sa
-        // povodne $params['action'], cize requestovana URLka.
         foreach ($this->routing as $routePattern => $route) {
-          if (preg_match($routePattern, $params['action'], $m)) {
-            // povodnu $params['action'] nahradim novou $route['action']
-            $params['action'] = $route['action'];
+          if (preg_match($routePattern, $controller, $m)) {
+            // povodny $controller nahradim novym $route['controller']
+            $controller = $route['controller'];
 
             $route['params'] = $this->replaceRouteVariables($route['params'], $m);
 
@@ -1156,85 +1157,84 @@ class Loader
             }
           }
         }
-
       }
 
-      if (empty($this->action)) {
-        if (empty($params['action'])) {
-          $this->action = (php_sapi_name() === 'cli' ? "" : $this->config['default_action']);
-        } else {
-          $this->action = $params['action'];
-        }
+      if (empty($controller)) {
+        $controller = (php_sapi_name() === 'cli' ? "" : $this->config['defaultController']);
       }
 
-      $this->dispatchEventToPlugins("onADIOSBeforeActionRender", ["adios" => $this]);
+      $this->dispatchEventToPlugins("onADIOSBeforeRender", ["adios" => $this]);
 
-      if (empty($this->action)) {
-        throw new \ADIOS\Core\Exceptions\GeneralException("No action specified.");
+      if (empty($controller)) {
+        throw new \ADIOS\Core\Exceptions\GeneralException("No controller specified.");
       }
 
-      $actionClassName = $this->getActionClassName($this->action);
+      $controllerClassName = $this->getControllerClassName($controller);
 
-      if (!class_exists($actionClassName)) {
-        throw new \ADIOS\Core\Exceptions\GeneralException("Unknown action '{$this->action}'.");
+      if (!class_exists($controllerClassName)) {
+        throw new \ADIOS\Core\Exceptions\GeneralException("Unknown controller '{$controller}'.");
       }
 
       if (php_sapi_name() === 'cli') {
-        if (!$actionClassName::$cliSAPIEnabled) {
-          throw new \ADIOS\Core\Exceptions\GeneralException("Action is not available for CLI interface.");
+        if (!$controllerClassName::$cliSAPIEnabled) {
+          throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not available for CLI interface.");
         }
       } else {
-        if (!$actionClassName::$webSAPIEnabled) {
-          throw new \ADIOS\Core\Exceptions\GeneralException("Action is not available for WEB interface.");
+        if (!$controllerClassName::$webSAPIEnabled) {
+          throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not available for WEB interface.");
         }
       }
 
       // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
-      $this->config = $actionClassName::overrideConfig($this->config, $params);
+      $this->config = $controllerClassName::overrideConfig($this->config, $params);
 
       if ($params['__IS_AJAX__']) {
         // tak nic
       } else if (
         !$this->getConfig("hide_default_desktop", FALSE)
-        && !$actionClassName::$hideDefaultDesktop
-        && !method_exists($actionClassName, "renderJSON")
+        && !$controllerClassName::$hideDefaultDesktop
+        && !method_exists($controllerClassName, "renderJson")
+        && $this->controllerNestingLevel == 0
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
-        $this->desktopContentAction = $this->action;
-        $this->desktopContentActionParams = $params;
-        $this->action = "Desktop";
+        $params = [
+          'contentController' => $controller,
+          'contentParams' => $params,
+          '_REQUEST' => $params,
+          '_COOKIE' => $_COOKIE,
+        ];
+        $controller = "Desktop";
       }
 
       if (
         !$this->userLogged
-        && $actionClassName::$requiresUserAuthentication
+        && $controllerClassName::$requiresUserAuthentication
       ) {
-        $this->action = "Login";
+        $controller = "Login";
       }
 
-      if (empty($this->action)) {
-        $this->action = "Desktop";
+      if (empty($controller)) {
+        $controller = "Desktop";
       }
 
       // Kontrola permissions
 
-      $permissionForrequestedUri = "";
+      $permissionForRequestedUri = "";
       foreach ($this->routing as $routePattern => $route) {
-        if (preg_match((string) $routePattern, $this->action, $m)) {
-          $permissionForrequestedUri = $route['permission'];
+        if (preg_match((string) $routePattern, $controller, $m)) {
+          $permissionForRequestedUri = $route['permission'];
         }
       }
 
       if (
-        !empty($permissionForrequestedUri)
-        && !$this->permissions->has($permissionForrequestedUri)
+        !empty($permissionForRequestedUri)
+        && !$this->permissions->has($permissionForRequestedUri)
       ) {
-        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForrequestedUri}).");
+        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedUri}).");
       }
 
       // TODO: Docasne. Ked bude fungovat, vymazat.
-      $params['permissionForrequestedUri'] = $permissionForrequestedUri;
-
+      $params['permissionForRequestedUri'] = $permissionForRequestedUri;
 
       // All OK, rendering content...
 
@@ -1247,10 +1247,99 @@ class Loader
 
       $this->setUid($uid);
 
-      return $this->renderAction($this->action, $params);
+      if (in_array($controller, array_keys($this->config['widgets']))) {
+        $controller = "{$controller}/Main";
+      }
+
+
+
+
+
+      $this->controller = $controller;
+      $this->controllerNestingLevel++;
+      $this->controllerStack[] = $this->controller;
+
+      $controllerClassName = $this->getControllerClassName($this->controller);
+
+      try {
+        // Kontrola permissions, krok 2
+        // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
+        // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
+        // to moze zmenit)
+        if ($controllerClassName::$requiresUserAuthentication) {
+          $this->checkPermissionsForController($this->controller, $params);
+        }
+
+        // permissions udelene
+        if ($this->controllerExists($this->controller)) {
+          $this->controllerObject = new $controllerClassName($this, $params);
+
+          if (method_exists($controllerClassName, "renderJson")) {
+            $controllerReturn = $this->controllerObject->renderJson($params);
+            $html = json_encode($controllerReturn);
+          } else if (method_exists($controllerClassName, "prepareView")) {
+            $controllerReturn = $this->controllerObject->prepareView($params)->render();
+
+            if ($controllerReturn === NULL) {
+              // akcia nic nereturnovala, iba robila echo
+              $html = "";
+            } else if (is_string($controllerReturn)) {
+              $html = $controllerReturn;
+            } else {
+              $html = $this->renderReturn($controllerReturn);
+            }
+          } else { // 2023-10-05 Deprecated
+            $controllerReturn = $this->controllerObject->render($params);
+
+            if ($controllerReturn === NULL) {
+              // akcia nic nereturnovala, iba robila echo
+              $html = "";
+            } else if (is_string($controllerReturn)) {
+              $html = $controllerReturn;
+            } else {
+              $html = $this->renderReturn($controllerReturn);
+            }
+          }
+
+        } else {
+
+          // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
+          $tmpTemplateName = $controllerClassName;
+          $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
+          $tmpTemplateName = str_replace("/Controllers/", "/Templates/", $tmpTemplateName);
+
+          $controllerFactoryClass = $this->classFactories['controller'] ?? \ADIOS\Core\Controller::class;
+          $tmp = new $controllerFactoryClass($this);
+          $tmp->twigTemplate = $tmpTemplateName;
+          $html = $tmp->render($params);
+        }
+      } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
+        $html = $this->renderFatal($e->getMessage());
+      } catch (
+        \Exception
+        // | \Throwable
+        $e) {
+        $error = error_get_last();
+
+        if ($error['type'] == E_ERROR) {
+          $html = $this->renderFatal(
+            '<div style="margin-bottom:1em;">'
+              . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
+            . '</div>'
+            . '<pre style="font-size:0.75em;font-family:Courier New">'
+              . $e->getTraceAsString()
+            . '</pre>',
+            TRUE
+          );
+        } else {
+          $html = $this->renderFatal($this->renderExceptionHtml($e));
+        }
+      }
+
+      return $html;
+
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      echo $this->renderFatal($e->getMessage());
-      exit;
+      return $this->renderFatal($e->getMessage());
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
@@ -1260,160 +1349,169 @@ class Loader
         $lines[] = "SERVER.REQUEST_URI = {$this->config['request_uri']}";
       }
 
-      echo join(" ", $lines);
-
-      exit();
+      return join(" ", $lines);
     }
   }
 
-  public function getActionClassName(string $action) : string {
+  public function getControllerClassName(string $controller) : string {
 
-    $actionPathParts = [];
-    foreach (explode("/", $action) as $actionPathPart) {
+    $controllerPathParts = [];
+    foreach (explode("/", $controller) as $controllerPathPart) {
       // convert-dash-string-toCamelCase
-      $actionPathParts[] = str_replace(' ', '', ucwords(str_replace('-', ' ', $actionPathPart)));
+      $controllerPathParts[] = str_replace(' ', '', ucwords(str_replace('-', ' ', $controllerPathPart)));
     }
-    $action = join("/", $actionPathParts);
+    $controller = join("/", $controllerPathParts);
 
-    $actionClassName = '';
+    $controllerClassName = '';
 
     // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
     foreach (array_keys($this->widgets) as $widgetName) {
-      if (strpos(strtolower($action), strtolower($widgetName)) === 0) {
-        $actionClassName =
+      if (strpos(strtolower($controller), strtolower($widgetName)) === 0) {
+        $controllerClassName =
           '\\App\\Widgets\\'
           . $widgetName
-          . '\\Actions\\'
-          . substr($action, strlen($widgetName) + 1)
+          . '\\Controllers\\'
+          . substr($controller, strlen($widgetName) + 1)
         ;
       }
     }
-    $actionClassName = str_replace('/', '\\', $actionClassName);
+    $controllerClassName = str_replace('/', '\\', $controllerClassName);
 
-    if (!class_exists($actionClassName)) {
+    if (!class_exists($controllerClassName)) {
       // Dusan 31.5.2023: Tento sposob zapisu akcii je deprecated.
-      $actionClassName = 'ADIOS\\Actions\\' . str_replace('/', '\\', $action);
+      $controllerClassName = 'ADIOS\\Controllers\\' . str_replace('/', '\\', $controller);
 
-      // $this->console->warning('[ADIOS] Deprecated class name for action ' . $action . '.');
+      // $this->console->warning('[ADIOS] Deprecated class name for controller ' . $controller . '.');
     }
 
-    return $actionClassName;
+    return $controllerClassName;
   }
 
-  public function actionExists(string $action) : bool {
-    return class_exists($this->getActionClassName($action));
+  public function controllerExists(string $controller) : bool {
+    return class_exists($this->getControllerClassName($controller));
   }
 
-  // funkcia renderAction() zabezpecuje:
-  //   - kontrolu pravomoci, ci moze logged user akciu spustit
-  //   - vyrenderovanie akcie alebo, ak neexistuje, vyrenderovanie twig template
+  // // funkcia renderAction() zabezpecuje:
+  // //   - kontrolu pravomoci, ci moze logged user akciu spustit
+  // //   - vyrenderovanie akcie alebo, ak neexistuje, vyrenderovanie twig template
 
-  public function renderAction($action, $params) {
-    if (!is_array($params)) $params = [];
+  // public function renderAction($action, $params) {
+  //   // if (!is_array($params)) $params = [];
 
-    $params['_REQUEST'] = $params;
-    $params['_COOKIE'] = $_COOKIE;
-    $this->action = $action;
+  //   // $params['_REQUEST'] = $params;
+  //   // $params['_COOKIE'] = $_COOKIE;
+  //   // $this->action = $action;
 
-    if (in_array($action, array_keys($this->config['widgets']))) {
-      $action = "{$action}/Main";
-    }
+  //   // if (in_array($action, array_keys($this->config['widgets']))) {
+  //   //   $action = "{$action}/Main";
+  //   // }
 
-    $this->actionNestingLevel++;
-    $this->actionStack[] = $action;
+  //   // $this->actionNestingLevel++;
+  //   // $this->actionStack[] = $action;
 
-    $actionClassName = $this->getActionClassName($action);
+  //   // $actionClassName = $this->getActionClassName($action);
 
-    try {
-      // Kontrola permissions, krok 2
-      // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
-      // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
-      // to moze zmenit)
-      if ($actionClassName::$requiresUserAuthentication) {
-        $this->checkPermissionsForAction($action, $params);
-      }
+  //   // try {
+  //   //   // Kontrola permissions, krok 2
+  //   //   // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
+  //   //   // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
+  //   //   // to moze zmenit)
+  //   //   if ($actionClassName::$requiresUserAuthentication) {
+  //   //     $this->checkPermissionsForAction($action, $params);
+  //   //   }
 
-      // permissions udelene
-      if ($this->actionExists($action)) {
-        $this->actionObject = new $actionClassName($this, $params);
+  //   //   // permissions udelene
+  //   //   if ($this->actionExists($action)) {
+  //   //     $this->actionObject = new $actionClassName($this, $params);
 
-        if (method_exists($actionClassName, "renderJSON")) {
-          $actionReturn = $this->actionObject->renderJSON($params);
-          $actionHtml = json_encode($actionReturn);
-        } else {
-          $actionReturn = $this->actionObject->render($params);
+  //   //     if (method_exists($actionClassName, "renderJson")) {
+  //   //       $actionReturn = $this->actionObject->renderJson($params);
+  //   //       $actionHtml = json_encode($actionReturn);
+  //   //     } else if (method_exists($actionClassName, "prepareView")) {
+  //   //       $actionReturn = $this->actionObject->prepareView($params)->render();
 
-          if ($actionReturn === NULL) {
-            // akcia nic nereturnovala, iba robila echo
-            $actionHtml = "";
-          } else if (is_string($actionReturn)) {
-            $actionHtml = $actionReturn;
-          } else {
-            $actionHtml = $this->renderReturn($actionReturn);
-          }
-        }
+  //   //       if ($actionReturn === NULL) {
+  //   //         // akcia nic nereturnovala, iba robila echo
+  //   //         $actionHtml = "";
+  //   //       } else if (is_string($actionReturn)) {
+  //   //         $actionHtml = $actionReturn;
+  //   //       } else {
+  //   //         $actionHtml = $this->renderReturn($actionReturn);
+  //   //       }
+  //   //     } else { // 2023-10-05 Deprecated
+  //   //       $actionReturn = $this->actionObject->render($params);
 
-      } else {
+  //   //       if ($actionReturn === NULL) {
+  //   //         // akcia nic nereturnovala, iba robila echo
+  //   //         $actionHtml = "";
+  //   //       } else if (is_string($actionReturn)) {
+  //   //         $actionHtml = $actionReturn;
+  //   //       } else {
+  //   //         $actionHtml = $this->renderReturn($actionReturn);
+  //   //       }
+  //   //     }
 
-        // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
-        $tmpTemplateName = $actionClassName;
-        $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
-        $tmpTemplateName = str_replace("/Actions/", "/Templates/", $tmpTemplateName);
+  //   //   } else {
 
-        $actionFactoryClass = $this->classFactories['action'] ?? \ADIOS\Core\Action::class;
-        $tmp = new $actionFactoryClass($this);
-        $tmp->twigTemplate = $tmpTemplateName;
-        $actionHtml = $tmp->render($params);
-      }
-    } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      $actionHtml = $this->renderFatal($e->getMessage());
-    } catch (
-      \Exception
-      // | \Throwable
-      $e) {
-      $error = error_get_last();
+  //   //     // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
+  //   //     $tmpTemplateName = $actionClassName;
+  //   //     $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
+  //   //     $tmpTemplateName = str_replace("/Actions/", "/Templates/", $tmpTemplateName);
 
-      if ($error['type'] == E_ERROR) {
-        $actionHtml = $this->renderFatal(
-          '<div style="margin-bottom:1em;">'
-            . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
-          . '</div>'
-          . '<pre style="font-size:0.75em;font-family:Courier New">'
-            . $e->getTraceAsString()
-          . '</pre>',
-          TRUE
-        );
-      } else {
-        // $actionHtml = $this->renderFatal(
-        //   '<div style="margin-bottom:1em;">'
-        //     . get_class($e) . ': ' . $e->getMessage()
-        //   . '</div>'
-        //   . '<pre style="font-size:0.75em;font-family:Courier New">'
-        //     . $e->getTraceAsString()
-        //   . '</pre>',
-        //   TRUE
-        // );
-        $actionHtml = $this->renderFatal($this->renderExceptionHtml($e));
-      }
-    }
+  //   //     $actionFactoryClass = $this->classFactories['action'] ?? \ADIOS\Core\Action::class;
+  //   //     $tmp = new $actionFactoryClass($this);
+  //   //     $tmp->twigTemplate = $tmpTemplateName;
+  //   //     $actionHtml = $tmp->render($params);
+  //   //   }
+  //   // } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
+  //   //   $actionHtml = $this->renderFatal($e->getMessage());
+  //   // } catch (
+  //   //   \Exception
+  //   //   // | \Throwable
+  //   //   $e) {
+  //   //   $error = error_get_last();
 
-    return $actionHtml;
-  }
+  //   //   if ($error['type'] == E_ERROR) {
+  //   //     $actionHtml = $this->renderFatal(
+  //   //       '<div style="margin-bottom:1em;">'
+  //   //         . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
+  //   //       . '</div>'
+  //   //       . '<pre style="font-size:0.75em;font-family:Courier New">'
+  //   //         . $e->getTraceAsString()
+  //   //       . '</pre>',
+  //   //       TRUE
+  //   //     );
+  //   //   } else {
+  //   //     // $actionHtml = $this->renderFatal(
+  //   //     //   '<div style="margin-bottom:1em;">'
+  //   //     //     . get_class($e) . ': ' . $e->getMessage()
+  //   //     //   . '</div>'
+  //   //     //   . '<pre style="font-size:0.75em;font-family:Courier New">'
+  //   //     //     . $e->getTraceAsString()
+  //   //     //   . '</pre>',
+  //   //     //   TRUE
+  //   //     // );
+  //   //     $actionHtml = $this->renderFatal($this->renderExceptionHtml($e));
+  //   //   }
+  //   // }
+
+  //   return $actionHtml;
+  // }
 
   /**
-   * Checks user permissions before rendering requested action.
+   * Checks user permissions before rendering requested controller.
    * Original implementation does nothing. Must be overriden
    * the application's main class.
    *
    * Does not return anything, only throws exceptions.
    *
    * @abstract
-   * @param string $action Name of the action to be rendered.
-   * @param array $params Parameters (a.k.a. arguments) of the action.
+   * @param string $controller Name of the controller to be rendered.
+   * @param array $params Parameters (a.k.a. arguments) of the controller.
    * @throws \ADIOS\Core\NotEnoughPermissionsException When the signed user does not have enough permissions.
    * @return void
    */
-  public function checkPermissionsForAction($action, $params = NULL) {
+  public function checkPermissionsForController($controller, $params = NULL) {
     // to be overriden
   }
 
@@ -1614,7 +1712,7 @@ class Loader
     return $eventData;
   }
 
-  public function hasPermissionForAction($action, $params) {
+  public function hasPermissionForController($controller, $params) {
     return TRUE;
   }
 
@@ -1792,7 +1890,7 @@ class Loader
 
   public function getUid($uid = '') {
     if (empty($uid)) {
-      $tmp = $this->action.'-'.time().rand(100000, 999999);
+      $tmp = $this->controller.'-'.time().rand(100000, 999999);
     } else {
       $tmp = $uid;
     }
@@ -1916,36 +2014,6 @@ class Loader
 
     return FALSE;
   }
-
-  // 20.1.2023: Deprecated
-  // public function generate_rc_perms($perms) { }
-
-  // 20.1.2023: Deprecated
-  // public function has_perms($perm) {
-  //   return TRUE;
-  // }
-
-  // 20.1.2023: Deprecated
-  // public function action_perms($action) {
-  //   return TRUE;
-  // }
-
-  // 20.1.2023: Deprecated
-  // public function db_perms($action) {
-  //   return TRUE;
-  // }
-
-  // 20.1.2023: Deprecated
-  // public function feature_perms($action) {
-  //   return TRUE;
-  // }
-
-  // 20.1.2023: Deprecated
-  // public function table_has_cols_perms($table_name, $operation) {
-  //   return TRUE;
-  // }
-
-
 
   public function renderCSSCache() {
     $css = "";

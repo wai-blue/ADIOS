@@ -1,0 +1,12 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace {{ thisController.namespace }};
+
+class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
+  public function preRender() {
+    return {{ varExport(thisController.config, "    ")|raw }};
+  }
+}
+

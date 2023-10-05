@@ -4,28 +4,28 @@
 
   var adios_menu_hidden = 0;
 
-  function window_popup(action, params, options) {
+  function window_popup(controller, params, options) {
     if (typeof options == 'undefined') options = {};
 
     if (options.type == 'POST') {
       let paramsObj = _ajax_params(params);
       let formHtml = '';
 
-      formHtml = '<form action="' + _APP_URL + '/' + _action_url(action, {}, true) + '" method=POST target="adios_popup">';
+      formHtml = '<form action="' + _APP_URL + '/' + _controller_url(controller, {}, true) + '" method=POST target="adios_popup">';
       for (var i in paramsObj) {
        formHtml += '<input type="hidden" name="' + i + '" value="' + paramsObj[i] + '" />';
       }
       formHtml += '</form>';
 
-      // console.log(_APP_URL + '/' + _action_url(action, {}, true));
+      // console.log(_APP_URL + '/' + _controller_url(controller, {}, true));
       // console.log(formHtml);
       $(formHtml).appendTo('body').submit();
     } else {
-      window.open(_APP_URL + '/' + _ajax_action_url(action, params));
+      window.open(_APP_URL + '/' + _ajax_controller_url(controller, params));
     }
   }
 
-  function window_render(action, params, onclose, options) {
+  function window_render(controller, params, onclose, options) {
     if (typeof params == 'undefined') params = {};
     if (typeof options == 'undefined') options = {};
 
@@ -34,7 +34,7 @@
     $('.adios.main-content .windows').addClass('update-in-progress');
 
     setTimeout(function() {
-      _ajax_read(action, params, function(html) {
+      _ajax_read(controller, params, function(html) {
 
         // if (params.windowParams && params.windowParams.uid) {
         //   $('#' + params.windowParams.uid).remove();
@@ -44,14 +44,14 @@
         $('.adios.main-content .windows').removeClass('update-in-progress');
 
         $('.adios.main-content .windows .windows-content').append(html);
-        // window_post_render(html, action, params, options);
+        // window_post_render(html, controller, params, options);
 
       });
 
     }, 0);
   }
 
-  function window_post_render(html, action, url, params, options) {
+  function window_post_render(html, controller, url, params, options) {
   // console.log(url);
   // alert('a');
     // $('.adios.main-content .windows .windows-content').append(html);
@@ -87,7 +87,7 @@
     }
 
     ADIOS_windows[windowId] = {
-      'action': action,
+      'controller': controller,
       'url': url,
       'params': params,
       'onclose': onclose,
@@ -102,7 +102,7 @@
         .attr('id', win.attr('id') + '_TO_BE_REMOVED')
       ;
       window_render(
-        ADIOS_windows[windowId]['action'],
+        ADIOS_windows[windowId]['controller'],
         ADIOS_windows[windowId]['params'],
         ADIOS_windows[windowId]['onclick'],
       );
@@ -144,11 +144,11 @@
     }
   }
 
-  function desktop_update(action, params, options) {
-    desktop_render(action, params, options);
+  function desktop_update(controller, params, options) {
+    desktop_render(controller, params, options);
   };
 
-  function desktop_render(action, params, options) {
+  function desktop_render(controller, params, options) {
     if (typeof params == 'undefined') params = {};
     if (typeof options == 'undefined') options = {};
 
@@ -158,7 +158,7 @@
       let paramsObj = _ajax_params(params);
       let formHtml = '';
 
-      formHtml = '<form action="' + _APP_URL + '/' + _action_url(action, {}, true) + '" method=POST>';
+      formHtml = '<form action="' + _APP_URL + '/' + _controller_url(controller, {}, true) + '" method=POST>';
       for (var i in paramsObj) {
        formHtml += '<input type="hidden" name="' + i + '" value="' + paramsObj[i] + '" />';
       }
@@ -166,13 +166,13 @@
 
       $(formHtml).appendTo('body').submit();
     } else {
-      window.location.href = _APP_URL + '/' + _action_url(action, params, true);
+      window.location.href = _APP_URL + '/' + _controller_url(controller, params, true);
     }
 
   }
 
 
-  function desktop_main_box_history_push(action, params, html, options) {
+  function desktop_main_box_history_push(controller, params, html, options) {
     if (typeof options != 'object') options = {};
 
     window.history.pushState(
@@ -181,7 +181,7 @@
         "pageTitle": document.title,
       },
       "",
-      _APP_URL + '/' + _action_url(action, params, true)
+      _APP_URL + '/' + _controller_url(controller, params, true)
     );
 
   };
