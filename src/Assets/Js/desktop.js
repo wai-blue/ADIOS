@@ -148,7 +148,7 @@
     desktop_render(controller, params, options);
   };
 
-  function desktop_render(controller, params, options) {
+  function desktop_render(url, params, options) {
     if (typeof params == 'undefined') params = {};
     if (typeof options == 'undefined') options = {};
 
