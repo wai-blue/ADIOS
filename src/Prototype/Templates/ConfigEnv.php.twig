@@ -11,6 +11,9 @@ $config["db_password"]         = "{{ ConfigEnv.db.password }}";
 $config["db_name"]             = "{{ ConfigEnv.db.database }}";
 $config["global_table_prefix"] = "{{ ConfigEnv.globalTablePrefix }}";
 
+$config['db']['provider']        = "{{ ConfigEnv.db.provider }}";
+$config['db']['dsn']             = "{{ ConfigEnv.db.dsn }}";
+
 // dirs & urls
 $config['rewrite_base']        = "{{ ConfigEnv.rewriteBase }}";
 $config["url"]                 = "{{ ConfigEnv.rootUrl }}";

@@ -10,10 +10,10 @@
 
 namespace ADIOS\Core\DB\Providers;
 
-class MySQLi extends \ADIOS\Core\DB
+class DoctrineDBAL extends \ADIOS\Core\DB
 {
 
-  private $queryResult;
+  private \Doctrine\DBAL\Result $statement;
 
   /**
    * Connects the DB object to the database.
@@ -25,62 +25,14 @@ class MySQLi extends \ADIOS\Core\DB
    */
   public function connect(): void
   {
-    $dbHost = $this->adios->getConfig('db_host', '');
-    $dbPort = $this->adios->getConfig('db_port', '');
-    $dbUser = $this->adios->getConfig('db_user', '');
-    $dbPassword = $this->adios->getConfig('db_password', '');
-    $dbName = $this->adios->getConfig('db_name', '');
-    $dbCodepage = $this->adios->getConfig('db_codepage', '');
-
-    if (empty($dbHost)) {
-      throw new \ADIOS\Core\Exceptions\DBException("Database connection string is not configured.");
-    }
-
-    if (!empty($dbPort) && is_numeric($dbPort)) {
-      $this->connection = new \mysqli(
-        $dbHost,
-        $dbUser,
-        $dbPassword,
-        $dbName,
-        $dbPort
-      );
-    } else {
-      $this->connection = new \mysqli(
-        $dbHost,
-        $dbUser,
-        $dbPassword
-      );
-    }
-
-    if (!empty($this->connection->connect_error)) {
-      throw new \ADIOS\Core\Exceptions\DBException($this->connection->connect_error);
-    }
-
-    $this->connection->select_db($dbName);
-
-    if ($this->connection->errno == 1049) {
-      // unknown database
-      $this->query("
-        create database if not exists `{$dbName}`
-        default charset = utf8mb4
-        default collate = utf8mb4_unicode_ci
-      ");
-
-      $this->adios->console->info("Created database `{$dbName}`");
-
-      $this->connection->select_db($dbName);
-    } else if ($this->connection->errno > 0) {
-      throw new \ADIOS\Core\Exceptions\DBException($this->connection->errno);
-    }
-
-    if (!empty($dbCodepage)) {
-      $this->connection->set_charset($dbCodepage);
-    }
+    $dsnParser = new \Doctrine\DBAL\Tools\DsnParser();
+    $connectionParams = $dsnParser->parse($this->adios->getConfig('db/dsn', ''));
+    $this->connection = \Doctrine\DBAL\DriverManager::getConnection($connectionParams);
   }
 
   function escape(string $str): string
   {
-    return $this->connection->real_escape_string((string) $str);
+    return $this->connection->quote((string) $str);
   }
 
   public function showTables(): array
@@ -110,7 +62,7 @@ class MySQLi extends \ADIOS\Core\DB
 
   public function fetchArray()
   {
-    return $this->queryResult->fetch_array(MYSQLI_ASSOC);
+    return $this->statement->fetchAssociative();
   }
 
   public function insertedId()
@@ -901,29 +853,7 @@ class MySQLi extends \ADIOS\Core\DB
     $query = trim($query, " ;");
     if (empty($query)) return FALSE;
 
-    $ts1 = _getmicrotime();
-
-    $this->queryResult = $this->connection->query($query);
-    $this->lastQueryDurationSec = _getmicrotime() - $ts1;
-
-    if (!empty($this->connection->error)) {
-      $foreginKeyErrorCodes = [1062, 1216, 1217, 1451, 1452];
-      $errorNo = $this->connection->errno;
-
-      if (in_array($errorNo, $foreginKeyErrorCodes)) {
-        throw new \ADIOS\Core\Exceptions\DBDuplicateEntryException(
-          json_encode([$this->connection->error, $query, $initiatingModel->fullName, $errorNo])
-        );
-      } else {
-        throw new \ADIOS\Core\Exceptions\DBException(
-          "ERROR #: {$errorNo}, "
-          . $this->connection->error
-          . ", QUERY: {$query}"
-        );
-      }
-    } else if ($this->logQueries) {
-      $this->adios->logger->info("Query OK [" . ($this->lastQueryDurationSec * 1000) . "]:\n{$query}", [], "db");
-    }
+    $this->statement = $this->connection->query($query);
 
     return TRUE;
   }
@@ -964,8 +894,7 @@ class MySQLi extends \ADIOS\Core\DB
 
     if (!$force_create) {
       try {
-        $this->query("select * from `{$table_name}`");
-        $cnt = mysqli_num_rows($this->queryResult);
+        $cnt = $this->query("select * from `{$table_name}`")->rowCount();
       } catch (\ADIOS\Core\Exceptions\DBException $e) {
         $cnt = 0;
       }

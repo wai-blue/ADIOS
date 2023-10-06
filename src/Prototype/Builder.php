@@ -135,10 +135,11 @@ class Builder {
   }
 
   public function renderFile($fileName, $template, $twigParams = NULL) {
-    $this->log("Rendering file {$fileName} from {$template}.");
 
     $outputFile = $this->outputFolder."/".$fileName;
     $canRender = FALSE;
+
+    $this->log("Rendering file {$outputFile} from {$template}.");
 
     if (file_exists($outputFile)) {
       $canRender = (strpos(file_get_contents($outputFile), self::REGENERATE_ALLOWED_TAG) !== FALSE);

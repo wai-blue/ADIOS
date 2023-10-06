@@ -369,15 +369,18 @@ class Loader
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
-      $dbFactoryClass = $this->classFactories['db'] ?? \ADIOS\Core\DB\Providers\MySQLi::class;
-      $this->db = new $dbFactoryClass($this, [
-        'db_host' => $this->getConfig('db_host', ''),
-        'db_port' => $this->getConfig('db_port', ''),
-        'db_user' => $this->getConfig('db_user', ''),
-        'db_password' => $this->getConfig('db_password', ''),
-        'db_name' => $this->getConfig('db_name', ''),
-        'db_codepage' => $this->getConfig('db_codepage', 'utf8mb4'),
-      ]);
+      if (empty($this->classFactories['db'] ?? '')) {
+        $dbProvider = $this->getConfig('db/provider', '');
+        if (empty($dbProvider)) {
+          $dbFactoryClass = '\\ADIOS\\Core\\DB';
+        } else {
+          $dbFactoryClass = '\\ADIOS\\Core\\DB\\Providers\\' . $dbProvider;
+        }
+      } else {
+        $dbFactoryClass = $this->classFactories['db'];
+      }
+
+      $this->db = new $dbFactoryClass($this);
 
       $this->onBeforeConfigLoaded();
 

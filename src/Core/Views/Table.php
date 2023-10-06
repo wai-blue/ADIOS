@@ -120,7 +120,7 @@ class Table extends \ADIOS\Core\View
       */
       'rowButtons' => [],
 
-      'buttons' => [],
+      'leftTitleButtons' => [],
 
       'form_data' => [],
 
@@ -228,32 +228,44 @@ class Table extends \ADIOS\Core\View
       }
     }
 
-    //
-    if (empty($this->params['buttons']['add']['onclick'])) {
-      $tmpUrl = $this->model->getFullUrlBase($this->params);
-      $tmpParentFormId = (int)($this->params['form_data']['id'] ?? 0);
+    // default parameters for Add button
+    if ($this->params['showAddButton']) {
+      if (empty($this->params['leftTitleButtons']['add']['onclick'])) {
+        $tmpUrl = $this->model->getFullUrlBase($this->params);
+        $tmpParentFormId = (int)($this->params['form_data']['id'] ?? 0);
 
-      if (!empty($this->params['foreignKey'])) {
-        $fkColumnName = $this->params['foreignKey'];
-        $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
-        if ($fkColumnDefinition !== NULL) {
-          $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
-          $tmpUrl = $tmpModel->urlBase . "/" . $tmpParentFormId . "/" . $tmpUrl;
+        if (!empty($this->params['foreignKey'])) {
+          $fkColumnName = $this->params['foreignKey'];
+          $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
+          if ($fkColumnDefinition !== NULL) {
+            $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
+            $tmpUrl = $tmpModel->urlBase . "/" . $tmpParentFormId . "/" . $tmpUrl;
+          }
+
+          $tmpUrl = str_replace("{{ {$this->params['foreignKey']} }}", $tmpParentFormId, $tmpUrl);
         }
 
-        $tmpUrl = str_replace("{{ {$this->params['foreignKey']} }}", $tmpParentFormId, $tmpUrl);
+        $this->params['leftTitleButtons']['add']['onclick'] = "
+          window_render(
+            '" . $tmpUrl . "/add',
+            {
+              defaultValues: JSON.parse(
+                Base64.decode('" . base64_encode(json_encode($this->params['defaultValuesForNewRecords'])) . "')
+              )
+            }
+          )
+        ";
       }
 
-      $this->params['buttons']['add']['onclick'] = "
-        window_render(
-          '" . $tmpUrl . "/add',
-          {
-            defaultValues: JSON.parse(
-              Base64.decode('" . base64_encode(json_encode($this->params['defaultValuesForNewRecords'])) . "')
-            )
-          }
-        )
-      ";
+      if (empty($this->params['leftTitleButtons']['add']['type'])) {
+        $this->params['leftTitleButtons']['add']['type'] = 'add';
+      }
+
+      if ($this->model->addButtonText != null) {
+        $this->params['leftTitleButtons']['add']['text'] = $this->model->addButtonText;
+      }
+    } else {
+      unset($this->params['leftTitleButtons']['add']);
     }
 
     // kontroly pre vylucenie nelogickosti parametrov
@@ -292,15 +304,6 @@ class Table extends \ADIOS\Core\View
     $this->pagesCount = ceil($this->allRowsCount / $this->params['itemsPerPage']);
     $this->pageButtonsCount = 4;
 
-    $this->params['showAddButton'] = (empty($this->params['buttons']['add']['onclick']) ? FALSE : $this->params['showAddButton']);
-
-    if (empty($this->params['buttons']['add']['type'])) {
-      $this->params['buttons']['add']['type'] = 'add';
-    }
-
-    if ($this->model->addButtonText != null) {
-      $this->params['buttons']['add']['text'] = $this->model->addButtonText;
-    }
   }
 
   protected function getColumns(): array
@@ -649,9 +652,8 @@ class Table extends \ADIOS\Core\View
         $titleLeftContent = [];
         $titleRightContent = [];
 
-        foreach ($this->params['buttons'] as $buttonKey => $buttonParams) {
-          if ($buttonKey == 'add' && !$this->params['showAddButton']) continue; 
-          $titleLeftContent[] = $this->addView('Button', $this->params['buttons'][$buttonKey]);
+        foreach ($this->params['leftTitleButtons'] as $buttonKey => $buttonParams) {
+          $titleLeftContent[] = $this->addView('Button', $buttonParams);
         }
         
         $titleLeftContent = array_reverse($titleLeftContent);
@@ -690,7 +692,7 @@ class Table extends \ADIOS\Core\View
 
         if (
           !empty($titleLeftContent)
-          || !empty($titleLeftContent)
+          || !empty($titleRightContent)
         ) {
           $html .= $this->addView('Title')
             ->setLeftContent($titleLeftContent)

@@ -27,6 +27,8 @@ $arguments = getopt(
     "db-user:",
     "db-password:",
     "db-name:",
+    "db-provider:",
+    "db-dsn:",
     "admin-password:",
   ],
   $restIndex
@@ -44,6 +46,8 @@ $dbPort = $arguments['db-port'] ?? '';
 $dbUser = $arguments['db-user'] ?? '';
 $dbPassword = $arguments['db-password'] ?? '';
 $dbName = $arguments['db-name'] ?? '';
+$dbProvider = $arguments['db-provider'] ?? '';
+$dbDsn = $arguments['db-dsn'] ?? '';
 $adminPassword = $arguments['admin-password'] ?? '';
 
 if (empty($outputFolder)) $outputFolder = ".";
@@ -142,6 +146,8 @@ $builder->setConfigEnv([
     "user" => $dbUser,
     "password" => $dbPassword,
     "database" => $dbName,
+    "provider" => $dbProvider,
+    "dsn" => $dbDsn,
   ],
   "globalTablePrefix" => "",
   "rewriteBase" => $rewriteBase,

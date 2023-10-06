@@ -46,26 +46,16 @@ class DB
    * @param string Name of this element
    * @param array Array of parameters for this module
    */
-  public function __construct($adios, $params)
+  public function __construct($adios)
   {
     $this->adios = $adios;
-
-    $this->db_host = $params['db_host'];
-    $this->db_port = $params['db_port'];
-    $this->db_user = $params['db_user'];
-    $this->db_password = $params['db_password'];
-    $this->db_name = $params['db_name'];
-    $this->db_codepage = $params['db_codepage'];
-
     $this->tables = [];
 
-    if (!empty($this->db_host)) {
-      $this->connect();
+    $this->connect();
 
-      $tmp = $this->showTables();
-      foreach ($tmp as $value) {
-        $this->existingSqlTables[] = reset($value);
-      }
+    $tmp = $this->showTables();
+    foreach ($tmp as $value) {
+      $this->existingSqlTables[] = reset($value);
     }
 
     $h = opendir(dirname(__FILE__) . '/DB/DataTypes');
