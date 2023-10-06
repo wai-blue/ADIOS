@@ -786,7 +786,7 @@ class Table extends \ADIOS\Core\View
           data-page='" . (int)$this->params['page'] . "'
           data-items-per-page='" . (int)$this->params['items-per-page'] . "'
           data-is-ajax='" . ($this->adios->isAjax() ? "1" : "0") . "'
-          data-is-in-form='" . (in_array("UI/Form", $this->adios->actionStack) ? "1" : "0") . "'
+          data-is-in-form='" . (in_array("UI/Form", (array) $this->adios->actionStack) ? "1" : "0") . "'
         >
       ";
     }
