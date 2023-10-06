@@ -174,8 +174,8 @@ class Button extends \ADIOS\Core\View {
       break;
       case 'delete':
         $defParams['faIcon'] = 'fas fa-trash-alt';
-        $defParams['class'] = "text-danger {$params['class']}";
-        $defParams['title'] = $this->translate("Delete");
+        $defParams['class'] = "btn-danger btn-icon-split {$params['class']}";
+        $defParams['text'] = $this->translate("Delete");
         $defParams['onclick'] = "{$this->adios->uid}_delete()";
         unset($params['class']);
       break;
@@ -194,7 +194,7 @@ class Button extends \ADIOS\Core\View {
         $defParams['faIcon'] = 'fas fa-print';
         $defParams['text'] = $this->translate("Print");
         $defParams['onclick'] = "{$this->adios->uid}_print()";
-        $defParams['class'] = "btn-info btn-icon-split {$params['class']}";
+        $defParams['class'] = "btn-light btn-icon-split {$params['class']}";
         unset($params['class']);
       break;
     }

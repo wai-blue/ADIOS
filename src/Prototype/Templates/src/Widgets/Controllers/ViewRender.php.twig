@@ -6,7 +6,7 @@ namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 
-  public function prepareView() {
+  public function prepareView(): ?\ADIOS\Core\View {
 
     // basic configuration
     $view = '{{ thisController.config.view }}';

@@ -92,8 +92,27 @@ class Controller {
    * @param  array $config Current ADIOS configuration
    * @return array Changed ADIOS configuration
    */
-  public static function overrideConfig($config) {
+  public static function overrideConfig($config, $params) {
     return $config;
+  }
+
+  /**
+   * If the controller shall only return JSON, this method must be overriden.
+   *
+   * @return array Array to be returned as a JSON.
+   */
+  public function renderJson() {
+    return NULL;
+  }
+
+  /**
+   * If the controller shall return the HTML of the view, this method must be overriden.
+   *
+   * @return array View to be used to render the HTML.
+   */
+  public function prepareView(): ?\ADIOS\Core\View
+  {
+    return NULL;
   }
   
   /**

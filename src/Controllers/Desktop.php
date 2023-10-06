@@ -105,6 +105,8 @@ class Desktop extends \ADIOS\Core\Controller {
       && $this->contentController != 'Desktop'
     ) {
       $contentHtml = $this->adios->render($this->contentController, $this->contentParams);
+    } else {
+      $contentHtml = '';
     }
 
     $params = [

@@ -132,10 +132,10 @@ ADIOS.views.Form = {
     });
 
     if (allowed) {
-      var action = $('#'+uid).attr('data-save-action');
+      var controller = $('#'+uid).attr('data-save-controller');
       var reopen_after_save = $('#'+uid).attr('data-reopen-after-save');
 
-      _ajax_read(action, data, function(saved_id) {
+      _ajax_read(controller, data, function(saved_id) {
 
         $('.'+uid+'_button').removeAttr('disabled');
 
@@ -169,17 +169,24 @@ ADIOS.views.Form = {
 
   },
 
+  print: function(uid) {
+    let modelUrlBase = $('#' + uid).attr('data-model-url-base');
+    let id = $('#'+uid).attr('data-id');
+
+    window_popup(modelUrlBase + '/' + id + '/print');
+  },
+
   delete: function(uid) {
 
     var data = {};
     data.model = $('#'+uid).attr('data-model');
     data.id = $('#' + uid).attr('data-id');
 
-    var action = $('#'+uid).attr('data-delete-action');
+    var controller = $('#'+uid).attr('data-delete-controller');
 
     $('.' + uid + '_button').attr('disabled', 'disabled');
 
-    _ajax_read(action, data, function(_saved_id){
+    _ajax_read(controller, data, function(_saved_id){
       $('.'+uid+'_button').removeAttr('disabled');
 
       if (isNaN(_saved_id)) {
@@ -215,9 +222,9 @@ ADIOS.views.Form = {
     };
 
     if (allowed){
-      var action = $('#'+uid).attr('data-copy-action');
-      var window_el = $('#'+uid).attr('data-window-uid');
-      _ajax_read(action, data, function(_saved_id){
+      var controller = $('#'+uid).attr('data-copy-controller');
+
+      _ajax_read(controller, data, function(_saved_id) {
         $('.'+uid+'_button').removeAttr('disabled');
         if (isNaN(_saved_id)) _alert(_saved_id); else {
 

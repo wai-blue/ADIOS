@@ -1191,9 +1191,8 @@ class Loader
       if ($params['__IS_AJAX__']) {
         // tak nic
       } else if (
-        !$this->getConfig("hide_default_desktop", FALSE)
+        !$this->getConfig("hideDesktop", FALSE)
         && !$controllerClassName::$hideDefaultDesktop
-        && !method_exists($controllerClassName, "renderJson")
         && $this->controllerNestingLevel == 0
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
@@ -1261,6 +1260,8 @@ class Loader
 
       $controllerClassName = $this->getControllerClassName($this->controller);
 
+      $return = '';
+
       try {
         // Kontrola permissions, krok 2
         // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
@@ -1270,51 +1271,48 @@ class Loader
           $this->checkPermissionsForController($this->controller, $params);
         }
 
-        // permissions udelene
+        // permissions granted
         if ($this->controllerExists($this->controller)) {
+
           $this->controllerObject = new $controllerClassName($this, $params);
 
-          if (method_exists($controllerClassName, "renderJson")) {
-            $controllerReturn = $this->controllerObject->renderJson($params);
-            $html = json_encode($controllerReturn);
-          } else if (method_exists($controllerClassName, "prepareView")) {
-            $controllerReturn = $this->controllerObject->prepareView($params)->render();
+          $json = $this->controllerObject->renderJson();
 
-            if ($controllerReturn === NULL) {
-              // akcia nic nereturnovala, iba robila echo
-              $html = "";
-            } else if (is_string($controllerReturn)) {
-              $html = $controllerReturn;
-            } else {
-              $html = $this->renderReturn($controllerReturn);
-            }
-          } else { // 2023-10-05 Deprecated
-            $controllerReturn = $this->controllerObject->render($params);
+          if (is_array($json)) {
+            $return = json_encode($json);
+          } else {
+            $view = $this->controllerObject->prepareView();
 
-            if ($controllerReturn === NULL) {
-              // akcia nic nereturnovala, iba robila echo
-              $html = "";
-            } else if (is_string($controllerReturn)) {
-              $html = $controllerReturn;
+            if ($view instanceof \ADIOS\Core\View) {
+              $return = $view->render();
             } else {
-              $html = $this->renderReturn($controllerReturn);
+              $renderReturn = $this->controllerObject->render($params);
+
+              if ($renderReturn === NULL) {
+                // akcia nic nereturnovala, iba robila echo
+                $return = "";
+              } else if (is_string($renderReturn)) {
+                $return = $renderReturn;
+              } else {
+                $return = $this->renderReturn($renderReturn);
+              }
             }
           }
 
-        } else {
+        // } else {
 
-          // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
-          $tmpTemplateName = $controllerClassName;
-          $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
-          $tmpTemplateName = str_replace("/Controllers/", "/Templates/", $tmpTemplateName);
+        //   // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
+        //   $tmpTemplateName = $controllerClassName;
+        //   $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
+        //   $tmpTemplateName = str_replace("/Controllers/", "/Templates/", $tmpTemplateName);
 
-          $controllerFactoryClass = $this->classFactories['controller'] ?? \ADIOS\Core\Controller::class;
-          $tmp = new $controllerFactoryClass($this);
-          $tmp->twigTemplate = $tmpTemplateName;
-          $html = $tmp->render($params);
+        //   $controllerFactoryClass = $this->classFactories['controller'] ?? \ADIOS\Core\Controller::class;
+        //   $tmp = new $controllerFactoryClass($this);
+        //   $tmp->twigTemplate = $tmpTemplateName;
+        //   $html = $tmp->render($params);
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-        $html = $this->renderFatal($e->getMessage());
+        $return = $this->renderFatal($e->getMessage());
       } catch (
         \Exception
         // | \Throwable
@@ -1322,7 +1320,7 @@ class Loader
         $error = error_get_last();
 
         if ($error['type'] == E_ERROR) {
-          $html = $this->renderFatal(
+          $return = $this->renderFatal(
             '<div style="margin-bottom:1em;">'
               . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
             . '</div>'
@@ -1332,11 +1330,11 @@ class Loader
             TRUE
           );
         } else {
-          $html = $this->renderFatal($this->renderExceptionHtml($e));
+          $return = $this->renderFatal($this->renderExceptionHtml($e));
         }
       }
 
-      return $html;
+      return $return;
 
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
       return $this->renderFatal($e->getMessage());

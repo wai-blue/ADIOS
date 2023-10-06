@@ -639,6 +639,19 @@ class Model extends \Illuminate\Database\Eloquent\Model
         ])
       ],
 
+      // Print
+      '/^' . $urlBase . '\/(\d+)\/print$/' => [
+        "permission" => "{$this->fullName}/Edit",
+        "controller" => "Printer",
+        "params" => array_merge($urlParams, [
+          "contentController" => $this->crud['print']['controller'] ?? "UI/Form",
+          "contentParams" => [
+            "model" => $this->fullName,
+            "id" => '$' . ($varsInUrl + 1),
+          ]
+        ])
+      ],
+
       // Search
       '/^' . $urlBase . '\/search$/' => [
         "permission" => "{$this->fullName}/Search",
@@ -842,6 +855,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["item"];
 
     return $item;
+  }
+
+  public function getLookupSqlValueById(int $id) {
+    $row = $this->adios->db->select($this)
+      ->columns([
+        [ $this->lookupSqlValue($this->fullTableSqlName), 'lookup_value' ]
+      ])
+      ->where([['id', '=', $id]])
+      ->fetch()
+    ;
+
+    return $row[0]['lookup_value'] ?? '';
   }
 
   public function getAll(string $keyBy = "id", $withLookups = FALSE, $processLookups = FALSE)

@@ -21,7 +21,7 @@
       // console.log(formHtml);
       $(formHtml).appendTo('body').submit();
     } else {
-      window.open(_APP_URL + '/' + _ajax_controller_url(controller, params));
+      window.open(_APP_URL + '/' + _controller_url(controller, params));
     }
   }
 

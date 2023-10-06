@@ -21,6 +21,9 @@ class Form extends \ADIOS\Core\View
   public ?\ADIOS\Core\View $copyButton = NULL;
   public ?\ADIOS\Core\View $saveButton = NULL;
   public ?\ADIOS\Core\View $deleteButton = NULL;
+  public ?\ADIOS\Core\View $printButton = NULL;
+
+  public bool $print = FALSE;
 
   public function __construct(
    object $adios,
@@ -37,19 +40,21 @@ class Form extends \ADIOS\Core\View
       'table' => '',
       'id' => '-1',
       'title' => '',
-      'title_params' => [],
+      'titleParams' => [],
       'formatter' => 'ui_form_formatter',
       'defaultValues' => [],
       'readonly' => false,
       'template' => [],
-      'show_save_button' => true,
-      'save_button_params' => [],
+      'showSaveButton' => true,
+      'saveButtonParams' => [],
       'show_close_button' => true,
       'close_button_params' => [],
-      'show_delete_button' => true,
-      'delete_button_params' => [],
-      'show_copy_button' => false,
-      'copy_button_params' => [],
+      'showDeleteButton' => true,
+      'deleteButtonParams' => [],
+      'showCopyButton' => false,
+      'copyButtonParams' => [],
+      'showPrintButton' => true,
+      'printButtonParams' => [],
       'formType' => 'window',
       'windowParams' => [],
       'width' => 700,
@@ -86,27 +91,29 @@ class Form extends \ADIOS\Core\View
     }
 
     if (empty($params['title'])) {
-      $tmpFormTitle = ($params['id'] <= 0 ? $this->model->formTitleForInserting : $this->model->formTitleForEditing);
+      // $tmpFormTitle = ($params['id'] <= 0 ? $this->model->formTitleForInserting : $this->model->formTitleForEditing);
+      $tmpFormTitle = '';
       if (empty($tmpFormTitle)) {
-        $this->params['title'] = "{$this->params['model']}: ".($this->params['id'] == -1
-          ? "Nový záznam"
-          : "Upraviť záznam č. {$this->params['id']}"
-        );
+        if ($params['id'] == -1) {
+          $params['title'] = $this->params['model'] . ': ' . $this->translate('Nový záznam');
+        } else {
+          $params['title'] = $this->model->getLookupSqlValueById($params['id']);
+        }
       } else {
         $params['title'] = $tmpFormTitle;
       }
     }
 
-    if (empty($params['save_action'])) {
-      $params['save_action'] = $this->model->urlBase."/save";
+    if (empty($params['saveController'])) {
+      $params['saveController'] = $this->model->urlBase."/save";
     }
 
-    if (empty($params['delete_action'])) {
-      $params['delete_action'] = $this->model->urlBase."/delete";
+    if (empty($params['deleteController'])) {
+      $params['deleteController'] = $this->model->urlBase."/delete";
     }
 
-    if (empty($params['copy_action'])) {
-      $params['copy_action'] = $this->model->urlBase."/copy";
+    if (empty($params['copyController'])) {
+      $params['copyController'] = $this->model->urlBase."/copy";
     }
 
     // call the parent constructor
@@ -150,44 +157,46 @@ class Form extends \ADIOS\Core\View
       }
     }
 
-    // default button params
+    // default buttons
+
 
     if ($this->params['id'] <= 0) {
-      $this->params['show_delete_button'] = FALSE;
-      $this->params['show_copy_button'] = FALSE;
+      $this->params['showDeleteButton'] = FALSE;
+      $this->params['showCopyButton'] = FALSE;
     }
 
     if ($this->params['readonly']) {
-      $this->params['show_save_button'] = FALSE;
-      $this->params['show_delete_button'] = FALSE;
+      $this->params['showSaveButton'] = FALSE;
+      $this->params['showDeleteButton'] = FALSE;
     }
 
-    if ($this->params['show_save_button']) {
-      $this->params['save_button_params']['type'] = ($this->params['id'] <= 0 ? 'add' : 'save');
+    // save button
+    if ($this->params['showSaveButton']) {
+      $this->params['saveButtonParams']['type'] = ($this->params['id'] <= 0 ? 'add' : 'save');
 
       if ($this->params['id'] <= 0 && !empty($this->model->formAddButtonText)) {
-        $this->params['save_button_params']['text'] = $this->model->formAddButtonText;
+        $this->params['saveButtonParams']['text'] = $this->model->formAddButtonText;
       }
 
       if ($this->params['id'] > 0 && !empty($this->model->formSaveButtonText)) {
-        $this->params['save_button_params']['text'] = $this->model->formSaveButtonText;
+        $this->params['saveButtonParams']['text'] = $this->model->formSaveButtonText;
       }
 
-      if (empty($this->params['save_button_params']['onclick'])) {
-        $this->params['save_button_params']['onclick'] = "ADIOS.views.Form.save('{$this->params['uid']}', {}, this);";
+      if (empty($this->params['saveButtonParams']['onclick'])) {
+        $this->params['saveButtonParams']['onclick'] = "ADIOS.views.Form.save('{$this->params['uid']}', {}, this);";
       }
 
-      $this->params['save_button_params']['class'] = "btn-save";
-      $this->saveButton = $this->addView('Button', $this->params['save_button_params']);
-    } else {
-      $this->saveButton = NULL;
+      $this->params['saveButtonParams']['class'] = "btn-save";
+      $this->saveButton = $this->create('Button', $this->params['saveButtonParams']);
     }
 
-    if ($this->params['show_delete_button']) {
-      $this->params['delete_button_params']['type'] = 'delete';
+    // delete button
+    if ($this->params['showDeleteButton']) {
+      $this->params['deleteButtonParams']['type'] = 'delete';
+      $this->params['deleteButtonParams']['class'] = 'ml-2';
 
-      if (empty($this->params['delete_button_params']['onclick'])) {
-        $this->params['delete_button_params']['onclick'] = "
+      if (empty($this->params['deleteButtonParams']['onclick'])) {
+        $this->params['deleteButtonParams']['onclick'] = "
           _confirm(
             '".$this->translate('You are about to delete the record. Continue?')."',
             {
@@ -201,16 +210,18 @@ class Form extends \ADIOS\Core\View
           );
         ";
       }
-      $this->deleteButton = $this->addView('Button', $this->params['delete_button_params']);
+      $this->deleteButton = $this->create('Button', $this->params['deleteButtonParams']);
     }
 
-    if ($this->params['show_copy_button']) {
-      $this->params['copy_button_params']['type'] = 'copy';
+    // copy button
+    if ($this->params['showCopyButton']) {
+      $this->params['copyButtonParams']['type'] = 'copy';
+      $this->params['copyButtonParams']['class'] = 'ml-2';
 
-      if (empty($this->params['copy_button_params']['onclick'])) {
-        $this->params['copy_button_params']['onclick'] = "
+      if (empty($this->params['copyButtonParams']['onclick'])) {
+        $this->params['copyButtonParams']['onclick'] = "
           _confirm(
-            '".$this->translate("Are you sure to delete this record?")."',
+            '".$this->translate("Are you sure to copy this record?")."',
             {},
             function() {
               ADIOS.views.Form.copy('{$this->params['uid']}')
@@ -219,49 +230,31 @@ class Form extends \ADIOS\Core\View
         ";
       }
 
-      $this->copyButton = $this->addView('Button', $this->params['copy_button_params']);
+      $this->copyButton = $this->create('Button', $this->params['copyButtonParams']);
     }
 
-    $this->params['close_button_params']['type'] = 'close';
+    // print button
+    if ($this->params['showPrintButton']) {
+      $this->params['printButtonParams']['type'] = 'print';
+      $this->params['printButtonParams']['class'] = 'ml-2';
+
+      if (empty($this->params['printButtonParams']['onclick'])) {
+        $this->params['printButtonParams']['onclick'] = "ADIOS.views.Form.print('{$this->params['uid']}');";
+      }
+
+      $this->printButton = $this->create('Button', $this->params['printButtonParams']);
+    }
+
+    // close button
+    $this->params['closeButtonParams']['type'] = 'close';
     
-    if (empty($this->params['close_button_params']['onclick'])) {
-      $this->params['close_button_params']['onclick'] = "ADIOS.views.Form.close('{$this->params['uid']}');";
+    if (empty($this->params['closeButtonParams']['onclick'])) {
+      $this->params['closeButtonParams']['onclick'] = "ADIOS.views.Form.close('{$this->params['uid']}');";
     }
 
-    $this->closeButton = $this->addView('Button', $this->params['close_button_params']);
+    $this->closeButton = $this->create('Button', $this->params['closeButtonParams']);
 
-
-    // if (empty($this->params['windowParams']['uid'])) {
-    //   $this->params['windowParams']['uid'] = $this->params['uid'].'_form';
-    // }
-    // if (!empty($this->params['windowParams']['uid'])) {
-    //   $this->params['windowUid'] = $this->params['windowParams']['uid'];
-    // }
-
-    if ($this->displayMode == 'desktop') {
-      if (is_array($this->params['title_params']['left'])) {
-        $this->params['title_params']['left'] = array_merge([$this->closeButton, $this->saveButton], $this->params['title_params']['left']);
-      } elseif ('' != $this->params['title_params']['left']) {
-        $this->params['title_params']['left'] = [$this->closeButton, $this->saveButton, $this->params['titles']['left']];
-      } else {
-        $this->params['title_params']['left'] = [$this->closeButton, $this->saveButton];
-      }
-
-      if (is_array($this->params['title_params']['right'])) {
-        $this->params['title_params']['right'] = array_merge([$this->copyButton, $this->deleteButton], $this->params['title_params']['right']);
-      } elseif ('' != $this->params['title_params']['right']) {
-        $this->params['title_params']['right'] = array_merge([$this->copyButton, $this->deleteButton], [$this->params['title_params']['right']]);
-      } else {
-        $this->params['title_params']['right'] = [$this->copyButton, $this->deleteButton];
-      }
-
-      if ('' == $this->params['title_params']['center']) {
-        $this->params['title_params']['center'] = $this->params['title'];
-      }
-
-      $this->add($this->addView('Button', $this->params['title_params']), 'title');
-    }
-
+    // onAfterInit
     $this->model->onFormAfterInit($this);
   }
 
@@ -351,10 +344,10 @@ class Form extends \ADIOS\Core\View
         </div>
       ";
 
-    } else if (is_string($item['action'])) {
+    } else if (is_string($item['controller'])) {
       $html .= "
         <div class='adios ui Form item'>
-          ".$this->adios->renderAction($item['action'], $item['params'])."
+          ".$this->adios->render($item['controller'], $item['params'])."
         </div>
       ";
 
@@ -421,16 +414,16 @@ class Form extends \ADIOS\Core\View
   function renderItems($items) {
     $html = "";
 
-    if (!empty($items['action'])) {
+    if (!empty($items['controller'])) {
       // ak je definovana akcia, generuje akciu s parametrami
-      $tmpAction = $items['action'];
+      $tmpController = $items['controller'];
 
-      $tmpActionParams = $items['params'];
-      $tmpActionParams['form_uid'] = $this->params['uid'];
-      $tmpActionParams['form_data'] = $this->data;
-      $tmpActionParams['initiating_model'] = $this->params['model'];
+      $tmpControllerParams = $items['params'];
+      $tmpControllerParams['form_uid'] = $this->params['uid'];
+      $tmpControllerParams['form_data'] = $this->data;
+      $tmpControllerParams['initiating_model'] = $this->params['model'];
 
-      $html = $this->adios->renderAction($tmpAction, $tmpActionParams);
+      $html = $this->adios->render($tmpController, $tmpControllerParams);
     } else if (is_callable($items['template'])) {
       // template je definovany ako anonymna funkcia
       $html = $items['template']($this->params['columns'], $this);
@@ -600,8 +593,8 @@ class Form extends \ADIOS\Core\View
                 'tabs' => $tabPages
               ])->render();
 
-            } else if (is_string($col['action'])) {
-              $col_html .= $this->adios->renderAction($col['action'], $col['params']);
+            } else if (is_string($col['controller'])) {
+              $col_html .= $this->adios->render($col['controller'], $col['params']);
             } else if (is_string($col['html'])) {
               $col_html .= $col['html'];
             } else if (is_array($col['content'])) {
@@ -636,9 +629,9 @@ class Form extends \ADIOS\Core\View
     $html .= '
       <div
         '.$this->main_params()."
-        data-save-action='{$this->params['save_action']}'
-        data-delete-action='{$this->params['delete_action']}'
-        data-copy-action='{$this->params['copy_action']}'
+        data-save-controller='{$this->params['saveController']}'
+        data-delete-controller='{$this->params['deleteController']}'
+        data-copy-controller='{$this->params['copyController']}'
         data-id='{$this->params['id']}'
         data-model='{$this->params['model']}'
         data-model-url-base='".ads($this->model->getFullUrlBase($this->params))."'
@@ -678,8 +671,23 @@ class Form extends \ADIOS\Core\View
       $window->setHeaderLeft([
         $this->saveButton,
         $this->copyButton,
-        $this->deleteButton
+        $this->deleteButton,
+        $this->printButton,
       ]);
+      $window->setHeaderRight([
+      ]);
+    }
+
+    if ($this->displayMode == 'desktop') {
+      $this->params['titleParams']['left'] = [$this->closeButton, $this->saveButton];
+      $this->params['titleParams']['right'] = [$this->copyButton, $this->deleteButton];
+
+      if ('' == $this->params['titleParams']['center']) {
+        $this->params['titleParams']['title'] = $this->params['title'];
+      }
+
+      $titleHtml = $this->create('Title', $this->params['titleParams'])->render();
+      $html = $titleHtml.$html;
     }
 
     return $this->applyDisplayMode((string) $html);

@@ -117,16 +117,16 @@ function _ajax_post_data(params) {
   return postData;
 }
 
-function _ajax_load(controller, params, onsuccess){
+function _ajax_load(controller, params, onsuccess) {
   if (typeof params == 'undefined') params = new Object;
   if (typeof onsuccess == 'undefined') onsuccess = function(){};
   params.adios_ajax_json_call = 1;
 
-  if (onsuccess == "synchronous"){
+  if (onsuccess == "synchronous") {
     res = _ajax_sread(controller, params);
     res = _ajax_check_json_format(res);
   }else{
-    _ajax_read(controller, params, function(res){
+    _ajax_read(controller, params, function(res) {
       res = _ajax_check_json_format(res);
       onsuccess(res);
     });
