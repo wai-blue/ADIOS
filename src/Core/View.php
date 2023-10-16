@@ -18,7 +18,7 @@ class View {
   
   public ?\ADIOS\Core\Loader $adios = null;
 
-  protected string $uid = "";
+  public string $uid = "";
 
   public bool $useSession = FALSE;
   public array $params = [];

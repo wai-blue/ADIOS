@@ -1084,14 +1084,15 @@ class Table extends \ADIOS\Core\View
               $rowHtml .= "
                 <a
                   href='" . ($rowButton['href'] ?? "javascript:void(0)") . "'
-                  onclick='
+                  onclick=\"
                     event.cancelBubble = true;
-                    let rowValuesBase64 = $(this).closest(\".Row\").data(\"row-values-base64\");
+                    let tableUid = '{$this->uid}';
+                    let rowValuesBase64 = $(this).closest('.Row').data('row-values-base64');
                     let row = JSON.parse(Base64.decode(rowValuesBase64));
 
-                    " . (isset($action) ? "_ajax_read(\"{$action['url']}\", {$action['params']})" : "") . "
+                    " . (isset($action) ? "_ajax_read('{$action['url']}', {$action['params']})" : "") . "
                     " . ($rowButton['onclick'] ?? "") . "
-                  '
+                  \"
                   ".(empty($rowButton['cssStyle']) ? "" : "style='" . ads($rowButton['cssStyle']) . "'")."
                   ".(empty($rowButton['cssClass']) ? "" : "class='" . ads($rowButton['cssClass']) . "'")."
                   ".(empty($rowButton['target']) ? "" : "target='" . ads($rowButton['target']) . "'")."
