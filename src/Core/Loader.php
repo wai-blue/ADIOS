@@ -1284,10 +1284,17 @@ class Loader
           if (is_array($json)) {
             $return = json_encode($json);
           } else {
-            $view = $this->controllerObject->prepareView();
+            [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
 
-            if ($view instanceof \ADIOS\Core\View) {
-              $return = $view->render();
+            if (is_string($view)) {
+              // create view object
+              $viewObject = $this->adios->view->create(
+                $view,
+                $viewParams
+              );
+
+              // render view
+              $return = $viewObject->render();
             } else {
               $renderReturn = $this->controllerObject->render($params);
 

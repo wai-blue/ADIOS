@@ -110,9 +110,12 @@ class Controller {
    *
    * @return array View to be used to render the HTML.
    */
-  public function prepareView(): ?\ADIOS\Core\View
+  public function prepareViewAndParams(): array
   {
-    return NULL;
+    return [
+      'view' => '',
+      'params' => [],
+    ];
   }
   
   /**
