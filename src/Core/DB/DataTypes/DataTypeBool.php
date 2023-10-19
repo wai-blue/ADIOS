@@ -11,11 +11,6 @@
 namespace ADIOS\Core\DB\DataTypes;
 
 /**
- * Deprecated boolean data type.
- *
- * Converted to **char(1)** in the SQL. Indexed by default. Default 'N'.
- * 'Y' means TRUE, 'N' means FALSE.
- *
  * *UI/Input* renders *checkbox* for this data type.
  *
  * Example of definition in \ADIOS\Core\Model's column() method:

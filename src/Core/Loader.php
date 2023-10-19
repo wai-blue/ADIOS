@@ -1285,16 +1285,24 @@ class Loader
             $return = json_encode($json);
           } else {
             [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
-
             if (is_string($view)) {
-              // create view object
-              $viewObject = $this->adios->view->create(
-                $view,
-                $viewParams
-              );
+              $viewTwig = $this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig';
 
-              // render view
-              $return = $viewObject->render();
+              $html = match (is_file($viewTwig)) {
+                true => $this->twig->render(
+                  $view, 
+                  [
+                    'uid' => $this->uid,
+                    'viewParams' => $viewParams,
+                  ]
+                ),
+                false => $this->view->create(
+                  $view,
+                  $viewParams
+                )->render()
+              };
+
+              return $html;
             } else {
               $renderReturn = $this->controllerObject->render($params);
 

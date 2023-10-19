@@ -119,7 +119,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   var $recordSaveOriginalData = NULL;
   protected string $fullTableSqlName = "";
 
-  private static $allItemsCache = NULL;
+  private static ?array $allItemsCache = NULL;
 
   public ?array $junctions = [];
 
