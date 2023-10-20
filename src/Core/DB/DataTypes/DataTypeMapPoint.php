@@ -16,7 +16,7 @@ namespace ADIOS\Core\DB\DataTypes;
 class DataTypeMapPoint extends \ADIOS\Core\DB\DataType
 {
   
-  //protected $defaultValue = '{"latitude": 0,"longitude": 0}';
+  protected $defaultValue = '{"latitude": 0,"longitude": 0}';
 
   public function get_sql_create_string($table_name, $col_name, $params = []) {
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 

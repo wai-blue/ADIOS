@@ -2121,8 +2121,8 @@ class Loader
     }
 
     foreach (scandir($this->widgetsDir) as $widget) {
-      if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/Main.js")) {
-        $jsFiles[] = $this->widgetsDir."/{$widget}/Main.js";
+      if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/main.js")) {
+        $jsFiles[] = $this->widgetsDir."/{$widget}/main.js";
       }
 
       if (is_dir($this->widgetsDir."/{$widget}/Assets/Js")) {
