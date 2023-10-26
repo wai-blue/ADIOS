@@ -17,11 +17,15 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
   public function renderJson() { 
-    $tmpModel = $this->adios->getModel($this->params['model']);
+    try {
+      $tmpModel = $this->adios->getModel($this->params['model']);
 
-    return [
-      'columns' => $tmpModel->columns()
-    ];
+      return [
+        'columns' => $tmpModel->columns()
+      ];
+    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
+      // TODO: Error
+    }
   }
 
 }

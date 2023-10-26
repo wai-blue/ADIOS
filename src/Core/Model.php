@@ -1800,4 +1800,28 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     return $recordInfo;
   }
+
+  public function getRequiredColumns(): array {
+    $requiredInputs = [];
+
+    foreach ($this->columns() as $columnName => $column) {
+      if (isset($column['required']) && $column['required'] == true) {
+        $requiredInputs[] = $columnName;
+      }
+    }
+
+    return $requiredInputs;
+  }
+
+  public function getEmptyRequiredInputs(array $inputs, array $requiredInputs): array {
+    $emptyRequiredInputs = [];
+
+    foreach ($requiredInputs as $requireInput) {
+      if ($inputs[$requireInput] == NULL || $inputs[$requireInput] == '') {
+        $emptyRequiredInputs[$requireInput] = true;
+      }
+    }
+
+    return $emptyRequiredInputs;
+  }
 }

@@ -88,19 +88,22 @@ export default class Form extends Component {
   }
 
   create() {
+    let notyf = new Notyf();
+
     //@ts-ignore
     axios.post(_APP_URL + '/UI/Form/OnCreate', {
+      model: this.state.model,
       inputs: this.state.inputs 
     }).then((res: any) => {
-      console.log(res);
+      notyf.success("Success");
     }).catch((res) => {
-      this.setState({
-        emptyRequiredInputs: res.response.data.emptyRequiredInputs 
-      });
+      notyf.error(res.response.data.message);
 
-      var notyf = new Notyf();
-
-      notyf.error('You must fill out the form before moving forward');
+      if (res.response.status == 422) {
+        this.setState({
+          emptyRequiredInputs: res.response.data.emptyRequiredInputs 
+        });
+      }
     });
   }
 
