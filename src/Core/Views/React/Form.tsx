@@ -79,27 +79,29 @@ export default class Form extends Component {
         model: this.state.model 
       }
     }).then(({data}: any) => {
-        this.setState({
-          columns: data.columns
-        });
+      this.setState({
+        columns: data.columns
+      });
 
-        this.initInputs(data.columns);
+      this.initInputs(data.columns);
     });
   }
 
   create() {
-    let emptyRequiredInputs: Object = {
-      name: true,
-      text: true
-    };
+    //@ts-ignore
+    axios.post(_APP_URL + '/UI/Form/OnCreate', {
+      inputs: this.state.inputs 
+    }).then((res: any) => {
+      console.log(res);
+    }).catch((res) => {
+      this.setState({
+        emptyRequiredInputs: res.response.data.emptyRequiredInputs 
+      });
 
-    this.setState({
-      emptyRequiredInputs: emptyRequiredInputs 
+      var notyf = new Notyf();
+
+      notyf.error('You must fill out the form before moving forward');
     });
-
-    var notyf = new Notyf();
-
-    notyf.error('You must fill out the form before moving forward');
   }
 
   inputOnChange(columnName: string, event: any) {
