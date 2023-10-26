@@ -2111,7 +2111,8 @@ class Loader
       dirname(__FILE__)."/../Assets/Js/jquery.quicksearch.js",
       dirname(__FILE__)."/../Assets/Js/datatables.js",
       dirname(__FILE__)."/../Assets/Js/jeditable.js",
-      dirname(__FILE__)."/../Assets/Js/draggable.js"
+      dirname(__FILE__)."/../Assets/Js/draggable.js",
+      dirname(__FILE__)."/../Assets/Js/react-bundle.js"
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
