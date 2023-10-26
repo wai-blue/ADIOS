@@ -30,9 +30,13 @@ module.exports = {
         exclude: /node_modules/,
         use: 'babel-loader',
       },
+      {
+        test: /\.(scss|css)$/,
+        use: ['style-loader', 'css-loader', 'sass-loader'],
+      }
     ],
   },
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],	
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.scss', '.css'],	
   }
  };

@@ -6,13 +6,19 @@ import Form from "./Core/Views/React/Form";
 import Example from "./Core/Views/React/Example";
 
 const components = {
-  form: <Form />,
+  form: <Form model="App\Widgets\Bookkeeping\Books\Models\Vat"/>,
   example: <Example />
 };
 
 const renderComponent = (component: string) => {
-  const componentElement = document.getElementById(component + '-component') as HTMLElement;
-  if (componentElement != null) createRoot(componentElement).render(components[component]);
+  //const componentElement = document.getElementById(component + '-component') as HTMLElement;
+  //if (componentElement != null) createRoot(componentElement).render(components[component]);
+
+  const allComponentsWithSameId = document.querySelectorAll('#' + component + '-component');
+
+  allComponentsWithSameId.forEach((element, index) => {
+    createRoot(element).render(components[component]);
+  });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
