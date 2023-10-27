@@ -4,10 +4,15 @@ import React from "react";
 import Form from "./Core/Views/React/Form";
 import Example from "./Core/Views/React/Example";
 
+const initializeComponents = [
+  'form',
+  'example'
+];
+
 const getComponent = (componentName: string, params: Object) => {
   let components: any = {
-    form: <Form {...params}/>,
-    example: <Example />
+    form: <Form {...params} />,
+    example: <Example {...params} />
   }; 
 
   return components[componentName];
@@ -17,25 +22,17 @@ const renderComponent = (component: string) => {
   const allComponentsWithSameId = document.querySelectorAll('#' + component + '-component');
 
   allComponentsWithSameId.forEach((element, index) => {
-    let componentParams = element.getAttribute("params");
-    let componentParamsParsed = componentParams != null 
-      ? JSON.parse(componentParams)
-      : {};
+    let componentProps: Object = {};
 
-    createRoot(element).render(getComponent(component, componentParamsParsed));
+    for (let i = 0;i < element.attributes.length;i++) {
+      componentProps[element.attributes[i].name] = element.attributes[i].value;   
+    }
+
+    createRoot(element).render(getComponent(component, componentProps));
   });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  //const rootElement = document.getElementById('page-top') as HTMLElement;
-  //const root = createRoot(rootElement);
-  
-  //const formComponent = document.getElementById('form-component') as HTMLElement;
-  //console.log(formComponent);
-  //createPortal(<Form />, formComponent);  
-  //createRoot(formComponent).render(<Form />);
-  
-  renderComponent("form");
-  renderComponent("example");
+  initializeComponents.map(item => renderComponent(item))
 });
 

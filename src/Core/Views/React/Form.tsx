@@ -131,6 +131,7 @@ export default class Form extends Component {
       inputs: this.state.inputs 
     }).then((res: any) => {
       notyf.success("Success");
+      this.initInputs(this.state.columns);
     }).catch((res) => {
       notyf.error(res.response.data.message);
 
@@ -160,11 +161,11 @@ export default class Form extends Component {
     });
   }
 
-  initInputs(columns: Object) {
+  initInputs(columns: FormColumns) {
     let inputs: any = {};
 
-    Object.keys(columns).map((columName: string) => {
-      inputs[columName] = '';
+    Object.keys(columns).map((columnName: string) => {
+      if (columnName != 'id') inputs[columnName] = null;
     });
 
     this.setState({
@@ -262,25 +263,27 @@ export default class Form extends Component {
           </div>
           <div className="card-body">
             {this.state.columns != null ? (
-              Object.keys(this.state.columns).map((columnName: string) => (
-                <div 
-                  className="row g-3 align-items-center mb-3"
-                  key={columnName}
-                >
-                  <div className="col-auto">
-                    <label htmlFor="inputPassword6" className="col-form-label">
-                      {this.state.columns[columnName].title}
-                      {this.state.columns[columnName].required == true ? <b className="text-danger">*</b> : ""}
-                    </label>
+              Object.keys(this.state.columns).map((columnName: string) => {
+                return columnName != 'id' ? (
+                  <div 
+                    className="row g-3 align-items-center mb-3"
+                    key={columnName}
+                  >
+                    <div className="col-auto">
+                      <label htmlFor="inputPassword6" className="col-form-label">
+                        {this.state.columns[columnName].title}
+                        {this.state.columns[columnName].required == true ? <b className="text-danger">*</b> : ""}
+                      </label>
+                    </div>
+                    {this._renderInput(columnName)}
+                    <div className="col-auto">
+                      <span id="passwordHelpInline" className="form-text">
+                        {this.state.columns[columnName].description}
+                      </span>
+                    </div>
                   </div>
-                  {this._renderInput(columnName)}
-                  <div className="col-auto">
-                    <span id="passwordHelpInline" className="form-text">
-                      {this.state.columns[columnName].description}
-                    </span>
-                  </div>
-                </div>
-              ))
+                ) : '';
+              })
             ) : ''}
 
             {this.isEdit == true ? (
