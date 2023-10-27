@@ -8,6 +8,9 @@ import 'notyf/notyf.min.css';
 import ReactQuill, { Value } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
+/** Components */
+import LookupInput from "./Inputs/LookupInput";
+
 interface FormProps {
   model: string,
 }
@@ -24,7 +27,9 @@ interface FormColumnParams {
   type: string,
   length?: number,
   required?: boolean,
-  description?: string
+  description?: string,
+  disabled?: boolean,
+  model?: string
 }
 
 interface FormColumns {
@@ -65,6 +70,36 @@ export default class Form extends Component {
     this.state = {
       model: props.model,
       emptyRequiredInputs: {},
+      columns: { 
+        "name": {
+          "title": "Name",
+          "type": "string",
+          "length": 150,
+          "required": true,
+        },
+        "company_name": {
+          "title": "Company Name",
+          "type": "string",
+          "length": 150,
+          "required": true,
+          "disabled": true
+        },
+        "lookup_test": {
+          "title": "Lookup test",
+          "type": "lookup",
+          "model": "App/Widgets/Bookkeeping/Books/Models/AccountingPeriod",
+          "length": 1,
+          "required": true
+        },
+        "is_active":{
+          "title": "Is active?",
+          "type": "boolean"
+        },
+        "text":{
+          "title": "Text",
+          "type": "editor"
+        }
+      }
     };
   }
 
@@ -112,7 +147,16 @@ export default class Form extends Component {
     changedInput[columnName] = event.target.value;
 
     this.setState({
-      inputs: {...this.inputs, ...changedInput}
+      inputs: {...this.state.inputs, ...changedInput}
+    });
+  }
+
+  lookupInputOnChange(columnName: string, item: any) {
+    let changedInput: any = {};
+    changedInput[columnName] = item.id;
+
+    this.setState({
+      inputs: {...this.state.inputs, ...changedInput}
     });
   }
 
@@ -137,6 +181,7 @@ export default class Form extends Component {
             value={this.inputs[columnName]}
             onChange={(e) => this.inputOnChange(columnName, e)}
             id="exampleFormControlTextarea4"
+            disabled={this.state.columns[columnName].disabled}
           />
         );
       case 'editor':
@@ -161,6 +206,7 @@ export default class Form extends Component {
               id="inputPassword6" 
               className={`form-control ${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : ''}`}
               aria-describedby="passwordHelpInline"
+              disabled={this.state.columns[columnName].disabled}
             />
           </div>
         );
@@ -175,6 +221,11 @@ export default class Form extends Component {
             />
           </div>
         )
+      case 'lookup':
+        return <LookupInput 
+          onChange={(item: any) => this.lookupInputOnChange(columnName, item)}
+          {...this.state.columns[columnName]}
+        />;
       default:
         return (
           <div className="col-auto">
@@ -183,8 +234,9 @@ export default class Form extends Component {
               value={this.inputs[columnName]}
               onChange={(e) => this.inputOnChange(columnName, e)}
               id="inputPassword6" 
-            className={`form-control ${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : ''}`}
-            aria-describedby="passwordHelpInline"
+              className={`form-control ${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : ''}`}
+              aria-describedby="passwordHelpInline"
+              disabled={this.state.columns[columnName].disabled}
           />
         </div>
       );
@@ -237,11 +289,11 @@ export default class Form extends Component {
                 className="btn btn-primary"
               >Uložiť zmeny</button>
             ) : (
-                <button 
-                  onClick={() => this.create()}
-                  className="btn btn-success"
-                >Vytvoriť</button>
-              )}
+              <button 
+                onClick={() => this.create()}
+                className="btn btn-success"
+              >Vytvoriť</button>
+            )}
           </div>
         </div>
       </div>
