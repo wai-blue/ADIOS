@@ -13,10 +13,12 @@ import LookupInput from "./Inputs/LookupInput";
 
 interface FormProps {
   model: string,
+  content?: Object
 }
 
 interface FormState {
   model: string,
+  content?: Object,
   columns?: FormColumns,
   inputs?: FormInputs,
   emptyRequiredInputs: Object
@@ -67,8 +69,11 @@ export default class Form extends Component {
   constructor(props: FormProps) {
     super(props);
 
+    console.log(props);
+
     this.state = {
       model: props.model,
+      content: props.content,
       emptyRequiredInputs: {},
       columns: { 
         "name": {
@@ -285,6 +290,12 @@ export default class Form extends Component {
                 ) : '';
               })
             ) : ''}
+
+            {this.state.content != null ? (
+              Object.keys(this.state.content).map((componentName: string) => {
+                return window.getComponent(componentName, this.state.content[componentName]);
+              })
+            ): ''}
 
             {this.isEdit == true ? (
               <button 

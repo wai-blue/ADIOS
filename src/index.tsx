@@ -18,14 +18,23 @@ const getComponent = (componentName: string, params: Object) => {
   return components[componentName];
 };
 
-const renderComponent = (component: string) => {
-  const allComponentsWithSameId = document.querySelectorAll('#' + component + '-component');
+//@ts-ignore
+window.getComponent = getComponent;
 
-  allComponentsWithSameId.forEach((element, index) => {
+const renderComponent = (component: string) => {
+  const allComponentsWithSameId = document.querySelectorAll('adios-' + component);
+
+  allComponentsWithSameId.forEach((element, _index) => {
     let componentProps: Object = {};
 
     for (let i = 0;i < element.attributes.length;i++) {
-      componentProps[element.attributes[i].name] = element.attributes[i].value;   
+      let elementValue = element.attributes[i].value;
+
+      if (isValidJSON(elementValue)) {
+        elementValue = JSON.parse(elementValue);
+      }
+
+      componentProps[element.attributes[i].name] = elementValue; 
     }
 
     createRoot(element).render(getComponent(component, componentProps));
@@ -35,4 +44,13 @@ const renderComponent = (component: string) => {
 document.addEventListener('DOMContentLoaded', () => {
   initializeComponents.map(item => renderComponent(item))
 });
+
+function isValidJSON(jsonString: string) {
+  try {
+    JSON.parse(jsonString);
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
 
