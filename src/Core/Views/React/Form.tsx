@@ -9,7 +9,11 @@ import ReactQuill, { Value } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
 /** Components */
-import LookupInput from "./Inputs/LookupInput";
+import InputLookup from "./Inputs/Lookup";
+import InputVarchar from "./Inputs/Varchar";
+import InputTextarea from "./Inputs/Textarea";
+import InputInt from "./Inputs/Int";
+import InputBoolean from "./Inputs/Boolean";
 
 interface FormProps {
   model: string,
@@ -75,6 +79,7 @@ export default class Form extends Component {
       model: props.model,
       content: props.content,
       emptyRequiredInputs: {},
+      inputs: {},
       columns: { 
         "name": {
           "title": "Name",
@@ -181,15 +186,27 @@ export default class Form extends Component {
   _renderInput(columnName: string): JSX.Element {
     switch (this.state.columns[columnName].type) {
       case 'text':
-        return (
-          <textarea
-            className={`form-control ${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : ''}`}
-            value={this.inputs[columnName]}
-            onChange={(e) => this.inputOnChange(columnName, e)}
-            id="exampleFormControlTextarea4"
-            disabled={this.state.columns[columnName].disabled}
-          />
-        );
+        return <InputTextarea 
+          parentForm={this}
+          columnName={columnName}
+        />;
+      case 'float':
+      case 'int':
+        return <InputInt 
+          parentForm={this}
+          columnName={columnName}
+        />;
+      case 'boolean':
+        return <InputBoolean 
+          parentForm={this}
+          columnName={columnName}
+        />;
+      case 'lookup':
+        return <InputLookup 
+          parentForm={this}
+          onChange={(item: any) => this.lookupInputOnChange(columnName, item)}
+          {...this.state.columns[columnName]}
+        />;
       case 'editor':
         return (
           <div className={'h-100 form-control ' + `${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
@@ -201,39 +218,13 @@ export default class Form extends Component {
             />
           </div>
         );
-      case 'float':
-      case 'int':
-        return (
-          <div className="col-auto">
-            <input 
-              type="number" 
-              value={this.inputs[columnName]}
-              onChange={(e) => this.inputOnChange(columnName, e)}
-              id="inputPassword6" 
-              className={`form-control ${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : ''}`}
-              aria-describedby="passwordHelpInline"
-              disabled={this.state.columns[columnName].disabled}
-            />
-          </div>
-        );
-      case 'boolean':
-        return (
-          <div className="form-check">
-            <input 
-              value={this.inputs[columnName]}
-              type="checkbox" 
-              id="flexCheckDefault"
-              className={`form-check-input ${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : ''}`}
-            />
-          </div>
-        )
-      case 'lookup':
-        return <LookupInput 
-          onChange={(item: any) => this.lookupInputOnChange(columnName, item)}
-          {...this.state.columns[columnName]}
-        />;
+
       default:
-        return (
+        return <InputVarchar
+          parentForm={this}
+          columnName={columnName}
+        />
+        /*return (
           <div className="col-auto">
             <input 
               type="text" 
@@ -245,7 +236,7 @@ export default class Form extends Component {
               disabled={this.state.columns[columnName].disabled}
           />
         </div>
-      );
+      );*/
     }
   }
   

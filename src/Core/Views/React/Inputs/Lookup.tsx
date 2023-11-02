@@ -2,22 +2,17 @@ import React, { Component } from 'react'
 import Select from 'react-select'
 import axios from 'axios'
 
-const options = [
-  { value: 'chocolate', label: 'Chocolate' },
-  { value: 'strawberry', label: 'Strawberry' },
-  { value: 'vanilla', label: 'Vanilla' }
-]
-
 interface LookupInputProps {
   model: string,
-  onChange: (e: any) => void
+  onChange: (e: any) => void,
+  parentForm: any
 }
 
 interface LookupInputState {
   data: Array<any> 
 }
 
-export default class LookupInput extends Component {
+export default class Lookup extends Component<LookupInputProps> {
   state: LookupInputState;
   model: string;
 
@@ -63,6 +58,7 @@ export default class LookupInput extends Component {
         getOptionLabel={this.getOptionLabel}
         getOptionValue={this.getOptionValue}
         onChange={this.props.onChange}
+        //onChange={this.props.parentForm.inputOnChange}
       />
     )
   } 
