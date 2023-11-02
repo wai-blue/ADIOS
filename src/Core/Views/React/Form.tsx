@@ -141,7 +141,7 @@ export default class Form extends Component {
       inputs: this.state.inputs 
     }).then((res: any) => {
       notyf.success("Success");
-      this.initInputs(this.state.columns);
+      if (this.state.columns != null) this.initInputs(this.state.columns);
     }).catch((res) => {
       notyf.error(res.response.data.message);
 
@@ -193,6 +193,8 @@ export default class Form extends Component {
   * Render different input types
   */
   _renderInput(columnName: string): JSX.Element {
+    if (this.state.columns == null) return <></>;
+
     switch (this.state.columns[columnName].type) {
       case 'text':
         return <InputTextarea 
@@ -227,7 +229,6 @@ export default class Form extends Component {
             />
           </div>
         );
-
       default:
         return <InputVarchar
           parentForm={this}
@@ -256,6 +257,11 @@ export default class Form extends Component {
           <div className="card-body">
             {this.state.columns != null ? (
               Object.keys(this.state.columns).map((columnName: string) => {
+                if (
+                  this.state.columns == null 
+                  || this.state.columns[columnName] == null
+              ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
+
                 return columnName != 'id' ? (
                   <div 
                     className="row g-3 align-items-center mb-3"
@@ -267,7 +273,9 @@ export default class Form extends Component {
                         {this.state.columns[columnName].required == true ? <b className="text-danger">*</b> : ""}
                       </label>
                     </div>
+
                     {this._renderInput(columnName)}
+
                     <div className="col-auto">
                       <span id="passwordHelpInline" className="form-text">
                         {this.state.columns[columnName].description}
@@ -280,7 +288,7 @@ export default class Form extends Component {
 
             {this.state.content != null ? (
               Object.keys(this.state.content).map((componentName: string) => {
-                return window.getComponent(componentName, this.state.content[componentName]);
+                return this.state.content != null ? window.getComponent(componentName, this.state.content[componentName]) : '';
               })
             ) : ''}
 

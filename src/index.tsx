@@ -4,11 +4,17 @@ import React from "react";
 import Form from "./Core/Views/React/Form";
 import Example from "./Core/Views/React/Example";
 
+/**
+* Initialize ADIOS components
+*/
 const initializeComponents = [
   'form',
   'example'
 ];
 
+/**
+* Get specific ADIOS component with destructed params 
+*/
 const getComponent = (componentName: string, params: Object) => {
   let components: any = {
     form: <Form {...params} />,
@@ -18,14 +24,9 @@ const getComponent = (componentName: string, params: Object) => {
   return components[componentName];
 };
 
-declare global {
-  interface Window {
-    getComponent: (componentName: string, params: Object) => React.JSX.Element;
-  }
-}
-
-window.getComponent = getComponent;
-
+/**
+ * Render React component (create HTML tag root and render) 
+ */
 const renderComponent = (component: string) => {
   const allComponentsWithSameId = document.querySelectorAll('adios-' + component);
 
@@ -58,4 +59,15 @@ function isValidJSON(jsonString: string) {
     return false;
   }
 }
+
+/**
+ * Define global functions
+ */
+declare global {
+  interface Window {
+    getComponent: (componentName: string, params: Object) => React.JSX.Element;
+  }
+}
+
+window.getComponent = getComponent;
 
