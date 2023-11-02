@@ -18,7 +18,12 @@ const getComponent = (componentName: string, params: Object) => {
   return components[componentName];
 };
 
-//@ts-ignore
+declare global {
+  interface Window {
+    getComponent: (componentName: string, params: Object) => React.JSX.Element;
+  }
+}
+
 window.getComponent = getComponent;
 
 const renderComponent = (component: string) => {

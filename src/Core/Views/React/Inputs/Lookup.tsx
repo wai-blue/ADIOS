@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import Select from 'react-select'
 import axios from 'axios'
+import { FormColumnParams } from '../Form' 
 
-interface LookupInputProps {
-  model: string,
-  onChange: (e: any) => void,
-  parentForm: any
+interface LookupInputProps extends FormColumnParams {
+  parentForm: any,
+  columnName: string
 }
 
 interface LookupInputState {
@@ -19,7 +19,8 @@ export default class Lookup extends Component<LookupInputProps> {
   constructor(props: LookupInputProps) {
     super(props);
 
-    this.model = props.model;
+    if (props.model != undefined) this.model = props.model;
+
     this.state = {
       data: [] 
     };
@@ -57,8 +58,7 @@ export default class Lookup extends Component<LookupInputProps> {
         options={this.state.data}
         getOptionLabel={this.getOptionLabel}
         getOptionValue={this.getOptionValue}
-        onChange={this.props.onChange}
-        //onChange={this.props.parentForm.inputOnChange}
+        onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}
       />
     )
   } 

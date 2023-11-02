@@ -28,7 +28,7 @@ interface FormState {
   emptyRequiredInputs: Object
 }
 
-interface FormColumnParams {
+export interface FormColumnParams {
   title: string,
   type: string,
   length?: number,
@@ -153,24 +153,30 @@ export default class Form extends Component {
     });
   }
 
-  inputOnChange(columnName: string, event: any) {
+  /**
+  * Input onChange with event parameter 
+  */
+  inputOnChange(columnName: string, event: React.FormEvent<HTMLInputElement>) {
+    let inputValue: string|number = event.currentTarget.value;
+
+    this.inputOnChangeRaw(columnName, inputValue);
+  }
+
+  /**
+  * Input onChange with raw input value, change inputs (React state)
+  */
+  inputOnChangeRaw(columnName: string, inputValue: any) {
     let changedInput: any = {};
-    changedInput[columnName] = event.target.value;
+    changedInput[columnName] = inputValue;
 
     this.setState({
       inputs: {...this.state.inputs, ...changedInput}
     });
   }
 
-  lookupInputOnChange(columnName: string, item: any) {
-    let changedInput: any = {};
-    changedInput[columnName] = item.id;
-
-    this.setState({
-      inputs: {...this.state.inputs, ...changedInput}
-    });
-  }
-
+  /**
+  * Dynamically initialize inputs (React state) from model columns
+  */
   initInputs(columns: FormColumns) {
     let inputs: any = {};
 
@@ -183,6 +189,9 @@ export default class Form extends Component {
     });
   }
 
+  /**
+  * Render different input types
+  */
   _renderInput(columnName: string): JSX.Element {
     switch (this.state.columns[columnName].type) {
       case 'text':
@@ -204,8 +213,8 @@ export default class Form extends Component {
       case 'lookup':
         return <InputLookup 
           parentForm={this}
-          onChange={(item: any) => this.lookupInputOnChange(columnName, item)}
           {...this.state.columns[columnName]}
+          columnName={columnName}
         />;
       case 'editor':
         return (
@@ -213,7 +222,7 @@ export default class Form extends Component {
             <ReactQuill 
               theme="snow" 
               value={this.inputs[columnName] as Value} 
-              onChange={(e) => this.inputOnChange(columnName, e)}
+              onChange={(value) => this.inputOnChangeRaw(columnName, value)}
               className="w-100" 
             />
           </div>
@@ -224,19 +233,6 @@ export default class Form extends Component {
           parentForm={this}
           columnName={columnName}
         />
-        /*return (
-          <div className="col-auto">
-            <input 
-              type="text" 
-              value={this.inputs[columnName]}
-              onChange={(e) => this.inputOnChange(columnName, e)}
-              id="inputPassword6" 
-              className={`form-control ${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : ''}`}
-              aria-describedby="passwordHelpInline"
-              disabled={this.state.columns[columnName].disabled}
-          />
-        </div>
-      );*/
     }
   }
   
@@ -286,7 +282,7 @@ export default class Form extends Component {
               Object.keys(this.state.content).map((componentName: string) => {
                 return window.getComponent(componentName, this.state.content[componentName]);
               })
-            ): ''}
+            ) : ''}
 
             {this.isEdit == true ? (
               <button 
