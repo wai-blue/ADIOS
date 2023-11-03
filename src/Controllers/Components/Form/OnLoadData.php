@@ -20,8 +20,14 @@ class OnLoadData extends \ADIOS\Core\Controller {
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
+      $inputs = [];
+      if (isset($this->params['id'])) {
+        $inputs = $tmpModel->find($this->params['id']);
+      }
+
       return [
-        'columns' => $tmpModel->columns()
+        'columns' => $tmpModel->columns(),
+        'inputs' => $inputs
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error
