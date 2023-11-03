@@ -32,7 +32,7 @@ export default class Lookup extends Component<LookupInputProps> {
 
   loadData() {
     //@ts-ignore
-    axios.get(_APP_URL + '/UI/Inputs/LookupInput/OnLoadData', {
+    axios.get(_APP_URL + '/Components/Inputs/Lookup/OnLoadData', {
       params: {
         model: this.model 
       }

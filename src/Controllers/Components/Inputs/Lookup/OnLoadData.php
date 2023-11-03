@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components\Inputs\LookupInput;
+namespace ADIOS\Controllers\Components\Inputs\Lookup;
 
 /**
  * @package Components\Controllers\Table
