@@ -17,6 +17,9 @@ import InputBoolean from "./Inputs/Boolean";
 
 interface FormProps {
   model: string,
+  id?: number,
+  title?: string,
+  readonly?: boolean,
   content?: Object
 }
 
@@ -25,6 +28,7 @@ interface FormState {
   content?: Object,
   columns?: FormColumns,
   inputs?: FormInputs,
+  isEdit: boolean,
   emptyRequiredInputs: Object
 }
 
@@ -46,8 +50,7 @@ interface FormInputs {
   [key: string]: string|number;
 }
 
-export default class Form extends Component {
-  isEdit: boolean = false;
+export default class Form extends Component<FormProps> {
   model: String;
   state: FormState;
 
@@ -73,11 +76,10 @@ export default class Form extends Component {
   constructor(props: FormProps) {
     super(props);
 
-    console.log(props);
-
     this.state = {
       model: props.model,
       content: props.content,
+      isEdit: false,
       emptyRequiredInputs: {},
       inputs: {},
       columns: { 
@@ -114,6 +116,8 @@ export default class Form extends Component {
   }
 
   componentDidMount() {
+    if (this.props.id) this.state.isEdit = true;
+
     this.loadData();
   }
 
@@ -121,14 +125,21 @@ export default class Form extends Component {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Form/OnLoadData', {
       params: {
-        model: this.state.model 
+        model: this.state.model,
+        id: this.props.id
       }
     }).then(({data}: any) => {
       this.setState({
         columns: data.columns
       });
 
-      this.initInputs(data.columns);
+      if (Object.keys(data.inputs).length > 0) {
+        this.setState({
+          inputs: data.inputs
+        });
+      } else {
+        this.initInputs(data.columns);
+      }
     });
   }
 
@@ -243,14 +254,14 @@ export default class Form extends Component {
         <div className="card w-100">
           <div className="card-header">
             <div className="row">
-              <div className="col-lg-6">
-                <h5 className="card-title fw-semibold mb-4">Form - { this.state.model }</h5>
+              <div className="col-lg-12">
+                <h3 className="card-title fw-semibold">{ this.props.title ? this.props.title : this.state.model } -  Nový záznam</h3>
               </div>
-              <div className="col-lg-6 text-end">
-                {this.isEdit ? <button 
+              <div className="col-lg-12 text-end">
+                {this.state.isEdit ? <button 
                   onClick={() => alert()}
                   className="btn btn-danger btn-sm"
-                ><i className="fa-solid fa-trash-can"></i> Vymazať</button> : ''}
+                ><i className="fas fa-trash"></i> Vymazať</button> : ''}
               </div>
             </div>
           </div>
@@ -292,16 +303,16 @@ export default class Form extends Component {
               })
             ) : ''}
 
-            {this.isEdit == true ? (
+            {this.state.isEdit == true ? (
               <button 
                 onClick={() => alert()}
-                className="btn btn-primary"
-              >Uložiť zmeny</button>
+                className="btn btn-secondary"
+              ><i className="fas fa-save"></i> Uložiť zmeny</button>
             ) : (
               <button 
                 onClick={() => this.create()}
-                className="btn btn-success"
-              >Vytvoriť</button>
+                className="btn btn-primary"
+              ><i className="fas fa-plus"></i> Vytvoriť</button>
             )}
           </div>
         </div>

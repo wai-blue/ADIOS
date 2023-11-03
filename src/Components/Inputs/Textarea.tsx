@@ -18,7 +18,7 @@ export default class Text extends Component<TextareaInputProps> {
           onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
           className={`form-control ${this.props.parentForm.state.emptyRequiredInputs[this.props.columnName] ? 'is-invalid' : ''}`}
           aria-describedby="passwordHelpInline"
-          disabled={this.props.parentForm.state.columns[this.props.columnName].disabled}
+          disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
         />
       </div>
     );
