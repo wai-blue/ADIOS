@@ -568,7 +568,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Default
       '/^' . $urlBase . '$/' => [
         "permission" => "{$this->fullName}/Browse",
-        "controller" => $this->crud['browse']['controller'] ?? "UI/Table",
+        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -577,7 +577,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Browse
       '/^' . $urlBase . '\/browse$/' => [
         "permission" => "{$this->fullName}/Browse",
-        "controller" => $this->crud['browse']['controller'] ?? "UI/Table",
+        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -586,7 +586,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Edit
       '/^' . $urlBase . '\/(\d+)\/edit$/' => [
         "permission" => "{$this->fullName}/Edit",
-        "controller" => $this->crud['edit']['controller'] ?? "UI/Form",
+        "controller" => $this->crud['edit']['controller'] ?? "Components/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
@@ -600,7 +600,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Add
       '/^' . $urlBase . '\/add$/' => [
         "permission" => "{$this->fullName}/Add",
-        "controller" => $this->crud['add']['controller'] ?? "UI/Form",
+        "controller" => $this->crud['add']['controller'] ?? "Components/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
@@ -615,7 +615,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Save
       '/^' . $urlBase . '\/save$/' => [
         "permission" => "{$this->fullName}/Save",
-        "controller" => $this->crud['save']['controller'] ?? "UI/Form/Save",
+        "controller" => $this->crud['save']['controller'] ?? "Components/Form/Save",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -624,7 +624,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Delete
       '/^' . $urlBase . '\/delete$/' => [
         "permission" => "{$this->fullName}/Delete",
-        "controller" => $this->crud['delete']['controller'] ?? "UI/Form/Delete",
+        "controller" => $this->crud['delete']['controller'] ?? "Components/Form/Delete",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -633,7 +633,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Copy
       '/^' . $urlBase . '\/copy$/' => [
         "permission" => "{$this->fullName}/Copy",
-        "controller" => $this->crud['copy']['controller'] ?? "UI/Form/Copy",
+        "controller" => $this->crud['copy']['controller'] ?? "Components/Form/Copy",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -644,7 +644,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "permission" => "{$this->fullName}/Edit",
         "controller" => "Printer",
         "params" => array_merge($urlParams, [
-          "contentController" => $this->crud['print']['controller'] ?? "UI/Form",
+          "contentController" => $this->crud['print']['controller'] ?? "Components/Form",
           "contentParams" => [
             "model" => $this->fullName,
             "id" => '$' . ($varsInUrl + 1),
@@ -655,7 +655,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Search
       '/^' . $urlBase . '\/search$/' => [
         "permission" => "{$this->fullName}/Search",
-        "controller" => $this->crud['search']['controller'] ?? "UI/Table/Search",
+        "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
@@ -669,7 +669,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Export/CSV
       '/^' . $urlBase . '\/Export\/CSV$/' => [
         "permission" => "{$this->fullName}/Export/CSV",
-        "controller" => "UI/Table/Export/CSV",
+        "controller" => "Components/Table/Export/CSV",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -678,7 +678,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV
       '/^' . $urlBase . '\/Import\/CSV$/' => [
         "permission" => "{$this->fullName}/Export/CSV",
-        "controller" => "UI/Table/Import/CSV",
+        "controller" => "Components/Table/Import/CSV",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -687,7 +687,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV/Import
       '/^' . $urlBase . '\/Import\/CSV\/Import$/' => [
         "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "UI/Table/Import/CSV/Import",
+        "controller" => "Components/Table/Import/CSV/Import",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -696,7 +696,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV/DownloadTemplate
       '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/' => [
         "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "UI/Table/Import/CSV/DownloadTemplate",
+        "controller" => "Components/Table/Import/CSV/DownloadTemplate",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -705,7 +705,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV/Preview
       '/^' . $urlBase . '\/Import\/CSV\/Preview$/' => [
         "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "UI/Table/Import/CSV/Preview",
+        "controller" => "Components/Table/Import/CSV/Preview",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -1209,7 +1209,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   //////////////////////////////////////////////////////////////////
-  // UI/Form methods
+  // Components/Form methods
 
   public function columnValidate(string $column, $value): bool {
     $valid = TRUE;
@@ -1423,7 +1423,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   //////////////////////////////////////////////////////////////////
-  // UI/Cards methods
+  // Components/Cards methods
 
   public function cards(array $cards = [])
   {
@@ -1451,7 +1451,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   //////////////////////////////////////////////////////////////////
-  // UI/Tree methods
+  // Components/Tree methods
 
   public function treeParams($params)
   {

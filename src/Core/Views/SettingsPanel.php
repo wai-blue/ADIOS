@@ -31,7 +31,7 @@ class SettingsPanel extends \ADIOS\Core\View {
             '__settings_group': '".ads($this->params['settings_group'])."',
           };
 
-          _ajax_read('UI/SettingsPanel/Save', data, function(res) {
+          _ajax_read('Components/SettingsPanel/Save', data, function(res) {
             if (isNaN(res)) {
               alert(res);
             } else {

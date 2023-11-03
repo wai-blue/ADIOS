@@ -13,7 +13,7 @@ namespace ADIOS\Controllers;
 /**
  * 'Forgot-password' action. Renders the password reset screen of the ADIOS application.
  *
- * @package UI\Controllers
+ * @package Components\Controllers
  */
 class PasswordReset extends \ADIOS\Core\Controller {
   public static bool $requiresUserAuthentication = FALSE;

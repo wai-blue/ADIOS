@@ -13,7 +13,7 @@ namespace ADIOS\Controllers;
 /**
  * 'Login' action. Renders the login screen of the ADIOS application.
  *
- * @package UI\Controllers
+ * @package Components\Controllers
  */
 class LoremIpsum extends \ADIOS\Core\Controller {
 

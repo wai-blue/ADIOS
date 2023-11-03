@@ -21,7 +21,7 @@ namespace ADIOS\Controllers;
  *
  * Action can be configured to render another action in the main content area.
  *
- * @package UI\Controllers
+ * @package Components\Controllers
  */
 class Printer extends \ADIOS\Core\Controller {
 

@@ -128,7 +128,7 @@ class TableSearch extends \ADIOS\Core\View {
 
           if (searchName != '' && searchName != null) {
             _ajax_read(
-              'UI/Table/Search/Save',
+              'Components/Table/Search/Save',
               {
                 'model': '" . ads($model) . "',
                 'searchGroup': '" . ads($searchGroup) . "',
@@ -144,7 +144,7 @@ class TableSearch extends \ADIOS\Core\View {
 
         function {$this->uid}_update_saved_searches() {
           _ajax_update(
-            'UI/Table/Search/SavedSearchesOverview',
+            'Components/Table/Search/SavedSearchesOverview',
             {
               'parentUid': '{$this->uid}',
               'searchGroup': '" . ads($searchGroup) . "'
@@ -156,7 +156,7 @@ class TableSearch extends \ADIOS\Core\View {
         function {$this->uid}_delete_saved_search(searchName) {
           if (confirm('Do you want to delete saved search?\\n\\n' + searchName)) {
             _ajax_read(
-              'UI/Table/Search/Delete',
+              'Components/Table/Search/Delete',
               {
                 'searchGroup': '" . ads($searchGroup) . "',
                 'searchName': searchName,
@@ -170,7 +170,7 @@ class TableSearch extends \ADIOS\Core\View {
 
         function {$this->uid}_load_saved_search(searchName) {
           _ajax_read(
-            'UI/Table/Search/Load',
+            'Components/Table/Search/Load',
             {
               'searchGroup': '" . ads($searchGroup) . "',
               'searchName': searchName,

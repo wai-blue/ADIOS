@@ -1,8 +1,8 @@
 import { createRoot } from "react-dom/client";
 import React from "react";
 
-import Form from "./Core/Views/React/Form";
-import Example from "./Core/Views/React/Example";
+import Form from "./Components/Form";
+import Example from "./Components/Example";
 
 /**
 * Initialize ADIOS components

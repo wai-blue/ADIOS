@@ -11,7 +11,7 @@
 namespace ADIOS\Controllers\Desktop\Ajax;
 
 /**
- * @package UI\Controllers
+ * @package Components\Controllers
  */
 class SetLanguage extends \ADIOS\Core\Controller {
   public function render() {

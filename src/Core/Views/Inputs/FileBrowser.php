@@ -128,7 +128,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
               onchange=\"
                 let fileInput = $('#{$this->uid}_{{ dirId }}_file_input');
                 let folderPath = {$this->uid}_getCurrentFolderPath();
-                let fileUploaderUrl = _APP_URL + '/UI/FileBrowser/Upload?folderPath=' + encodeURIComponent(folderPath);
+                let fileUploaderUrl = _APP_URL + '/Components/FileBrowser/Upload?folderPath=' + encodeURIComponent(folderPath);
                 let formData = new FormData();
                 
                 formData.append('upload', fileInput[0].files[0]);
@@ -198,7 +198,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
                     let folderPath = {$this->uid}_getCurrentFolderPath();
 
                     _ajax_read(
-                      'UI/FileBrowser/CreateFolder',
+                      'Components/FileBrowser/CreateFolder',
                       {
                         'folder': folderPath + '/' + folderName,
                       },
@@ -256,7 +256,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
                         let folderPath = {$this->uid}_getCurrentFolderPath();
 
                         _ajax_read(
-                          'UI/FileBrowser/RenameFolder',
+                          'Components/FileBrowser/RenameFolder',
                           {
                             'folder': folderPath,
                             'newFolderName': newFolderName,
@@ -286,7 +286,7 @@ class FileBrowser extends \ADIOS\Core\Views\Input {
                         let _this = $(this);
 
                         _ajax_read(
-                          'UI/FileBrowser/DeleteFolder',
+                          'Components/FileBrowser/DeleteFolder',
                           {
                             'folder': {$this->uid}_getCurrentFolderPath(),
                           },

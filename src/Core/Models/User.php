@@ -167,7 +167,7 @@ class User extends \ADIOS\Core\Model {
   public function routing(array $routing = []) {
     return parent::routing([
       '/^MyProfile$/' => [
-        "action" => "UI/Form",
+        "action" => "Components/Form",
         "params" => [
           "model" => "ADIOS/Core/Models/User",
           "myProfileView" => TRUE,
