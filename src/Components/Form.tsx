@@ -15,12 +15,20 @@ import InputTextarea from "./Inputs/Textarea";
 import InputInt from "./Inputs/Int";
 import InputBoolean from "./Inputs/Boolean";
 
+interface Content {
+  [key: string]: ContentCard|any;
+}
+
+interface ContentCard {
+  title: string
+}
+
 interface FormProps {
   model: string,
   id?: number,
   title?: string,
   readonly?: boolean,
-  content?: Object
+  content?: Content
 }
 
 interface FormState {
@@ -82,38 +90,40 @@ export default class Form extends Component<FormProps> {
       isEdit: false,
       emptyRequiredInputs: {},
       inputs: {},
-      columns: { 
-        "name": {
-          "title": "Name",
-          "type": "string",
-          "length": 150,
-          "required": true,
-        },
-        "company_name": {
-          "title": "Company Name",
-          "type": "string",
-          "length": 150,
-          "required": true,
-          "disabled": true
-        },
-        "lookup_test": {
-          "title": "Lookup test",
-          "type": "lookup",
-          "model": "App/Widgets/Bookkeeping/Books/Models/AccountingPeriod",
-          "length": 1,
-          "required": true
-        },
-        "is_active":{
-          "title": "Is active?",
-          "type": "boolean"
-        },
-        "text":{
-          "title": "Text",
-          "type": "editor"
-        }
-      }
+      columns: undefined 
     };
   }
+
+  //_testColumns = { 
+  //  "name": {
+  //    "title": "Name",
+  //    "type": "string",
+  //    "length": 150,
+  //    "required": true,
+  //  },
+  //  "company_name": {
+  //    "title": "Company Name",
+  //    "type": "string",
+  //    "length": 150,
+  //    "required": true,
+  //    "disabled": true
+  //  },
+  //  "lookup_test": {
+  //    "title": "Lookup test",
+  //    "type": "lookup",
+  //    "model": "App/Widgets/Bookkeeping/Books/Models/AccountingPeriod",
+  //    "length": 1,
+  //    "required": true
+  //  },
+  //  "is_active":{
+  //    "title": "Is active?",
+  //    "type": "boolean"
+  //  },
+  //  "text":{
+  //    "title": "Text",
+  //    "type": "editor"
+  //  }
+  //};
 
   componentDidMount() {
     if (this.props.id) this.state.isEdit = true;
@@ -201,36 +211,61 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
+  * Render content item 
+  */
+  _renderContentItem(contentItemParams: undefined|string|Object): JSX.Element {
+    if (contentItemParams == undefined) return <b style={{color: 'red'}}>Content item params are not defined</b>;
+
+    let contentItemKeys = Object.keys(contentItemParams);
+    if (contentItemKeys.length == 0) return <b style={{color: 'red'}}>Bad content item definition</b>;
+
+    let contentItemName = contentItemKeys[0];
+
+    switch (contentItemName) {
+      case 'item': return this._renderInput(contentItemParams['item'] as string);
+      default: return window.getComponent(contentItemName, contentItemParams[contentItemName]);
+    }
+  }
+
+  /**
   * Render different input types
   */
   _renderInput(columnName: string): JSX.Element {
     if (this.state.columns == null) return <></>;
+    console.log("COl to render: " + columnName);
+    console.log(this.state.columns);
+
+    let inputToRender: JSX.Element;
 
     switch (this.state.columns[columnName].type) {
       case 'text':
-        return <InputTextarea 
+        inputToRender = <InputTextarea 
           parentForm={this}
           columnName={columnName}
         />;
+      break;
       case 'float':
       case 'int':
-        return <InputInt 
+        inputToRender = <InputInt 
           parentForm={this}
           columnName={columnName}
         />;
+      break;
       case 'boolean':
-        return <InputBoolean 
+        inputToRender = <InputBoolean 
           parentForm={this}
           columnName={columnName}
         />;
+      break;
       case 'lookup':
-        return <InputLookup 
+        inputToRender = <InputLookup 
           parentForm={this}
           {...this.state.columns[columnName]}
           columnName={columnName}
         />;
+      break;
       case 'editor':
-        return (
+        inputToRender = (
           <div className={'h-100 form-control ' + `${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
             <ReactQuill 
               theme="snow" 
@@ -240,12 +275,34 @@ export default class Form extends Component<FormProps> {
             />
           </div>
         );
+      break;
       default:
-        return <InputVarchar
+        inputToRender = <InputVarchar
           parentForm={this}
           columnName={columnName}
         />
+      break;
     }
+
+    return columnName != 'id' ? (
+      <div 
+        className="row g-3 align-items-center mb-3"
+        key={columnName}
+      >
+        <div className="col-auto">
+          <label htmlFor="inputPassword6" className="col-form-label">
+            {this.state.columns[columnName].title}
+            {this.state.columns[columnName].required == true ? <b className="text-danger">*</b> : ""}
+          </label>
+        </div>
+        {inputToRender}
+        <div className="col-auto">
+          <span id="passwordHelpInline" className="form-text">
+            {this.state.columns[columnName].description}
+          </span>
+        </div>
+      </div>
+    ) : <></>;
   }
   
   render() {
@@ -263,43 +320,38 @@ export default class Form extends Component<FormProps> {
                   className="btn btn-danger btn-sm"
                 ><i className="fas fa-trash"></i> Vymazať</button> : ''}
               </div>
+
+              {this.props.content?.cards ? (
+                <div className="card text-center bg-light mt-2"> 
+                  <ul className="nav nav-tabs card-header-tabs">
+                    {Object.keys(this.props.content.cards).map((cardKey: string) => {
+                      return (
+                        <li className="nav-item"> 
+                          <a 
+                             className="nav-link active" 
+                             href="https://practice.geeksforgeeks.org/courses"
+                          >{ this.props.content?.cards[cardKey].title}</a> 
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ) : ''}
             </div>
           </div>
           <div className="card-body">
-            {this.state.columns != null ? (
+            {this.props.content != null ? 
+              Object.keys(this.props.content).map((contentArea: string) => {
+                return this._renderContentItem(this.props.content[contentArea]); 
+              })
+            : this.state.columns != null ? (
               Object.keys(this.state.columns).map((columnName: string) => {
                 if (
                   this.state.columns == null 
                   || this.state.columns[columnName] == null
-              ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
+                ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
 
-                return columnName != 'id' ? (
-                  <div 
-                    className="row g-3 align-items-center mb-3"
-                    key={columnName}
-                  >
-                    <div className="col-auto">
-                      <label htmlFor="inputPassword6" className="col-form-label">
-                        {this.state.columns[columnName].title}
-                        {this.state.columns[columnName].required == true ? <b className="text-danger">*</b> : ""}
-                      </label>
-                    </div>
-
-                    {this._renderInput(columnName)}
-
-                    <div className="col-auto">
-                      <span id="passwordHelpInline" className="form-text">
-                        {this.state.columns[columnName].description}
-                      </span>
-                    </div>
-                  </div>
-                ) : '';
-              })
-            ) : ''}
-
-            {this.state.content != null ? (
-              Object.keys(this.state.content).map((componentName: string) => {
-                return this.state.content != null ? window.getComponent(componentName, this.state.content[componentName]) : '';
+                return this._renderInput(columnName)
               })
             ) : ''}
 

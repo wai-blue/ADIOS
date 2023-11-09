@@ -16,12 +16,12 @@ const initializeComponents = [
 * Get specific ADIOS component with destructed params 
 */
 const getComponent = (componentName: string, params: Object) => {
-  let components: any = {
-    form: <Form {...params} />,
-    example: <Example {...params} />
-  }; 
-
-  return components[componentName];
+  switch (componentName) {
+    //@ts-ignore
+    case 'form': return <Form {...params} />;
+    case 'example': return <Example {...params} />;
+    default: return <b style={{color: 'red'}}>Component {componentName} doesn't exist</b>; 
+  }
 };
 
 /**
