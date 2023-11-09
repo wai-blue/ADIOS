@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, JSXElementConstructor } from "react";
 
 import axios from "axios";
 
@@ -28,7 +28,8 @@ interface FormProps {
   id?: number,
   title?: string,
   readonly?: boolean,
-  content?: Content
+  content?: Content,
+  layout?: Array<Array<string>>
 }
 
 interface FormState {
@@ -61,6 +62,7 @@ interface FormInputs {
 export default class Form extends Component<FormProps> {
   model: String;
   state: FormState;
+  layout: string;
 
   columns: FormColumns = { 
     "name": {
@@ -83,6 +85,7 @@ export default class Form extends Component<FormProps> {
   
   constructor(props: FormProps) {
     super(props);
+    console.log(props);
 
     this.state = {
       model: props.model,
@@ -92,6 +95,10 @@ export default class Form extends Component<FormProps> {
       inputs: {},
       columns: undefined 
     };
+
+
+    //@ts-ignore
+    this.layout = this.props.layout?.map(row => `"${row.join(' ')}"`).join('\n');
   }
 
   //_testColumns = { 
@@ -213,7 +220,7 @@ export default class Form extends Component<FormProps> {
   /**
   * Render content item 
   */
-  _renderContentItem(contentItemParams: undefined|string|Object): JSX.Element {
+  _renderContentItem(contentItemArea: string, contentItemParams: undefined|string|Object): JSX.Element {
     if (contentItemParams == undefined) return <b style={{color: 'red'}}>Content item params are not defined</b>;
 
     let contentItemKeys = Object.keys(contentItemParams);
@@ -221,10 +228,24 @@ export default class Form extends Component<FormProps> {
 
     let contentItemName = contentItemKeys[0];
 
+    let contentItem: JSX.Element;
+
     switch (contentItemName) {
-      case 'item': return this._renderInput(contentItemParams['item'] as string);
-      default: return window.getComponent(contentItemName, contentItemParams[contentItemName]);
+      case 'item': 
+        contentItem = this._renderInput(contentItemParams['item'] as string);
+      break;
+      case 'html': 
+        contentItem = (<div dangerouslySetInnerHTML={{ __html: contentItemParams['html'] }} />);
+      break;
+      default: 
+        contentItem = window.getComponent(contentItemName, contentItemParams[contentItemName]);
     }
+    
+    return (
+      <div style={{gridArea: contentItemArea}}>
+        {contentItem}
+      </div>
+    );
   }
 
   /**
@@ -232,8 +253,6 @@ export default class Form extends Component<FormProps> {
   */
   _renderInput(columnName: string): JSX.Element {
     if (this.state.columns == null) return <></>;
-    console.log("COl to render: " + columnName);
-    console.log(this.state.columns);
 
     let inputToRender: JSX.Element;
 
@@ -243,27 +262,27 @@ export default class Form extends Component<FormProps> {
           parentForm={this}
           columnName={columnName}
         />;
-      break;
+        break;
       case 'float':
       case 'int':
         inputToRender = <InputInt 
           parentForm={this}
           columnName={columnName}
         />;
-      break;
+        break;
       case 'boolean':
         inputToRender = <InputBoolean 
           parentForm={this}
           columnName={columnName}
         />;
-      break;
+        break;
       case 'lookup':
         inputToRender = <InputLookup 
           parentForm={this}
           {...this.state.columns[columnName]}
           columnName={columnName}
         />;
-      break;
+        break;
       case 'editor':
         inputToRender = (
           <div className={'h-100 form-control ' + `${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
@@ -275,13 +294,13 @@ export default class Form extends Component<FormProps> {
             />
           </div>
         );
-      break;
+        break;
       default:
         inputToRender = <InputVarchar
           parentForm={this}
           columnName={columnName}
         />
-      break;
+        break;
     }
 
     return columnName != 'id' ? (
@@ -304,7 +323,7 @@ export default class Form extends Component<FormProps> {
       </div>
     ) : <></>;
   }
-  
+
   render() {
     return (
       <div className="m-3">
@@ -328,8 +347,8 @@ export default class Form extends Component<FormProps> {
                       return (
                         <li className="nav-item"> 
                           <a 
-                             className="nav-link active" 
-                             href="https://practice.geeksforgeeks.org/courses"
+                            className="nav-link active" 
+                            href="https://practice.geeksforgeeks.org/courses"
                           >{ this.props.content?.cards[cardKey].title}</a> 
                         </li>
                       );
@@ -339,21 +358,31 @@ export default class Form extends Component<FormProps> {
               ) : ''}
             </div>
           </div>
-          <div className="card-body">
-            {this.props.content != null ? 
-              Object.keys(this.props.content).map((contentArea: string) => {
-                return this._renderContentItem(this.props.content[contentArea]); 
-              })
-            : this.state.columns != null ? (
-              Object.keys(this.state.columns).map((columnName: string) => {
-                if (
-                  this.state.columns == null 
-                  || this.state.columns[columnName] == null
-                ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
 
-                return this._renderInput(columnName)
-              })
-            ) : ''}
+          <div className="card-body">
+            <div 
+              style={{
+                display: 'grid', 
+                gridTemplateRows: 'auto', 
+                gridTemplateAreas: this.layout, 
+                gridGap: '10px'
+              }}
+            >
+              {this.props.content != null ? 
+                Object.keys(this.props.content).map((contentArea: string) => {
+                  return this._renderContentItem(contentArea, this.props.content[contentArea]); 
+                })
+              : this.state.columns != null ? (
+                Object.keys(this.state.columns).map((columnName: string) => {
+                  if (
+                    this.state.columns == null 
+                    || this.state.columns[columnName] == null
+                  ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
+
+                  return this._renderInput(columnName)
+                })
+              ) : ''}
+            </div>
 
             {this.state.isEdit == true ? (
               <button 
