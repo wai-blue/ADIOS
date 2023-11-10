@@ -1288,18 +1288,19 @@ class Loader
             if (is_string($view)) {
               $viewTwig = $this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig';
 
-              $html = match (is_file($viewTwig)) {
-                true => $this->twig->render(
+              if (is_file($viewTwig)) {
+                $html = $this->twig->render(
                   $view, 
                   [
                     'uid' => $this->uid,
                     'viewParams' => $viewParams,
                   ]
-                ),
-                false => $this->view->create(
+                );
+              } else {
+                $html = $this->view->create(
                   $view,
                   $viewParams
-                )->render()
+                )->render();
               };
 
               return $html;
