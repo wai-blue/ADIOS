@@ -1,14 +1,19 @@
 import { createRoot } from "react-dom/client";
 import React from "react";
 
+/**
+ * Components
+ */
 import Form from "./Components/Form";
 import Example from "./Components/Example";
+import Table from "./Components/Table";
 
 /**
 * Initialize ADIOS components
 */
 const initializeComponents = [
   'form',
+  'table',
   'example'
 ];
 
@@ -19,6 +24,7 @@ const getComponent = (componentName: string, params: Object) => {
   switch (componentName) {
     //@ts-ignore
     case 'form': return <Form {...params} />;
+    case 'table': return <Table {...params} />;
     case 'example': return <Example {...params} />;
     default: return <b style={{color: 'red'}}>Component {componentName} doesn't exist</b>; 
   }

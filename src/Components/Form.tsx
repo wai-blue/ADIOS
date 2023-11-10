@@ -85,7 +85,6 @@ export default class Form extends Component<FormProps> {
   
   constructor(props: FormProps) {
     super(props);
-    console.log(props);
 
     this.state = {
       model: props.model,
@@ -231,8 +230,8 @@ export default class Form extends Component<FormProps> {
     let contentItem: JSX.Element;
 
     switch (contentItemName) {
-      case 'item': 
-        contentItem = this._renderInput(contentItemParams['item'] as string);
+      case 'input': 
+        contentItem = this._renderInput(contentItemParams['input'] as string);
       break;
       case 'html': 
         contentItem = (<div dangerouslySetInnerHTML={{ __html: contentItemParams['html'] }} />);
