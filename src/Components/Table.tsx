@@ -1,13 +1,20 @@
 import React, { Component } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import axios from "axios";
 
 interface TableProps {
   model: string
 }
 
+interface TableColumns {
+  [key: string]: string;
+}
+
 interface TableState {
   model: string,
-  page: number
+  page: number,
+  columns: TableColumns,
+  data: Array<Object> 
 }
 
 export default class Table extends Component {
@@ -49,7 +56,10 @@ export default class Table extends Component {
     super(props);
 
     this.state = {
-      model: props.model
+      model: props.model,
+      data: [],
+      columns: {},
+      page: 0
     };
   }
 
@@ -76,7 +86,7 @@ export default class Table extends Component {
     return (
       <div style={{ height: 400, width: '100%' }}>
         <DataGrid
-          rows={this.rows}
+          rows={this.state.data}
           columns={this.columns}
           initialState={{
             pagination: {

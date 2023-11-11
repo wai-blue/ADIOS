@@ -10,6 +10,8 @@
 
 namespace ADIOS\Core;
 
+use Illuminate\Pagination\Paginator;
+
 /**
  * Core implementation of database model. Extends from Eloquent's model and adds own
  * functionalities.
