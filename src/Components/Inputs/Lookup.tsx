@@ -54,8 +54,9 @@ export default class Lookup extends Component<LookupInputProps> {
   render() {
     return (
       <Select
-        className={`w-50 ${this.props.parentForm.state.emptyRequiredInputs[this.props.columnName] ? 'is-invalid' : ''}`}
-        options={this.state.data}
+        className={`${this.props.parentForm.state.emptyRequiredInputs[this.props.columnName] ? 'is-invalid' : ''}`}
+        options={Object.values(this.state.data)}
+        value={this.state.data[this.props.parentForm.state.inputs[this.props.columnName]]}
         getOptionLabel={this.getOptionLabel}
         getOptionValue={this.getOptionValue}
         onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}

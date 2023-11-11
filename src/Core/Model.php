@@ -1297,10 +1297,25 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "data" => $data,
     ])["params"];
   }
+  
+  /**
+  * Check if the lookup table needs the id of the inserted record from this model  
+  */
+  private function ___getInsertedIdForLookupColumn(array $lookupColumns, array $lookupData, int $insertedRecordId): array {
+    foreach ($lookupColumns as $lookupColumnName => $lookupColumnData) {
+      if ($lookupColumnData['type'] != 'lookup') continue; 
 
-  public function recordSave($data)
+      if ($lookupColumnData['model'] == $this->fullName) {
+        $lookupData[$lookupColumnName]  = $insertedRecordId; 
+        break;
+      }
+    }
+
+    return $lookupData;
+  }
+
+  public function recordSave(array $data)
   {
-
     try {
       $id = (int) $data['id'];
 
@@ -1319,33 +1334,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
         }
       }
 
-      // save data for lookup models first (and create records, if necessary)
-
-      foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
-        $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? '';
-        if (empty($lookupColumnName)) continue;
-
-        $lookupModel = $this->adios->getModel($lookupModelName);
-
-        $lookupModel->recordValidate($lookupData);
-
-        if ($data[$lookupColumnName] <= 0) {
-          $lookupData = $lookupModel->onBeforeInsert($lookupData);
-        } else {
-          $lookupData = $lookupModel->onBeforeUpdate($lookupData);
-        }
-
-        $lookupData = $this->onBeforeSave($lookupData);
-
-        if ($data[$lookupColumnName] <= 0) {
-          $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
-        } else {
-          $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
-        }
-      }
-
-      // save data for this model
-
       $this->recordValidate($dataForThisModel);
 
       if ($id <= 0) {
@@ -1363,6 +1351,30 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $returnValue = $this->updateRow($dataForThisModel, $id);
       }
 
+      // save data for lookup models first (and create records, if necessary)
+      foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
+        $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? NULL;
+
+        if ($lookupColumnName == NULL) continue;
+
+        $lookupModel = $this->adios->getModel($lookupModelName);
+        $lookupData = $this->___getInsertedIdForLookupColumn($lookupModel->columns(), $lookupData, $data['id']);
+        $lookupModel->recordValidate($lookupData);
+
+        if ($data[$lookupColumnName] <= 0) {
+          $lookupData = $lookupModel->onBeforeInsert($lookupData);
+        } else {
+          $lookupData = $lookupModel->onBeforeUpdate($lookupData);
+        }
+
+        $lookupData = $this->onBeforeSave($lookupData);
+
+        if ($data[$lookupColumnName] <= 0) {
+          $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
+        } else {
+          $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
+        }
+      }
 
       // save cross-table-alignments
       foreach ($this->junctions as $jName => $jParams) {
@@ -1393,7 +1405,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
         }
       }
 
-
       if ($id <= 0) {
         $returnValue = $this->onAfterInsert($data, $returnValue);
       } else {
@@ -1401,7 +1412,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
       }
 
       $returnValue = $this->onAfterSave($data, $returnValue);
-
       return $returnValue;
     } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
       return $this->adios->renderHtmlFatal($e->getMessage());

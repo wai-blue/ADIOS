@@ -180,6 +180,27 @@ export default class Form extends Component<FormProps> {
     });
   }
 
+  save() {
+    let notyf = new Notyf();
+
+    //@ts-ignore
+    axios.patch(_APP_URL + '/Components/Form/OnSave', {
+      model: this.state.model,
+      inputs: this.state.inputs 
+    }).then((res: any) => {
+      notyf.success("Success");
+      //if (this.state.columns != null) this.initInputs(this.state.columns);
+    }).catch((res) => {
+      notyf.error(res.response.data.message);
+
+      if (res.response.status == 422) {
+        this.setState({
+          emptyRequiredInputs: res.response.data.emptyRequiredInputs 
+        });
+      }
+    });
+  }
+
   /**
   * Input onChange with event parameter 
   */
@@ -195,6 +216,7 @@ export default class Form extends Component<FormProps> {
   inputOnChangeRaw(columnName: string, inputValue: any) {
     let changedInput: any = {};
     changedInput[columnName] = inputValue;
+    console.log(changedInput);
 
     this.setState({
       inputs: {...this.state.inputs, ...changedInput}
@@ -299,21 +321,22 @@ export default class Form extends Component<FormProps> {
           parentForm={this}
           columnName={columnName}
         />
-        break;
     }
 
     return columnName != 'id' ? (
       <div 
-        className="row g-3 align-items-center mb-3"
+        className="row g-1 align-items-center"
         key={columnName}
       >
-        <div className="col-auto">
-          <label htmlFor="inputPassword6" className="col-form-label">
+        <div className="col-lg-3">
+          <label className="col-form-label">
             {this.state.columns[columnName].title}
             {this.state.columns[columnName].required == true ? <b className="text-danger">*</b> : ""}
           </label>
         </div>
-        {inputToRender}
+        <div className="col-lg-9">
+          {inputToRender}
+        </div>
         <div className="col-auto">
           <span id="passwordHelpInline" className="form-text">
             {this.state.columns[columnName].description}
@@ -330,7 +353,7 @@ export default class Form extends Component<FormProps> {
           <div className="card-header">
             <div className="row">
               <div className="col-lg-12">
-                <h3 className="card-title fw-semibold">{ this.props.title ? this.props.title : this.state.model } -  Nový záznam</h3>
+                <h3 className="card-title">{ this.props.title ? this.props.title : this.state.model } -  Nový záznam</h3>
               </div>
               <div className="col-lg-12 text-end">
                 {this.state.isEdit ? <button 
@@ -371,27 +394,27 @@ export default class Form extends Component<FormProps> {
                 Object.keys(this.props.content).map((contentArea: string) => {
                   return this._renderContentItem(contentArea, this.props.content[contentArea]); 
                 })
-              : this.state.columns != null ? (
-                Object.keys(this.state.columns).map((columnName: string) => {
-                  if (
-                    this.state.columns == null 
-                    || this.state.columns[columnName] == null
-                  ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
+                : this.state.columns != null ? (
+                  Object.keys(this.state.columns).map((columnName: string) => {
+                    if (
+                      this.state.columns == null 
+                        || this.state.columns[columnName] == null
+                    ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
 
-                  return this._renderInput(columnName)
-                })
-              ) : ''}
+                    return this._renderInput(columnName)
+                  })
+                ) : ''}
             </div>
 
             {this.state.isEdit == true ? (
               <button 
-                onClick={() => alert()}
-                className="btn btn-secondary"
-              ><i className="fas fa-save"></i> Uložiť zmeny</button>
+                onClick={() => this.save()}
+                className="btn btn-secondary mt-2"
+              ><i className="fas fa-save"></i> Uložiť</button>
             ) : (
               <button 
                 onClick={() => this.create()}
-                className="btn btn-primary"
+                className="btn btn-primary mt-2"
               ><i className="fas fa-plus"></i> Vytvoriť</button>
             )}
           </div>

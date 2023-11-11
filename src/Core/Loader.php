@@ -2037,6 +2037,7 @@ class Loader
     $cssFiles = [
       dirname(__FILE__)."/../Assets/Css/fontawesome-5.13.0.css",
       dirname(__FILE__)."/../Assets/Css/bootstrap.min.css",
+      //dirname(__FILE__)."/../Assets/Css/bootstrapmd.min.css",
       dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
       dirname(__FILE__)."/../Assets/Css/responsive.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",

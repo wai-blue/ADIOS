@@ -13,7 +13,7 @@ namespace ADIOS\Controllers\Components\Form;
 /**
  * @package Components\Controllers\Table
  */
-class OnCreate extends \ADIOS\Core\Controller {
+class OnSave extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
   public function renderJson() { 
@@ -39,7 +39,7 @@ class OnCreate extends \ADIOS\Core\Controller {
       return [
         'status' => 'error',
         'message' => 'Fill in all required inputs',
-        'emptyRequiredInputs' => $emptyRequiredInputs
+        'emptyRequiredInputs' => $emptyRequiredInputs 
       ];
     } catch (\Exception $e) {
       http_response_code(400);
@@ -48,7 +48,6 @@ class OnCreate extends \ADIOS\Core\Controller {
         'status' => 'error',
         'message' => $e->getMessage() 
       ];
-
     }
   }
 }

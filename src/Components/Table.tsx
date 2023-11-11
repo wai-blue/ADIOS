@@ -1,7 +1,18 @@
 import React, { Component } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 
+interface TableProps {
+  model: string
+}
+
+interface TableState {
+  model: string,
+  page: number
+}
+
 export default class Table extends Component {
+  state: TableState;
+
   columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'firstName', headerName: 'First name', width: 130 },
@@ -33,6 +44,33 @@ export default class Table extends Component {
     { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
     { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
   ];
+
+  constructor(props: TableProps) {
+    super(props);
+
+    this.state = {
+      model: props.model
+    };
+  }
+
+  componentDidMount() {
+    this.loadData();
+  }
+
+  loadData() {
+    //@ts-ignore
+    axios.get(_APP_URL + '/Components/Table/OnLoadData', {
+      params: {
+        page: this.state.page,
+        model: this.state.model
+      }
+    }).then(({data}: any) => {
+      this.setState({
+        columns: data.columns,
+        data: data.data
+      });
+    });
+  }
 
   render() {
     return (

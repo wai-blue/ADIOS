@@ -19,7 +19,12 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public function renderJson() { 
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
-      $data = $tmpModel->get();
+      $tmpData = $tmpModel->get();
+      
+      $data = [];
+      foreach ($tmpData as $item) {
+        $data[$item['id']] = $item;  
+      }
 
       return [
         'data' => $data
