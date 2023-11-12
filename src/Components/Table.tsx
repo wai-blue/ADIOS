@@ -10,11 +10,27 @@ interface TableColumns {
   [key: string]: string;
 }
 
+interface TableData {
+  current_page: number,
+  data: Array<any>,
+  first_page_url: string,
+  from: number,
+  last_page: number,
+  last_page_url: string,
+  links: Array<any>,
+  next_page_url: string|null,
+  path: string,
+  per_page: number,
+  prev_page_url: string|null,
+  to: number,
+  total: number
+}
+
 interface TableState {
   model: string,
   page: number,
   columns: TableColumns,
-  data: Array<Object> 
+  data?: TableData
 }
 
 export default class Table extends Component {
@@ -57,8 +73,8 @@ export default class Table extends Component {
 
     this.state = {
       model: props.model,
-      data: [],
       columns: {},
+      data: undefined,
       page: 0
     };
   }
@@ -83,10 +99,14 @@ export default class Table extends Component {
   }
 
   render() {
+    if (!this.state.data) {
+      return <small>Loading</small>;
+    }
+
     return (
       <div style={{ height: 400, width: '100%' }}>
         <DataGrid
-          rows={this.state.data}
+          rows={this.state.data.data}
           columns={this.columns}
           initialState={{
             pagination: {

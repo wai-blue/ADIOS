@@ -18,9 +18,10 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
   public function renderJson() { 
     try {
-      //$tmpModel = $this->adios->getModel($this->params['model']);
-      $xxx = \App\Widgets\Bookkeeping\Books\Models\Vat::paginate(5);
-var_dump($xxx); exit;
+      $tmpModel = $this->adios->getModel($this->params['model']);
+
+      $data = $tmpModel->paginate(5);
+
       return [
         'columns' => $tmpModel->columns(),
         'data' => $data
