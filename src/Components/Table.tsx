@@ -1,8 +1,10 @@
 import React, { Component } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import axios from "axios";
+import { ModalPageLarge } from "./Modal";
 
 interface TableProps {
+  title?: string,
   model: string
 }
 
@@ -27,16 +29,18 @@ interface TableData {
 }
 
 interface TableState {
-  model: string,
   page: number,
-  columns: TableColumns,
+  pageLength: number,
+  columns?: Array<GridColDef>,
   data?: TableData
 }
 
 export default class Table extends Component {
   state: TableState;
+  model: string;
+  title: string;
 
-  columns: GridColDef[] = [
+  _testColumns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'firstName', headerName: 'First name', width: 130 },
     { field: 'lastName', headerName: 'Last name', width: 130 },
@@ -56,7 +60,7 @@ export default class Table extends Component {
     },
   ];
 
-  rows = [
+  _testData = [
     { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
     { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
     { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
@@ -72,23 +76,33 @@ export default class Table extends Component {
     super(props);
 
     this.state = {
-      model: props.model,
-      columns: {},
+      columns: undefined,
       data: undefined,
-      page: 0
+      page: 1,
+      pageLength: 15,
+      //columns: this._testColumns,
+      //data: this._testData
     };
+
+    this.model = props.model;
+    this.title = props.title ? props.title : this.model;
   }
 
   componentDidMount() {
     this.loadData();
   }
 
-  loadData() {
+  loadData(page: number = 1) {
+    this.setState({
+      page: page
+    });
+
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Table/OnLoadData', {
       params: {
-        page: this.state.page,
-        model: this.state.model
+        page: page,
+        pageLength: this.state.pageLength,
+        model: this.model
       }
     }).then(({data}: any) => {
       this.setState({
@@ -98,23 +112,48 @@ export default class Table extends Component {
     });
   }
 
+  add() {
+    ModalPageLarge({url: '/sandbox/react/Form'}, this.loadData);
+  }
+
   render() {
-    if (!this.state.data) {
+    if (!this.state.data || !this.state.columns) {
       return <small>Loading</small>;
     }
 
     return (
-      <div style={{ height: 400, width: '100%' }}>
+      <div className="card">
+        <div className="card-header">
+          <div className="row">
+            <div className="col-lg-12">
+              <h3 className="card-title">{this.title}</h3>
+            </div>
+            <div className="col-lg-12">
+              <button
+                className="btn btn-primary"
+                onClick={() => this.add()} 
+              >Add</button>
+            </div>
+          </div>
+        </div>
+        
         <DataGrid
           rows={this.state.data.data}
-          columns={this.columns}
+          columns={this.state.columns}
           initialState={{
             pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
+              paginationModel: {
+                page: (this.state.page - 1), 
+                pageSize: this.state.pageLength
+              },
             },
           }}
-          pageSizeOptions={[5, 10]}
-          checkboxSelection
+          paginationMode="server"
+          onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
+          rowCount={this.state.data.total} 
+          //loading={false}
+          //pageSizeOptions={[5, 10]}
+          //checkboxSelection
         />
       </div>
     );

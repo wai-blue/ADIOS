@@ -18,12 +18,31 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
   public function renderJson() { 
     try {
+      $params = $this->params;
+      
+      $pageLength = (int) $params['pageLength'] ?? 15;
+
       $tmpModel = $this->adios->getModel($this->params['model']);
 
-      $data = $tmpModel->paginate(5);
+      $tmpColumns = $tmpModel->columns();
+
+      $columns = [];
+      foreach ($tmpColumns as $columnName => $column) {
+        $columns[] = [
+          'field' => $columnName,
+          'headerName' => $column['title']
+        ];
+      }
+
+      // Laravel pagination
+      $data = $tmpModel->paginate(
+        $pageLength, ['*'], 
+        'page', 
+        $this->params['page']
+      );
 
       return [
-        'columns' => $tmpModel->columns(),
+        'columns' => $columns, 
         'data' => $data
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
