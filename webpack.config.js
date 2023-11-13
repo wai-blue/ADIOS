@@ -16,27 +16,34 @@ const generateEntries = () => {
   return entry;
 };
 
-module.exports = {
-  //entry: generateEntries(),
-  entry: './src/index.tsx',
-  output: {
-    path: path.resolve(__dirname, 'src/Assets/Js'),
-    filename: 'react-bundle.js',
-  },
-  module: {
-    rules: [
-      {
-	test: /\.(js|mjs|jsx|ts|tsx)$/,
-        exclude: /node_modules/,
-        use: 'babel-loader',
-      },
-      {
-        test: /\.(scss|css)$/,
-        use: ['style-loader', 'css-loader', 'sass-loader'],
-      }
-    ],
-  },
-  resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx', '.scss', '.css'],	
-  }
+module.exports = (env, arg) => {
+  // trying render just one specific component
+  // npm run build:component -- component=Table
+  let entry = arg.env.component != undefined 
+    ? './src/Components/' + arg.env.component + '.tsx': './src/index.tsx'; 
+
+  return {
+    //entry: generateEntries(),
+    entry: entry, 
+    output: {
+      path: path.resolve(__dirname, 'src/Assets/Js'),
+      filename: 'react-bundle.js',
+    },
+    module: {
+      rules: [
+        {
+          test: /\.(js|mjs|jsx|ts|tsx)$/,
+          exclude: /node_modules/,
+          use: 'babel-loader',
+        },
+        {
+          test: /\.(scss|css)$/,
+          use: ['style-loader', 'css-loader', 'sass-loader'],
+        }
+      ],
+    },
+    resolve: {
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.scss', '.css'],	
+    }
+  }  
 };

@@ -37,6 +37,7 @@ interface TableState {
 
 export default class Table extends Component {
   state: TableState;
+
   model: string;
   title: string;
 
@@ -80,6 +81,7 @@ export default class Table extends Component {
       data: undefined,
       page: 1,
       pageLength: 15,
+
       //columns: this._testColumns,
       //data: this._testData
     };
@@ -113,7 +115,7 @@ export default class Table extends Component {
   }
 
   add() {
-    ModalPageLarge({url: '/sandbox/react/Form'}, this.loadData);
+    ModalPageLarge({url: '/sandbox/react/FormAdd'}, () => this.loadData);
   }
 
   render() {

@@ -60,27 +60,11 @@ interface FormInputs {
 }
 
 export default class Form extends Component<FormProps> {
-  model: String;
   state: FormState;
+
+  model: String;
   layout: string;
-
-  columns: FormColumns = { 
-    "name": {
-      "title": "Name",
-      "type": "string",
-      "length": 150,
-      "required": true
-    },
-    "is_active":{
-      "title": "Is active?",
-      "type": "boolean"
-    },
-    "text":{
-      "title": "Text",
-      "type": "editor"
-    }
-  };
-
+  columns: FormColumns = {}; 
   inputs: FormInputs = {};
   
   constructor(props: FormProps) {
@@ -92,7 +76,9 @@ export default class Form extends Component<FormProps> {
       isEdit: false,
       emptyRequiredInputs: {},
       inputs: {},
-      columns: undefined 
+      columns: undefined,
+
+      //columns: this._testColumns
     };
 
 
@@ -163,7 +149,7 @@ export default class Form extends Component<FormProps> {
     let notyf = new Notyf();
 
     //@ts-ignore
-    axios.post(_APP_URL + '/Components/Form/OnCreate', {
+    axios.post(_APP_URL + '/Components/Form/OnSave', {
       model: this.state.model,
       inputs: this.state.inputs 
     }).then((res: any) => {
