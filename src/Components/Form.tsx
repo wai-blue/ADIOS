@@ -225,6 +225,52 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
+  * Render tab
+  */
+  _renderTab(): JSX.Element {
+    if (this.props.content?.tabs) {
+      let tabs: any = Object.keys(this.props.content.tabs).map((tabName: string) => {
+        return this._renderTabContent(this.props.content.tabs[tabName]);
+      })
+
+      return tabs;
+    } else {
+      return this._renderTabContent(this.props.content);
+    } 
+  }
+
+  /*
+  * Render tab content
+  */
+  _renderTabContent(content: any) {
+    return (
+      <div 
+        style={{
+          display: 'grid', 
+          gridTemplateRows: 'auto', 
+          gridTemplateAreas: this.layout, 
+          gridGap: '10px'
+        }}
+      >
+        {this.props.content != null ? 
+          Object.keys(content).map((contentArea: string) => {
+            return this._renderContentItem(contentArea, content[contentArea]); 
+          })
+          : this.state.columns != null ? (
+            Object.keys(this.state.columns).map((columnName: string) => {
+              if (
+                this.state.columns == null 
+                  || this.state.columns[columnName] == null
+              ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
+
+              return this._renderInput(columnName)
+            })
+          ) : ''}
+      </div>
+    );
+  }
+
+  /**
   * Render content item 
   */
   _renderContentItem(contentItemArea: string, contentItemParams: undefined|string|Object): JSX.Element {
@@ -314,17 +360,17 @@ export default class Form extends Component<FormProps> {
         className="row g-1 align-items-center"
         key={columnName}
       >
-        <div className="col-lg-3">
-          <label className="col-form-label">
+        <div className="col-lg-4">
+          <label className="col-form-label text-dark">
             {this.state.columns[columnName].title}
-            {this.state.columns[columnName].required == true ? <b className="text-danger">*</b> : ""}
+            {this.state.columns[columnName].required == true ? <b className="ms-1 text-danger">*</b> : ""}
           </label>
         </div>
-        <div className="col-lg-9">
+        <div className="col-lg-8">
           {inputToRender}
         </div>
         <div className="col-auto">
-          <span id="passwordHelpInline" className="form-text">
+          <span className="form-text">
             {this.state.columns[columnName].description}
           </span>
         </div>
@@ -339,7 +385,8 @@ export default class Form extends Component<FormProps> {
           <div className="card-header">
             <div className="row">
               <div className="col-lg-12">
-                <h3 className="card-title">{ this.props.title ? this.props.title : this.state.model } -  Nový záznam</h3>
+                <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.state.model } -  
+                <small className="text-secondary"> Nový záznam</small></h3>
               </div>
               <div className="col-lg-12 text-end">
                 {this.state.isEdit ? <button 
@@ -348,16 +395,16 @@ export default class Form extends Component<FormProps> {
                 ><i className="fas fa-trash"></i> Vymazať</button> : ''}
               </div>
 
-              {this.props.content?.cards ? (
+              {this.props.content?.tabs ? (
                 <div className="card text-center bg-light mt-2"> 
                   <ul className="nav nav-tabs card-header-tabs">
-                    {Object.keys(this.props.content.cards).map((cardKey: string) => {
+                    {Object.keys(this.props.content?.tabs).map((tabName: string) => {
                       return (
                         <li className="nav-item"> 
                           <a 
                             className="nav-link active" 
                             href="https://practice.geeksforgeeks.org/courses"
-                          >{ this.props.content?.cards[cardKey].title}</a> 
+                          >{ tabName }</a> 
                         </li>
                       );
                     })}
@@ -368,29 +415,7 @@ export default class Form extends Component<FormProps> {
           </div>
 
           <div className="card-body">
-            <div 
-              style={{
-                display: 'grid', 
-                gridTemplateRows: 'auto', 
-                gridTemplateAreas: this.layout, 
-                gridGap: '10px'
-              }}
-            >
-              {this.props.content != null ? 
-                Object.keys(this.props.content).map((contentArea: string) => {
-                  return this._renderContentItem(contentArea, this.props.content[contentArea]); 
-                })
-                : this.state.columns != null ? (
-                  Object.keys(this.state.columns).map((columnName: string) => {
-                    if (
-                      this.state.columns == null 
-                        || this.state.columns[columnName] == null
-                    ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
-
-                    return this._renderInput(columnName)
-                  })
-                ) : ''}
-            </div>
+            {this._renderTab()}
 
             {this.state.isEdit == true ? (
               <button 
