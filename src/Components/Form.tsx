@@ -241,7 +241,12 @@ export default class Form extends Component<FormProps> {
     });
   }
 
+  /*
+  * Initialize form tabs is are defined
+  */
   initTabs() {
+    if (this.props.content?.tabs == undefined) return;
+
     let tabs: any = {};
     let firstIteration: boolean = true;
 
@@ -264,8 +269,7 @@ export default class Form extends Component<FormProps> {
   _renderTab(): JSX.Element {
     if (this.props.content?.tabs) {
       let tabs: any = Object.keys(this.props.content.tabs).map((tabName: string) => {
-        //let kebabCaseString = inputString.toLowerCase().replace(/\s+/g, '-');
-        return this._renderTabContent(tabName, this.props.content.tabs[tabName]);
+        return this._renderTabContent(tabName, this.props.content?.tabs[tabName]);
       })
 
       return tabs;
@@ -276,12 +280,13 @@ export default class Form extends Component<FormProps> {
 
   /*
   * Render tab content
+  * If tab is not set, use default tabName else use activated one
   */
   _renderTabContent(tabName: string, content: any) {
-    console.log(this.state.tabs);
-    if (this.state.tabs == undefined) return <b>xxx</b>;
-    console.log(this.state.tabs[tabName]);
-    if (tabName == "default" || this.state.tabs[tabName]['active']) {
+    if (
+      tabName == "default" 
+      || (this.state.tabs && this.state.tabs[tabName]['active'])
+    ) {
       return (
         <div 
           style={{
@@ -299,7 +304,7 @@ export default class Form extends Component<FormProps> {
               Object.keys(this.state.columns).map((columnName: string) => {
                 if (
                   this.state.columns == null 
-                    || this.state.columns[columnName] == null
+                  || this.state.columns[columnName] == null
                 ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
 
                 return this._renderInput(columnName)
@@ -308,26 +313,32 @@ export default class Form extends Component<FormProps> {
         </div>
       );
     } else {
-      return <b>xx</b>
+      return <></>;
     }
   }
 
   /**
   * Render content item 
   */
-  _renderContentItem(contentItemArea: string, contentItemParams: undefined|string|Object): JSX.Element {
+  _renderContentItem(contentItemArea: string, contentItemParams: undefined|string|Object|Array<string>): JSX.Element {
     if (contentItemParams == undefined) return <b style={{color: 'red'}}>Content item params are not defined</b>;
 
     let contentItemKeys = Object.keys(contentItemParams);
     if (contentItemKeys.length == 0) return <b style={{color: 'red'}}>Bad content item definition</b>;
 
-    let contentItemName = contentItemKeys[0];
+    let contentItemName = contentItemArea == "inputs" 
+      ? contentItemArea : contentItemKeys[0];
 
     let contentItem: JSX.Element;
 
     switch (contentItemName) {
       case 'input': 
         contentItem = this._renderInput(contentItemParams['input'] as string);
+      break;
+      case 'inputs':
+        contentItem = (contentItemParams as Array<string>).map((input: string) => {
+          return this._renderInput(input)
+        });
       break;
       case 'html': 
         contentItem = (<div dangerouslySetInnerHTML={{ __html: contentItemParams['html'] }} />);
@@ -423,7 +434,7 @@ export default class Form extends Component<FormProps> {
   render() {
     return (
       <div className="m-3">
-        <div className="card w-100">
+        <div className="card w-100 overflow-auto">
           <div className="card-header">
             <div className="row">
               <div className="col-lg-12">

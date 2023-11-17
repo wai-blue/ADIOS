@@ -4,8 +4,35 @@ import axios from "axios";
 import { ModalPageLarge } from "./Modal";
 
 interface TableProps {
+  // Required
+  model: string,
+  
+  // Additional
   title?: string,
-  model: string
+  showTitle?: boolean,
+  showPaging?: boolean,
+  showControls?: boolean,
+  showAddButton?: boolean,
+  showPrintButton?: boolean,
+  showSearchButton?: boolean,
+  showExportCsvButton?: boolean,
+  showImportCsvButton?: boolean,
+  showFulltextSearch?: boolean
+}
+
+interface TableParams {
+  model: string,
+  title: string,
+  showTitle: boolean,
+  showPaging: boolean,
+  showControls: boolean,
+  showAddButton: boolean,
+  showPrintButton: boolean,
+  showSearchButton: boolean,
+  showExportCsvButton: boolean,
+  showImportCsvButton: boolean,
+  showFulltextSearch: boolean,
+  showCardOverlay: boolean
 }
 
 interface TableColumns {
@@ -37,9 +64,20 @@ interface TableState {
 
 export default class Table extends Component {
   state: TableState;
-
-  model: string;
-  title: string;
+  params: TableParams = {
+    model: "" ,
+    title: "",
+    showTitle:  true,
+    showPaging: true,
+    showControls: true,
+    showAddButton: true,
+    showPrintButton: true,
+    showSearchButton: true,
+    showExportCsvButton: true,
+    showImportCsvButton: false,
+    showFulltextSearch: true,
+    showCardOverlay: true
+  };
 
   _testColumns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
@@ -55,8 +93,7 @@ export default class Table extends Component {
       field: 'fullName',
       headerName: 'Full name',
       description: 'This column has a value getter and is not sortable.',
-      sortable: false,
-      width: 160,
+      sortable: false, width: 160,
       valueGetter: (params: GridValueGetterParams) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
     },
   ];
@@ -86,8 +123,8 @@ export default class Table extends Component {
       //data: this._testData
     };
 
-    this.model = props.model;
-    this.title = props.title ? props.title : this.model;
+    this.params = {...this.params, ...this.props};
+    this.params.title = props.title ? props.title : this.params.model;
   }
 
   componentDidMount() {
@@ -104,7 +141,7 @@ export default class Table extends Component {
       params: {
         page: page,
         pageLength: this.state.pageLength,
-        model: this.model
+        model: this.params.model
       }
     }).then(({data}: any) => {
       this.setState({
@@ -127,9 +164,13 @@ export default class Table extends Component {
       <div className="card">
         <div className="card-header">
           <div className="row">
-            <div className="col-lg-12">
-              <h3 className="card-title">{this.title}</h3>
-            </div>
+
+            {this.params.showTitle ? (
+              <div className="col-lg-12">
+                <h3 className="card-title">{this.params.title}</h3>
+              </div>
+            ) : ''}
+
             <div className="col-lg-12">
               <button
                 className="btn btn-primary"
