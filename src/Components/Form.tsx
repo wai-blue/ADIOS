@@ -38,7 +38,8 @@ interface FormState {
   columns?: FormColumns,
   inputs?: FormInputs,
   isEdit: boolean,
-  emptyRequiredInputs: Object
+  emptyRequiredInputs: Object,
+  tabs?: any 
 }
 
 export interface FormColumnParams {
@@ -77,6 +78,7 @@ export default class Form extends Component<FormProps> {
       emptyRequiredInputs: {},
       inputs: {},
       columns: undefined,
+      tabs: undefined 
 
       //columns: this._testColumns
     };
@@ -120,6 +122,7 @@ export default class Form extends Component<FormProps> {
   componentDidMount() {
     if (this.props.id) this.state.isEdit = true;
 
+    this.initTabs();
     this.loadData();
   }
 
@@ -224,50 +227,89 @@ export default class Form extends Component<FormProps> {
     });
   }
 
+  changeTab(changeTabName: string) {
+    let tabs: any = {};
+
+    Object.keys(this.state.tabs).map((tabName: string) => {
+      tabs[tabName] = {
+        active: tabName == changeTabName
+      };
+    });
+
+    this.setState({
+      tabs: tabs
+    });
+  }
+
+  initTabs() {
+    let tabs: any = {};
+    let firstIteration: boolean = true;
+
+    Object.keys(this.props.content?.tabs).map((tabName: string) => {
+      tabs[tabName] = {
+        active: firstIteration 
+      };
+
+      firstIteration = false;
+    });
+
+    this.setState({
+      tabs: tabs
+    });  
+  }
+
   /**
   * Render tab
   */
   _renderTab(): JSX.Element {
     if (this.props.content?.tabs) {
       let tabs: any = Object.keys(this.props.content.tabs).map((tabName: string) => {
-        return this._renderTabContent(this.props.content.tabs[tabName]);
+        //let kebabCaseString = inputString.toLowerCase().replace(/\s+/g, '-');
+        return this._renderTabContent(tabName, this.props.content.tabs[tabName]);
       })
 
       return tabs;
     } else {
-      return this._renderTabContent(this.props.content);
+      return this._renderTabContent("default", this.props.content);
     } 
   }
 
   /*
   * Render tab content
   */
-  _renderTabContent(content: any) {
-    return (
-      <div 
-        style={{
-          display: 'grid', 
-          gridTemplateRows: 'auto', 
-          gridTemplateAreas: this.layout, 
-          gridGap: '10px'
-        }}
-      >
-        {this.props.content != null ? 
-          Object.keys(content).map((contentArea: string) => {
-            return this._renderContentItem(contentArea, content[contentArea]); 
-          })
-          : this.state.columns != null ? (
-            Object.keys(this.state.columns).map((columnName: string) => {
-              if (
-                this.state.columns == null 
-                  || this.state.columns[columnName] == null
-              ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
-
-              return this._renderInput(columnName)
+  _renderTabContent(tabName: string, content: any) {
+    console.log(this.state.tabs);
+    if (this.state.tabs == undefined) return <b>xxx</b>;
+    console.log(this.state.tabs[tabName]);
+    if (tabName == "default" || this.state.tabs[tabName]['active']) {
+      return (
+        <div 
+          style={{
+            display: 'grid', 
+            gridTemplateRows: 'auto', 
+            gridTemplateAreas: this.layout, 
+            gridGap: '10px'
+          }}
+        >
+          {this.props.content != null ? 
+            Object.keys(content).map((contentArea: string) => {
+              return this._renderContentItem(contentArea, content[contentArea]); 
             })
-          ) : ''}
-      </div>
-    );
+            : this.state.columns != null ? (
+              Object.keys(this.state.columns).map((columnName: string) => {
+                if (
+                  this.state.columns == null 
+                    || this.state.columns[columnName] == null
+                ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
+
+                return this._renderInput(columnName)
+              })
+            ) : ''}
+        </div>
+      );
+    } else {
+      return <b>xx</b>
+    }
   }
 
   /**
@@ -395,21 +437,19 @@ export default class Form extends Component<FormProps> {
                 ><i className="fas fa-trash"></i> Vymazať</button> : ''}
               </div>
 
-              {this.props.content?.tabs ? (
-                <div className="card text-center bg-light mt-2"> 
-                  <ul className="nav nav-tabs card-header-tabs">
-                    {Object.keys(this.props.content?.tabs).map((tabName: string) => {
-                      return (
-                        <li className="nav-item"> 
-                          <a 
-                            className="nav-link active" 
-                            href="https://practice.geeksforgeeks.org/courses"
-                          >{ tabName }</a> 
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
+              {this.state.tabs != undefined ? (
+                <ul className="nav nav-tabs card-header-tabs mt-3">
+                  {Object.keys(this.state.tabs).map((tabName: string) => {
+                    return (
+                      <li className="nav-item"> 
+                        <button 
+                          className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
+                          onClick={() => this.changeTab(tabName)}
+                        >{ tabName }</button> 
+                      </li>
+                    );
+                  })}
+                </ul>
               ) : ''}
             </div>
           </div>
