@@ -32,6 +32,15 @@ interface FormProps {
   layout?: Array<Array<string>>
 }
 
+/*interface FormParams {
+  model: string,
+  id: number,
+  title: string,
+  readonly: boolean,
+  content: Content,
+  layout: Array<Array<string>>
+}*/
+
 interface FormState {
   model: string,
   content?: Object,
