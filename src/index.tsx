@@ -53,9 +53,9 @@ const renderComponent = (component: string) => {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+//document.addEventListener('DOMContentLoaded', () => {
   initializeComponents.map(item => renderComponent(item))
-});
+//});
 
 function isValidJSON(jsonString: string) {
   try {
@@ -76,4 +76,3 @@ declare global {
 }
 
 window.getComponent = getComponent;
-
