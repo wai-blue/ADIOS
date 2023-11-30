@@ -21,25 +21,21 @@ class OnSave extends \ADIOS\Core\Controller {
       $params = $this->getRequestParams();
 
       $tmpModel = $this->adios->getModel($params['model']);
-
-      $emptyRequiredInputs = $tmpModel->getEmptyRequiredInputs(
-        $params['inputs'], 
-        $tmpModel->getRequiredColumns());
-    
-      if (!empty($emptyRequiredInputs)) throw new \ADIOS\Core\Exceptions\GeneralException();
-
+      
       $tmpModel->recordSave($params['inputs']);
 
       return [
         'status' => 'success'
       ];
-    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
+    } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
       http_response_code(422);
+
+      $invalidInputs = json_decode($e->getMessage());
 
       return [
         'status' => 'error',
-        'message' => 'Fill in all required inputs',
-        'emptyRequiredInputs' => $emptyRequiredInputs 
+        'message' => 'Invalid inputs',
+        'invalidInputs' => $invalidInputs
       ];
     } catch (\Exception $e) {
       http_response_code(400);
