@@ -17,7 +17,7 @@ export default class Text extends Component<BooleanInputProps> {
           type="checkbox" 
           value={this.props.parentForm.state.inputs[this.props.columnName]}
           onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
-          className={`form-check-input ${this.props.parentForm.state.emptyRequiredInputs[this.props.columnName] ? 'is-invalid' : ''}`}
+          className={`form-check-input ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
           disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
         />
       </div>

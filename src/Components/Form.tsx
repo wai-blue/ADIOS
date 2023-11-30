@@ -47,7 +47,7 @@ interface FormState {
   columns?: FormColumns,
   inputs?: FormInputs,
   isEdit: boolean,
-  emptyRequiredInputs: Object,
+  invalidInputs: Object,
   tabs?: any 
 }
 
@@ -84,7 +84,7 @@ export default class Form extends Component<FormProps> {
       model: props.model,
       content: props.content,
       isEdit: false,
-      emptyRequiredInputs: {},
+      invalidInputs: {},
       inputs: {},
       columns: undefined,
       tabs: undefined 
@@ -172,7 +172,7 @@ export default class Form extends Component<FormProps> {
 
       if (res.response.status == 422) {
         this.setState({
-          emptyRequiredInputs: res.response.data.emptyRequiredInputs 
+          invalidInputs: res.response.data.invalidInputs 
         });
       }
     });
@@ -193,7 +193,7 @@ export default class Form extends Component<FormProps> {
 
       if (res.response.status == 422) {
         this.setState({
-          emptyRequiredInputs: res.response.data.emptyRequiredInputs 
+          invalidInputs: res.response.data.invalidInputs 
         });
       }
     });
@@ -400,7 +400,7 @@ export default class Form extends Component<FormProps> {
         break;
       case 'editor':
         inputToRender = (
-          <div className={'h-100 form-control ' + `${this.state.emptyRequiredInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
+          <div className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
             <ReactQuill 
               theme="snow" 
               value={this.inputs[columnName] as Value} 
