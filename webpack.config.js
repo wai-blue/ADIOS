@@ -1,9 +1,8 @@
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 const fs = require('fs');
 
 const generateEntries = () => {
-  const viewsPath = path.join(__dirname, 'src', 'Core/Views/React');
+  const viewsPath = path.join(__dirname, 'src/Components');
   const entry = {};
 
   fs.readdirSync(viewsPath).forEach((file) => {
@@ -26,8 +25,17 @@ module.exports = (env, arg) => {
     //entry: generateEntries(),
     entry: entry, 
     output: {
-      path: path.resolve(__dirname, 'src/Assets/Js'),
-      filename: 'react-bundle.js',
+      path: path.resolve(__dirname, 'src/Assets/Js/React'),
+      filename: '[fullhash].js',
+      clean: true
+      //filename: 'react-bundle.js'
+      //path: path.resolve(__dirname, 'src/Assets/Js/Components'),
+     //filename: '[name].js',
+     //libraryTarget: 'umd',
+     //library: '[name]'
+    },
+    optimization: {
+      minimize: false, // Disable minification
     },
     module: {
       rules: [
@@ -43,7 +51,7 @@ module.exports = (env, arg) => {
       ],
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.scss', '.css'],	
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.scss', '.css'],
     }
-  }  
+  }
 };

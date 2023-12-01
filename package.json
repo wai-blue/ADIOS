@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "npx babel --watch src/Components --out-dir .",
     "build": "npx webpack --mode development",
+    "build:prod": "npx webpack --mode production",
     "build:component": "npx webpack --mode development --env"
   },
   "browser": {
@@ -37,11 +39,14 @@
     "@types/react-dom": "^18.2.14",
     "@types/sweetalert": "^2.0.4",
     "axios": "^1.5.1",
+    "babel-cli": "^6.26.0",
+    "babel-preset-react-app": "^3.1.2",
     "notyf": "^3.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-quill": "^2.0.0",
     "react-select": "^5.7.7",
+    "react-tagsinput": "^3.20.3",
     "sweetalert2": "^11.9.0",
     "ts-loader": "^9.5.0",
     "typescript": "^5.2.2"

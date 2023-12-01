@@ -5,8 +5,15 @@ import React from "react";
  * Components
  */
 import Form from "./Components/Form";
-import Example from "./Components/Example";
 import Table from "./Components/Table";
+import FloatingModal from "./Components/FloatingModal";
+
+/**
+* Examples
+*/
+
+import Example from "./Components/Example";
+import ExampleModelHover from "./Components/Examples/ModelHover";
 
 /**
 * Initialize ADIOS components
@@ -14,7 +21,11 @@ import Table from "./Components/Table";
 const initializeComponents = [
   'form',
   'table',
-  'example'
+  'floating-modal',
+  
+  // Examples
+  'example',
+  'example-model-hover'
 ];
 
 /**
@@ -25,7 +36,11 @@ const getComponent = (componentName: string, params: Object) => {
     //@ts-ignore
     case 'form': return <Form {...params} />;
     case 'table': return <Table {...params} />;
+    case 'floating-modal': return <FloatingModal>xxx</FloatingModal>;
+
+    // Examples
     case 'example': return <Example {...params} />;
+    case 'example-model-hover': return <ExampleModelHover {...params} />;
     default: return <b style={{color: 'red'}}>Component {componentName} doesn't exist</b>; 
   }
 };
@@ -53,9 +68,9 @@ const renderComponent = (component: string) => {
   });
 }
 
-//document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
   initializeComponents.map(item => renderComponent(item))
-//});
+});
 
 function isValidJSON(jsonString: string) {
   try {
