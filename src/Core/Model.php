@@ -1272,32 +1272,35 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function recordValidate($data)
   {
+    $invalidInputs = [];
+
     foreach ($this->columns() as $column => $colDefinition) {
-     if (!$this->columnValidate($column, $data[$column])) {
-        throw new \ADIOS\Core\Exceptions\RecordSaveException(
-          $this->adios->translate(
-            "`{{ colTitle }}` contains invalid value.",
-            [ 'colTitle' => $colDefinition['title'] ]
-          )
-        );
-      } else if (
+      if (
         $colDefinition['required']
-        && !$this->columnValidate($column, $data[$column])
+        && ($data[$column] == NULL || $data[$column] == '')
       ) {
-        throw new \ADIOS\Core\Exceptions\RecordSaveException(
-          $this->adios->translate(
-            "`{{ colTitle }}` is required.",
-            [ 'colTitle' => $colDefinition['title'] ]
-          )
+        $invalidInputs[$column] = $this->adios->translate(
+          "`{{ colTitle }}` is required.",
+          [ 'colTitle' => $colDefinition['title'] ]
+        );
+      } else if (!$this->columnValidate($column, $data[$column])) {
+        $invalidInputs[$column] = $this->adios->translate(
+          "`{{ colTitle }}` contains invalid value.",
+          [ 'colTitle' => $colDefinition['title'] ]
         );
       }
+    }
 
+    if (!empty($invalidInputs)) {
+      throw new \ADIOS\Core\Exceptions\RecordSaveException(
+        json_encode($invalidInputs)
+      );
     }
 
     return $this->adios->dispatchEventToPlugins("onModelAfterRecordValidate", [
       "model" => $this,
-      "data" => $data,
-    ])["params"];
+      "data" => $data
+    ])['params'];
   }
   
   /**
@@ -1318,106 +1321,103 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function recordSave(array $data)
   {
-    try {
-      $id = (int) $data['id'];
+    $id = (int) $data['id'];
 
-      $this->recordSaveOriginalData = $data;
+    $this->recordSaveOriginalData = $data;
 
-      // extract data for this model and data for lookup models
+    // extract data for this model and data for lookup models
 
-      $dataForThisModel = [];
-      $dataForLookupModels = [];
-      foreach ($data as $key => $value) {
-        if (strpos($key, ":LOOKUP:") === FALSE) {
-          $dataForThisModel[$key] = $value;
-        } else {
-          [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
-          $dataForLookupModels[$columnName][$lookupColumnName] = $value;
-        }
-      }
-
-      $this->recordValidate($dataForThisModel);
-
-      if ($id <= 0) {
-        $dataForThisModel = $this->onBeforeInsert($dataForThisModel);
+    $dataForThisModel = [];
+    $dataForLookupModels = [];
+    foreach ($data as $key => $value) {
+      if (strpos($key, ":LOOKUP:") === FALSE) {
+        $dataForThisModel[$key] = $value;
       } else {
-        $dataForThisModel = $this->onBeforeUpdate($dataForThisModel);
+        [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
+        $dataForLookupModels[$columnName][$lookupColumnName] = $value;
       }
-
-      $dataForThisModel = $this->onBeforeSave($dataForThisModel);
-
-      if ($id <= 0) {
-        $returnValue = $this->insertRow($dataForThisModel);
-        $data['id'] = (int) $returnValue;
-      } else {
-        $returnValue = $this->updateRow($dataForThisModel, $id);
-      }
-
-      // save data for lookup models first (and create records, if necessary)
-      foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
-        $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? NULL;
-
-        if ($lookupColumnName == NULL) continue;
-
-        $lookupModel = $this->adios->getModel($lookupModelName);
-        $lookupData = $this->___getInsertedIdForLookupColumn($lookupModel->columns(), $lookupData, $data['id']);
-        $lookupModel->recordValidate($lookupData);
-
-        if ($data[$lookupColumnName] <= 0) {
-          $lookupData = $lookupModel->onBeforeInsert($lookupData);
-        } else {
-          $lookupData = $lookupModel->onBeforeUpdate($lookupData);
-        }
-
-        $lookupData = $this->onBeforeSave($lookupData);
-
-        if ($data[$lookupColumnName] <= 0) {
-          $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
-        } else {
-          $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
-        }
-      }
-
-      // save cross-table-alignments
-      foreach ($this->junctions as $jName => $jParams) {
-        if (!isset($data[$jName])) continue;
-
-        $assignments = @json_decode($data[$jName], TRUE);
-
-        if (is_array($assignments)) {
-          $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
-
-          foreach ($assignments as $assignment) {
-            $this->adios->db->query("
-              insert into `{$junctionModel->getFullTableSqlName()}` (
-                `{$jParams['masterKeyColumn']}`,
-                `{$jParams['optionKeyColumn']}`
-              ) values (
-                {$id},
-                '" . $this->adios->db->escape($assignment) . "'
-              )
-              on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
-            ");
-          }
-
-          $junctionModel
-            ->where($jParams['masterKeyColumn'], $id)
-            ->whereNotIn($jParams['optionKeyColumn'], $assignments)
-            ->delete();
-        }
-      }
-
-      if ($id <= 0) {
-        $returnValue = $this->onAfterInsert($data, $returnValue);
-      } else {
-        $returnValue = $this->onAfterUpdate($data, $returnValue);
-      }
-
-      $returnValue = $this->onAfterSave($data, $returnValue);
-      return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
-      return $this->adios->renderHtmlFatal($e->getMessage());
     }
+
+    $this->recordValidate($dataForThisModel);
+
+    if ($id <= 0) {
+      $dataForThisModel = $this->onBeforeInsert($dataForThisModel);
+    } else {
+      $dataForThisModel = $this->onBeforeUpdate($dataForThisModel);
+    }
+
+    $dataForThisModel = $this->onBeforeSave($dataForThisModel);
+
+    if ($id <= 0) {
+      $returnValue = $this->insertRow($dataForThisModel);
+      $data['id'] = (int) $returnValue;
+    } else {
+      $returnValue = $this->updateRow($dataForThisModel, $id);
+    }
+
+    // save data for lookup models first (and create records, if necessary)
+    foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
+      $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? NULL;
+
+      if ($lookupColumnName == NULL) continue;
+
+      $lookupModel = $this->adios->getModel($lookupModelName);
+      $lookupData = $this->___getInsertedIdForLookupColumn($lookupModel->columns(), $lookupData, $data['id']);
+      $lookupModel->recordValidate($lookupData);
+
+      if ($data[$lookupColumnName] <= 0) {
+        $lookupData = $lookupModel->onBeforeInsert($lookupData);
+      } else {
+        $lookupData = $lookupModel->onBeforeUpdate($lookupData);
+      }
+
+      $lookupData = $this->onBeforeSave($lookupData);
+
+      if ($data[$lookupColumnName] <= 0) {
+        $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
+      } else {
+        $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
+      }
+    }
+
+    // save cross-table-alignments
+    foreach ($this->junctions as $jName => $jParams) {
+      if (!isset($data[$jName])) continue;
+
+      $assignments = @json_decode($data[$jName], TRUE);
+
+      if (is_array($assignments)) {
+        $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
+
+        foreach ($assignments as $assignment) {
+          $this->adios->db->query("
+            insert into `{$junctionModel->getFullTableSqlName()}` (
+              `{$jParams['masterKeyColumn']}`,
+              `{$jParams['optionKeyColumn']}`
+            ) values (
+              {$id},
+              '" . $this->adios->db->escape($assignment) . "'
+            )
+            on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
+          ");
+        }
+
+        $junctionModel
+          ->where($jParams['masterKeyColumn'], $id)
+          ->whereNotIn($jParams['optionKeyColumn'], $assignments)
+          ->delete();
+      }
+    }
+
+    if ($id <= 0) {
+      $returnValue = $this->onAfterInsert($data, $returnValue);
+    } else {
+      $returnValue = $this->onAfterUpdate($data, $returnValue);
+    }
+
+    $returnValue = $this->onAfterSave($data, $returnValue);
+
+    return $returnValue;
   }
 
   public function recordDelete(int $id)
@@ -1811,29 +1811,5 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $recordInfo['updated_at']['value'] = date('Y-m-d H:i:s');
 
     return $recordInfo;
-  }
-
-  public function getRequiredColumns(): array {
-    $requiredInputs = [];
-
-    foreach ($this->columns() as $columnName => $column) {
-      if (isset($column['required']) && $column['required'] == true) {
-        $requiredInputs[] = $columnName;
-      }
-    }
-
-    return $requiredInputs;
-  }
-
-  public function getEmptyRequiredInputs(array $inputs, array $requiredInputs): array {
-    $emptyRequiredInputs = [];
-
-    foreach ($requiredInputs as $requireInput) {
-      if ($inputs[$requireInput] == NULL || $inputs[$requireInput] == '') {
-        $emptyRequiredInputs[$requireInput] = true;
-      }
-    }
-
-    return $emptyRequiredInputs;
   }
 }

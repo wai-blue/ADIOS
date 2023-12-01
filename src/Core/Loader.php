@@ -2112,8 +2112,7 @@ class Loader
       dirname(__FILE__)."/../Assets/Js/jquery.quicksearch.js",
       dirname(__FILE__)."/../Assets/Js/datatables.js",
       dirname(__FILE__)."/../Assets/Js/jeditable.js",
-      dirname(__FILE__)."/../Assets/Js/draggable.js",
-      dirname(__FILE__)."/../Assets/Js/react-bundle.js"
+      dirname(__FILE__)."/../Assets/Js/draggable.js"
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
@@ -2134,8 +2133,17 @@ class Loader
       }
     }
 
+    // Load react bundle file
+    foreach (scandir(dirname(__FILE__).'/../Assets/Js/React') as $file) {
+      if ('.js' == substr($file, -3)) {
+        $jsFiles[] = dirname(__FILE__)."/../Assets/Js/React/{$file}";
+      }
+    }
+
+    //var_dump($jsFiles); exit;
+
     foreach ($jsFiles as $file) {
-      $js .= @file_get_contents($file)."\n";
+      $js .= @file_get_contents($file).";\n";
     }
 
     $js .= "
