@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import FloatingModal from "./FloatingModal";
 
 export default class Example extends Component {
   state = {
@@ -28,8 +29,13 @@ export default class Example extends Component {
         <button onClick={this.handleAgeChange}>
           Increment age
         </button>
+
         <p>Hello, {this.state.name}. You are {this.state.age}.</p>
-      </> 
+
+        <FloatingModal>
+          <h1>{this.state.age}</h1>
+        </FloatingModal>
+      </>
     );
   }
 }

@@ -23,7 +23,7 @@ interface ContentCard {
   title: string
 }
 
-interface FormProps {
+export interface FormProps {
   model: string,
   id?: number,
   title?: string,
@@ -80,6 +80,8 @@ export default class Form extends Component<FormProps> {
   constructor(props: FormProps) {
     super(props);
 
+    console.log(props);
+
     this.state = {
       model: props.model,
       content: props.content,
@@ -127,6 +129,15 @@ export default class Form extends Component<FormProps> {
   //    "type": "editor"
   //  }
   //};
+
+  /**
+   * This function trigger if something change, for Form id of record
+   */
+  componentDidUpdate(prevProps: any) {
+    if (prevProps.id !== this.props.id) {
+      this.loadData();
+    }
+  }
 
   componentDidMount() {
     if (this.props.id) this.state.isEdit = true;
