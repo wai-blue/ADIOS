@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import FloatingModal from "./../FloatingModal";
+import Modal from "./../Modal";
 
 export default class ModelHover extends Component {
   state = {
@@ -21,9 +21,9 @@ export default class ModelHover extends Component {
 
         <p>Counter: {this.state.counter}</p>
         
-        <FloatingModal>
+        <Modal>
           <h1>{this.state.counter}</h1>
-        </FloatingModal>
+        </Modal>
       </>
     );
   }

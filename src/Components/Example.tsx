@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import FloatingModal from "./FloatingModal";
+import Modal from "./Modal";
 
 export default class Example extends Component {
   state = {
@@ -32,9 +32,9 @@ export default class Example extends Component {
 
         <p>Hello, {this.state.name}. You are {this.state.age}.</p>
 
-        <FloatingModal>
+        <Modal>
           <h1>{this.state.age}</h1>
-        </FloatingModal>
+        </Modal>
       </>
     );
   }

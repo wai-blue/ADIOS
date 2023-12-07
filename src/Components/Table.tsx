@@ -3,10 +3,9 @@ import { DataGrid, GridColDef, GridValueGetterParams, skSK } from '@mui/x-data-g
 import axios from "axios";
 import { v4 } from 'uuid';
 
-import { ModalPageLarge } from "./Modal";
 import { FormProps } from "./Form";
 
-import FloatingModal from "./FloatingModal";
+import Modal, { ModalProps } from "./Modal";
 import Form from "./Form";
 
 import Loader from "./Loader";
@@ -14,8 +13,10 @@ import Loader from "./Loader";
 interface TableProps {
   // Required
   model: string,
-  
+
   // Additional
+  formModal?: ModalProps,
+
   title?: string,
   showTitle?: boolean,
   showPaging?: boolean,
@@ -30,6 +31,7 @@ interface TableProps {
 
 interface TableParams {
   uid: string,
+  modal: ModalProps,
   model: string,
   title: string,
   showTitle: boolean,
@@ -77,6 +79,10 @@ export default class Table extends Component {
 
   params: TableParams = {
     uid: v4(),
+
+    // Params for Modal with Form component
+    modal: {},
+
     model: "" ,
     title: "",
     showTitle:  true,
@@ -135,7 +141,7 @@ export default class Table extends Component {
       pageLength: 15,
       form: {
         model: this.params.model,
-        id: -1
+        id: undefined
       }
 
       //columns: this._testColumns,
@@ -167,8 +173,14 @@ export default class Table extends Component {
     });
   }
 
-  add() {
-    ModalPageLarge({url: '/sandbox/react/FormAdd'}, () => this.loadData);
+
+  onAddClick() {
+    //@ts-ignore
+    $('#adios-modal-' + this.params.uid).modal('toggle');
+
+    this.setState({
+      form: {...this.state.form, id: undefined }
+    })
   }
 
   onRowClick(id: number) {
@@ -189,14 +201,15 @@ export default class Table extends Component {
 
     return (
       <>
-        <FloatingModal 
+        <Modal 
           uid={this.params.uid}
+          {...this.params.modal}
         >
           <Form 
             model={this.params.model}
             id={this.state.form?.id}
           />
-        </FloatingModal>
+        </Modal>
 
         <div className="card">
           <div className="card-header">
@@ -211,7 +224,7 @@ export default class Table extends Component {
               <div className="col-lg-12">
                 <button
                   className="btn btn-primary"
-                  onClick={() => this.add()} 
+                  onClick={() => this.onAddClick()} 
                 >Add</button>
               </div>
             </div>

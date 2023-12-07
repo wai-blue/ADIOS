@@ -76,7 +76,7 @@ export default class Form extends Component<FormProps> {
   layout: string;
   columns: FormColumns = {}; 
   inputs: FormInputs = {};
-  
+
   constructor(props: FormProps) {
     super(props);
 
@@ -135,13 +135,13 @@ export default class Form extends Component<FormProps> {
    */
   componentDidUpdate(prevProps: any) {
     if (prevProps.id !== this.props.id) {
+      this.checkIfIsEdit();
       this.loadData();
     }
   }
 
   componentDidMount() {
-    if (this.props.id) this.state.isEdit = true;
-
+    this.checkIfIsEdit();
     this.initTabs();
     this.loadData();
   }
@@ -154,18 +154,18 @@ export default class Form extends Component<FormProps> {
         id: this.props.id
       }
     }).then(({data}: any) => {
-      this.setState({
-        columns: data.columns
-      });
-
-      if (Object.keys(data.inputs).length > 0) {
         this.setState({
-          inputs: data.inputs
+          columns: data.columns
         });
-      } else {
-        this.initInputs(data.columns);
-      }
-    });
+
+        if (Object.keys(data.inputs).length > 0) {
+          this.setState({
+            inputs: data.inputs
+          });
+        } else {
+          this.initInputs(data.columns);
+        }
+      });
   }
 
   create() {
@@ -211,8 +211,15 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-  * Input onChange with event parameter 
-  */
+   * Check if is id = undefined or id is > 0
+   */
+  checkIfIsEdit() {
+    this.state.isEdit = this.props.id ? true : false;
+  }
+
+  /**
+    * Input onChange with event parameter 
+    */
   inputOnChange(columnName: string, event: React.FormEvent<HTMLInputElement>) {
     let inputValue: string|number = event.currentTarget.value;
 
@@ -220,8 +227,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-  * Input onChange with raw input value, change inputs (React state)
-  */
+    * Input onChange with raw input value, change inputs (React state)
+    */
   inputOnChangeRaw(columnName: string, inputValue: any) {
     let changedInput: any = {};
     changedInput[columnName] = inputValue;
@@ -233,8 +240,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-  * Dynamically initialize inputs (React state) from model columns
-  */
+    * Dynamically initialize inputs (React state) from model columns
+    */
   initInputs(columns: FormColumns) {
     let inputs: any = {};
 
@@ -242,6 +249,7 @@ export default class Form extends Component<FormProps> {
       if (columnName != 'id') inputs[columnName] = null;
     });
 
+    console.log(inputs);
     this.setState({
       inputs: inputs
     });
@@ -262,8 +270,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /*
-  * Initialize form tabs is are defined
-  */
+    * Initialize form tabs is are defined
+    */
   initTabs() {
     if (this.props.content?.tabs == undefined) return;
 
@@ -284,8 +292,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-  * Render tab
-  */
+    * Render tab
+    */
   _renderTab(): JSX.Element {
     if (this.props.content?.tabs) {
       let tabs: any = Object.keys(this.props.content.tabs).map((tabName: string) => {
@@ -299,9 +307,9 @@ export default class Form extends Component<FormProps> {
   }
 
   /*
-  * Render tab content
-  * If tab is not set, use default tabName else use activated one
-  */
+    * Render tab content
+    * If tab is not set, use default tabName else use activated one
+    */
   _renderTabContent(tabName: string, content: any) {
     if (
       tabName == "default" 
@@ -338,8 +346,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-  * Render content item 
-  */
+    * Render content item 
+    */
   _renderContentItem(contentItemArea: string, contentItemParams: undefined|string|Object|Array<string>): JSX.Element {
     if (contentItemParams == undefined) return <b style={{color: 'red'}}>Content item params are not defined</b>;
 
@@ -375,8 +383,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-  * Render different input types
-  */
+    * Render different input types
+    */
   _renderInput(columnName: string): JSX.Element {
     if (this.state.columns == null) return <></>;
 

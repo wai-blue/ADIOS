@@ -13,7 +13,7 @@ export default class Text extends Component<TextareaInputProps> {
   render() {
     return (
       <textarea 
-        value={this.props.parentForm.state.inputs[this.props.columnName]}
+        value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
         onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
         className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
         aria-describedby="passwordHelpInline"

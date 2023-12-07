@@ -6,7 +6,7 @@ import React from "react";
  */
 import Form from "./Components/Form";
 import Table from "./Components/Table";
-import FloatingModal from "./Components/FloatingModal";
+//import FloatingModal from "./Components/FloatingModal";
 
 /**
 * Examples
@@ -36,7 +36,7 @@ const getComponent = (componentName: string, params: Object) => {
     //@ts-ignore
     case 'form': return <Form {...params} />;
     case 'table': return <Table {...params} />;
-    case 'floating-modal': return <FloatingModal>xxx</FloatingModal>;
+    //case 'floating-modal': return <FloatingModal>xxx</FloatingModal>;
 
     // Examples
     case 'example': return <Example {...params} />;

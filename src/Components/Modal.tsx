@@ -1,66 +1,93 @@
-import Swal, { SweetAlertOptions } from "sweetalert2";
+import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+import $ from 'jquery';
+import { v4 } from 'uuid';
 
-export interface ModalParams {
-  url: string,
-  title?: string|null
+import './Css/Modal.css';
+
+export interface ModalProps {
+  //onClose?: () => void;
+  uid?: string,
+  type?: string,
+  children?: any;
+  isActive?: boolean;
 }
 
-export function ModalPageLarge(
-  params: ModalParams,
-  onClose?: () => void
-): void {
-  const iframeContent = `
-    <iframe 
-      src="` + _APP_URL + params.url + `" 
-      width="100%" 
-      height="800px" 
-      frameborder="0"
-    ></iframe>
-  `;
-
-  Swal.fire({
-    title: params.title,
-    html: iframeContent,
-    width: '80%',
-    showCloseButton: true,
-    showConfirmButton: false,
-    showCancelButton: false,
-    focusConfirm: false,
-    customClass: {
-      container: 'iframe-popup-container',
-    },
-    willClose: () => {
-      if (onClose) onClose();
-    }
-  } as SweetAlertOptions);
+interface ModalParams {
+  uid: string,
+  type: string
 }
 
-/*export function ModalHtmlLarge(
-  params: ModalParams,
-  onClose?: () => void
-): void {
-  const iframeContent = `
-    <iframe 
-      src="` + config.serverUrl + params.url + `" 
-      width="100%" 
-      height="800px" 
-      frameborder="0"
-    ></iframe>
-  `;
+interface ModalState {
+  isActive: boolean;
+}
 
-  Swal.fire({
-    title: params.title,
-    html: iframeContent,
-    width: '80%',
-    showCloseButton: true,
-    showConfirmButton: false,
-    showCancelButton: false,
-    focusConfirm: false,
-    customClass: {
-      container: 'iframe-popup-container',
-    },
-    willClose: () => {
-      if (onClose) onClose();
+export default class Modal extends Component<ModalProps> {
+  private modalRoot: HTMLDivElement;
+  state: ModalState;
+
+  params: ModalParams = {
+    uid: "",
+    type: "right"
+  };
+
+  constructor(props: ModalProps) {
+    super(props);
+
+    this.state = {
+      isActive: true
+    };
+
+    console.log(props);
+    this.params = {
+      uid: this.props.uid ?? v4(),
+      type: this.props.type ?? "right"
     }
-  } as SweetAlertOptions);
-}*/
+
+    this.modalRoot = document.createElement('div');
+    document.body.appendChild(this.modalRoot);
+  };
+
+  componentWillUnmount() {
+    document.body.removeChild(this.modalRoot);
+  }
+
+  toggleModal() {
+    //$('#adios-modal-' + this.params.uid).modal('toggle');
+  }
+
+  render() {
+    console.log("Modal rendered");
+
+    return ReactDOM.createPortal(
+      <div 
+        className={"modal " + this.params.type + " fade"}
+        id={'adios-modal-' + this.params.uid} 
+        role="dialog"
+        aria-labelledby="myModalLabel2"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+
+            <div className="modal-header">
+              <button 
+                type="button" 
+                className="close" 
+                data-dismiss="modal" 
+                aria-label="Close"
+                onClick={() => this.toggleModal()}
+              ><span aria-hidden="true">&times;</span></button>
+              <h4 className="modal-title" id="myModalLabel2">Right Sidebar</h4>
+            </div>
+
+            <div className="modal-body">
+              {this.props.children}
+            </div>
+
+          </div>
+        </div>
+      </div>,
+      this.modalRoot
+    );
+  } 
+}
