@@ -11,7 +11,7 @@
 namespace ADIOS\Core\DB\DataTypes;
 
 /**
- * *UI/Input* renders *checkbox* for this data type.
+ * *Components/Input* renders *checkbox* for this data type.
  *
  * Example of definition in \ADIOS\Core\Model's column() method:
  * ```

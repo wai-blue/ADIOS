@@ -68,7 +68,7 @@ class Form extends \ADIOS\Core\View
 
     // nacitanie udajov
     if (empty($params['model'])) {
-      exit("UI/Form: Don't know what model to work with.");
+      exit("Components/Form: Don't know what model to work with.");
       return;
     }
 

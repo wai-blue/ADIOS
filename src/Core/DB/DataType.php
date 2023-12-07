@@ -53,7 +53,7 @@ class DataType {
   
   /**
    * Returns the HTML-formatted string of the given value.
-   * Used in UI/Table element to format cells of the table.
+   * Used in Components/Table element to format cells of the table.
    *
    * @param  mixed $value Value to be formatted.
    * @param  mixed $params Configuration of the HTML output (e.g. format of date string).
@@ -78,7 +78,7 @@ class DataType {
 
   /**
    * Returns the CSV-formatted string of the given value.
-   * Used in UI/Table element for CSV exports.
+   * Used in Components/Table element for CSV exports.
    *
    * @param  mixed $value Value to be formatted.
    * @param  mixed $params Configuration of the HTML output (e.g. format of date string).

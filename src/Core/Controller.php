@@ -195,5 +195,9 @@ class Controller {
       return $e->getMessage();
     }
   }
+
+  public function getRequestParams(): array {
+    return json_decode(file_get_contents("php://input"), true);
+  }
 }
 

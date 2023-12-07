@@ -84,7 +84,7 @@ class Table extends \ADIOS\Core\View
       'showColumnsFilter' => true,
       'allowOrderModification' => true,
 
-      'refreshAction' => 'UI/Table',
+      'refreshAction' => 'Components/Table',
       'onclick' => '',
 
       'showTitle' => true,
@@ -128,7 +128,7 @@ class Table extends \ADIOS\Core\View
     ], $params);
 
     if (empty($params['model'])) {
-      throw new \Exception("UI/Table: Don't know what model to work with.");
+      throw new \Exception("Components/Table: Don't know what model to work with.");
     }
   
     $this->model = $this->adios->getModel($params['model']);
@@ -608,7 +608,7 @@ class Table extends \ADIOS\Core\View
         }
 
         if ($this->params['showPrintButton']) {
-          $printButtonAction = $this->model->printButtonAction ?? "UI/Table/PrintPdf";
+          $printButtonAction = $this->model->printButtonAction ?? "Components/Table/PrintPdf";
 
           $moreActionsButtonItems[] = [
             "faIcon" => "fas fa-print",
@@ -786,7 +786,7 @@ class Table extends \ADIOS\Core\View
           data-page='" . (int)$this->params['page'] . "'
           data-items-per-page='" . (int)$this->params['items-per-page'] . "'
           data-is-ajax='" . ($this->adios->isAjax() ? "1" : "0") . "'
-          data-is-in-form='" . (in_array("UI/Form", (array) $this->adios->actionStack) ? "1" : "0") . "'
+          data-is-in-form='" . (in_array("Components/Form", (array) $this->adios->actionStack) ? "1" : "0") . "'
         >
       ";
     }

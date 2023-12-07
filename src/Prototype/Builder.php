@@ -183,12 +183,13 @@ class Builder {
 
   public function copyFile($srcFile, $destFile) {
     $this->log("Copying file {$srcFile} to {$destFile}.");
-    if (!file_exists(__DIR__."/Templates/".$srcFile)) {
-      throw new \Exception("File ".__DIR__."/Templates/{$srcFile} does not exist.");
-    } else {
+
+    if (!file_exists(__DIR__ . "/Templates/" . $srcFile)) {
+      throw new \Exception("File " . __DIR__ . "/Templates/{$srcFile} does not exist.");
+    } else if (!file_exists($this->outputFolder . "/" . $destFile)) {
       copy(
-        __DIR__."/Templates/".$srcFile,
-        $this->outputFolder."/".$destFile
+        __DIR__ . "/Templates/" . $srcFile,
+        $this->outputFolder . "/" . $destFile
       );
     }
 
@@ -387,11 +388,15 @@ class Builder {
       if (is_array($widgetConfig['controllers'] ?? NULL)) {
         $this->createFolder($widgetRootDir . '/Controllers');
         $this->createFolder($widgetRootDir . '/Templates');
+        $this->createFolder($widgetRootDir . '/Views');
 
         foreach ($widgetConfig['controllers'] as $controllerName => $controllerConfig) {
           if (isset($controllerConfig['phpTemplate'])) {
-            $controllerPhpFileTemplate = 'src/Widgets/Controllers/' . $controllerConfig['phpTemplate'] . '.php.twig';
-            $controllerHtmlFileTemplate = '';
+            if ($controllerConfig['phpTemplate'] == 'ViewRender') {
+              $controllerPhpFileTemplate = 'src/Widgets/Controllers/' . $controllerConfig['phpTemplate'] . '.php.twig';
+              $controllerHtmlFileTemplate = '';
+              $controllerHtmlFileView = 'src/Widgets/ControllerTemplates/DefaultEmpty.html.twig';
+            }
           } else {
             $controllerPhpFileTemplate = 'src/Widgets/ControllerWithTemplate.php.twig';
             $controllerHtmlFileTemplate = 'src/Widgets/ControllerTemplates/' . $controllerConfig['template'] . '.html.twig';
@@ -424,7 +429,6 @@ class Builder {
             $controllerClassName = $controllerName;
           }
 
-
           $tmpControllerParams = array_merge(
             $this->prototype,
             [
@@ -454,6 +458,17 @@ class Builder {
               $controllerHtmlFileTemplate,
               $widgetRootDir . '/Templates/' . $controllerName . '.twig'
             );
+          }
+
+          // Render View for Controller
+          // Render just one time
+          if (isset($controllerHtmlFileView)) {
+            if (!is_file($widgetRootDir . '/Views/' . $controllerName . '.twig')) {
+              $this->copyFile(
+                $controllerHtmlFileView,
+                $widgetRootDir . '/Views/' . $controllerName . '.twig'
+              );
+            } 
           }
         }
       }

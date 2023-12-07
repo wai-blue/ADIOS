@@ -2038,6 +2038,7 @@ class Loader
     $cssFiles = [
       dirname(__FILE__)."/../Assets/Css/fontawesome-5.13.0.css",
       dirname(__FILE__)."/../Assets/Css/bootstrap.min.css",
+      //dirname(__FILE__)."/../Assets/Css/bootstrapmd.min.css",
       dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
       dirname(__FILE__)."/../Assets/Css/responsive.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",
@@ -2133,8 +2134,17 @@ class Loader
       }
     }
 
+    // Load react bundle file
+    foreach (scandir(dirname(__FILE__).'/../Assets/Js/React') as $file) {
+      if ('.js' == substr($file, -3)) {
+        $jsFiles[] = dirname(__FILE__)."/../Assets/Js/React/{$file}";
+      }
+    }
+
+    //var_dump($jsFiles); exit;
+
     foreach ($jsFiles as $file) {
-      $js .= @file_get_contents($file)."\n";
+      $js .= @file_get_contents($file).";\n";
     }
 
     $js .= "

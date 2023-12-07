@@ -15,7 +15,7 @@ namespace ADIOS\Core\DB\DataTypes;
  *
  * Converted to **boolean** in the SQL. Indexed by default. Default 0. NOT NULL.
  *
- * *UI/Input* renders *checkbox* for this data type.
+ * *Components/Input* renders *checkbox* for this data type.
  *
  * Example of definition in \ADIOS\Core\Model's column() method:
  * ```

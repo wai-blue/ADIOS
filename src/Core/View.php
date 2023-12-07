@@ -100,7 +100,7 @@ class View {
     $this->displayMode = $this->params['displayMode'];
     $this->childViews = [];
     $this->classes = ['adios', 'ui', $componentName];
-    $this->twigTemplate = $this->twigTemplate ?? "UI/{$this->fullName}";
+    $this->twigTemplate = $this->twigTemplate ?? "Components/{$this->fullName}";
 
     if (
       empty($this->displayMode)

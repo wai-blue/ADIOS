@@ -7,7 +7,7 @@ namespace ADIOS\Core\DB\DataTypes;
  *
  * Converted to **text** in the SQL.
  *
- * *UI/Input* renders *textarea* for this data type.
+ * *Components/Input* renders *textarea* for this data type.
  *
  * Example of definition in \ADIOS\Core\Model's column() method:
  * ```

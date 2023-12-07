@@ -13,7 +13,7 @@ namespace ADIOS\Controllers\Desktop;
 /**
  * 'Desktop/InstallUpgrades' action. Installs database upgrades of models in the ADIOS application.
  *
- * @package UI\Controllers\Desktop
+ * @package Components\Controllers\Desktop
  */
 class InstallUpgrades extends \ADIOS\Core\Controller
 {

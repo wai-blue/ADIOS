@@ -10,6 +10,8 @@
 
 namespace ADIOS\Core;
 
+use Illuminate\Pagination\Paginator;
+
 /**
  * Core implementation of database model. Extends from Eloquent's model and adds own
  * functionalities.
@@ -568,7 +570,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Default
       '/^' . $urlBase . '$/' => [
         "permission" => "{$this->fullName}/Browse",
-        "controller" => $this->crud['browse']['controller'] ?? "UI/Table",
+        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -577,7 +579,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Browse
       '/^' . $urlBase . '\/browse$/' => [
         "permission" => "{$this->fullName}/Browse",
-        "controller" => $this->crud['browse']['controller'] ?? "UI/Table",
+        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -586,7 +588,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Edit
       '/^' . $urlBase . '\/(\d+)\/edit$/' => [
         "permission" => "{$this->fullName}/Edit",
-        "controller" => $this->crud['edit']['controller'] ?? "UI/Form",
+        "controller" => $this->crud['edit']['controller'] ?? "Components/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
@@ -600,7 +602,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Add
       '/^' . $urlBase . '\/add$/' => [
         "permission" => "{$this->fullName}/Add",
-        "controller" => $this->crud['add']['controller'] ?? "UI/Form",
+        "controller" => $this->crud['add']['controller'] ?? "Components/Form",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
@@ -615,7 +617,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Save
       '/^' . $urlBase . '\/save$/' => [
         "permission" => "{$this->fullName}/Save",
-        "controller" => $this->crud['save']['controller'] ?? "UI/Form/Save",
+        "controller" => $this->crud['save']['controller'] ?? "Components/Form/Save",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -624,7 +626,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Delete
       '/^' . $urlBase . '\/delete$/' => [
         "permission" => "{$this->fullName}/Delete",
-        "controller" => $this->crud['delete']['controller'] ?? "UI/Form/Delete",
+        "controller" => $this->crud['delete']['controller'] ?? "Components/Form/Delete",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -633,7 +635,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Copy
       '/^' . $urlBase . '\/copy$/' => [
         "permission" => "{$this->fullName}/Copy",
-        "controller" => $this->crud['copy']['controller'] ?? "UI/Form/Copy",
+        "controller" => $this->crud['copy']['controller'] ?? "Components/Form/Copy",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -644,7 +646,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "permission" => "{$this->fullName}/Edit",
         "controller" => "Printer",
         "params" => array_merge($urlParams, [
-          "contentController" => $this->crud['print']['controller'] ?? "UI/Form",
+          "contentController" => $this->crud['print']['controller'] ?? "Components/Form",
           "contentParams" => [
             "model" => $this->fullName,
             "id" => '$' . ($varsInUrl + 1),
@@ -655,7 +657,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Search
       '/^' . $urlBase . '\/search$/' => [
         "permission" => "{$this->fullName}/Search",
-        "controller" => $this->crud['search']['controller'] ?? "UI/Table/Search",
+        "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "searchGroup" => $this->tableTitle ?? $urlBase,
@@ -669,7 +671,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Export/CSV
       '/^' . $urlBase . '\/Export\/CSV$/' => [
         "permission" => "{$this->fullName}/Export/CSV",
-        "controller" => "UI/Table/Export/CSV",
+        "controller" => "Components/Table/Export/CSV",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -678,7 +680,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV
       '/^' . $urlBase . '\/Import\/CSV$/' => [
         "permission" => "{$this->fullName}/Export/CSV",
-        "controller" => "UI/Table/Import/CSV",
+        "controller" => "Components/Table/Import/CSV",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -687,7 +689,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV/Import
       '/^' . $urlBase . '\/Import\/CSV\/Import$/' => [
         "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "UI/Table/Import/CSV/Import",
+        "controller" => "Components/Table/Import/CSV/Import",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -696,7 +698,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV/DownloadTemplate
       '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/' => [
         "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "UI/Table/Import/CSV/DownloadTemplate",
+        "controller" => "Components/Table/Import/CSV/DownloadTemplate",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -705,7 +707,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Import/CSV/Preview
       '/^' . $urlBase . '\/Import\/CSV\/Preview$/' => [
         "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "UI/Table/Import/CSV/Preview",
+        "controller" => "Components/Table/Import/CSV/Preview",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
@@ -1209,7 +1211,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   //////////////////////////////////////////////////////////////////
-  // UI/Form methods
+  // Components/Form methods
 
   public function columnValidate(string $column, $value): bool {
     $valid = TRUE;
@@ -1270,142 +1272,152 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function recordValidate($data)
   {
+    $invalidInputs = [];
+
     foreach ($this->columns() as $column => $colDefinition) {
-     if (!$this->columnValidate($column, $data[$column])) {
-        throw new \ADIOS\Core\Exceptions\RecordSaveException(
-          $this->adios->translate(
-            "`{{ colTitle }}` contains invalid value.",
-            [ 'colTitle' => $colDefinition['title'] ]
-          )
-        );
-      } else if (
+      if (
         $colDefinition['required']
-        && !$this->columnValidate($column, $data[$column])
+        && ($data[$column] == NULL || $data[$column] == '')
       ) {
-        throw new \ADIOS\Core\Exceptions\RecordSaveException(
-          $this->adios->translate(
-            "`{{ colTitle }}` is required.",
-            [ 'colTitle' => $colDefinition['title'] ]
-          )
+        $invalidInputs[$column] = $this->adios->translate(
+          "`{{ colTitle }}` is required.",
+          [ 'colTitle' => $colDefinition['title'] ]
+        );
+      } else if (!$this->columnValidate($column, $data[$column])) {
+        $invalidInputs[$column] = $this->adios->translate(
+          "`{{ colTitle }}` contains invalid value.",
+          [ 'colTitle' => $colDefinition['title'] ]
         );
       }
+    }
 
+    if (!empty($invalidInputs)) {
+      throw new \ADIOS\Core\Exceptions\RecordSaveException(
+        json_encode($invalidInputs)
+      );
     }
 
     return $this->adios->dispatchEventToPlugins("onModelAfterRecordValidate", [
       "model" => $this,
-      "data" => $data,
-    ])["params"];
+      "data" => $data
+    ])['params'];
+  }
+  
+  /**
+  * Check if the lookup table needs the id of the inserted record from this model  
+  */
+  private function ___getInsertedIdForLookupColumn(array $lookupColumns, array $lookupData, int $insertedRecordId): array {
+    foreach ($lookupColumns as $lookupColumnName => $lookupColumnData) {
+      if ($lookupColumnData['type'] != 'lookup') continue; 
+
+      if ($lookupColumnData['model'] == $this->fullName) {
+        $lookupData[$lookupColumnName]  = $insertedRecordId; 
+        break;
+      }
+    }
+
+    return $lookupData;
   }
 
-  public function recordSave($data)
+  public function recordSave(array $data)
   {
+    $id = (int) $data['id'];
 
-    try {
-      $id = (int) $data['id'];
+    $this->recordSaveOriginalData = $data;
 
-      $this->recordSaveOriginalData = $data;
+    // extract data for this model and data for lookup models
 
-      // extract data for this model and data for lookup models
-
-      $dataForThisModel = [];
-      $dataForLookupModels = [];
-      foreach ($data as $key => $value) {
-        if (strpos($key, ":LOOKUP:") === FALSE) {
-          $dataForThisModel[$key] = $value;
-        } else {
-          [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
-          $dataForLookupModels[$columnName][$lookupColumnName] = $value;
-        }
-      }
-
-      // save data for lookup models first (and create records, if necessary)
-
-      foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
-        $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? '';
-        if (empty($lookupColumnName)) continue;
-
-        $lookupModel = $this->adios->getModel($lookupModelName);
-
-        $lookupModel->recordValidate($lookupData);
-
-        if ($data[$lookupColumnName] <= 0) {
-          $lookupData = $lookupModel->onBeforeInsert($lookupData);
-        } else {
-          $lookupData = $lookupModel->onBeforeUpdate($lookupData);
-        }
-
-        $lookupData = $this->onBeforeSave($lookupData);
-
-        if ($data[$lookupColumnName] <= 0) {
-          $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
-        } else {
-          $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
-        }
-      }
-
-      // save data for this model
-
-      $this->recordValidate($dataForThisModel);
-
-      if ($id <= 0) {
-        $dataForThisModel = $this->onBeforeInsert($dataForThisModel);
+    $dataForThisModel = [];
+    $dataForLookupModels = [];
+    foreach ($data as $key => $value) {
+      if (strpos($key, ":LOOKUP:") === FALSE) {
+        $dataForThisModel[$key] = $value;
       } else {
-        $dataForThisModel = $this->onBeforeUpdate($dataForThisModel);
+        [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
+        $dataForLookupModels[$columnName][$lookupColumnName] = $value;
       }
-
-      $dataForThisModel = $this->onBeforeSave($dataForThisModel);
-
-      if ($id <= 0) {
-        $returnValue = $this->insertRow($dataForThisModel);
-        $data['id'] = (int) $returnValue;
-      } else {
-        $returnValue = $this->updateRow($dataForThisModel, $id);
-      }
-
-
-      // save cross-table-alignments
-      foreach ($this->junctions as $jName => $jParams) {
-        if (!isset($data[$jName])) continue;
-
-        $assignments = @json_decode($data[$jName], TRUE);
-
-        if (is_array($assignments)) {
-          $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
-
-          foreach ($assignments as $assignment) {
-            $this->adios->db->query("
-              insert into `{$junctionModel->getFullTableSqlName()}` (
-                `{$jParams['masterKeyColumn']}`,
-                `{$jParams['optionKeyColumn']}`
-              ) values (
-                {$id},
-                '" . $this->adios->db->escape($assignment) . "'
-              )
-              on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
-            ");
-          }
-
-          $junctionModel
-            ->where($jParams['masterKeyColumn'], $id)
-            ->whereNotIn($jParams['optionKeyColumn'], $assignments)
-            ->delete();
-        }
-      }
-
-
-      if ($id <= 0) {
-        $returnValue = $this->onAfterInsert($data, $returnValue);
-      } else {
-        $returnValue = $this->onAfterUpdate($data, $returnValue);
-      }
-
-      $returnValue = $this->onAfterSave($data, $returnValue);
-
-      return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
-      return $this->adios->renderHtmlFatal($e->getMessage());
     }
+
+    $this->recordValidate($dataForThisModel);
+
+    if ($id <= 0) {
+      $dataForThisModel = $this->onBeforeInsert($dataForThisModel);
+    } else {
+      $dataForThisModel = $this->onBeforeUpdate($dataForThisModel);
+    }
+
+    $dataForThisModel = $this->onBeforeSave($dataForThisModel);
+
+    if ($id <= 0) {
+      $returnValue = $this->insertRow($dataForThisModel);
+      $data['id'] = (int) $returnValue;
+    } else {
+      $returnValue = $this->updateRow($dataForThisModel, $id);
+    }
+
+    // save data for lookup models first (and create records, if necessary)
+    foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
+      $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? NULL;
+
+      if ($lookupColumnName == NULL) continue;
+
+      $lookupModel = $this->adios->getModel($lookupModelName);
+      $lookupData = $this->___getInsertedIdForLookupColumn($lookupModel->columns(), $lookupData, $data['id']);
+      $lookupModel->recordValidate($lookupData);
+
+      if ($data[$lookupColumnName] <= 0) {
+        $lookupData = $lookupModel->onBeforeInsert($lookupData);
+      } else {
+        $lookupData = $lookupModel->onBeforeUpdate($lookupData);
+      }
+
+      $lookupData = $this->onBeforeSave($lookupData);
+
+      if ($data[$lookupColumnName] <= 0) {
+        $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
+      } else {
+        $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
+      }
+    }
+
+    // save cross-table-alignments
+    foreach ($this->junctions as $jName => $jParams) {
+      if (!isset($data[$jName])) continue;
+
+      $assignments = @json_decode($data[$jName], TRUE);
+
+      if (is_array($assignments)) {
+        $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
+
+        foreach ($assignments as $assignment) {
+          $this->adios->db->query("
+            insert into `{$junctionModel->getFullTableSqlName()}` (
+              `{$jParams['masterKeyColumn']}`,
+              `{$jParams['optionKeyColumn']}`
+            ) values (
+              {$id},
+              '" . $this->adios->db->escape($assignment) . "'
+            )
+            on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
+          ");
+        }
+
+        $junctionModel
+          ->where($jParams['masterKeyColumn'], $id)
+          ->whereNotIn($jParams['optionKeyColumn'], $assignments)
+          ->delete();
+      }
+    }
+
+    if ($id <= 0) {
+      $returnValue = $this->onAfterInsert($data, $returnValue);
+    } else {
+      $returnValue = $this->onAfterUpdate($data, $returnValue);
+    }
+
+    $returnValue = $this->onAfterSave($data, $returnValue);
+
+    return $returnValue;
   }
 
   public function recordDelete(int $id)
@@ -1423,7 +1435,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   //////////////////////////////////////////////////////////////////
-  // UI/Cards methods
+  // Components/Cards methods
 
   public function cards(array $cards = [])
   {
@@ -1451,7 +1463,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   //////////////////////////////////////////////////////////////////
-  // UI/Tree methods
+  // Components/Tree methods
 
   public function treeParams($params)
   {

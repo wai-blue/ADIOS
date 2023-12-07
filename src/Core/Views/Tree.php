@@ -40,7 +40,7 @@ class Tree extends \ADIOS\Core\View
     // validacia parametrov
 
     if (empty($params['model'])) {
-      exit("UI/Form: Don't know what model to work with.");
+      exit("Components/Form: Don't know what model to work with.");
       return;
     }
 
@@ -74,7 +74,7 @@ class Tree extends \ADIOS\Core\View
               '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/edit',
               '',
               function(res) {
-                _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
+                _ajax_read('Components/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
                   btn.find('.text').text(res2);
                 });
               }
@@ -239,7 +239,7 @@ class Tree extends \ADIOS\Core\View
                   function(res) {
                     if (res.data.id > 0) {
                       _ajax_read(
-                        'UI/Tree/GetItemText',
+                        'Components/Tree/GetItemText',
                         {
                           model: '{$this->model->fullName}',
                           id: res.data.id
@@ -383,7 +383,7 @@ class Tree extends \ADIOS\Core\View
             'values': serialized,
           };
 
-          _ajax_read('UI/Tree/Save', data, function(res) {
+          _ajax_read('Components/Tree/Save', data, function(res) {
             if (isNaN(res)) {
               _alert(res);
             } else {

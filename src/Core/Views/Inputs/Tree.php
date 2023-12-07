@@ -35,7 +35,7 @@ class Tree extends \ADIOS\Core\Input
               '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/edit',
               '',
               function(res) {
-                _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
+                _ajax_read('Components/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
                   btn.find('.text').text(res2);
                 });
               }
@@ -142,7 +142,7 @@ class Tree extends \ADIOS\Core\Input
                 {},
                 function(res) {
                   if (res.data.id > 0) {
-                    _ajax_read('UI/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
+                    _ajax_read('Components/Tree/GetItemText', { model: '{$this->model->fullName}', id: res.data.id }, function(res2) {
                       let clone = li.clone(true);
                       clone
                         .data('id', res.data.id)

@@ -9,8 +9,11 @@
   <meta name="author" content="">
   <link rel='shortcut icon' href='{% if config.brand.favicon == "" %}{{ config.url }}/adios/assets/images/favicon.png{% else %}{{ config.brand.favicon }}{% endif %}'>
   <title>{{ config.brand.title }}</title>
+
   <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.11/lib/draggable.bundle.js"></script> {# TODO: Lepsia implementacia Draggable #}
+
   <script src='{{ config.url }}/adios/cache.js'></script>
+
   <link rel=stylesheet type='text/css' href='{{ config.url }}/adios/cache.css' rel="stylesheet">
   <script>
     var _APP_URL = '{{ config.url }}';

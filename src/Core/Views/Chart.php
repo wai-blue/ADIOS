@@ -10,7 +10,7 @@ use ADIOS\Core\View;
 class Chart extends View
 {
 
-  public string $twigTemplate = "Core/UI/Chart";
+  public string $twigTemplate = "Core/Components/Chart";
   private ?Model $model = null;
 
   public function __construct(?Loader $adios, array $params = []) {
@@ -22,22 +22,22 @@ class Chart extends View
     ], $params);
 
     if (empty($this->params['datasets'])) {
-      exit("UI/Chart: Data not provided. Please specify datasets property.");
+      exit("Components/Chart: Data not provided. Please specify datasets property.");
     }
 
     foreach ($this->params['datasets'] as &$dataset) {
       if ($dataset['model'] == '' && $dataset['data'] == '') {
-        exit("UI/Chart: Data not provided. Please specify model or data properties in datasets.");
+        exit("Components/Chart: Data not provided. Please specify model or data properties in datasets.");
       }
 
       if ($dataset['labelColumn'] == '' && $dataset['labels'] == '') {
-        exit("UI/Chart: Labels not provided. Please specify labelColumn or labels properties in datasets.");
+        exit("Components/Chart: Labels not provided. Please specify labelColumn or labels properties in datasets.");
       }
 
       if ($dataset['model'] != '') {
 
         if ($dataset['dataColumns'] == '') {
-          exit("UI/Chart: Data not provided. Please specify dataColumns property in datasets.");
+          exit("Components/Chart: Data not provided. Please specify dataColumns property in datasets.");
         }
 
         # Determines the amount of chart data rows, that need to be fetched

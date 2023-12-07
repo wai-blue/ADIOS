@@ -811,7 +811,7 @@ class Input extends \ADIOS\Core\View {
       //     $default_src = $this->translate("No file uploaded");
       //     $file_src_base = "{$this->adios->config['url']}/File?f=";
       //     // $upload_params = "type=file&column={$this->params['column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
-      //     // $file_upload_url = "{$this->adios->config['url']}/UI/FileBrowser/Upload?output=json&".$upload_params;
+      //     // $file_upload_url = "{$this->adios->config['url']}/Components/FileBrowser/Upload?output=json&".$upload_params;
 
       //     if ('' != $this->params['value']) {
       //       $file_short_name = end(explode('/', $this->params['value']));

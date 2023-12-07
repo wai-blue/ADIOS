@@ -5,7 +5,7 @@ namespace ADIOS\Core\Views;
 
 class DataTable extends \ADIOS\Core\View {
 
-  public string $twigTemplate = "Core/UI/DataTable";
+  public string $twigTemplate = "Core/Components/DataTable";
   private ?\ADIOS\Core\Model $model = null;
 
   public function __construct(?\ADIOS\Core\Loader $adios, array $params = []) {
@@ -14,9 +14,9 @@ class DataTable extends \ADIOS\Core\View {
     $this->params = parent::params_merge([
       'datatableName' => null,
       'model' => null,
-      'loadDataAction' => 'UI/DataTable/LoadData',
-      'refreshAction' => 'UI/DataTable/Refresh',
-      'updateAction' => 'UI/DataTable/Update',
+      'loadDataAction' => 'Components/DataTable/LoadData',
+      'refreshAction' => 'Components/DataTable/Refresh',
+      'updateAction' => 'Components/DataTable/Update',
       'defaultValues' => [],
       'columns' => [],
       'data' => [],
@@ -31,7 +31,7 @@ class DataTable extends \ADIOS\Core\View {
     ], $params);
 
     if ($this->params['model'] == '') {
-      exit("UI/DataTable: Don't know what model to work with.");
+      exit("Components/DataTable: Don't know what model to work with.");
       return;
     }
 

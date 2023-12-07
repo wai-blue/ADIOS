@@ -12,15 +12,15 @@ namespace ADIOS\Core\Views;
 
 class Dashboard extends \ADIOS\Core\View
 {
-  public string $twigTemplate = "Core/UI/Dashboard";
+  public string $twigTemplate = "Core/Components/Dashboard";
 
   public function __construct($adios, array $params = []) {
     $this->adios = $adios;
 
     $this->params = parent::params_merge([
       'title' => 'Dashboard',
-      'saveAction' => '/UI/Dashboard/SaveConfig',
-      'addCardsAction' => '/UI/Dashboard/AddCards'
+      'saveAction' => '/Components/Dashboard/SaveConfig',
+      'addCardsAction' => '/Components/Dashboard/AddCards'
     ], $params);
 
     $this->params['preset'] = (int) ($_GET['preset'] ?? 0); # TODO: If preset isn't specified, use the last used

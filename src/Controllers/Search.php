@@ -11,7 +11,7 @@
 namespace ADIOS\Controllers;
 
 /**
- * @package UI\Controllers
+ * @package Components\Controllers
  */
 class Search extends \ADIOS\Core\Controller {
   public function preRender() {
