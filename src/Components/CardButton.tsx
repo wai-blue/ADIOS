@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-export interface CardButtonProps {
+interface CardButtonProps {
   onClick?: string,
   href?: string,
   text: string,

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 
-export interface TitleProps {
+interface TitleProps {
   title: string,
   right?: string,
   left?: string
