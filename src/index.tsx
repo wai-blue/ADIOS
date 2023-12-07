@@ -6,6 +6,10 @@ import React from "react";
  */
 import Form from "./Components/Form";
 import Table from "./Components/Table";
+import CardButton from "./Components/CardButton";
+import Title from "./Components/Title";
+import Breadcrumbs from "./Components/Breadcrumbs";
+
 //import FloatingModal from "./Components/FloatingModal";
 
 /**
@@ -21,6 +25,10 @@ import ExampleModelHover from "./Components/Examples/ModelHover";
 const initializeComponents = [
   'form',
   'table',
+  'card-button',
+  'title',
+  'breadcrumbs',
+
   'floating-modal',
   
   // Examples
@@ -32,10 +40,19 @@ const initializeComponents = [
 * Get specific ADIOS component with destructed params 
 */
 const getComponent = (componentName: string, params: Object) => {
+  //@ts-ignore
   switch (componentName) {
     //@ts-ignore
     case 'form': return <Form {...params} />;
+    //@ts-ignore
     case 'table': return <Table {...params} />;
+    //@ts-ignore
+    case 'card-button': return <CardButton {...params} />;
+    //@ts-ignore
+    case 'title': return <Title {...params} />;
+    //@ts-ignore
+    case 'breadcrumbs': return <Breadcrumbs {...params} />;
+
     //case 'floating-modal': return <FloatingModal>xxx</FloatingModal>;
 
     // Examples
