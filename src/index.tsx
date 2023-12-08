@@ -1,6 +1,8 @@
 import { createRoot } from "react-dom/client";
 import React from "react";
 
+import { v4 } from 'uuid';
+
 /**
  * Components
  */
@@ -23,13 +25,12 @@ import ExampleModelHover from "./Components/Examples/ModelHover";
 * Initialize ADIOS components
 */
 const initializeComponents = [
+  'breadcrumbs',
+  'card-button',
+  'card',
   'form',
   'table',
-  'card-button',
   'title',
-  'breadcrumbs',
-
-  'floating-modal',
   
   // Examples
   'example',
@@ -79,6 +80,11 @@ const renderComponent = (component: string) => {
       }
 
       componentProps[element.attributes[i].name] = elementValue; 
+    }
+
+    // Check if uid exists or create custom
+    if (componentProps['uid'] == undefined) {
+      componentProps['uid'] = v4();
     }
 
     createRoot(element).render(getComponent(component, componentProps));
