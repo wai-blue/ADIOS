@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 
 interface TitleProps {
+  uid: string,
   title: string,
   right?: string,
   left?: string
@@ -14,7 +15,10 @@ export default class Title extends Component<TitleProps> {
 
   render() {
     return (
-      <div className="adios ui Title p-4">
+      <div 
+        id={"adios-title-" + this.props.uid}
+        className="adios react ui Title p-4"
+      >
         <div className="row">
           <div className="col-lg-12 p-0">
             <div 

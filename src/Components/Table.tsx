@@ -1,7 +1,6 @@
 import React, { Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK } from '@mui/x-data-grid';
 import axios from "axios";
-import { v4 } from 'uuid';
 
 import { FormProps } from "./Form";
 
@@ -12,6 +11,7 @@ import Loader from "./Loader";
 
 interface TableProps {
   // Required
+  uid: string,
   model: string,
 
   // Additional
@@ -46,10 +46,6 @@ interface TableParams {
   showCardOverlay: boolean
 }
 
-interface TableColumns {
-  [key: string]: string;
-}
-
 interface TableData {
   current_page: number,
   data: Array<any>,
@@ -78,12 +74,11 @@ export default class Table extends Component {
   state: TableState;
 
   params: TableParams = {
-    uid: v4(),
-
     // Params for Modal with Form component
     modal: {},
 
-    model: "" ,
+    uid: this.props.uid,
+    model: this.props.model,
     title: "",
     showTitle:  true,
     showPaging: true,
@@ -211,45 +206,50 @@ export default class Table extends Component {
           />
         </Modal>
 
-        <div className="card">
-          <div className="card-header">
-            <div className="row">
+        <div
+          id={"adios-table-" + this.params.uid}
+          className="adios react ui table"
+        >
+          <div className="card">
+            <div className="card-header">
+              <div className="row">
 
-              {this.params.showTitle ? (
+                {this.params.showTitle ? (
+                  <div className="col-lg-12">
+                    <h3 className="card-title">{this.params.title}</h3>
+                  </div>
+                ) : ''}
+
                 <div className="col-lg-12">
-                  <h3 className="card-title">{this.params.title}</h3>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => this.onAddClick()} 
+                  >Add</button>
                 </div>
-              ) : ''}
-
-              <div className="col-lg-12">
-                <button
-                  className="btn btn-primary"
-                  onClick={() => this.onAddClick()} 
-                >Add</button>
               </div>
             </div>
-          </div>
-          
-          <DataGrid
-            localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
-            rows={this.state.data.data}
-            columns={this.state.columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  page: (this.state.page - 1), 
-                  pageSize: this.state.pageLength
+            
+            <DataGrid
+              localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
+              rows={this.state.data.data}
+              columns={this.state.columns}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    page: (this.state.page - 1), 
+                    pageSize: this.state.pageLength
+                  },
                 },
-              },
-            }}
-            paginationMode="server"
-            onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
-            rowCount={this.state.data.total}
-            onRowClick={(item) => this.onRowClick(item.id as number)}
-            //loading={false}
-            //pageSizeOptions={[5, 10]}
-            //checkboxSelection
-          />
+              }}
+              paginationMode="server"
+              onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
+              rowCount={this.state.data.total}
+              onRowClick={(item) => this.onRowClick(item.id as number)}
+              //loading={false}
+              //pageSizeOptions={[5, 10]}
+              //checkboxSelection
+            />
+          </div>
         </div>
       </>
     );

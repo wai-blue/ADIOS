@@ -24,6 +24,7 @@ interface ContentCard {
 }
 
 export interface FormProps {
+  uid: string,
   model: string,
   id?: number,
   title?: string,
@@ -461,7 +462,10 @@ export default class Form extends Component<FormProps> {
 
   render() {
     return (
-      <div className="m-3">
+      <div
+        id={"adios-form-" + this.props.uid}
+        className="adios react ui form"
+      >
         <div className="card w-100 overflow-auto">
           <div className="card-header">
             <div className="row">

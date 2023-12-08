@@ -7,7 +7,7 @@ import './Css/Modal.css';
 
 export interface ModalProps {
   //onClose?: () => void;
-  uid?: string,
+  uid: string,
   type?: string,
   children?: any;
   isActive?: boolean;
@@ -27,7 +27,7 @@ export default class Modal extends Component<ModalProps> {
   state: ModalState;
 
   params: ModalParams = {
-    uid: "",
+    uid: this.props.uid,
     type: "right"
   };
 
@@ -57,14 +57,11 @@ export default class Modal extends Component<ModalProps> {
   }
 
   render() {
-    console.log("Modal rendered");
-
     return ReactDOM.createPortal(
-      <div 
-        className={"modal " + this.params.type + " fade"}
+      <div
         id={'adios-modal-' + this.params.uid} 
+        className={"modal " + this.params.type + " fade"}
         role="dialog"
-        aria-labelledby="myModalLabel2"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
@@ -72,7 +69,6 @@ export default class Modal extends Component<ModalProps> {
             <div className="modal-header">
               <button 
                 type="button" 
-                className="close" 
                 data-dismiss="modal" 
                 aria-label="Close"
                 onClick={() => this.toggleModal()}
