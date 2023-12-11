@@ -127,7 +127,7 @@ class MySQLi extends \ADIOS\Core\DB
    */
   public function typedSqlValue($value): string
   {
-    if ($value instanceof string) {
+    if (is_string($value)) {
       return "'" . $this->escape($value) . "'";
     } else if (is_float($value)) {
       return (float) $value;
@@ -749,7 +749,9 @@ class MySQLi extends \ADIOS\Core\DB
         // columns
         $columnsArray = [];
         foreach ($columns as $column) {
-          if (strpos($column[1], '`') === FALSE) {
+          if ($column[1] === '*') {
+            $columnsArray[] = '*';
+          } else if (strpos($column[1], '`') === FALSE) {
             if (strpos($column[1], '.') === FALSE) {
               $columnsArray[] = '`' . $column[1] . '` as `' . $column[2] . '`';
             } else {

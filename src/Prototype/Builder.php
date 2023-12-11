@@ -246,8 +246,6 @@ class Builder {
     $this->copyFile('.htaccess-subfolder', 'tmp/.htaccess');
     $this->copyFile('.htaccess-subfolder', 'upload/.htaccess');
 
-    $this->renderFile('src/Init.php', 'src/Init.php.twig');
-
     $this->renderFile('index.php', 'index.php.twig');
     $this->renderFile('web.php', 'web.php.twig');
     $this->renderFile('ConfigEnv.php', 'ConfigEnv.php.twig');
@@ -260,6 +258,7 @@ class Builder {
       ]
     );
 
+    $routing = [];
 
     $configWidgetsEnabled = [];
     foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
@@ -342,6 +341,10 @@ class Builder {
         )
       );
 
+      if (is_array($widgetConfig['routing'] ?? NULL)) {
+        $routing = array_merge($routing, $widgetConfig['routing']);
+      }
+
       if (is_array($widgetConfig['models'] ?? NULL)) {
         $this->createFolder($widgetRootDir . '/Models');
 
@@ -411,6 +414,7 @@ class Builder {
 
           if (strpos($controllerName, '/') !== FALSE) {
             $controllerRootDir = $widgetRootDir . '/Controllers';
+            $viewRootDir = $widgetRootDir . '/Views';
 
             $tmpDirs = explode('/', $controllerName);
             
@@ -418,10 +422,12 @@ class Builder {
 
             foreach ($tmpDirs as $level => $tmpDir) {
               $controllerRootDir .= '/' . $tmpDir;
+              $viewRootDir .= '/' . $tmpDir;
 
               if ($level != count($tmpDirs) - 1) {
                 $controllerNamespace .= '\\' . $tmpDir;
                 $this->createFolder($controllerRootDir);
+                $this->createFolder($viewRootDir);
               }
 
             }
@@ -477,6 +483,11 @@ class Builder {
         file_put_contents($this->outputFolder . '/' . $widgetRootDir . '/main.js', $widgetConfig['javascript']);
       }
     }
+
+    // render init script
+    $this->renderFile('src/Init.php', 'src/Init.php.twig', [
+      'routing' => $routing
+    ]);
   }
 
   // public function createEmptyDatabase() {

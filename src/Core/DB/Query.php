@@ -201,11 +201,17 @@ class Query
           $tableAlias,
           FALSE
         );
+      } else if ($column === '*' || $column[0] === '*') {
+        $this->add([
+          self::column,
+          '*',
+          ''
+        ]);
       } else {
         $this->add([
           self::column,
           $column[0],
-          $column[1]
+          $column[1] ?? $column[0]
         ]);
       }
     }
@@ -367,6 +373,12 @@ class Query
    */
   public function execute()
   {
+    if (
+      $this->type == self::select
+      && empty($this->getStatements(self::column))
+    ) {
+      throw new \ADIOS\Core\Exceptions\DBException("Query has no columns to select. Use columns() method.");
+    }
     $result = $this->db->query($this->buildSql(), $this->model);
 
     switch ($this->type) {
@@ -398,7 +410,9 @@ class Query
    */
   public function fetchOne(): array
   {
-    return reset($this->fetch());
+    $item = reset($this->fetch());
+    if (!is_array($item)) $item = [];
+    return $item;
   }
 
   /**
