@@ -26,7 +26,7 @@ export default class Card extends Component<CardProps> {
           ) : ''}
 
           <div className="card-body">
-            { this.props.content }
+            <div dangerouslySetInnerHTML={{ __html: this.props.content ?? "" }} />
           </div>
         </div>
       </div>

@@ -1,91 +1,91 @@
 .adios.ui.react.loader.content {
-	width: 50vmin;
-	height: 50vmin;
-	text-align: center;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-direction: column;
-	perspective: 1000vmin;
+  width: 50vmin;
+  height: 50vmin;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  perspective: 1000vmin;
 }
 
 .adios.ui.react.loader.bars {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	padding: 6.5vmin 3vmin;
-	animation: mirror1 calc(var(--s) * 2) ease 0s infinite ;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  padding: 6.5vmin 3vmin;
+  animation: mirror1 calc(var(--s) * 2) ease 0s infinite ;
 }
 
 .adios.ui.react.loader.bars + .adios.ui.react.loader.bars {
-	transform: rotate(90deg) rotateX(180deg);
-	animation: mirror2 calc(var(--s) * 2) ease calc(var(--s) / 2) infinite;
+  transform: rotate(90deg) rotateX(180deg);
+  animation: mirror2 calc(var(--s) * 2) ease calc(var(--s) / 2) infinite;
 }
 
 .adios.ui.react.loader.bar {
-	width: 44vmin;
-	height: 3vmin;
-	margin: 2vmin 0vmin;
-	background: linear-gradient(90deg, #fff0 33%, var(--w) 33% 67%, #fff0 67% 100%);
-	animation: grow var(--s) ease-in-out 0s infinite alternate; 
-	background-size: 300%;
-	background-position-x: -203%;
+  width: 44vmin;
+  height: 3vmin;
+  margin: 2vmin 0vmin;
+  background: linear-gradient(90deg, #fff0 33%, var(--w) 33% 67%, #fff0 67% 100%);
+  animation: grow var(--s) ease-in-out 0s infinite alternate; 
+  background-size: 300%;
+  background-position-x: -203%;
 }
 
 @keyframes mirror1 {
-	0%, 47%, 99.99%, 100% { transform: rotate(180deg) rotateX(0deg); }
-	47.01%, 99.98% { transform: rotate(180deg) rotateX(180deg); }
+  0%, 47%, 99.99%, 100% { transform: rotate(180deg) rotateX(0deg); }
+  47.01%, 99.98% { transform: rotate(180deg) rotateX(180deg); }
 }
 
 @keyframes mirror2 {
-	0%, 47%, 99.99%, 100% { transform: rotate(90deg) rotateX(180deg); }
-	47.01%, 99.98% { transform: rotate(90deg) rotateX(0deg); }
+  0%, 47%, 99.99%, 100% { transform: rotate(90deg) rotateX(180deg); }
+  47.01%, 99.98% { transform: rotate(90deg) rotateX(0deg); }
 }
 
 @keyframes grow {
-	0%, 25% { background-position-x: -297%; }
-	45%, 55% { background-position-x: -250%; }
-	75%, 100% { background-position-x: -203%; }
+  0%, 25% { background-position-x: -297%; }
+  45%, 55% { background-position-x: -250%; }
+  75%, 100% { background-position-x: -203%; }
 }
 
 .adios.ui.react.loader.bar:nth-child(2) {
-	animation-delay: calc(var(--s) * -0.02);
+  animation-delay: calc(var(--s) * -0.02);
 }
 .adios.ui.react.loader.bar:nth-child(3) {
-	animation-delay: calc(var(--s) * -0.04);
+  animation-delay: calc(var(--s) * -0.04);
 }
 .adios.ui.react.loader.bar:nth-child(4) {
-	animation-delay: calc(var(--s) * -0.06);
+  animation-delay: calc(var(--s) * -0.06);
 }
 .adios.ui.react.loader.bar:nth-child(5) {
-	animation-delay: calc(var(--s) * -0.08);
+  animation-delay: calc(var(--s) * -0.08);
 }
 .adios.ui.react.loader.bar:nth-child(6) {
-	animation-delay: calc(var(--s) * -0.1);
+  animation-delay: calc(var(--s) * -0.1);
 }
 .adios.ui.react.loader.bar:nth-child(7) {
-	animation-delay: calc(var(--s) * -0.12);
+  animation-delay: calc(var(--s) * -0.12);
 }
 
 .adios.ui.react.loader.bars:nth-child(2) .bar:nth-child(1) {
-	animation-delay: calc(calc(var(--s) * -0.001) - calc(var(--s) / 2));
+  animation-delay: calc(calc(var(--s) * -0.001) - calc(var(--s) / 2));
 }
 .adios.ui.react.loader.bars:nth-child(2) .bar:nth-child(2) {
-	animation-delay: calc(calc(var(--s) * -0.02) - calc(var(--s) / 2));
+  animation-delay: calc(calc(var(--s) * -0.02) - calc(var(--s) / 2));
 }
 .adios.ui.react.loader.bars:nth-child(2) .bar:nth-child(3) {
-	animation-delay: calc(calc(var(--s) * -0.04) - calc(var(--s) / 2));
+  animation-delay: calc(calc(var(--s) * -0.04) - calc(var(--s) / 2));
 }
 .adios.ui.react.loader.bars:nth-child(2) .bar:nth-child(4) {
-	animation-delay: calc(calc(var(--s) * -0.06) - calc(var(--s) / 2));
+  animation-delay: calc(calc(var(--s) * -0.06) - calc(var(--s) / 2));
 }
 .adios.ui.react.loader.bars:nth-child(2) .bar:nth-child(5) {
-	animation-delay: calc(calc(var(--s) * -0.08) - calc(var(--s) / 2));
+  animation-delay: calc(calc(var(--s) * -0.08) - calc(var(--s) / 2));
 }
 .adios.ui.react.loader.bars:nth-child(2) .bar:nth-child(6) {
-	animation-delay: calc(calc(var(--s) * -0.1) - calc(var(--s) / 2));
+  animation-delay: calc(calc(var(--s) * -0.1) - calc(var(--s) / 2));
 }
 .adios.ui.react.loader.bars:nth-child(2) .bar:nth-child(7) {
-	animation-delay: calc(calc(var(--s) * -0.12) - calc(var(--s) / 2));
+  animation-delay: calc(calc(var(--s) * -0.12) - calc(var(--s) / 2));
 }
 

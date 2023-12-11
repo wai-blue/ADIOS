@@ -18,27 +18,23 @@ export default class CardButton extends Component<CardButtonProps> {
 
   render() {
     return (
-      <div  
+      <a 
         id={"adios-card-button-" + this.props.uid}
-        className="adios react ui card-button"
+        href={this.props.href}
+        //onClick={this.props.onClick}
+        className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4"}
+        style={{width: '14em'}}
       >
-        <a 
-          href={this.props.href}
-          //onClick={this.props.onClick}
-          className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4"}
-          style={{width: '14em'}}
-        >
-          <i 
-            className={this.props.icon} 
-            style={{fontSize: '4em'}}
-          ></i>
+        <i 
+          className={this.props.icon} 
+          style={{fontSize: '4em'}}
+        ></i>
 
-          <div className="text-center pt-4 mt-4 h5">{ this.props.text }</div>
-          { this.props.subtitle ? (
-            <div className="text-center small">{ this.props.subtitle }</div>
-          ) : ''}
-        </a>
-      </div>
+        <div className="text-center pt-4 mt-4 h5">{ this.props.text }</div>
+        { this.props.subtitle ? (
+          <div className="text-center small">{ this.props.subtitle }</div>
+        ) : ''}
+      </a>
     );
   }
 }

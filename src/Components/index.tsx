@@ -6,20 +6,22 @@ import { v4 } from 'uuid';
 /**
  * Components
  */
-import Form from "./Components/Form";
-import Table from "./Components/Table";
-import CardButton from "./Components/CardButton";
-import Title from "./Components/Title";
-import Breadcrumbs from "./Components/Breadcrumbs";
+import Form from "./Form";
+import Table from "./Table";
+import CardButton from "./CardButton";
+import Title from "./Title";
+import Breadcrumbs from "./Breadcrumbs";
+import Card from "./Card";
+import Button from "./Button";
 
-//import FloatingModal from "./Components/FloatingModal";
+//import FloatingModal from "./FloatingModal";
 
 /**
 * Examples
 */
 
-import Example from "./Components/Example";
-import ExampleModelHover from "./Components/Examples/ModelHover";
+import Example from "./Example";
+import ExampleModelHover from "./Examples/ModelHover";
 
 /**
 * Initialize ADIOS components
@@ -31,6 +33,7 @@ const initializeComponents = [
   'form',
   'table',
   'title',
+  'button',
   
   // Examples
   'example',
@@ -50,9 +53,13 @@ const getComponent = (componentName: string, params: Object) => {
     //@ts-ignore
     case 'card-button': return <CardButton {...params} />;
     //@ts-ignore
+    case 'card': return <Card {...params} />;
+    //@ts-ignore
     case 'title': return <Title {...params} />;
     //@ts-ignore
     case 'breadcrumbs': return <Breadcrumbs {...params} />;
+    //@ts-ignore
+    case 'button': return <Button {...params} />;
 
     //case 'floating-modal': return <FloatingModal>xxx</FloatingModal>;
 

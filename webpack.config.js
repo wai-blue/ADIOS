@@ -19,7 +19,7 @@ module.exports = (env, arg) => {
   // trying render just one specific component
   // npm run build:component -- component=Table
   let entry = arg.env.component != undefined 
-    ? './src/Components/' + arg.env.component + '.tsx': './src/index.tsx'; 
+    ? './src/Components/' + arg.env.component + '.tsx': './src/Components/index.tsx'; 
 
   return {
     //entry: generateEntries(),
