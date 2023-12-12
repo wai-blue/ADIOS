@@ -7,6 +7,7 @@ import 'notyf/notyf.min.css';
 
 import ReactQuill, { Value } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import Swal, { SweetAlertOptions } from "sweetalert2";
 
 /** Components */
 import InputLookup from "./Inputs/Lookup";
@@ -14,7 +15,8 @@ import InputVarchar from "./Inputs/Varchar";
 import InputTextarea from "./Inputs/Textarea";
 import InputInt from "./Inputs/Int";
 import InputBoolean from "./Inputs/Boolean";
-import Swal, { SweetAlertOptions } from "sweetalert2";
+import MapPoint from "./Inputs/MapPoint";
+import Color from "./Inputs/Color";
 
 interface Content {
   [key: string]: ContentCard|any;
@@ -84,55 +86,17 @@ export default class Form extends Component<FormProps> {
   constructor(props: FormProps) {
     super(props);
 
-    console.log(props);
-
     this.state = {
       model: props.model,
       content: props.content,
       isEdit: false,
       invalidInputs: {},
       inputs: {},
-      columns: undefined,
-      tabs: undefined 
-
-      //columns: this._testColumns
     };
-
 
     //@ts-ignore
     this.layout = this.props.layout?.map(row => `"${row.join(' ')}"`).join('\n');
   }
-
-  //_testColumns = { 
-  //  "name": {
-  //    "title": "Name",
-  //    "type": "string",
-  //    "length": 150,
-  //    "required": true,
-  //  },
-  //  "company_name": {
-  //    "title": "Company Name",
-  //    "type": "string",
-  //    "length": 150,
-  //    "required": true,
-  //    "disabled": true
-  //  },
-  //  "lookup_test": {
-  //    "title": "Lookup test",
-  //    "type": "lookup",
-  //    "model": "App/Widgets/Bookkeeping/Books/Models/AccountingPeriod",
-  //    "length": 1,
-  //    "required": true
-  //  },
-  //  "is_active":{
-  //    "title": "Is active?",
-  //    "type": "boolean"
-  //  },
-  //  "text":{
-  //    "title": "Text",
-  //    "type": "editor"
-  //  }
-  //};
 
   /**
    * This function trigger if something change, for Form id of record
@@ -426,20 +390,32 @@ export default class Form extends Component<FormProps> {
           parentForm={this}
           columnName={columnName}
         />;
-        break;
+      break;
       case 'boolean':
         inputToRender = <InputBoolean 
           parentForm={this}
           columnName={columnName}
         />;
-        break;
+      break;
       case 'lookup':
         inputToRender = <InputLookup 
           parentForm={this}
           {...this.state.columns[columnName]}
           columnName={columnName}
         />;
-        break;
+      break;
+      case 'MapPoint':
+        inputToRender = <MapPoint
+          parentForm={this}
+          columnName={columnName}
+        />;
+      break;
+      case 'color':
+        inputToRender = <Color
+          parentForm={this}
+          columnName={columnName}
+        />;
+      break;
       case 'editor':
         inputToRender = (
           <div className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>

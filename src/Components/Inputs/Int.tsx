@@ -5,7 +5,7 @@ interface IntInputProps {
   columnName: string
 }
 
-export default class Text extends Component<IntInputProps> {
+export default class Int extends Component<IntInputProps> {
   constructor(props: IntInputProps) {
     super(props);
   }

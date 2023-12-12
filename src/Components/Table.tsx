@@ -171,8 +171,22 @@ export default class Table extends Component {
         search: this.state.search
       }
     }).then(({data}: any) => {
+      let columns: Array<any> = [];
+
+      if (data.columns) {
+        columns = data.columns.map((column: any) => {
+            switch (column['type']) {
+              case 'color': return { 
+                ...column, 
+                renderCell: (params: any) => <span style={{ width: '20px', height: '20px', background: params.value }} className="rounded"/>
+              }
+              default: return column;
+            }
+        });
+      }
+
       this.setState({
-        columns: data.columns,
+        columns: columns,
         data: data.data,
         title: data.title
       });

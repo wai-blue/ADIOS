@@ -32,7 +32,9 @@ class OnLoadData extends \ADIOS\Core\Controller {
         $columns[] = [
           'field' => $columnName,
           'headerName' => $column['title'],
-          'flex' => 1
+          'flex' => 1,
+          'type' => $column['type']
+          //'html' => "<b class='text-danger'>xxx</b>"
         ];
       }
 

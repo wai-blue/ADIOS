@@ -5,7 +5,7 @@ interface BooleanInputProps {
   columnName: string
 }
 
-export default class Text extends Component<BooleanInputProps> {
+export default class Boolean extends Component<BooleanInputProps> {
   constructor(props: BooleanInputProps) {
     super(props);
   }

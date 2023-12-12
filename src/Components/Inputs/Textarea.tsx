@@ -5,7 +5,7 @@ interface TextareaInputProps {
   columnName: string
 }
 
-export default class Text extends Component<TextareaInputProps> {
+export default class Textarea extends Component<TextareaInputProps> {
   constructor(props: TextareaInputProps) {
     super(props);
   }
