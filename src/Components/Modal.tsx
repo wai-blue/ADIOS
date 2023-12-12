@@ -38,7 +38,6 @@ export default class Modal extends Component<ModalProps> {
       isActive: true
     };
 
-    console.log(props);
     this.params = {
       uid: this.props.uid ?? v4(),
       type: this.props.type ?? "right"
@@ -50,10 +49,6 @@ export default class Modal extends Component<ModalProps> {
 
   componentWillUnmount() {
     document.body.removeChild(this.modalRoot);
-  }
-
-  toggleModal() {
-    //$('#adios-modal-' + this.params.uid).modal('toggle');
   }
 
   render() {
@@ -72,8 +67,7 @@ export default class Modal extends Component<ModalProps> {
                 type="button" 
                 data-dismiss="modal" 
                 aria-label="Close"
-                onClick={() => this.toggleModal()}
-              ><span aria-hidden="true">&times;</span></button>
+              ><span>&times;</span></button>
             </div>
 
             <div className="modal-body">

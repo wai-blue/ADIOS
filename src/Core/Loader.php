@@ -940,6 +940,19 @@ class Loader
       echo $jsCache;
 
       exit();
+    } else if ($this->requestedUri == "adios/react.js") {
+      $jsCache = $this->renderReactJsBundle();
+      $cachingTime = 3600;
+
+      header("Content-type: text/js");
+      header("ETag: ".md5($jsCache));
+      header($headerExpires);
+      header("Pragma: cache");
+      header($headerCacheControl);
+
+      echo $jsCache;
+
+      exit();
     } else {
       foreach ($this->assetsUrlMap as $urlPart => $mapping) {
         if (preg_match('/^'.str_replace("/", "\\/", $urlPart).'/', $this->requestedUri, $m)) {
@@ -2081,6 +2094,20 @@ class Loader
     return $css;
   }
 
+  public function renderReactJsBundle(): string {
+    $jsFile = "";
+
+    // Load react bundle file
+    foreach (scandir(dirname(__FILE__).'/../Assets/Js/React') as $file) {
+      if ('.js' == substr($file, -3)) {
+        $jsFile = dirname(__FILE__)."/../Assets/Js/React/{$file}";
+        break;
+      }
+    }
+
+    return @file_get_contents($jsFile).";\n";
+  }
+
   public function renderJSCache() {
     $js = "";
 
@@ -2133,15 +2160,6 @@ class Loader
         }
       }
     }
-
-    // Load react bundle file
-    foreach (scandir(dirname(__FILE__).'/../Assets/Js/React') as $file) {
-      if ('.js' == substr($file, -3)) {
-        $jsFiles[] = dirname(__FILE__)."/../Assets/Js/React/{$file}";
-      }
-    }
-
-    //var_dump($jsFiles); exit;
 
     foreach ($jsFiles as $file) {
       $js .= @file_get_contents($file).";\n";
