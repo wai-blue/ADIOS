@@ -1,5 +1,6 @@
 import React, { ChangeEvent, Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
+import { styled } from '@mui/material/styles';
 import axios from "axios";
 
 import { FormProps } from "./Form";
@@ -178,21 +179,21 @@ export default class Table extends Component {
     });
   }
 
-  onAddClick() {
+  toggleModal() {
     //@ts-ignore
     $('#adios-modal-' + this.params.uid).modal('toggle');
+  }
 
+  onAddClick() {
+    this.toggleModal();
     this.setState({
       form: {...this.state.form, id: undefined }
     })
   }
 
+
   onRowClick(id: number) {
-    //@ts-ignore
-    $('#adios-modal-' + this.params.uid).modal('toggle');
-
-    console.log(id);
-
+    this.toggleModal();
     this.setState({
       form: {...this.state.form, id: id}
     })
@@ -232,7 +233,14 @@ export default class Table extends Component {
             model={this.params.model}
             id={this.state.form?.id}
             title={this.state.title}
-            refreshCallback={() => this.loadData()}
+            onSaveCallback={() => {
+              this.loadData();
+              this.toggleModal();
+            }}
+            onDeleteCallback={() => {
+              this.loadData();
+              this.toggleModal();
+            }}
           />
         </Modal>
 
@@ -292,35 +300,42 @@ export default class Table extends Component {
               </div>
             </div>
            
-            <div style={{width: '100%'}}>
-              <DataGrid
-                localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
-                rows={this.state.data.data}
-                columns={this.state.columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      page: (this.state.page - 1), 
-                      pageSize: this.state.pageLength
-                    },
+            <DataGrid
+              localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
+              autoHeight={true}
+              rows={this.state.data.data}
+              columns={this.state.columns}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    page: (this.state.page - 1), 
+                    pageSize: this.state.pageLength
                   },
-                }}
-                paginationMode="server"
-                onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
-                sortingMode="server"
-                onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
-                filterMode="server"
-                onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
-                rowCount={this.state.data.total}
-                onRowClick={(item) => this.onRowClick(item.id as number)}
-                disableColumnFilter
-                disableColumnSelector
-                disableDensitySelector
-                //loading={false}
-                //pageSizeOptions={[5, 10]}
-                //checkboxSelection
-              />
-            </div>
+                },
+              }}
+              paginationMode="server"
+              onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
+              sortingMode="server"
+              onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
+              filterMode="server"
+              onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
+              rowCount={this.state.data.total}
+              onRowClick={(item) => this.onRowClick(item.id as number)}
+              disableColumnFilter
+              disableColumnSelector
+              disableDensitySelector
+              sx={{
+                '.MuiDataGrid-cell:focus': {
+                  outline: 'none'
+                },
+                '& .MuiDataGrid-row:hover': {
+                  cursor: 'pointer'
+                }
+              }}
+              //loading={false}
+              //pageSizeOptions={[5, 10]}
+              //checkboxSelection
+            />
           </div>
         </div>
       </>

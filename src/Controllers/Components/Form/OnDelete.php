@@ -13,7 +13,7 @@ namespace ADIOS\Controllers\Components\Form;
 /**
  * @package Components\Controllers\Table
  */
-class OnSave extends \ADIOS\Core\Controller {
+class OnDelete extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
   public function renderJson() { 
@@ -22,21 +22,10 @@ class OnSave extends \ADIOS\Core\Controller {
 
       $tmpModel = $this->adios->getModel($params['model']);
       
-      $tmpModel->recordSave($params['inputs']);
+      $tmpModel->find($params['id'])->delete();
 
       return [
-        'status' => 'success',
-        'message' => isset($params['inputs']['id']) ? 'Záznam uložený' : 'Pridaný nový záznam'
-      ];
-    } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
-      http_response_code(422);
-
-      $invalidInputs = json_decode($e->getMessage());
-
-      return [
-        'status' => 'error',
-        'message' => 'Neboli vyplnené všetky povinné polia',
-        'invalidInputs' => $invalidInputs
+        'status' => 'success'
       ];
     } catch (\Exception $e) {
       http_response_code(400);

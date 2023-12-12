@@ -31,7 +31,8 @@ export interface FormProps {
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
-  refreshCallback?: () => void
+  onSaveCallback?: () => void,
+  onDeleteCallback?: () => void
 }
 
 /*interface FormParams {
@@ -139,6 +140,10 @@ export default class Form extends Component<FormProps> {
     if (prevProps.id !== this.props.id) {
       this.checkIfIsEdit();
       this.loadData();
+
+      this.setState({
+        invalidInputs: {}
+      });
     }
   }
 
@@ -170,7 +175,7 @@ export default class Form extends Component<FormProps> {
       });
   }
 
-  create() {
+  saveRecord() {
     let notyf = new Notyf();
 
     //@ts-ignore
@@ -178,40 +183,40 @@ export default class Form extends Component<FormProps> {
       model: this.state.model,
       inputs: this.state.inputs 
     }).then((res: any) => {
-      notyf.success("Pridaný nový záznam");
-      if (this.props.refreshCallback) this.props.refreshCallback();
-      if (this.state.columns != null) this.initInputs(this.state.columns);
-    }).catch((res) => {
-      notyf.error(res.response.data.message);
+        notyf.success(res.data.message);
+        if (this.props.onSaveCallback) this.props.onSaveCallback();
+        //if (this.state.columns != null) this.initInputs(this.state.columns);
+      }).catch((res) => {
+        notyf.error(res.response.data.message);
 
-      if (res.response.status == 422) {
-        this.setState({
-          invalidInputs: res.response.data.invalidInputs 
-        });
-      }
-    });
+        if (res.response.status == 422) {
+          this.setState({
+            invalidInputs: res.response.data.invalidInputs 
+          });
+        }
+      });
   }
 
-  save() {
+  deleteRecord(id: number) {
     let notyf = new Notyf();
 
     //@ts-ignore
-    axios.patch(_APP_URL + '/Components/Form/OnSave', {
+    axios.patch(_APP_URL + '/Components/Form/OnDelete', {
       model: this.state.model,
-      inputs: this.state.inputs 
-    }).then((res: any) => {
-      notyf.success("Success");
-      if (this.props.refreshCallback) this.props.refreshCallback();
-      //if (this.state.columns != null) this.initInputs(this.state.columns);
-    }).catch((res) => {
-      notyf.error(res.response.data.message);
+      id: id
+    }).then(() => {
+        notyf.success("Záznam zmazaný");
+        if (this.props.onDeleteCallback) this.props.onDeleteCallback();
+        //if (this.state.columns != null) this.initInputs(this.state.columns);
+      }).catch((res) => {
+        notyf.error(res.response.data.message);
 
-      if (res.response.status == 422) {
-        this.setState({
-          invalidInputs: res.response.data.invalidInputs 
-        });
-      }
-    });
+        if (res.response.status == 422) {
+          this.setState({
+            invalidInputs: res.response.data.invalidInputs 
+          });
+        }
+      });
   }
 
   /**
@@ -317,7 +322,7 @@ export default class Form extends Component<FormProps> {
   _renderTabContent(tabName: string, content: any) {
     if (
       tabName == "default" 
-      || (this.state.tabs && this.state.tabs[tabName]['active'])
+        || (this.state.tabs && this.state.tabs[tabName]['active'])
     ) {
       return (
         <div 
@@ -336,7 +341,7 @@ export default class Form extends Component<FormProps> {
               Object.keys(this.state.columns).map((columnName: string) => {
                 if (
                   this.state.columns == null 
-                  || this.state.columns[columnName] == null
+                    || this.state.columns[columnName] == null
                 ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
 
                 return this._renderInput(columnName)
@@ -366,19 +371,19 @@ export default class Form extends Component<FormProps> {
     switch (contentItemName) {
       case 'input': 
         contentItem = this._renderInput(contentItemParams['input'] as string);
-      break;
+        break;
       case 'inputs':
         contentItem = (contentItemParams as Array<string>).map((input: string) => {
           return this._renderInput(input)
         });
-      break;
+        break;
       case 'html': 
         contentItem = (<div dangerouslySetInnerHTML={{ __html: contentItemParams['html'] }} />);
-      break;
+        break;
       default: 
         contentItem = window.getComponent(contentItemName, contentItemParams[contentItemName]);
     }
-    
+
     return (
       <div style={{gridArea: contentItemArea}}>
         {contentItem}
@@ -482,7 +487,7 @@ export default class Form extends Component<FormProps> {
               <div className="col-lg-12 m-0 p-0 mt-2">
                 <div className="d-flex flex-row-reverse">
                   {this.state.isEdit ? <button 
-                    onClick={() => alert()}
+                    onClick={() => this.deleteRecord(this.props.id ?? 0)}
                     className="btn btn-danger btn-sm"
                   ><i className="fas fa-trash"></i> Zmazať</button> : ''}
                 </div>
@@ -508,17 +513,15 @@ export default class Form extends Component<FormProps> {
           <div className="card-body">
             {this._renderTab()}
 
-            {this.state.isEdit == true ? (
-              <button 
-                onClick={() => this.save()}
-                className="btn btn-primary mt-2"
-              ><i className="fas fa-save"></i> Uložiť záznam</button>
-            ) : (
-              <button 
-                onClick={() => this.create()}
-                className="btn btn-primary mt-2"
-              ><i className="fas fa-plus"></i> Pridať záznam</button>
-            )}
+            <button 
+              onClick={() => this.saveRecord()}
+              className="btn btn-primary mt-2"
+            >
+              {this.state.isEdit == true 
+                ? <span><i className="fas fa-save"></i> Uložiť záznam</span>
+                : <span><i className="fas fa-plus"></i> Pridať záznam</span>
+              }
+            </button>
           </div>
         </div>
       </div>
