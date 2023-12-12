@@ -1,5 +1,5 @@
-import React, { Component, useId } from "react";
-import { DataGrid, GridColDef, GridValueGetterParams, skSK } from '@mui/x-data-grid';
+import React, { ChangeEvent, Component, useId } from "react";
+import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import axios from "axios";
 
 import { FormProps } from "./Form";
@@ -63,11 +63,15 @@ interface TableData {
 }
 
 interface TableState {
+  title: string,
   page: number,
   pageLength: number,
   columns?: Array<GridColDef>,
   data?: TableData,
-  form?: FormProps
+  form?: FormProps,
+  orderBy?: GridSortModel,
+  filterBy?: GridFilterModel,
+  search?: string
 }
 
 export default class Table extends Component {
@@ -130,11 +134,13 @@ export default class Table extends Component {
     this.params.title = props.title ? props.title : this.params.model;
 
     this.state = {
+      title: this.params.title,
       columns: undefined,
       data: undefined,
       page: 1,
       pageLength: 15,
       form: {
+        uid: props.uid,
         model: this.params.model,
         id: undefined
       }
@@ -158,16 +164,19 @@ export default class Table extends Component {
       params: {
         page: page,
         pageLength: this.state.pageLength,
-        model: this.params.model
+        model: this.params.model,
+        orderBy: this.state.orderBy,
+        filterBy: this.state.filterBy,
+        search: this.state.search
       }
     }).then(({data}: any) => {
       this.setState({
         columns: data.columns,
-        data: data.data
+        data: data.data,
+        title: data.title
       });
     });
   }
-
 
   onAddClick() {
     //@ts-ignore
@@ -189,6 +198,24 @@ export default class Table extends Component {
     })
   }
 
+  onFilterChange(data: GridFilterModel) {
+    this.setState({
+      filterBy: data
+    }, () => this.loadData());
+  }
+
+  onOrderByChange(data: GridSortModel) {
+    this.setState({
+      orderBy: data[0]
+    }, () => this.loadData());
+  }
+
+  onSearchChange(search: string) {
+    this.setState({
+      search: search
+    }, () => this.loadData());
+  }
+
   render() {
     if (!this.state.data || !this.state.columns) {
       return <Loader />;
@@ -201,6 +228,7 @@ export default class Table extends Component {
           {...this.params.modal}
         >
           <Form 
+            uid={this.params.uid}
             model={this.params.model}
             id={this.state.form?.id}
           />
@@ -212,19 +240,31 @@ export default class Table extends Component {
         >
           <div className="card">
             <div className="card-header">
-              <div className="row">
+              <div className="row m-0">
 
                 {this.params.showTitle ? (
                   <div className="col-lg-12">
-                    <h3 className="card-title">{this.params.title}</h3>
+                    <h3 className="card-title m-0">{this.state.title}</h3>
                   </div>
                 ) : ''}
 
-                <div className="col-lg-12">
+                <div className="col-lg-6">
                   <button
                     className="btn btn-primary"
                     onClick={() => this.onAddClick()} 
-                  >Add</button>
+                  ><i className="fas fa-plus"/> Pridať záznam</button>
+                </div>
+
+                <div className="col-lg-6 mx-auto">
+                  <div className="input-group">
+                    <input 
+                      className="form-control border-end-0 border rounded-pill"
+                      type="search"
+                      placeholder="Hľadať"
+                      value={this.state.search} 
+                      onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -243,8 +283,20 @@ export default class Table extends Component {
               }}
               paginationMode="server"
               onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
+              sortingMode="server"
+              onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
+              filterMode="server"
+              onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
               rowCount={this.state.data.total}
               onRowClick={(item) => this.onRowClick(item.id as number)}
+              disableColumnFilter
+              disableColumnSelector
+              disableDensitySelector
+              slotProps={{
+                toolbar: {
+                  showQuickFilter: true,
+                },
+              }}
               //loading={false}
               //pageSizeOptions={[5, 10]}
               //checkboxSelection
