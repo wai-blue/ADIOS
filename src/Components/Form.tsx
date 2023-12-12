@@ -14,6 +14,7 @@ import InputVarchar from "./Inputs/Varchar";
 import InputTextarea from "./Inputs/Textarea";
 import InputInt from "./Inputs/Int";
 import InputBoolean from "./Inputs/Boolean";
+import Swal, { SweetAlertOptions } from "sweetalert2";
 
 interface Content {
   [key: string]: ContentCard|any;
@@ -198,25 +199,38 @@ export default class Form extends Component<FormProps> {
   }
 
   deleteRecord(id: number) {
-    let notyf = new Notyf();
-
     //@ts-ignore
-    axios.patch(_APP_URL + '/Components/Form/OnDelete', {
-      model: this.state.model,
-      id: id
-    }).then(() => {
-        notyf.success("Záznam zmazaný");
-        if (this.props.onDeleteCallback) this.props.onDeleteCallback();
-        //if (this.state.columns != null) this.initInputs(this.state.columns);
-      }).catch((res) => {
-        notyf.error(res.response.data.message);
+    Swal.fire({
+      title: 'Ste si istý?',
+      html: 'Ste si istý, že chcete vymazať tento záznam?',
+      icon: 'danger',
+      showCancelButton: true,
+      cancelButtonText: 'Nie',
+      confirmButtonText: 'Áno',
+      confirmButtonColor: '#dc4c64',
+      reverseButtons: false,
+    } as SweetAlertOptions).then((result) => {
+      if (result.isConfirmed) {
+        let notyf = new Notyf();
+        //@ts-ignore
+        axios.patch(_APP_URL + '/Components/Form/OnDelete', {
+          model: this.state.model,
+          id: id
+        }).then(() => {
+            notyf.success("Záznam zmazaný");
+            if (this.props.onDeleteCallback) this.props.onDeleteCallback();
+            //if (this.state.columns != null) this.initInputs(this.state.columns);
+          }).catch((res) => {
+            notyf.error(res.response.data.message);
 
-        if (res.response.status == 422) {
-          this.setState({
-            invalidInputs: res.response.data.invalidInputs 
+            if (res.response.status == 422) {
+              this.setState({
+                invalidInputs: res.response.data.invalidInputs 
+              });
+            }
           });
-        }
-      });
+      }
+    })
   }
 
   /**
