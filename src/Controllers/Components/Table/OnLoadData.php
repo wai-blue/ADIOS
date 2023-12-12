@@ -20,17 +20,19 @@ class OnLoadData extends \ADIOS\Core\Controller {
     try {
       $params = $this->params;
       
-      $pageLength = (int) $params['pageLength'] ?? 15;
-
       $tmpModel = $this->adios->getModel($this->params['model']);
 
+      $tableTitle = $tmpModel->tableTitle;
       $tmpColumns = $tmpModel->columns();
+
+      $pageLength = (int) $params['pageLength'] ?? 15;
 
       $columns = [];
       foreach ($tmpColumns as $columnName => $column) {
         $columns[] = [
           'field' => $columnName,
-          'headerName' => $column['title']
+          'headerName' => $column['title'],
+          'flex' => 1
         ];
       }
 
@@ -64,7 +66,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
       return [
         'columns' => $columns, 
         'data' => $data,
-        'title' => $tmpModel->tableTitle
+        'title' => $tableTitle
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error

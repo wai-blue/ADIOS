@@ -30,7 +30,8 @@ export interface FormProps {
   title?: string,
   readonly?: boolean,
   content?: Content,
-  layout?: Array<Array<string>>
+  layout?: Array<Array<string>>,
+  refreshCallback?: () => void
 }
 
 /*interface FormParams {
@@ -177,7 +178,8 @@ export default class Form extends Component<FormProps> {
       model: this.state.model,
       inputs: this.state.inputs 
     }).then((res: any) => {
-      notyf.success("Success");
+      notyf.success("Pridaný nový záznam");
+      if (this.props.refreshCallback) this.props.refreshCallback();
       if (this.state.columns != null) this.initInputs(this.state.columns);
     }).catch((res) => {
       notyf.error(res.response.data.message);
@@ -199,6 +201,7 @@ export default class Form extends Component<FormProps> {
       inputs: this.state.inputs 
     }).then((res: any) => {
       notyf.success("Success");
+      if (this.props.refreshCallback) this.props.refreshCallback();
       //if (this.state.columns != null) this.initInputs(this.state.columns);
     }).catch((res) => {
       notyf.error(res.response.data.message);
@@ -469,15 +472,20 @@ export default class Form extends Component<FormProps> {
         <div className="card w-100 overflow-auto">
           <div className="card-header">
             <div className="row">
-              <div className="col-lg-12">
+              <div className="col-lg-12 m-0 p-0">
                 <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.state.model } -  
-                <small className="text-secondary"> Nový záznam</small></h3>
+                  <small className="text-secondary">
+                    {this.state.isEdit ? ' Editácia záznamu' : ' Nový záznam'}
+                  </small>
+                </h3>
               </div>
-              <div className="col-lg-12 text-end">
-                {this.state.isEdit ? <button 
-                  onClick={() => alert()}
-                  className="btn btn-danger btn-sm"
-                ><i className="fas fa-trash"></i> Vymazať</button> : ''}
+              <div className="col-lg-12 m-0 p-0 mt-2">
+                <div className="d-flex flex-row-reverse">
+                  {this.state.isEdit ? <button 
+                    onClick={() => alert()}
+                    className="btn btn-danger btn-sm"
+                  ><i className="fas fa-trash"></i> Zmazať</button> : ''}
+                </div>
               </div>
 
               {this.state.tabs != undefined ? (
@@ -503,13 +511,13 @@ export default class Form extends Component<FormProps> {
             {this.state.isEdit == true ? (
               <button 
                 onClick={() => this.save()}
-                className="btn btn-secondary mt-2"
-              ><i className="fas fa-save"></i> Uložiť</button>
+                className="btn btn-primary mt-2"
+              ><i className="fas fa-save"></i> Uložiť záznam</button>
             ) : (
               <button 
                 onClick={() => this.create()}
                 className="btn btn-primary mt-2"
-              ><i className="fas fa-plus"></i> Vytvoriť</button>
+              ><i className="fas fa-plus"></i> Pridať záznam</button>
             )}
           </div>
         </div>

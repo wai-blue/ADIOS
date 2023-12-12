@@ -34,7 +34,7 @@ class OnSave extends \ADIOS\Core\Controller {
 
       return [
         'status' => 'error',
-        'message' => 'Invalid inputs',
+        'message' => 'Neboli vyplnené všetky povinné polia',
         'invalidInputs' => $invalidInputs
       ];
     } catch (\Exception $e) {

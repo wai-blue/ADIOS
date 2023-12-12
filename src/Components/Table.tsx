@@ -231,6 +231,8 @@ export default class Table extends Component {
             uid={this.params.uid}
             model={this.params.model}
             id={this.state.form?.id}
+            title={this.state.title}
+            refreshCallback={() => this.loadData()}
           />
         </Modal>
 
@@ -243,22 +245,43 @@ export default class Table extends Component {
               <div className="row m-0">
 
                 {this.params.showTitle ? (
-                  <div className="col-lg-12">
+                  <div className="col-lg-12 p-0 m-0">
                     <h3 className="card-title m-0">{this.state.title}</h3>
                   </div>
                 ) : ''}
 
-                <div className="col-lg-6">
+                <div className="col-lg-6 m-0 p-0">
                   <button
                     className="btn btn-primary"
                     onClick={() => this.onAddClick()} 
                   ><i className="fas fa-plus"/> Pridať záznam</button>
                 </div>
 
-                <div className="col-lg-6 mx-auto">
-                  <div className="input-group">
+                <div className="col-lg-6 m-0 p-0">
+                  <div className="d-flex flex-row-reverse">
+                    <div className="dropdown no-arrow">
+                      <button 
+                        className="btn btn-light dropdown-toggle" 
+                        type="button"
+                        data-toggle="dropdown"
+                        aria-haspopup="true"
+                        aria-expanded="false"
+                      >
+                        <i className="fas fa-ellipsis-v"/>
+                      </button>
+                      <div className="dropdown-menu">
+                        <button className="dropdown-item" type="button">
+                          <i className="fas fa-file-export mr-2"/> Exportovať do CSV
+                        </button>
+                        <button className="dropdown-item" type="button">
+                          <i className="fas fa-print mr-2"/> Tlačiť
+                        </button>
+                      </div>
+                    </div>
+
                     <input 
-                      className="form-control border-end-0 border rounded-pill"
+                      className="mr-2 form-control border-end-0 border rounded-pill"
+                      style={{maxWidth: '250px'}}
                       type="search"
                       placeholder="Hľadať"
                       value={this.state.search} 
@@ -268,39 +291,36 @@ export default class Table extends Component {
                 </div>
               </div>
             </div>
-            
-            <DataGrid
-              localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
-              rows={this.state.data.data}
-              columns={this.state.columns}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    page: (this.state.page - 1), 
-                    pageSize: this.state.pageLength
+           
+            <div style={{width: '100%'}}>
+              <DataGrid
+                localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
+                rows={this.state.data.data}
+                columns={this.state.columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      page: (this.state.page - 1), 
+                      pageSize: this.state.pageLength
+                    },
                   },
-                },
-              }}
-              paginationMode="server"
-              onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
-              sortingMode="server"
-              onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
-              filterMode="server"
-              onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
-              rowCount={this.state.data.total}
-              onRowClick={(item) => this.onRowClick(item.id as number)}
-              disableColumnFilter
-              disableColumnSelector
-              disableDensitySelector
-              slotProps={{
-                toolbar: {
-                  showQuickFilter: true,
-                },
-              }}
-              //loading={false}
-              //pageSizeOptions={[5, 10]}
-              //checkboxSelection
-            />
+                }}
+                paginationMode="server"
+                onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
+                sortingMode="server"
+                onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
+                filterMode="server"
+                onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
+                rowCount={this.state.data.total}
+                onRowClick={(item) => this.onRowClick(item.id as number)}
+                disableColumnFilter
+                disableColumnSelector
+                disableDensitySelector
+                //loading={false}
+                //pageSizeOptions={[5, 10]}
+                //checkboxSelection
+              />
+            </div>
           </div>
         </div>
       </>

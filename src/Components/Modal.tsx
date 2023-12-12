@@ -68,12 +68,12 @@ export default class Modal extends Component<ModalProps> {
 
             <div className="modal-header">
               <button 
+                className="btn btn-light"
                 type="button" 
                 data-dismiss="modal" 
                 aria-label="Close"
                 onClick={() => this.toggleModal()}
               ><span aria-hidden="true">&times;</span></button>
-              <h4 className="modal-title" id="myModalLabel2">Right Sidebar</h4>
             </div>
 
             <div className="modal-body">
