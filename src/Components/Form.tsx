@@ -15,8 +15,10 @@ import InputVarchar from "./Inputs/Varchar";
 import InputTextarea from "./Inputs/Textarea";
 import InputInt from "./Inputs/Int";
 import InputBoolean from "./Inputs/Boolean";
-import MapPoint from "./Inputs/MapPoint";
-import Color from "./Inputs/Color";
+import InputMapPoint from "./Inputs/MapPoint";
+import InputColor from "./Inputs/Color";
+import InputImage from "./Inputs/Image";
+import InputTags from "./Inputs/Tags";
 
 interface Content {
   [key: string]: ContentCard|any;
@@ -405,13 +407,25 @@ export default class Form extends Component<FormProps> {
         />;
       break;
       case 'MapPoint':
-        inputToRender = <MapPoint
+        inputToRender = <InputMapPoint
           parentForm={this}
           columnName={columnName}
         />;
       break;
       case 'color':
-        inputToRender = <Color
+        inputToRender = <InputColor
+          parentForm={this}
+          columnName={columnName}
+        />;
+      break;
+      case 'tags':
+        inputToRender = <InputTags
+          parentForm={this}
+          columnName={columnName}
+        />;
+      break;
+      case 'image':
+        inputToRender = <InputImage
           parentForm={this}
           columnName={columnName}
         />;
