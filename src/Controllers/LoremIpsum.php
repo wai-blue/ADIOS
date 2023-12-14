@@ -20,6 +20,6 @@ class LoremIpsum extends \ADIOS\Core\Controller {
 
   public function render()
   {
-    return $this->adios->view->create('LoremIpsum', $this->params)->render();
+    return $this->adios->view->create('\\ADIOS\\Core\\ViewsWithController\\LoremIpsum', $this->params)->render();
   }
 }

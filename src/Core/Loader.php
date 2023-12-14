@@ -653,11 +653,11 @@ class Loader
         ));
 
         // inicializacia UI wrappera
-        // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\View::class;
+        // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\ViewWithController::class;
         // $this->ui = new $uiFactoryClass($this);
 
         // inicializacia UI wrappera
-        $viewFactoryClass = $this->classFactories['view'] ?? \ADIOS\Core\View::class;
+        $viewFactoryClass = $this->classFactories['view'] ?? \ADIOS\Core\ViewWithController::class;
         $this->view = new $viewFactoryClass($this);
       }
 

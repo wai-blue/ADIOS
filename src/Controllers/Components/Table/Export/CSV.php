@@ -21,7 +21,7 @@ class CSV extends \ADIOS\Core\Controller {
     $columns = $model->columns();
     $tableParams = json_decode(base64_decode($this->params['tableParams']), TRUE);
 
-    $uiTable = new \ADIOS\Core\Views\Table($this->adios, $tableParams);
+    $uiTable = new \ADIOS\Core\ViewsWithController\Table($this->adios, $tableParams);
     $data = $uiTable->data;
     $firstRow = reset($data);
 

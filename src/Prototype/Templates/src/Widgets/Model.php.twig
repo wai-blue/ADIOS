@@ -64,7 +64,7 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   }
 
 {% if (thisModel.config.onFormParams) %}
-  public function onFormParams(\ADIOS\Core\Views\Form $formObject): array
+  public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject): array
   {
     $data = $formObject->data;
     $params = $formObject->params;

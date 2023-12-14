@@ -6,12 +6,20 @@ namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 
+  use \{{ thisController.traitNamespace }}\{{ thisController.class }};
+
   public function prepareViewAndParams(): array {
 
-    // basic configuration
-    $view = '{{ thisController.config.view }}';
+    // prepare view
+    $this->view = '{{ thisController.config.view }}';
 
-    $viewParams = array_merge(
+    // call onBeforePrepareViewAndParams, if it exists
+    if (method_exists($this, 'onBeforePrepareViewAndParams')) {
+      $this->onBeforePrepareViewAndParams();
+    }
+
+    // build-up view params
+    $this->viewParams = array_merge(
       $this->params,
       [
         'windowParams' => $this->params['windowParams'] ?? [],
@@ -19,7 +27,12 @@ class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 {{ varExport(thisController.config.params, "      ")|raw }} ?? []
     );
 
+    // call onAfterPrepareViewAndParams, if it exists
+    if (method_exists($this, 'onAfterPrepareViewAndParams')) {
+      $this->onAfterPrepareViewAndParams();
+    }
+
     // render view
-    return [$view, $viewParams];
+    return [$this->view, $this->viewParams];
   }
 }

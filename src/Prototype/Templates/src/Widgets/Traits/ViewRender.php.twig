@@ -1,0 +1,38 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace {{ thisController.traitNamespace }};
+
+trait {{ thisController.class }} {
+
+  // Uncomment methods in this trait, if you wish to implement custom code into the controller.
+  // !!! DO NOT FORGET TO DELETE THE prototypeBuilderRegenerateAllowed TAG !!!
+
+  // /**
+  //  * onBeforePrepareViewAndParams
+  //  * Called from the main controller at the beginning of the prepareViewAndParams()
+  //  * Method should modify controller's $params, $view or $viewParams object.
+  //  *
+  //  * @return void
+  //  */
+  // public function onBeforePrepareViewAndParams() {
+  //   $this->params[...] = ...;
+  //   $this->view[...] = ...;
+  //   $this->viewParams[...] = ...;
+  // }
+
+  // /**
+  //  * onAfterPrepareViewAndParams
+  //  * Called from the main controller at the end of the prepareViewAndParams()
+  //  * Method should modify controller's $params, $view or $viewParams object.
+  //  *
+  //  * @return void
+  //  */
+  // public function onAfterPrepareViewAndParams() {
+  //   $this->params[...] = ...;
+  //   $this->view[...] = ...;
+  //   $this->viewParams[...] = ...;
+  // }
+
+}

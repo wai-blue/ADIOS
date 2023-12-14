@@ -17,7 +17,7 @@ class GetCardContent extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = TRUE;
 
   function render() {
-    $dashboard = new \ADIOS\Core\Views\Dashboard($this->adios);
+    $dashboard = new \ADIOS\Core\ViewsWithController\Dashboard($this->adios);
 
     return $dashboard->getCardContent($this->params['uid'] ?? "");
   }

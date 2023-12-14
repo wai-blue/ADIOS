@@ -41,7 +41,7 @@ class Search extends \ADIOS\Core\Controller {
   }
 
   public function render() {
-     // TODO: Po zmene z \ADIOS\Core\UI na \ADIOS\Core\View toto sposobuje nekonecnu rekurziu
+     // TODO: Po zmene z \ADIOS\Core\UI na \ADIOS\Core\ViewWithController toto sposobuje nekonecnu rekurziu
     $content = parent::render();
 
     $window = $this->adios->view->Window([

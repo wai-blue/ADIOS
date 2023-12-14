@@ -103,7 +103,7 @@ trait {{ thisModel.class }} {
 
   /* onTableParams */
   /*
-  public function onTableParams(\ADIOS\Core\Views\Table $tableObject, array $params): array
+  public function onTableParams(\ADIOS\Core\ViewsWithController\Table $tableObject, array $params): array
   {
     return (array) parent::onTableParams($tableObject, $params);
   }
@@ -111,7 +111,7 @@ trait {{ thisModel.class }} {
 
   /* onTableRowParams */
   /*
-  public function onTableRowParams(\ADIOS\Core\Views\Table $tableObject, array $params, array $data): array
+  public function onTableRowParams(\ADIOS\Core\ViewsWithController\Table $tableObject, array $params, array $data): array
   {
     return (array) parent::onTableRowParams($tableObject, $params, $data);
   }
@@ -119,7 +119,7 @@ trait {{ thisModel.class }} {
 
   /* onTableRowCssFormatter */
   /*
-  public function onTableRowCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableRowCssFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) parent::onTableRowCssFormatter($tableObject, $data);
   }
@@ -127,7 +127,7 @@ trait {{ thisModel.class }} {
 
   /* onTableCellCssFormatter */
   /*
-  public function onTableCellCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableCellCssFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) parent::onTableCellCssFormatter($tableObject, $data);
   }
@@ -135,7 +135,7 @@ trait {{ thisModel.class }} {
 
   /* onTableCellHtmlFormatter */
   /*
-  public function onTableCellHtmlFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableCellHtmlFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) parent::onTableCellHtmlFormatter($tableObject, $data);
   }
@@ -143,7 +143,7 @@ trait {{ thisModel.class }} {
 
   /* onTableCellCsvFormatter */
   /*
-  public function onTableCellCsvFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableCellCsvFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) parent::onTableCellCsvFormatter($tableObject, $data);
   }
@@ -156,7 +156,7 @@ trait {{ thisModel.class }} {
 
   /* onTableBeforeInit */
   /*
-  public function onTableBeforeInit(\ADIOS\Core\Views\Table $tableObject): void
+  public function onTableBeforeInit(\ADIOS\Core\ViewsWithController\Table $tableObject): void
   {
     parent::onTableBeforeInit($tableObject);
   }
@@ -164,7 +164,7 @@ trait {{ thisModel.class }} {
 
   /* onTableAfterInit */
   /*
-  public function onTableAfterInit(\ADIOS\Core\Views\Table $tableObject): void
+  public function onTableAfterInit(\ADIOS\Core\ViewsWithController\Table $tableObject): void
   {
     parent::onTableAfterInit($tableObject);
   }
@@ -172,7 +172,7 @@ trait {{ thisModel.class }} {
 
   /* onTableAfterDataLoaded */
   /*
-  public function onTableAfterDataLoaded(\ADIOS\Core\Views\Table $tableObject): void
+  public function onTableAfterDataLoaded(\ADIOS\Core\ViewsWithController\Table $tableObject): void
   {
     parent::onTableAfterDataLoaded($tableObject);
   }
@@ -187,7 +187,7 @@ trait {{ thisModel.class }} {
 
   /* onFormBeforeInit */
   /*
-  public function onFormBeforeInit(\ADIOS\Core\Views\Form $formObject): void
+  public function onFormBeforeInit(\ADIOS\Core\ViewsWithController\Form $formObject): void
   {
     parent::onFormBeforeInit($tableObject);
   }
@@ -195,7 +195,7 @@ trait {{ thisModel.class }} {
 
   /* onFormAfterInit */
   /*
-  public function onFormAfterInit(\ADIOS\Core\Views\Form $formObject): void
+  public function onFormAfterInit(\ADIOS\Core\ViewsWithController\Form $formObject): void
   {
     parent::onFormAfterInit($tableObject);
   }
