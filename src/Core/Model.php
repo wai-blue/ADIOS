@@ -1326,7 +1326,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $this->recordSaveOriginalData = $data;
 
     // extract data for this model and data for lookup models
-
     $dataForThisModel = [];
     $dataForLookupModels = [];
     foreach ($data as $key => $value) {
@@ -1335,6 +1334,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
       } else {
         [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
         $dataForLookupModels[$columnName][$lookupColumnName] = $value;
+      }
+
+      // Upload image
+      if ($this->columns()[$key]['type'] == 'image') {
+        $imageData = preg_replace('/^data:image\/[^;]+;base64,/', '', $data[$key]['file']);
+        $image = base64_decode($imageData);
+
+        // TODO: Validate
+        file_put_contents($this->adios->config['files_dir'] . "/{$data[$key]['fileName']}", $image); 
+
+        // Replace just with filePath to save in DB
+        $dataForThisModel[$key] = $data[$key]['fileName'];
       }
     }
 

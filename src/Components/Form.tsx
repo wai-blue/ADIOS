@@ -221,7 +221,6 @@ export default class Form extends Component<FormProps> {
   inputOnChangeRaw(columnName: string, inputValue: any) {
     let changedInput: any = {};
     changedInput[columnName] = inputValue;
-    console.log(changedInput);
 
     this.setState({
       inputs: {...this.state.inputs, ...changedInput}

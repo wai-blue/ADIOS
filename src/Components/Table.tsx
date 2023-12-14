@@ -178,7 +178,22 @@ export default class Table extends Component {
             switch (column['type']) {
               case 'color': return { 
                 ...column, 
-                renderCell: (params: any) => <span style={{ width: '20px', height: '20px', background: params.value }} className="rounded"/>
+                renderCell: (params: any) => {
+                  return <span 
+                    style={{ width: '20px', height: '20px', background: params.value }} 
+                    className="rounded" 
+                  />
+                }
+              }
+              case 'image': return { 
+                ...column, 
+                renderCell: (params: any) => {
+                  return <img 
+                    style={{ width: '30px', height: '30px' }}
+                    src={"http://localhost/bladeerp/upload/" + params.value}
+                    className="rounded"
+                  />
+                }
               }
               default: return column;
             }

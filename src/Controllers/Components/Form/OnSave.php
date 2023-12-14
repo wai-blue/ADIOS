@@ -21,7 +21,7 @@ class OnSave extends \ADIOS\Core\Controller {
       $params = $this->getRequestParams();
 
       $tmpModel = $this->adios->getModel($params['model']);
-      
+
       $tmpModel->recordSave($params['inputs']);
 
       return [

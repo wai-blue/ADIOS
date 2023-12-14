@@ -19,11 +19,20 @@ export default class Image extends Component<ImageInputProps> {
     this.state = {
       images: []
     }
+
+    console.log(this.props.parentForm.state.inputs[this.props.columnName]);
   }
 
  onChange = (images: Array<any>, addUpdateIndex: any) => {
-    // data for submit
+    let image = images[0];
     console.log(images);
+
+    this.props.parentForm.inputOnChangeRaw(this.props.columnName, {
+      fileName: image.file.name,
+      file: image.data_url
+      //fileSize: image.file.size,
+      //fileType: image.file.type,
+    });
 
     this.setState({
       images: images
@@ -33,11 +42,12 @@ export default class Image extends Component<ImageInputProps> {
   render() {
     return (
       <ImageUploading
-        multiple
         value={this.state.images}
         onChange={this.onChange}
         maxNumber={1}
         dataURLKey="data_url"
+        //value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
+        //onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
       >
         {({
           imageList,
