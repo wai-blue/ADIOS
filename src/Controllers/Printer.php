@@ -36,7 +36,7 @@ class Printer extends \ADIOS\Core\Controller {
     $this->contentParams = $params['contentParams'] ?? [];
 
     $this->contentParams['print'] = TRUE;
-    $this->contentParams['displayMode'] = \ADIOS\Core\View::DISPLAY_MODE_DESKTOP;
+    $this->contentParams['displayMode'] = \ADIOS\Core\ViewWithController::DISPLAY_MODE_DESKTOP;
   }
 
   public static function overrideConfig($config, $params)

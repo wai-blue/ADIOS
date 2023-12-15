@@ -183,7 +183,7 @@ class User extends \ADIOS\Core\Model {
     return ($user === NULL ? [] : $user->toArray());
   }
 
-  public function onFormParams(\ADIOS\Core\Views\Form $formObject, array $params): array
+  public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject, array $params): array
   {
 
     if ($params["myProfileView"]) {

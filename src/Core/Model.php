@@ -568,7 +568,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $routing = [
 
       // Default
-      '/^' . $urlBase . '$/' => [
+      '/^' . $urlBase . '$/i' => [
         "permission" => "{$this->fullName}/Browse",
         "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
@@ -577,7 +577,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Browse
-      '/^' . $urlBase . '\/browse$/' => [
+      '/^' . $urlBase . '\/browse$/i' => [
         "permission" => "{$this->fullName}/Browse",
         "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
@@ -586,7 +586,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Edit
-      '/^' . $urlBase . '\/(\d+)\/edit$/' => [
+      '/^' . $urlBase . '\/(\d+)\/edit$/i' => [
         "permission" => "{$this->fullName}/Edit",
         "controller" => $this->crud['edit']['controller'] ?? "Components/Form",
         "params" => array_merge($urlParams, [
@@ -600,7 +600,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Add
-      '/^' . $urlBase . '\/add$/' => [
+      '/^' . $urlBase . '\/add$/i' => [
         "permission" => "{$this->fullName}/Add",
         "controller" => $this->crud['add']['controller'] ?? "Components/Form",
         "params" => array_merge($urlParams, [
@@ -615,7 +615,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Save
-      '/^' . $urlBase . '\/save$/' => [
+      '/^' . $urlBase . '\/save$/i' => [
         "permission" => "{$this->fullName}/Save",
         "controller" => $this->crud['save']['controller'] ?? "Components/Form/Save",
         "params" => array_merge($urlParams, [
@@ -633,7 +633,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Copy
-      '/^' . $urlBase . '\/copy$/' => [
+      '/^' . $urlBase . '\/copy$/i' => [
         "permission" => "{$this->fullName}/Copy",
         "controller" => $this->crud['copy']['controller'] ?? "Components/Form/Copy",
         "params" => array_merge($urlParams, [
@@ -642,7 +642,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Print
-      '/^' . $urlBase . '\/(\d+)\/print$/' => [
+      '/^' . $urlBase . '\/(\d+)\/print$/i' => [
         "permission" => "{$this->fullName}/Edit",
         "controller" => "Printer",
         "params" => array_merge($urlParams, [
@@ -655,7 +655,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Search
-      '/^' . $urlBase . '\/search$/' => [
+      '/^' . $urlBase . '\/search$/i' => [
         "permission" => "{$this->fullName}/Search",
         "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
         "params" => array_merge($urlParams, [
@@ -678,7 +678,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Import/CSV
-      '/^' . $urlBase . '\/Import\/CSV$/' => [
+      '/^' . $urlBase . '\/Import\/CSV$/i' => [
         "permission" => "{$this->fullName}/Export/CSV",
         "controller" => "Components/Table/Import/CSV",
         "params" => array_merge($urlParams, [
@@ -687,7 +687,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Import/CSV/Import
-      '/^' . $urlBase . '\/Import\/CSV\/Import$/' => [
+      '/^' . $urlBase . '\/Import\/CSV\/Import$/i' => [
         "permission" => "{$this->fullName}/Import/CSV",
         "controller" => "Components/Table/Import/CSV/Import",
         "params" => array_merge($urlParams, [
@@ -696,7 +696,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Import/CSV/DownloadTemplate
-      '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/' => [
+      '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/i' => [
         "permission" => "{$this->fullName}/Import/CSV",
         "controller" => "Components/Table/Import/CSV/DownloadTemplate",
         "params" => array_merge($urlParams, [
@@ -705,13 +705,35 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ],
 
       // Import/CSV/Preview
-      '/^' . $urlBase . '\/Import\/CSV\/Preview$/' => [
+      '/^' . $urlBase . '\/Import\/CSV\/Preview$/i' => [
         "permission" => "{$this->fullName}/Import/CSV",
         "controller" => "Components/Table/Import/CSV/Preview",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
         ])
       ],
+
+      // Api/Get/<ID>
+      '/^Api\/' . $urlBase . '\/Get\/(\d+)$/i' => [
+        "permission" => "{$this->fullName}/Api/Get",
+        "controller" => ($this->crud['api']['controller'] ?? "Api")."/Get",
+        "params" => array_merge($urlParams, [
+          "model" => $this->fullName,
+          "id" => '$' . ($varsInUrl + 1),
+        ])
+      ],
+
+      // Api/Get:<column>=<value>
+      '/^Api\/' . $urlBase . '\/Get:(.+)=(.+)$/i' => [
+        "permission" => "{$this->fullName}/Api/Get",
+        "controller" => ($this->crud['api']['controller'] ?? "Api")."/Get",
+        "params" => array_merge($urlParams, [
+          "model" => $this->fullName,
+          "column" => '$' . ($varsInUrl + 1),
+          "value" => '$' . ($varsInUrl + 2),
+        ])
+      ],
+
     ];
 
     return $routing;
@@ -1107,11 +1129,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableParams
    *
-   * @param \ADIOS\Core\Views\Table $tableObject
+   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
    *
    * @return array Modified table params
    */
-  public function onTableParams(\ADIOS\Core\Views\Table $tableObject, array $params): array
+  public function onTableParams(\ADIOS\Core\ViewsWithController\Table $tableObject, array $params): array
   {
     return (array) $this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
       "tableObject" => $tableObject,
@@ -1122,11 +1144,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableRowParams
    *
-   * @param \ADIOS\Core\Views\Table $tableObject
+   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
    *
    * @return array Modified row params
    */
-  public function onTableRowParams(\ADIOS\Core\Views\Table $tableObject, array $params, array $data): array
+  public function onTableRowParams(\ADIOS\Core\ViewsWithController\Table $tableObject, array $params, array $data): array
   {
     return (array) $this->adios->dispatchEventToPlugins("onModelAfterTableRowParams", [
       "tableObject" => $tableObject,
@@ -1136,7 +1158,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
 
-  public function onTableRowCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableRowCssFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableRowCssFormatter", [
       "tableObject" => $tableObject,
@@ -1144,7 +1166,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["css"];
   }
 
-  public function onTableCellCssFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableCellCssFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellCssFormatter", [
       "tableObject" => $tableObject,
@@ -1152,7 +1174,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["css"];
   }
 
-  public function onTableCellHtmlFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableCellHtmlFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellHtmlFormatter", [
       "tableObject" => $tableObject,
@@ -1160,7 +1182,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])["data"]["html"];
   }
 
-  public function onTableCellCsvFormatter(\ADIOS\Core\Views\Table $tableObject, array $data): string
+  public function onTableCellCsvFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
   {
     return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellCsvFormatter", [
       "tableObject" => $tableObject,
@@ -1171,11 +1193,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableBeforeInit
    *
-   * @param \ADIOS\Core\Views\Table $tableObject
+   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
    *
    * @return void
    */
-  public function onTableBeforeInit(\ADIOS\Core\Views\Table $tableObject): void
+  public function onTableBeforeInit(\ADIOS\Core\ViewsWithController\Table $tableObject): void
   {
     $this->adios->dispatchEventToPlugins("onModelAfterTableBeforeInit", [
       "tableObject" => $tableObject,
@@ -1185,11 +1207,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableAfterInit
    *
-   * @param \ADIOS\Core\Views\Table $tableObject
+   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
    *
    * @return void
    */
-  public function onTableAfterInit(\ADIOS\Core\Views\Table $tableObject): void
+  public function onTableAfterInit(\ADIOS\Core\ViewsWithController\Table $tableObject): void
   {
     $this->adios->dispatchEventToPlugins("onModelAfterTableAfterInit", [
       "tableObject" => $tableObject,
@@ -1199,11 +1221,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableAfterDataLoaded
    *
-   * @param \ADIOS\Core\Views\Table $tableObject
+   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
    *
    * @return void
    */
-  public function onTableAfterDataLoaded(\ADIOS\Core\Views\Table $tableObject): void
+  public function onTableAfterDataLoaded(\ADIOS\Core\ViewsWithController\Table $tableObject): void
   {
     $this->adios->dispatchEventToPlugins("onModelAfterTableAfterDataLoaded", [
       "tableObject" => $tableObject,
@@ -1248,7 +1270,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
   }
 
-  public function onFormParams(\ADIOS\Core\Views\Form $formObject, array $params): array
+  public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject, array $params): array
   {
     return (array) $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
       "formObject" => $formObject,

@@ -15,7 +15,7 @@ namespace ADIOS\Controllers\Components;
  */
 class Table extends \ADIOS\Core\Controller {
   function render() {
-    $table = $this->adios->view->create('Table', $this->params);
+    $table = $this->adios->view->create('\\ADIOS\\Core\\ViewsWithController\\Table', $this->params);
     return $table->render();
   }
 }

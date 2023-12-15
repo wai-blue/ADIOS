@@ -20,7 +20,7 @@ class CSV extends \ADIOS\Core\Controller {
     $model = $this->params['model'];
     $modelObject = $this->adios->getModel($model);
 
-    $fileUploadInput = new \ADIOS\Core\Views\Input(
+    $fileUploadInput = new \ADIOS\Core\ViewsWithController\Input(
       $this->adios,
       [
         "uid" => "{$this->uid}_csv_file",
