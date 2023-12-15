@@ -19,7 +19,7 @@ class Controller {
    * Shorthand for "global table prefix"
    */
   protected string $gtp = "";
-  
+
   /**
    * Array of parameters (arguments) passed to the controller
    */
@@ -51,6 +51,7 @@ class Controller {
   public static bool $webSAPIEnabled = TRUE;
 
   public array $dictionary = [];
+  public array $viewParams = [];
 
   public string $name = "";
   public string $shortName = "";
@@ -58,6 +59,7 @@ class Controller {
   public string $controller = "";
   public string $myRootFolder = "";
   public string $twigTemplate = "";
+  public string $view = "";
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = [])
   {
