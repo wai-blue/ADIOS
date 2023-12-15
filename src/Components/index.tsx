@@ -117,6 +117,7 @@ function isValidJSON(jsonString: string) {
 declare global {
   interface Window {
     getComponent: (componentName: string, params: Object) => React.JSX.Element;
+    _APP_URL: string;
   }
 }
 

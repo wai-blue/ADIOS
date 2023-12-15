@@ -18,18 +18,15 @@ export default class Image extends Component<ImageInputProps> {
 
     this.state = {
       images: []
-    }
-
-    console.log(this.props.parentForm.state.inputs[this.props.columnName]);
+    };
   }
 
  onChange = (images: Array<any>, addUpdateIndex: any) => {
     let image = images[0];
-    console.log(images);
 
     this.props.parentForm.inputOnChangeRaw(this.props.columnName, {
-      fileName: image.file.name,
-      file: image.data_url
+      fileName: image ? image.file.name : null,
+      fileData: image ? image.fileData : null
       //fileSize: image.file.size,
       //fileType: image.file.type,
     });
@@ -42,25 +39,24 @@ export default class Image extends Component<ImageInputProps> {
   render() {
     return (
       <ImageUploading
-        value={this.state.images}
+        value={this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null 
+          ? [this.props.parentForm.state.inputs[this.props.columnName]]
+          : []
+        }
         onChange={this.onChange}
         maxNumber={1}
-        dataURLKey="data_url"
-        //value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
-        //onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
+        dataURLKey="fileData"
       >
         {({
           imageList,
           onImageUpload,
-          onImageRemoveAll,
           onImageUpdate,
           onImageRemove,
           isDragging,
           dragProps,
         }) => (
-          // write your building UI
           <div className="upload__image-wrapper">
-            {this.state.images.length == 0 ? (
+            {this.props.parentForm.state.inputs[this.props.columnName]['fileData'] == null ? (
               <button
                 className="btn btn-light btn-sm"
                 style={isDragging ? { color: 'red' } : undefined}
@@ -73,7 +69,7 @@ export default class Image extends Component<ImageInputProps> {
 
             {imageList.map((image, index) => (
               <div key={index} className="image-item">
-                <img src={image['data_url']} alt="" width="100" />
+                <img src={image['fileData']} alt="" width="100" />
                 <div className="image-item__btn-wrapper text-left">
                   <button 
                       className="btn btn-light btn-sm text-info"

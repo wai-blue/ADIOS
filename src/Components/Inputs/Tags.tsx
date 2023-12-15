@@ -56,7 +56,7 @@ export default class Tags extends Component<TagsInputProps> {
   render() {
     return (
       <ReactTags
-        tags={this.state.tags}
+        //tags={this.state.tags}
         //suggestions={this.state.suggestions}
         //delimiters={this.state.delimiters}
         handleDelete={this.handleDelete}

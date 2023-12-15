@@ -1360,11 +1360,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       // Upload image
       if ($this->columns()[$key]['type'] == 'image') {
-        $imageData = preg_replace('/^data:image\/[^;]+;base64,/', '', $data[$key]['file']);
+        $imageData = preg_replace('/^data:image\/[^;]+;base64,/', '', $data[$key]['fileData']);
         $image = base64_decode($imageData);
 
         // TODO: Validate
-        file_put_contents($this->adios->config['files_dir'] . "/{$data[$key]['fileName']}", $image); 
+        file_put_contents($this->adios->config['files_dir'] . "/{$data[$key]['fileName']}", $image);
 
         // Replace just with filePath to save in DB
         $dataForThisModel[$key] = $data[$key]['fileName'];

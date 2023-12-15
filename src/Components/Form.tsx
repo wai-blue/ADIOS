@@ -132,13 +132,7 @@ export default class Form extends Component<FormProps> {
           columns: data.columns
         });
 
-        if (Object.keys(data.inputs).length > 0) {
-          this.setState({
-            inputs: data.inputs
-          });
-        } else {
-          this.initInputs(data.columns);
-        }
+        this.initInputs(data.columns, data.inputs);
       });
   }
 
@@ -230,14 +224,22 @@ export default class Form extends Component<FormProps> {
   /**
     * Dynamically initialize inputs (React state) from model columns
     */
-  initInputs(columns: FormColumns) {
+  initInputs(columns: FormColumns, inputsValues?: Array<any>) {
     let inputs: any = {};
 
     Object.keys(columns).map((columnName: string) => {
-      if (columnName != 'id') inputs[columnName] = null;
+      switch (columns[columnName]['type']) {
+        case 'image':
+          inputs[columnName] = {
+            fileName: inputsValues[columnName] ?? null,
+            fileData: inputsValues[columnName] != undefined ? _APP_URL + "/upload/" + inputsValues[columnName] : null
+          };
+        break;
+        default:
+          inputs[columnName] = inputsValues[columnName] ?? null;
+      }
     });
 
-    console.log(inputs);
     this.setState({
       inputs: inputs
     });

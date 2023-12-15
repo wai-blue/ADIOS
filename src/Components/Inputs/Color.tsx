@@ -11,10 +11,6 @@ export default class Color extends Component<BooleanInputProps> {
     super(props);
   }
 
-  onColorChange(hex: string) {
-    console.log(hex);
-  }
-
   render() {
     return (
       <>

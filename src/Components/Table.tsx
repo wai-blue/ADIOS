@@ -190,7 +190,7 @@ export default class Table extends Component {
                 renderCell: (params: any) => {
                   return <img 
                     style={{ width: '30px', height: '30px' }}
-                    src={"http://localhost/bladeerp/upload/" + params.value}
+                    src={_APP_URL + "/upload/" + params.value}
                     className="rounded"
                   />
                 }
