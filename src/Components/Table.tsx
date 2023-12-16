@@ -136,7 +136,6 @@ export default class Table extends Component {
 
     this.state = {
       title: this.params.title,
-      columns: undefined,
       data: undefined,
       page: 1,
       pageLength: 15,
@@ -152,7 +151,49 @@ export default class Table extends Component {
   }
 
   componentDidMount() {
+    this.loadParams();
     this.loadData();
+  }
+
+  loadParams() {
+    //@ts-ignore
+    axios.get(_APP_URL + '/Components/Table/OnLoadParams', {
+      params: {
+        model: this.params.model
+      }
+    }).then(({data}: any) => {
+      let columns: Array<any> = [];
+
+      columns = data.columns.map((column: any) => {
+        switch (column['type']) {
+          case 'color': return { 
+            ...column, 
+            renderCell: (params: any) => {
+              return <span 
+                style={{ width: '20px', height: '20px', background: params.value }} 
+                className="rounded" 
+              />
+            }
+          }
+          case 'image': return { 
+            ...column, 
+            renderCell: (params: any) => {
+              return <img 
+                style={{ width: '30px', height: '30px' }}
+                src={data.folderUrl + "/" + params.value}
+                className="rounded"
+              />
+            }
+          }
+          default: return column;
+        }
+      });
+
+      this.setState({
+        columns: columns,
+        title: data.title
+      });
+    });
   }
 
   loadData(page: number = 1) {
@@ -171,39 +212,8 @@ export default class Table extends Component {
         search: this.state.search
       }
     }).then(({data}: any) => {
-      let columns: Array<any> = [];
-
-      if (data.columns) {
-        columns = data.columns.map((column: any) => {
-            switch (column['type']) {
-              case 'color': return { 
-                ...column, 
-                renderCell: (params: any) => {
-                  return <span 
-                    style={{ width: '20px', height: '20px', background: params.value }} 
-                    className="rounded" 
-                  />
-                }
-              }
-              case 'image': return { 
-                ...column, 
-                renderCell: (params: any) => {
-                  return <img 
-                    style={{ width: '30px', height: '30px' }}
-                    src={_APP_URL + "/upload/" + params.value}
-                    className="rounded"
-                  />
-                }
-              }
-              default: return column;
-            }
-        });
-      }
-
       this.setState({
-        columns: columns,
-        data: data.data,
-        title: data.title
+        data: data.data
       });
     });
   }
@@ -219,7 +229,6 @@ export default class Table extends Component {
       form: {...this.state.form, id: undefined }
     })
   }
-
 
   onRowClick(id: number) {
     this.toggleModal();

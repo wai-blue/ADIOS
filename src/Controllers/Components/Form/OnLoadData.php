@@ -26,7 +26,6 @@ class OnLoadData extends \ADIOS\Core\Controller {
       }
 
       return [
-        'columns' => $tmpModel->columns(),
         'inputs' => $inputs
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {

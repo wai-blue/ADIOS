@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components\Table;
+namespace ADIOS\Controllers\Components\Form;
 
 /**
  * @package Components\Controllers\Table
@@ -20,21 +20,8 @@ class OnLoadParams extends \ADIOS\Core\Controller {
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
-      $tmpColumns = $tmpModel->columns();
-
-      $columns = [];
-      foreach ($tmpColumns as $columnName => $column) {
-        $columns[] = [
-          'field' => $columnName,
-          'headerName' => $column['title'],
-          'flex' => 1,
-          'type' => $column['type']
-        ];
-      }
-
       return [
-        'columns' => $columns, 
-        'title' => $tmpModel->tableTitle,
+        'columns' => $tmpModel->columns(),
         'folderUrl' => $tmpModel->getFolderUrl()
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {

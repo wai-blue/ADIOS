@@ -35,7 +35,9 @@ export default class Tags extends Component<TagsInputProps> {
   handleAddition = (tag: {id: string, text: string}) => {
     this.setState({
       tags: [...this.state.tags, tag]
-    })
+    });
+
+    this.props.parentForm.inputOnChangeRaw(this.props.columnName, JSON.stringify(this.state.tags));
   };
 
   handleDrag = (tag: {id: string, text: string}, currPos: number, newPos: number) => {
@@ -56,7 +58,7 @@ export default class Tags extends Component<TagsInputProps> {
   render() {
     return (
       <ReactTags
-        //tags={this.state.tags}
+        tags={this.state.tags}
         //suggestions={this.state.suggestions}
         //delimiters={this.state.delimiters}
         handleDelete={this.handleDelete}

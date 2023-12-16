@@ -82,7 +82,6 @@ export default class Form extends Component<FormProps> {
 
   model: String;
   layout: string;
-  columns: FormColumns = {}; 
   inputs: FormInputs = {};
 
   constructor(props: FormProps) {
@@ -117,7 +116,24 @@ export default class Form extends Component<FormProps> {
   componentDidMount() {
     this.checkIfIsEdit();
     this.initTabs();
-    this.loadData();
+
+    this.loadParams();
+  }
+
+  loadParams() {
+    //@ts-ignore
+    axios.get(_APP_URL + '/Components/Form/OnLoadParams', {
+      params: {
+        model: this.state.model
+      }
+    }).then(({data}: any) => {
+      //this.columns = data.columns;
+      //this.loadData();
+
+      this.setState({
+        columns: data.columns
+      }, () => this.loadData());
+    });
   }
 
   loadData() {
@@ -128,12 +144,8 @@ export default class Form extends Component<FormProps> {
         id: this.props.id
       }
     }).then(({data}: any) => {
-        this.setState({
-          columns: data.columns
-        });
-
-        this.initInputs(data.columns, data.inputs);
-      });
+      this.initInputs(this.state.columns, data.inputs);
+    });
   }
 
   saveRecord() {
@@ -144,18 +156,18 @@ export default class Form extends Component<FormProps> {
       model: this.state.model,
       inputs: this.state.inputs 
     }).then((res: any) => {
-        notyf.success(res.data.message);
-        if (this.props.onSaveCallback) this.props.onSaveCallback();
-        //if (this.state.columns != null) this.initInputs(this.state.columns);
-      }).catch((res) => {
-        notyf.error(res.response.data.message);
+      notyf.success(res.data.message);
+      if (this.props.onSaveCallback) this.props.onSaveCallback();
+      //if (this.state.columns != null) this.initInputs(this.state.columns);
+    }).catch((res) => {
+      notyf.error(res.response.data.message);
 
-        if (res.response.status == 422) {
-          this.setState({
-            invalidInputs: res.response.data.invalidInputs 
-          });
-        }
-      });
+      if (res.response.status == 422) {
+        this.setState({
+          invalidInputs: res.response.data.invalidInputs 
+        });
+      }
+    });
   }
 
   deleteRecord(id: number) {
@@ -224,9 +236,9 @@ export default class Form extends Component<FormProps> {
   /**
     * Dynamically initialize inputs (React state) from model columns
     */
-  initInputs(columns: FormColumns, inputsValues?: Array<any>) {
+  initInputs(columns?: FormColumns, inputsValues?: Array<any>) {
     let inputs: any = {};
-
+    //console.log(columns);
     Object.keys(columns).map((columnName: string) => {
       switch (columns[columnName]['type']) {
         case 'image':
@@ -318,14 +330,14 @@ export default class Form extends Component<FormProps> {
             Object.keys(content).map((contentArea: string) => {
               return this._renderContentItem(contentArea, content[contentArea]); 
             })
-            : this.state.columns != null ? (
-              Object.keys(this.state.columns).map((columnName: string) => {
+            : this.state.inputs != null ? (
+              Object.keys(this.state.inputs).map((inputName: string) => {
                 if (
                   this.state.columns == null 
-                    || this.state.columns[columnName] == null
-                ) return <strong style={{color: 'red'}}>Not defined params for {columnName}</strong>;
+                  || this.state.columns[inputName] == null
+                ) return <strong style={{color: 'red'}}>Not defined params for {inputName}</strong>;
 
-                return this._renderInput(columnName)
+                return this._renderInput(inputName)
               })
             ) : ''}
         </div>

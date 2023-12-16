@@ -27,17 +27,6 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
       $pageLength = (int) $params['pageLength'] ?? 15;
 
-      $columns = [];
-      foreach ($tmpColumns as $columnName => $column) {
-        $columns[] = [
-          'field' => $columnName,
-          'headerName' => $column['title'],
-          'flex' => 1,
-          'type' => $column['type']
-          //'html' => "<b class='text-danger'>xxx</b>"
-        ];
-      }
-
       // FILTER BY
       if (isset($params['filterBy'])) {
         // TODO

@@ -1360,14 +1360,20 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       // Upload image
       if ($this->columns()[$key]['type'] == 'image') {
+        $folderPath = $this->getFolderPath(); 
+        $fileName = bin2hex(random_bytes(10)) . '-' . $data[$key]['fileName'];
+
+        if (!is_dir($folderPath)) mkdir($folderPath);
+
         $imageData = preg_replace('/^data:image\/[^;]+;base64,/', '', $data[$key]['fileData']);
         $image = base64_decode($imageData);
 
-        // TODO: Validate
-        file_put_contents($this->adios->config['files_dir'] . "/{$data[$key]['fileName']}", $image);
+        if (file_put_contents($folderPath . "/{$fileName}", $image) === false) {
+          throw new \Exception($this->translate("Upload file error"));
+        }
 
         // Replace just with filePath to save in DB
-        $dataForThisModel[$key] = $data[$key]['fileName'];
+        $dataForThisModel[$key] = $fileName;
       }
     }
 
@@ -1844,5 +1850,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $recordInfo['updated_at']['value'] = date('Y-m-d H:i:s');
 
     return $recordInfo;
+  }
+
+  public function getFolderUrl(): string {
+    return "{$this->adios->config['files_url']}/" . str_replace('/', '-', $this->fullName);
+  }
+
+  public function getFolderPath(): string {
+    return "{$this->adios->config['files_dir']}/" . str_replace('/', '-', $this->fullName);
   }
 }
