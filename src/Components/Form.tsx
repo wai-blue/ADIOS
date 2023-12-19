@@ -19,6 +19,7 @@ import InputMapPoint from "./Inputs/MapPoint";
 import InputColor from "./Inputs/Color";
 import InputImage from "./Inputs/Image";
 import InputTags from "./Inputs/Tags";
+import DateTime from "./Inputs/DateTime";
 
 interface Content {
   [key: string]: ContentCard|any;
@@ -56,7 +57,8 @@ interface FormState {
   inputs?: FormInputs,
   isEdit: boolean,
   invalidInputs: Object,
-  tabs?: any 
+  tabs?: any,
+  folderUrl?: string
 }
 
 export interface FormColumnParams {
@@ -92,7 +94,7 @@ export default class Form extends Component<FormProps> {
       content: props.content,
       isEdit: false,
       invalidInputs: {},
-      inputs: {},
+      inputs: {}
     };
 
     //@ts-ignore
@@ -127,11 +129,9 @@ export default class Form extends Component<FormProps> {
         model: this.state.model
       }
     }).then(({data}: any) => {
-      //this.columns = data.columns;
-      //this.loadData();
-
       this.setState({
-        columns: data.columns
+        columns: data.columns,
+        folderUrl: data.folderUrl
       }, () => this.loadData());
     });
   }
@@ -158,7 +158,6 @@ export default class Form extends Component<FormProps> {
     }).then((res: any) => {
       notyf.success(res.data.message);
       if (this.props.onSaveCallback) this.props.onSaveCallback();
-      //if (this.state.columns != null) this.initInputs(this.state.columns);
     }).catch((res) => {
       notyf.error(res.response.data.message);
 
@@ -184,6 +183,7 @@ export default class Form extends Component<FormProps> {
     } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
         let notyf = new Notyf();
+
         //@ts-ignore
         axios.patch(_APP_URL + '/Components/Form/OnDelete', {
           model: this.state.model,
@@ -191,16 +191,15 @@ export default class Form extends Component<FormProps> {
         }).then(() => {
             notyf.success("Záznam zmazaný");
             if (this.props.onDeleteCallback) this.props.onDeleteCallback();
-            //if (this.state.columns != null) this.initInputs(this.state.columns);
-          }).catch((res) => {
-            notyf.error(res.response.data.message);
+        }).catch((res) => {
+          notyf.error(res.response.data.message);
 
-            if (res.response.status == 422) {
-              this.setState({
-                invalidInputs: res.response.data.invalidInputs 
-              });
-            }
-          });
+          if (res.response.status == 422) {
+            this.setState({
+              invalidInputs: res.response.data.invalidInputs 
+            });
+          }
+        });
       }
     })
   }
@@ -244,7 +243,7 @@ export default class Form extends Component<FormProps> {
         case 'image':
           inputs[columnName] = {
             fileName: inputsValues[columnName] ?? null,
-            fileData: inputsValues[columnName] != undefined ? _APP_URL + "/upload/" + inputsValues[columnName] : null
+            fileData: inputsValues[columnName] != undefined ? this.state.folderUrl + '/' + inputsValues[columnName] : null
           };
         break;
         default:
@@ -439,6 +438,12 @@ export default class Form extends Component<FormProps> {
       break;
       case 'image':
         inputToRender = <InputImage
+          parentForm={this}
+          columnName={columnName}
+        />;
+      break;
+      case 'datetime':
+        inputToRender = <DateTime
           parentForm={this}
           columnName={columnName}
         />;

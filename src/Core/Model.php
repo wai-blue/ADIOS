@@ -1341,6 +1341,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $lookupData;
   }
 
+  private function ___validateBase64Image(string $base64String) {
+    $pattern = '/^data:image\/[^;]+;base64,/';
+    return preg_match($pattern, $base64String);
+}
+
   public function recordSave(array $data)
   {
     $id = (int) $data['id'];
@@ -1360,8 +1365,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
       // Upload image
       if ($this->columns()[$key]['type'] == 'image') {
+        // If is not base64 (new image, skip)
+        if ($this->___validateBase64Image($data[$key]['fileData']) == 0) {
+          unset($dataForThisModel[$key]);
+          continue;
+        }
+
         $folderPath = $this->getFolderPath(); 
         $fileName = bin2hex(random_bytes(10)) . '-' . $data[$key]['fileName'];
+
+        // Replace just with filePath to save in DB
+        $dataForThisModel[$key] = $fileName;
 
         if (!is_dir($folderPath)) mkdir($folderPath);
 
@@ -1371,9 +1385,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
         if (file_put_contents($folderPath . "/{$fileName}", $image) === false) {
           throw new \Exception($this->translate("Upload file error"));
         }
-
-        // Replace just with filePath to save in DB
-        $dataForThisModel[$key] = $fileName;
       }
     }
 
