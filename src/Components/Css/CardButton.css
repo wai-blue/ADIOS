@@ -1,0 +1,13 @@
+.card-blue {
+  background-color: var(--blue);
+  color: white;
+}
+
+.card-white {
+  border-color: lightgrey;
+}
+
+.bg-blue:hover {
+  background-color: #1e335f;
+  color: white;
+}

@@ -27,20 +27,24 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
 
   render() {
     return (
-      <div 
+      <div
         id={"adios-breadcrumbs-" + this.props.uid}
         className="adios react ui breadcrumbs"
       >
-        <nav 
+        <nav
           aria-label="breadcrumb"
         >
           <ol className="breadcrumb">
             {this.state.items.map((item, i) => (
-              <li className={"breadcrumb-item"}>
-                <a 
-                  href={item.url} 
-                  className={"text-primary " + (this.state.items.length - 1 == i ? "active" : "")}
-                >{ item.text }</a>
+              <li className="breadcrumb-item">
+                {this.state.items.length - 1 === i ? (
+                  <span className="text-primary active">{item.text}</span>
+                ) : (
+                  <a
+                    href={item.url}
+                    className="text-primary"
+                  >{item.text}</a>
+                )}
               </li>
             ))}
           </ol>

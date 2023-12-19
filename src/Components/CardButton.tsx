@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import './Css/CardButton.css';
 
 interface CardButtonProps {
   uid: string,
@@ -22,7 +23,7 @@ export default class CardButton extends Component<CardButtonProps> {
         id={"adios-card-button-" + this.props.uid}
         href={this.props.href}
         //onClick={this.props.onClick}
-        className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4"}
+        className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4 card-blue bg-blue"}
         style={{width: '14em'}}
       >
         <i 
