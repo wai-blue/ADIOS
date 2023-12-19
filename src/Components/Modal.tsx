@@ -32,6 +32,7 @@ export default class Modal extends Component<ModalProps> {
   };
 
   constructor(props: ModalProps) {
+    console.log(props);
     super(props);
 
     this.state = {
@@ -70,7 +71,10 @@ export default class Modal extends Component<ModalProps> {
               ><span>&times;</span></button>
             </div>
 
-            <div className="modal-body">
+            <div 
+              id={'adios-modal-body-' + this.params.uid}
+              className="modal-body"
+            >
               {this.props.children}
             </div>
 
