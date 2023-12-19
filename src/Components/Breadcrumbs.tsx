@@ -38,7 +38,7 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
             {this.state.items.map((item, i) => (
               <li className="breadcrumb-item">
                 {this.state.items.length - 1 === i ? (
-                  <span className="text-primary active">{item.text}</span>
+                  <span style={{color: '#e78b00'}}>{item.text}</span>
                 ) : (
                   <a
                     href={item.url}
