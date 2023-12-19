@@ -8,7 +8,7 @@ interface CardButtonProps {
   text: string,
   icon: string,
   subtitle?: string,
-  cssClass?: string,
+  css?: string,
 }
 
 export default class CardButton extends Component<CardButtonProps> {
@@ -22,8 +22,7 @@ export default class CardButton extends Component<CardButtonProps> {
       <a 
         id={"adios-card-button-" + this.props.uid}
         href={this.props.href}
-        //onClick={this.props.onClick}
-        className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4 card-blue bg-blue"}
+        className={"btn " + this.props.css + " shadow-sm mb-1 p-4 card-blue bg-blue"}
         style={{width: '14em'}}
       >
         <i 

@@ -3,7 +3,7 @@ import React, { Component } from "react";
 interface ButtonProps {
   uid: string,
   type?: string,
-  onClick?: string,
+  onclick?: string,
   href?: string,
   text: string,
   icon: string,
@@ -13,7 +13,7 @@ interface ButtonProps {
 interface ButtonParams {
   uid: string,
   type?: string,
-  onClick?: string,
+  onclick?: string,
   href?: string,
   text: string,
   icon: string,
@@ -24,7 +24,7 @@ export default class Button extends Component<ButtonProps> {
   params: ButtonParams  = {
     uid: this.props.uid,
     type: "",
-    onClick: "",
+    onclick: "",
     href: "",
     text: "",
     icon: "fas fa-check",
@@ -39,26 +39,20 @@ export default class Button extends Component<ButtonProps> {
     if (this.props.type) {
       switch (this.props.type) {
         case 'save':
-          this.params.onClick = 'Save';
           this.params.icon = 'fas fa-check';
           this.params.css = 'btn-success';
         break;
         case 'delete':
-          this.params.onClick = 'Delete';
           this.params.icon = 'fas fa-check';
           this.params.css = 'btn-danger';
         break;
         case 'close':
-          this.params.onClick = 'Close';
           this.params.icon = 'fas fa-times';
           this.params.css = 'btn-light';
         break;
       }
     }
-
-console.log(this.params);
   }
-
 
   render() {
     return (
@@ -68,8 +62,7 @@ console.log(this.params);
       >
         <a 
           className={"adios ui Button btn " + this.params.css + " btn-icon-split"}
-          href={this.params.href} 
-          onClick={() => alert(this.params.onClick)}
+          href={this.params.href ? window._APP_URL + '/' + this.params.href : '#'}
         >
           <span className="icon">
             <i className={this.params.icon}></i>

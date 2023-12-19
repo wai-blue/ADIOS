@@ -13,6 +13,7 @@ import Title from "./Title";
 import Breadcrumbs from "./Breadcrumbs";
 import Card from "./Card";
 import Button from "./Button";
+import Modal from "./Modal";
 
 //import FloatingModal from "./FloatingModal";
 
@@ -34,6 +35,7 @@ const initializeComponents = [
   'table',
   'title',
   'button',
+  'modal',
   
   // Examples
   'example',
@@ -60,8 +62,8 @@ const getComponent = (componentName: string, params: Object) => {
     case 'breadcrumbs': return <Breadcrumbs {...params} />;
     //@ts-ignore
     case 'button': return <Button {...params} />;
-
-    //case 'floating-modal': return <FloatingModal>xxx</FloatingModal>;
+    //@ts-ignore
+    case 'modal': return <Modal {...params} ></Modal>;
 
     // Examples
     case 'example': return <Example {...params} />;
@@ -94,13 +96,24 @@ const renderComponent = (component: string) => {
       componentProps['uid'] = v4();
     }
 
-    createRoot(element).render(getComponent(component, componentProps));
+    let componentBuildElement = createRoot(element);
+    componentBuildElement.render(getComponent(component, componentProps));
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initializeComponents.map(item => renderComponent(item))
-});
+const renderComponents = () => {
+  //document.addEventListener('DOMContentLoaded', () => {
+  const renderedComponents = initializeComponents.map(item => renderComponent(item))
+  //});
+}
+
+//const reRenderComponents = () => {
+  //console.log(renderedComponents);
+  //@ts-ignore
+  //renderedComponents.map(item => item.render());
+//}
+
+renderComponents();
 
 function isValidJSON(jsonString: string) {
   try {
@@ -116,9 +129,34 @@ function isValidJSON(jsonString: string) {
  */
 declare global {
   interface Window {
+    //renderComponent: (componentName: string) => void;
     getComponent: (componentName: string, params: Object) => React.JSX.Element;
+    adiosModal: (controllerUrl: string) => void,
     _APP_URL: string;
   }
 }
 
 window.getComponent = getComponent;
+//window.renderComponent = renderComponent;
+
+/*
+  * Preskumat moznosti ako znovu vyrenderovat uz niekde renderovane komponenty
+  * V tejto funkcii sa predpoklada, ze adios cache je nacitana a tak isto pripnuty bootstrap.js pre modal
+  * #adios-modal-global sa vytvara v Desktop.twig
+  * Nasledne sa meni iba kontent tohto modalo #adios-modal-body-global
+  */
+window.adiosModal = (controllerUrl: string) => {
+  //@ts-ignore
+ _ajax_update(
+    controllerUrl,
+    {},
+    'adios-modal-body-global',
+    {
+      success: () => {
+        //@ts-ignore
+        $('#adios-modal-global').modal();
+        renderComponents();
+      }
+    }
+  );
+}
