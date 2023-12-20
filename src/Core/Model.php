@@ -1366,7 +1366,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Upload image
       if ($this->columns()[$key]['type'] == 'image') {
         // If is not base64 (new image, skip)
-        if ($this->___validateBase64Image($data[$key]['fileData']) == 0) {
+        if ($this->___validateBase64Image((string) $data[$key]['fileData']) == 0) {
           unset($dataForThisModel[$key]);
           continue;
         }
