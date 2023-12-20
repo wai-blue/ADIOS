@@ -21,7 +21,13 @@ export default class CardButton extends Component<CardButtonProps> {
     return (
       <a 
         id={"adios-card-button-" + this.props.uid}
-        href={this.props.href}
+        href={
+          this.props.href ? (
+            this.props.href.startsWith('/') 
+              ? _APP_URL + this.props.href 
+              : window.location.href + '/' + this.props.href
+          ) : '#'
+        }
         className={"btn " + this.props.css + " shadow-sm mb-1 p-4 card-blue bg-blue"}
         style={{width: '14em'}}
       >

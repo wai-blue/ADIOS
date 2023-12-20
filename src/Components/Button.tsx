@@ -62,7 +62,13 @@ export default class Button extends Component<ButtonProps> {
       >
         <a 
           className={"adios ui Button btn " + this.params.css + " btn-icon-split"}
-          href={this.params.href ? window._APP_URL + '/' + this.params.href : '#'}
+          href={
+            this.params.href ? (
+              this.params.href.startsWith('/') 
+                ? _APP_URL + this.params.href 
+                : window.location.href + '/' + this.params.href
+            ) : '#'
+          }
         >
           <span className="icon">
             <i className={this.params.icon}></i>
