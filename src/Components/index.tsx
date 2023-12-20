@@ -15,12 +15,9 @@ import Card from "./Card";
 import Button from "./Button";
 import Modal from "./Modal";
 
-//import FloatingModal from "./FloatingModal";
-
 /**
 * Examples
 */
-
 import Example from "./Example";
 import ExampleModelHover from "./Examples/ModelHover";
 
@@ -40,6 +37,13 @@ const initializeComponents = [
   // Examples
   'example',
   'example-model-hover'
+];
+
+/**
+ * Define attributes which will not removed
+ */
+const attributesToSkip = [
+  'onclick'
 ];
 
 /**
@@ -75,20 +79,32 @@ const getComponent = (componentName: string, params: Object) => {
 /**
  * Render React component (create HTML tag root and render) 
  */
-const renderComponent = (component: string) => {
-  const allComponentsWithSameId = document.querySelectorAll('adios-' + component);
+const renderComponent = (specificHtmlElement: string, component: string) => {
+  const allComponentsWithSameId = document.querySelectorAll(
+    specificHtmlElement + ' adios-' + component);
 
   allComponentsWithSameId.forEach((element, _index) => {
     let componentProps: Object = {};
 
-    for (let i = 0;i < element.attributes.length;i++) {
-      let elementValue = element.attributes[i].value;
+    // Find attribute and also delete him using [0] index
+    let i: number = 0
+    while (element.attributes.length > i) {
+      let attributeName = element.attributes[i].name;
+      let attributeValue = element.attributes[i].value;
 
-      if (isValidJSON(elementValue)) {
-        elementValue = JSON.parse(elementValue);
+      if (isValidJSON(attributeValue)) {
+        attributeValue = JSON.parse(attributeValue);
       }
 
-      componentProps[element.attributes[i].name] = elementValue; 
+      componentProps[attributeName] = attributeValue; 
+
+      if (attributesToSkip.includes(attributeName)) {
+        i++;
+        continue;
+      }
+
+      // Remove attributes from HTML DOM
+      element.removeAttribute(element.attributes[i].name);
     }
 
     // Check if uid exists or create custom
@@ -101,17 +117,11 @@ const renderComponent = (component: string) => {
   });
 }
 
-const renderComponents = () => {
+const renderComponents = (specificHtmlElement: string = 'body') => {
   //document.addEventListener('DOMContentLoaded', () => {
-  const renderedComponents = initializeComponents.map(item => renderComponent(item))
+  initializeComponents.map(item => renderComponent(specificHtmlElement, item))
   //});
 }
-
-//const reRenderComponents = () => {
-  //console.log(renderedComponents);
-  //@ts-ignore
-  //renderedComponents.map(item => item.render());
-//}
 
 renderComponents();
 
@@ -155,7 +165,7 @@ window.adiosModal = (controllerUrl: string) => {
       success: () => {
         //@ts-ignore
         $('#adios-modal-global').modal();
-        renderComponents();
+        renderComponents('#adios-modal-body-global');
       }
     }
   );
