@@ -500,7 +500,7 @@ export default class Form extends Component<FormProps> {
           <div className="card-header">
             <div className="row">
               <div className="col-lg-12 m-0 p-0">
-                <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.state.model } -  
+                <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.state.model } -
                   <small className="text-secondary">
                     {this.state.isEdit ? ' Editácia záznamu' : ' Nový záznam'}
                   </small>
