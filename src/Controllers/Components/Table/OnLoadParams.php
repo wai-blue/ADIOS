@@ -37,6 +37,8 @@ class OnLoadParams extends \ADIOS\Core\Controller {
 
       $columns = [];
       foreach ($tmpColumns as $columnName => $column) {
+        if ($columnName == 'id') continue;
+
         $columns[] = [
           'field' => $columnName,
           'headerName' => $column['title'],

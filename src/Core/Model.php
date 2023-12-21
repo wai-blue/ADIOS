@@ -1870,4 +1870,5 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function getFolderPath(): string {
     return "{$this->adios->config['files_dir']}/" . str_replace('/', '-', $this->fullName);
   }
+
 }

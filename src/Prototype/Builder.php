@@ -349,10 +349,29 @@ class Builder {
       if (is_array($widgetConfig['models'] ?? NULL)) {
         $this->createFolder($widgetRootDir . '/Models');
 
-        foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
+        //$modelsSqlNames = [];
+        //foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
+        //  $modelsSqlNames[
+        //    str_replace('\\', '/', $widgetNamespace . '/' . $widgetClassName . '/Models/' . $modelName)
+        //  ] = $modelConfig['sqlName'];
+        //}
 
+        foreach ($widgetConfig['models'] as $modelName => $modelConfig) {
           $modelPrototypeBuilderConfig = $modelConfig['_prototypeBuilder'] ?? [];
           unset($modelConfig['_prototypeBuilder']);
+
+          // Eloquent relatioship functions
+          $modelConfig['eloquentRelationships'] = [];
+          foreach ($modelConfig['columns'] as $columnName => $column) {
+            if ($column['type'] == 'lookup') {
+              $modelConfig['eloquentRelationships'][] = [
+                //'name' => $modelsSqlNames[$column['model']],
+                'column' => $columnName,
+                'type' => 'BelongsTo',
+                'model' => str_replace('/', '\\', $column['model'])
+              ];
+            }
+          }
 
           $tmpModelParams = array_merge(
             $this->prototype,

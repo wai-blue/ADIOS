@@ -19,6 +19,7 @@ export default class Image extends Component<ImageInputProps> {
     this.state = {
       images: []
     };
+    console.log(this.props.parentForm.state.inputs[this.props.columnName]);
   }
 
  onChange = (images: Array<any>, addUpdateIndex: any) => {
@@ -39,7 +40,7 @@ export default class Image extends Component<ImageInputProps> {
   render() {
     return (
       <ImageUploading
-        value={this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null 
+        value={this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null
           ? [this.props.parentForm.state.inputs[this.props.columnName]]
           : []
         }

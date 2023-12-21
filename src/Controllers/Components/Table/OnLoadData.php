@@ -27,6 +27,23 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
       $pageLength = (int) $params['pageLength'] ?? 15;
 
+      $tmpModel = $tmpModel->select('*');
+
+      //LOOKUPS
+      foreach ($tmpColumns as $columnName => $column) {
+        if ($column['type'] == 'lookup') {
+          $lookupModel = $this->adios->getModel($column['model']);
+
+          $lookupSqlValue = "(" .
+            str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
+            . ") as lookupSqlValue";
+
+          $tmpModel->with([$columnName => function ($query) use ($lookupSqlValue) {
+            $query->selectRaw('id, ' . $lookupSqlValue);
+          }]);
+        }
+      }
+
       // FILTER BY
       if (isset($params['filterBy'])) {
         // TODO
@@ -55,7 +72,6 @@ class OnLoadData extends \ADIOS\Core\Controller {
         $this->params['page']);
 
       return [
-        'columns' => $columns, 
         'data' => $data,
         'title' => $tableTitle
       ];

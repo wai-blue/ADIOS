@@ -238,12 +238,17 @@ export default class Form extends Component<FormProps> {
   initInputs(columns?: FormColumns, inputsValues?: Array<any>) {
     let inputs: any = {};
     //console.log(columns);
+
+    if (!columns) return;
+
     Object.keys(columns).map((columnName: string) => {
       switch (columns[columnName]['type']) {
         case 'image':
           inputs[columnName] = {
-            fileName: inputsValues[columnName] ?? null,
-            fileData: inputsValues[columnName] != undefined ? this.state.folderUrl + '/' + inputsValues[columnName] : null
+            fileName: inputsValues[columnName] ?? inputsValues[columnName],
+            fileData: inputsValues[columnName] != undefined && inputsValues[columnName] != ""
+              ? this.state.folderUrl + '/' + inputsValues[columnName]
+              : null
           };
         break;
         default:
@@ -496,7 +501,7 @@ export default class Form extends Component<FormProps> {
         id={"adios-form-" + this.props.uid}
         className="adios react ui form"
       >
-        <div className="card w-100 overflow-auto">
+        <div className="card w-100">
           <div className="card-header">
             <div className="row">
               <div className="col-lg-12 m-0 p-0">

@@ -179,11 +179,21 @@ export default class Table extends Component {
           case 'image': return { 
             ...column, 
             renderCell: (params: any) => {
+              if (!params.value) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+
               return <img 
                 style={{ width: '30px', height: '30px' }}
                 src={data.folderUrl + "/" + params.value}
                 className="rounded"
               />
+            }
+          }
+          case 'lookup': return { 
+            ...column, 
+            renderCell: (params: any) => {
+              return <span style={{
+                color: '#2d4a8a'
+              }}>{params.value?.lookupSqlValue}</span>
             }
           }
           case 'date':
