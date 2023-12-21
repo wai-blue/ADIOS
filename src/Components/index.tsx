@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import React from "react";
 
-import { v4 } from 'uuid';
+import * as uuid from 'uuid';
 
 /**
  * Components
@@ -109,7 +109,7 @@ const renderComponent = (specificHtmlElement: string, component: string) => {
 
     // Check if uid exists or create custom
     if (componentProps['uid'] == undefined) {
-      componentProps['uid'] = v4();
+      componentProps['uid'] = uuid.v4();
     }
 
     let componentBuildElement = createRoot(element);
@@ -157,7 +157,7 @@ window.getComponent = getComponent;
   */
 window.adiosModal = (controllerUrl: string) => {
   //@ts-ignore
- _ajax_update(
+  _ajax_update(
     controllerUrl,
     {},
     'adios-modal-body-global',

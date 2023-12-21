@@ -7,6 +7,7 @@ import { FormProps } from "./Form";
 
 import Modal, { ModalProps } from "./Modal";
 import Form from "./Form";
+import { dateToEUFormat } from "./Inputs/DateTime";
 
 import Loader from "./Loader";
 
@@ -165,7 +166,7 @@ export default class Table extends Component {
       let columns: Array<any> = [];
 
       columns = data.columns.map((column: any) => {
-        switch (column['type']) {
+        switch (column['columnType']) {
           case 'color': return { 
             ...column, 
             renderCell: (params: any) => {
@@ -183,6 +184,14 @@ export default class Table extends Component {
                 src={data.folderUrl + "/" + params.value}
                 className="rounded"
               />
+            }
+          }
+          case 'date':
+          case 'datetime':
+          case 'datetime': return { 
+            ...column, 
+            renderCell: (params: any) => {
+              return dateToEUFormat(params.value);
             }
           }
           default: return column;
