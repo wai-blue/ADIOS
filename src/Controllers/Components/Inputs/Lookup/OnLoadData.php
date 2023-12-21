@@ -19,11 +19,16 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public function renderJson() { 
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
-      $tmpData = $tmpModel->get();
-      
+
+      $lookupSqlValue = "(" .
+        str_replace("{%TABLE%}.", '', $tmpModel->lookupSqlValue())
+        . ") as lookupSqlValue";
+
+      $tmpData = $tmpModel->selectRaw('id, ' . $lookupSqlValue)->get();
+
       $data = [];
       foreach ($tmpData as $item) {
-        $data[$item['id']] = $item;  
+        $data[$item['id']] = $item;
       }
 
       return [

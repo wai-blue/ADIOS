@@ -48,7 +48,7 @@ export default class Lookup extends Component<LookupInputProps> {
   }
 
   getOptionLabel(option: any) {
-    return option.name;
+    return option.lookupSqlValue;
   }
 
   render() {
