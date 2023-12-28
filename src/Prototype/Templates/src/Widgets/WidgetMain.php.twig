@@ -11,6 +11,7 @@ class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
       $this->addSidebarItem([
         "fa_icon" => "fas {% if itemConfig.faIcon %}{{ itemConfig.faIcon }}{% else %}{{ thisWidget.config.faIcon }}{% endif %}",
         "title" => "{{ itemTitle }}",
+        "custom_title" => "{{ itemConfig.customTitle|raw }}",
 {% if itemConfig.url %}
         "onclick" => "desktop_update('{{ itemConfig.url }}');",
 {% endif %}

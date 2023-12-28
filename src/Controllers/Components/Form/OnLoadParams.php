@@ -22,7 +22,9 @@ class OnLoadParams extends \ADIOS\Core\Controller {
 
       return [
         'columns' => $tmpModel->columns(),
-        'folderUrl' => $tmpModel->getFolderUrl()
+        'folderUrl' => $tmpModel->getFolderUrl(),
+        'formSaveButtonText' => $tmpModel->formSaveButtonText ?? "Uložiť záznam",
+        'formAddButtonText' => $tmpModel->formAddButtonText ?? "Pridať záznam"
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error

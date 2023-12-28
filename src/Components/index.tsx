@@ -155,11 +155,11 @@ window.getComponent = getComponent;
   * #adios-modal-global sa vytvara v Desktop.twig
   * Nasledne sa meni iba kontent tohto modalo #adios-modal-body-global
   */
-window.adiosModal = (controllerUrl: string) => {
+window.adiosModal = (controllerUrl: string, params: Object = {}) => {
   //@ts-ignore
   _ajax_update(
     controllerUrl,
-    {},
+    params,
     'adios-modal-body-global',
     {
       success: () => {

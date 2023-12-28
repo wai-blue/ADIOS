@@ -73,7 +73,8 @@ interface TableState {
   form?: FormProps,
   orderBy?: GridSortModel,
   filterBy?: GridFilterModel,
-  search?: string
+  search?: string,
+  addButtonText?: string
 }
 
 export default class Table extends Component {
@@ -95,7 +96,8 @@ export default class Table extends Component {
     showExportCsvButton: true,
     showImportCsvButton: false,
     showFulltextSearch: true,
-    showCardOverlay: true
+    showCardOverlay: true,
+    showAddButtonText: "Pridať záznam"
   };
 
   //_testColumns: GridColDef[] = [
@@ -210,7 +212,8 @@ export default class Table extends Component {
 
       this.setState({
         columns: columns,
-        title: data.title
+        title: data.title,
+        addButtonText: data.addButtonText
       });
     });
   }
@@ -319,7 +322,7 @@ export default class Table extends Component {
                   <button
                     className="btn btn-primary"
                     onClick={() => this.onAddClick()} 
-                  ><i className="fas fa-plus"/> Pridať záznam</button>
+                  ><i className="fas fa-plus"/> { this.state.addButtonText }</button>
                 </div>
 
                 <div className="col-lg-6 m-0 p-0">

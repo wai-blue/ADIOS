@@ -12,9 +12,9 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
 
   public bool $isJunctionTable = {{ thisModel.config.isJunctionTable ? 'TRUE' : 'FALSE' }};
 
-  public ?string $addButtonText = "{{ thisModel.config.addButtonText|raw }}";
-  public ?string $formAddButtonText = "{{ thisModel.config.formAddButtonText|raw }}";
-  public ?string $formSaveButtonText = "{{ thisModel.config.formSaveButtonText|raw }}";
+  public ?string $addButtonText = {% if thisModel.config.addButtonText %} "{{ thisModel.config.addButtonText|raw }}" {% else %} null {% endif %};
+  public ?string $formAddButtonText = {% if thisModel.config.formAddButtonText %} "{{ thisModel.config.formAddButtonText|raw }}" {% else %} null {% endif %};
+  public ?string $formSaveButtonText = {% if thisModel.config.formSaveButtonText %} "{{ thisModel.config.formSaveButtonText|raw }}" {% else %} null {% endif %};
 
   public string $sqlName = "{{ thisModel.config.sqlName|raw }}";
   public string $urlBase = "{{ thisModel.config.urlBase|raw }}";

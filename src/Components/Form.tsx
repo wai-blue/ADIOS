@@ -58,7 +58,9 @@ interface FormState {
   isEdit: boolean,
   invalidInputs: Object,
   tabs?: any,
-  folderUrl?: string
+  folderUrl?: string,
+  formAddButtonText?: string,
+  formSaveButtonText?: string
 }
 
 export interface FormColumnParams {
@@ -131,7 +133,9 @@ export default class Form extends Component<FormProps> {
     }).then(({data}: any) => {
       this.setState({
         columns: data.columns,
-        folderUrl: data.folderUrl
+        folderUrl: data.folderUrl,
+        formAddButtonText: data.formAddButtonText,
+        formSaveButtonText: data.formSaveButtonText
       }, () => this.loadData());
     });
   }
@@ -545,8 +549,8 @@ export default class Form extends Component<FormProps> {
               className="btn btn-primary mt-2"
             >
               {this.state.isEdit == true 
-                ? <span><i className="fas fa-save"></i> Uložiť záznam</span>
-                : <span><i className="fas fa-plus"></i> Pridať záznam</span>
+                ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
+                : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
               }
             </button>
           </div>
