@@ -24,7 +24,15 @@ class OnLoadData extends \ADIOS\Core\Controller {
         str_replace("{%TABLE%}.", '', $tmpModel->lookupSqlValue())
         . ") as lookupSqlValue";
 
-      $tmpData = $tmpModel->selectRaw('id, ' . $lookupSqlValue)->get();
+      $tmpData = $tmpModel->selectRaw('id, ' . $lookupSqlValue);
+
+      if ($this->params['search']) {
+        foreach ($tmpModel->columns() as $columnName => $column) {
+          $tmpData->orWhere($columnName, 'LIKE', '%' . $this->params['search'] . '%');
+        }
+      }
+
+      $tmpData = $tmpData->get();
 
       $data = [];
       foreach ($tmpData as $item) {

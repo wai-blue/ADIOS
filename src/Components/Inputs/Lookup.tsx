@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import Select from 'react-select'
+import AsyncSelect from 'react-select/async'
 import axios from 'axios'
 import { FormColumnParams } from '../Form' 
 
@@ -30,16 +30,19 @@ export default class Lookup extends Component<LookupInputProps> {
     this.loadData();
   }
 
-  loadData() {
+  loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Inputs/Lookup/OnLoadData', {
       params: {
-        model: this.model 
+        model: this.model,
+        search: inputValue
       }
     }).then(({data}: any) => {
       this.setState({
         data: data.data
       });
+
+      if (callback) callback(Object.values(data.data));
     });
   }
 
@@ -53,14 +56,16 @@ export default class Lookup extends Component<LookupInputProps> {
 
   render() {
     return (
-      <Select
+      <AsyncSelect
         className={`${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
-        options={Object.values(this.state.data)}
+        loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
+        defaultOptions={Object.values(this.state.data)}
         value={this.state.data[this.props.parentForm.state.inputs[this.props.columnName]]}
         getOptionLabel={this.getOptionLabel}
         getOptionValue={this.getOptionValue}
         onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}
         isDisabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
+        placeholder="Vybrať záznam..."
       />
     )
   } 
