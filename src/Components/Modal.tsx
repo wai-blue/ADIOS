@@ -11,6 +11,7 @@ export interface ModalProps {
   type?: string,
   children?: any;
   isActive?: boolean;
+  title?: string
 }
 
 interface ModalParams {
@@ -20,6 +21,7 @@ interface ModalParams {
 
 interface ModalState {
   isActive: boolean;
+  title?: string;
 }
 
 export default class Modal extends Component<ModalProps> {
@@ -35,7 +37,8 @@ export default class Modal extends Component<ModalProps> {
     super(props);
 
     this.state = {
-      isActive: true
+      isActive: true,
+      title: props.title
     };
 
     this.params = {
@@ -60,7 +63,6 @@ export default class Modal extends Component<ModalProps> {
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
-
             <div className="modal-header">
               <button 
                 className="btn btn-light"
@@ -68,6 +70,13 @@ export default class Modal extends Component<ModalProps> {
                 data-dismiss="modal" 
                 aria-label="Close"
               ><span>&times;</span></button>
+
+              {this.state.title ? (
+                <h4 
+                  className="modal-title"
+                  id={'adios-modal-title-' + this.params.uid}
+                >{this.state.title}</h4>
+              ) : ''}
             </div>
 
             <div 

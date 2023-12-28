@@ -149,13 +149,29 @@ declare global {
 window.getComponent = getComponent;
 //window.renderComponent = renderComponent;
 
+interface AdiosModal {
+  adiosModal?: {
+    title: string
+  },
+  [key: string]: any
+}
+
 /*
   * Preskumat moznosti ako znovu vyrenderovat uz niekde renderovane komponenty
   * V tejto funkcii sa predpoklada, ze adios cache je nacitana a tak isto pripnuty bootstrap.js pre modal
   * #adios-modal-global sa vytvara v Desktop.twig
   * Nasledne sa meni iba kontent tohto modalo #adios-modal-body-global
   */
-window.adiosModal = (controllerUrl: string, params: Object = {}) => {
+window.adiosModal = (controllerUrl: string, params: AdiosModal = {}) => {
+  if (params.adiosModal) {
+    if (params.adiosModal.title) {
+      //@ts-ignore
+      $('#adios-modal-title-global').text(params.adiosModal.title);
+    }
+
+    delete params['adiosModal'];
+  }
+
   //@ts-ignore
   _ajax_update(
     controllerUrl,

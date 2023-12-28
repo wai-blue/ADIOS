@@ -478,23 +478,17 @@ export default class Form extends Component<FormProps> {
 
     return columnName != 'id' ? (
       <div 
-        className="row g-1 align-items-center"
+        className="form-group mb-0"
         key={columnName}
       >
-        <div className="col-lg-4">
-          <label className="col-form-label text-dark">
-            {this.state.columns[columnName].title}
-            {this.state.columns[columnName].required == true ? <b className="ms-1 text-danger">*</b> : ""}
-          </label>
-        </div>
-        <div className="col-lg-8">
-          {inputToRender}
-        </div>
-        <div className="col-auto">
-          <span className="form-text">
-            {this.state.columns[columnName].description}
-          </span>
-        </div>
+        <label className="text-dark">
+          {this.state.columns[columnName].title}
+          {this.state.columns[columnName].required == true ? <b className="text-danger"> *</b> : ""}
+        </label>
+
+        {inputToRender}
+
+        <small className="form-text text-muted">{this.state.columns[columnName].description}</small>
       </div>
     ) : <></>;
   }
@@ -515,11 +509,22 @@ export default class Form extends Component<FormProps> {
                   </small>
                 </h3>
               </div>
+
               <div className="col-lg-12 m-0 p-0 mt-2">
-                <div className="d-flex flex-row-reverse">
+                <div className="d-flex flex-row">
+                  <button 
+                    onClick={() => this.saveRecord()}
+                    className="btn btn-primary"
+                  >
+                    {this.state.isEdit == true 
+                      ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
+                      : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
+                    }
+                  </button>
+
                   {this.state.isEdit ? <button 
                     onClick={() => this.deleteRecord(this.props.id ?? 0)}
-                    className="btn btn-danger btn-sm"
+                    className="ml-auto btn btn-danger btn-sm"
                   ><i className="fas fa-trash"></i> Zmazať</button> : ''}
                 </div>
               </div>
@@ -543,16 +548,6 @@ export default class Form extends Component<FormProps> {
 
           <div className="card-body">
             {this._renderTab()}
-
-            <button 
-              onClick={() => this.saveRecord()}
-              className="btn btn-primary mt-2"
-            >
-              {this.state.isEdit == true 
-                ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
-                : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
-              }
-            </button>
           </div>
         </div>
       </div>
