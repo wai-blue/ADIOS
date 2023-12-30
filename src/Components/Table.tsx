@@ -198,6 +198,20 @@ export default class Table extends Component {
               }}>{params.value?.lookupSqlValue}</span>
             }
           }
+          case 'enum': return { 
+            ...column, 
+            renderCell: (params: any) => {
+              return column['enumValues'][params.value];
+            }
+          }
+          case 'bool':
+          case 'boolean': return { 
+            ...column, 
+            renderCell: (params: any) => {
+                if (params.value) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>;
+                else return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>;
+            }
+          }
           case 'date':
           case 'datetime':
           case 'datetime': return { 

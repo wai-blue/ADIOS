@@ -51,7 +51,7 @@ export default class Tags extends Component<TagsInputProps> {
     });
   };
 
-  handleTagClick = index => {
+  handleTagClick = (index: number) => {
     console.log('The tag at index ' + index + ' was clicked');
   };
 

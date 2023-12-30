@@ -44,7 +44,8 @@ class OnLoadParams extends \ADIOS\Core\Controller {
           'headerName' => $column['title'],
           'flex' => 1,
           'type' =>  $this->getColumnType($column['type']),
-          'columnType' => $column['type']
+          'columnType' => isset($column['enum_values']) ? 'enum' : $column['type'],
+          'enumValues' => $column['enum_values']
         ];
       }
 

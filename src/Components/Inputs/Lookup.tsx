@@ -57,7 +57,6 @@ export default class Lookup extends Component<LookupInputProps> {
   render() {
     return (
       <AsyncSelect
-        className={`${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
         loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
         defaultOptions={Object.values(this.state.data)}
         value={this.state.data[this.props.parentForm.state.inputs[this.props.columnName]]}
@@ -65,7 +64,13 @@ export default class Lookup extends Component<LookupInputProps> {
         getOptionValue={this.getOptionValue}
         onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}
         isDisabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
-        placeholder="Vybrať záznam..."
+        placeholder=""
+        styles={{
+          control: (baseStyles, state) => ({
+            ...baseStyles,
+            borderColor: this.props.parentForm.state.invalidInputs[this.props.columnName] ? '#e74a3b' : '#d1d3e2',
+          }),
+        }}
       />
     )
   } 
