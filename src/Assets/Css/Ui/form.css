@@ -75,7 +75,7 @@
 }
 .adios.ui.Form.heading.heading_first {margin-top:0px;}
 
-.adios.ui.Input.ui_input_type_decimal { width: 42%; }
+.adios.ui.Input.ui_input_type_decimal { max-width: 42%; }
 
 .adios.ui.Form .input-content input[type=text]:not(.ui_input_type_decimal),
 .adios.ui.Form .input-content input[type=password] {

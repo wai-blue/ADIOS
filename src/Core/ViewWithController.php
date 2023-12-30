@@ -132,7 +132,7 @@ class ViewWithController {
     $chr = substr($name, 0, 1);
     $firstLetterIsCapital = strtolower($chr) != $chr;
 
-    $className = "\\ADIOS\\Core\\Views\\{$name}";
+    $className = "\\ADIOS\\Core\\ViewsWithController\\{$name}";
 
     if (
       $firstLetterIsCapital

@@ -320,9 +320,16 @@ export default class Table extends Component {
 
                 <div className="col-lg-6 m-0 p-0">
                   <button
-                    className="btn btn-primary"
+                    className="btn btn-primary btn-icon-split"
                     onClick={() => this.onAddClick()} 
-                  ><i className="fas fa-plus"/> { this.state.addButtonText }</button>
+                  >
+                    <span className="icon">
+                      <i className="fas fa-plus"/>
+                    </span>
+                    <span className="text">
+                      { this.state.addButtonText }
+                    </span>
+                  </button>
                 </div>
 
                 <div className="col-lg-6 m-0 p-0">

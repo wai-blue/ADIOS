@@ -23,8 +23,8 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
     $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : 'default ' . (float) $this->getDefaultValue($params) . ' ';
     $params['sql_definitions'] ??= '';
 
-    $width = min(max((int) $params['byte_size'], 1), 65);
-    $decimals = min(min(max((int) $params['decimals'], 0), 30), $width);
+    $width = min(max((int) $params['byte_size'], 10), 35);
+    $decimals = min(min(max((int) $params['decimals'], 2), 10), $width);
 
     $sqlDataType = ($params['sql_data_type'] ?? "decimal");
 

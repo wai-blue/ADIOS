@@ -52,7 +52,7 @@ class DataTypeText extends \ADIOS\Core\DB\DataType
 
   public function toHtml($value, $params = [])
   {
-    $value = 'yes' == $params['col_definition']['wa_list_no_html_convert'] ? $value : strip_tags($value);
+    $value = 'yes' == $params['col_definition']['wa_list_no_html_convert'] ? $value : strip_tags($value ?? '');
     $html = mb_substr($value, 0, ($params['col_definition']['wa_list_char_length'] ? $params['col_definition']['wa_list_char_length'] : 80), 'utf-8');
     if (strlen($html) < strlen($value)) {
       $html .= '...';
