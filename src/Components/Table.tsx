@@ -341,7 +341,7 @@ export default class Table extends Component {
                       <i className="fas fa-plus"/>
                     </span>
                     <span className="text">
-                      { this.state.addButtonText }
+                      {this.state.addButtonText}
                     </span>
                   </button>
                 </div>
