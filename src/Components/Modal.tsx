@@ -63,7 +63,7 @@ export default class Modal extends Component<ModalProps> {
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
-            <div className="modal-header">
+            <div className="modal-header text-left">
               <button 
                 className="btn btn-light"
                 type="button" 
@@ -73,7 +73,7 @@ export default class Modal extends Component<ModalProps> {
 
               {this.state.title ? (
                 <h4 
-                  className="modal-title"
+                  className="modal-title text-dark"
                   id={'adios-modal-title-' + this.params.uid}
                 >{this.state.title}</h4>
               ) : ''}

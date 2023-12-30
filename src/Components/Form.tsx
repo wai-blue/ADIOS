@@ -39,17 +39,9 @@ export interface FormProps {
   content?: Content,
   layout?: Array<Array<string>>,
   onSaveCallback?: () => void,
-  onDeleteCallback?: () => void
+  onDeleteCallback?: () => void,
+  hideOverlay?: boolean
 }
-
-/*interface FormParams {
-  model: string,
-  id: number,
-  title: string,
-  readonly: boolean,
-  content: Content,
-  layout: Array<Array<string>>
-}*/
 
 interface FormState {
   model: string,
@@ -511,7 +503,7 @@ export default class Form extends Component<FormProps> {
         id={"adios-form-" + this.props.uid}
         className="adios react ui form"
       >
-        <div className="card w-100">
+        <div className={(this.props.hideOverlay ? '' : 'card ') + 'w-100'}>
           <div className="card-header">
             <div className="row">
               <div className="col-lg-12 m-0 p-0">

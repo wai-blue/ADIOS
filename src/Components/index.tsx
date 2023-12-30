@@ -89,7 +89,7 @@ const renderComponent = (specificHtmlElement: string, component: string) => {
     // Find attribute and also delete him using [0] index
     let i: number = 0
     while (element.attributes.length > i) {
-      let attributeName = element.attributes[i].name;
+      let attributeName = element.attributes[i].name.replace(/-([a-z])/g, (_: any, letter: string) => letter.toUpperCase());
       let attributeValue = element.attributes[i].value;
 
       if (isValidJSON(attributeValue)) {
@@ -163,6 +163,8 @@ interface AdiosModal {
   * Nasledne sa meni iba kontent tohto modalo #adios-modal-body-global
   */
 window.adiosModal = (controllerUrl: string, params: AdiosModal = {}) => {
+  $('#adios-modal-title-global').text("");
+
   if (params.adiosModal) {
     if (params.adiosModal.title) {
       //@ts-ignore
