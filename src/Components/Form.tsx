@@ -40,7 +40,8 @@ export interface FormProps {
   layout?: Array<Array<string>>,
   onSaveCallback?: () => void,
   onDeleteCallback?: () => void,
-  hideOverlay?: boolean
+  hideOverlay?: boolean,
+  showInModal?: boolean
 }
 
 interface FormState {
@@ -497,64 +498,105 @@ export default class Form extends Component<FormProps> {
     ) : <></>;
   }
 
-  render() {
+  _renderActionButtons(): JSX.Element {
     return (
-      <div
-        id={"adios-form-" + this.props.uid}
-        className="adios react ui form"
-      >
-        <div className={(this.props.hideOverlay ? '' : 'card ') + 'w-100'}>
-          <div className="card-header">
-            <div className="row">
-              <div className="col-lg-12 m-0 p-0">
-                <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.state.model } -
-                  <small className="text-secondary">
-                    {this.state.isEdit ? ' Editácia záznamu' : ' Nový záznam'}
-                  </small>
-                </h3>
-              </div>
+      <div className="row">
+        <div className="col-lg-12 m-0 p-0 mt-2">
+          <div className="d-flex flex-row">
+            <button 
+              onClick={() => this.saveRecord()}
+              className="btn btn-sm btn-primary"
+            >
+              {this.state.isEdit == true 
+                ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
+                : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
+              }
+            </button>
 
-              <div className="col-lg-12 m-0 p-0 mt-2">
-                <div className="d-flex flex-row">
-                  <button 
-                    onClick={() => this.saveRecord()}
-                    className="btn btn-sm btn-primary"
-                  >
-                    {this.state.isEdit == true 
-                      ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
-                      : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
-                    }
-                  </button>
-
-                  {this.state.isEdit ? <button 
-                    onClick={() => this.deleteRecord(this.props.id ?? 0)}
-                    className="ml-auto btn btn-danger btn-sm"
-                  ><i className="fas fa-trash"></i> Zmazať</button> : ''}
-                </div>
-              </div>
-
-              {this.state.tabs != undefined ? (
-                <ul className="nav nav-tabs card-header-tabs mt-3">
-                  {Object.keys(this.state.tabs).map((tabName: string) => {
-                    return (
-                      <li className="nav-item"> 
-                        <button 
-                          className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
-                          onClick={() => this.changeTab(tabName)}
-                        >{ tabName }</button> 
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : ''}
-            </div>
-          </div>
-
-          <div className="card-body">
-            {this._renderTab()}
+            {this.state.isEdit ? <button 
+              onClick={() => this.deleteRecord(this.props.id ?? 0)}
+              className="ml-2 btn btn-danger btn-sm"
+            ><i className="fas fa-trash"></i> Zmazať</button> : ''}
           </div>
         </div>
       </div>
+    );
+  }
+
+  render() {
+    return (
+      <>
+        {this.props.showInModal ? (
+          <div className="modal-header text-left">
+            <button 
+              className="btn btn-light"
+              type="button" 
+              data-dismiss="modal" 
+              aria-label="Close"
+            ><span>&times;</span></button>
+
+            {this.props.title ? (
+              <h4 
+                className="modal-title text-dark"
+                id={'adios-modal-title-' + this.props.uid}
+              >{this.props.title} -
+                <small className="text-secondary">
+                  {this.state.isEdit ? ' Editácia záznamu' : ' Nový záznam'}
+                </small>
+              </h4>
+            ) : ''}
+
+            {this._renderActionButtons()}
+          </div>
+        ) : ''}
+
+        <div
+          id={"adios-form-" + this.props.uid}
+          className="adios react ui form"
+        >
+            {this.props.showInModal ? (
+              <div className="modal-body">
+                {this._renderTab()}
+              </div>
+            ) : (
+              <div className="card w-100">
+                <div className="card-header">
+                  <div className="row">
+                    <div className="col-lg-12 m-0 p-0">
+                      <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.state.model } -
+                        <small className="text-secondary">
+                          {this.state.isEdit ? ' Editácia záznamu' : ' Nový záznam'}
+                        </small>
+                      </h3>
+                    </div>
+
+                    {this._renderActionButtons()}
+
+                    {this.state.tabs != undefined ? (
+                      <ul className="nav nav-tabs card-header-tabs mt-3">
+                        {Object.keys(this.state.tabs).map((tabName: string) => {
+                          return (
+                            <li className="nav-item"> 
+                              <button 
+                                className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
+                                onClick={() => this.changeTab(tabName)}
+                              >{ tabName }</button> 
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : ''}
+                  </div>
+                </div>
+
+                <div className="card-body">
+                  {this._renderTab()}
+                </div>
+
+              </div>
+            )}
+        </div>
+      </>
     );
   }
 }

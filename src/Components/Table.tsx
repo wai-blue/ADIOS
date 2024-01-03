@@ -301,12 +301,14 @@ export default class Table extends Component {
         <Modal 
           uid={this.params.uid}
           {...this.params.modal}
+          hideHeader={true}
         >
           <Form 
             uid={this.params.uid}
             model={this.params.model}
             id={this.state.form?.id}
             title={this.state.title}
+            showInModal={true}
             onSaveCallback={() => {
               this.loadData();
               this.toggleModal();

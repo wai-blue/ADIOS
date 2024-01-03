@@ -11,7 +11,8 @@ export interface ModalProps {
   type?: string,
   children?: any;
   isActive?: boolean;
-  title?: string
+  title?: string;
+  hideHeader?: boolean;
 }
 
 interface ModalParams {
@@ -63,29 +64,38 @@ export default class Modal extends Component<ModalProps> {
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
-            <div className="modal-header text-left">
-              <button 
-                className="btn btn-light"
-                type="button" 
-                data-dismiss="modal" 
-                aria-label="Close"
-              ><span>&times;</span></button>
+            {this.props.hideHeader ? (
+              <div 
+                id={'adios-modal-body-' + this.params.uid}
+              >
+                {this.props.children}
+              </div>
+            ) : (
+              <>
+                <div className="modal-header text-left">
+                  <button 
+                    className="btn btn-light"
+                    type="button" 
+                    data-dismiss="modal" 
+                    aria-label="Close"
+                  ><span>&times;</span></button>
 
-              {this.state.title ? (
-                <h4 
-                  className="modal-title text-dark"
-                  id={'adios-modal-title-' + this.params.uid}
-                >{this.state.title}</h4>
-              ) : ''}
-            </div>
+                  {this.state.title ? (
+                    <h4 
+                      className="modal-title text-dark"
+                      id={'adios-modal-title-' + this.params.uid}
+                    >{this.state.title}</h4>
+                  ) : ''}
+                </div>
 
-            <div 
-              id={'adios-modal-body-' + this.params.uid}
-              className="modal-body"
-            >
-              {this.props.children}
-            </div>
-
+                <div 
+                  id={'adios-modal-body-' + this.params.uid}
+                  className="modal-body"
+                >
+                  {this.props.children}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>,
