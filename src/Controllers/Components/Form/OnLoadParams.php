@@ -24,7 +24,9 @@ class OnLoadParams extends \ADIOS\Core\Controller {
         'columns' => $tmpModel->columns(),
         'folderUrl' => $tmpModel->getFolderUrl(),
         'formSaveButtonText' => $tmpModel->formSaveButtonText ?? "Uložiť záznam",
-        'formAddButtonText' => $tmpModel->formAddButtonText ?? "Pridať záznam"
+        'formAddButtonText' => $tmpModel->formAddButtonText ?? "Pridať záznam",
+        'formTitleForEditing' => $tmpModel->formTitleForEditing,
+        'formTitleForInserting' => $tmpModel->formTitleForInserting,
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error

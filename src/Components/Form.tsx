@@ -45,7 +45,6 @@ export interface FormProps {
 }
 
 interface FormState {
-  model: string,
   content?: Object,
   columns?: FormColumns,
   inputs?: FormInputs,
@@ -54,7 +53,9 @@ interface FormState {
   tabs?: any,
   folderUrl?: string,
   formAddButtonText?: string,
-  formSaveButtonText?: string
+  formSaveButtonText?: string,
+  formTitleForEditing?: string,
+  formTitleForInserting?: string,
 }
 
 export interface FormColumnParams {
@@ -87,7 +88,6 @@ export default class Form extends Component<FormProps> {
     super(props);
 
     this.state = {
-      model: props.model,
       content: props.content,
       isEdit: false,
       invalidInputs: {},
@@ -123,14 +123,16 @@ export default class Form extends Component<FormProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Form/OnLoadParams', {
       params: {
-        model: this.state.model
+        model: this.props.model
       }
     }).then(({data}: any) => {
       this.setState({
         columns: data.columns,
         folderUrl: data.folderUrl,
         formAddButtonText: data.formAddButtonText,
-        formSaveButtonText: data.formSaveButtonText
+        formSaveButtonText: data.formSaveButtonText,
+        formTitleForEditing: data.formTitleForEditing,
+        formTitleForInserting: data.formTitleForInserting,
       }, () => this.loadData());
     });
   }
@@ -139,7 +141,7 @@ export default class Form extends Component<FormProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Form/OnLoadData', {
       params: {
-        model: this.state.model,
+        model: this.props.model,
         id: this.props.id
       }
     }).then(({data}: any) => {
@@ -152,7 +154,7 @@ export default class Form extends Component<FormProps> {
 
     //@ts-ignore
     axios.post(_APP_URL + '/Components/Form/OnSave', {
-      model: this.state.model,
+      model: this.props.model,
       inputs: this.state.inputs 
     }).then((res: any) => {
       notyf.success(res.data.message);
@@ -185,7 +187,7 @@ export default class Form extends Component<FormProps> {
 
         //@ts-ignore
         axios.patch(_APP_URL + '/Components/Form/OnDelete', {
-          model: this.state.model,
+          model: this.props.model,
           id: id
         }).then(() => {
             notyf.success("Záznam zmazaný");
@@ -541,7 +543,7 @@ export default class Form extends Component<FormProps> {
                 id={'adios-modal-title-' + this.props.uid}
               >{this.props.title} -
                 <small className="text-secondary">
-                  {this.state.isEdit ? ' Editácia záznamu' : ' Nový záznam'}
+                  {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
                 </small>
               </h4>
             ) : ''}
@@ -563,9 +565,9 @@ export default class Form extends Component<FormProps> {
                 <div className="card-header">
                   <div className="row">
                     <div className="col-lg-12 m-0 p-0">
-                      <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.state.model } -
+                      <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.props.model } -
                         <small className="text-secondary">
-                          {this.state.isEdit ? ' Editácia záznamu' : ' Nový záznam'}
+                          {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
                         </small>
                       </h3>
                     </div>

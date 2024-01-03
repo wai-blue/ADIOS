@@ -1,6 +1,5 @@
 import React, { ChangeEvent, Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
-import { styled } from '@mui/material/styles';
 import axios from "axios";
 
 import { FormProps } from "./Form";
@@ -12,42 +11,25 @@ import { dateToEUFormat } from "./Inputs/DateTime";
 import Loader from "./Loader";
 
 interface TableProps {
-  // Required
   uid: string,
   model: string,
-
-  // Additional
   formModal?: ModalProps,
-
   title?: string,
   showTitle?: boolean,
-  showPaging?: boolean,
-  showControls?: boolean,
-  showAddButton?: boolean,
-  showPrintButton?: boolean,
-  showSearchButton?: boolean,
-  showExportCsvButton?: boolean,
-  showImportCsvButton?: boolean,
-  showFulltextSearch?: boolean
+  modal?: ModalProps,
+
+  //TODO
+  //showPaging?: boolean,
+  //showControls?: boolean,
+  //showAddButton?: boolean,
+  //showPrintButton?: boolean,
+  //showSearchButton?: boolean,
+  //showExportCsvButton?: boolean,
+  //showImportCsvButton?: boolean,
+  //showFulltextSearch?: boolean
 }
 
-interface TableParams {
-  uid: string,
-  modal: ModalProps,
-  model: string,
-  title: string,
-  showTitle: boolean,
-  showPaging: boolean,
-  showControls: boolean,
-  showAddButton: boolean,
-  showPrintButton: boolean,
-  showSearchButton: boolean,
-  showExportCsvButton: boolean,
-  showImportCsvButton: boolean,
-  showFulltextSearch: boolean,
-  showCardOverlay: boolean
-}
-
+// Laravel pagination
 interface TableData {
   current_page: number,
   data: Array<any>,
@@ -65,7 +47,6 @@ interface TableData {
 }
 
 interface TableState {
-  title: string,
   page: number,
   pageLength: number,
   columns?: Array<GridColDef>,
@@ -74,82 +55,24 @@ interface TableState {
   orderBy?: GridSortModel,
   filterBy?: GridFilterModel,
   search?: string,
-  addButtonText?: string
+  addButtonText?: string,
+  tableTitle?: string
 }
 
-export default class Table extends Component {
+export default class Table extends Component<TableProps> {
   state: TableState;
 
-  params: TableParams = {
-    // Params for Modal with Form component
-    modal: {},
-
-    uid: this.props.uid,
-    model: this.props.model,
-    title: "",
-    showTitle:  true,
-    showPaging: true,
-    showControls: true,
-    showAddButton: true,
-    showPrintButton: true,
-    showSearchButton: true,
-    showExportCsvButton: true,
-    showImportCsvButton: false,
-    showFulltextSearch: true,
-    showCardOverlay: true,
-    showAddButtonText: "Pridať záznam"
-  };
-
-  //_testColumns: GridColDef[] = [
-  //  { field: 'id', headerName: 'ID', width: 70 },
-  //  { field: 'firstName', headerName: 'First name', width: 130 },
-  //  { field: 'lastName', headerName: 'Last name', width: 130 },
-  //  {
-  //    field: 'age',
-  //    headerName: 'Age',
-  //    type: 'number',
-  //    width: 90,
-  //  },
-  //  {
-  //    field: 'fullName',
-  //    headerName: 'Full name',
-  //    description: 'This column has a value getter and is not sortable.',
-  //    sortable: false, width: 160,
-  //    valueGetter: (params: GridValueGetterParams) => `${params.row.firstName || ''} ${params.row.lastName || ''}`,
-  //  },
-  //];
-
-  //_testData = [
-  //  { id: 1, lastName: 'Snow', firstName: 'Jon', age: 35 },
-  //  { id: 2, lastName: 'Lannister', firstName: 'Cersei', age: 42 },
-  //  { id: 3, lastName: 'Lannister', firstName: 'Jaime', age: 45 },
-  //  { id: 4, lastName: 'Stark', firstName: 'Arya', age: 16 },
-  //  { id: 5, lastName: 'Targaryen', firstName: 'Daenerys', age: null },
-  //  { id: 6, lastName: 'Melisandre', firstName: null, age: 150 },
-  //  { id: 7, lastName: 'Clifford', firstName: 'Ferrara', age: 44 },
-  //  { id: 8, lastName: 'Frances', firstName: 'Rossini', age: 36 },
-  //  { id: 9, lastName: 'Roxie', firstName: 'Harvey', age: 65 },
-  //];
-  //
   constructor(props: TableProps) {
     super(props);
 
-    this.params = {...this.params, ...this.props};
-    this.params.title = props.title ? props.title : this.params.model;
-
     this.state = {
-      title: this.params.title,
-      data: undefined,
+      tableTitle:  props.title ?? props.model,
       page: 1,
       pageLength: 15,
       form: {
         uid: props.uid,
-        model: this.params.model,
-        id: undefined
+        model: props.model
       }
-
-      //columns: this._testColumns,
-      //data: this._testData
     };
   }
 
@@ -162,7 +85,7 @@ export default class Table extends Component {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Table/OnLoadParams', {
       params: {
-        model: this.params.model
+        model: this.props.model
       }
     }).then(({data}: any) => {
       let columns: Array<any> = [];
@@ -226,7 +149,7 @@ export default class Table extends Component {
 
       this.setState({
         columns: columns,
-        title: data.title,
+        tableTitle: data.tableTitle,
         addButtonText: data.addButtonText
       });
     });
@@ -242,7 +165,7 @@ export default class Table extends Component {
       params: {
         page: page,
         pageLength: this.state.pageLength,
-        model: this.params.model,
+        model: this.props.model,
         orderBy: this.state.orderBy,
         filterBy: this.state.filterBy,
         search: this.state.search
@@ -256,7 +179,7 @@ export default class Table extends Component {
 
   toggleModal() {
     //@ts-ignore
-    $('#adios-modal-' + this.params.uid).modal('toggle');
+    $('#adios-modal-' + this.props.uid).modal('toggle');
   }
 
   onAddClick() {
@@ -299,15 +222,15 @@ export default class Table extends Component {
     return (
       <>
         <Modal 
-          uid={this.params.uid}
-          {...this.params.modal}
+          uid={this.props.uid}
+          {...this.props.modal}
           hideHeader={true}
         >
           <Form 
-            uid={this.params.uid}
-            model={this.params.model}
+            uid={this.props.uid}
+            model={this.props.model}
             id={this.state.form?.id}
-            title={this.state.title}
+            title={this.state.tableTitle}
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
@@ -321,16 +244,16 @@ export default class Table extends Component {
         </Modal>
 
         <div
-          id={"adios-table-" + this.params.uid}
+          id={"adios-table-" + this.props.uid}
           className="adios react ui table"
         >
           <div className="card">
             <div className="card-header">
               <div className="row m-0">
 
-                {this.params.showTitle ? (
+                {this.props.showTitle ? (
                   <div className="col-lg-12 p-0 m-0">
-                    <h3 className="card-title m-0">{this.state.title}</h3>
+                    <h3 className="card-title m-0">{this.state.tableTitle}</h3>
                   </div>
                 ) : ''}
 
