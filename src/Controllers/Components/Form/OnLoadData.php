@@ -21,7 +21,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
       $inputs = [];
-      if (isset($this->params['id'])) {
+      if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
         $inputs = $tmpModel->find($this->params['id']);
       }
 
