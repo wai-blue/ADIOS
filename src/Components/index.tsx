@@ -14,6 +14,7 @@ import Breadcrumbs from "./Breadcrumbs";
 import Card from "./Card";
 import Button from "./Button";
 import Modal from "./Modal";
+import FormButton from "./FormButton";
 
 /**
 * Examples
@@ -33,6 +34,7 @@ const initializeComponents = [
   'title',
   'button',
   'modal',
+  'form-button',
   
   // Examples
   'example',
@@ -68,6 +70,8 @@ const getComponent = (componentName: string, params: Object) => {
     case 'button': return <Button {...params} />;
     //@ts-ignore
     case 'modal': return <Modal {...params} ></Modal>;
+    //@ts-ignore
+    case 'form-button': return <FormButton {...params} />;
 
     // Examples
     case 'example': return <Example {...params} />;

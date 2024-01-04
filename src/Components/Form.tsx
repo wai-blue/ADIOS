@@ -34,7 +34,6 @@ export interface FormProps {
   uid: string,
   model: string,
   id?: number,
-  title?: string,
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
@@ -55,7 +54,7 @@ interface FormState {
   formAddButtonText?: string,
   formSaveButtonText?: string,
   formTitleForEditing?: string,
-  formTitleForInserting?: string,
+  formTitleForInserting?: string
 }
 
 export interface FormColumnParams {
@@ -107,7 +106,8 @@ export default class Form extends Component<FormProps> {
       this.loadData();
 
       this.setState({
-        invalidInputs: {}
+        invalidInputs: {},
+        isEdit: this.props.id ? this.props.id > 0 : false
       });
     }
   }
@@ -536,18 +536,12 @@ export default class Form extends Component<FormProps> {
               data-dismiss="modal" 
               aria-label="Close"
             ><span>&times;</span></button>
-
-            {this.props.title ? (
-              <h4 
-                className="modal-title text-dark"
-                id={'adios-modal-title-' + this.props.uid}
-              >{this.props.title} -
-                <small className="text-secondary">
-                  {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
-                </small>
-              </h4>
-            ) : ''}
-
+            <h3
+              id={'adios-modal-title-' + this.props.uid}
+              className="m-0 p-0"
+            >
+              {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
+            </h3>
             {this._renderActionButtons()}
           </div>
         ) : ''}
@@ -565,10 +559,8 @@ export default class Form extends Component<FormProps> {
                 <div className="card-header">
                   <div className="row">
                     <div className="col-lg-12 m-0 p-0">
-                      <h3 className="card-title p-0 m-0">{ this.props.title ? this.props.title : this.props.model } -
-                        <small className="text-secondary">
-                          {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
-                        </small>
+                      <h3 className="card-title p-0 m-0">
+                        {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
                       </h3>
                     </div>
 

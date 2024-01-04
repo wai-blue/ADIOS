@@ -5,75 +5,69 @@ interface ButtonProps {
   type?: string,
   onclick?: string,
   href?: string,
-  text: string,
-  icon: string,
+  text?: string,
+  icon?: string,
   css?: string
 }
 
-interface ButtonParams {
-  uid: string,
-  type?: string,
-  onclick?: string,
-  href?: string,
-  text: string,
+interface ButtonState {
   icon: string,
-  css?: string
+  css: string
 }
 
 export default class Button extends Component<ButtonProps> {
-  params: ButtonParams  = {
-    uid: this.props.uid,
-    type: "",
-    onclick: "",
-    href: "",
-    text: "",
-    icon: "fas fa-check",
-    css: "btn-primary"
-  };
+  state: ButtonState;
 
   constructor(props: ButtonProps) {
     super(props);
 
-    this.params = {...this.params, ...this.props};
+    this.state = {
+      css: props.css ?? 'btn-primary',
+      icon: props.icon ?? 'fas fa-check',
+    };
 
-    if (this.props.type) {
-      switch (this.props.type) {
-        case 'save':
-          this.params.icon = 'fas fa-check';
-          this.params.css = 'btn-success';
-        break;
-        case 'delete':
-          this.params.icon = 'fas fa-check';
-          this.params.css = 'btn-danger';
-        break;
-        case 'close':
-          this.params.icon = 'fas fa-times';
-          this.params.css = 'btn-light';
-        break;
-      }
+    switch (this.props.type) {
+      case 'save':
+        this.state = {
+          icon: 'fas fa-check',
+          css: 'btn-success'
+        }
+      break;
+      case 'delete':
+        this.state = {
+          icon: 'fas fa-check',
+          css: 'btn-danger'
+        }
+      break;
+      case 'close':
+        this.state = {
+          icon: 'fas fa-times',
+          css: 'btn-light'
+        }
+      break;
     }
   }
 
   render() {
     return (
-      <div  
+      <div
         id={"adios-button-" + this.props.uid}
         className="adios react ui button"
       >
         <a 
-          className={"adios ui Button btn " + this.params.css + " btn-icon-split"}
+          className={"adios ui Button btn " + this.state.css + " btn-icon-split"}
           href={
-            this.params.href ? (
-              this.params.href.startsWith('/') 
-                ? _APP_URL + this.params.href 
-                : window.location.href + '/' + this.params.href
+            this.props.href ? (
+              this.props.href.startsWith('/') 
+                ? window._APP_URL + this.props.href 
+                : window.location.href + '/' + this.props.href
             ) : '#'
           }
         >
           <span className="icon">
-            <i className={this.params.icon}></i>
+            <i className={this.state.icon}></i>
           </span>
-          <span className="text">{this.params.text}</span>
+          <span className="text">{this.props.text}</span>
         </a>
       </div>
     );

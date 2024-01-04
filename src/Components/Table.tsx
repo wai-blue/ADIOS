@@ -251,11 +251,9 @@ export default class Table extends Component<TableProps> {
             <div className="card-header">
               <div className="row m-0">
 
-                {this.props.showTitle ? (
-                  <div className="col-lg-12 p-0 m-0">
-                    <h3 className="card-title m-0">{this.state.tableTitle}</h3>
-                  </div>
-                ) : ''}
+                <div className="col-lg-12 p-0 m-0">
+                  <h3 className="card-title m-0">{this.state.tableTitle}</h3>
+                </div>
 
                 <div className="col-lg-6 m-0 p-0">
                   <button

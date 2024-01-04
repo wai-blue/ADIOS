@@ -51,7 +51,7 @@ class OnLoadParams extends \ADIOS\Core\Controller {
 
       return [
         'columns' => $columns, 
-        'title' => $tmpModel->tableTitle,
+        'tableTitle' => $tmpModel->tableTitle,
         'folderUrl' => $tmpModel->getFolderUrl(),
         'addButtonText' => $tmpModel->addButtonText ?? "Pridať záznam"
       ];

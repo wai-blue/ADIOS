@@ -1,81 +1,66 @@
 import React, { Component } from "react";
+import Modal, { ModalProps } from "./Modal";
+import Form from "./Form";
 
-interface ButtonProps {
+interface FormButtonProps {
   uid: string,
-  type?: string,
-  onclick?: string,
-  href?: string,
-  text: string,
-  icon: string,
-  css?: string
+  model: string,
+  css?: string,
+  icon?: string,
+  text: string
 }
 
-interface ButtonParams {
-  uid: string,
-  type?: string,
-  onclick?: string,
-  href?: string,
-  text: string,
+interface FormButtonState {
+  css: string,
   icon: string,
-  css?: string
 }
 
-export default class Button extends Component<ButtonProps> {
-  params: ButtonParams  = {
-    uid: this.props.uid,
-    type: "",
-    onclick: "",
-    href: "",
-    text: "",
-    icon: "fas fa-check",
-    css: "btn-primary"
-  };
+export default class FormButton extends Component<FormButtonProps> {
+  state: FormButtonState;
 
-  constructor(props: ButtonProps) {
+  constructor(props: FormButtonProps) {
     super(props);
 
-    this.params = {...this.params, ...this.props};
-
-    if (this.props.type) {
-      switch (this.props.type) {
-        case 'save':
-          this.params.icon = 'fas fa-check';
-          this.params.css = 'btn-success';
-        break;
-        case 'delete':
-          this.params.icon = 'fas fa-check';
-          this.params.css = 'btn-danger';
-        break;
-        case 'close':
-          this.params.icon = 'fas fa-times';
-          this.params.css = 'btn-light';
-        break;
-      }
+    this.state = {
+      css: props.css ?? 'btn-primary',
+      icon: props.icon ?? 'fas fa-check',
     }
+  }
+
+  toggleModal() {
+    //@ts-ignore
+    $('#adios-modal-' + this.props.uid).modal('toggle');
   }
 
   render() {
     return (
-      <div  
-        id={"adios-button-" + this.props.uid}
-        className="adios react ui button"
-      >
-        <a 
-          className={"adios ui Button btn " + this.params.css + " btn-icon-split"}
-          href={
-            this.params.href ? (
-              this.params.href.startsWith('/') 
-                ? _APP_URL + this.params.href 
-                : window.location.href + '/' + this.params.href
-            ) : '#'
-          }
+      <>
+        <Modal 
+          uid={this.props.uid}
+          //{...this.props.modal}
+          hideHeader={true}
         >
-          <span className="icon">
-            <i className={this.params.icon}></i>
-          </span>
-          <span className="text">{this.params.text}</span>
-        </a>
-      </div>
+          <Form 
+            uid={this.props.uid}
+            model={this.props.model}
+            showInModal={true}
+          />
+        </Modal>
+        <div
+          id={"adios-button-" + this.props.uid}
+          className="adios react ui button"
+        >
+          <button
+            onClick={() => this.toggleModal()}
+            className={"adios ui Button btn " + this.state.css + " btn-icon-split"}
+          >
+            <span className="icon">
+              <i className={this.state.icon}></i>
+            </span>
+            <span className="text">{this.props.text}</span>
+          </button>
+        </div>
+      </>
     );
   }
 }
