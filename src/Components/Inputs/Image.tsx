@@ -19,7 +19,6 @@ export default class Image extends Component<ImageInputProps> {
     this.state = {
       images: []
     };
-    console.log(this.props.parentForm.state.inputs[this.props.columnName]);
   }
 
  onChange = (images: Array<any>, addUpdateIndex: any) => {

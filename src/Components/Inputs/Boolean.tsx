@@ -11,7 +11,6 @@ export default class Boolean extends Component<BooleanInputProps> {
   }
 
   render() {
-    console.log(this.props.parentForm.state.inputs[this.props.columnName]);
     return (
       <div className="form-check mb-4">
         <input 

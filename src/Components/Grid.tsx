@@ -35,7 +35,7 @@ export default class Grid extends Component<GridProps> {
     super(props);
 
     this.params = {...this.params, ...this.props};
-console.log(this.params);
+
     if (this.props.type) {
       switch (this.props.type) {
         case 'save':
