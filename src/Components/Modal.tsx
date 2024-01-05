@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import $ from 'jquery';
-import { v4 } from 'uuid';
+import * as uuid from 'uuid';
 
 import './Css/Modal.css';
 
@@ -13,14 +12,12 @@ export interface ModalProps {
   isActive?: boolean;
   title?: string;
   hideHeader?: boolean;
-}
-
-interface ModalParams {
-  uid: string,
-  type: string
+  isOpen?: boolean;
 }
 
 interface ModalState {
+  uid: string,
+  type: string,
   isActive: boolean;
   title?: string;
 }
@@ -29,23 +26,15 @@ export default class Modal extends Component<ModalProps> {
   private modalRoot: HTMLDivElement;
   state: ModalState;
 
-  params: ModalParams = {
-    uid: this.props.uid,
-    type: "right"
-  };
-
   constructor(props: ModalProps) {
     super(props);
 
     this.state = {
+      uid: this.props.uid ?? uuid.v4(),
+      type: this.props.type ?? "right",
       isActive: true,
       title: props.title
     };
-
-    this.params = {
-      uid: this.props.uid ?? v4(),
-      type: this.props.type ?? "right"
-    }
 
     this.modalRoot = document.createElement('div');
     document.body.appendChild(this.modalRoot);
@@ -55,18 +44,24 @@ export default class Modal extends Component<ModalProps> {
     document.body.removeChild(this.modalRoot);
   }
 
+  componentDidMount() {
+    if (this.props.isOpen === true) {
+      window.adiosModalToggle(this.state.uid);
+    }
+  }
+
   render() {
     return ReactDOM.createPortal(
       <div
-        id={'adios-modal-' + this.params.uid} 
-        className={"modal " + this.params.type + " fade"}
+        id={'adios-modal-' + this.state.uid} 
+        className={"modal " + this.state.type + " fade"}
         role="dialog"
       >
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             {this.props.hideHeader ? (
               <div 
-                id={'adios-modal-body-' + this.params.uid}
+                id={'adios-modal-body-' + this.state.uid}
               >
                 {this.props.children}
               </div>
@@ -83,13 +78,13 @@ export default class Modal extends Component<ModalProps> {
                   {this.state.title ? (
                     <h4 
                       className="modal-title text-dark"
-                      id={'adios-modal-title-' + this.params.uid}
+                      id={'adios-modal-title-' + this.state.uid}
                     >{this.state.title}</h4>
                   ) : ''}
                 </div>
 
                 <div 
-                  id={'adios-modal-body-' + this.params.uid}
+                  id={'adios-modal-body-' + this.state.uid}
                   className="modal-body"
                 >
                   {this.props.children}

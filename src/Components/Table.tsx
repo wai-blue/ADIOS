@@ -76,20 +76,11 @@ export default class Table extends Component<TableProps> {
         id: props.formId
       }
     };
-
   }
 
   componentDidMount() {
     this.loadParams();
     this.loadData();
-
-    // TODO: vyriesit inteligentnejsie, bez setTimeout
-    if (this.props.formId) {
-      let t = this;
-      setTimeout(function() {
-        t.toggleModal();
-      }, 400);
-    }
   }
 
   loadParams() {
@@ -188,20 +179,15 @@ export default class Table extends Component<TableProps> {
     });
   }
 
-  toggleModal() {
-    //@ts-ignore
-    $('#adios-modal-' + this.props.uid).modal('toggle');
-  }
-
   onAddClick() {
-    this.toggleModal();
+    window.adiosModalToggle(this.props.uid);
     this.setState({
       form: {...this.state.form, id: undefined }
     })
   }
 
   onRowClick(id: number) {
-    this.toggleModal();
+    window.adiosModalToggle(this.props.uid);
     this.setState({
       form: {...this.state.form, id: id}
     })
@@ -236,20 +222,20 @@ export default class Table extends Component<TableProps> {
           uid={this.props.uid}
           {...this.props.modal}
           hideHeader={true}
+          isOpen={this.props.formId ? true : false}
         >
           <Form 
             uid={this.props.uid}
             model={this.props.model}
             id={this.state.form?.id}
-            title={this.state.tableTitle}
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
-              this.toggleModal();
+              window.adiosModalToggle(this.props.uid);
             }}
             onDeleteCallback={() => {
               this.loadData();
-              this.toggleModal();
+              window.adiosModalToggle(this.props.uid);
             }}
           />
         </Modal>

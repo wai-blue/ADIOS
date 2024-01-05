@@ -146,6 +146,7 @@ declare global {
     //renderComponent: (componentName: string) => void;
     getComponent: (componentName: string, params: Object) => React.JSX.Element;
     adiosModal: (controllerUrl: string) => void,
+    adiosModalToggle: (uid: string) => void,
     _APP_URL: string;
   }
 }
@@ -192,3 +193,9 @@ window.adiosModal = (controllerUrl: string, params: AdiosModal = {}) => {
     }
   );
 }
+
+window.adiosModalToggle = (uid: string) => {
+  //@ts-ignore
+  $('#adios-modal-' + uid).modal('toggle');
+}
+

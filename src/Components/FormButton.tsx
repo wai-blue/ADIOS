@@ -27,11 +27,6 @@ export default class FormButton extends Component<FormButtonProps> {
     }
   }
 
-  toggleModal() {
-    //@ts-ignore
-    $('#adios-modal-' + this.props.uid).modal('toggle');
-  }
-
   render() {
     return (
       <>
@@ -51,7 +46,7 @@ export default class FormButton extends Component<FormButtonProps> {
           className="adios react ui button"
         >
           <button
-            onClick={() => this.toggleModal()}
+            onClick={() => window.adiosModalToggle(this.props.uid)}
             className={"adios ui Button btn " + this.state.css + " btn-icon-split"}
           >
             <span className="icon">

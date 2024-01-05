@@ -209,7 +209,7 @@ export default class Form extends Component<FormProps> {
    * Check if is id = undefined or id is > 0
    */
   checkIfIsEdit() {
-    this.state.isEdit = this.props.id ? true : false;
+    this.state.isEdit = this.props.id && this.props.id > 1 ? true : false;
   }
 
   /**
