@@ -502,25 +502,21 @@ export default class Form extends Component<FormProps> {
 
   _renderActionButtons(): JSX.Element {
     return (
-      <div className="row">
-        <div className="col-lg-12 m-0 p-0 mt-2">
-          <div className="d-flex flex-row">
-            <button 
-              onClick={() => this.saveRecord()}
-              className="btn btn-sm btn-primary"
-            >
-              {this.state.isEdit == true 
-                ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
-                : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
-              }
-            </button>
+      <div className="d-flex flex-row-reverse">
+        <button 
+          onClick={() => this.saveRecord()}
+          className="btn btn-sm btn-primary"
+        >
+          {this.state.isEdit == true 
+            ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
+            : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
+          }
+        </button>
 
-            {this.state.isEdit ? <button 
-              onClick={() => this.deleteRecord(this.props.id ?? 0)}
-              className="ml-2 btn btn-danger btn-sm"
-            ><i className="fas fa-trash"></i> Zmazať</button> : ''}
-          </div>
-        </div>
+        {this.state.isEdit ? <button 
+          onClick={() => this.deleteRecord(this.props.id ?? 0)}
+          className="mr-2 btn btn-danger btn-sm"
+        ><i className="fas fa-trash"></i> Zmazať</button> : ''}
       </div>
     );
   }
@@ -529,20 +525,28 @@ export default class Form extends Component<FormProps> {
     return (
       <>
         {this.props.showInModal ? (
-          <div className="modal-header text-left">
-            <button 
-              className="btn btn-light"
-              type="button" 
-              data-dismiss="modal" 
-              aria-label="Close"
-            ><span>&times;</span></button>
-            <h3
-              id={'adios-modal-title-' + this.props.uid}
-              className="m-0 p-0"
-            >
-              {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
-            </h3>
-            {this._renderActionButtons()}
+          <div className="modal-header">
+            <div className="row w-100 p-0 m-0 d-flex align-items-center justify-content-center">
+              <div className="col-lg-4">
+                <button 
+                  className="btn btn-light"
+                  type="button" 
+                  data-dismiss="modal" 
+                  aria-label="Close"
+                ><span>&times;</span></button>
+              </div>
+              <div className="col-lg-4 text-center">
+                <h3
+                  id={'adios-modal-title-' + this.props.uid}
+                  className="m-0 p-0"
+                >
+                  {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
+                </h3>
+              </div>
+              <div className="col-lg-4">
+                {this._renderActionButtons()}
+              </div>
+            </div>
           </div>
         ) : ''}
 
