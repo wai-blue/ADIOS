@@ -9,12 +9,12 @@ require(__DIR__."/src/Init.php");
 
 try {
 
-  $myAdiosApp = new MyAdiosApp($config, TRUE);
-  $myAdiosApp->install();
+  $app = new App($config, TRUE);
+  $app->install();
 
   // user roles and users
-  $userModel = $myAdiosApp->getModel("ADIOS/Core/Models/User");
-  $userRoleModel = $myAdiosApp->getModel("ADIOS/Core/Models/UserRole");
+  $userModel = $app->getModel("ADIOS/Core/Models/User");
+  $userRoleModel = $app->getModel("ADIOS/Core/Models/UserRole");
 
   $idRole = $userRoleModel->insertRow(["name" => "Administrator"]);
 
@@ -34,7 +34,7 @@ try {
   echo $e->getMessage();
 }
 
-$errors = $myAdiosApp->console->getErrors();
+$errors = $app->console->getErrors();
 if (count($errors) > 0) {
   echo "ADIOS app installation failed. Following errors occured during the installation.\n";
   echo "\n";

@@ -588,7 +588,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Edit
       '/^' . $urlBase . '\/(\d+)\/edit$/i' => [
         "permission" => "{$this->fullName}/Edit",
-        "controller" => $this->crud['edit']['controller'] ?? "Components/Form",
+        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
@@ -602,7 +602,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Add
       '/^' . $urlBase . '\/add$/i' => [
         "permission" => "{$this->fullName}/Add",
-        "controller" => $this->crud['add']['controller'] ?? "Components/Form",
+        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
@@ -940,9 +940,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
     );
   }
 
-  public function insertRow($data)
+  public function insertRow($data, $ignoreIdValue = TRUE)
   {
-    unset($data['id']);
+    if ($ignoreIdValue) {
+      unset($data['id']);
+    }
 
     return $this->adios->db->insert($this)
       ->set($data)

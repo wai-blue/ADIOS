@@ -417,13 +417,20 @@ class Builder {
         $this->createFolder($widgetRootDir . '/Views');
 
         foreach ($widgetConfig['controllers'] as $controllerName => $controllerConfig) {
+          $controllerHtmlFileView = '';
+
           $relatedView = $controllerConfig['view'] ?? '';
 
           if (isset($controllerConfig['phpTemplate'])) {
             if ($controllerConfig['phpTemplate'] == 'ViewRender') {
               $controllerPhpFileTemplate = 'src/Widgets/Controllers/ViewRender.php.twig';
               $controllerHtmlFileTemplate = '';
-              $controllerHtmlFileView = 'src/Widgets/ControllerTemplates/DefaultEmpty.html.twig';
+
+              if (substr($controllerConfig['view'], 0, 5) == 'ADIOS') {
+                $controllerHtmlFileView = ''; // nevygenerujem ziadne view, pretoze pouzivam ADIOSove
+              } else {
+                $controllerHtmlFileView = 'src/Widgets/ControllerTemplates/DefaultEmpty.html.twig';
+              }
 
               $traitPhpFileTemplate = 'src/Widgets/Traits/ViewRender.php.twig';
             }
@@ -517,6 +524,7 @@ class Builder {
           if (
             strpos(strtolower($relatedView), "adios/core") === FALSE
             && isset($controllerHtmlFileView)
+            && !empty($controllerHtmlFileView)
             && !is_file($widgetRootDir . '/Views/' . $controllerName . '.twig')
           ) {
             $this->copyFile(
@@ -535,7 +543,7 @@ class Builder {
 
     // render init script
     $this->renderFile('src/Init.php', 'src/Init.php.twig', [
-      'routing' => $routing
+      'routing' => $routing,
     ]);
   }
 

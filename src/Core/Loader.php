@@ -1299,9 +1299,15 @@ class Loader
           } else {
             [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
             if (is_string($view)) {
-              $viewTwig = $this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig';
+              if (substr($view, 0, 3) == 'App') {
+                $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
+              } else if (substr($view, 0, 5) == 'ADIOS') {
+                $canUseTwig = is_file(__DIR__ . '/..' . str_replace('ADIOS', '', $view) . '.twig');
+              } else {
+                $canUseTwig = FALSE;
+              }
 
-              if (is_file($viewTwig)) {
+              if ($canUseTwig) {
                 $html = $this->twig->render(
                   $view, 
                   [

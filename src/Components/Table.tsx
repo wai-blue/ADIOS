@@ -17,6 +17,7 @@ interface TableProps {
   title?: string,
   showTitle?: boolean,
   modal?: ModalProps,
+  formId?: number
 
   //TODO
   //showPaging?: boolean,
@@ -66,19 +67,29 @@ export default class Table extends Component<TableProps> {
     super(props);
 
     this.state = {
-      tableTitle:  props.title ?? props.model,
+      tableTitle: props.title ?? props.model,
       page: 1,
       pageLength: 15,
       form: {
         uid: props.uid,
-        model: props.model
+        model: props.model,
+        id: props.formId
       }
     };
+
   }
 
   componentDidMount() {
     this.loadParams();
     this.loadData();
+
+    // TODO: vyriesit inteligentnejsie, bez setTimeout
+    if (this.props.formId) {
+      let t = this;
+      setTimeout(function() {
+        t.toggleModal();
+      }, 400);
+    }
   }
 
   loadParams() {
@@ -258,7 +269,7 @@ export default class Table extends Component<TableProps> {
                 <div className="col-lg-6 m-0 p-0">
                   <button
                     className="btn btn-primary btn-icon-split"
-                    onClick={() => this.onAddClick()} 
+                    onClick={() => this.onAddClick()}
                   >
                     <span className="icon">
                       <i className="fas fa-plus"/>

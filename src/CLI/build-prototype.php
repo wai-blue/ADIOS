@@ -27,6 +27,7 @@ $arguments = getopt(
     "db-user:",
     "db-password:",
     "db-name:",
+    "db-codepage:",
     "db-provider:",
     "db-dsn:",
     "admin-password:",
@@ -46,6 +47,7 @@ $dbPort = $arguments['db-port'] ?? '';
 $dbUser = $arguments['db-user'] ?? '';
 $dbPassword = $arguments['db-password'] ?? '';
 $dbName = $arguments['db-name'] ?? '';
+$dbCodepage = $arguments['db-codepage'] ?? '';
 $dbProvider = $arguments['db-provider'] ?? '';
 $dbDsn = $arguments['db-dsn'] ?? '';
 $adminPassword = $arguments['admin-password'] ?? '';
@@ -132,6 +134,10 @@ if (
   if (empty($dbName)) {
     $dbName = readline($colorYellow."DB name = ");
   }
+
+  if (empty($dbCodepage)) {
+    $dbCodepage = readline($colorYellow."DB codepage = ");
+  }
 }
 
 
@@ -146,6 +152,7 @@ $builder->setConfigEnv([
     "user" => $dbUser,
     "password" => $dbPassword,
     "database" => $dbName,
+    "codepage" => $dbCodepage,
     "provider" => $dbProvider,
     "dsn" => $dbDsn,
   ],
