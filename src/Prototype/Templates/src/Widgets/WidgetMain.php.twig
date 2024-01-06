@@ -6,7 +6,7 @@ namespace {{ thisWidget.namespace }};
 
 class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
   public function init() {
-    if ($this->adios->hasPermissionsForAction("{{ thisWidget.name }}")) {
+    if ($this->adios->hasPermissionsForController("{{ thisWidget.name }}")) {
 {% for itemTitle, itemConfig in thisWidget.config.sidebar %}
       $this->addSidebarItem([
         "fa_icon" => "fas {% if itemConfig.faIcon %}{{ itemConfig.faIcon }}{% else %}{{ thisWidget.config.faIcon }}{% endif %}",
