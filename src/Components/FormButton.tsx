@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import Modal, { ModalProps } from "./Modal";
-import Form from "./Form";
+import Form, { FormProps } from "./Form";
 
 interface FormButtonProps {
   uid: string,
@@ -9,6 +9,7 @@ interface FormButtonProps {
   icon?: string,
   text: string,
   formId?: number
+  form?: FormProps
 }
 
 interface FormButtonState {
@@ -41,6 +42,7 @@ export default class FormButton extends Component<FormButtonProps> {
             model={this.props.model}
             showInModal={true}
             id={this.props.formId}
+            {...this.props.form}
           />
         </Modal>
         <div

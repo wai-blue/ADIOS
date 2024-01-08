@@ -18,6 +18,7 @@ export default class Textarea extends Component<TextareaInputProps> {
         className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
         aria-describedby="passwordHelpInline"
         disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
+        rows={5}
       />
     );
   } 

@@ -331,7 +331,7 @@ export default class Form extends Component<FormProps> {
             display: 'grid', 
             gridTemplateRows: 'auto', 
             gridTemplateAreas: this.layout, 
-            gridGap: '10px'
+            gridGap: '15px'
           }}
         >
           {this.props.content != null ? 
@@ -374,7 +374,7 @@ export default class Form extends Component<FormProps> {
         contentItem = this._renderInput(contentItemParams['input'] as string);
         break;
       case 'inputs':
-        contentItem = (contentItemParams as Array<string>).map((input: string) => {
+        contentItem = (contentItemParams['inputs'] as Array<string>).map((input: string) => {
           return this._renderInput(input)
         });
         break;

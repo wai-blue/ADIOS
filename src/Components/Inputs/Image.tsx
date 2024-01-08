@@ -39,7 +39,9 @@ export default class Image extends Component<ImageInputProps> {
   render() {
     return (
       <ImageUploading
-        value={this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null
+        value={
+          this.props.parentForm.state.inputs[this.props.columnName]
+          && this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null
           ? [this.props.parentForm.state.inputs[this.props.columnName]]
           : []
         }
@@ -56,16 +58,20 @@ export default class Image extends Component<ImageInputProps> {
           dragProps,
         }) => (
           <div className="upload__image-wrapper">
-            {this.props.parentForm.state.inputs[this.props.columnName]['fileData'] == null ? (
-              <button
-                className="btn btn-light btn-sm"
-                style={isDragging ? { color: 'red' } : undefined}
-                onClick={onImageUpload}
-                {...dragProps}
-              >
-                Vybrať obrázok
-              </button>
-            ) : ''}
+            {this.props.parentForm.state.inputs[this.props.columnName]
+              && this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null
+              ? ''
+              : (
+                <button
+                  className="btn btn-light btn-sm"
+                  style={isDragging ? { color: 'red' } : undefined}
+                  onClick={onImageUpload}
+                  {...dragProps}
+                >
+                  Vybrať obrázok
+                </button>
+              )
+            }
 
             {imageList.map((image, index) => (
               <div key={index} className="image-item">
