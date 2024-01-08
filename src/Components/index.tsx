@@ -15,6 +15,7 @@ import Card from "./Card";
 import Button from "./Button";
 import Modal from "./Modal";
 import FormButton from "./FormButton";
+import FormCardButton from "./FormCardButton";
 
 /**
 * Examples
@@ -35,6 +36,7 @@ const initializeComponents = [
   'button',
   'modal',
   'form-button',
+  'form-card-button',
   
   // Examples
   'example',
@@ -72,6 +74,8 @@ const getComponent = (componentName: string, params: Object) => {
     case 'modal': return <Modal {...params} ></Modal>;
     //@ts-ignore
     case 'form-button': return <FormButton {...params} />;
+    //@ts-ignore
+    case 'form-card-button': return <FormCardButton {...params} />;
 
     // Examples
     case 'example': return <Example {...params} />;
@@ -93,14 +97,24 @@ const renderComponent = (specificHtmlElement: string, component: string) => {
     // Find attribute and also delete him using [0] index
     let i: number = 0
     while (element.attributes.length > i) {
-      let attributeName = element.attributes[i].name.replace(/-([a-z])/g, (_: any, letter: string) => letter.toUpperCase());
-      let attributeValue = element.attributes[i].value;
+      let attributeName: string = element.attributes[i].name.replace(/-([a-z])/g, (_: any, letter: string) => letter.toUpperCase());
+      let attributeValue: any = element.attributes[i].value;
 
       if (isValidJSON(attributeValue)) {
-        attributeValue = JSON.parse(attributeValue);
+        let attributeValues: Object|Array<any> = JSON.parse(attributeValue);
+        if (!Array.isArray(attributeValues)) {
+          attributeValue = {};
+
+          attributeValue  = Object.keys(attributeValues).reduce(function(result, key) {
+            result[key] = getValidatedAttributeValue(key, attributeValues[key]);
+            return result;
+          }, {});
+        } else {
+          attributeValue = attributeValues;
+        }
       }
 
-      componentProps[attributeName] = attributeValue; 
+      componentProps[attributeName] = getValidatedAttributeValue(attributeName, attributeValue); 
 
       if (attributesToSkip.includes(attributeName)) {
         i++;
@@ -136,6 +150,14 @@ function isValidJSON(jsonString: string) {
   } catch (error) {
     return false;
   }
+}
+
+/**
+ * Validate attribute value
+ * E.g. if string contains Callback create frunction from string
+ */
+function getValidatedAttributeValue(attributeName: string, attributeValue: any): Function|any {
+  return attributeName.toLowerCase().includes('callback') ? new Function(attributeValue) : attributeValue;
 }
 
 /**

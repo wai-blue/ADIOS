@@ -2,10 +2,8 @@ import React, { ChangeEvent, Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import axios from "axios";
 
-import { FormProps } from "./Form";
-
 import Modal, { ModalProps } from "./Modal";
-import Form from "./Form";
+import Form, { FormProps } from "./Form";
 import { dateToEUFormat } from "./Inputs/DateTime";
 
 import Loader from "./Loader";
@@ -17,7 +15,8 @@ interface TableProps {
   title?: string,
   showTitle?: boolean,
   modal?: ModalProps,
-  formId?: number
+  formId?: number,
+  form?: FormProps
 
   //TODO
   //showPaging?: boolean,
@@ -90,71 +89,71 @@ export default class Table extends Component<TableProps> {
         model: this.props.model
       }
     }).then(({data}: any) => {
-      let columns: Array<any> = [];
+        let columns: Array<any> = [];
 
-      columns = data.columns.map((column: any) => {
-        switch (column['columnType']) {
-          case 'color': return { 
-            ...column, 
-            renderCell: (params: any) => {
-              return <span 
-                style={{ width: '20px', height: '20px', background: params.value }} 
-                className="rounded" 
-              />
+        columns = data.columns.map((column: any) => {
+          switch (column['columnType']) {
+            case 'color': return { 
+              ...column, 
+              renderCell: (params: any) => {
+                return <span 
+                  style={{ width: '20px', height: '20px', background: params.value }} 
+                  className="rounded" 
+                />
+              }
             }
-          }
-          case 'image': return { 
-            ...column, 
-            renderCell: (params: any) => {
-              if (!params.value) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+            case 'image': return { 
+              ...column, 
+              renderCell: (params: any) => {
+                if (!params.value) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
 
-              return <img 
-                style={{ width: '30px', height: '30px' }}
-                src={data.folderUrl + "/" + params.value}
-                className="rounded"
-              />
+                return <img 
+                  style={{ width: '30px', height: '30px' }}
+                  src={data.folderUrl + "/" + params.value}
+                  className="rounded"
+                />
+              }
             }
-          }
-          case 'lookup': return { 
-            ...column, 
-            renderCell: (params: any) => {
-              return <span style={{
-                color: '#2d4a8a'
-              }}>{params.value?.lookupSqlValue}</span>
+            case 'lookup': return { 
+              ...column, 
+              renderCell: (params: any) => {
+                return <span style={{
+                  color: '#2d4a8a'
+                }}>{params.value?.lookupSqlValue}</span>
+              }
             }
-          }
-          case 'enum': return { 
-            ...column, 
-            renderCell: (params: any) => {
-              return column['enumValues'][params.value];
+            case 'enum': return { 
+              ...column, 
+              renderCell: (params: any) => {
+                return column['enumValues'][params.value];
+              }
             }
-          }
-          case 'bool':
-          case 'boolean': return { 
-            ...column, 
-            renderCell: (params: any) => {
+            case 'bool':
+            case 'boolean': return { 
+              ...column, 
+              renderCell: (params: any) => {
                 if (params.value) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>;
                 else return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>;
+              }
             }
-          }
-          case 'date':
-          case 'datetime':
-          case 'datetime': return { 
-            ...column, 
-            renderCell: (params: any) => {
-              return dateToEUFormat(params.value);
+            case 'date':
+            case 'datetime':
+            case 'datetime': return { 
+              ...column, 
+              renderCell: (params: any) => {
+                return dateToEUFormat(params.value);
+              }
             }
+            default: return column;
           }
-          default: return column;
-        }
-      });
+        });
 
-      this.setState({
-        columns: columns,
-        tableTitle: data.tableTitle,
-        addButtonText: data.addButtonText
+        this.setState({
+          columns: columns,
+          tableTitle: data.tableTitle,
+          addButtonText: data.addButtonText
+        });
       });
-    });
   }
 
   loadData(page: number = 1) {
@@ -173,10 +172,10 @@ export default class Table extends Component<TableProps> {
         search: this.state.search
       }
     }).then(({data}: any) => {
-      this.setState({
-        data: data.data
+        this.setState({
+          data: data.data
+        });
       });
-    });
   }
 
   onAddClick() {
@@ -237,6 +236,7 @@ export default class Table extends Component<TableProps> {
               this.loadData();
               window.adiosModalToggle(this.props.uid);
             }}
+            {...this.props.form}
           />
         </Modal>
 

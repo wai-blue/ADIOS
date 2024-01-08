@@ -7,7 +7,8 @@ interface FormButtonProps {
   model: string,
   css?: string,
   icon?: string,
-  text: string
+  text: string,
+  formId?: number
 }
 
 interface FormButtonState {
@@ -39,6 +40,7 @@ export default class FormButton extends Component<FormButtonProps> {
             uid={this.props.uid}
             model={this.props.model}
             showInModal={true}
+            id={this.props.formId}
           />
         </Modal>
         <div

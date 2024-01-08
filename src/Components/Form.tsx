@@ -563,7 +563,7 @@ export default class Form extends Component<FormProps> {
                 <div className="card-header">
                   <div className="row">
                     <div className="col-lg-12 m-0 p-0">
-                      <h3 className="card-title p-0 m-0">
+                      <h3 className="card-title">
                         {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
                       </h3>
                     </div>
