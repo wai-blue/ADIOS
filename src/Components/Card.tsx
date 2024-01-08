@@ -18,16 +18,14 @@ export default class Card extends Component<CardProps> {
         id={"adios-card-" + this.props.uid}
         className="adios react ui card"
       >
-        <div className="card shadow-sm mb-2">
-          {this.props.title ? (
-            <div className="card-header py-3">
-              <h6 className="m-0 font-weight-bold text-primary">{ this.props.title }</h6>
-            </div>
-          ) : ''}
-
-          <div className="card-body">
-            <div dangerouslySetInnerHTML={{ __html: this.props.content ?? "" }} />
+        {this.props.title ? (
+          <div className="card-header py-3">
+            <h6 className="m-0 font-weight-bold text-primary">{ this.props.title }</h6>
           </div>
+        ) : ''}
+
+        <div className="card-body">
+          <div dangerouslySetInnerHTML={{ __html: this.props.content ?? "" }} />
         </div>
       </div>
     );
