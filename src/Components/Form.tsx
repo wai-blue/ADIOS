@@ -502,21 +502,22 @@ export default class Form extends Component<FormProps> {
 
   _renderActionButtons(): JSX.Element {
     return (
-      <div className="d-flex flex-row-reverse">
+      <div className="d-flex">
         <button 
           onClick={() => this.saveRecord()}
-          className="btn btn-sm btn-primary"
+          className="btn btn-sm btn-primary btn-icon-split"
         >
           {this.state.isEdit == true 
-            ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
-            : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
+            ? <><span className="icon"><i className="fas fa-save"></i></span><span className="text">{this.state.formSaveButtonText}</span></>
+            : <><span className="icon"><i className="fas fas fa-plus"></i></span><span className="text">{this.state.formAddButtonText}</span></>
           }
         </button>
 
         {this.state.isEdit ? <button 
           onClick={() => this.deleteRecord(this.props.id ?? 0)}
-          className="mr-2 btn btn-danger btn-sm"
-        ><i className="fas fa-trash"></i> Zmazať</button> : ''}
+          className="ml-2 btn btn-danger btn-sm btn-icon-split"
+        ><span className="icon"><i className="fas fa-trash"></i></span><span className="text">Zmazať</span>
+        </button> : ''}
       </div>
     );
   }
@@ -528,12 +529,7 @@ export default class Form extends Component<FormProps> {
           <div className="modal-header">
             <div className="row w-100 p-0 m-0 d-flex align-items-center justify-content-center">
               <div className="col-lg-4">
-                <button 
-                  className="btn btn-light"
-                  type="button" 
-                  data-dismiss="modal" 
-                  aria-label="Close"
-                ><span>&times;</span></button>
+                {this._renderActionButtons()}
               </div>
               <div className="col-lg-4 text-center">
                 <h3
@@ -543,8 +539,13 @@ export default class Form extends Component<FormProps> {
                   {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
                 </h3>
               </div>
-              <div className="col-lg-4">
-                {this._renderActionButtons()}
+              <div className="col-lg-4 d-flex flex-row-reverse">
+                <button 
+                  className="btn btn-light"
+                  type="button" 
+                  data-dismiss="modal" 
+                  aria-label="Close"
+                ><span>&times;</span></button>
               </div>
             </div>
           </div>

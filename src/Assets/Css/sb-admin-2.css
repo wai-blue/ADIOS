@@ -10550,7 +10550,7 @@ a:focus {
 
 .btn-icon-split {
   padding: 0;
-  overflow: hidden;
+  /* overflow: hidden; */
   display: inline-flex;
   align-items: stretch;
   justify-content: center;
