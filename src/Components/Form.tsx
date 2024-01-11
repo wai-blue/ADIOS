@@ -509,7 +509,7 @@ export default class Form extends Component<FormProps> {
 
           {this.state.columns[columnName].unit ? (
             <div className="input-group-append">
-              <span className="input-group-text">$</span>
+              <span className="input-group-text">{this.state.columns[columnName].unit}</span>
             </div>
           ) : ''}
         </div>
