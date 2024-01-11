@@ -17,6 +17,7 @@ $config['files_url']                     = '//' . $_SERVER['HTTP_HOST'] . $confi
 
 // brand
 $config['brand']['title']                = '{{ ConfigApp.applicationName }}';
+$config['brand']['headline']             = '{{ ConfigApp.applicationHeadline }}';
 $config['brand']['favicon']              = {% if ConfigApp.brand.favicon %}'{{ ConfigApp.brand.favicon }}'{% else %}$config['url'] . '/src/Assets/images/favicon.png'{% endif %};
 $config['brand']['login']['splash']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.loginScreenImage ?? 'login-screen.jpg' }}';
 $config['brand']['sidebar']['icon']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.sidebar.icon ?? 'logo.png' }}';
