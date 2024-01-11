@@ -21,6 +21,7 @@ import InputImage from "./Inputs/Image";
 import InputTags from "./Inputs/Tags";
 import InputDateTime from "./Inputs/DateTime";
 import InputEnumValues from "./Inputs/EnumValues";
+import InputTime from "./Inputs/Time";
 
 interface Content {
   [key: string]: ContentCard|any;
@@ -65,7 +66,8 @@ export interface FormColumnParams {
   description?: string,
   disabled?: boolean,
   model?: string,
-  enum_values?: Array<string|number>
+  enum_values?: Array<string|number>,
+  unit?: string
 }
 
 interface FormColumns {
@@ -463,6 +465,12 @@ export default class Form extends Component<FormProps> {
             columnName={columnName}
           />;
           break;
+        case 'time':
+          inputToRender = <InputTime
+            parentForm={this}
+            columnName={columnName}
+          />;
+          break;
         case 'editor':
           inputToRender = (
             <div className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
@@ -485,7 +493,7 @@ export default class Form extends Component<FormProps> {
 
     return columnName != 'id' ? (
       <div 
-        className="form-group mb-3"
+        className="input-form mb-3"
         key={columnName}
       >
         <label className="text-dark">
@@ -493,7 +501,18 @@ export default class Form extends Component<FormProps> {
           {this.state.columns[columnName].required == true ? <b className="text-danger"> *</b> : ""}
         </label>
 
-        {inputToRender}
+        <div 
+          className="input-group"
+          key={columnName}
+        >
+          {inputToRender}
+
+          {this.state.columns[columnName].unit ? (
+            <div className="input-group-append">
+              <span className="input-group-text">$</span>
+            </div>
+          ) : ''}
+        </div>
 
         <small className="form-text text-muted">{this.state.columns[columnName].description}</small>
       </div>
