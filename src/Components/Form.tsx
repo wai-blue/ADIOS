@@ -534,16 +534,29 @@ export default class Form extends Component<FormProps> {
           onClick={() => this.saveRecord()}
           className="btn btn-sm btn-primary btn-icon-split"
         >
-          {this.state.isEdit == true 
-            ? <span><i className="fas fa-save"></i> {this.state.saveButtonText}</span>
-            : <span><i className="fas fa-plus"></i> {this.state.addButtonText}</span>
+          {this.state.isEdit
+            ? (
+              <>
+                <span className="icon"><i className="fas fa-save"></i></span>
+                <span className="text"> {this.state.saveButtonText}</span>
+              </>
+            )
+            : (
+              <>
+                <span className="icon"><i className="fas fa-plus"></i></span>
+                <span className="text"> {this.state.addButtonText}</span>
+              </>
+            )
           }
         </button>
 
         {this.state.isEdit ? <button 
           onClick={() => this.deleteRecord(this.props.id ?? 0)}
           className="mr-2 btn btn-danger btn-sm btn-icon-split"
-        ><i className="fas fa-trash"></i> Zmazať</button> : ''}
+        >
+          <span className="icon"><i className="fas fa-trash"></i></span>
+          <span className="text">  Zmazať</span>
+        </button> : ''}
       </div>
     );
   }
