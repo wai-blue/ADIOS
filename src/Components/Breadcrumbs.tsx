@@ -41,7 +41,7 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
                   <span style={{color: '#e78b00'}}>{item.text}</span>
                 ) : (
                   <a
-                    href={item.url}
+                    href={window._APP_URL + '/' + item.url}
                     className="text-primary"
                   >{item.text}</a>
                 )}

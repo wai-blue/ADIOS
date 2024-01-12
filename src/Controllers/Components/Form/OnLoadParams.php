@@ -20,14 +20,13 @@ class OnLoadParams extends \ADIOS\Core\Controller {
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
-      return [
-        'columns' => $tmpModel->columns(),
-        'folderUrl' => $tmpModel->getFolderUrl(),
-        'formSaveButtonText' => $tmpModel->formSaveButtonText ?? "Uložiť záznam",
-        'formAddButtonText' => $tmpModel->formAddButtonText ?? "Pridať záznam",
-        'formTitleForEditing' => $tmpModel->formTitleForEditing,
-        'formTitleForInserting' => $tmpModel->formTitleForInserting,
-      ];
+      return array_merge(
+        [
+          'columns' => $tmpModel->columns(),
+          'folderUrl' => $tmpModel->getFolderUrl(),
+        ],
+        $tmpModel->defaultFormParams ?? []
+      );
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error
     }

@@ -184,7 +184,8 @@
             {% if config.top_bar.custom.controller != "" %}
               {{ adiosRender(config.top_bar.custom.controller, config.top_bar.custom.controller_params)|raw }}
             {% else %}
-              {{ config.application_name }}
+              {{ config.brand.title }}
+              {{ config.brand.headline }}
             {% endif %}
           </div>
 

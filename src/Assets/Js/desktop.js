@@ -44,6 +44,8 @@
         $('.adios.main-content .windows').removeClass('update-in-progress');
 
         $('.adios.main-content .windows .windows-content').append(html);
+
+        if (typeof onclose == 'function') onclose();
         // window_post_render(html, controller, params, options);
 
       });

@@ -42,7 +42,7 @@ export default class Lookup extends Component<LookupInputProps> {
         data: data.data
       });
 
-      if (callback) callback(Object.values(data.data));
+      if (callback) callback(Object.values(data.data ?? {}));
     });
   }
 
@@ -55,16 +55,22 @@ export default class Lookup extends Component<LookupInputProps> {
   }
 
   render() {
+  // console.log(input, this.state.data);
+    let input = this.props.parentForm.state.inputs[this.props.columnName];
+    let data = this.state.data ?? {};
+    let value = (input in data ? data[input] : 0);
+
     return (
       <AsyncSelect
         loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
-        defaultOptions={Object.values(this.state.data)}
-        value={this.state.data[this.props.parentForm.state.inputs[this.props.columnName]]}
+        defaultOptions={Object.values(this.state.data ?? {})}
+        value={value}
         getOptionLabel={this.getOptionLabel}
         getOptionValue={this.getOptionValue}
         onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}
         isDisabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
         placeholder=""
+        className="w-100"
         styles={{
           control: (baseStyles, state) => ({
             ...baseStyles,
