@@ -538,13 +538,13 @@ export default class Form extends Component<FormProps> {
             ? (
               <>
                 <span className="icon"><i className="fas fa-save"></i></span>
-                <span className="text"> {this.state.saveButtonText}</span>
+                <span className="text"> {this.state.saveButtonText ?? "Uložiť záznam"}</span>
               </>
             )
             : (
               <>
                 <span className="icon"><i className="fas fa-plus"></i></span>
-                <span className="text"> {this.state.addButtonText}</span>
+                <span className="text"> {this.state.addButtonText ?? "Pridať záznam"}</span>
               </>
             )
           }
@@ -552,7 +552,7 @@ export default class Form extends Component<FormProps> {
 
         {this.state.isEdit ? <button 
           onClick={() => this.deleteRecord(this.props.id ?? 0)}
-          className="mr-2 btn btn-danger btn-sm btn-icon-split"
+          className="ml-2 btn btn-danger btn-sm btn-icon-split"
         >
           <span className="icon"><i className="fas fa-trash"></i></span>
           <span className="text">  Zmazať</span>
