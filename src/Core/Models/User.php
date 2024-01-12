@@ -123,12 +123,12 @@ class User extends \ADIOS\Core\Model {
         'title' => $this->translate('Last access IP'),
         'readonly' => TRUE,
       ],
-      'id_token_reset_password' => [
-        'type' => 'lookup',
-        'model' => "ADIOS/Core/Models/Token",
-        'title' => $this->translate('Reset password token'),
-        'readonly' => TRUE,
-      ]
+      //'id_token_reset_password' => [
+      //  'type' => 'lookup',
+      //  'model' => "ADIOS/Core/Models/Token",
+      //  'title' => $this->translate('Reset password token'),
+      //  'readonly' => TRUE,
+      //]
     ]);
   }
 
@@ -264,6 +264,14 @@ class User extends \ADIOS\Core\Model {
         ["password" => password_hash($password, PASSWORD_DEFAULT)]
       )
     ;
+  }
+
+  public function id_role(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
+    return $this->BelongsTo(\ADIOS\Core\Models\UserRole::class, 'id_role');
+  }
+
+  public function id_token_reset_password(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
+    return $this->BelongsTo(\ADIOS\Core\Models\Token::class, 'id_token_reset_password');
   }
 
 }
