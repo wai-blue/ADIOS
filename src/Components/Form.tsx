@@ -45,17 +45,18 @@ export interface FormProps {
 }
 
 interface FormState {
-  content?: Object,
+  content?: Content,
   columns?: FormColumns,
   inputs?: FormInputs,
   isEdit: boolean,
   invalidInputs: Object,
   tabs?: any,
   folderUrl?: string,
-  formAddButtonText?: string,
-  formSaveButtonText?: string,
-  formTitleForEditing?: string,
-  formTitleForInserting?: string
+  addButtonText?: string,
+  saveButtonText?: string,
+  titleForEditing?: string,
+  titleForInserting?: string,
+  layout?: string
 }
 
 export interface FormColumnParams {
@@ -82,7 +83,6 @@ export default class Form extends Component<FormProps> {
   state: FormState;
 
   model: String;
-  layout: string;
   inputs: FormInputs = {};
 
   constructor(props: FormProps) {
@@ -90,13 +90,13 @@ export default class Form extends Component<FormProps> {
 
     this.state = {
       content: props.content,
+      layout: this.convertLayoutToString(props.layout),
       isEdit: false,
       invalidInputs: {},
       inputs: {}
     };
 
-    //@ts-ignore
-    this.layout = this.props.layout?.map(row => `"${row.join(' ')}"`).join('\n');
+    // this.updateLayout();
   }
 
   /**
@@ -128,14 +128,17 @@ export default class Form extends Component<FormProps> {
         model: this.props.model
       }
     }).then(({data}: any) => {
-      this.setState({
+      data.layout = this.convertLayoutToString(data.layout);
+
+      let newState = {
         columns: data.columns,
         folderUrl: data.folderUrl,
-        formAddButtonText: data.formAddButtonText,
-        formSaveButtonText: data.formSaveButtonText,
-        formTitleForEditing: data.formTitleForEditing,
-        formTitleForInserting: data.formTitleForInserting,
-      }, () => this.loadData());
+        ...data
+      };
+      this.setState(newState, () => {
+        this.loadData();
+        // this.updateLayout();
+      });
     });
   }
 
@@ -285,12 +288,12 @@ export default class Form extends Component<FormProps> {
     * Initialize form tabs is are defined
     */
   initTabs() {
-    if (this.props.content?.tabs == undefined) return;
+    if (this.state.content?.tabs == undefined) return;
 
     let tabs: any = {};
     let firstIteration: boolean = true;
 
-    Object.keys(this.props.content?.tabs).map((tabName: string) => {
+    Object.keys(this.state.content?.tabs).map((tabName: string) => {
       tabs[tabName] = {
         active: firstIteration 
       };
@@ -303,18 +306,23 @@ export default class Form extends Component<FormProps> {
     });  
   }
 
+  convertLayoutToString(layout?: Array<Array<string>>): string {
+    //@ts-ignore
+    return layout?.map(row => `"${row.join(' ')}"`).join('\n');
+  }
+
   /**
     * Render tab
     */
   _renderTab(): JSX.Element {
-    if (this.props.content?.tabs) {
-      let tabs: any = Object.keys(this.props.content.tabs).map((tabName: string) => {
-        return this._renderTabContent(tabName, this.props.content?.tabs[tabName]);
+    if (this.state.content?.tabs) {
+      let tabs: any = Object.keys(this.state.content.tabs).map((tabName: string) => {
+        return this._renderTabContent(tabName, this.state.content?.tabs[tabName]);
       })
 
       return tabs;
     } else {
-      return this._renderTabContent("default", this.props.content);
+      return this._renderTabContent("default", this.state.content);
     } 
   }
 
@@ -332,11 +340,11 @@ export default class Form extends Component<FormProps> {
           style={{
             display: 'grid', 
             gridTemplateRows: 'auto', 
-            gridTemplateAreas: this.layout, 
+            gridTemplateAreas: this.state.layout, 
             gridGap: '15px'
           }}
         >
-          {this.props.content != null ? 
+          {this.state.content != null ? 
             Object.keys(content).map((contentArea: string) => {
               return this._renderContentItem(contentArea, content[contentArea]); 
             })
@@ -524,17 +532,17 @@ export default class Form extends Component<FormProps> {
       <div className="d-flex flex-row-reverse">
         <button 
           onClick={() => this.saveRecord()}
-          className="btn btn-sm btn-primary"
+          className="btn btn-sm btn-primary btn-icon-split"
         >
           {this.state.isEdit == true 
-            ? <span><i className="fas fa-save"></i> {this.state.formSaveButtonText}</span>
-            : <span><i className="fas fa-plus"></i> {this.state.formAddButtonText}</span>
+            ? <span><i className="fas fa-save"></i> {this.state.saveButtonText}</span>
+            : <span><i className="fas fa-plus"></i> {this.state.addButtonText}</span>
           }
         </button>
 
         {this.state.isEdit ? <button 
           onClick={() => this.deleteRecord(this.props.id ?? 0)}
-          className="mr-2 btn btn-danger btn-sm"
+          className="mr-2 btn btn-danger btn-sm btn-icon-split"
         ><i className="fas fa-trash"></i> Zmazať</button> : ''}
       </div>
     );
@@ -559,7 +567,7 @@ export default class Form extends Component<FormProps> {
                   id={'adios-modal-title-' + this.props.uid}
                   className="m-0 p-0"
                 >
-                  {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
+                  {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
                 </h3>
               </div>
               <div className="col-lg-4">
@@ -583,7 +591,7 @@ export default class Form extends Component<FormProps> {
                   <div className="row">
                     <div className="col-lg-12 m-0 p-0">
                       <h3 className="card-title">
-                        {this.state.isEdit ? this.state.formTitleForEditing : this.state.formTitleForInserting}
+                        {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
                       </h3>
                     </div>
 

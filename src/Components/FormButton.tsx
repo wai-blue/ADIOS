@@ -4,12 +4,10 @@ import Form, { FormProps } from "./Form";
 
 interface FormButtonProps {
   uid: string,
-  model: string,
   css?: string,
   icon?: string,
   text: string,
-  formId?: number
-  form?: FormProps
+  formParams?: FormProps
 }
 
 interface FormButtonState {
@@ -39,10 +37,8 @@ export default class FormButton extends Component<FormButtonProps> {
         >
           <Form 
             uid={this.props.uid}
-            model={this.props.model}
             showInModal={true}
-            id={this.props.formId}
-            {...this.props.form}
+            {...this.props.formParams}
           />
         </Modal>
         <div

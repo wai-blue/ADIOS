@@ -10,11 +10,21 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   use \{{ thisModel.namespace }}\Callbacks\{{ thisModel.class }};
 {% endif %}
 
+{% if thisModel.config.constants is iterable %}
+  {% for constName, constValue in thisModel.config.constants %}
+    const {{ constName }} = {{ constValue }};
+  {% endfor %}
+{% endif %}
+
   public bool $isJunctionTable = {{ thisModel.config.isJunctionTable ? 'TRUE' : 'FALSE' }};
 
   public ?string $addButtonText = {% if thisModel.config.addButtonText %} "{{ thisModel.config.addButtonText|raw }}" {% else %} null {% endif %};
   public ?string $formAddButtonText = {% if thisModel.config.formAddButtonText %} "{{ thisModel.config.formAddButtonText|raw }}" {% else %} null {% endif %};
   public ?string $formSaveButtonText = {% if thisModel.config.formSaveButtonText %} "{{ thisModel.config.formSaveButtonText|raw }}" {% else %} null {% endif %};
+
+  public ?array $defaultFormParams = 
+{{ varExport(thisModel.config.defaultFormParams | default(null), "    ")|raw }}
+  ;
 
   public string $sqlName = "{{ thisModel.config.sqlName|raw }}";
   public string $urlBase = "{{ thisModel.config.urlBase|raw }}";
