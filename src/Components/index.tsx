@@ -176,11 +176,8 @@ declare global {
 window.getComponent = getComponent;
 //window.renderComponent = renderComponent;
 
-interface AdiosModal {
-  adiosModal?: {
-    title: string
-  },
-  [key: string]: any
+interface AdiosModalParams {
+  title: string
 }
 
 /*
@@ -189,16 +186,12 @@ interface AdiosModal {
   * #adios-modal-global sa vytvara v Desktop.twig
   * Nasledne sa meni iba kontent tohto modalo #adios-modal-body-global
   */
-window.adiosModal = (controllerUrl: string, params: AdiosModal = {}) => {
+window.adiosModal = (controllerUrl: string, params: any = {}, modalParams: AdiosModalParams|null = null) => {
   $('#adios-modal-title-global').text("");
 
-  if (params.adiosModal) {
-    if (params.adiosModal.title) {
-      //@ts-ignore
-      $('#adios-modal-title-global').text(params.adiosModal.title);
-    }
-
-    delete params['adiosModal'];
+  if (modalParams != null) {
+    //@ts-ignore
+    $('#adios-modal-title-global').text(modalParams.title);
   }
 
   //@ts-ignore
