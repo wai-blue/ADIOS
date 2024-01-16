@@ -16,7 +16,7 @@ interface TableProps {
   showTitle?: boolean,
   modal?: ModalProps,
   formId?: number,
-  form?: FormProps
+  formParams?: FormProps
 
   //TODO
   //showPaging?: boolean,
@@ -236,7 +236,7 @@ export default class Table extends Component<TableProps> {
               this.loadData();
               window.adiosModalToggle(this.props.uid);
             }}
-            {...this.props.form}
+            {...this.props.formParams}
           />
         </Modal>
 

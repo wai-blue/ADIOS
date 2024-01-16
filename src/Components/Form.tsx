@@ -41,7 +41,8 @@ export interface FormProps {
   onSaveCallback?: () => void,
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
-  showInModal?: boolean
+  showInModal?: boolean,
+  columns?: FormColumns
 }
 
 interface FormState {
@@ -129,12 +130,14 @@ export default class Form extends Component<FormProps> {
       }
     }).then(({data}: any) => {
       data.layout = this.convertLayoutToString(data.layout);
+      data.columns = this.objectMerge(data.columns, this.props.columns);
 
       let newState = {
         columns: data.columns,
         folderUrl: data.folderUrl,
         ...data
       };
+
       this.setState(newState, () => {
         this.loadData();
         // this.updateLayout();
@@ -208,6 +211,21 @@ export default class Form extends Component<FormProps> {
           });
       }
     })
+  }
+
+  // TODO: Prehodit niekde medzi spolocne
+  objectMerge(target: Object, source: Object): Object {
+    for (const key in source) {
+      if (source.hasOwnProperty(key)) {
+        if (source[key] instanceof Object && key in target) {
+          this.objectMerge(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      }
+    }
+
+    return target;
   }
 
   /**

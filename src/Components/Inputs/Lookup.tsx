@@ -68,7 +68,7 @@ export default class Lookup extends Component<LookupInputProps> {
         getOptionLabel={this.getOptionLabel}
         getOptionValue={this.getOptionValue}
         onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}
-        isDisabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
+        isDisabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].readonly}
         placeholder=""
         className="w-100"
         styles={{
