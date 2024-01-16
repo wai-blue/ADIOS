@@ -68,19 +68,27 @@ export default class Modal extends Component<ModalProps> {
             ) : (
               <>
                 <div className="modal-header text-left">
-                  <button 
-                    className="btn btn-light"
-                    type="button" 
-                    data-dismiss="modal" 
-                    aria-label="Close"
-                  ><span>&times;</span></button>
+                  <div className="row w-100 p-0 m-0 d-flex align-items-center justify-content-center">
+                    <div className="col-lg-8 text-left">
+                      {this.state.title ? (
+                        <h3
+                          id={'adios-modal-title-' + this.props.uid}
+                          className="m-0 p-0"
+                        >
+                          {this.state.title}
+                        </h3>
+                      ) : ''}
+                    </div>
 
-                  {this.state.title ? (
-                    <h4 
-                      className="modal-title text-dark"
-                      id={'adios-modal-title-' + this.state.uid}
-                    >{this.state.title}</h4>
-                  ) : ''}
+                    <div className="col-lg-4 d-flex flex-row-reverse">
+                      <button 
+                        className="btn btn-light"
+                        type="button" 
+                        data-dismiss="modal" 
+                        aria-label="Close"
+                      ><span>&times;</span></button>
+                    </div>
+                  </div>
                 </div>
 
                 <div 
