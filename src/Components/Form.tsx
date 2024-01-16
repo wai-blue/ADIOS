@@ -486,15 +486,12 @@ export default class Form extends Component<FormProps> {
           />;
           break;
         case 'datetime':
+        case 'date':
+        case 'time':
           inputToRender = <InputDateTime
             parentForm={this}
             columnName={columnName}
-          />;
-          break;
-        case 'time':
-          inputToRender = <InputTime
-            parentForm={this}
-            columnName={columnName}
+            type={this.state.columns[columnName].type}
           />;
           break;
         case 'editor':

@@ -1,9 +1,6 @@
 import React, { Component } from 'react'
-
-interface DateTimeInputProps {
-  parentForm: any,
-  columnName: string
-}
+import "flatpickr/dist/themes/material_blue.css";
+import Flatpickr from "react-flatpickr";
 
 export const dateToEUFormat = (dateString: string): string => {
   let d = new Date(dateString);
@@ -15,20 +12,58 @@ export const dateToEUFormat = (dateString: string): string => {
   ;
 }
 
+interface DateTimeInputProps {
+  parentForm: any,
+  columnName: string,
+  type: string
+}
 
 export default class DateTime extends Component<DateTimeInputProps> {
+  options: any = {
+    dateFormat: 'd.m.Y',
+    allowInput: true,
+    locale: {
+      weekdays: {
+        shorthand: ['Ne.', 'Po.', 'Ut.', 'St.', 'Št.', 'Pi.', 'So.'],
+        longhand: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+      },
+      months: {
+        shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Máj', 'Jún', 'Júl', 'Aug', 'Sep', 'Okt', 'Nov', 'Dec'],
+        longhand: ['Január', 'Február', 'Marec', 'Apríl', 'Máj', 'Jún', 'Júl', 'August', 'September', 'Október', 'November', 'December']
+      },
+      weekStart: 1
+    }
+  };
+
   constructor(props: DateTimeInputProps) {
     super(props);
+
+    switch (props.type) {
+      case 'datetime': 
+        this.options = {...this.options, ...{ dateFormat: 'd.m.Y H:i' }};
+      break;
+      case 'time': 
+        this.options = {
+          ...this.options,
+          ...{
+            dateFormat: 'H:i',
+            enableTime: true,
+            noCalendar: true,
+            time_24hr: true
+          }
+        };
+      break;
+    }
   }
 
   render() {
     return (
-      <input 
-        type="datetime-local" 
+      <Flatpickr
         value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
-        onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
+        onChange={(data: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, data[0] ?? null)}
         className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
         disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
+        options={this.options}
       />
     );
   } 
