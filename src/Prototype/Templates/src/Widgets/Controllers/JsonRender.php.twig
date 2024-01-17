@@ -1,0 +1,18 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace {{ thisController.namespace }};
+
+class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
+
+  public static bool $hideDefaultDesktop = true;
+
+  public function renderJson() { 
+    try {
+      return [];
+    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
+      // TODO: Error
+    }
+  }
+}

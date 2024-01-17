@@ -2100,18 +2100,27 @@ class Loader
     return $css;
   }
 
-  public function renderReactJsBundle(): string {
-    $jsFile = "";
-
-    // Load react bundle file
-    foreach (scandir(dirname(__FILE__).'/../Assets/Js/React') as $file) {
+  private function scanReactFolder(string $path): string {
+    foreach (scandir($path . '/Assets/Js/React') as $file) {
       if ('.js' == substr($file, -3)) {
-        $jsFile = dirname(__FILE__)."/../Assets/Js/React/{$file}";
-        break;
+        return @file_get_contents($path . "/Assets/Js/React/{$file}") . ";";
       }
     }
+  }
 
-    return @file_get_contents($jsFile).";\n";
+  public function renderReactJsBundle(): string {
+    $reactFolders = [
+      dirname(__FILE__) . '/..',
+      $this->config['src_dir']
+    ];
+
+    $jsFilesContent = "";
+
+    foreach ($reactFolders as $reactFolder) {
+      $jsFilesContent .= $this->scanReactFolder($reactFolder);
+    }
+
+    return $jsFilesContent;
   }
 
   public function renderJSCache() {

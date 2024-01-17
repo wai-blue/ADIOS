@@ -422,17 +422,21 @@ class Builder {
           $relatedView = $controllerConfig['view'] ?? '';
 
           if (isset($controllerConfig['phpTemplate'])) {
-            if ($controllerConfig['phpTemplate'] == 'ViewRender') {
-              $controllerPhpFileTemplate = 'src/Widgets/Controllers/ViewRender.php.twig';
-              $controllerHtmlFileTemplate = '';
+            switch ($controllerConfig['phpTemplate']) {
+              case 'ViewRender':
+                $controllerPhpFileTemplate = 'src/Widgets/Controllers/ViewRender.php.twig';
 
-              if (substr($controllerConfig['view'], 0, 5) == 'ADIOS') {
-                $controllerHtmlFileView = ''; // nevygenerujem ziadne view, pretoze pouzivam ADIOSove
-              } else {
-                $controllerHtmlFileView = 'src/Widgets/ControllerTemplates/DefaultEmpty.html.twig';
-              }
+                if (substr($controllerConfig['view'], 0, 5) == 'ADIOS') {
+                  $controllerHtmlFileView = ''; // nevygenerujem ziadne view, pretoze pouzivam ADIOSove
+                } else {
+                  $controllerHtmlFileView = 'src/Widgets/ControllerTemplates/DefaultEmpty.html.twig';
+                }
 
-              $traitPhpFileTemplate = 'src/Widgets/Traits/ViewRender.php.twig';
+                $traitPhpFileTemplate = 'src/Widgets/Traits/ViewRender.php.twig';
+              break;
+              case 'JsonRender':
+                $controllerPhpFileTemplate = 'src/Widgets/Controllers/JsonRender.php.twig';
+              break;
             }
           } else {
             $controllerPhpFileTemplate = 'src/Widgets/ControllerWithTemplate.php.twig';

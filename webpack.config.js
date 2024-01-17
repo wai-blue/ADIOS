@@ -35,7 +35,7 @@ module.exports = (env, arg) => {
      //library: '[name]'
     },
     optimization: {
-      minimize: false, // Disable minification
+      minimize: true, // Disable minification
     },
     module: {
       rules: [
