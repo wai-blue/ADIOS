@@ -9,6 +9,8 @@ import ReactQuill, { Value } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Swal, { SweetAlertOptions } from "sweetalert2";
 
+import { deepObjectMerge } from "./helper";
+
 /** Components */
 import InputLookup from "./Inputs/Lookup";
 import InputVarchar from "./Inputs/Varchar";
@@ -21,7 +23,6 @@ import InputImage from "./Inputs/Image";
 import InputTags from "./Inputs/Tags";
 import InputDateTime from "./Inputs/DateTime";
 import InputEnumValues from "./Inputs/EnumValues";
-import InputTime from "./Inputs/Time";
 
 interface Content {
   [key: string]: ContentCard|any;
@@ -42,7 +43,11 @@ export interface FormProps {
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
   showInModal?: boolean,
-  columns?: FormColumns
+  columns?: FormColumns,
+  titleForInserting?: string,
+  titleForEditing?: string,
+  saveButtonText?: string,
+  addButtonText?: string
 }
 
 interface FormState {
@@ -72,7 +77,7 @@ export interface FormColumnParams {
   unit?: string
 }
 
-interface FormColumns {
+export interface FormColumns {
   [key: string]: FormColumnParams;
 }
 
@@ -129,8 +134,8 @@ export default class Form extends Component<FormProps> {
         model: this.props.model
       }
     }).then(({data}: any) => {
+      data = deepObjectMerge(data, this.props);
       data.layout = this.convertLayoutToString(data.layout);
-      data.columns = this.objectMerge(data.columns, this.props.columns);
 
       let newState = {
         columns: data.columns,
@@ -211,21 +216,6 @@ export default class Form extends Component<FormProps> {
           });
       }
     })
-  }
-
-  // TODO: Prehodit niekde medzi spolocne
-  objectMerge(target: Object, source: Object): Object {
-    for (const key in source) {
-      if (source.hasOwnProperty(key)) {
-        if (source[key] instanceof Object && key in target) {
-          this.objectMerge(target[key], source[key]);
-        } else {
-          target[key] = source[key];
-        }
-      }
-    }
-
-    return target;
   }
 
   /**
@@ -645,7 +635,6 @@ export default class Form extends Component<FormProps> {
                 <div className="card-body">
                   {this._renderTab()}
                 </div>
-
               </div>
             )}
         </div>

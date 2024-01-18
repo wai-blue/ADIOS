@@ -3,7 +3,7 @@ import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridF
 import axios from "axios";
 
 import Modal, { ModalProps } from "./Modal";
-import Form, { FormProps } from "./Form";
+import Form, { FormProps, FormColumns } from "./Form";
 import { dateToEUFormat } from "./Inputs/DateTime";
 
 import Loader from "./Loader";
@@ -17,6 +17,8 @@ interface TableProps {
   modal?: ModalProps,
   formId?: number,
   formParams?: FormProps
+  addButtonText?: string
+  columns?: FormColumns
 
   //TODO
   //showPaging?: boolean,
@@ -56,7 +58,7 @@ interface TableState {
   filterBy?: GridFilterModel,
   search?: string,
   addButtonText?: string,
-  tableTitle?: string
+  title?: string
 }
 
 export default class Table extends Component<TableProps> {
@@ -64,9 +66,7 @@ export default class Table extends Component<TableProps> {
 
   constructor(props: TableProps) {
     super(props);
-
     this.state = {
-      tableTitle: props.title ?? props.model,
       page: 1,
       pageLength: 15,
       form: {
@@ -150,8 +150,8 @@ export default class Table extends Component<TableProps> {
 
         this.setState({
           columns: columns,
-          tableTitle: data.tableTitle,
-          addButtonText: data.addButtonText
+          title: this.props.title ?? data.tableTitle,
+          addButtonText: this.props.addButtonText ?? data.addButtonText
         });
       });
   }
@@ -237,6 +237,7 @@ export default class Table extends Component<TableProps> {
               window.adiosModalToggle(this.props.uid);
             }}
             {...this.props.formParams}
+            columns={this.props.columns}
           />
         </Modal>
 
@@ -249,7 +250,7 @@ export default class Table extends Component<TableProps> {
               <div className="row m-0">
 
                 <div className="col-lg-12 p-0 m-0">
-                  <h3 className="card-title m-0">{this.state.tableTitle}</h3>
+                  <h3 className="card-title m-0">{this.state.title}</h3>
                 </div>
 
                 <div className="col-lg-6 m-0 p-0">

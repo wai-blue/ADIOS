@@ -19,15 +19,16 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public function renderJson() { 
     try {
       $params = $this->params;
-      
+      $pageLength = (int) $params['pageLength'] ?? 15;
+
       $tmpModel = $this->adios->getModel($this->params['model']);
 
       $tableTitle = $tmpModel->tableTitle;
-      $tmpColumns = $tmpModel->columns();
+      $tmpColumns = $tmpModel->getColumnsToShowInView('Table');
 
-      $pageLength = (int) $params['pageLength'] ?? 15;
+      $columnsToShowAsString = implode(', ', array_keys($tmpColumns));
 
-      $tmpModel = $tmpModel->select('*');
+      $tmpModel = $tmpModel->selectRaw($columnsToShowAsString);
 
       //LOOKUPS
       foreach ($tmpColumns as $columnName => $column) {

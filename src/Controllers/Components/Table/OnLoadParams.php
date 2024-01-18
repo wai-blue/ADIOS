@@ -33,7 +33,7 @@ class OnLoadParams extends \ADIOS\Core\Controller {
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
-      $tmpColumns = $tmpModel->columns();
+      $tmpColumns = $tmpModel->getColumnsToShowInView('Table');
 
       $columns = [];
       foreach ($tmpColumns as $columnName => $column) {

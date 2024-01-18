@@ -31,8 +31,6 @@ export default class FormCardButton extends Component<FormCardButtonProps> {
       css: props.css ?? 'btn-primary',
       icon: props.icon ?? 'fas fa-check',
     }
-
-    console.log(this.props.form);
   }
 
   render() {

@@ -805,6 +805,31 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $newColumns;
   }
 
+  public function getColumnsToShow(): array {
+    $columnsToShow = [];
+    foreach ($this->columns() as $columnName => $columnValue) {
+      if (isset($columnValue['showColumn']) && $columnValue['showColumn'] === false) continue;
+      $columnsToShow[$columnName] = $columnValue;
+    }
+
+    return $columnsToShow;
+  }
+
+  public function getColumnsToShowInView(string $view = 'Table'): array {
+    $columnsToShow = [];
+    foreach ($this->columns() as $columnName => $columnValue) {
+      if (isset($columnValue['showColumn']) && $columnValue['showColumn'] === false) continue;
+      else if (
+        isset($columnValue['viewParams'][$view]['showColumn'])
+        && $columnValue['viewParams'][$view]['showColumn'] === false
+      ) continue;
+
+      $columnsToShow[$columnName] = $columnValue;
+    }
+
+    return $columnsToShow;
+  }
+
   public function columnNames()
   {
     return array_keys($this->columns());

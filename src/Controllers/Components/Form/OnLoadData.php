@@ -11,7 +11,7 @@
 namespace ADIOS\Controllers\Components\Form;
 
 /**
- * @package Components\Controllers\Table
+ * @package Components\Controllers\Form
  */
 class OnLoadData extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
@@ -22,7 +22,8 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
       $inputs = [];
       if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
-        $inputs = $tmpModel->find($this->params['id']);
+        $columnsToShowAsString = implode(', ', array_keys($tmpModel->getColumnsToShowInView('Form')));
+        $inputs = $tmpModel->selectRaw($columnsToShowAsString)->find($this->params['id']);
       }
 
       return [

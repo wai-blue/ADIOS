@@ -11,7 +11,7 @@
 namespace ADIOS\Controllers\Components\Form;
 
 /**
- * @package Components\Controllers\Table
+ * @package Components\Controllers\Form
  */
 class OnLoadParams extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
@@ -22,7 +22,7 @@ class OnLoadParams extends \ADIOS\Core\Controller {
 
       return array_merge(
         [
-          'columns' => $tmpModel->columns(),
+          'columns' => $tmpModel->getColumnsToShowInView('Form'),
           'folderUrl' => $tmpModel->getFolderUrl(),
         ],
         $tmpModel->defaultFormParams ?? []
