@@ -52,7 +52,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
       // Search
       if (isset($params['search'])) {
-        $tmpModel = $tmpModel->where(function ($query) use ($params, $tmpColumns) {
+        $tmpModel->where(function ($query) use ($params, $tmpColumns) {
           foreach ($tmpColumns as $columnName => $column) {
             $query->orWhere($columnName, 'like', "%{$params['search']}%");
           }
@@ -61,9 +61,11 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
       // ORDER BY
       if (isset($params['orderBy'])) {
-        $tmpModel = $tmpModel->orderBy(
+        $tmpModel->orderBy(
           $params['orderBy']['field'],
           $params['orderBy']['sort']);
+      } else {
+        $tmpModel->orderBy('id', 'DESC');
       }
 
       // Laravel pagination
