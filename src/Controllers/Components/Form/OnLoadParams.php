@@ -19,10 +19,17 @@ class OnLoadParams extends \ADIOS\Core\Controller {
   public function renderJson() { 
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
+      $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
+
+      if (isset($this->params['columns'])) {
+        $tmpColumns = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+          $tmpColumns,
+          $this->params['columns']);
+      }
 
       return array_merge(
         [
-          'columns' => $tmpModel->getColumnsToShowInView('Form'),
+          'columns' => $tmpColumns,
           'folderUrl' => $tmpModel->getFolderUrl(),
         ],
         $tmpModel->defaultFormParams ?? []

@@ -74,7 +74,8 @@ export interface FormColumnParams {
   disabled?: boolean,
   model?: string,
   enum_values?: Array<string|number>,
-  unit?: string
+  unit?: string,
+  defaultValue?: any
 }
 
 export interface FormColumns {
@@ -131,7 +132,8 @@ export default class Form extends Component<FormProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Form/OnLoadParams', {
       params: {
-        model: this.props.model
+        model: this.props.model,
+        columns: this.props.columns
       }
     }).then(({data}: any) => {
       data = deepObjectMerge(data, this.props);
@@ -266,16 +268,24 @@ export default class Form extends Component<FormProps> {
           break;
         case 'bool':
         case 'boolean':
-          inputs[columnName] = inputsValues[columnName] ?? 0;
+          inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
           break;
         default:
-          inputs[columnName] = inputsValues[columnName] ?? null;
+          inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
       }
     });
 
     this.setState({
       inputs: inputs
     });
+  }
+
+  /**
+   * Get default value form Model definition
+   */
+  getDefaultValueForInput(columnName: string, otherValue: any): any {
+    if (!this.state.columns) return;
+    return this.state.columns[columnName].defaultValue ?? otherValue
   }
 
   changeTab(changeTabName: string) {

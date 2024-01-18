@@ -50,6 +50,13 @@ class OnLoadData extends \ADIOS\Core\Controller {
         // TODO
       }
 
+      // WHERE
+      if (isset($params['where']) && is_array($params['where'])) {
+        foreach ($params['where'] as $where) {
+          $tmpModel->where($where[0], $where[1], $where[2]);
+        }
+      }
+
       // Search
       if (isset($params['search'])) {
         $tmpModel->where(function ($query) use ($params, $tmpColumns) {
@@ -58,7 +65,6 @@ class OnLoadData extends \ADIOS\Core\Controller {
           }
         });
       }
-
       // ORDER BY
       if (isset($params['orderBy'])) {
         $tmpModel->orderBy(

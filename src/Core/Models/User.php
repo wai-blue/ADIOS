@@ -83,7 +83,8 @@ class User extends \ADIOS\Core\Model {
         'type' => 'lookup',
         'title' => $this->translate('Role'),
         'model' => "ADIOS/Core/Models/UserRole",
-        'input_style' => 'select'
+        'input_style' => 'select',
+        'showColumn' => false
       ],
       'photo' => [
         'type' => 'image',
