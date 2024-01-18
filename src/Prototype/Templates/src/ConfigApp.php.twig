@@ -33,6 +33,7 @@ $config['web']['themeDir'] = realpath(__DIR__ . '/../src/Web/Theme');
 // misc
 $config['defaultController'] = '{% if ConfigApp.defaultController == '' %}Desktop{% else %}{{ ConfigApp.defaultController }}{% endif %}';
 $config['available_languages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}['sk']{% endif %};
+$config['userRoles'] = {% if ConfigApp.userRoles %}{{ varExport(ConfigApp.userRoles)|raw }}{% else %}[]{% endif %};
 $config['skin'] = '{{ ConfigApp.skin ?? blue }}';
 
 {% if ConfigApp.smtp %}
