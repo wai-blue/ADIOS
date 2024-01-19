@@ -12,6 +12,13 @@ var ADIOS = {
     window_render(url, params, options.onclose, options);
   },
 
+  registerCustomReactElement(elementName, elementObject) {
+    if (typeof window['App']['customReactElements'] == 'undefined') {
+      window['App']['customReactElements'] = {};
+    }
+    window['App']['customReactElements'][elementName] = elementObject;
+  },
+
   views: {
   }
 }

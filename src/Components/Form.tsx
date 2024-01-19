@@ -74,7 +74,8 @@ export interface FormColumnParams {
   model?: string,
   enumValues?: Array<string|number>,
   unit?: string,
-  defaultValue?: any
+  defaultValue?: any,
+  viewParams: any
 }
 
 export interface FormColumns {
@@ -430,83 +431,94 @@ export default class Form extends Component<FormProps> {
         columnName={columnName}
       />
     } else {
-      switch (this.state.columns[columnName].type) {
-        case 'text':
-          inputToRender = <InputTextarea 
-            parentForm={this}
-            columnName={columnName}
-          />;
-          break;
-        case 'float':
-        case 'int':
-          inputToRender = <InputInt 
-            parentForm={this}
-            columnName={columnName}
-          />;
-          break;
-        case 'boolean':
-          inputToRender = <InputBoolean 
-            parentForm={this}
-            columnName={columnName}
-          />;
-          break;
-        case 'lookup':
-          inputToRender = <InputLookup 
-            parentForm={this}
-            {...this.state.columns[columnName]}
-            columnName={columnName}
-          />;
-          break;
-        case 'MapPoint':
-          inputToRender = <InputMapPoint
-            parentForm={this}
-            columnName={columnName}
-          />;
-          break;
-        case 'color':
-          inputToRender = <InputColor
-            parentForm={this}
-            columnName={columnName}
-          />;
-          break;
-        case 'tags':
-          inputToRender = <InputTags
-            parentForm={this}
-            columnName={columnName}
-          />;
-          break;
-        case 'image':
-          inputToRender = <InputImage
-            parentForm={this}
-            columnName={columnName}
-          />;
-          break;
-        case 'datetime':
-        case 'date':
-        case 'time':
-          inputToRender = <InputDateTime
-            parentForm={this}
-            columnName={columnName}
-            type={this.state.columns[columnName].type}
-          />;
-          break;
-        case 'editor':
-          inputToRender = (
-            <div className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
-              <ReactQuill 
-                theme="snow" 
-                value={this.inputs[columnName] as Value} 
-                onChange={(value) => this.inputOnChangeRaw(columnName, value)}
-                className="w-100" 
-              />
-            </div>
-          );
-          break;
-        default:
-          inputToRender = <InputVarchar
-            parentForm={this}
-            columnName={columnName}
-          />
+      if (this.state.columns[columnName].viewParams?.Form?.inputJSX) {
+        let inputJSX = this.state.columns[columnName].viewParams.Form.inputJSX;
+        inputToRender = React.createElement(
+          window['App']['customReactElements'][inputJSX],
+          {
+           parentForm: this,
+           columnName: columnName
+          }
+        );
+      } else {
+        switch (this.state.columns[columnName].type) {
+          case 'text':
+            inputToRender = <InputTextarea 
+              parentForm={this}
+              columnName={columnName}
+            />;
+            break;
+          case 'float':
+          case 'int':
+            inputToRender = <InputInt 
+              parentForm={this}
+              columnName={columnName}
+            />;
+            break;
+          case 'boolean':
+            inputToRender = <InputBoolean 
+              parentForm={this}
+              columnName={columnName}
+            />;
+            break;
+          case 'lookup':
+            inputToRender = <InputLookup 
+              parentForm={this}
+              {...this.state.columns[columnName]}
+              columnName={columnName}
+            />;
+            break;
+          case 'MapPoint':
+            inputToRender = <InputMapPoint
+              parentForm={this}
+              columnName={columnName}
+            />;
+            break;
+          case 'color':
+            inputToRender = <InputColor
+              parentForm={this}
+              columnName={columnName}
+            />;
+            break;
+          case 'tags':
+            inputToRender = <InputTags
+              parentForm={this}
+              columnName={columnName}
+            />;
+            break;
+          case 'image':
+            inputToRender = <InputImage
+              parentForm={this}
+              columnName={columnName}
+            />;
+            break;
+          case 'datetime':
+          case 'date':
+          case 'time':
+            inputToRender = <InputDateTime
+              parentForm={this}
+              columnName={columnName}
+              type={this.state.columns[columnName].type}
+            />;
+            break;
+          case 'editor':
+            inputToRender = (
+              <div className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
+                <ReactQuill 
+                  theme="snow" 
+                  value={this.inputs[columnName] as Value} 
+                  onChange={(value) => this.inputOnChangeRaw(columnName, value)}
+                  className="w-100" 
+                />
+              </div>
+            );
+            break;
+          default:
+            inputToRender = <InputVarchar
+              parentForm={this}
+              columnName={columnName}
+            />
+        }
       }
     }
 
