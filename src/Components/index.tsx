@@ -144,8 +144,13 @@ renderComponents();
 
 function isValidJSON(jsonString: string) {
   try {
-    JSON.parse(jsonString);
-    return true;
+    let tmp = JSON.parse(jsonString);
+
+    if (tmp && typeof tmp === "object") {
+      return true;
+    } else {
+      return false;
+    }
   } catch (error) {
     return false;
   }

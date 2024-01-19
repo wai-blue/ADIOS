@@ -98,7 +98,7 @@ export default class Form extends Component<FormProps> {
     this.state = {
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
-      isEdit: false,
+      isEdit: props.id ? props.id > 0 : false,
       invalidInputs: {},
       inputs: {}
     };
@@ -220,7 +220,7 @@ export default class Form extends Component<FormProps> {
    * Check if is id = undefined or id is > 0
    */
   checkIfIsEdit() {
-    this.state.isEdit = this.props.id && this.props.id > 1 ? true : false;
+    this.state.isEdit = this.props.id && this.props.id > 0 ? true : false;
   }
 
   /**
@@ -564,7 +564,7 @@ export default class Form extends Component<FormProps> {
     return (
       <div className="d-flex">
         <button
-          className="btn btn-sm btn-dark mr-2"
+          className="btn btn-sm btn-light mr-2"
           type="button"
           data-dismiss="modal"
           aria-label="Close"
@@ -572,7 +572,7 @@ export default class Form extends Component<FormProps> {
 
         <button 
           onClick={() => this.saveRecord()}
-          className="btn btn-sm btn-primary btn-icon-split"
+          className="btn btn-sm btn-success btn-icon-split"
         >
           {this.state.isEdit
             ? (
