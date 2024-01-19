@@ -67,6 +67,14 @@ class Widget {
     // desktop shortcuts, routing, ...
   }
 
+  public function onBeforeRender() {
+    // to be overriden
+  }
+
+  public function onAfterRender() {
+    // to be overriden
+  }
+
   public function routing(array $routing = [])
   {
     return $this->adios->dispatchEventToPlugins("onWidgetAfterRouting", [
@@ -100,11 +108,6 @@ class Widget {
     $this->adios->dispatchEventToPlugins("onWidgetAfterModelsLoaded", [
       "widget" => $this,
     ]);
-  }
-
-  public function addSidebarItem($item) {
-    $item['___widgetClassName'] = get_class($this);
-    $this->adios->config['desktop']['sidebarItems'][] = $item;
   }
 
 }

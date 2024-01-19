@@ -5,10 +5,15 @@
 namespace {{ thisWidget.namespace }};
 
 class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
-  public function init() {
-    if ($this->adios->hasPermissionsForController("{{ thisWidget.name }}")) {
+  public function onBeforeRender() {
+    if (
+      $this->adios->controllerObject::class == "ADIOS\\Controllers\\Desktop"
+      && $this->adios->hasPermissionsForController("{{ thisWidget.name }}")
+    ) {
+      $desktop = $this->adios->controllerObject;
+
 {% for itemTitle, itemConfig in thisWidget.config.sidebar %}
-      $this->addSidebarItem([
+      $desktop->addSidebarItem($this, [
         "fa_icon" => "fas {% if itemConfig.faIcon %}{{ itemConfig.faIcon }}{% else %}{{ thisWidget.config.faIcon }}{% endif %}",
         "title" => "{{ itemTitle }}",
         "custom_title" => "{{ itemConfig.customTitle|raw }}",

@@ -159,6 +159,9 @@ class Loader
   public $test = NULL;
   public $web = NULL;
 
+  public $view = "";
+  public $viewParams = [];
+
   public array $assetsUrlMap = [];
 
   public int $controllerNestingLevel = 0;
@@ -621,6 +624,13 @@ class Loader
         ));
         $this->twig->addExtension(new \Twig\Extension\StringLoaderExtension());
         $this->twig->addExtension(new \Twig\Extension\DebugExtension());
+
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'str2url',
+          function ($string) {
+            return \ADIOS\Core\HelperFunctions::str2url($string);
+          }
+        ));
         $this->twig->addFunction(new \Twig\TwigFunction(
           'translate',
           function ($string, $objectClassName = "") {
@@ -1175,11 +1185,11 @@ class Loader
         }
       }
 
+      $this->params = $params;
+
       if (empty($controller)) {
         $controller = (php_sapi_name() === 'cli' ? "" : $this->config['defaultController']);
       }
-
-      $this->dispatchEventToPlugins("onADIOSBeforeRender", ["adios" => $this]);
 
       if (empty($controller)) {
         throw new \ADIOS\Core\Exceptions\GeneralException("No controller specified.");
@@ -1202,9 +1212,9 @@ class Loader
       }
 
       // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
-      $this->config = $controllerClassName::overrideConfig($this->config, $params);
+      $this->config = $controllerClassName::overrideConfig($this->config, $this->params);
 
-      if ($params['__IS_AJAX__']) {
+      if ($this->params['__IS_AJAX__']) {
         // tak nic
       } else if (
         !$this->getConfig("hideDesktop", FALSE)
@@ -1212,11 +1222,12 @@ class Loader
         && $this->controllerNestingLevel == 0
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
-        $params = [
+        $this->params = [
           'contentController' => $controller,
-          'contentParams' => $params,
-          '_REQUEST' => $params,
-          '_COOKIE' => $_COOKIE,
+          'contentParams' => $this->params,
+          'config' => $this->config,
+          // '_REQUEST' => $params,
+          // '_COOKIE' => $_COOKIE,
         ];
         $controller = "Desktop";
       }
@@ -1249,15 +1260,15 @@ class Loader
       }
 
       // TODO: Docasne. Ked bude fungovat, vymazat.
-      $params['permissionForRequestedUri'] = $permissionForRequestedUri;
+      $this->params['permissionForRequestedUri'] = $permissionForRequestedUri;
 
       // All OK, rendering content...
 
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
-        $uid = $this->getUid($params['id']);
+        $uid = $this->getUid($this->params['id']);
       } else {
-        $uid = $this->uid.'__'.$this->getUid($params['id']);
+        $uid = $this->uid.'__'.$this->getUid($this->params['id']);
       }
 
       $this->setUid($uid);
@@ -1278,26 +1289,38 @@ class Loader
 
       $return = '';
 
+      $this->dispatchEventToPlugins("onADIOSBeforeRender", ["adios" => $this]);
+
       try {
         // Kontrola permissions, krok 2
         // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
         // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
         // to moze zmenit)
         if ($controllerClassName::$requiresUserAuthentication) {
-          $this->checkPermissionsForController($this->controller, $params);
+          $this->checkPermissionsForController($this->controller, $this->params);
         }
 
         // permissions granted
         if ($this->controllerExists($this->controller)) {
 
-          $this->controllerObject = new $controllerClassName($this, $params);
+          $this->controllerObject = new $controllerClassName($this, $this->params);
 
           $json = $this->controllerObject->renderJson();
+
+          $this->onBeforeRender();
+
+          foreach ($this->widgets as $widget) {
+            $widget->onBeforeRender();
+          }
 
           if (is_array($json)) {
             $return = json_encode($json);
           } else {
             [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
+
+            $this->view = $view;
+            $this->viewParams = $viewParams;
+
             if (is_string($view)) {
               if (substr($view, 0, 3) == 'App') {
                 $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
@@ -1309,7 +1332,7 @@ class Loader
 
               if ($canUseTwig) {
                 $html = $this->twig->render(
-                  $view, 
+                  $this->view,
                   [
                     'uid' => $this->uid,
                     'config' => $this->config,
@@ -1319,14 +1342,14 @@ class Loader
                 );
               } else {
                 $html = $this->view->create(
-                  $view,
-                  $viewParams
+                  $this->view,
+                  $this->viewParams
                 )->render();
               };
 
               return $html;
             } else {
-              $renderReturn = $this->controllerObject->render($params);
+              $renderReturn = $this->controllerObject->render($this->params);
 
               if ($renderReturn === NULL) {
                 // akcia nic nereturnovala, iba robila echo
@@ -1339,6 +1362,12 @@ class Loader
             }
           }
 
+          $this->onAfterRender();
+
+          foreach ($this->widgets as $widget) {
+            $widget->onAfterRender();
+          }
+
         // } else {
 
         //   // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
@@ -1349,7 +1378,7 @@ class Loader
         //   $controllerFactoryClass = $this->classFactories['controller'] ?? \ADIOS\Core\Controller::class;
         //   $tmp = new $controllerFactoryClass($this);
         //   $tmp->twigTemplate = $tmpTemplateName;
-        //   $html = $tmp->render($params);
+        //   $html = $tmp->render($this->params);
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
         $return = $this->renderFatal($e->getMessage());
@@ -1919,6 +1948,14 @@ class Loader
   }
 
   public function onModelsLoaded() {
+    // to be overriden
+  }
+
+  public function onBeforeRender() {
+    // to be overriden
+  }
+
+  public function onAfterRender() {
     // to be overriden
   }
 

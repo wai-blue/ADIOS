@@ -36,6 +36,11 @@ class Desktop extends \ADIOS\Core\Controller {
     $this->contentParams = $params['contentParams'] ?? [];
   }
 
+  public function addSidebarItem($widget, $item) {
+    $item['___widgetClassName'] = get_class($widget);
+    $this->adios->config['desktop']['sidebarItems'][] = $item;
+  }
+
   public function preRender() {
     $settingsMenuItems = [];
 
