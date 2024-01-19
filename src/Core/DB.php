@@ -340,8 +340,8 @@ class DB
           } else {
             switch ($col_definition['type']) {
               case "int":
-                if (is_array($col_definition['enum_values'])) {
-                  $keys = array_keys($col_definition['enum_values']);
+                if (is_array($col_definition['enumValues'])) {
+                  $keys = array_keys($col_definition['enumValues']);
                   $random_val = $keys[rand(0, count($keys) - 1)];
                 } else {
                   $minValue = (float) ($col_definition['minValue'] ?? 0);
@@ -409,8 +409,8 @@ class DB
               break;
               case 'enum':
                 # TODO
-                //var_dump($col_definition['enum_values']); exit;
-                //$random_val = $col_definition['enum_values'];
+                //var_dump($col_definition['enumValues']); exit;
+                //$random_val = $col_definition['enumValues'];
               break;
               case 'lookup':
                 if (!isset($col_definition['required']) || $col_definition['required'] == false) {

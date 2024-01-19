@@ -60,7 +60,7 @@
             "priority": {
               "type": "int",
               "title": "Priority",
-              "enum_values": ["High", "Middle", "Low"],
+              "enumValues": ["High", "Middle", "Low"],
               "show_column": true
             }
           },
@@ -216,7 +216,7 @@
             },
             {
               "title": "Product-based margins",
-              "input": { "type": "int", "enum_values": ["Apply product-based margins globally", "Apply product-based margins per category"] },
+              "input": { "type": "int", "enumValues": ["Apply product-based margins globally", "Apply product-based margins per category"] },
               "description": "Setting other margins according to selected purchase parameters."
             },
             {

@@ -448,8 +448,8 @@ class Table extends \ADIOS\Core\ViewWithController
       $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
       $cellCsv = $tmpInput->formatValueToCsv();
     } else if ($this->adios->db->isRegisteredColumnType($columnDefinition['type'])) {
-      if (!empty($columnDefinition['enum_values'])) {
-        $cellCsv = $columnDefinition['enum_values'][$rowValues[$columnName]];
+      if (!empty($columnDefinition['enumValues'])) {
+        $cellCsv = $columnDefinition['enumValues'][$rowValues[$columnName]];
       } else {
         $cellCsv = $this->adios->db->columnTypes[$columnDefinition['type']]->toCsv(
           $rowValues[$columnName],
@@ -880,16 +880,16 @@ class Table extends \ADIOS\Core\ViewWithController
             case 'float':
             case 'decimal':
             case 'int':
-              if (_count($col_def['enum_values'])) {
+              if (_count($col_def['enumValues'])) {
                 $input_type = 'select';
-                $input_values = $col_def['enum_values'];
+                $input_values = $col_def['enumValues'];
               } else {
                 $input_type = 'text';
               }
               break;
             case 'enum':
               $input_type = 'select';
-              $input_values = explode(',', $col_def['enum_values']);
+              $input_values = explode(',', $col_def['enumValues']);
               break;
             case 'boolean':
               $input_type = 'bool';
@@ -1051,7 +1051,7 @@ class Table extends \ADIOS\Core\ViewWithController
               'html' => $cellHtml,
             ]);
 
-            if ((in_array($colDef['type'], ['int', 'float', 'decimal']) && !is_array($colDef['enum_values']))) {
+            if ((in_array($colDef['type'], ['int', 'float', 'decimal']) && !is_array($colDef['enumValues']))) {
               $alignClass = 'align_right';
             } else {
               $alignClass = 'align_left';

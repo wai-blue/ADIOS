@@ -97,8 +97,8 @@ class PrintPdf extends \ADIOS\Core\ViewWithController
               ? '<span style="color: green">True</span>' 
               : '<span style="color: red">False</span>'
             ),
-            'int' => (isset($columns[$colName]['enum_values']) 
-              ? $columns[$colName]['enum_values'][$colValue] 
+            'int' => (isset($columns[$colName]['enumValues']) 
+              ? $columns[$colName]['enumValues'][$colValue] 
               : $colValue
             ),
             'date', 'datetime' => $adios->db->columnTypes[$columns[$colName]["type"]]->toHtml(

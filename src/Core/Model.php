@@ -815,11 +815,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $columnsToShow;
   }
 
-  public function getColumnsToShowInView(string $view = 'Table'): array {
+  public function getColumnsToShowInView(string $view): array {
     $columnsToShow = [];
     foreach ($this->columns() as $columnName => $columnValue) {
-      if (isset($columnValue['showColumn']) && $columnValue['showColumn'] === false) continue;
-      else if (
+      if (
         isset($columnValue['viewParams'][$view]['showColumn'])
         && $columnValue['viewParams'][$view]['showColumn'] === false
       ) continue;

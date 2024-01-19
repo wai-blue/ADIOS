@@ -65,9 +65,9 @@ class DataTypeInt extends DataType
       } else {
         $html = $value;
       }
-    } elseif (is_array($params['col_definition']['enum_values'])) {
+    } elseif (is_array($params['col_definition']['enumValues'])) {
       $html = l(
-        $params['col_definition']['enum_values'][$value],
+        $params['col_definition']['enumValues'][$value],
         [],
         ['input_column_settings_enum_translation' => true]
       );

@@ -56,7 +56,7 @@ class Input extends \ADIOS\Core\ViewWithController {
         'default_date_value' => '',
         'max_date' => '',
         'min_date' => '',
-        'enum_values' => [],
+        'enumValues' => [],
         'decimals' => 2,
         'interface' => '',
         //'rename_file' => true,
@@ -174,9 +174,9 @@ class Input extends \ADIOS\Core\ViewWithController {
         ";
       }
 
-      /* varchar / int (s enum_values) */
+      /* varchar / int (s enumValues) */
       if (
-        !empty($this->params['enum_values'])
+        !empty($this->params['enumValues'])
         && in_array($this->params['type'], ['int', 'varchar'])
       ) {
         $html = "
@@ -191,7 +191,7 @@ class Input extends \ADIOS\Core\ViewWithController {
           >
         ";
 
-        foreach ($this->params['enum_values'] as $enum_key => $enum_value) {
+        foreach ($this->params['enumValues'] as $enum_key => $enum_value) {
           if (strval($this->params['value']) === strval($enum_key)) {
             $sel = 'selected';
           } else {
@@ -405,13 +405,13 @@ class Input extends \ADIOS\Core\ViewWithController {
       /* char, varchar */
       /* color */
       /* date, datetime, time, timestamp */
-      /* int (bez enum_values), year */
+      /* int (bez enumValues), year */
       /* float */
       /* text (single_line) */
       /* MapPoint */
       if (
-        ($this->params['type'] == 'varchar' && !_count($this->params['enum_values']))
-        || ($this->params['type'] == 'int' && !_count($this->params['enum_values']))
+        ($this->params['type'] == 'varchar' && !_count($this->params['enumValues']))
+        || ($this->params['type'] == 'int' && !_count($this->params['enumValues']))
         || ($this->params['type'] == 'text' && 'single_line' == $this->params['interface'])
         || in_array(
           $this->params['type'],

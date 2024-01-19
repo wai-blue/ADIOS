@@ -55,7 +55,7 @@
             "priority": {
               "type": "int",
               "title": "Priority",
-              "enum_values": ["High", "Middle", "Low"],
+              "enumValues": ["High", "Middle", "Low"],
               "show_column": true
             }
           },
@@ -170,7 +170,7 @@
             "availability": {
               "type": "int",
               "title": "Availability",
-              "enum_values": ["In stock", "Last items", "Sold out", "Hidden"],
+              "enumValues": ["In stock", "Last items", "Sold out", "Hidden"],
               "show_column": true
             }
           }
@@ -273,7 +273,7 @@
             },
             {
               "title": "Product-based margins",
-              "input": { "type": "int", "enum_values": ["Apply product-based margins globally", "Apply product-based margins per category"] },
+              "input": { "type": "int", "enumValues": ["Apply product-based margins globally", "Apply product-based margins per category"] },
               "description": "Setting other margins according to selected purchase parameters."
             },
             {

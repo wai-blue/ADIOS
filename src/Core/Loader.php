@@ -1312,7 +1312,9 @@ class Loader
                   $view, 
                   [
                     'uid' => $this->uid,
+                    'config' => $this->config,
                     'viewParams' => $viewParams,
+                    'windowParams' => $viewParams['windowParams'] ?? NULL,
                   ]
                 );
               } else {
@@ -2101,11 +2103,16 @@ class Loader
   }
 
   private function scanReactFolder(string $path): string {
+    $reactJs = '';
+
     foreach (scandir($path . '/Assets/Js/React') as $file) {
       if ('.js' == substr($file, -3)) {
-        return @file_get_contents($path . "/Assets/Js/React/{$file}") . ";";
+        $reactJs = @file_get_contents($path . "/Assets/Js/React/{$file}") . ";";
+        break;
       }
     }
+
+    return $reactJs;
   }
 
   public function renderReactJsBundle(): string {

@@ -42,7 +42,7 @@
             "priority": {
               "type": "int",
               "title": "Priority",
-              "enum_values": ["High", "Middle", "Low"],
+              "enumValues": ["High", "Middle", "Low"],
               "show_column": true
             }
           },

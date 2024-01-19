@@ -22,9 +22,7 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   public ?string $formAddButtonText = {% if thisModel.config.formAddButtonText %} "{{ thisModel.config.formAddButtonText|raw }}" {% else %} null {% endif %};
   public ?string $formSaveButtonText = {% if thisModel.config.formSaveButtonText %} "{{ thisModel.config.formSaveButtonText|raw }}" {% else %} null {% endif %};
 
-  public ?array $defaultFormParams = 
-{{ varExport(thisModel.config.defaultFormParams | default(null), "    ")|raw }}
-  ;
+  public ?array $defaultFormParams = NULL;
 
   public string $sqlName = "{{ thisModel.config.sqlName|raw }}";
   public string $urlBase = "{{ thisModel.config.urlBase|raw }}";
@@ -41,6 +39,14 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   ;
 
   public bool $storeRecordInfo = {%if thisModel.config.storeRecordInfo %}TRUE{% else %}FALSE{% endif %};
+
+  public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
+    parent::__construct($adiosOrAttributes, $eloquentQuery);
+
+    $this->defaultFormParams = 
+      {{ varExport(thisModel.config.defaultFormParams | default(null), "    ")|raw }}
+    ;
+  }
 
   public function columns(array $columns = []): array
   {

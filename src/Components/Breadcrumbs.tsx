@@ -26,6 +26,29 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
   }
 
   render() {
+    // TODO: ak this.state.items nie je pole (napr.
+    // syntax error v JSON v <adios-breadcrumbs>),
+    // tak by malo vypisat dajaku error hlasku
+
+    let html = '';
+
+    if (Array.isArray(this.state.items)) {
+      html = this.state.items.map((item, i) => (
+        <li className="breadcrumb-item">
+          {this.state.items.length - 1 === i ? (
+            <span style={{color: '#e78b00'}}>{item.text}</span>
+          ) : (
+            <a
+              href={window._APP_URL + '/' + item.url}
+              className="text-primary"
+            >{item.text}</a>
+          )}
+        </li>
+      ));
+    } else {
+      html = <p>No breadcrubms to show.</p>;
+    }
+
     return (
       <div
         id={"adios-breadcrumbs-" + this.props.uid}
@@ -35,18 +58,7 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
           aria-label="breadcrumb"
         >
           <ol className="breadcrumb">
-            {this.state.items.map((item, i) => (
-              <li className="breadcrumb-item">
-                {this.state.items.length - 1 === i ? (
-                  <span style={{color: '#e78b00'}}>{item.text}</span>
-                ) : (
-                  <a
-                    href={window._APP_URL + '/' + item.url}
-                    className="text-primary"
-                  >{item.text}</a>
-                )}
-              </li>
-            ))}
+            {html}
           </ol>
         </nav>
       </div>

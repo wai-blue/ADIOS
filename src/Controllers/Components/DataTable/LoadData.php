@@ -120,9 +120,9 @@ class LoadData extends \ADIOS\Core\Controller {
                     break;
                 }
 
-                if (!empty($this->sessionParams['columnSettings'][$colName]['enum_values'])) {
+                if (!empty($this->sessionParams['columnSettings'][$colName]['enumValues'])) {
                     $this->data[$rowKey][$colName] = 
-                        $this->sessionParams['columnSettings'][$colName]['enum_values'][$colVal];
+                        $this->sessionParams['columnSettings'][$colName]['enumValues'][$colVal];
                 }
             }
         }

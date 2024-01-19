@@ -73,7 +73,7 @@ export interface FormColumnParams {
   description?: string,
   disabled?: boolean,
   model?: string,
-  enum_values?: Array<string|number>,
+  enumValues?: Array<string|number>,
   unit?: string,
   defaultValue?: any
 }
@@ -427,8 +427,8 @@ export default class Form extends Component<FormProps> {
     if (this.state.columns == null) return <></>;
 
     let inputToRender: JSX.Element;
+    if (this.state.columns[columnName].enumValues) {
 
-    if (this.state.columns[columnName].enum_values) {
       inputToRender = <InputEnumValues
         parentForm={this}
         columnName={columnName}
@@ -553,13 +553,13 @@ export default class Form extends Component<FormProps> {
             ? (
               <>
                 <span className="icon"><i className="fas fa-save"></i></span>
-                <span className="text"> {this.state.saveButtonText ?? "Uložiť záznam"}</span>
+                <span className="text"> {this.state.saveButtonText ?? "Save record"}</span>
               </>
             )
             : (
               <>
                 <span className="icon"><i className="fas fa-plus"></i></span>
-                <span className="text"> {this.state.addButtonText ?? "Pridať záznam"}</span>
+                <span className="text"> {this.state.addButtonText ?? "Add new record"}</span>
               </>
             )
           }

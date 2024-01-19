@@ -17,9 +17,8 @@ class App extends \ADIOS\Core\Loader {
   public function __construct($config = NULL, $mode = NULL, $forceUserLogout = FALSE) {
     parent::__construct($config, $mode, $forceUserLogout);
 
-    $this->addRouting(
-{{ varExport(routing, "      ")|raw }}
-    );
+    require_once(__DIR__ . '/Routing.php');
+
   }
 
   public function hasPermissionsForController($action, $params = NULL) {

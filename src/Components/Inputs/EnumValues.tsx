@@ -12,7 +12,7 @@ export default class EnumValues extends Component<EnumValuesInputProps> {
 
   render() {
     let parentForm: any = this.props.parentForm;
-    let enumValues: any = parentForm.state.columns[this.props.columnName].enum_values ?? {};
+    let enumValues: any = parentForm.state.columns[this.props.columnName].enumValues ?? {};
 
     return (
       <select

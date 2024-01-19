@@ -75,9 +75,9 @@ class Preview extends \ADIOS\Core\Controller {
           $acceptedValuesHtml = $this->translate("Decimal numbers with dot (.) as a decimal separator and no thousands separator. Example: 123456.78");
         break;
         case "int":
-          if (is_array($columns[$tmpColName]["enum_values"])) {
+          if (is_array($columns[$tmpColName]["enumValues"])) {
             $acceptedValuesHtml = "<select style='font-size:inherit;color:inherit'>";
-            foreach ($columns[$tmpColName]["enum_values"] as $value) {
+            foreach ($columns[$tmpColName]["enumValues"] as $value) {
               $acceptedValuesHtml .= "<option>".hsc($value)."</option>";
             }
             $acceptedValuesHtml .= "</select>";

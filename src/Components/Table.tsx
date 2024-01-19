@@ -138,7 +138,7 @@ export default class Table extends Component<TableProps> {
               }
             }
             case 'date':
-            case 'datetime':
+            case 'time':
             case 'datetime': return { 
               ...column, 
               renderCell: (params: any) => {

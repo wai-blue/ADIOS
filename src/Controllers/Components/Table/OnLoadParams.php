@@ -44,8 +44,8 @@ class OnLoadParams extends \ADIOS\Core\Controller {
           'headerName' => $column['title'],
           'flex' => 1,
           'type' =>  $this->getColumnType($column['type']),
-          'columnType' => isset($column['enum_values']) ? 'enum' : $column['type'],
-          'enumValues' => $column['enum_values']
+          'columnType' => isset($column['enumValues']) ? 'enum' : $column['type'],
+          'enumValues' => $column['enumValues']
         ];
       }
 
@@ -53,7 +53,7 @@ class OnLoadParams extends \ADIOS\Core\Controller {
         'columns' => $columns, 
         'tableTitle' => $tmpModel->tableTitle,
         'folderUrl' => $tmpModel->getFolderUrl(),
-        'addButtonText' => $tmpModel->addButtonText ?? "Pridať záznam"
+        'addButtonText' => $tmpModel->addButtonText ?? "Add new record"
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error

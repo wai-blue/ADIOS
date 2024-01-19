@@ -28,10 +28,10 @@ class Update extends \ADIOS\Core\Controller {
         $tmpModel = $this->adios->getModel($sessionParams['model']);
 
         // Replace newValue if col is type of enum
-        if (!empty($sessionParams['columnSettings'][$colNameToUpdate]['enum_values'])) {
+        if (!empty($sessionParams['columnSettings'][$colNameToUpdate]['enumValues'])) {
           $newValue = array_search(
             $this->params['newValue'], 
-            $sessionParams['columnSettings'][$colNameToUpdate]['enum_values']
+            $sessionParams['columnSettings'][$colNameToUpdate]['enumValues']
           );
         } 
 

@@ -45,8 +45,8 @@ class DataTypeVarchar extends \ADIOS\Core\DB\DataType
 
     $value = $params['export_csv'] ? $value : htmlspecialchars((string) $value);
 
-    if (is_array($params['col_definition']['enum_values'])) {
-      $html = l($params['col_definition']['enum_values'][$value]);
+    if (is_array($params['col_definition']['enumValues'])) {
+      $html = l($params['col_definition']['enumValues'][$value]);
     } else {
       if (empty($value)) {
         $html = "<div style='color:#EEEEEE'>[N/A]</div>";

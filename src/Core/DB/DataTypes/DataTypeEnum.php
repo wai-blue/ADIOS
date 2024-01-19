@@ -18,10 +18,10 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
     public function sqlCreateString($table_name, $col_name, $params = [])
     {
       $sql = "`$col_name` ENUM(";
-      $e_vals = $params['enum_values'];
+      $e_vals = $params['enumValues'];
       $e_vals = str_replace('\,', '$%^@$%#$^%^$%#$^%$%@#$', $e_vals);
-      $enum_values = explode(',', $e_vals);
-      foreach ($enum_values as $key => $value) {
+      $enumValues = explode(',', $e_vals);
+      foreach ($enumValues as $key => $value) {
           $sql .= "'".trim(str_replace('$%^@$%#$^%^$%#$^%$%@#$', ',', $value))."', ";
       }
       $sql = substr($sql, 0, -2).") {$params['sql_definitions']}";
@@ -31,7 +31,7 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
 
     public function sqlValueString($table_name, $col_name, $value, $params = [])
     {
-      $e_vals = explode(',', $this->adios->db->tables[$table_name][$col_name]['enum_values']);
+      $e_vals = explode(',', $this->adios->db->tables[$table_name][$col_name]['enumValues']);
       if (in_array($value, $e_vals)) {
         $sql = "{$col_name}='".$this->adios->db->escape($value)."'";
       } else {

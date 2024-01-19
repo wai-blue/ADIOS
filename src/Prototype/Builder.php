@@ -545,8 +545,10 @@ class Builder {
       }
     }
 
-    // render init script
-    $this->renderFile('src/Init.php', 'src/Init.php.twig', [
+    // render init scripte
+    $this->renderFile('src/Init.php', 'src/Init.php.twig');
+
+    $this->renderFile('src/Routing.php', 'src/Routing.php.twig', [
       'routing' => $routing,
     ]);
   }

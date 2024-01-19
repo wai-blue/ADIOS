@@ -98,7 +98,7 @@
       colName = colDefinition.data;
 
       if (typeof colName != "undefined" && colDefinition.adiosColumn.type != "boolean") {
-        let tmpEditableEnumData = colDefinition.adiosColumn.enum_values;
+        let tmpEditableEnumData = colDefinition.adiosColumn.enumValues;
 
         function {{ params.datatableName }}_init_editor_{{ colName }}() {
           let {{ params.datatableName }}_editorSettings_{{ colName }} = {

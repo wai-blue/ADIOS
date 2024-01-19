@@ -154,13 +154,13 @@ class MySQLi extends \ADIOS\Core\DB
     $s = explode(',', $filterValue);
 
     if (
-      ($type == 'int' && _count($column['enum_values']))
+      ($type == 'int' && _count($column['enumValues']))
       || in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password', 'lookup'])
     ) {
-      if (_count($column['enum_values'])) {
+      if (_count($column['enumValues'])) {
         $w = [];
         $s = [];
-        foreach ($column['enum_values'] as $evk => $evv) {
+        foreach ($column['enumValues'] as $evk => $evv) {
           // PATO fix 07-08-2023
           // Ak intangible a tangible (ak som vybral tangible tak vyhodnotilo nespravne
           // /lebo inTANGIBLE je to iste slovo)
@@ -182,7 +182,7 @@ class MySQLi extends \ADIOS\Core\DB
     }
 
     if ($column['virtual']) {
-      if ($type == 'int' && _count($column['enum_values'])) {
+      if ($type == 'int' && _count($column['enumValues'])) {
         //
       } else {
         $columnName = '(' . $column['sql'] . ')';
@@ -198,10 +198,10 @@ class MySQLi extends \ADIOS\Core\DB
       '=' == $filterValue[0]
       || (is_array($s) && 1 == count($s) && is_array($w) && 1 == count($w))
       || (is_array($s) && 1 == count($s) && !is_array($w) && '' != $w)
-      || !empty($column['enum_values'])
+      || !empty($column['enumValues'])
     ) {
 
-      if (!_count($column['enum_values'])) {
+      if (!_count($column['enumValues'])) {
         $s = reset($s);
       }
 
@@ -209,7 +209,7 @@ class MySQLi extends \ADIOS\Core\DB
         $s = substr($filterValue, 1);
       }
 
-      if (!_count($column['enum_values']) and '!=' == substr($s, 0, 2)) {
+      if (!_count($column['enumValues']) and '!=' == substr($s, 0, 2)) {
         $not = true;
         $s = substr($s, 2);
       }
@@ -232,10 +232,10 @@ class MySQLi extends \ADIOS\Core\DB
         }
       }
 
-      if ($type == 'int' && _count($column['enum_values'])) {
+      if ($type == 'int' && _count($column['enumValues'])) {
         $return = " `{$columnName}` IN (\"" . implode('","', $s) . "\")";
         //$return = " `{$columnName}_enum_value` like '%" . $this->escape(trim($s)) . "%'";
-      } else if ($type == 'varchar' && _count($column['enum_values'])) {
+      } else if ($type == 'varchar' && _count($column['enumValues'])) {
         $return = " `{$columnName}` IN (\"" . implode('","', $w) . "\")";
       } else if (in_array($type, ['varchar', 'text', 'color', 'file', 'image', 'enum', 'password'])) {
         $return = " `{$columnName}` like '%" . $this->escape(trim($s)) . "%'";
@@ -250,7 +250,7 @@ class MySQLi extends \ADIOS\Core\DB
       if (
         $type == 'float'
         || $type == 'decimal'
-        || ('int' == $type && !_count($column['enum_values']))
+        || ('int' == $type && !_count($column['enumValues']))
       ) {
         $s = trim(str_replace(',', '.', $s));
         $s = str_replace(' ', '', $s);
