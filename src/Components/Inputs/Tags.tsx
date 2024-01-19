@@ -5,7 +5,8 @@ import './../Css/Inputs/Tags.css';
 
 interface TagsInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 export default class Tags extends Component<TagsInputProps> {

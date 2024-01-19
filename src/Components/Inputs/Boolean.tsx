@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 
 interface BooleanInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 export default class Boolean extends Component<BooleanInputProps> {

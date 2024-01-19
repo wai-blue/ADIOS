@@ -5,7 +5,8 @@ import { FormColumnParams } from '../Form'
 
 interface LookupInputProps extends FormColumnParams {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 interface LookupInputState {

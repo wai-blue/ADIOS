@@ -3,7 +3,8 @@ import Block from '@uiw/react-color-block';
 
 interface BooleanInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 export default class Color extends Component<BooleanInputProps> {

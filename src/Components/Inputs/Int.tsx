@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 
 interface IntInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 export default class Int extends Component<IntInputProps> {

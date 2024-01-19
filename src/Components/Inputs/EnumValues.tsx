@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 
 interface EnumValuesInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 export default class EnumValues extends Component<EnumValuesInputProps> {

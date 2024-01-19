@@ -446,6 +446,7 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputTextarea 
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'float':
@@ -453,12 +454,14 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputInt 
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'boolean':
             inputToRender = <InputBoolean 
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'lookup':
@@ -466,30 +469,35 @@ export default class Form extends Component<FormProps> {
               parentForm={this}
               {...this.state.columns[columnName]}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'MapPoint':
             inputToRender = <InputMapPoint
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'color':
             inputToRender = <InputColor
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'tags':
             inputToRender = <InputTags
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'image':
             inputToRender = <InputImage
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'datetime':
@@ -499,6 +507,7 @@ export default class Form extends Component<FormProps> {
               parentForm={this}
               columnName={columnName}
               type={this.state.columns[columnName].type}
+              params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'editor':
@@ -517,6 +526,7 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputVarchar
               parentForm={this}
               columnName={columnName}
+              params={this.state.columns[columnName].viewParams?.Form}
             />
         }
       }

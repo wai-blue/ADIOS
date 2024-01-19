@@ -5,7 +5,8 @@ const AnyReactComponent = ({ text }) => <div>{text}</div>;
 
 interface MapPointInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 export default class MapPoint extends Component<MapPointInputProps> {

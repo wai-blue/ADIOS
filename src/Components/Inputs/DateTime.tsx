@@ -31,7 +31,8 @@ export const datetimeToEUFormat = (dateString: string): string => {
 interface DateTimeInputProps {
   parentForm: any,
   columnName: string,
-  type: string
+  type: string,
+  params: any
 }
 
 export default class DateTime extends Component<DateTimeInputProps> {

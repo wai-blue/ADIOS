@@ -2,7 +2,8 @@ import React, { Component } from 'react'
 
 interface TextareaInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 export default class Textarea extends Component<TextareaInputProps> {

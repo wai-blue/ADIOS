@@ -3,7 +3,8 @@ import ImageUploading from 'react-images-uploading';
 
 interface ImageInputProps {
   parentForm: any,
-  columnName: string
+  columnName: string,
+  params: any
 }
 
 interface ImageInputState {
