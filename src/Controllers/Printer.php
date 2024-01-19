@@ -26,17 +26,15 @@ namespace ADIOS\Controllers;
 class Printer extends \ADIOS\Core\Controller {
 
  public string $contentController = '';
- public array $contentParams = [];
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = [])
   {
     parent::__construct($adios, $params);
 
     $this->contentController = $params['contentController'] ?? '';
-    $this->contentParams = $params['contentParams'] ?? [];
 
-    $this->contentParams['print'] = TRUE;
-    $this->contentParams['displayMode'] = \ADIOS\Core\ViewWithController::DISPLAY_MODE_DESKTOP;
+    $this->params['print'] = TRUE;
+    $this->params['displayMode'] = \ADIOS\Core\ViewWithController::DISPLAY_MODE_DESKTOP;
   }
 
   public static function overrideConfig($config, $params)
@@ -51,7 +49,7 @@ class Printer extends \ADIOS\Core\Controller {
       !empty($this->contentController)
       && $this->contentController != 'Printer'
     ) {
-      $contentHtml = $this->adios->render($this->contentController, $this->contentParams);
+      $contentHtml = $this->adios->render($this->contentController, $this->params);
     } else {
       $contentHtml = '';
     }

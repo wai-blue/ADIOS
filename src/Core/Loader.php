@@ -1222,13 +1222,9 @@ class Loader
         && $this->controllerNestingLevel == 0
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
-        $this->params = [
-          'contentController' => $controller,
-          'contentParams' => $this->params,
-          'config' => $this->config,
-          // '_REQUEST' => $params,
-          // '_COOKIE' => $_COOKIE,
-        ];
+        $this->params['contentController'] = $controller;
+        $this->params['config'] = $this->config;
+
         $controller = "Desktop";
       }
 
@@ -1305,13 +1301,13 @@ class Loader
 
           $this->controllerObject = new $controllerClassName($this, $this->params);
 
-          $json = $this->controllerObject->renderJson();
-
           $this->onBeforeRender();
 
           foreach ($this->widgets as $widget) {
             $widget->onBeforeRender();
           }
+
+          $json = $this->controllerObject->renderJson();
 
           if (is_array($json)) {
             $return = json_encode($json);

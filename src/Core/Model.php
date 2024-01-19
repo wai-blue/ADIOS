@@ -647,7 +647,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "controller" => "Printer",
         "params" => array_merge($urlParams, [
           "contentController" => $this->crud['print']['controller'] ?? "Components/Form",
-          "contentParams" => [
+          "params" => [
             "model" => $this->fullName,
             "id" => '$' . ($varsInUrl + 1),
           ]

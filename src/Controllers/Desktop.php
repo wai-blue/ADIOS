@@ -25,15 +25,13 @@ namespace ADIOS\Controllers;
  */
 class Desktop extends \ADIOS\Core\Controller {
 
- public string $contentController = '';
- public array $contentParams = [];
+  public string $contentController = '';
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = [])
   {
     parent::__construct($adios, $params);
 
     $this->contentController = $params['contentController'] ?? '';
-    $this->contentParams = $params['contentParams'] ?? [];
   }
 
   public function addSidebarItem($widget, $item) {
@@ -109,7 +107,7 @@ class Desktop extends \ADIOS\Core\Controller {
       !empty($this->contentController)
       && $this->contentController != 'Desktop'
     ) {
-      $contentHtml = $this->adios->render($this->contentController, $this->contentParams);
+      $contentHtml = $this->adios->render($this->contentController, $this->params);
     } else {
       $contentHtml = '';
     }
