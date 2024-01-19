@@ -1,3 +1,6 @@
+import React from "react";
+import Notification from "./Notification";
+
 export function deepObjectMerge(target: any, source: any): Object {
   for (const key in source) {
     if (source.hasOwnProperty(key)) {
@@ -14,3 +17,12 @@ export function deepObjectMerge(target: any, source: any): Object {
   return target;
 }
 
+export function adiosError(htmlText: string): JSX.Element {
+  Notification.error(htmlText);
+
+  return (
+    <div className="alert alert-danger" role="alert">
+      <div dangerouslySetInnerHTML={{ __html: htmlText }} />
+    </div>
+  );
+}

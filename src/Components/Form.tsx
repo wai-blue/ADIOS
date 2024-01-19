@@ -2,14 +2,13 @@ import React, { Component, JSXElementConstructor } from "react";
 
 import axios from "axios";
 
-import { Notyf } from "notyf";
-import 'notyf/notyf.min.css';
+import Notification from "./Notification";
 
 import ReactQuill, { Value } from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Swal, { SweetAlertOptions } from "sweetalert2";
 
-import { deepObjectMerge } from "./helper";
+import { deepObjectMerge, adiosError } from "./Helper";
 
 /** Components */
 import InputLookup from "./Inputs/Lookup";
@@ -165,17 +164,15 @@ export default class Form extends Component<FormProps> {
   }
 
   saveRecord() {
-    let notyf = new Notyf();
-
     //@ts-ignore
     axios.post(_APP_URL + '/Components/Form/OnSave', {
       model: this.props.model,
       inputs: this.state.inputs 
     }).then((res: any) => {
-      notyf.success(res.data.message);
+      Notification.success(res.data.message);
       if (this.props.onSaveCallback) this.props.onSaveCallback();
     }).catch((res) => {
-      notyf.error(res.response.data.message);
+      Notification.error(res.response.data.message);
 
       if (res.response.status == 422) {
         this.setState({
@@ -198,17 +195,15 @@ export default class Form extends Component<FormProps> {
       reverseButtons: false,
     } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
-        let notyf = new Notyf();
-
         //@ts-ignore
         axios.patch(_APP_URL + '/Components/Form/OnDelete', {
           model: this.props.model,
           id: id
         }).then(() => {
-            notyf.success("Záznam zmazaný");
+            Notification.success("Záznam zmazaný");
             if (this.props.onDeleteCallback) this.props.onDeleteCallback();
           }).catch((res) => {
-            notyf.error(res.response.data.message);
+            Notification.error(res.response.data.message);
 
             if (res.response.status == 422) {
               this.setState({
@@ -425,6 +420,7 @@ export default class Form extends Component<FormProps> {
     */
   _renderInput(columnName: string): JSX.Element {
     if (this.state.columns == null) return <></>;
+    if (!this.state.columns[columnName]) return adiosError(`Column: <b>${columnName}</b> doesn't exist in model or is not shown`);
 
     let inputToRender: JSX.Element;
 
