@@ -58,7 +58,7 @@ class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
               add_event: {
                 text: 'Pridať vlastnú udalosť',
                 click: function() {
-                  window_render(
+                  ADIOS.renderWindow(
                     'Calendar/Events/Add',
                     '',
                     function(params) {
@@ -103,7 +103,7 @@ class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 
             },
             eventClick: function(info) {
-              window_render(
+              ADIOS.renderWindow(
                 'Calendar/Events/' + info.event.id + '/edit',
                 '',
                 function(params) {

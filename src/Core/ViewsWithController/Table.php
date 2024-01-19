@@ -246,7 +246,7 @@ class Table extends \ADIOS\Core\ViewWithController
         }
 
         $this->params['leftTitleButtons']['add']['onclick'] = "
-          window_render(
+          ADIOS.renderWindow(
             '" . $tmpUrl . "/add',
             {
               defaultValues: JSON.parse(
@@ -579,7 +579,7 @@ class Table extends \ADIOS\Core\ViewWithController
             "faIcon" => "fas fa-search",
             "text" => $this->translate("Advanced search"),
             "onclick" => "
-              window_render(
+              ADIOS.renderWindow(
                 '{$searchAction}',
                 {},
                 function(res) {
@@ -641,7 +641,7 @@ class Table extends \ADIOS\Core\ViewWithController
             "text" => $this->translate("Import from CSV"),
             "onclick" => "
               let tmpTableParams = Base64.encode(JSON.stringify(ui_table_params['{$this->uid}']));
-              window_render(
+              ADIOS.renderWindow(
                 '{$importCsvAction}',
                 { model: '" . ads($this->params['model']) . "' }
               );
@@ -684,7 +684,7 @@ class Table extends \ADIOS\Core\ViewWithController
           $titleRightContent[] = $this->addView('\\ADIOS\\Core\\ViewsWithController\\Button', [
             "faIcon" => "fas fa-ellipsis-v",
             "title" => "",
-            "onclick" => "window_render('{$searchAction}');",
+            "onclick" => "ADIOS.renderWindow('{$searchAction}');",
             "dropdown" => $moreActionsButtonItems,
             "class" => "btn-light",
           ]);
@@ -757,7 +757,7 @@ class Table extends \ADIOS\Core\ViewWithController
                 " . $this->addView('\\ADIOS\\Core\\ViewsWithController\\Button', [
             "type" => "close",
             "text" => $this->translate("Clear filter"),
-            "onclick" => "desktop_update('{$this->adios->requestedAction}');",
+            "onclick" => "ADIOS.renderDesktop('{$this->adios->requestedAction}');",
           ])->render() . "
               </div>
             </div>
@@ -1014,7 +1014,7 @@ class Table extends \ADIOS\Core\ViewWithController
           $rowCss = $this->model->onTableRowCssFormatter($this, $row);
 
           $rowOnclick = $rowParams['onclick'] ?: "
-            window_render(
+            ADIOS.renderWindow(
               '" . $this->model->getFullUrlBase(array_merge($rowParams, $row)) . "/' + id + '/edit'
             );
             $(this).closest('.Content').find('.Row').removeClass('highlighted');

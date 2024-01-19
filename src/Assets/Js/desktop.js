@@ -103,7 +103,7 @@
       win
         .attr('id', win.attr('id') + '_TO_BE_REMOVED')
       ;
-      window_render(
+      ADIOS.renderWindow(
         ADIOS_windows[windowId]['controller'],
         ADIOS_windows[windowId]['params'],
         ADIOS_windows[windowId]['onclick'],

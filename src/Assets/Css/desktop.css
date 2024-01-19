@@ -383,3 +383,9 @@ h3 { padding-bottom: 0.5em; }
 @media (pointer: none) {
   .adios_shortcut_item:hover .shortcut_title, .adios_shortcut_item:hover .shortcut_subitems {display:block;animation-name: shortcut_mobile_fade;animation-duration: 3s;}
 }
+
+
+
+.adios.react.ui.table {
+  margin-top: 1em;
+}

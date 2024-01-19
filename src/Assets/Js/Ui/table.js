@@ -206,7 +206,7 @@
         index--;
         objects[item] = JSON.parse(JSON.stringify(params.default_values));
         objects[item][col] = data[item]['file_path'];
-        window_render('UI/Form',
+        ADIOS.renderWindow('UI/Form',
           {table: table,
           id: index,
           simple_insert: params.simple_insert,

@@ -153,7 +153,7 @@ ADIOS.views.Form = {
           ADIOS.views.Form.close(uid);
 
           if (reopen_after_save) {
-            window_render(data.modelUrlBase + '/' + data.id + '/edit');
+            ADIOS.renderWindow(data.modelUrlBase + '/' + data.id + '/edit');
           }
 
           if (typeof params.aftersave_callback === 'function') {
@@ -237,7 +237,7 @@ ADIOS.views.Form = {
           if ($('#'+uid).attr('data-form-type') == 'desktop'){
             desktop_render('UI/Form', {formType: 'desktop', table: data.table, id: _saved_id});
           }else{
-            window_render('UI/Form', {table: data.table, id: _saved_id});
+            ADIOS.renderWindow('UI/Form', {table: data.table, id: _saved_id});
           };
 
           if(typeof params.aftercopy_callback === 'function'){

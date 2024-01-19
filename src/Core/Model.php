@@ -181,7 +181,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         Model <b>{$this->fullName}</b> has new upgrades available.
         <a
           href='javascript:void(0)'
-          onclick='desktop_update(\"Desktop/InstallUpgrades\");'
+          onclick='ADIOS.renderDesktop(\"Desktop/InstallUpgrades\");'
         >Install upgrades</a>
       ");
     } else if (!$this->hasSqlTable()) {
@@ -189,7 +189,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         Model <b>{$this->fullName}</b> has no SQL table.
         <a
           href='javascript:void(0)'
-          onclick='desktop_update(\"Desktop/InstallUpgrades\");'
+          onclick='ADIOS.renderDesktop(\"Desktop/InstallUpgrades\");'
         >Create table</a>
       ");
     } else if (!$this->isInstalled()) {
@@ -197,7 +197,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         Model <b>{$this->fullName}</b> is not installed.
         <a
           href='javascript:void(0)'
-          onclick='desktop_update(\"Desktop/InstallUpgrades\");'
+          onclick='ADIOS.renderDesktop(\"Desktop/InstallUpgrades\");'
         >Install model</a>
       ");
     }
@@ -815,9 +815,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $columnsToShow;
   }
 
-  public function getColumnsToShowInView(string $view): array {
+  public function getColumnsToShowInView(string $view, array|null $columns = NULL): array {
+    if ($columns === NULL) {
+      $columns = $this->columns();
+    }
     $columnsToShow = [];
-    foreach ($this->columns() as $columnName => $columnValue) {
+    foreach ($columns as $columnName => $columnValue) {
       if (
         isset($columnValue['viewParams'][$view]['showColumn'])
         && $columnValue['viewParams'][$view]['showColumn'] === false

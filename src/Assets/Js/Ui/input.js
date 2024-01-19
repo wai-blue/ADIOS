@@ -520,7 +520,7 @@ function ui_input_image_download(uid, text) {
 };
 
 function ui_input_lookup_detail(id, uid) {
-  window_render(
+  ADIOS.renderWindow(
     'UI/Form',
     {
       'model': $('#' + uid).attr('data-model'),
@@ -536,7 +536,7 @@ function ui_input_lookup_detail(id, uid) {
 function ui_input_lookup_search(inputUid) {
   let form_data = ADIOS.views.Form.get_values($('#' + inputUid).attr('data-form-uid'));
 
-  window_render(
+  ADIOS.renderWindow(
     'UI/Input/LookupSearch',
     {
       model: $('#' + inputUid).attr('data-model'),
@@ -550,7 +550,7 @@ function ui_input_lookup_search(inputUid) {
 };
 
 function ui_input_lookup_add(uid) {
-  window_render(
+  ADIOS.renderWindow(
     'UI/Form',
     {
       table: $('#' + uid).attr('data-table'),
@@ -592,7 +592,7 @@ function ui_input_table_remove_item(uid, id) {
 };
 
 function ui_input_ftp_browser(uid, type) {
-  window_render(
+  ADIOS.renderWindow(
     'UI/Input/ftp_browser',
     $('#' + uid).attr('data-upload-params') + '&type=' + type + '&input_uid=' + uid,
     function (res) { }
@@ -611,7 +611,7 @@ function ui_input_table_add_value(uid, text) {
 };
 
 function ui_input_table_detail(id, uid) {
-  window_render(
+  ADIOS.renderWindow(
     'UI/Form',
     {
       table: $('#' + uid).attr('data-table'),

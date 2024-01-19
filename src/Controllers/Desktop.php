@@ -46,7 +46,7 @@ class Desktop extends \ADIOS\Core\Controller {
       "faIcon" => "fas fa-user",
       "text" => $this->translate("My profile"),
       "onclick" => "
-        window_render(
+        ADIOS.renderWindow(
           'MyProfile',
           '',
           function() {

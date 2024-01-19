@@ -111,7 +111,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
             searchString = {$this->uid}_get_search_string();
           }
 
-          desktop_update(
+          ADIOS.renderDesktop(
             '{$model->getFullUrlBase($this->params)}',
             {
               'searchGroup': '" . ads($searchGroup) . "',

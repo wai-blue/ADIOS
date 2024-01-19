@@ -31,7 +31,7 @@ class Tree extends \ADIOS\Core\Input
             let li = $(this).closest('li');
             let btn = $(this).closest('.dropdown').find(' > .btn');
 
-            window_render(
+            ADIOS.renderWindow(
               '" . $this->model->getFullUrlBase($this->params) . "/' + li.data('id') + '/edit',
               '',
               function(res) {
@@ -137,7 +137,7 @@ class Tree extends \ADIOS\Core\Input
               let ul = $(this).closest('ul');
               let li = ul.find(' > li[data-id=-1]');
 
-              window_render(
+              ADIOS.renderWindow(
                 '" . $this->model->getFullUrlBase($this->params) . "/{$parent}/Add',
                 {},
                 function(res) {

@@ -14,18 +14,17 @@ class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
 
 {% for itemTitle, itemConfig in thisWidget.config.sidebar %}
       $desktop->addSidebarItem($this, [
-        "fa_icon" => "fas {% if itemConfig.faIcon %}{{ itemConfig.faIcon }}{% else %}{{ thisWidget.config.faIcon }}{% endif %}",
+        {% if itemConfig.icon %} "icon" => "{{ itemConfig.icon }}", {% endif %}
         "title" => "{{ itemTitle }}",
-        "custom_title" => "{{ itemConfig.customTitle|raw }}",
 {% if itemConfig.url %}
-        "onclick" => "desktop_update('{{ itemConfig.url }}');",
+        "onclick" => "ADIOS.renderDesktop('{{ itemConfig.url }}');",
 {% endif %}
 {% if itemConfig.sub is iterable %}
         "sub" => [
 {% for subItemTitle, subItemConfig in itemConfig.sub %}
           [
             "title" => "{{ subItemTitle }}",
-            "onclick" => "desktop_update('{{ subItemConfig.url }}');",
+            "onclick" => "ADIOS.renderDesktop('{{ subItemConfig.url }}');",
           ],
 {% endfor %}
         ],

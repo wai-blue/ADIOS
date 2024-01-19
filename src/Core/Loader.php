@@ -1938,10 +1938,6 @@ class Loader
     // to be overriden
   }
 
-  public function onModelsLoaded() {
-    // to be overriden
-  }
-
   public function onBeforeRender() {
     // to be overriden
   }

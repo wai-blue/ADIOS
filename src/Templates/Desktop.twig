@@ -113,12 +113,9 @@
                 {{ shortcut.onclick|raw }}
               "
             >
-              {% if shortcut.custom_title %}
-                {{ shortcut.custom_title|raw }}
-              {% else %}
-                <i class="{{ shortcut.fa_icon }}"></i>
-                <span>{{ translate(shortcut.title|raw, shortcut.___widgetClassName) }}</span>
-              {% endif %}
+              
+              {% if shortcut.icon %}<i class="{{ shortcut.icon }}"></i>{% endif %}
+              <span>{{ shortcut.title|raw }}</span>
             </a>
             {% if shortcut.sub is iterable %}
               <div

@@ -49,7 +49,7 @@ class CSV extends \ADIOS\Core\Controller {
           if (confirm(warningText)) {
             let data = ADIOS.views.Form.get_values('{$this->uid}_form', '{$this->uid}_');
             data.model = '{$model}';
-            window_render(
+            ADIOS.renderWindow(
               '{$modelObject->urlBase}/Import/CSV/Import',
               data
             );

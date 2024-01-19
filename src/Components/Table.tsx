@@ -289,8 +289,8 @@ export default class Table extends Component<TableProps> {
           id={"adios-table-" + this.props.uid}
           className="adios react ui table"
         >
-          <div className="card">
-            <div className="card-header">
+          <div className="card border-0">
+            <div className="card-header mb-2">
               <div className="row m-0">
 
                 <div className="col-lg-12 p-0 m-0">
