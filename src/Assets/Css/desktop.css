@@ -262,6 +262,14 @@ h3 { padding-bottom: 0.5em; }
 .adios_main{margin-left:50px; transition: margin 0.3s;flex:1;margin-top:40px;display:flex;flex-direction:column;position:relative;}
 .adios_main_wrapper.hidden_shortcuts .adios_main {margin-left:0px;}
 
+.adios.loader-style-1 {
+  width: 100%;
+  text-align: center;
+  padding: 1em;
+  background: #FAFAFA;
+  border: 1px solid #EEEEEE;
+}
+
 .adios.main-content {
   /* height: calc(100vh - 5em); */
   /* padding-top: 1em; */

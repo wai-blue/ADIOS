@@ -159,9 +159,6 @@ class Loader
   public $test = NULL;
   public $web = NULL;
 
-  public $view = "";
-  public $viewParams = [];
-
   public array $assetsUrlMap = [];
 
   public int $controllerNestingLevel = 0;
@@ -1224,6 +1221,7 @@ class Loader
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
         $this->params['contentController'] = $controller;
         $this->params['config'] = $this->config;
+        $this->params['_COOKIE'] = $_COOKIE;
 
         $controller = "Desktop";
       }
@@ -1314,9 +1312,6 @@ class Loader
           } else {
             [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
 
-            $this->view = $view;
-            $this->viewParams = $viewParams;
-
             if (is_string($view)) {
               if (substr($view, 0, 3) == 'App') {
                 $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
@@ -1328,7 +1323,7 @@ class Loader
 
               if ($canUseTwig) {
                 $html = $this->twig->render(
-                  $this->view,
+                  $view,
                   [
                     'uid' => $this->uid,
                     'config' => $this->config,
@@ -1338,8 +1333,8 @@ class Loader
                 );
               } else {
                 $html = $this->view->create(
-                  $this->view,
-                  $this->viewParams
+                  $view,
+                  $viewParams
                 )->render();
               };
 

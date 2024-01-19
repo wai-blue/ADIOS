@@ -538,9 +538,16 @@ export default class Form extends Component<FormProps> {
     ) : <></>;
   }
 
-  _renderActionButtons(): JSX.Element {
+  _renderButtonsLeft(): JSX.Element {
     return (
       <div className="d-flex">
+        <button
+          className="btn btn-sm btn-dark mr-2"
+          type="button"
+          data-dismiss="modal"
+          aria-label="Close"
+        ><span>&times;</span></button>
+
         <button 
           onClick={() => this.saveRecord()}
           className="btn btn-sm btn-primary btn-icon-split"
@@ -549,28 +556,38 @@ export default class Form extends Component<FormProps> {
             ? (
               <>
                 <span className="icon"><i className="fas fa-save"></i></span>
-                <span className="text"> {this.state.saveButtonText ?? "Save record"}</span>
+                <span className="text"> {this.state.saveButtonText ?? "Save"}</span>
               </>
             )
             : (
               <>
                 <span className="icon"><i className="fas fa-plus"></i></span>
-                <span className="text"> {this.state.addButtonText ?? "Add new record"}</span>
+                <span className="text"> {this.state.addButtonText ?? "Add"}</span>
               </>
             )
           }
         </button>
-
-        {this.state.isEdit ? <button 
-          onClick={() => this.deleteRecord(this.props.id ?? 0)}
-          className="ml-2 btn btn-danger btn-sm btn-icon-split"
-        >
-          <span className="icon"><i className="fas fa-trash"></i></span>
-          <span className="text">  Zmazať</span>
-        </button> : ''}
       </div>
     );
   }
+
+  _renderButtonsRight(): JSX.Element {
+    return (
+      <div className="d-flex">
+        {this.state.isEdit ? <button 
+          onClick={() => this.deleteRecord(this.props.id ?? 0)}
+          className="btn btn-danger btn-sm btn-icon-split"
+        >
+          <span className="icon"><i className="fas fa-trash"></i></span>
+          <span className="text">Delete</span>
+        </button> : ''}
+
+      </div>
+    );
+  }
+
+
+
 
   render() {
     return (
@@ -578,8 +595,8 @@ export default class Form extends Component<FormProps> {
         {this.props.showInModal ? (
           <div className="modal-header">
             <div className="row w-100 p-0 m-0 d-flex align-items-center justify-content-center">
-              <div className="col-lg-4">
-                {this._renderActionButtons()}
+              <div className="col-lg-4 p-0">
+                {this._renderButtonsLeft()}
               </div>
               <div className="col-lg-4 text-center">
                 <h3
@@ -589,13 +606,8 @@ export default class Form extends Component<FormProps> {
                   {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
                 </h3>
               </div>
-              <div className="col-lg-4 d-flex flex-row-reverse">
-                <button 
-                  className="btn btn-light"
-                  type="button" 
-                  data-dismiss="modal" 
-                  aria-label="Close"
-                ><span>&times;</span></button>
+              <div className="col-lg-4 p-0 d-flex flex-row-reverse">
+                {this._renderButtonsRight()}
               </div>
             </div>
           </div>
@@ -619,7 +631,7 @@ export default class Form extends Component<FormProps> {
                       </h3>
                     </div>
 
-                    {this._renderActionButtons()}
+                    {this._renderButtonsLeft()}
 
                     {this.state.tabs != undefined ? (
                       <ul className="nav nav-tabs card-header-tabs mt-3">
@@ -635,6 +647,8 @@ export default class Form extends Component<FormProps> {
                         })}
                       </ul>
                     ) : ''}
+
+                    {this._renderButtonsRight()}
                   </div>
                 </div>
 

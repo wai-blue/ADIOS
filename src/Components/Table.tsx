@@ -4,7 +4,7 @@ import axios from "axios";
 
 import Modal, { ModalProps } from "./Modal";
 import Form, { FormProps, FormColumns } from "./Form";
-import { dateToEUFormat } from "./Inputs/DateTime";
+import { dateToEUFormat, timeToEUFormat, datetimeToEUFormat } from "./Inputs/DateTime";
 
 import Loader from "./Loader";
 
@@ -83,6 +83,10 @@ export default class Table extends Component<TableProps> {
     this.loadData();
   }
 
+  _commonCellRenderer(column, content): JSX.Element {
+    return <div className={column.viewParams?.Table?.cssClass}>{content}</div>
+  }
+
   loadParams() {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Table/OnLoadParams', {
@@ -97,55 +101,93 @@ export default class Table extends Component<TableProps> {
             case 'color': return { 
               ...column, 
               renderCell: (params: any) => {
-                return <span 
-                  style={{ width: '20px', height: '20px', background: params.value }} 
-                  className="rounded" 
-                />
+                return this._commonCellRenderer(
+                  column,
+                  <span 
+                    style={{ width: '20px', height: '20px', background: params.value }} 
+                    className="rounded" 
+                  />
+                );
               }
             }
             case 'image': return { 
               ...column, 
               renderCell: (params: any) => {
-                if (!params.value) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+                if (!params.value) {
+                  return this._commonCellRenderer(
+                    column, 
+                    <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+                  );
+                }
 
-                return <img 
-                  style={{ width: '30px', height: '30px' }}
-                  src={data.folderUrl + "/" + params.value}
-                  className="rounded"
-                />
+                return this._commonCellRenderer(
+                  column,
+                  <img 
+                    style={{ width: '30px', height: '30px' }}
+                    src={data.folderUrl + "/" + params.value}
+                    className="rounded"
+                  />
+                );
               }
             }
             case 'lookup': return { 
               ...column, 
               renderCell: (params: any) => {
-                return <span style={{
-                  color: '#2d4a8a'
-                }}>{params.value?.lookupSqlValue}</span>
+                return this._commonCellRenderer(
+                  column,
+                  <span style={{
+                    color: '#2d4a8a'
+                  }}>{params.value?.lookupSqlValue}</span>
+                );
               }
             }
             case 'enum': return { 
               ...column, 
               renderCell: (params: any) => {
-                return column['enumValues'][params.value];
+                return this._commonCellRenderer(column, column['enumValues'][params.value]);
               }
             }
             case 'bool':
             case 'boolean': return { 
               ...column, 
               renderCell: (params: any) => {
-                if (params.value) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>;
-                else return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>;
+                if (params.value) {
+                  return this._commonCellRenderer(
+                    column,
+                    <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
+                  );
+                } else {
+                  return this._commonCellRenderer(
+                    column,
+                    <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
+                  );
+                }
               }
             }
-            case 'date':
-            case 'time':
+            case 'date': return { 
+              ...column, 
+              renderCell: (params: any) => {
+                return this._commonCellRenderer(column, dateToEUFormat(params.value));
+              }
+            }
+            case 'time': return { 
+              ...column, 
+              renderCell: (params: any) => {
+                return this._commonCellRenderer(column, timeToEUFormat(params.value));
+              }
+            }
             case 'datetime': return { 
               ...column, 
               renderCell: (params: any) => {
-                return dateToEUFormat(params.value);
+                return this._commonCellRenderer(column, datetimeToEUFormat(params.value));
               }
             }
-            default: return column;
+            default: return {
+              ...column,
+              renderCell: (params: any) => {
+                return this._commonCellRenderer(column, params.value);
+              }
+            }
           }
         });
 
@@ -295,7 +337,7 @@ export default class Table extends Component<TableProps> {
                       className="mr-2 form-control border-end-0 border rounded-pill"
                       style={{maxWidth: '250px'}}
                       type="search"
-                      placeholder="Hľadať"
+                      placeholder="Press Enter to search..."
                       value={this.state.search} 
                       onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
                     />
@@ -325,9 +367,9 @@ export default class Table extends Component<TableProps> {
               onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
               rowCount={this.state.data.total}
               onRowClick={(item) => this.onRowClick(item.id as number)}
-              disableColumnFilter
-              disableColumnSelector
-              disableDensitySelector
+              // disableColumnFilter
+              // disableColumnSelector
+              // disableDensitySelector
               sx={{
                 '.MuiDataGrid-cell:focus': {
                   outline: 'none'
