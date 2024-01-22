@@ -45,14 +45,14 @@ class Permissions {
 
   public function isEnabled(string $permission, int $idUserRole = 0) : bool
   {
-    if ($idUserRole <= 0) $idUserRole = (int) $this->adios->userProfile['id_role'];
+    if ($idUserRole <= 0) $idUserRole = (int) reset($this->adios->userProfile['roles']);
 
     return (bool) in_array($permission, $this->enabledPermissions[$idUserRole]);
   }
   
   public function has(string $permission, int $idUserRole = 0) : bool
   {
-    if ($idUserRole <= 0) $idUserRole = (int) $this->adios->userProfile['id_role'];
+    if ($idUserRole <= 0) $idUserRole = (int) reset($this->adios->userProfile['roles']);
 
     // TODO: Docasne. Ked bude fungovat, vymazat.
     if (strpos($permission, "Administrator/Permission") === 0) return TRUE;

@@ -240,6 +240,12 @@ class User extends \ADIOS\Core\Model {
         if ($passwordMatch) {
           $authResult = $user;
 
+          $tmpRoles = [];
+          foreach ($authResult['roles'] as $role) {
+            $tmpRoles[] = (int) $role['pivot']['id_role'];
+          }
+          $authResult['roles'] = $tmpRoles;
+
           if ($rememberLogin) {
             setcookie(
               _ADIOS_ID.'-user',
