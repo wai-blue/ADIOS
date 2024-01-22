@@ -14,8 +14,8 @@ if (function_exists('_adios_file_download_callback')) {
     _adios_file_download_callback($_GET['f']);
 }
 
-$file = realpath($this->config['files_dir'].'/'.$_GET['f']);
-if (realpath($this->config['files_dir']) != substr($file, 0, strlen(realpath($this->config['files_dir'])))) {
+$file = realpath($this->config['uploadDir'].'/'.$_GET['f']);
+if (realpath($this->config['uploadDir']) != substr($file, 0, strlen(realpath($this->config['uploadDir'])))) {
     echo 'ilegall access';
     die();
 }

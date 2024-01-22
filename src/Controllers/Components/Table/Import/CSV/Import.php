@@ -28,7 +28,7 @@ class Import extends \ADIOS\Core\Controller {
     $row = 0;
     $importedRows = 0;
 
-    if (($handle = fopen("{$this->adios->config['files_dir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
+    if (($handle = fopen("{$this->adios->config['uploadDir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
       while (($csvRow = fgetcsv($handle, 1000, $separator)) !== FALSE) {
         $row++;
 

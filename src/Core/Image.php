@@ -49,9 +49,9 @@ if ($debug) {
 
 $orig_filename = (empty($f) ? $this->config['image']['no_image_file'] : $f); /// orig filename je aj s castou cesty
 if ($debug) {
-    print_r("{$this->config['files_dir']}/{$orig_filename}");
+    print_r("{$this->config['uploadDir']}/{$orig_filename}");
 }
-if (!is_file("{$this->config['files_dir']}/{$orig_filename}") || !@is_array(getimagesize("{$this->config['files_dir']}/{$orig_filename}"))) {
+if (!is_file("{$this->config['uploadDir']}/{$orig_filename}") || !@is_array(getimagesize("{$this->config['uploadDir']}/{$orig_filename}"))) {
     $orig_filename = $this->config['image']['no_image_file'];
 }
 
@@ -65,16 +65,16 @@ if ($debug) {
 
 $no_image_render = FALSE;
 
-if ('' == $orig_filename || !file_exists($this->config['files_dir'].'/'.$orig_filename)) {
+if ('' == $orig_filename || !file_exists($this->config['uploadDir'].'/'.$orig_filename)) {
     $orig_filename = dirname(__FILE__).'/../Assets/images/empty.png';
     $no_image_render = TRUE;
 }
 
-$file = realpath($this->config['files_dir'].'/'.$f);
-if (!$no_image_render && realpath($this->config['files_dir']) != substr($file, 0, strlen(realpath($this->config['files_dir'])))) {
+$file = realpath($this->config['uploadDir'].'/'.$f);
+if (!$no_image_render && realpath($this->config['uploadDir']) != substr($file, 0, strlen(realpath($this->config['uploadDir'])))) {
     echo 'ilegall access';
-    if ($this->config['devel_mode']) {
-        echo "<br/>{$this->config['files_dir']} -- $file ";
+    if ($this->config['develMode']) {
+        echo "<br/>{$this->config['uploadDir']} -- $file ";
     }
     die();
 }
@@ -84,7 +84,7 @@ if (!isset($configurations[$cfg_name])) { // ak nie je zadana konfiguracia, vrat
         if ($no_image_render) {
             $tmp_h_file = "{$orig_filename}";
         } else {
-            $tmp_h_file = "{$this->config['files_dir']}/{$orig_filename}";
+            $tmp_h_file = "{$this->config['uploadDir']}/{$orig_filename}";
         }
 
         $last_modified_time = filemtime($tmp_h_file);
@@ -107,7 +107,7 @@ if (!isset($configurations[$cfg_name])) { // ak nie je zadana konfiguracia, vrat
     if ($no_image_render) {
         $img->load("{$orig_filename}");
     } else {
-        $img->load("{$this->config['files_dir']}/{$orig_filename}");
+        $img->load("{$this->config['uploadDir']}/{$orig_filename}");
     }
 
     if (IMAGETYPE_JPEG == $img->image_type) {
@@ -138,7 +138,7 @@ if ($width > 0) {
     $cfg['height'] = round($width / ($configurations[$cfg_name]['width'] / $configurations[$cfg_name]['height']));
 }
 
-$img_cache_dir = "{$this->config['files_dir']}/___cache".(empty($cfg['subdir']) ? '' : "/{$cfg['subdir']}");
+$img_cache_dir = "{$this->config['uploadDir']}/___cache".(empty($cfg['subdir']) ? '' : "/{$cfg['subdir']}");
 
 // kontrola ci adresar do ktoreho ma ist skonvertovany obrazok existuje ak neexistuje tak ho vytvorim
 if (!is_dir($img_cache_dir)) {
@@ -207,7 +207,7 @@ if (is_file("{$img_cache_dir}/{$new_filename}") && !$debug && !$this->config['de
     if ($no_image_render) {
         $img->load("{$orig_filename}");
     } else {
-        $img->load("{$this->config['files_dir']}/{$orig_filename}");
+        $img->load("{$this->config['uploadDir']}/{$orig_filename}");
     }
 
     $tmp_cfg_width = (int) ($configurations[$cfg_name]['width'] ?? 0);
@@ -341,7 +341,7 @@ if (is_file("{$img_cache_dir}/{$new_filename}") && !$debug && !$this->config['de
         if ($no_image_render) {
             $tmp_h_file = "{$orig_filename}";
         } else {
-            $tmp_h_file = "{$this->config['files_dir']}/{$orig_filename}";
+            $tmp_h_file = "{$this->config['uploadDir']}/{$orig_filename}";
         }
         $last_modified_time = filemtime($tmp_h_file);
         $etag = md5_file($tmp_h_file);

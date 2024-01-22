@@ -17,6 +17,6 @@ class DeleteFile extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = TRUE;
 
   public function render() {
-    unlink(realpath($this->adios->config['files_dir'])."/".$this->params['folderPath']."/".trim((string) $this->params['fileName']));
+    unlink(realpath($this->adios->config['uploadDir'])."/".$this->params['folderPath']."/".trim((string) $this->params['fileName']));
   }
 }

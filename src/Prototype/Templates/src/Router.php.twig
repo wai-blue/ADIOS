@@ -1,0 +1,15 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace App\Core;
+
+class Router extends \ADIOS\Core\Router {
+  public function __construct(\ADIOS\Core\Loader $adios) {
+    parent::__construct($adios);
+
+    $this->addRouting(
+{{ varExport(routing, "      ")|raw }}
+    );
+  }
+}

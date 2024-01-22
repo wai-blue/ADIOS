@@ -45,7 +45,7 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
 
     $value = htmlspecialchars($value);
 
-    if ('' != $value && file_exists($this->adios->config['files_dir']."/{$value}")) {
+    if ('' != $value && file_exists($this->adios->config['uploadDir']."/{$value}")) {
       $value = str_replace('\\', '/', $value);
       $value = explode('/', $value);
       $value[count($value) - 1] = rawurlencode($value[count($value) - 1]);

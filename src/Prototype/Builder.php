@@ -233,6 +233,8 @@ class Builder {
     $this->createFolder('src');
     $this->createFolder('src/Assets');
     $this->createFolder('src/Assets/images');
+    $this->createFolder('src/Core');
+    $this->createFolder('src/Core/Models');
     $this->createFolder('src/Widgets');
     $this->createFolder('log');
     $this->createFolder('tmp');
@@ -545,10 +547,15 @@ class Builder {
       }
     }
 
-    // render init scripte
-    $this->renderFile('src/Init.php', 'src/Init.php.twig');
+    $this->renderFile('src/App.php', 'src/App.php.twig');
 
-    $this->renderFile('src/Routing.php', 'src/Routing.php.twig', [
+    $this->renderFile('src/Core/Router.php', 'src/Router.php.twig', [
+      'routing' => $routing,
+    ]);
+    $this->renderFile('src/Core/Models/User.php', 'src/Models/User.php.twig', [
+      'routing' => $routing,
+    ]);
+    $this->renderFile('src/Core/Models/UserRole.php', 'src/Models/UserRole.php.twig', [
       'routing' => $routing,
     ]);
   }

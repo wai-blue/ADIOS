@@ -8,7 +8,7 @@ class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
   public function onBeforeRender() {
     if (
       $this->adios->controllerObject::class == "ADIOS\\Controllers\\Desktop"
-      && $this->adios->hasPermissionsForController("{{ thisWidget.name }}")
+      && $this->adios->permissions->has("{{ thisWidget.name }}")
     ) {
       $desktop = $this->adios->controllerObject;
 

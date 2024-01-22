@@ -703,7 +703,7 @@ class Input extends \ADIOS\Core\ViewWithController {
       /* file */
       if ('file' == $this->params['type']) {
         if ('' != $this->params['value']) {
-          $file_href = "{$this->adios->config['files_url']}/".ads($this->params['value']);
+          $file_href = "{$this->adios->config['uploadUrl']}/".ads($this->params['value']);
         } else {
           $file_href = "";
         }
@@ -790,7 +790,7 @@ class Input extends \ADIOS\Core\ViewWithController {
                       $('#{$this->params['uid']}_href')
                         .attr(
                           'href',
-                          '{$this->adios->config['files_url']}/' + file
+                          '{$this->adios->config['uploadUrl']}/' + file
                         )
                         .text(file)
                       ;
@@ -836,7 +836,7 @@ class Input extends \ADIOS\Core\ViewWithController {
       //           '.$this->generate_input_events().'
       //           value="'.ads($this->params['value'])."\"
       //           {$this->params['html_attributes']}
-      //           data-src-real-base=\"".ads($this->adios->config['files_url']).'"
+      //           data-src-real-base=\"".ads($this->adios->config['uploadUrl']).'"
       //           data-src-base="'.ads($file_src_base).'"
       //           data-default-txt="'.ads($default_src).'"
       //           data-subdir="'.ads($this->params['subdir']).'"

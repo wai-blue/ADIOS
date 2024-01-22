@@ -19,14 +19,14 @@ class User extends \ADIOS\Core\Model {
   const TOKEN_TYPE_USER_FORGOT_PASSWORD = 551155;
 
   public string $urlBase = "users";
-  public ?string $lookupSqlValue = "concat({%TABLE%}.name, ' ', {%TABLE%}.surname)";
+  public ?string $lookupSqlValue = "{%TABLE%}.login";
 
   public string $tableTitle = "Users";
   public string $formTitleForInserting = "New user";
   public string $formTitleForEditing = "User";
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
-    $this->sqlName = "users";
+    $this->sqlName = "_users";
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
     if (is_object($adiosOrAttributes)) {
@@ -42,23 +42,6 @@ class User extends \ADIOS\Core\Model {
   public function columns(array $columns = []): array
   {
     return parent::columns([
-      'name' => [
-        'type' => 'varchar',
-        'title' => $this->translate('Given name'),
-        // Example
-        'viewParams' => [
-          'Table' => [
-            'showColumn' => true
-          ],
-          'Form' => [
-            'showColumn' => true
-          ],
-        ],
-      ],
-      'surname' => [
-        'type' => 'varchar',
-        'title' => $this->translate('Family name')
-      ],
       'login' => [
         'type' => 'varchar',
         'title' => $this->translate('Login'),
@@ -67,60 +50,30 @@ class User extends \ADIOS\Core\Model {
       'password' => [
         'type' => 'password',
         'title' => $this->translate('Password'),
-        'showColumn' => false
-      ],
-      'email' => [
-        'type' => 'varchar',
-        'title' => $this->translate('Email'),
-        'showColumn' => false
-      ],
-      'phone_number' => [
-        'type' => 'varchar',
-        'title' => $this->translate('Phone number'),
-        'showColumn' => false
-      ],
-      'id_role' => [
-        'type' => 'lookup',
-        'title' => $this->translate('Role'),
-        'model' => "ADIOS/Core/Models/UserRole",
-        'input_style' => 'select',
-        'showColumn' => false
-      ],
-      'photo' => [
-        'type' => 'image',
-        'title' => $this->translate('Photo'),
-        'only_upload' => 'yes',
-        'subdir' => 'users/',
-        "description" => $this->translate("Supported image extensions: jpg, gif, png, jpeg"),
       ],
       'is_active' => [
         'type' => 'boolean',
         'title' => $this->translate('Active'),
-        'showColumn' => false
       ],
       'last_login_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last login'),
         'readonly' => TRUE,
-        'showColumn' => false
       ],
       'last_login_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last login IP'),
         'readonly' => TRUE,
-        'showColumn' => false
       ],
       'last_access_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last access'),
         'readonly' => TRUE,
-        'showColumn' => false
       ],
       'last_access_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last access IP'),
         'readonly' => TRUE,
-        'showColumn' => false
       ],
       //'id_token_reset_password' => [
       //  'type' => 'lookup',
@@ -164,6 +117,19 @@ class User extends \ADIOS\Core\Model {
     ];
   }
 
+  public function indexes(array $indexes = []) {
+    return parent::indexes([
+      "login" => [
+        "type" => "unique",
+        "columns" => [
+          "login" => [
+            "order" => "asc",
+          ],
+        ],
+      ],
+    ]);
+  }
+
   public function routing(array $routing = []) {
     return parent::routing([
       '/^MyProfile$/' => [
@@ -177,11 +143,11 @@ class User extends \ADIOS\Core\Model {
     ]);
   }
 
-  public function getById($id) {
-    $id = (int) $id;
-    $user = self::find($id);
-    return ($user === NULL ? [] : $user->toArray());
-  }
+  // public function getById($id) {
+  //   $id = (int) $id;
+  //   $user = self::find($id);
+  //   return ($user === NULL ? [] : $user->toArray());
+  // }
 
   public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject, array $params): array
   {
@@ -192,13 +158,8 @@ class User extends \ADIOS\Core\Model {
         "columns" => [
           [
             "rows" => [
-              "name",
-              "surname",
               "login",
               "password",
-              "email",
-              "phone_number",
-              "photo",
             ],
           ],
         ],
@@ -206,6 +167,100 @@ class User extends \ADIOS\Core\Model {
     }
 
     return (array) $params;
+  }
+
+
+  public function getClientIpAddress() {
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+      $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+      $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else {
+      $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    return $ip;
+  }
+
+  public function updateAccessInformation(int $idUser) {
+    $clientIp = $this->getClientIpAddress();
+    $this->where('id', $idUser)->update([
+      'last_access_time' => date('Y-m-d H:i:s'),
+      'last_access_ip' => $clientIp,
+    ]);
+  }
+
+  public function updateLoginAndAccessInformation(int $idUser) {
+    $clientIp = $this->getClientIpAddress();
+    $this->where('id', $idUser)->update([
+      'last_login_time' => date('Y-m-d H:i:s'),
+      'last_login_ip' => $clientIp,
+      'last_access_time' => date('Y-m-d H:i:s'),
+      'last_access_ip' => $clientIp,
+    ]);
+  }
+
+  public function authCookieGetLogin() {
+    list($tmpHash, $tmpLogin) = explode(",", $_COOKIE[_ADIOS_ID.'-user']);
+    return $tmpLogin;
+  }
+
+  public function authCookieSerialize($login, $password) {
+    return md5($login.".".$password).",".$login;
+  }
+
+  public function authUser(string $login, string $password, $rememberLogin = FALSE): void {
+    $authResult = FALSE;
+
+    $login = trim($login);
+
+    if (empty($login) && !empty($_COOKIE[_ADIOS_ID.'-user'])) {
+      $login = $this->authCookieGetLogin();
+    }
+
+    if (!empty($login)) {
+      $users = $this
+        ->with('roles')
+        ->where('login', '=', $login)
+        ->where('is_active', '<>', 0)
+        ->get()
+        ->toArray()
+      ;
+
+      foreach ($users as $user) {
+        $passwordMatch = FALSE;
+
+        if (!empty($password) && password_verify($password, $user['password'])) {
+          // plain text
+          $passwordMatch = TRUE;
+        } else if (
+          $_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($user['login'], $user['password'])) {
+          $passwordMatch = TRUE;
+        }
+
+        if ($passwordMatch) {
+          $authResult = $user;
+
+          if ($rememberLogin) {
+            setcookie(
+              _ADIOS_ID.'-user',
+              $this->authCookieSerialize($user['login'], $user['password']),
+              time() + (3600 * 24 * 30)
+            );
+          }
+
+          break;
+
+        }
+      }
+    }
+
+    if (is_array($authResult)) {
+      $this->adios->userProfile = $authResult;
+      $this->adios->userLogged = TRUE;
+      $_SESSION[_ADIOS_ID]['userProfile'] = $authResult;
+    } else {
+      $this->logoutUser();
+    }
   }
 
   public function generateToken($idUser, $tokenSalt, $tokenType) {
@@ -251,6 +306,17 @@ class User extends \ADIOS\Core\Model {
     return $userData;
   }
 
+  public function logoutUser() {
+    unset($_SESSION[_ADIOS_ID]['userProfile']);
+    $this->adios->userProfile = [];
+    $this->adios->userLogged = FALSE;
+  }
+
+  public function loadUserFromSession() {
+    $this->adios->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
+    $this->adios->userLogged = TRUE;
+  }
+
   public function getByEmail(string $email) {
     $user = self::where("email", $email)->first();
 
@@ -266,9 +332,17 @@ class User extends \ADIOS\Core\Model {
     ;
   }
 
-  public function id_role(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
-    return $this->BelongsTo(\ADIOS\Core\Models\UserRole::class, 'id_role');
+
+
+  // Eloquent relations
+
+  public function roles() {
+    return $this->belongsToMany(\ADIOS\Core\Models\UserRole::class);
   }
+
+  // public function id_role(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
+  //   return $this->BelongsTo(\ADIOS\Core\Models\UserRole::class, 'id_role');
+  // }
 
   public function id_token_reset_password(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
     return $this->BelongsTo(\ADIOS\Core\Models\Token::class, 'id_token_reset_password');

@@ -176,9 +176,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
       );
     }
 
+    $currentVersion = (int) $this->getCurrentInstalledVersion();
+    $lastVersion = $this->getLastAvailableVersion();
+
+    if ($this->lastVersion == 0) {
+      $this->saveConfig('installed-version', $lastVersion);
+    }
+
     if ($this->hasAvailableUpgrades()) {
+
       $this->adios->userNotifications->addHtml("
-        Model <b>{$this->fullName}</b> has new upgrades available.
+        Model <b>{$this->fullName}</b> has new upgrades available (from {$currentVersion} to {$lastVersion}).
         <a
           href='javascript:void(0)'
           onclick='ADIOS.renderDesktop(\"Desktop/InstallUpgrades\");'
@@ -286,6 +294,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return (int) ($this->getConfig('installed-version') ?? 0);
   }
 
+  public function getLastAvailableVersion(): int
+  {
+    return max(array_keys($this->upgrades()));
+  }
+
   /**
    * Returns list of available upgrades. This method must be overriden by each model.
    *
@@ -364,7 +377,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function hasAvailableUpgrades(): bool
   {
     $currentVersion = $this->getCurrentInstalledVersion();
-    $lastVersion = max(array_keys($this->upgrades()));
+    $lastVersion = $this->getLastAvailableVersion();
     return ($lastVersion > $currentVersion);
   }
 
@@ -379,7 +392,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     if ($this->hasAvailableUpgrades()) {
       $currentVersion = (int) $this->getCurrentInstalledVersion();
-      $lastVersion = max(array_keys($this->upgrades()));
+      $lastVersion = $this->getLastAvailableVersion();
 
       try {
         $this->adios->db->startTransaction();
@@ -1893,11 +1906,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   public function getFolderUrl(): string {
-    return "{$this->adios->config['files_url']}/" . str_replace('/', '-', $this->fullName);
+    return "{$this->adios->config['uploadUrl']}/" . str_replace('/', '-', $this->fullName);
   }
 
   public function getFolderPath(): string {
-    return "{$this->adios->config['files_dir']}/" . str_replace('/', '-', $this->fullName);
+    return "{$this->adios->config['uploadDir']}/" . str_replace('/', '-', $this->fullName);
   }
 
 }

@@ -33,7 +33,7 @@ class Console {
  
   public function __construct($adios) {
     $this->adios = $adios;
-    $this->logDir = $this->adios->config['log_dir'] ?? "";
+    $this->logDir = $this->adios->config['logDir'] ?? "";
 
     $this->initLogger('core');
   }

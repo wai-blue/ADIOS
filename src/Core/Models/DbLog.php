@@ -18,7 +18,7 @@ namespace ADIOS\Core\Models;
 class DbLog extends \ADIOS\Core\Model {
 
   public function __construct(&$adios) {
-    $this->sqlName = "db_log";
+    $this->sqlName = "_db_log";
     parent::__construct($adios);
   }
 

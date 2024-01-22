@@ -37,7 +37,7 @@ spl_autoload_register(function ($class) {
         $widgetName = array_pop($widgetPath);
         $widgetPath = join("/", $widgetPath);
 
-        if (!@include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$widgetPath}/Controllers/{$widgetName}.php")) {
+        if (!@include_once($___ADIOSObject->config['srcDir'] . "/Widgets/{$widgetPath}/Controllers/{$widgetName}.php")) {
           // ak ani widgetovska, skusim plugin
           $class = str_replace("Plugins/", "", $class);
           $pathLeft = "";
@@ -69,8 +69,8 @@ spl_autoload_register(function ($class) {
         throw new \Exception("ADIOS is not loaded.");
       }
 
-      if (!@include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$m[1]}/Main.php")) {
-        include_once($___ADIOSObject->config['src_dir'] . "/Widgets/{$m[1]}.php");
+      if (!@include_once($___ADIOSObject->config['srcDir'] . "/Widgets/{$m[1]}/Main.php")) {
+        include_once($___ADIOSObject->config['srcDir'] . "/Widgets/{$m[1]}.php");
       }
     } else if (preg_match('/ADIOS\/Plugins\/([\w\/]+)/', $class, $m)) {
       foreach ($___ADIOSObject->pluginFolders as $pluginFolder) {
@@ -88,20 +88,20 @@ spl_autoload_register(function ($class) {
       if (is_file($testFile)) {
         include_once($testFile);
       } else {
-        include_once($___ADIOSObject->config['src_dir'] . "/../tests/{$class}.php");
+        include_once($___ADIOSObject->config['srcDir'] . "/../tests/{$class}.php");
       }
 
     } else if (preg_match('/ADIOS\/Web\/([\w\/]+)/', $class, $m)) {
       $class = str_replace("ADIOS/Web/", "", $class);
 
-      include_once($___ADIOSObject->config['src_dir'] . "/Web/{$class}.php");
+      include_once($___ADIOSObject->config['srcDir'] . "/Web/{$class}.php");
 
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
       include_once(__DIR__ . "/../{$m[1]}.php");
 
     } else if (preg_match('/App\/([\w\/]+)/', $class, $m)) {
-      $fname1 = $___ADIOSObject->config['src_dir'] . "/{$m[1]}/Main.php";
-      $fname2 = $___ADIOSObject->config['src_dir'] . "/{$m[1]}.php";
+      $fname1 = $___ADIOSObject->config['srcDir'] . "/{$m[1]}/Main.php";
+      $fname2 = $___ADIOSObject->config['srcDir'] . "/{$m[1]}.php";
       
       if (is_file($fname1)) {
         include($fname1);
@@ -132,7 +132,6 @@ class Loader
   public bool $logged = FALSE;
 
   public array $config = [];
-  public array $routing = [];
   public array $widgets = [];
 
   public array $widgetsInstalled = [];
@@ -145,19 +144,20 @@ class Loader
   public array $models = [];
 
   public bool $userLogged = FALSE;
-  public $userProfile = NULL;
+  public array $userProfile = [];
   public array $userPasswordReset = [];
 
   public ?\ADIOS\Core\DB $db = NULL;
-  public $twig = NULL;
-  public $ui = NULL;
-  public $console = NULL;
-  public $locale = NULL;
-  public $email = NULL;
-  public $userNotifications = NULL;
-  public $permissions = NULL; // objekt triedy Permissions
-  public $test = NULL;
-  public $web = NULL;
+  public ?\ADIOS\Core\Console $console = NULL;
+  public ?\ADIOS\Core\Locale $locale = NULL;
+  public ?\ADIOS\Core\Router $router = NULL;
+  public ?\ADIOS\Core\Email $email = NULL;
+  public ?\ADIOS\Core\UserNotifications $userNotifications = NULL;
+  public ?\ADIOS\Core\Permissions $permissions = NULL;
+  public ?\ADIOS\Core\Test $test = NULL;
+  public ?\ADIOS\Core\Web\Loader $web = NULL;
+
+  public ?\Twig\Environment $twig = NULL;
 
   public array $assetsUrlMap = [];
 
@@ -166,8 +166,6 @@ class Loader
 
   public string $dictionaryFilename = "Core-Loader";
   public array $dictionary = [];
-
-  public array $classFactories = [];
 
   public bool $forceUserLogout = FALSE;
 
@@ -184,13 +182,13 @@ class Loader
       $mode = self::ADIOS_MODE_FULL;
     }
 
-    $this->test = new \ADIOS\Core\Test($this);
+    $this->test = new ($this->getCoreClass('Test'))($this);
 
     if (is_array($config)) {
       $this->config = $config;
     }
 
-    $this->widgetsDir = $config['widgets_dir'] ?? "";
+    $this->widgetsDir = $config['widgetsDir'] ?? "";
 
     $this->version = file_get_contents(__DIR__."/../version.txt");
 
@@ -200,19 +198,19 @@ class Loader
 
     if (empty($this->config['dir'])) $this->config['dir'] = "";
     if (empty($this->config['url'])) $this->config['url'] = "";
-    if (empty($this->config['rewrite_base'])) $this->config['rewrite_base'] = "";
+    if (empty($this->config['rewriteBase'])) $this->config['rewriteBase'] = "";
 
     $this->srcDir = realpath(__DIR__."/..");
 
-    if (empty($this->config['session_salt'])) {
-      $this->config['session_salt'] = rand(100000, 999999);
+    if (empty($this->config['sessionSalt'])) {
+      $this->config['sessionSalt'] = rand(100000, 999999);
     }
 
-    $this->config['request_uri'] = $_SERVER['REQUEST_URI'] ?? "";
+    $this->config['requestUri'] = $_SERVER['REQUEST_URI'] ?? "";
 
     // load available languages
-    if (empty($this->config['available_languages'] ?? [])) {
-      $this->config['available_languages'] = ["en"];
+    if (empty($this->config['availableLanguages'] ?? [])) {
+      $this->config['availableLanguages'] = ["en"];
     }
 
     // pouziva sa ako vseobecny prefix niektorych session premennych,
@@ -220,15 +218,15 @@ class Loader
     if (!defined('_ADIOS_ID')) {
       define(
         '_ADIOS_ID',
-        $this->config['session_salt']."-".substr(md5($this->config['session_salt']), 0, 5)
+        $this->config['sessionSalt']."-".substr(md5($this->config['sessionSalt']), 0, 5)
       );
     }
 
     // ak requestuje nejaky Asset (css, js, image, font), tak ho vyplujem a skoncim
-    if ($this->config['rewrite_base'] == "/") {
-      $this->requestedUri = ltrim($this->config['request_uri'], "/");
+    if ($this->config['rewriteBase'] == "/") {
+      $this->requestedUri = ltrim($this->config['requestUri'], "/");
     } else {
-      $this->requestedUri = str_replace($this->config['rewrite_base'], "", $this->config['request_uri']);
+      $this->requestedUri = str_replace($this->config['rewriteBase'], "", $this->config['requestUri']);
     }
 
     $this->assetsUrlMap["adios/assets/css/"] = __DIR__."/../Assets/Css/";
@@ -265,8 +263,7 @@ class Loader
     try {
 
       // inicializacia debug konzoly
-      $consoleFactoryClass = $this->classFactories['console'] ?? \ADIOS\Core\Console::class;
-      $this->console = new $consoleFactoryClass($this);
+      $this->console = new ($this->getCoreClass('Console'))($this);
       $this->console->clearLog("timestamps", "info");
 
       // global $gtp; - pouziva sa v basic_functions.php
@@ -321,6 +318,7 @@ class Loader
       $this->registerModel("ADIOS/Core/Models/Translate");
       $this->registerModel("ADIOS/Core/Models/User");
       $this->registerModel("ADIOS/Core/Models/UserRole");
+      $this->registerModel("ADIOS/Core/Models/UserHasRole");
       $this->registerModel("ADIOS/Core/Models/Token");
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
@@ -340,13 +338,13 @@ class Loader
 
         // start session
 
-        if ($this->config['set_session_time'] ?? TRUE) {
+        if ($this->config['setSessionTime'] ?? TRUE) {
           ini_set('session.gc_maxlifetime', $this->config['session_maxlifetime'] ?? 60 * 60);
           ini_set('session.gc_probability', $this->config['session_probability'] ?? 1);
           ini_set('session.gc_divisor', $this->config['session_divisor'] ?? 1000);
         }
 
-        ini_set('session.use_cookies', $this->config['session_use_cookies'] ?? TRUE);
+        ini_set('session.use_cookies', $this->config['sessionUseCookies'] ?? TRUE);
 
         session_id();
         session_name(_ADIOS_ID);
@@ -355,32 +353,23 @@ class Loader
         define('_SESSION_ID', session_id());
       }
 
+      // inicializacia routera
+      $this->router = new ($this->getCoreClass('Router'))($this);
+
       // inicializacia locale objektu
-      $localeFactoryClass = $this->classFactories['locale'] ?? \ADIOS\Core\Locale::class;
-      $this->locale = new $localeFactoryClass($this);
+      $this->locale = new ($this->getCoreClass('Locale'))($this);
 
       // inicializacia objektu notifikacii
-      $userNotificationsFactoryClass = $this->classFactories['userNotifications'] ?? \ADIOS\Core\UserNotifications::class;
-      $this->userNotifications = new $userNotificationsFactoryClass($this);
+      $this->userNotifications = new ($this->getCoreClass('UserNotifications'))($this);
 
       // inicializacia mailera
-      $emailFactoryClass = $this->classFactories['userNotifications'] ?? \ADIOS\Core\Email::class;
-      $this->email = new $emailFactoryClass($this);
+      $this->email = new ($this->getCoreClass('Email'))($this);
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
-      if (empty($this->classFactories['db'] ?? '')) {
-        $dbProvider = $this->getConfig('db/provider', '');
-        if (empty($dbProvider)) {
-          $dbFactoryClass = '\\ADIOS\\Core\\DB';
-        } else {
-          $dbFactoryClass = '\\ADIOS\\Core\\DB\\Providers\\' . $dbProvider;
-        }
-      } else {
-        $dbFactoryClass = $this->classFactories['db'];
-      }
-
-      $this->db = new $dbFactoryClass($this);
+      $dbProvider = $this->getConfig('db/provider', '');
+      $dbProviderClass = $this->getCoreClass('DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
+      $this->db = new $dbProviderClass($this);
 
       $this->onBeforeConfigLoaded();
 
@@ -393,9 +382,9 @@ class Loader
           $this->config['language'] = $_SESSION[_ADIOS_ID]['language'];
         }
 
-        if (is_array($this->config['available_languages'])) {
-          if (!in_array($this->config['language'], $this->config['available_languages'])) {
-            $this->config['language'] = reset($this->config['available_languages']);
+        if (is_array($this->config['availableLanguages'])) {
+          if (!in_array($this->config['language'], $this->config['availableLanguages'])) {
+            $this->config['language'] = reset($this->config['availableLanguages']);
           }
         }
 
@@ -411,23 +400,23 @@ class Loader
       $this->onAfterConfigLoaded();
 
       // object pre kontrolu permissions
-      $this->permissions = new \ADIOS\Core\Permissions($this);
+      $this->permissions = new ($this->getCoreClass('Permissions'))($this);
 
       // inicializacia web renderera (byvala CASCADA)
       if (isset($this->config['web']) && is_array($this->config['web'])) {
-        $this->web = new \ADIOS\Core\Web\Loader($this, $this->config['web']);
+        $this->web = new ($this->getCoreClass('Web\\Loader'))($this, $this->config['web']);
       }
 
       // timezone
       date_default_timezone_set($this->config['timezone']);
 
       if ($mode == self::ADIOS_MODE_FULL) {
+        $userModel = new ($this->getCoreClass('Models\\User'))($this);
 
         if (isset($_POST['passwordReset'])) {
           $email = isset($_POST["email"]) ? $_POST["email"] : "";
 
           if ($email != "") {
-            $userModel = $this->getModel("ADIOS/Core/Models/User");
             $userData = $userModel->getByEmail($email);
 
             if (!empty($userData)) {
@@ -439,31 +428,31 @@ class Loader
 
               try {
                 $this->email = new \ADIOS\Core\Lib\Email(
-                  $config["smtp_host"],
-                  $config["smtp_port"]
+                  $config["smtp"]["host"],
+                  $config["smtp"]["port"]
                 );
 
                 $this->email
-                  ->setLogin($config["smtp_login"], $config["smtp_password"])
-                  ->setFrom($config["smtp_from"])
+                  ->setLogin($config["smtp"]["login"], $config["smtp"]["password"])
+                  ->setFrom($config["smtp"]["from"])
                 ;
 
-                if ($config["smtp_protocol"] == 'ssl') {
+                if ($config["smtp"]["protocol"] == 'ssl') {
                   $this->email->setProtocol(\ADIOS\Core\Lib\Email::SSL);
                 }
 
-                if ($config["smtp_protocol"] == 'tls') {
+                if ($config["smtp"]["protocol"] == 'tls') {
                   $this->email->setProtocol(\ADIOS\Core\Lib\Email::TLS);
                 }
 
                 $this->email->addTo($email);
                 $this->email->setSubject(
-                  $config["application_name"].
+                  $config["brand"]["title"].
                   " - ".$this->translate("password reset", [], $this)
                 );
                 $this->email->setHtmlMessage("
                   <h4>
-                    {$config['application_name']}
+                    {$config["brand"]["title"]}
                     - ". $this->translate("password reset", [], $this)."
                   </h4>
                   <p>"
@@ -520,15 +509,14 @@ class Loader
           } else {
             $this->userPasswordReset["error"] = FALSE;
 
-            $userModel = $this->getModel("ADIOS/Core/Models/User");
             $userData = $userModel->validateToken($_GET["token"], true);
 
             if ($userData) {
               $userModel->updatePassword($userData["id"], $newPassword);
 
-              $this->authUser(
-                $userData['login'],
-                $newPassword
+              $userModel->authUser(
+                $userData['login'] ?? '',
+                $newPassword ?? ''
               );
 
               header('Location: ' . $this->config['url']);
@@ -541,61 +529,30 @@ class Loader
         if ($this->forceUserLogout) unset($_SESSION[_ADIOS_ID]['userProfile']);
 
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
-          $adiosUserModel = $this->getModel("ADIOS/Core/Models/User");
-          // $maxSessionLoginDurationDays = $this->getConfig('auth/max-session-login-duration-days') ?? 1;
-          // $maxSessionLoginDurationTime = ((int) $maxSessionLoginDurationDays) * 60 * 60 * 24;
+          $user = $userModel->find((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
 
-
-          $user = reset(
-            $this->db->select($adiosUserModel)
-              ->columns([\ADIOS\Core\DB\Query::allColumnsWithoutLookups])
-              ->where([
-                ['id', '=', (int) $_SESSION[_ADIOS_ID]['userProfile']['id']]
-              ])
-              ->fetch()
+          if ($user['is_active'] != 1) {
+            $userModel->logoutUser();
+          } else {
+            $userModel->loadUserFromSession();
+            $userModel->updateAccessInformation((int) $this->userProfile['id']);
+          }
+        } else if (!empty($_POST['login']) && !empty($_POST['password'])) {
+          $userModel->authUser(
+            $_POST['login'],
+            $_POST['password'],
+            ((int) $_POST['keep_logged_in']) == 1
           );
 
-          if (
-            $user['is_active'] != 1
-            // || $maxSessionLoginDurationTime + strtotime($user['last_access_time']) < time()
-          ) {
-            unset($_SESSION[_ADIOS_ID]['userProfile']);
-            $this->userProfile = [];
-            $this->userLogged = FALSE;
-          } else {
-            $this->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
-            $this->userLogged = TRUE;
-            $clientIp = $this->getClientIpAddress();
-            $this->db->query("
-              UPDATE `{$adiosUserModel->getFullTableSqlName()}`
-              SET
-                `last_access_time` = '".date('Y-m-d H:i:s')."',
-                `last_access_ip` = '{$clientIp}'
-              WHERE `id` = ".(int)$this->userProfile['id'].";
-            ");
-          }
-        } else if ($this->authUser(
-          $_POST['login'],
-          $_POST['password'],
-          ((int) $_POST['keep_logged_in']) == 1
-        )) {
-          // ked uz som prihlaseny, redirectnem sa, aby nasledny F5 refresh
-          // nevyzadoval form resubmission
-
-          // Dusan 8.8.2013: toto sposobovalo TOO_MANY_REDIRECTS, docasne vypnute
-          // header('Location: ' . $this->config['url']);
-          // exit();
-        } else {
-          $this->userProfile = [];
-          $this->userLogged = FALSE;
+          $userModel->updateLoginAndAccessInformation((int) $this->userProfile['id']);
         }
 
         // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
         $this->onUserAuthorised();
 
-      }
 
-      if ($mode == self::ADIOS_MODE_FULL) {
+
+
 
         // inicializacia widgetov
 
@@ -613,8 +570,7 @@ class Loader
 
         // inicializacia twigu
 
-        $twigLoaderFactoryClass = $this->classFactories['twigLoader'] ?? \ADIOS\Core\Lib\TwigLoader::class;
-        $twigLoader = new $twigLoaderFactoryClass($this);
+        $twigLoader = new ($this->getCoreClass('TwigLoader'))($this);
         $this->twig = new \Twig\Environment($twigLoader, array(
           'cache' => FALSE,
           'debug' => TRUE,
@@ -659,13 +615,8 @@ class Loader
           }
         ));
 
-        // inicializacia UI wrappera
-        // $uiFactoryClass = $this->classFactories['ui'] ?? \ADIOS\Core\ViewWithController::class;
-        // $this->ui = new $uiFactoryClass($this);
-
-        // inicializacia UI wrappera
-        $viewFactoryClass = $this->classFactories['view'] ?? \ADIOS\Core\ViewWithController::class;
-        $this->view = new $viewFactoryClass($this);
+        // inicializacia view
+        $this->view = new ($this->getCoreClass('ViewWithController'))($this);
       }
 
       $this->dispatchEventToPlugins("onADIOSAfterInit", ["adios" => $this]);
@@ -688,19 +639,8 @@ class Loader
     return isset($_REQUEST['__IS_WINDOW__']) && $_REQUEST['__IS_WINDOW__'] == "1";
   }
 
-  //////////////////////////////////////////////////////////////////////////////
-  // ROUTING
-
-  public function setRouting($routing) {
-    if (is_array($routing)) {
-      $this->routing = $routing;
-    }
-  }
-
-  public function addRouting($routing) {
-    if (is_array($routing)) {
-      $this->routing = array_merge($this->routing, $routing);
-    }
+  public function getCoreClass($class) {
+    return $this->config['coreClasses'][$class] ?? ('\\ADIOS\\Core\\' . $class);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -715,7 +655,7 @@ class Loader
         }
         $this->widgets[$widgetName] = new $widgetClassName($this);
 
-        $this->addRouting($this->widgets[$widgetName]->routing());
+        $this->router->addRouting($this->widgets[$widgetName]->routing());
       } catch (\Exception $e) {
         exit("Failed to load widget {$widgetName}: ".$e->getMessage());
       }
@@ -770,7 +710,7 @@ class Loader
         $modelClassName = $this->getModelClassName($modelName);
         $this->modelObjects[$modelName] = new $modelClassName($this);
 
-        $this->addRouting($this->modelObjects[$modelName]->routing());
+        $this->router->addRouting($this->modelObjects[$modelName]->routing());
 
       } catch (\Exception $e) {
         throw new \ADIOS\Core\Exceptions\GeneralException("Can't find model '{$modelName}'. ".$e->getMessage());
@@ -841,7 +781,7 @@ class Loader
     }
 
     if (empty($dictionaryFolder)) {
-      $dictionaryFolder = "{$this->config['src_dir']}/Lang";
+      $dictionaryFolder = "{$this->config['srcDir']}/Lang";
     }
 
     if (strlen($toLanguage) == 2) {
@@ -876,10 +816,10 @@ class Loader
     if (empty($this->dictionary[$toLanguage])) {
       $this->dictionary[$toLanguage] = [];
 
-      $dictionaryFiles = \ADIOS\Core\HelperFunctions::scanDirRecursively("{$this->config['src_dir']}/Lang");
+      $dictionaryFiles = \ADIOS\Core\HelperFunctions::scanDirRecursively("{$this->config['srcDir']}/Lang");
 
       foreach ($dictionaryFiles as $file) {
-        include("{$this->config['src_dir']}/Lang/{$file}");
+        include("{$this->config['srcDir']}/Lang/{$file}");
 
         $this->dictionary[$toLanguage] =  \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
           $this->dictionary[$toLanguage],
@@ -1099,23 +1039,6 @@ class Loader
     $this->console->info("Core installation done in ".round((microtime(true) - $installationStart), 2)." seconds.");
   }
 
-  public function replaceRouteVariables($routeParams, $variables) {
-    if (is_array($routeParams)) {
-      foreach ($routeParams as $paramName => $paramValue) {
-
-        if (is_array($paramValue)) {
-          $routeParams[$paramName] = $this->replaceRouteVariables($paramValue, $variables);
-        } else {
-          foreach ($variables as $k2 => $v2) {
-            $routeParams[$paramName] = str_replace('$'.$k2, $v2, $routeParams[$paramName]);
-          }
-        }
-      }
-    }
-
-    return $routeParams;
-  }
-
   // funkcia render() zabezpecuje:
   //   - routing podla a) (ne)prihlaseny user, b) $this->requestedController, c) $_REQUEST['__IS_AJAX__']
   //   - kontrolu requestu podla $_REQUEST['c']
@@ -1155,47 +1078,22 @@ class Loader
           if (!is_array($params)) { // toto nastane v pripade, ked $_SERVER['argv'] nie je JSON string
             $params = $_SERVER['argv'];
           }
-          $controller = $_SERVER['argv'][1] ?? "";
+          $this->controller = $_SERVER['argv'][1] ?? "";
         } else {
-          $controller = $_REQUEST['controller'];
+          $this->controller = $_REQUEST['controller'] ?? '';
           $params = $_REQUEST;
           unset($params['controller']);
         }
+      } else {
+        $this->controller = $controller;
       }
 
-      if (!empty($controller)) {
-        // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim controller a params.
-        // Ak pre $params['controller'] neexistuje vhodny routing, nemenim nic - pouzije sa
-        // povodne $params['controller'], cize requestovana URLka.
+      list($this->controller, $this->params) = $this->router->applyRouting($this->controller, $params);
 
-        foreach ($this->routing as $routePattern => $route) {
-          if (preg_match($routePattern, $controller, $m)) {
-            // povodny $controller nahradim novym $route['controller']
-            $controller = $route['controller'];
-
-            $route['params'] = $this->replaceRouteVariables($route['params'], $m);
-
-            foreach ($route['params'] as $k => $v) {
-              $params[$k] = $v;
-            }
-          }
-        }
-      }
-
-      $this->params = $params;
-
-      if (empty($controller)) {
-        $controller = (php_sapi_name() === 'cli' ? "" : $this->config['defaultController']);
-      }
-
-      if (empty($controller)) {
-        throw new \ADIOS\Core\Exceptions\GeneralException("No controller specified.");
-      }
-
-      $controllerClassName = $this->getControllerClassName($controller);
+      $controllerClassName = $this->getControllerClassName($this->controller);
 
       if (!class_exists($controllerClassName)) {
-        throw new \ADIOS\Core\Exceptions\GeneralException("Unknown controller '{$controller}'.");
+        throw new \ADIOS\Core\Exceptions\GeneralException("Unknown controller '{$this->controller}'.");
       }
 
       if (php_sapi_name() === 'cli') {
@@ -1219,42 +1117,27 @@ class Loader
         && $this->controllerNestingLevel == 0
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
-        $this->params['contentController'] = $controller;
+        $this->params['contentController'] = $this->controller;
         $this->params['config'] = $this->config;
         $this->params['_COOKIE'] = $_COOKIE;
 
-        $controller = "Desktop";
+        $this->controller = $this->config['defaultDesktopController'] ?? 'Desktop';
       }
 
       if (
         !$this->userLogged
         && $controllerClassName::$requiresUserAuthentication
       ) {
-        $controller = "Login";
+        $this->controller = "Login";
       }
 
-      if (empty($controller)) {
-        $controller = "Desktop";
+      if (empty($this->controller)) {
+        $this->controller = $this->config['defaultDesktopController'] ?? 'Desktop';
       }
 
       // Kontrola permissions
 
-      $permissionForRequestedUri = "";
-      foreach ($this->routing as $routePattern => $route) {
-        if (preg_match((string) $routePattern, $controller, $m)) {
-          $permissionForRequestedUri = $route['permission'];
-        }
-      }
-
-      if (
-        !empty($permissionForRequestedUri)
-        && !$this->permissions->has($permissionForRequestedUri)
-      ) {
-        throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedUri}).");
-      }
-
-      // TODO: Docasne. Ked bude fungovat, vymazat.
-      $this->params['permissionForRequestedUri'] = $permissionForRequestedUri;
+      $this->router->checkPermissions($this->controller);
 
       // All OK, rendering content...
 
@@ -1267,15 +1150,14 @@ class Loader
 
       $this->setUid($uid);
 
-      if (in_array($controller, array_keys($this->config['widgets']))) {
-        $controller = "{$controller}/Main";
+      if (in_array($this->controller, array_keys($this->config['widgets']))) {
+        $this->controller = "{$this->controller}/Main";
       }
 
 
 
 
 
-      $this->controller = $controller;
       $this->controllerNestingLevel++;
       $this->controllerStack[] = $this->controller;
 
@@ -1358,18 +1240,6 @@ class Loader
           foreach ($this->widgets as $widget) {
             $widget->onAfterRender();
           }
-
-        // } else {
-
-        //   // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
-        //   $tmpTemplateName = $controllerClassName;
-        //   $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
-        //   $tmpTemplateName = str_replace("/Controllers/", "/Templates/", $tmpTemplateName);
-
-        //   $controllerFactoryClass = $this->classFactories['controller'] ?? \ADIOS\Core\Controller::class;
-        //   $tmp = new $controllerFactoryClass($this);
-        //   $tmp->twigTemplate = $tmpTemplateName;
-        //   $html = $tmp->render($this->params);
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
         $return = $this->renderFatal($e->getMessage());
@@ -1403,8 +1273,8 @@ class Loader
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
       if ($this->config['debug']) {
         $lines[] = "Requested URI = {$this->requestedUri}";
-        $lines[] = "Rewrite base = {$this->config['rewrite_base']}";
-        $lines[] = "SERVER.REQUEST_URI = {$this->config['request_uri']}";
+        $lines[] = "Rewrite base = {$this->config['rewriteBase']}";
+        $lines[] = "SERVER.REQUEST_URI = {$this->config['requestUri']}";
       }
 
       return join(" ", $lines);
@@ -1448,113 +1318,6 @@ class Loader
   public function controllerExists(string $controller) : bool {
     return class_exists($this->getControllerClassName($controller));
   }
-
-  // // funkcia renderAction() zabezpecuje:
-  // //   - kontrolu pravomoci, ci moze logged user akciu spustit
-  // //   - vyrenderovanie akcie alebo, ak neexistuje, vyrenderovanie twig template
-
-  // public function renderAction($action, $params) {
-  //   // if (!is_array($params)) $params = [];
-
-  //   // $params['_REQUEST'] = $params;
-  //   // $params['_COOKIE'] = $_COOKIE;
-  //   // $this->action = $action;
-
-  //   // if (in_array($action, array_keys($this->config['widgets']))) {
-  //   //   $action = "{$action}/Main";
-  //   // }
-
-  //   // $this->actionNestingLevel++;
-  //   // $this->actionStack[] = $action;
-
-  //   // $actionClassName = $this->getActionClassName($action);
-
-  //   // try {
-  //   //   // Kontrola permissions, krok 2
-  //   //   // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
-  //   //   // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
-  //   //   // to moze zmenit)
-  //   //   if ($actionClassName::$requiresUserAuthentication) {
-  //   //     $this->checkPermissionsForAction($action, $params);
-  //   //   }
-
-  //   //   // permissions udelene
-  //   //   if ($this->actionExists($action)) {
-  //   //     $this->actionObject = new $actionClassName($this, $params);
-
-  //   //     if (method_exists($actionClassName, "renderJson")) {
-  //   //       $actionReturn = $this->actionObject->renderJson($params);
-  //   //       $actionHtml = json_encode($actionReturn);
-  //   //     } else if (method_exists($actionClassName, "prepareView")) {
-  //   //       $actionReturn = $this->actionObject->prepareView($params)->render();
-
-  //   //       if ($actionReturn === NULL) {
-  //   //         // akcia nic nereturnovala, iba robila echo
-  //   //         $actionHtml = "";
-  //   //       } else if (is_string($actionReturn)) {
-  //   //         $actionHtml = $actionReturn;
-  //   //       } else {
-  //   //         $actionHtml = $this->renderReturn($actionReturn);
-  //   //       }
-  //   //     } else { // 2023-10-05 Deprecated
-  //   //       $actionReturn = $this->actionObject->render($params);
-
-  //   //       if ($actionReturn === NULL) {
-  //   //         // akcia nic nereturnovala, iba robila echo
-  //   //         $actionHtml = "";
-  //   //       } else if (is_string($actionReturn)) {
-  //   //         $actionHtml = $actionReturn;
-  //   //       } else {
-  //   //         $actionHtml = $this->renderReturn($actionReturn);
-  //   //       }
-  //   //     }
-
-  //   //   } else {
-
-  //   //     // ak sa nepodari najst classu, tak skusim aspon vyrenderovat template
-  //   //     $tmpTemplateName = $actionClassName;
-  //   //     $tmpTemplateName = str_replace("\\", "/", $tmpTemplateName);
-  //   //     $tmpTemplateName = str_replace("/Actions/", "/Templates/", $tmpTemplateName);
-
-  //   //     $actionFactoryClass = $this->classFactories['action'] ?? \ADIOS\Core\Action::class;
-  //   //     $tmp = new $actionFactoryClass($this);
-  //   //     $tmp->twigTemplate = $tmpTemplateName;
-  //   //     $actionHtml = $tmp->render($params);
-  //   //   }
-  //   // } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-  //   //   $actionHtml = $this->renderFatal($e->getMessage());
-  //   // } catch (
-  //   //   \Exception
-  //   //   // | \Throwable
-  //   //   $e) {
-  //   //   $error = error_get_last();
-
-  //   //   if ($error['type'] == E_ERROR) {
-  //   //     $actionHtml = $this->renderFatal(
-  //   //       '<div style="margin-bottom:1em;">'
-  //   //         . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
-  //   //       . '</div>'
-  //   //       . '<pre style="font-size:0.75em;font-family:Courier New">'
-  //   //         . $e->getTraceAsString()
-  //   //       . '</pre>',
-  //   //       TRUE
-  //   //     );
-  //   //   } else {
-  //   //     // $actionHtml = $this->renderFatal(
-  //   //     //   '<div style="margin-bottom:1em;">'
-  //   //     //     . get_class($e) . ': ' . $e->getMessage()
-  //   //     //   . '</div>'
-  //   //     //   . '<pre style="font-size:0.75em;font-family:Courier New">'
-  //   //     //     . $e->getTraceAsString()
-  //   //     //   . '</pre>',
-  //   //     //   TRUE
-  //   //     // );
-  //   //     $actionHtml = $this->renderFatal($this->renderExceptionHtml($e));
-  //   //   }
-  //   // }
-
-  //   return $actionHtml;
-  // }
 
   /**
    * Checks user permissions before rendering requested controller.
@@ -1822,50 +1585,62 @@ class Loader
   // }
 
   public function saveConfig(array $config, string $path = '') {
-    if (is_array($config)) {
-      foreach ($config as $key => $value) {
-        $tmpPath = $path.$key;
+    try {
+      if (is_array($config)) {
+        foreach ($config as $key => $value) {
+          $tmpPath = $path.$key;
 
-        if (is_array($value)) {
-          $this->saveConfig($value, $tmpPath.'/');
-        } else if ($value === NULL) {
-          $this->db->query("
-            delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
-            where `path` like '".$this->db->escape($tmpPath)."%'
-          ");
-        } else {
-          $this->db->query("
-            insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
-              `path` = '".$this->db->escape($tmpPath)."',
-              `value` = '".$this->db->escape($value)."'
-            on duplicate key update
-              `path` = '".$this->db->escape($tmpPath)."',
-              `value` = '".$this->db->escape($value)."'
-          ");
+          if (is_array($value)) {
+            $this->saveConfig($value, $tmpPath.'/');
+          } else if ($value === NULL) {
+            $this->db->query("
+              delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
+              where `path` like '".$this->db->escape($tmpPath)."%'
+            ");
+          } else {
+            $this->db->query("
+              insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config` set
+                `path` = '".$this->db->escape($tmpPath)."',
+                `value` = '".$this->db->escape($value)."'
+              on duplicate key update
+                `path` = '".$this->db->escape($tmpPath)."',
+                `value` = '".$this->db->escape($value)."'
+            ");
+          }
         }
       }
+    } catch (\Exception $e) {
+      // do nothing
     }
   }
 
   public function saveConfigByPath(string $path, $value) {
-    if (!empty($path)) {
-      $this->db->query("
-        insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
-          `path` = '".$this->db->escape($path)."',
-          `value` = '".$this->db->escape($value)."'
-        on duplicate key update
-          `path` = '".$this->db->escape($path)."',
-          `value` = '".$this->db->escape($value)."'
-      ");
+    try {
+      if (!empty($path)) {
+        $this->db->query("
+          insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config` set
+            `path` = '".$this->db->escape($path)."',
+            `value` = '".$this->db->escape($value)."'
+          on duplicate key update
+            `path` = '".$this->db->escape($path)."',
+            `value` = '".$this->db->escape($value)."'
+        ");
+      }
+    } catch (\Exception $e) {
+      // do nothing
     }
   }
 
   public function deleteConfig($path) {
-    if (!empty($path)) {
-      $this->db->query("
-        delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
-        where `path` like '".$this->db->escape($path)."%'
-      ");
+    try {
+      if (!empty($path)) {
+        $this->db->query("
+          delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
+          where `path` like '".$this->db->escape($path)."%'
+        ");
+      }
+    } catch (\Exception $e) {
+      // do nothing
     }
   }
 
@@ -1874,7 +1649,7 @@ class Loader
       $queryOk = $this->db->query("
         select
           *
-        from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
+        from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
         order by id asc
       ");
 
@@ -1901,13 +1676,10 @@ class Loader
     $this->config['protocol'] = (strtoupper($_SERVER['HTTPS'] ?? "") == "ON" ? "https" : "http");
     $this->config['timezone'] = $this->config['timezone'] ?? 'Europe/Bratislava';
 
-    $this->config['files_dir'] = $this->config['files_dir'] ?? "{$this->config['dir']}/upload";
-    $this->config['files_url'] = $this->config['files_url'] ?? "{$this->config['url']}/upload";
+    $this->config['uploadDir'] = $this->config['uploadDir'] ?? "{$this->config['dir']}/upload";
+    $this->config['uploadUrl'] = $this->config['uploadUrl'] ?? "{$this->config['url']}/upload";
 
-    $this->config['upload_dir'] = $this->config['files_dir'];
-    $this->config['upload_url'] = $this->config['files_url'];
-
-    $this->config['files_dir'] = str_replace("\\", "/", $this->config['files_dir']);
+    $this->config['uploadDir'] = str_replace("\\", "/", $this->config['uploadDir']);
   }
 
   public function onUserAuthorised() {
@@ -1991,92 +1763,6 @@ class Loader
     $this->uid = $uid;
   }
 
-  public function getClientIpAddress() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-      $ip = $_SERVER['HTTP_CLIENT_IP'];
-    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-      $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    } else {
-      $ip = $_SERVER['REMOTE_ADDR'];
-    }
-    return $ip;
-  }
-
-  public function authCookieSerialize($login, $password) {
-    return md5($login.".".$password).",".$login;
-  }
-
-  public function authCookieGetLogin() {
-    list($tmpHash, $tmpLogin) = explode(",", $_COOKIE[_ADIOS_ID.'-user']);
-    return $tmpLogin;
-  }
-
-  public function authUser($login, $password, $rememberLogin = FALSE) {
-    $this->userProfile = null;
-    $login = trim((string) $login);
-
-    if (empty($login) && !empty($_COOKIE[_ADIOS_ID.'-user'])) {
-      $login = $this->authCookieGetLogin();
-    }
-
-    if (!empty($login)) {
-      $adiosUserModel = $this->getModel("ADIOS/Core/Models/User");
-      $this->db->query("
-        select
-          *
-        from `{$adiosUserModel->getFullTableSqlName()}`
-        where
-          (
-            `login`= '".$this->db->escape($login)."'
-            or `email`= '".$this->db->escape($login)."'
-          )
-          and `is_active` <> 0
-      ");
-
-      while ($data = $this->db->fetchArray()) {
-        $passwordMatch = FALSE;
-
-        if (!empty($password) && password_verify($password, $data['password'])) {
-          // plain text
-          $passwordMatch = TRUE;
-        } else if ($_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($data['login'], $data['password'])) {
-          $passwordMatch = TRUE;
-        }
-
-        if ($passwordMatch) {
-          $this->userProfile = $data;
-          $this->userLogged = TRUE;
-
-          // update last_login_time a last_login_ip
-          $clientIp = $this->getClientIpAddress();
-          $this->db->query("
-            UPDATE ".(empty($this->gtp) ? '' : $this->gtp . '_')."users
-            SET
-              last_login_time = '".date('Y-m-d H:i:s')."',
-              last_login_ip = '{$clientIp}',
-              last_access_time = '".date('Y-m-d H:i:s')."',
-              last_access_ip = '{$clientIp}'
-            WHERE id = ".(int)$this->userProfile['id'].";
-          ");
-
-          $_SESSION[_ADIOS_ID]['userProfile'] = $this->userProfile;
-
-          if ($rememberLogin) {
-            setcookie(
-              _ADIOS_ID.'-user',
-              $this->authCookieSerialize($data['login'], $data['password']),
-              time() + (3600 * 24 * 30)
-            );
-          }
-
-          return TRUE;
-        }
-      }
-    }
-
-    return FALSE;
-  }
-
   public function renderCSSCache() {
     $css = "";
 
@@ -2142,7 +1828,7 @@ class Loader
   public function renderReactJsBundle(): string {
     $reactFolders = [
       dirname(__FILE__) . '/..',
-      $this->config['src_dir']
+      $this->config['srcDir']
     ];
 
     $jsFilesContent = "";
@@ -2215,7 +1901,7 @@ class Loader
       var adios_language_translations = {};
     ";
 
-    foreach ($this->config['available_languages'] as $language) {
+    foreach ($this->config['availableLanguages'] as $language) {
       $js .= "
         adios_language_translations['{$language}'] = {
           'Confirmation': '".ads($this->translate("Confirmation", [], $this, $language))."',

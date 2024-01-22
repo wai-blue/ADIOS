@@ -18,7 +18,7 @@ namespace ADIOS\Core\Models;
 class Translate extends \ADIOS\Core\Model {
 
   public function __construct(&$adios) {
-    $this->sqlName = "translate";
+    $this->sqlName = "_translate";
     parent::__construct($adios);
   }
 

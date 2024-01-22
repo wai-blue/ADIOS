@@ -1,0 +1,46 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace App\Core\Models;
+
+class User extends \ADIOS\Core\Models\User {
+  public function columns(array $columns = []): array
+  {
+    return parent::columns([
+      'name' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Given name'),
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+          'Form' => [
+            'showColumn' => true
+          ],
+        ],
+      ],
+      'surname' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Family name')
+      ],
+      'email' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Email'),
+        'showColumn' => false
+      ],
+      'phone_number' => [
+        'type' => 'varchar',
+        'title' => $this->translate('Phone number'),
+        'showColumn' => false
+      ],
+      'photo' => [
+        'type' => 'image',
+        'title' => $this->translate('Photo'),
+        'only_upload' => 'yes',
+        'subdir' => 'users/',
+        "description" => $this->translate("Supported image extensions: jpg, gif, png, jpeg"),
+      ],
+    ]);
+  }
+}

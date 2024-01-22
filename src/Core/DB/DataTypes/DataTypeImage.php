@@ -52,7 +52,7 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType
 
         $value = htmlspecialchars($value);
 
-        if ('' != $value && file_exists($this->adios->config['files_dir']."/{$value}")) {
+        if ('' != $value && file_exists($this->adios->config['uploadDir']."/{$value}")) {
             $img_url = "{$this->adios->config['images_url']}/{$value}";
             $img_style = "style='height:30px;border:none'";
 

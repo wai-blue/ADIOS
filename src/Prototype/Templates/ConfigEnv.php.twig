@@ -12,18 +12,18 @@ $config["db_name"]             = "{{ ConfigEnv.db.database }}";
 $config["db_codepage"]         = "{{ ConfigEnv.db.codepage }}";
 $config["global_table_prefix"] = "{{ ConfigEnv.globalTablePrefix }}";
 
-$config['db']['provider']        = "{{ ConfigEnv.db.provider }}";
-$config['db']['dsn']             = "{{ ConfigEnv.db.dsn }}";
+$config['db']['provider']      = "{{ ConfigEnv.db.provider }}";
+$config['db']['dsn']           = "{{ ConfigEnv.db.dsn }}";
 
 // dirs & urls
-$config['rewrite_base']        = "{{ ConfigEnv.rewriteBase }}";
+$config['rewriteBase']         = "{{ ConfigEnv.rewriteBase }}";
 $config["url"]                 = "{{ ConfigEnv.rootUrl }}";
 
 // web
-$config['web']['rewriteBase'] = '{{ ConfigEnv.rewriteBase }}web/';
+// $config['web']['rewriteBase']  = '{{ ConfigEnv.rewriteBase }}web/';
 
 // misc
-$config['devel_mode'] = TRUE;
-$config['language'] = "sk";
+$config['develMode']           = TRUE;
+$config['language']            = "sk";
 
-$config['debugTranslations'] = FALSE;
+$config['debugTranslations']   = FALSE;

@@ -90,7 +90,7 @@ class Desktop extends \ADIOS\Core\Controller {
     // develMenuItems
     $develMenuItems = [];
 
-    if ($this->adios->config['devel_mode']) {
+    if ($this->adios->config['develMode']) {
       // $develMenuItems[] = [
       //   "text" => $this->translate("Show console"),
       //   "faIcon" => "fas fa-terminal",

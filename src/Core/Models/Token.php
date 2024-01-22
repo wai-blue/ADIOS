@@ -22,7 +22,7 @@ class Token extends \ADIOS\Core\Model {
   public $tokenTypes = [];
 
   public function __construct(&$adios) {
-    $this->sqlName = "tokens";
+    $this->sqlName = "_tokens";
     parent::__construct($adios);
   }
 

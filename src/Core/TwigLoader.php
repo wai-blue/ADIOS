@@ -1,12 +1,12 @@
 <?php
 
-namespace ADIOS\Core\Lib;
+namespace ADIOS\Core;
 
 class TwigLoader implements \Twig\Loader\LoaderInterface {
 
   public $adios;
 
-  public function __construct(&$adios) {
+  public function __construct($adios) {
     $this->adios = $adios;
   }
 
@@ -43,7 +43,7 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $templateName = str_replace("ADIOS/Templates/", "", $templateName);
 
       // najprv skusim hladat core template...
-      $templateFile = dirname(__FILE__)."/../../Templates/{$templateName}.twig";
+      $templateFile = __DIR__."/../Templates/{$templateName}.twig";
 
       // ...potom Widget akciu
       if (!is_file($templateFile)) {

@@ -2,22 +2,21 @@
 
 {{ builderInfo.php|raw }}
 
-// global
-$config['application_name']              = '{{ ConfigApp.applicationName }}';
-$config['session_salt']                  = '{{ ConfigApp.sessionSalt }}';
+// session
+$config['sessionSalt']                   = '{{ ConfigApp.sessionSalt }}';
 
 // dirs & urls
 $config['dir']                           = realpath(__DIR__ . '/..');
-$config['src_dir']                       = realpath(__DIR__ . '/../src');
-$config['log_dir']                       = realpath(__DIR__ . '/../log');
-$config['tmp_dir']                       = realpath(__DIR__ . '/../tmp');
-$config['widgets_dir']                   = realpath(__DIR__ . '/../src/Widgets');
-$config['files_dir']                     = realpath(__DIR__ . '/../{{ ConfigApp.uploadDir ?? 'upload' }}');
-$config['files_url']                     = '//' . $_SERVER['HTTP_HOST'] . $config['rewrite_base'] . '{{ ConfigApp.uploadDir ?? 'upload' }}';
+$config['srcDir']                        = realpath(__DIR__ . '/../src');
+$config['logDir']                        = realpath(__DIR__ . '/../log');
+$config['tmpDir']                        = realpath(__DIR__ . '/../tmp');
+$config['widgetsDir']                    = realpath(__DIR__ . '/../src/Widgets');
+$config['uploadDir']                     = realpath(__DIR__ . '/../{{ ConfigApp.uploadDir ?? 'upload' }}');
+$config['uploadUrl']                     = '//' . $_SERVER['HTTP_HOST'] . $config['rewriteBase'] . '{{ ConfigApp.uploadDir ?? 'upload' }}';
 
 // brand
-$config['brand']['title']                = '{{ ConfigApp.applicationName }}';
-$config['brand']['headline']             = '{{ ConfigApp.applicationHeadline }}';
+$config['brand']['title']                = '{{ ConfigApp.brand.title }}';
+$config['brand']['headline']             = '{{ ConfigApp.brand.headline }}';
 $config['brand']['favicon']              = {% if ConfigApp.brand.favicon %}'{{ ConfigApp.brand.favicon }}'{% else %}$config['url'] . '/src/Assets/images/favicon.png'{% endif %};
 $config['brand']['login']['splash']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.loginScreenImage ?? 'login-screen.jpg' }}';
 $config['brand']['sidebar']['icon']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.sidebar.icon ?? 'logo.png' }}';
@@ -28,20 +27,33 @@ $config['brand']['sidebar']['title']     = '{{ ConfigApp.brand.sidebar.title ?? 
 $config['widgets'] = {{ varExport(configWidgetsEnabled)|raw }};
 
 // web
-$config['web']['themeDir'] = realpath(__DIR__ . '/../src/Web/Theme');
+// $config['web']['themeDir'] = realpath(__DIR__ . '/../src/Web/Theme');
 
 // misc
 $config['defaultController'] = '{% if ConfigApp.defaultController == '' %}Desktop{% else %}{{ ConfigApp.defaultController }}{% endif %}';
-$config['available_languages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}['sk']{% endif %};
+$config['availableLanguages'] = {% if ConfigApp.availableLanguages %}{{ varExport(ConfigApp.availableLanguages)|raw }}{% else %}['sk']{% endif %};
 $config['userRoles'] = {% if ConfigApp.userRoles %}{{ varExport(ConfigApp.userRoles)|raw }}{% else %}[]{% endif %};
 $config['skin'] = '{{ ConfigApp.skin ?? blue }}';
 
+$config['coreClasses'] = [
+  'Router' => \App\Core\Router::class,
+  'User' => \App\Core\User::class,
+// Uncomment these lines if you want to override another core classes
+//   'Console' => \App\Core\Console::class,
+//   'Locale' => \App\Core\Locale::class,
+//   'TwigLoader' => \App\Core\TwigLoader::class,
+//   'UserNotifications' => \App\Core\UserNotifications::class,
+//   'Email' => \App\Core\Email::class,
+//   'Models\\User' => \App\Core\Models\User::class,
+//   'ViewWithController' => \App\Core\ViewWithController::class,
+];
+
 {% if ConfigApp.smtp %}
 // SMTP server
-$config['smtp_host'] = '{{ ConfigApp.smtp.host }}';
-$config['smtp_port'] = '{{ ConfigApp.smtp.port }}';
-$config['smtp_login'] = '{{ ConfigApp.smtp.login }}';
-$config['smtp_password'] = '{{ ConfigApp.smtp.password }}';
-$config['smtp_protocol'] = '{{ ConfigApp.smtp.protocol }}';
-$config['smtp_from'] = '{{ ConfigApp.smtp.from }}';
+$config['smtp']['host'] = '{{ ConfigApp.smtp.host }}';
+$config['smtp']['port'] = '{{ ConfigApp.smtp.port }}';
+$config['smtp']['login'] = '{{ ConfigApp.smtp.login }}';
+$config['smtp']['password'] = '{{ ConfigApp.smtp.password }}';
+$config['smtp']['protocol'] = '{{ ConfigApp.smtp.protocol }}';
+$config['smtp']['from'] = '{{ ConfigApp.smtp.from }}';
 {% endif %}

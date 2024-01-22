@@ -79,12 +79,15 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
     ]);
   }
 
+  // Eloquent relations START
 {% for eloquentRelationship in thisModel.config.eloquentRelationships %}
   public function {{ eloquentRelationship['column'] }}(): \Illuminate\Database\Eloquent\Relations\{{ eloquentRelationship['type'] }} {
     return $this->{{ eloquentRelationship['type'] }}(\{{ eloquentRelationship['model'] }}::class, '{{ eloquentRelationship['column'] }}');
   }
 
 {% endfor %}
+
+  // Eloquent relations END
 
 {% if (thisModel.config.onFormParams) %}
   public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject): array

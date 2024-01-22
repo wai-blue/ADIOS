@@ -5,7 +5,7 @@
 set_time_limit(60*10);
 session_start();
 
-require(__DIR__."/src/Init.php");
+require(__DIR__."/src/App.php");
 
 try {
 
@@ -15,19 +15,23 @@ try {
   // user roles and users
   $userModel = $app->getModel("ADIOS/Core/Models/User");
   $userRoleModel = $app->getModel("ADIOS/Core/Models/UserRole");
+  $userHasRoleModel = $app->getModel("ADIOS/Core/Models/UserHasRole");
 
-  $idRole = $userRoleModel->insertRow(["name" => "Administrator"]);
+  $idRoleAdministrator = $userRoleModel->insertRow(["name" => "Administrator"]);
 
   $adminPassword = "{{ adminPassword }}";
 
-  $userModel->insertRow([
-    "name" => "Administrator",
+  $idUserAdministrator = $userModel->insertRow([
     "login" => "administrator",
     "password" => $adminPassword,
     "password_1" => $adminPassword,
     "password_2" => $adminPassword,
     "is_active" => 1,
-    "id_role" => $idRole,
+  ]);
+
+  $userHasRoleModel->insertRow([
+    "id_user" => $idUserAdministrator,
+    "id_role" => $idRoleAdministrator,
   ]);
 
 } catch (\Exception $e) {

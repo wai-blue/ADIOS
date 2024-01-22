@@ -26,7 +26,7 @@ class UserRole extends \ADIOS\Core\Model {
   public string $formTitleForEditing = "User role";
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
-    $this->sqlName = "users_roles";
+    $this->sqlName = "_user_roles";
     parent::__construct($adiosOrAttributes);
   }
 

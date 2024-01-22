@@ -23,7 +23,7 @@ class Config extends \ADIOS\Core\Model {
   public string $formTitleForEditing = "Configuration parameter";
 
   public function __construct($adios) {
-    $this->sqlName = "config";
+    $this->sqlName = "_config";
     parent::__construct($adios);
   }
 

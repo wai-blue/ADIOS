@@ -14,14 +14,4 @@ require_once(__DIR__ . "/../vendor/autoload.php");
 
 // create own ADIOS class
 class App extends \ADIOS\Core\Loader {
-  public function __construct($config = NULL, $mode = NULL, $forceUserLogout = FALSE) {
-    parent::__construct($config, $mode, $forceUserLogout);
-
-    require_once(__DIR__ . '/Routing.php');
-
-  }
-
-  public function hasPermissionsForController($action, $params = NULL) {
-    return TRUE;
-  }
 }

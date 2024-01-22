@@ -135,7 +135,7 @@ class Preview extends \ADIOS\Core\Controller {
     $csvRows = [];
     $row = 1;
 
-    if (($handle = fopen("{$this->adios->config['files_dir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
+    if (($handle = fopen("{$this->adios->config['uploadDir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
       while (($data = fgetcsv($handle, 1000, $separator)) !== FALSE) {
         $csvRows[] = array_map(
           function($str) {
@@ -187,7 +187,7 @@ class Preview extends \ADIOS\Core\Controller {
     ";
 
 
-    // $csv = file_get_contents("{$this->adios->config['files_dir']}/csv-import/{$csvFile}");
+    // $csv = file_get_contents("{$this->adios->config['uploadDir']}/csv-import/{$csvFile}");
     return $conversionTableHtml;
 
   }
