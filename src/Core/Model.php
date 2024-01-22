@@ -766,7 +766,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'sql_definitions' => 'primary key auto_increment',
         'title' => 'ID',
         'readonly' => 'yes',
-        'class' => 'primary-key'
+        'viewParams' => [
+          'Table' => ['showColumn' => TRUE]
+        ],
       ];
     }
 
@@ -836,10 +838,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
     foreach ($columns as $columnName => $columnValue) {
       if (
         isset($columnValue['viewParams'][$view]['showColumn'])
-        && $columnValue['viewParams'][$view]['showColumn'] === false
-      ) continue;
-
-      $columnsToShow[$columnName] = $columnValue;
+        && $columnValue['viewParams'][$view]['showColumn'] === true
+      ) {
+        $columnsToShow[$columnName] = $columnValue;
+      }
     }
 
     return $columnsToShow;
@@ -980,12 +982,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
     );
   }
 
-  public function insertRow($data, $ignoreIdValue = TRUE)
+  public function insertRow($data)
   {
-    if ($ignoreIdValue) {
-      unset($data['id']);
-    }
-
     return $this->adios->db->insert($this)
       ->set($data)
       ->execute()
@@ -1913,10 +1911,26 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return "{$this->adios->config['uploadDir']}/" . str_replace('/', '-', $this->fullName);
   }
 
+
+  public function relationships(): array {
+    $relationships = [];
+
+    foreach ($this->columns() as $columnName => $columnDefinition) {
+      if ($columnDefinition['type'] == 'lookup') {
+        $relationships[] = $columnName;
+      }
+    }
+
+    return $relationships;
+  }
+
   public function modifyTableLoadDataQuery(
     \Illuminate\Database\Eloquent\Builder $query,
     string $tag
   ): \Illuminate\Database\Eloquent\Builder {
-    return $query; // to be overriden
+    foreach ($this->relationships() as $relationship) {
+      $query = $query->with($relationship);
+    }
+    return $query;
   }
 }

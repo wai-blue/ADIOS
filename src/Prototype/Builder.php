@@ -419,6 +419,7 @@ class Builder {
         $this->createFolder($widgetRootDir . '/Views');
 
         foreach ($widgetConfig['controllers'] as $controllerName => $controllerConfig) {
+          $controllerName = substr($controllerName, strlen($widgetName) + 1);
           $controllerHtmlFileView = '';
 
           $relatedView = $controllerConfig['view'] ?? '';

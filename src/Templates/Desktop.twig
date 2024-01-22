@@ -91,7 +91,7 @@
         {% if shortcut.separator %}
           <hr class="sidebar-divider d-none d-md-block">
         {% else %}
-          <li class="nav-item" style="{{ shortcut.style }}">
+          <li class="nav-item" style="{{ shortcut.cssStyle }}">
             <a
               id="nav-link-{{ loop.index }}"
               {% if shortcut.sub is iterable %}

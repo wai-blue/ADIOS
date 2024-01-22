@@ -92,15 +92,18 @@ export default class Table extends Component<TableProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Table/OnLoadParams', {
       params: {
-        model: this.props.model
+        model: this.props.model,
+        columns: this.props.columns
       }
     }).then(({data}: any) => {
         let columns: Array<any> = [];
 
         columns = data.columns.map((column: any) => {
-          switch (column['columnType']) {
+          switch (column['type']) {
             case 'color': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 return this._commonCellRenderer(
                   column,
@@ -112,7 +115,9 @@ export default class Table extends Component<TableProps> {
               }
             }
             case 'image': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 if (!params.value) {
                   return this._commonCellRenderer(
@@ -132,7 +137,9 @@ export default class Table extends Component<TableProps> {
               }
             }
             case 'lookup': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 return this._commonCellRenderer(
                   column,
@@ -143,14 +150,18 @@ export default class Table extends Component<TableProps> {
               }
             }
             case 'enum': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 return this._commonCellRenderer(column, column['enumValues'][params.value]);
               }
             }
             case 'bool':
             case 'boolean': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 if (params.value) {
                   return this._commonCellRenderer(
@@ -166,25 +177,45 @@ export default class Table extends Component<TableProps> {
               }
             }
             case 'date': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 return this._commonCellRenderer(column, dateToEUFormat(params.value));
               }
             }
             case 'time': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 return this._commonCellRenderer(column, timeToEUFormat(params.value));
               }
             }
             case 'datetime': return { 
-              ...column, 
+              ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 return this._commonCellRenderer(column, datetimeToEUFormat(params.value));
               }
             }
+            case 'tags': return {
+              ...column,
+              headerName: column['title'],
+              flex: 1,
+              renderCell: (params: any) => {
+                return <div>
+                  {params.value.map((value) => {
+                    return <span className="badge badge-info mx-1">{value[column.dataKey]}</span>;
+                  })}
+                </div>
+              }
+            }
             default: return {
               ...column,
+              headerName: column['title'],
+              flex: 1,
               renderCell: (params: any) => {
                 return this._commonCellRenderer(column, params.value);
               }

@@ -26,7 +26,12 @@ class OnLoadData extends \ADIOS\Core\Controller {
       $tableTitle = $tmpModel->tableTitle;
       $tmpColumns = $tmpModel->getColumnsToShowInView('Table');
 
-      $columnsToShowAsString = implode(', ', array_keys($tmpColumns));
+      $columnsToShowAsString = '';
+      foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+        if (!isset($tmpColumnDefinition['relationship'])) {
+          $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ').$tmpColumnName;
+        }
+      }
 
       // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
       $tmpQuery = $tmpModel->selectRaw($columnsToShowAsString);
@@ -43,6 +48,10 @@ class OnLoadData extends \ADIOS\Core\Controller {
           $tmpQuery->with([$columnName => function ($query) use ($lookupSqlValue) {
             $query->selectRaw('id, ' . $lookupSqlValue);
           }]);
+        }
+
+        if (isset($column['relationship'])) {
+          $tmpQuery->with($column['relationship']);
         }
       }
 
@@ -75,9 +84,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
         $tmpQuery->orderBy('id', 'DESC');
       }
 
-      if (isset($params['tag'])) {
-        $tmpQuery = $tmpModel->modifyTableLoadDataQuery($tmpQuery, $params['tag']);
-      }
+      $tmpQuery = $tmpModel->modifyTableLoadDataQuery($tmpQuery, $params['tag']);
 
       // Laravel pagination
       $data = $tmpQuery->paginate(

@@ -45,7 +45,14 @@ class User extends \ADIOS\Core\Model {
       'login' => [
         'type' => 'varchar',
         'title' => $this->translate('Login'),
-        'showColumn' => false
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+          'Form' => [
+            'showColumn' => true
+          ],
+        ],
       ],
       'password' => [
         'type' => 'password',
@@ -54,6 +61,14 @@ class User extends \ADIOS\Core\Model {
       'is_active' => [
         'type' => 'boolean',
         'title' => $this->translate('Active'),
+        'viewParams' => [
+          'Table' => [
+            'showColumn' => true
+          ],
+          'Form' => [
+            'showColumn' => true
+          ],
+        ],
       ],
       'last_login_time' => [
         'type' => 'datetime',
@@ -341,6 +356,13 @@ class User extends \ADIOS\Core\Model {
 
 
   // Eloquent relations
+
+  public function relationships(): array {
+    $relationships = parent::relationships();
+    $relationships[] = 'roles';
+
+    return $relationships;
+  }
 
   public function roles() {
     return $this->belongsToMany(

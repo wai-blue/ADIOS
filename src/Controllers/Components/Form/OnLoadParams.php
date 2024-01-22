@@ -21,7 +21,7 @@ class OnLoadParams extends \ADIOS\Core\Controller {
       $tmpModel = $this->adios->getModel($this->params['model']);
       $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
 
-      if (isset($this->params['columns'])) {
+      if (is_array($this->params['columns'])) {
         $tmpColumns = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
           $tmpColumns,
           $this->params['columns']);
