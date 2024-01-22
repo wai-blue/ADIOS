@@ -41,7 +41,7 @@ class User extends \ADIOS\Core\Model {
 
   public function columns(array $columns = []): array
   {
-    return parent::columns([
+    return parent::columns(array_merge($columns, [
       'login' => [
         'type' => 'varchar',
         'title' => $this->translate('Login'),
@@ -82,7 +82,7 @@ class User extends \ADIOS\Core\Model {
       //  'readonly' => TRUE,
       //  'showColumn' => false,
       //]
-    ]);
+    ]));
   }
 
   public function upgrades() : array {

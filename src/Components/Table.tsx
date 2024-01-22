@@ -20,7 +20,7 @@ interface TableProps {
   addButtonText?: string
   columns?: FormColumns
   where?: Array<any>,
-  loadDataTag?: string
+  tag?: string
 
   //TODO
   //showPaging?: boolean,
@@ -215,7 +215,7 @@ export default class Table extends Component<TableProps> {
         filterBy: this.state.filterBy,
         search: this.state.search,
         where: this.props.where,
-        loadDataTag: this.props.loadDataTag
+        tag: this.props.tag
       }
     }).then(({data}: any) => {
         this.setState({

@@ -75,8 +75,8 @@ class OnLoadData extends \ADIOS\Core\Controller {
         $tmpQuery->orderBy('id', 'DESC');
       }
 
-      if (isset($params['loadDataTag'])) {
-        $tmpQuery = $tmpModel->modifyTableLoadDataQuery($tmpQuery, $params['loadDataTag']);
+      if (isset($params['tag'])) {
+        $tmpQuery = $tmpModel->modifyTableLoadDataQuery($tmpQuery, $params['tag']);
       }
 
       // Laravel pagination

@@ -1913,4 +1913,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return "{$this->adios->config['uploadDir']}/" . str_replace('/', '-', $this->fullName);
   }
 
+  public function modifyTableLoadDataQuery(
+    \Illuminate\Database\Eloquent\Builder $query,
+    string $tag
+  ): \Illuminate\Database\Eloquent\Builder {
+    return $query; // to be overriden
+  }
 }
