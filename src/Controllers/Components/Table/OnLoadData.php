@@ -28,7 +28,8 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
       $columnsToShowAsString = implode(', ', array_keys($tmpColumns));
 
-      $tmpModel = $tmpModel->selectRaw($columnsToShowAsString);
+      // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
+      $tmpQuery = $tmpModel->selectRaw($columnsToShowAsString);
 
       //LOOKUPS
       foreach ($tmpColumns as $columnName => $column) {
@@ -39,7 +40,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
             str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
             . ") as lookupSqlValue";
 
-          $tmpModel->with([$columnName => function ($query) use ($lookupSqlValue) {
+          $tmpQuery->with([$columnName => function ($query) use ($lookupSqlValue) {
             $query->selectRaw('id, ' . $lookupSqlValue);
           }]);
         }
@@ -53,13 +54,13 @@ class OnLoadData extends \ADIOS\Core\Controller {
       // WHERE
       if (isset($params['where']) && is_array($params['where'])) {
         foreach ($params['where'] as $where) {
-          $tmpModel->where($where[0], $where[1], $where[2]);
+          $tmpQuery->where($where[0], $where[1], $where[2]);
         }
       }
 
       // Search
       if (isset($params['search'])) {
-        $tmpModel->where(function ($query) use ($params, $tmpColumns) {
+        $tmpQuery->where(function ($query) use ($params, $tmpColumns) {
           foreach ($tmpColumns as $columnName => $column) {
             $query->orWhere($columnName, 'like', "%{$params['search']}%");
           }
@@ -67,15 +68,19 @@ class OnLoadData extends \ADIOS\Core\Controller {
       }
       // ORDER BY
       if (isset($params['orderBy'])) {
-        $tmpModel->orderBy(
+        $tmpQuery->orderBy(
           $params['orderBy']['field'],
           $params['orderBy']['sort']);
       } else {
-        $tmpModel->orderBy('id', 'DESC');
+        $tmpQuery->orderBy('id', 'DESC');
+      }
+
+      if (isset($params['loadDataTag'])) {
+        $tmpQuery = $tmpModel->modifyTableLoadDataQuery($tmpQuery, $params['loadDataTag']);
       }
 
       // Laravel pagination
-      $data = $tmpModel->paginate(
+      $data = $tmpQuery->paginate(
         $pageLength, ['*'], 
         'page', 
         $this->params['page']);

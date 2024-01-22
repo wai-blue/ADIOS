@@ -337,7 +337,12 @@ class User extends \ADIOS\Core\Model {
   // Eloquent relations
 
   public function roles() {
-    return $this->belongsToMany(\ADIOS\Core\Models\UserRole::class);
+    return $this->belongsToMany(
+      \ADIOS\Core\Models\UserRole::class,
+      '_user_has_roles',
+      'id_user',
+      'id_role'
+    );
   }
 
   // public function id_role(): \Illuminate\Database\Eloquent\Relations\BelongsTo {

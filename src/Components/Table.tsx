@@ -19,7 +19,8 @@ interface TableProps {
   formParams?: FormProps
   addButtonText?: string
   columns?: FormColumns
-  where?: Array<any>
+  where?: Array<any>,
+  loadDataTag?: string
 
   //TODO
   //showPaging?: boolean,
@@ -213,7 +214,8 @@ export default class Table extends Component<TableProps> {
         orderBy: this.state.orderBy,
         filterBy: this.state.filterBy,
         search: this.state.search,
-        where: this.props.where
+        where: this.props.where,
+        loadDataTag: this.props.loadDataTag
       }
     }).then(({data}: any) => {
         this.setState({
