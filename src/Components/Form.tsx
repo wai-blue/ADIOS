@@ -129,7 +129,7 @@ export default class Form extends Component<FormProps> {
 
   loadParams() {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Form/OnLoadParams';
-console.log(this.props, loadParamsController);
+
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadParamsController, {
       params: {
@@ -140,6 +140,7 @@ console.log(this.props, loadParamsController);
       data = deepObjectMerge(data, this.props);
       data.layout = this.convertLayoutToString(data.layout);
 
+        console.log(data);
       let newState = {
         columns: data.columns,
         folderUrl: data.folderUrl,

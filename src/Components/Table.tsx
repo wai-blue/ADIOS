@@ -7,6 +7,7 @@ import Form, { FormProps, FormColumns } from "./Form";
 import { dateToEUFormat, timeToEUFormat, datetimeToEUFormat } from "./Inputs/DateTime";
 
 import Loader from "./Loader";
+import { adiosError } from "./Helper";
 
 interface TableProps {
   uid: string,
@@ -102,6 +103,8 @@ export default class Table extends Component<TableProps> {
       }
     }).then(({data}: any) => {
         let columns: Array<any> = [];
+
+        if (data.columns.length == 0) adiosError("Any column to show. Set showColumn param for column");
 
         for (let columnName in data.columns) {
           let origColumn = data.columns[columnName];

@@ -19,18 +19,18 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public function renderJson() { 
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);
-      $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
 
       $inputs = [];
       if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
         $columnsToShowAsString = '';
+        $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
+
         foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
           if (!isset($tmpColumnDefinition['relationship'])) {
-            $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ').$tmpColumnName;
+            $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
           }
         }
 
-        // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
         $inputs = $tmpModel->selectRaw($columnsToShowAsString)->find($this->params['id']);
       }
 

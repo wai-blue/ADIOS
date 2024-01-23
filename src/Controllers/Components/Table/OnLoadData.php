@@ -33,7 +33,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
     $columnsToShowAsString = '';
     foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
       if (!isset($tmpColumnDefinition['relationship'])) {
-        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ').$tmpColumnName;
+        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
       }
     }
 
