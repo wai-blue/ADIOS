@@ -128,8 +128,8 @@ export default class Form extends Component<FormProps> {
   }
 
   loadParams() {
-    let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadData';
-
+    let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Form/OnLoadParams';
+console.log(this.props, loadParamsController);
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadParamsController, {
       params: {

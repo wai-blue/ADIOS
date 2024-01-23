@@ -91,7 +91,7 @@ export default class Table extends Component<TableProps> {
   }
 
   loadParams() {
-    let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadData';
+    let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadParams';
 
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadParamsController, {
