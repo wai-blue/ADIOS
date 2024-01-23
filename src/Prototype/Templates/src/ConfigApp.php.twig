@@ -36,8 +36,10 @@ $config['userRoles'] = {% if ConfigApp.userRoles %}{{ varExport(ConfigApp.userRo
 $config['skin'] = '{{ ConfigApp.skin ?? blue }}';
 
 $config['coreClasses'] = [
+  'Permissions' => \App\Core\Permissions::class,
   'Router' => \App\Core\Router::class,
-  'User' => \App\Core\User::class,
+  'Models\\User' => \App\Core\Models\User::class,
+  'Models\\UserRole' => \App\Core\Models\UserRole::class,
 // Uncomment these lines if you want to override another core classes
 //   'Console' => \App\Core\Console::class,
 //   'Locale' => \App\Core\Locale::class,

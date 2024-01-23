@@ -1,0 +1,15 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace App\Core;
+
+class Permissions extends \ADIOS\Core\Permissions {
+  public function __construct(\ADIOS\Core\Loader $adios) {
+    parent::__construct($adios);
+
+    $this->enabledPermissions = array_merge($this->enabledPermissions,
+{{ varExport(permissions, "      ")|raw }}
+    );
+  }
+}

@@ -50,19 +50,26 @@ class Permissions {
     return (bool) in_array($permission, $this->enabledPermissions[$idUserRole]);
   }
   
-  public function has(string $permission, int $idUserRole = 0) : bool
+  public function has(string $permission, array $idUserRoles = []) : bool
   {
-    if ($idUserRole <= 0) $idUserRole = (int) reset($this->adios->userProfile['roles']);
+    if (count($idUserRoles) == 0) $idUserRoles = $this->adios->userProfile['roles'];
 
     // TODO: Docasne. Ked bude fungovat, vymazat.
     if (strpos($permission, "Administrator/Permission") === 0) return TRUE;
     if (strpos($permission, "Core/Models") === 0) return TRUE;
 
-    if ($idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR) {
-      return TRUE;
-    } else {
-      return (bool) in_array($permission, (array) $this->enabledPermissions[$idUserRole]);
+    $permissionGranted = FALSE;
+    foreach ($idUserRoles as $idUserRole) {
+      if ($idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR) {
+        $permissionGranted = TRUE;
+      } else {
+        $permissionGranted = (bool) in_array($permission, (array) $this->enabledPermissions[$idUserRole]);
+      }
+
+      if ($permissionGranted) break;
     }
+
+    return $permissionGranted;
   }
   
 }

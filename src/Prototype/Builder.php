@@ -262,6 +262,7 @@ class Builder {
     );
 
     $routing = [];
+    $permissions = [];
 
     $configWidgetsEnabled = [];
     foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
@@ -346,6 +347,10 @@ class Builder {
 
       if (is_array($widgetConfig['routing'] ?? NULL)) {
         $routing = array_merge($routing, $widgetConfig['routing']);
+      }
+
+      if (is_array($widgetConfig['permissions'] ?? NULL)) {
+        $permissions = array_merge($permissions, $widgetConfig['permissions']);
       }
 
       if (is_array($widgetConfig['models'] ?? NULL)) {
@@ -550,15 +555,14 @@ class Builder {
 
     $this->renderFile('src/App.php', 'src/App.php.twig');
 
+    $this->renderFile('src/Core/Permissions.php', 'src/Permissions.php.twig', [
+      'permissions' => $permissions,
+    ]);
     $this->renderFile('src/Core/Router.php', 'src/Router.php.twig', [
       'routing' => $routing,
     ]);
-    $this->renderFile('src/Core/Models/User.php', 'src/Models/User.php.twig', [
-      'routing' => $routing,
-    ]);
-    $this->renderFile('src/Core/Models/UserRole.php', 'src/Models/UserRole.php.twig', [
-      'routing' => $routing,
-    ]);
+    $this->renderFile('src/Core/Models/User.php', 'src/Models/User.php.twig', []);
+    $this->renderFile('src/Core/Models/UserRole.php', 'src/Models/UserRole.php.twig', []);
   }
 
   // public function createEmptyDatabase() {

@@ -639,7 +639,7 @@ class Loader
     return isset($_REQUEST['__IS_WINDOW__']) && $_REQUEST['__IS_WINDOW__'] == "1";
   }
 
-  public function getCoreClass($class) {
+  public function getCoreClass($class): string {
     return $this->config['coreClasses'][$class] ?? ('\\ADIOS\\Core\\' . $class);
   }
 
@@ -1207,7 +1207,11 @@ class Loader
                 $html = $this->twig->render(
                   $view,
                   [
+                    'USER_ROLES' => ($this->getCoreClass('Models\\UserRole'))::USER_ROLES,
+                    'USER_ROLE_NAMES' => ($this->getCoreClass('Models\\UserRole'))::USER_ROLE_NAMES,
+
                     'uid' => $this->uid,
+                    'user' => $this->userProfile,
                     'config' => $this->config,
                     'viewParams' => $viewParams,
                     'windowParams' => $viewParams['windowParams'] ?? NULL,

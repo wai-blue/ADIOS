@@ -45,6 +45,19 @@ function _print_r($var, $only_return = false) {
   }
 }
 
+function _var_dump($var, $only_return = false) {
+  ob_start();
+  $dump = var_dump($var);
+  $dump = ob_get_clean();
+  $str = "<pre style='font-size:11px;color:orange'>{$dump}</pre>";
+
+  if ($only_return) {
+    return $str;
+  } else {
+    echo $str;
+  }
+}
+
 function _getmicrotime() {
   list($usec, $sec) = explode(' ', microtime());
   return (float) $usec + (float) $sec;
