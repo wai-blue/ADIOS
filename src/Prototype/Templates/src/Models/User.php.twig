@@ -44,16 +44,4 @@ class User extends \ADIOS\Core\Models\User {
     ]));
   }
 
-  public function modifyTableLoadDataQuery(
-    \Illuminate\Database\Eloquent\Builder $query,
-    string $tag
-  ): \Illuminate\Database\Eloquent\Builder {
-    return $query;
-
-    // switch ($tag) {
-    //   case 'tag_1':
-    //     return $query;
-    //   break;
-    // }
-  }
 }

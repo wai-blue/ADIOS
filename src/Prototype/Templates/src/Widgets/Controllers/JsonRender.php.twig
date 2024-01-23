@@ -10,7 +10,9 @@ class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 
   public function renderJson() { 
     try {
-      return [];
+      return 
+{{ varExport(thisController.config.params, "      ")|raw }} ?? []
+      ;
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error
     }

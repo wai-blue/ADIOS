@@ -46,7 +46,8 @@ export interface FormProps {
   titleForInserting?: string,
   titleForEditing?: string,
   saveButtonText?: string,
-  addButtonText?: string
+  addButtonText?: string,
+  loadParamsController?: string
 }
 
 interface FormState {
@@ -102,8 +103,6 @@ export default class Form extends Component<FormProps> {
       invalidInputs: {},
       inputs: {}
     };
-
-    // this.updateLayout();
   }
 
   /**
@@ -129,8 +128,10 @@ export default class Form extends Component<FormProps> {
   }
 
   loadParams() {
+    let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadData';
+
     //@ts-ignore
-    axios.get(_APP_URL + '/Components/Form/OnLoadParams', {
+    axios.get(_APP_URL + '/' + loadParamsController, {
       params: {
         model: this.props.model,
         columns: this.props.columns
@@ -322,7 +323,9 @@ export default class Form extends Component<FormProps> {
 
   convertLayoutToString(layout?: Array<Array<string>>): string {
     //@ts-ignore
-    return layout?.map(row => `"${row.join(' ')}"`).join('\n');
+    let l = layout?.map(row => `"${row.join(' ')}"`).join('\n');
+    console.log(l);
+    return l;
   }
 
   /**

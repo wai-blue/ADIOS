@@ -34,7 +34,10 @@
   <adios-table
     model="{{ viewParams.model }}"
     tag="{{ viewParams.tag }}"
+    load-data-controller='{{ viewParams.loadDataController }}'
+    load-params-controller='{{ viewParams.loadParamsController }}'
     form-id="{{ viewParams.id | default(null) }}"
+    form-params='{{ viewParams.formParams|json_encode }}'
   ></adios-table>
 #}
 

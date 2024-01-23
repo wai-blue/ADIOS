@@ -1923,14 +1923,4 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     return $relationships;
   }
-
-  public function modifyTableLoadDataQuery(
-    \Illuminate\Database\Eloquent\Builder $query,
-    string $tag
-  ): \Illuminate\Database\Eloquent\Builder {
-    foreach ($this->relationships() as $relationship) {
-      $query = $query->with($relationship);
-    }
-    return $query;
-  }
 }

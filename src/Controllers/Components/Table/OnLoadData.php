@@ -16,85 +16,105 @@ namespace ADIOS\Controllers\Components\Table;
 class OnLoadData extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
-  public function renderJson() { 
-    try {
-      $params = $this->params;
-      $pageLength = (int) $params['pageLength'] ?? 15;
+  protected ?\Illuminate\Database\Eloquent\Builder $query = null;
 
-      $tmpModel = $this->adios->getModel($this->params['model']);
+  public \ADIOS\Core\Model $model;
+  public array $data = [];
 
-      $tableTitle = $tmpModel->tableTitle;
-      $tmpColumns = $tmpModel->getColumnsToShowInView('Table');
+  public function prepareQuery(): \Illuminate\Database\Eloquent\Builder {
+    $params = $this->params;
+    $pageLength = (int) $params['pageLength'] ?? 15;
 
-      $columnsToShowAsString = '';
-      foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-        if (!isset($tmpColumnDefinition['relationship'])) {
-          $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ').$tmpColumnName;
-        }
+    $this->model = $this->adios->getModel($this->params['model']);
+
+    $tableTitle = $this->model->tableTitle;
+    $tmpColumns = $this->model->getColumnsToShowInView('Table');
+
+    $columnsToShowAsString = '';
+    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+      if (!isset($tmpColumnDefinition['relationship'])) {
+        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ').$tmpColumnName;
+      }
+    }
+
+    // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
+    $query = $this->model->selectRaw($columnsToShowAsString);
+
+    // LOOKUPS and RELATIONSHIPS
+    foreach ($tmpColumns as $columnName => $column) {
+      if ($column['type'] == 'lookup') {
+        $lookupModel = $this->adios->getModel($column['model']);
+
+        $lookupSqlValue = "(" .
+          str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
+          . ") as lookupSqlValue";
+
+        $query->with([$columnName => function ($query) use ($lookupSqlValue) {
+          $query->selectRaw('id, ' . $lookupSqlValue);
+        }]);
       }
 
-      // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-      $tmpQuery = $tmpModel->selectRaw($columnsToShowAsString);
-
-      //LOOKUPS
-      foreach ($tmpColumns as $columnName => $column) {
-        if ($column['type'] == 'lookup') {
-          $lookupModel = $this->adios->getModel($column['model']);
-
-          $lookupSqlValue = "(" .
-            str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
-            . ") as lookupSqlValue";
-
-          $tmpQuery->with([$columnName => function ($query) use ($lookupSqlValue) {
-            $query->selectRaw('id, ' . $lookupSqlValue);
-          }]);
-        }
-
-        if (isset($column['relationship'])) {
-          $tmpQuery->with($column['relationship']);
-        }
+      if (isset($column['relationship'])) {
+        $query->with($column['relationship']);
       }
+    }
 
-      // FILTER BY
-      if (isset($params['filterBy'])) {
-        // TODO
+    // FILTER BY
+    if (isset($params['filterBy'])) {
+      // TODO
+    }
+
+    // WHERE
+    if (isset($params['where']) && is_array($params['where'])) {
+      foreach ($params['where'] as $where) {
+        $query->where($where[0], $where[1], $where[2]);
       }
+    }
 
-      // WHERE
-      if (isset($params['where']) && is_array($params['where'])) {
-        foreach ($params['where'] as $where) {
-          $tmpQuery->where($where[0], $where[1], $where[2]);
-        }
-      }
-
-      // Search
-      if (isset($params['search'])) {
-        $tmpQuery->where(function ($query) use ($params, $tmpColumns) {
-          foreach ($tmpColumns as $columnName => $column) {
+    // Search
+    if (isset($params['search'])) {
+      $query->where(function ($query) use ($params, $tmpColumns) {
+        foreach ($tmpColumns as $columnName => $column) {
+          if (!isset($column['relationship'])) {
             $query->orWhere($columnName, 'like', "%{$params['search']}%");
           }
-        });
-      }
-      // ORDER BY
-      if (isset($params['orderBy'])) {
-        $tmpQuery->orderBy(
-          $params['orderBy']['field'],
-          $params['orderBy']['sort']);
-      } else {
-        $tmpQuery->orderBy('id', 'DESC');
-      }
+        }
+      });
+    }
+    // ORDER BY
+    if (isset($params['orderBy'])) {
+      $query->orderBy(
+        $params['orderBy']['field'],
+        $params['orderBy']['sort']);
+    } else {
+      $query->orderBy('id', 'DESC');
+    }
 
-      $tmpQuery = $tmpModel->modifyTableLoadDataQuery($tmpQuery, $params['tag']);
+    return $query;
+  }
 
-      // Laravel pagination
-      $data = $tmpQuery->paginate(
-        $pageLength, ['*'], 
-        'page', 
-        $this->params['page']);
+  public function loadData(): array {
+    // Laravel pagination
+    return $this->query->paginate(
+      $pageLength, ['*'],
+      'page',
+      $this->params['page'])->toArray();
+  }
+
+  public function postprocessData(array $data): array {
+    return $data;
+  }
+
+  public function renderJson() {
+    try {
+
+      $this->query = $this->prepareQuery();
+      $data = $this->loadData();
+      $data['data'] = $this->postprocessData($data['data']);
 
       return [
         'data' => $data,
-        'title' => $tableTitle
+        'title' => $tableTitle,
       ];
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error
