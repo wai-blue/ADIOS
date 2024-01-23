@@ -34,6 +34,7 @@ class OnLoadParams extends \ADIOS\Core\Controller {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
       $columns = $tmpModel->getColumnsToShowInView('Table');
+
       if (is_array($this->params['columns'])) {
         $columns = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
           $columns,

@@ -22,7 +22,15 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
       $inputs = [];
       if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
-        $columnsToShowAsString = implode(', ', array_keys($tmpModel->getColumnsToShowInView('Form')));
+        $columnsToShowAsString = '';
+        $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
+
+        foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+          if (!isset($tmpColumnDefinition['relationship'])) {
+            $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
+          }
+        }
+
         $inputs = $tmpModel->selectRaw($columnsToShowAsString)->find($this->params['id']);
       }
 

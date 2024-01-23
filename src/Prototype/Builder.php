@@ -425,10 +425,10 @@ class Builder {
           $relatedView = $controllerConfig['view'] ?? '';
 
           if (isset($controllerConfig['phpTemplate'])) {
+            $controllerPhpFileTemplate = "src/Widgets/Controllers/{$controllerConfig['phpTemplate']}.php.twig";
+
             switch ($controllerConfig['phpTemplate']) {
               case 'ViewRender':
-                $controllerPhpFileTemplate = 'src/Widgets/Controllers/ViewRender.php.twig';
-
                 if (substr($controllerConfig['view'], 0, 5) == 'ADIOS') {
                   $controllerHtmlFileView = ''; // nevygenerujem ziadne view, pretoze pouzivam ADIOSove
                 } else {
@@ -436,9 +436,6 @@ class Builder {
                 }
 
                 $traitPhpFileTemplate = 'src/Widgets/Traits/ViewRender.php.twig';
-              break;
-              case 'JsonRender':
-                $controllerPhpFileTemplate = 'src/Widgets/Controllers/JsonRender.php.twig';
               break;
             }
           } else {

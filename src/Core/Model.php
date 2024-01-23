@@ -834,11 +834,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if ($columns === NULL) {
       $columns = $this->columns();
     }
+
     $columnsToShow = [];
     foreach ($columns as $columnName => $columnValue) {
       if (
-        isset($columnValue['viewParams'][$view]['showColumn'])
-        && $columnValue['viewParams'][$view]['showColumn'] === true
+        (isset($columnValue['showColumn']) && $columnValue['showColumn'] === true)
+        || (isset($columnValue['viewParams'][$view]['showColumn']) && $columnValue['viewParams'][$view]['showColumn'] === true)
       ) {
         $columnsToShow[$columnName] = $columnValue;
       }
