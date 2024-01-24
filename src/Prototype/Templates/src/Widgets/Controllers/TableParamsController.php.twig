@@ -4,22 +4,19 @@
 
 namespace {{ thisController.namespace }};
 
-class {{ thisController.class }} extends \ADIOS\Controllers\Components\Table\OnLoadData {
+class {{ thisController.class }} extends \ADIOS\Controllers\Components\Table\OnLoadParams {
 
   public static bool $hideDefaultDesktop = true;
 
-  public function prepareQuery(): \Illuminate\Database\Eloquent\Builder {
-    $query = parent::prepareQuery();
+  public function renderJson() { 
+    $parentTableParams = parent::renderJson();
 
-    // Modify the $query here
-    // You can use $this->model property to get the model for which the query is built.
-    // !!! DO NOT FORGET TO DELETE THE prototypeBuilderRegenerateAllowed TAG !!!
-
-    return $query;
+    try {
+      return array_merge($parentTableParams,
+{{ varExport(thisController.config.params, "      ")|raw }} ?? []
+      );
+    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
+      // TODO: Error
+    }
   }
-
-  public function postprocessData(array $data): array {
-    return $data;
-  }
-
 }

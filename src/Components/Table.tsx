@@ -24,6 +24,7 @@ interface TableProps {
   tag?: string,
   loadParamsController?: string,
   loadDataController?: string
+  rowHeight: number,
 
   //TODO
   //showPaging?: boolean,
@@ -373,6 +374,7 @@ export default class Table extends Component<TableProps> {
               onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
               rowCount={this.state.data.total}
               onRowClick={(item) => this.onRowClick(item.id as number)}
+              rowHeight={this.props.rowHeight ? this.props.rowHeight : 30}
 
               // stripped rows
               getRowClassName={ (params) => params.indexRelativeToCurrentPage % 2 === 0 ? '' : 'bg-light' }
