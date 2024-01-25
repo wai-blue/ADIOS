@@ -45,6 +45,7 @@ class User extends \ADIOS\Core\Model {
       'login' => [
         'type' => 'varchar',
         'title' => $this->translate('Login'),
+        'showColumn' => true,
       ],
       'password' => [
         'type' => 'password',

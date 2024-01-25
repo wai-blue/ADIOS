@@ -12,11 +12,35 @@ var ADIOS = {
     window_render(url, params, options.onclose, options);
   },
 
-  registerCustomReactElement(elementName, elementObject) {
-    if (typeof window['App']['customReactElements'] == 'undefined') {
-      window['App']['customReactElements'] = {};
+  registerReactElement(elementName, elementObject) {
+    if (typeof window['App']['reactElements'] == 'undefined') {
+      window['App']['reactElements'] = {};
     }
-    window['App']['customReactElements'][elementName] = elementObject;
+    window['App']['reactElements'][elementName] = elementObject;
+  },
+
+  modal(controllerUrl, params = {}, modalParams = null) {
+    $('#adios-modal-title-global').text("");
+
+    if (modalParams != null) {
+      $('#adios-modal-title-global').text(modalParams.title);
+    }
+
+    _ajax_update(
+      controllerUrl,
+      params,
+      'adios-modal-body-global',
+      {
+        success: () => {
+          $('#adios-modal-global').modal();
+          window.renderComponents('#adios-modal-body-global');
+        }
+      }
+    );
+  },
+
+  modalToggle(uid) {
+    $('#adios-modal-' + uid).modal('toggle');
   },
 
   views: {

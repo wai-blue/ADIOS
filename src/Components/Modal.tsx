@@ -46,7 +46,7 @@ export default class Modal extends Component<ModalProps> {
 
   componentDidMount() {
     if (this.props.isOpen === true) {
-      window.adiosModalToggle(this.state.uid);
+      ADIOS.modalToggle(this.state.uid);
     }
   }
 

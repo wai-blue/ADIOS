@@ -52,7 +52,7 @@ export default class FormCardButton extends Component<FormCardButtonProps> {
 
         <button
           id={"adios-card-button-" + this.props.uid}
-          onClick={() => window.adiosModalToggle(this.props.uid)}
+          onClick={() => ADIOS.modalToggle(this.props.uid)}
           className={"btn " + this.state.css + " shadow-sm mb-1 p-4"}
           style={{width: '14em'}}
         >

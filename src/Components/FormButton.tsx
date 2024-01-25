@@ -46,7 +46,7 @@ export default class FormButton extends Component<FormButtonProps> {
           className="adios react ui button"
         >
           <button
-            onClick={() => window.adiosModalToggle(this.props.uid)}
+            onClick={() => ADIOS.modalToggle(this.props.uid)}
             className={"adios ui Button btn " + this.state.css + " btn-icon-split"}
           >
             <span className="icon">

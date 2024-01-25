@@ -134,13 +134,11 @@ const renderComponent = (specificHtmlElement: string, component: string) => {
   });
 }
 
-const renderComponents = (specificHtmlElement: string = 'body') => {
-  //document.addEventListener('DOMContentLoaded', () => {
+window.renderComponents = (specificHtmlElement: string) => {
   initializeComponents.map(item => renderComponent(specificHtmlElement, item))
-  //});
 }
 
-renderComponents();
+window.renderComponents('body');
 
 function isValidJSON(jsonString: string) {
   try {
@@ -169,52 +167,26 @@ function getValidatedAttributeValue(attributeName: string, attributeValue: any):
  */
 declare global {
   interface Window {
-    //renderComponent: (componentName: string) => void;
+    renderComponents: (specificHtmlElement: string) => void;
     getComponent: (componentName: string, params: Object) => React.JSX.Element;
-    adiosModal: (controllerUrl: string) => void,
-    adiosModalToggle: (uid: string) => void,
     _APP_URL: string;
   }
 }
 
 window.getComponent = getComponent;
-//window.renderComponent = renderComponent;
 
-interface AdiosModalParams {
-  title: string
-}
 
-/*
-  * Preskumat moznosti ako znovu vyrenderovat uz niekde renderovane komponenty
-  * V tejto funkcii sa predpoklada, ze adios cache je nacitana a tak isto pripnuty bootstrap.js pre modal
-  * #adios-modal-global sa vytvara v Desktop.twig
-  * Nasledne sa meni iba kontent tohto modalo #adios-modal-body-global
-  */
-window.adiosModal = (controllerUrl: string, params: any = {}, modalParams: AdiosModalParams|null = null) => {
-  $('#adios-modal-title-global').text("");
 
-  if (modalParams != null) {
-    //@ts-ignore
-    $('#adios-modal-title-global').text(modalParams.title);
-  }
 
-  //@ts-ignore
-  _ajax_update(
-    controllerUrl,
-    params,
-    'adios-modal-body-global',
-    {
-      success: () => {
-        //@ts-ignore
-        $('#adios-modal-global').modal();
-        renderComponents('#adios-modal-body-global');
-      }
-    }
-  );
-}
 
-window.adiosModalToggle = (uid: string) => {
-  //@ts-ignore
-  $('#adios-modal-' + uid).modal('toggle');
-}
 
+ADIOS.registerReactElement('Form', Form);
+ADIOS.registerReactElement('Table', Table);
+ADIOS.registerReactElement('CardButton', CardButton);
+ADIOS.registerReactElement('Title', Title);
+ADIOS.registerReactElement('Breadcrumbs', Breadcrumbs);
+ADIOS.registerReactElement('Card', Card);
+ADIOS.registerReactElement('Button', Button);
+ADIOS.registerReactElement('Modal', Modal);
+ADIOS.registerReactElement('FormButton', FormButton);
+ADIOS.registerReactElement('FormCardButton', FormCardButton);

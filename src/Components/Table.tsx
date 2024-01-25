@@ -230,14 +230,14 @@ export default class Table extends Component<TableProps> {
   }
 
   onAddClick() {
-    window['adiosModalToggle'](this.props.uid);
+    ADIOS.modalToggle(this.props.uid);
     this.setState({
       form: {...this.state.form, id: undefined }
     })
   }
 
   onRowClick(id: number) {
-    window['adiosModalToggle'](this.props.uid);
+    ADIOS.modalToggle(this.props.uid);
     this.setState({
       form: {...this.state.form, id: id}
     })
@@ -281,11 +281,11 @@ export default class Table extends Component<TableProps> {
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
-              window['adiosModalToggle'](this.props.uid);
+              ADIOS.modalToggle(this.props.uid);
             }}
             onDeleteCallback={() => {
               this.loadData();
-              window['adiosModalToggle'](this.props.uid);
+              ADIOS.modalToggle(this.props.uid);
             }}
             {...this.props.formParams}
             columns={this.props.columns}

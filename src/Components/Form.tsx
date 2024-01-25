@@ -140,7 +140,6 @@ export default class Form extends Component<FormProps> {
       data = deepObjectMerge(data, this.props);
       data.layout = this.convertLayoutToString(data.layout);
 
-        console.log(data);
       let newState = {
         columns: data.columns,
         folderUrl: data.folderUrl,
@@ -438,7 +437,7 @@ export default class Form extends Component<FormProps> {
       if (this.state.columns[columnName].viewParams?.Form?.inputJSX) {
         let inputJSX = this.state.columns[columnName].viewParams.Form.inputJSX;
         inputToRender = React.createElement(
-          window['App']['customReactElements'][inputJSX],
+          window['App']['reactElements'][inputJSX],
           {
            parentForm: this,
            columnName: columnName
