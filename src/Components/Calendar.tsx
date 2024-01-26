@@ -20,7 +20,11 @@ interface CalendarState {
   poradie?: number,
   calendarTitle: string,
   datumOd: Date,
-  datumDo: Date
+  datumDo: Date,
+  rok?: number,
+  tyzden?: number,
+  isReadonly: boolean,
+  warning?: string
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -44,11 +48,12 @@ export default class Calendar extends Component<CalendarProps> {
     this.state = {
       rCnt: 0,
       idCvicisko: this.props.cviciska[0].id,
-      idTim: this.props.timy[0].id,
+      idTim: this.props.timy[Object.keys(this.props.timy)[0]].id,
       poradie: 0,
       calendarTitle: 'def',
       datumOd: lastMonday,
       datumDo: lastDayInWeek,
+      isReadonly: false,
     };
 
     console.log(this.state);
@@ -70,14 +75,38 @@ export default class Calendar extends Component<CalendarProps> {
         datumDo: this.state.datumDo
       }
     }).then(({data}: any) => {
-        this.setState({
-          data: data.data
-        }, () => {
-          //@ts-ignore
-          this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
-            console.log(item);
-          });
-        })
+
+      let isReadonly = false;
+      let warning = '';
+
+      if (
+        data.tyzden < this.getWeekNumber(new Date())
+        || data.rok < (new Date()).getFullYear()
+      ) {
+        isReadonly = true;
+        warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
+      } else if (this.state.idTim) {
+        if (this.props.timy[this.state.idTim].poradie != data.poradie) {
+          // isReadonly = true;
+          warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
+        }
+      } else {
+        warning = 'Môžete upravovať rozpis.';
+      }
+
+      this.setState({
+        data: data.data,
+        poradie: data.poradie,
+        rok: data.rok,
+        tyzden: data.tyzden,
+        isReadonly: isReadonly,
+        warning: warning
+      }, () => {
+        //@ts-ignore
+        this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
+          console.log(item);
+        });
+      })
     });
   }
 
@@ -224,7 +253,7 @@ export default class Calendar extends Component<CalendarProps> {
                               className={
                                 "rezervacka volne "
                                 + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")
-                                + " " + (r[7] != this.state.idTim ? "readonly" : "")
+                                + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
                               }
                               data-den={d}
                               onClick={() =>
@@ -252,7 +281,7 @@ export default class Calendar extends Component<CalendarProps> {
                             key={this.state.rCnt}
                             className={
                               "rezervacka"
-                              + " " + (r[7] != this.state.idTim ? "readonly" : "")
+                              + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
                             }
                             data-den={d}
                             style={{ gridColumn }}
@@ -404,15 +433,14 @@ export default class Calendar extends Component<CalendarProps> {
 
               <select
                 className="form-control rounded-sm"
-                style={{maxWidth: '250px'}}
                 onChange={(event: any) => this.idTimOnChange(event)}
                 value={this.state.idTim}
               >
-                {this.props.timy.map((tim: any) => (
+                {Object.keys(this.props.timy).map((key: any) => (
                   <option
-                    key={tim.id}
-                    value={tim.id}
-                  >{tim.nazov}</option>
+                    key={this.props.timy[key].id}
+                    value={this.props.timy[key].id}
+                  >{this.props.timy[key].nazov} (poradie: {this.props.timy[key].poradie})</option>
                 ))}
               </select>
             </div>
@@ -430,6 +458,8 @@ export default class Calendar extends Component<CalendarProps> {
           </div>
         </div>
 
+        <div>{this.state.warning}</div>
+
         <div id={'adios-calendar-' + this.props.uid} className="rezervacny-kalendar rounded-sm">
           <div className="header" style={{ gridRow: 'span 2' }}>Dátum</div>
           <div className="header">Hodina</div>
@@ -444,10 +474,13 @@ export default class Calendar extends Component<CalendarProps> {
           {this._renderCalendar()}
         </div>
         <div>
+          isReadonly = {this.state.isReadonly};
           idCvicisko = {this.state.idCvicisko};
           idTim = {this.state.idTim};
           datumOd = {this.state.datumOd.getDate()}.{this.state.datumOd.getMonth()+1}.{this.state.datumOd.getFullYear()};
           datumDo = {this.state.datumDo.getDate()}.{this.state.datumDo.getMonth()+1}.{this.state.datumDo.getFullYear()};
+          rok = {this.state.rok};
+          tyzden = {this.state.tyzden};
           poradie = {this.state.poradie};
         </div>
       </>
