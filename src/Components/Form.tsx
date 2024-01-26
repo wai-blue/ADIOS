@@ -47,7 +47,8 @@ export interface FormProps {
   titleForEditing?: string,
   saveButtonText?: string,
   addButtonText?: string,
-  loadParamsController?: string
+  loadParamsController?: string,
+  defaultValues: Object
 }
 
 interface FormState {
@@ -117,6 +118,9 @@ export default class Form extends Component<FormProps> {
         invalidInputs: {},
         isEdit: this.props.id ? this.props.id > 0 : false
       });
+    } else if (prevProps.defaultValues != this.props.defaultValues) {
+      console.log(this.props.defaultValues);
+      this.initInputs(this.state.columns, this.props.defaultValues);
     }
   }
 
@@ -251,7 +255,7 @@ export default class Form extends Component<FormProps> {
   /**
     * Dynamically initialize inputs (React state) from model columns
     */
-  initInputs(columns?: FormColumns, inputsValues?: Array<any>) {
+  initInputs(columns?: FormColumns, inputsValues: Object = {}) {
     let inputs: any = {};
 
     if (!columns) return;
@@ -274,6 +278,8 @@ export default class Form extends Component<FormProps> {
           inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
       }
     });
+
+    console.log(inputs);
 
     this.setState({
       inputs: inputs

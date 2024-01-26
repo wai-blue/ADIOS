@@ -25,8 +25,7 @@ interface CalendarState {
   tyzden?: number,
   isReadonly: boolean,
   warning?: string,
-  hh?: number,
-  mm?: number
+  casOd?: string
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -50,7 +49,7 @@ export default class Calendar extends Component<CalendarProps> {
     this.state = {
       rCnt: 0,
       idCvicisko: this.props.cviciska[0].id,
-      idTim: this.props.timy[Object.keys(this.props.timy)[0]].id,
+      idTim: this.props.timy.length != 0 ? this.props.timy[Object.keys(this.props.timy)[0]].id : 0,
       poradie: 0,
       calendarTitle: 'def',
       datumOd: lastMonday,
@@ -74,7 +73,8 @@ export default class Calendar extends Component<CalendarProps> {
         idTim: this.state.idTim,
         idCvicisko: this.state.idCvicisko,
         datumOd: this.state.datumOd,
-        datumDo: this.state.datumDo
+        datumDo: this.state.datumDo,
+        casOd: this.state.casOd
       }
     }).then(({data}: any) => {
 
@@ -128,10 +128,13 @@ export default class Calendar extends Component<CalendarProps> {
     });
   }
 
+  formatTimeNumber(number: number) {
+    return `${number < 10 ? '0' : ''}${number}`;
+  }
+
   pickTime(hh: number, mm: number) {
     this.setState({
-      hh: hh,
-      mm: mm
+      casOd: `${this.formatTimeNumber(hh)}:${this.formatTimeNumber(mm)}`
     });
 
     //@ts-ignore
@@ -369,7 +372,7 @@ export default class Calendar extends Component<CalendarProps> {
     return (
       <>
         <Modal
-          title={"Rezervácia cvičiska " + (this.state.hh ? this.state.hh + ":" + this.state.mm : '')}
+          title={"Rezervácia cvičiska " + (this.state.casOd ? this.state.casOd : '')}
           uid={this.props.uid}
         >
           <FormCardButton
@@ -381,7 +384,12 @@ export default class Calendar extends Component<CalendarProps> {
               uid: this.props.uid + '-trening',
               model: "App/Widgets/Rozpis/Models/Trening",
               onSaveCallback: () => this.closeAndLoadData('trening'),
-              onDeleteCallback: () => this.closeAndLoadData('trening')
+              onDeleteCallback: () => this.closeAndLoadData('trening'),
+              defaultValues: {
+                zaciatok: this.state.casOd,
+                id_tim: this.state.idTim,
+                id_cvicisko: this.state.idCvicisko
+              }
             }}
           ></FormCardButton>
 
@@ -394,7 +402,10 @@ export default class Calendar extends Component<CalendarProps> {
               uid: this.props.uid + '-zapas',
               model: "App/Widgets/Rozpis/Models/Zapas",
               onSaveCallback: () => this.closeAndLoadData('zapas'),
-              onDeleteCallback: () => this.closeAndLoadData('zapas')
+              onDeleteCallback: () => this.closeAndLoadData('zapas'),
+              defaultValues: {
+                zaciatok: this.state.casOd
+              }
             }}
           ></FormCardButton>
 
@@ -407,7 +418,10 @@ export default class Calendar extends Component<CalendarProps> {
               uid: this.props.uid + '-komercia',
               model: "App/Widgets/Rozpis/Models/Komercia",
               onSaveCallback: () => this.closeAndLoadData('komercia'),
-              onDeleteCallback: () => this.closeAndLoadData('komercia')
+              onDeleteCallback: () => this.closeAndLoadData('komercia'),
+              defaultValues: {
+                zaciatok: this.state.casOd
+              }
             }}
           ></FormCardButton>
         </Modal>
