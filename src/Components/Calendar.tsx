@@ -1,6 +1,9 @@
 import React, { Component } from "react";
 import axios from "axios";
 
+import FormCardButton from './FormCardButton';
+import Modal from './Modal';
+
 interface CalendarProps {
   uid: string,
   loadDataController?: string,
@@ -214,11 +217,13 @@ export default class Calendar extends Component<CalendarProps> {
                               data-den={d}
                               onClick={() =>
                                 //@ts-ignore
-                                ADIOS.modal(
-                                  'rozpis/form-rezervacia-pridat',
-                                  { hh, mm },
-                                  { title: `Rezervácia cvičiska na čas: ${hh}:${mm}` }
-                                )
+                                ADIOS.modalToggle(this.props.uid)
+                                //@ts-ignore
+                                //ADIOS.modal(
+                                //  'rozpis/form-rezervacia-pridat',
+                                //  { hh, mm },
+                                //  { title: `Rezervácia cvičiska na čas: ${hh}:${mm}` }
+                                //)
                               }
                             ></div>
                           );
@@ -297,9 +302,59 @@ export default class Calendar extends Component<CalendarProps> {
     })
   }
 
+  closeAndLoadData(modalUid: string) {
+    this.loadData();
+    //@ts-ignore
+    ADIOS.modalToggle(this.props.uid + '-' + modalUid);
+  }
+
   render() {
     return (
       <>
+        <Modal
+          title="Rezervácia cvičiska"
+          uid={this.props.uid}
+        >
+          <FormCardButton
+            uid={this.props.uid + '-trening'}
+            text="Tréning"
+            css="btn-primary m-1"
+            icon="fas fa-running"
+            form={{
+              uid: this.props.uid + '-trening',
+              model: "App/Widgets/Rozpis/Models/Trening",
+              onSaveCallback: () => this.closeAndLoadData('trening'),
+              onDeleteCallback: () => this.closeAndLoadData('trening')
+            }}
+          ></FormCardButton>
+
+          <FormCardButton
+            uid={this.props.uid + '-zapas'}
+            text="Zápas"
+            css="btn-light"
+            icon="fas fa-people-arrows m-1"
+            form={{
+              uid: this.props.uid + '-zapas',
+              model: "App/Widgets/Rozpis/Models/Zapas",
+              onSaveCallback: () => this.closeAndLoadData('zapas'),
+              onDeleteCallback: () => this.closeAndLoadData('zapas')
+            }}
+          ></FormCardButton>
+
+          <FormCardButton
+            uid={this.props.uid + '-komercia'}
+            text="Komercia"
+            css="btn-light m-1"
+            icon="fas fa-euro-sign"
+            form={{
+              uid: this.props.uid + '-komercia',
+              model: "App/Widgets/Rozpis/Models/Komercia",
+              onSaveCallback: () => this.closeAndLoadData('komercia'),
+              onDeleteCallback: () => this.closeAndLoadData('komercia')
+            }}
+          ></FormCardButton>
+        </Modal>
+
         <div className="row mb-2">
           <div className="col-lg-6 pl-0">
             <div className="d-flex flex-row align-items-center">

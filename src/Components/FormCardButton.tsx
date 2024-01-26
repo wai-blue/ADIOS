@@ -5,7 +5,6 @@ import Form, { FormProps } from "./Form";
 
 interface FormCardButtonProps {
   uid: string,
-  model: string,
   onClick?: string,
   href?: string,
   text: string,
@@ -42,8 +41,8 @@ export default class FormCardButton extends Component<FormCardButtonProps> {
           hideHeader={true}
         >
           <Form 
-            uid={this.props.uid}
-            model={this.props.model}
+            uid={this.props.form?.uid ?? this.props.uid}
+            model={this.props.form?.model ?? ''}
             showInModal={true}
             id={this.props.formId}
             {...this.props.form}
