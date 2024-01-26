@@ -17,13 +17,10 @@ interface CalendarState {
   data?: Array<Array<Array<any>>>,
   idTim?: number,
   idCvicisko?: number,
-  rok?: number,
-  tyzden?: number,
   poradie?: number,
   calendarTitle: string,
-  weekStart: Date,
-  weekEnd: Date,
-  weekNumber: number
+  datumOd: Date,
+  datumDo: Date
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -48,13 +45,10 @@ export default class Calendar extends Component<CalendarProps> {
       rCnt: 0,
       idCvicisko: this.props.cviciska[0].id,
       idTim: this.props.timy[0].id,
-      rok: 0,
-      tyzden: 0,
       poradie: 0,
       calendarTitle: 'def',
-      weekStart: lastMonday,
-      weekEnd: lastDayInWeek,
-      weekNumber: this.getWeekNumber(lastMonday)
+      datumOd: lastMonday,
+      datumDo: lastDayInWeek,
     };
 
     console.log(this.state);
@@ -72,8 +66,8 @@ export default class Calendar extends Component<CalendarProps> {
       params: {
         idTim: this.state.idTim,
         idCvicisko: this.state.idCvicisko,
-        weekNumber: this.state.weekNumber,
-        currentYear: this.state.weekStart.getFullYear()
+        datumOd: this.state.datumOd,
+        datumDo: this.state.datumDo
       }
     }).then(({data}: any) => {
         this.setState({
@@ -309,8 +303,8 @@ export default class Calendar extends Component<CalendarProps> {
     );
   }
 
-  getWeekNumber(week: Date) {
-    let newDate = new Date(week);
+  getWeekNumber(date: Date) {
+    let newDate = new Date(date);
     newDate.setDate(newDate.getDate() + 4 - (newDate.getDay() || 7));
 
     let year = newDate.getFullYear();
@@ -322,12 +316,11 @@ export default class Calendar extends Component<CalendarProps> {
   calculateWeeks(type: string = 'next') {
     let weeks: Object = {};
 
-    let weekStart = new Date(this.state.weekStart.getTime() + (type == 'next' ? 7 : -7) * 24 * 60 * 60 * 1000);
+    let datumOd = new Date(this.state.datumOd.getTime() + (type == 'next' ? 7 : -7) * 24 * 60 * 60 * 1000);
 
     weeks = {
-      weekStart: weekStart,
-      weekEnd: new Date(this.state.weekEnd.getTime() + (type == 'next' ? 7 : -7) * 24 * 60 * 60 * 1000),
-      weekNumber: this.getWeekNumber(weekStart)
+      datumOd: datumOd,
+      datumDo: new Date(this.state.datumDo.getTime() + (type == 'next' ? 7 : -7) * 24 * 60 * 60 * 1000),
     }
 
     this.setState({...weeks}, () => {
@@ -428,9 +421,9 @@ export default class Calendar extends Component<CalendarProps> {
             <div className="d-flex flex-row justify-content-end align-items-center">
               <a href="#" onClick={() => this.calculateWeeks('previous')} className="btn btn-primary">«</a>
               <div className="text-primary text-center" style={{margin: "0 0.5em", width: "200px"}}>
-                { this.state.weekStart.getDate() }.{ this.state.weekStart.getMonth() + 1 }.{ this.state.weekStart.getFullYear() }
+                { this.state.datumOd.getDate() }.{ this.state.datumOd.getMonth() + 1 }.{ this.state.datumOd.getFullYear() }
                 &nbsp;-&nbsp;
-                { this.state.weekEnd.getDate() }.{ this.state.weekEnd.getMonth() + 1 }.{ this.state.weekStart.getFullYear() }
+                { this.state.datumDo.getDate() }.{ this.state.datumDo.getMonth() + 1 }.{ this.state.datumOd.getFullYear() }
               </div>
               <a href="#" onClick={() => this.calculateWeeks()} className="btn btn-primary">»</a>
             </div>
@@ -453,8 +446,8 @@ export default class Calendar extends Component<CalendarProps> {
         <div>
           idCvicisko = {this.state.idCvicisko};
           idTim = {this.state.idTim};
-          rok = {this.state.rok};
-          tyzden = {this.state.tyzden};
+          datumOd = {this.state.datumOd.getDate()}.{this.state.datumOd.getMonth()+1}.{this.state.datumOd.getFullYear()};
+          datumDo = {this.state.datumDo.getDate()}.{this.state.datumDo.getMonth()+1}.{this.state.datumDo.getFullYear()};
           poradie = {this.state.poradie};
         </div>
       </>
