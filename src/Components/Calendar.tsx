@@ -17,6 +17,9 @@ interface CalendarState {
   data?: Array<Array<Array<any>>>,
   idTim?: number,
   idCvicisko?: number,
+  rok?: number,
+  tyzden?: number,
+  poradie?: number,
   calendarTitle: string,
   weekStart: Date,
   weekEnd: Date
@@ -42,10 +45,17 @@ export default class Calendar extends Component<CalendarProps> {
 
     this.state = {
       rCnt: 0,
+      idCvicisko: this.props.cviciska[0].id,
+      idTim: this.props.timy[0].id,
+      rok: 0,
+      tyzden: 0,
+      poradie: 0,
       calendarTitle: 'def',
       weekStart: lastMonday,
       weekEnd: new Date(lastMonday.getTime() + 6 * 24 * 60 * 60 * 1000)
     };
+
+    console.log(this.state);
 
     this.url = props.loadDataController ?? props.loadDataUrl ?? '';
   }
@@ -213,7 +223,11 @@ export default class Calendar extends Component<CalendarProps> {
                             <div
                               id={`rezervacka-${this.state.rCnt++}`}
                               key={this.state.rCnt}
-                              className={"rezervacka volne " + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")}
+                              className={
+                                "rezervacka volne "
+                                + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")
+                                + " " + (r[7] != this.state.idTim ? "readonly" : "")
+                              }
                               data-den={d}
                               onClick={() =>
                                 //@ts-ignore
@@ -238,7 +252,10 @@ export default class Calendar extends Component<CalendarProps> {
                           <div
                             id={`rezervacka-${this.state.rCnt}`}
                             key={this.state.rCnt}
-                            className="rezervacka"
+                            className={
+                              "rezervacka"
+                              + " " + (r[7] != this.state.idTim ? "readonly" : "")
+                            }
                             data-den={d}
                             style={{ gridColumn }}
                           >
@@ -380,7 +397,6 @@ export default class Calendar extends Component<CalendarProps> {
                 onChange={(event: any) => this.idTimOnChange(event)}
                 value={this.state.idTim}
               >
-                <option value="">Všetky</option>
                 {this.props.timy.map((tim: any) => (
                   <option
                     key={tim.id}
@@ -415,6 +431,13 @@ export default class Calendar extends Component<CalendarProps> {
 
           <div className="header">Deň</div>
           {this._renderCalendar()}
+        </div>
+        <div>
+          idCvicisko = {this.state.idCvicisko};
+          idTim = {this.state.idTim};
+          rok = {this.state.rok};
+          tyzden = {this.state.tyzden};
+          poradie = {this.state.poradie};
         </div>
       </>
     );
