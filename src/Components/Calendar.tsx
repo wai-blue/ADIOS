@@ -19,7 +19,8 @@ interface CalendarState {
   idCvicisko?: number,
   calendarTitle: string,
   weekStart: Date,
-  weekEnd: Date
+  weekEnd: Date,
+  weekNumber: number
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -36,15 +37,16 @@ export default class Calendar extends Component<CalendarProps> {
   constructor(props: CalendarProps) {
     super(props);
 
-    const today = new Date();
-    const dayOfWeek = today.getDay() - 1;
-    const lastMonday = new Date(today.getTime() - dayOfWeek * 24 * 60 * 60 * 1000);
+    let now: Date = new Date();
+    let lastMonday: Date = new Date(now.getTime() - (now.getDay() - 1) * 24 * 60 * 60 * 1000);
+    let lastDayInWeek = new Date(lastMonday.getTime() + 6 * 24 * 60 * 60 * 1000);
 
     this.state = {
       rCnt: 0,
       calendarTitle: 'def',
       weekStart: lastMonday,
-      weekEnd: new Date(lastMonday.getTime() + 6 * 24 * 60 * 60 * 1000)
+      weekEnd: lastDayInWeek,
+      weekNumber: this.getWeekNumber(lastMonday)
     };
 
     this.url = props.loadDataController ?? props.loadDataUrl ?? '';
@@ -59,7 +61,9 @@ export default class Calendar extends Component<CalendarProps> {
     axios.get(_APP_URL + '/' + this.url, {
       params: {
         idTim: this.state.idTim,
-        idCvicisko: this.state.idCvicisko
+        idCvicisko: this.state.idCvicisko,
+        weekNumber: this.state.weekNumber,
+        currentYear: this.state.weekStart.getFullYear()
       }
     }).then(({data}: any) => {
         this.setState({
@@ -288,17 +292,29 @@ export default class Calendar extends Component<CalendarProps> {
     );
   }
 
-  nextWeek() {
-    this.setState({
-      weekStart: new Date(this.state.weekStart.getTime() + 7 * 24 * 60 * 60 * 1000),
-      weekEnd: new Date(this.state.weekEnd.getTime() + 7 * 24 * 60 * 60 * 1000)
-    })
+  getWeekNumber(week: Date) {
+    let newDate = new Date(week);
+    newDate.setDate(newDate.getDate() + 4 - (newDate.getDay() || 7));
+
+    let year = newDate.getFullYear();
+    let daysDiff = Math.floor((newDate.getTime() - new Date(year, 0, 4).getTime()) / (24 * 60 * 60 * 1000));
+
+    return Math.ceil((daysDiff + 1) / 7);
   }
 
-  previousWeek() {
-    this.setState({
-      weekStart: new Date(this.state.weekStart.getTime() - 7 * 24 * 60 * 60 * 1000),
-      weekEnd: new Date(this.state.weekEnd.getTime() - 7 * 24 * 60 * 60 * 1000)
+  calculateWeeks(type: string = 'next') {
+    let weeks: Object = {};
+
+    let weekStart = new Date(this.state.weekStart.getTime() + (type == 'next' ? 7 : -7) * 24 * 60 * 60 * 1000);
+
+    weeks = {
+      weekStart: weekStart,
+      weekEnd: new Date(this.state.weekEnd.getTime() + (type == 'next' ? 7 : -7) * 24 * 60 * 60 * 1000),
+      weekNumber: this.getWeekNumber(weekStart)
+    }
+
+    this.setState({...weeks}, () => {
+        this.loadData();
     })
   }
 
@@ -306,6 +322,8 @@ export default class Calendar extends Component<CalendarProps> {
     this.loadData();
     //@ts-ignore
     ADIOS.modalToggle(this.props.uid + '-' + modalUid);
+    //@ts-ignore
+    ADIOS.modalToggle(this.props.uid);
   }
 
   render() {
@@ -392,13 +410,13 @@ export default class Calendar extends Component<CalendarProps> {
           </div>
           <div className="col-lg-6 pr-0">
             <div className="d-flex flex-row justify-content-end align-items-center">
-              <a href="#" onClick={() => this.previousWeek()} className="btn btn-primary">«</a>
+              <a href="#" onClick={() => this.calculateWeeks('previous')} className="btn btn-primary">«</a>
               <div className="text-primary text-center" style={{margin: "0 0.5em", width: "200px"}}>
                 { this.state.weekStart.getDate() }.{ this.state.weekStart.getMonth() + 1 }.{ this.state.weekStart.getFullYear() }
                 &nbsp;-&nbsp;
                 { this.state.weekEnd.getDate() }.{ this.state.weekEnd.getMonth() + 1 }.{ this.state.weekStart.getFullYear() }
               </div>
-              <a href="#" onClick={() => this.nextWeek()} className="btn btn-primary">»</a>
+              <a href="#" onClick={() => this.calculateWeeks()} className="btn btn-primary">»</a>
             </div>
           </div>
         </div>
