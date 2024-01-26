@@ -24,7 +24,9 @@ interface CalendarState {
   rok?: number,
   tyzden?: number,
   isReadonly: boolean,
-  warning?: string
+  warning?: string,
+  hh?: number,
+  mm?: number
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -53,7 +55,7 @@ export default class Calendar extends Component<CalendarProps> {
       calendarTitle: 'def',
       datumOd: lastMonday,
       datumDo: lastDayInWeek,
-      isReadonly: false,
+      isReadonly: false
     };
 
     console.log(this.state);
@@ -124,6 +126,16 @@ export default class Calendar extends Component<CalendarProps> {
     }, () => {
       this.loadData();
     });
+  }
+
+  pickTime(hh: number, mm: number) {
+    this.setState({
+      hh: hh,
+      mm: mm
+    });
+
+    //@ts-ignore
+    ADIOS.modalToggle(this.props.uid);
   }
 
   sortable(section: any, onUpdate: any) {
@@ -256,16 +268,7 @@ export default class Calendar extends Component<CalendarProps> {
                                 + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
                               }
                               data-den={d}
-                              onClick={() =>
-                                //@ts-ignore
-                                ADIOS.modalToggle(this.props.uid)
-                                //@ts-ignore
-                                //ADIOS.modal(
-                                //  'rozpis/form-rezervacia-pridat',
-                                //  { hh, mm },
-                                //  { title: `Rezervácia cvičiska na čas: ${hh}:${mm}` }
-                                //)
-                              }
+                              onClick={() => this.pickTime(hh, mm)}
                             ></div>
                           );
                         });
@@ -306,10 +309,7 @@ export default class Calendar extends Component<CalendarProps> {
                                   className="cast-cviciska"
                                   style={{ background: this._addOpacity(r[2], '60') }}
                                   //onClick={() => ADIOS.modal('rozpis/treningy/form', { hh, mm })}
-                                  onClick={() => {
-                                      //@ts-ignore
-                                      ADIOS.modalToggle(this.props.uid);
-                                  }}
+                                  onClick={() => this.pickTime(hh, mm)}
                                 >
                                   <div className="cas">{`${hh}:${mm}`}</div>
                                   <div className="nazov">{r[3]}</div>
@@ -369,7 +369,7 @@ export default class Calendar extends Component<CalendarProps> {
     return (
       <>
         <Modal
-          title="Rezervácia cvičiska"
+          title={"Rezervácia cvičiska " + (this.state.hh ? this.state.hh + ":" + this.state.mm : '')}
           uid={this.props.uid}
         >
           <FormCardButton

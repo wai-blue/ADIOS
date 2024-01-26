@@ -50,6 +50,17 @@ export default class Modal extends Component<ModalProps> {
     }
   }
 
+  /**
+   * This function trigger if something change, for Form id of record
+   */
+  componentDidUpdate(prevProps: any) {
+    if (prevProps.title != this.props.title) {
+      this.setState({
+        title: this.props.title
+      });
+    }
+  }
+
   render() {
     return ReactDOM.createPortal(
       <div
