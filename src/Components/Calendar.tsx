@@ -1,10 +1,13 @@
 import React, { Component } from "react";
 import axios from "axios";
 import moment from "moment";
+import { dateToString } from "./Helper";
+import Notification from "./Notification";
 
 import FormCardButton from './FormCardButton';
 import Form from './Form';
 import Modal from './Modal';
+import SwalButton from "./SwalButton";
 
 interface CalendarProps {
   uid: string,
@@ -93,7 +96,7 @@ export default class Calendar extends Component<CalendarProps> {
         warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
       } else if (this.state.idTim) {
         if (this.props.timy[this.state.idTim].poradie != data.poradie) {
-          // isReadonly = true;
+          isReadonly = true;
           warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
         }
       } else {
@@ -137,13 +140,17 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   pickDateTime(slot: Moment) {
-    this.setState({
-      rezervaciaDatum: `${slot.format('DD.MM.YYYY')}`,
-      rezervaciaCasOd: `${slot.format('HH:mm')}`
-    });
+    if (!this.state.isReadonly) {
+      this.setState({
+        rezervaciaDatum: `${slot.format('DD.MM.YYYY')}`,
+        rezervaciaCasOd: `${slot.format('HH:mm')}`
+      });
 
-    //@ts-ignore
-    ADIOS.modalToggle(this.props.uid + '-trening-form-modal');
+      //@ts-ignore
+      ADIOS.modalToggle(this.props.uid + '-trening-form-modal');
+    } else {
+      Notification.error(this.state.warning ?? '');
+    }
   }
 
   sortable(section: any, onUpdate: any) {
@@ -321,6 +328,7 @@ export default class Calendar extends Component<CalendarProps> {
                                     style={{ background: this._addOpacity(rr[0], '60') }}
                                     onClick={() => {
                                       //@ts-ignore
+                                      // TODO EDIT
                                       ADIOS.modalToggle(this.props.uid);
                                     }}
                                   >
@@ -331,7 +339,6 @@ export default class Calendar extends Component<CalendarProps> {
                                 <div
                                   className="cast-cviciska"
                                   style={{ background: this._addOpacity(r[2], '60') }}
-                                  //onClick={() => ADIOS.modal('rozpis/treningy/form', { hh, mm })}
                                   onClick={() => {
                                     if (r[7] == this.state.idTim) {
                                       this.pickDateTime(_slot);
@@ -484,7 +491,20 @@ export default class Calendar extends Component<CalendarProps> {
           ></Form>
         </Modal>
 
-        <div className="row mb-2">
+        {this.state.isReadonly ? (
+          <div className='alert alert-danger' role='alert'>
+            <i className='fas fa-exclamation-triangle mr-4 align-self-center'></i>
+            {this.state.warning}
+          </div>
+        ) : (
+            <div className='alert alert-success' role='alert'>
+              <i className='fas fa-check mr-4 align-self-center'></i>
+              Rozpis môžete upravovať
+            </div>
+          )
+        }
+
+        <div className="row mt-1 mb-2">
           <div className="col-lg-6 pl-0">
             <div className="d-flex flex-row align-items-center">
               <select
@@ -530,8 +550,6 @@ export default class Calendar extends Component<CalendarProps> {
           </div>
         </div>
 
-        <div>{this.state.warning}</div>
-
         <div id={'adios-calendar-' + this.props.uid} className="rezervacny-kalendar rounded-sm">
           <div className="header" style={{ gridRow: 'span 2' }}>Dátum</div>
           <div className="header">Hodina</div>
@@ -545,6 +563,58 @@ export default class Calendar extends Component<CalendarProps> {
           <div className="header">Deň</div>
           {this._renderCalendar()}
         </div>
+
+        <div className="row mt-4">
+          <div className="col-lg-8"></div>
+          <div className="col-lg-4 text-right">
+            {!this.state.isReadonly ? (
+              <>
+                <SwalButton
+                  uid={this.props.uid}
+                  text="Ukončiť tvorbu rozpisu"
+                  css="btn-success"
+                  icon="fas fa-check"
+                  confirmUrl="rozpis/kalendar/potvrdit-rozpis"
+                  successMessage="Rozpis úspešne ukončený"
+                  confirmParams={{
+                    idSportovisko: this.props.idSportovisko,
+                    rok: this.state.rok,
+                    tyzden: this.state.tyzden
+                  }}
+                  onConfirmCallback={() => this.loadData()}
+                  swal={{
+                    title: "Ukončiť tvorbu rozpisu",
+                    html:`
+                      <p>
+                        Chystáte sa ukončiť tvorbu rozpisu v týždni <b>${dateToString(this.state.datumOd)} - ${dateToString(this.state.datumDo)}</b>
+                        na všetkých cvičiskách.<br/>
+                      </p>
+
+                      <div class='alert alert-danger' role='alert'>
+                        <i class='fas fa-exclamation-triangle mr-4 align-self-center'></i>
+                        Krok sa nedá vrátiť späť. Ďalšie zmeny v rozpise bude môcť vykonať iba klubový koordinátor.<br/>
+                      </div>
+
+                      <div class='alert alert-success' role='alert'>
+                        <i class='fas fa-check mr-4 align-self-center'></i>
+                        Potvrdením umožníte tvoriť rozpis ďalšiemu trénerovi v poradí.
+                      </div>
+                    `,
+                    icon: "info",
+                    confirmButtonText: "Potvrdiť",
+                    confirmButtonColor: '#1cc88a',
+                    cancelButtonText: "Zrušiť"
+                  }}
+                ></SwalButton>
+
+                <div className="mt-2">
+                  Umožníte tvoriť rozpis ďalšiemu trénerovi v poradí.
+                </div>
+              </>
+            ) : ''}
+          </div>
+        </div>
+
         <div>
           isReadonly = {this.state.isReadonly};
           idCvicisko = {this.state.idCvicisko};
