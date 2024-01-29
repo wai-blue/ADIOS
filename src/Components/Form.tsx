@@ -118,7 +118,9 @@ export default class Form extends Component<FormProps> {
         invalidInputs: {},
         isEdit: this.props.id ? this.props.id > 0 : false
       });
-    } else if (prevProps.defaultValues != this.props.defaultValues) {
+    }
+
+    if (prevProps.defaultValues != this.props.defaultValues) {
       console.log(this.props.defaultValues);
       this.initInputs(this.state.columns, this.props.defaultValues);
     }
