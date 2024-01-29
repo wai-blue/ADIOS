@@ -121,7 +121,7 @@ export default class Form extends Component<FormProps> {
     }
 
     if (prevProps.defaultValues != this.props.defaultValues) {
-      console.log(this.props.defaultValues);
+      // console.log(this.props.defaultValues);
       this.initInputs(this.state.columns, this.props.defaultValues);
     }
   }
@@ -335,7 +335,7 @@ export default class Form extends Component<FormProps> {
   convertLayoutToString(layout?: Array<Array<string>>): string {
     //@ts-ignore
     let l = layout?.map(row => `"${row.join(' ')}"`).join('\n');
-    console.log(l);
+    // console.log(l);
     return l;
   }
 

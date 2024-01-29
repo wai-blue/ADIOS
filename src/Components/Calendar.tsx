@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import axios from "axios";
+import moment from "moment";
 
 import FormCardButton from './FormCardButton';
+import Form from './Form';
 import Modal from './Modal';
 
 interface CalendarProps {
@@ -25,7 +27,8 @@ interface CalendarState {
   tyzden?: number,
   isReadonly: boolean,
   warning?: string,
-  casOd?: string
+  rezervaciaDatum?: string,
+  rezervaciaCasOd?: string
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -57,7 +60,7 @@ export default class Calendar extends Component<CalendarProps> {
       isReadonly: false
     };
 
-    console.log(this.state);
+    // console.log(this.state);
 
     this.url = props.loadDataController ?? props.loadDataUrl ?? '';
   }
@@ -73,8 +76,7 @@ export default class Calendar extends Component<CalendarProps> {
         idTim: this.state.idTim,
         idCvicisko: this.state.idCvicisko,
         datumOd: this.state.datumOd,
-        datumDo: this.state.datumDo,
-        casOd: this.state.casOd
+        datumDo: this.state.datumDo
       }
     }).then(({data}: any) => {
 
@@ -132,13 +134,14 @@ export default class Calendar extends Component<CalendarProps> {
     return `${number < 10 ? '0' : ''}${number}`;
   }
 
-  pickTime(hh: number, mm: number) {
+  pickDateTime(slot: Moment) {
     this.setState({
-      casOd: `${this.formatTimeNumber(hh)}:${this.formatTimeNumber(mm)}`
+      rezervaciaDatum: `${slot.format('YYYY-MM-DD')}`,
+      rezervaciaCasOd: `${slot.format('HH:mm')}`
     });
 
     //@ts-ignore
-    ADIOS.modalToggle(this.props.uid);
+    ADIOS.modalToggle(this.props.uid + '-trening-form-modal');
   }
 
   sortable(section: any, onUpdate: any) {
@@ -241,27 +244,31 @@ export default class Calendar extends Component<CalendarProps> {
         {Array.from({ length: 7 }, (_, d) => (
           <React.Fragment key={d}>
             {(() => {
-              let hh = 6;
-              let mm = 0;
+              let slot = moment(this.state.datumOd).add(d, 'days').startOf('day').set({hour: 6});
+              // let hh = 0;
+              // let mm = 0;
+
+              // console.log('|', this.state.datumOd, slot, slot.format());
 
               if (!this.state.data) return;
 
-              return (
+              let dayLine =
                 <React.Fragment>
-                  <div className="header">30.10.</div>
+                  <div className="header">{slot.format('D.M.YYYY')}</div>
                   <div className="header">{dni[d]}</div>
 
                   {this.state.data[d]
                     ? (this.state.data[d].map((r: any) => {
+                      // console.log(r);
                       if (r[1] === 0 && r[2] === '' && r[3] === '') {
                         return Array.from({ length: r[0] / 15 }, (_, v) => {
-                          mm += 15;
-                          if (mm >= 60) {
-                            mm -= 60;
-                            hh += 1;
-                          }
+                          // let hh = slot.hours();
+                          // let mm = slot.minutes();
+                          const _slot = moment(slot);
 
-                          return (
+                          // console.log('A', slot, hh, mm);
+
+                          let div = (
                             <div
                               id={`rezervacka-${this.state.rCnt++}`}
                               key={this.state.rCnt}
@@ -270,18 +277,28 @@ export default class Calendar extends Component<CalendarProps> {
                                 + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")
                                 + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
                               }
+                              title={slot.format('D.M.YYYY HH:mm')}
                               data-den={d}
-                              onClick={() => this.pickTime(hh, mm)}
+                              onClick={() => this.pickDateTime(_slot)}
                             ></div>
                           );
+
+                          slot = slot.add(15, 'minutes');
+
+                          return div;
+
                         });
                       } else {
+                        const _slot = moment(slot);
                         const span = (r[0] + r[1]) / 15;
                         const gridColumn = `span ${span}`;
 
                         this.state.rCnt += span;
 
-                        return (
+                        // let hh = slot.hours();
+                        // let mm = slot.minutes();
+
+                        let div = (
                           <div
                             id={`rezervacka-${this.state.rCnt}`}
                             key={this.state.rCnt}
@@ -289,6 +306,7 @@ export default class Calendar extends Component<CalendarProps> {
                               "rezervacka"
                               + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
                             }
+                            title={slot.format('D.M.YYYY HH:mm')}
                             data-den={d}
                             style={{ gridColumn }}
                           >
@@ -312,9 +330,13 @@ export default class Calendar extends Component<CalendarProps> {
                                   className="cast-cviciska"
                                   style={{ background: this._addOpacity(r[2], '60') }}
                                   //onClick={() => ADIOS.modal('rozpis/treningy/form', { hh, mm })}
-                                  onClick={() => this.pickTime(hh, mm)}
+                                  onClick={() => {
+                                    if (r[7] == this.state.idTim) {
+                                      this.pickDateTime(_slot);
+                                    }
+                                  }}
                                 >
-                                  <div className="cas">{`${hh}:${mm}`}</div>
+                                  <div className="cas">{`${_slot.hours()}:${_slot.minutes()}`}</div>
                                   <div className="nazov">{r[3]}</div>
                                   <div className="trener">{r[4]}</div>
                                 </div>
@@ -323,11 +345,17 @@ export default class Calendar extends Component<CalendarProps> {
                             <div className="rolba" style={{ flex: r[1] / 15 }}></div>
                           </div>
                         );
+
+                        slot = slot.add(span*15, 'minutes');
+
+                        return div;
                       }
                     })
                   ) : ''}
                 </React.Fragment>
-              );
+              ;
+
+              return dayLine;
             })()}
           </React.Fragment>
         ))}
@@ -372,8 +400,13 @@ export default class Calendar extends Component<CalendarProps> {
     return (
       <>
         <Modal
-          title={"Rezervácia cvičiska " + (this.state.casOd ? this.state.casOd : '')}
-          uid={this.props.uid}
+          title={
+            "Rezervácia cvičiska "
+            + (this.state.rezervaciaDatum ? this.state.rezervaciaDatum : '')
+            + ' '
+            + (this.state.rezervaciaCasOd ? this.state.rezervaciaCasOd : '')
+          }
+          uid={this.props.uid + '-zvolit-typ-rezervacie'}
         >
           <FormCardButton
             uid={this.props.uid + '-trening'}
@@ -386,7 +419,8 @@ export default class Calendar extends Component<CalendarProps> {
               onSaveCallback: () => this.closeAndLoadData('trening'),
               onDeleteCallback: () => this.closeAndLoadData('trening'),
               defaultValues: {
-                zaciatok: this.state.casOd,
+                datum: this.state.rezervaciaDatum,
+                zaciatok: this.state.rezervaciaCasOd,
                 id_tim: this.state.idTim,
                 id_cvicisko: this.state.idCvicisko
               }
@@ -404,7 +438,8 @@ export default class Calendar extends Component<CalendarProps> {
               onSaveCallback: () => this.closeAndLoadData('zapas'),
               onDeleteCallback: () => this.closeAndLoadData('zapas'),
               defaultValues: {
-                zaciatok: this.state.casOd
+                datum: this.state.rezervaciaDatum,
+                zaciatok: this.state.rezervaciaCasOd
               }
             }}
           ></FormCardButton>
@@ -420,10 +455,31 @@ export default class Calendar extends Component<CalendarProps> {
               onSaveCallback: () => this.closeAndLoadData('komercia'),
               onDeleteCallback: () => this.closeAndLoadData('komercia'),
               defaultValues: {
-                zaciatok: this.state.casOd
+                datum: this.state.rezervaciaDatum,
+                zaciatok: this.state.rezervaciaCasOd
               }
             }}
           ></FormCardButton>
+        </Modal>
+
+
+        <Modal
+          uid={this.props.uid + '-trening-form-modal'}
+          hideHeader={true}
+        >
+          <Form
+            uid={this.props.uid + '-trening-form'}
+            showInModal={true}
+            model="App/Widgets/Rozpis/Models/Trening"
+            onSaveCallback={() => this.closeAndLoadData('trening')}
+            onDeleteCallback={() => this.closeAndLoadData('trening')}
+            defaultValues={{
+              datum: this.state.rezervaciaDatum,
+              zaciatok: this.state.rezervaciaCasOd,
+              id_tim: this.state.idTim,
+              id_cvicisko: this.state.idCvicisko
+            }}
+          ></Form>
         </Modal>
 
         <div className="row mb-2">
