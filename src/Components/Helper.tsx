@@ -26,3 +26,7 @@ export function adiosError(htmlText: string): JSX.Element {
     </div>
   );
 }
+
+export function dateToString(date: Date): string {
+  return `${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`;
+}
