@@ -172,6 +172,10 @@ export default class Form extends Component<FormProps> {
   }
 
   saveRecord() {
+    this.setState({
+      invalidInputs: {}
+    });
+
     //@ts-ignore
     axios.post(_APP_URL + '/Components/Form/OnSave', {
       model: this.props.model,
@@ -180,16 +184,15 @@ export default class Form extends Component<FormProps> {
       Notification.success(res.data.message);
       if (this.props.onSaveCallback) this.props.onSaveCallback();
     }).catch((res) => {
-        console.log(res);
-        if (res.response) {
-          Notification.error(res.response.data.message);
+      if (res.response) {
+        Notification.error(res.response.data.message);
 
-          if (res.response.status == 422) {
-            this.setState({
-              invalidInputs: res.response.data.invalidInputs 
-            });
-          }
+        if (res.response.status == 422) {
+          this.setState({
+            invalidInputs: res.response.data.invalidInputs 
+          });
         }
+      }
     });
   }
 
