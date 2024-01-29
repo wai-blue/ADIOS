@@ -79,7 +79,7 @@ export default class DateTime extends Component<DateTimeInputProps> {
         value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
         onChange={(data: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, data[0] ?? null)}
         className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
-        disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
+        disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].readonly}
         options={this.options}
       />
     );

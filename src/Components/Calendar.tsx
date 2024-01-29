@@ -11,7 +11,8 @@ interface CalendarProps {
   loadDataController?: string,
   loadDataUrl?: string,
   cviciska: Array<any>,
-  timy: Array<any>
+  timy: Array<any>,
+  idSportovisko: number
 }
 
 interface CalendarState {
@@ -45,6 +46,7 @@ export default class Calendar extends Component<CalendarProps> {
   constructor(props: CalendarProps) {
     super(props);
 
+    console.log(props);
     let now: Date = new Date();
     let lastMonday: Date = new Date(now.getTime() - (now.getDay() - 1) * 24 * 60 * 60 * 1000);
     let lastDayInWeek = new Date(lastMonday.getTime() + 6 * 24 * 60 * 60 * 1000);
@@ -136,7 +138,7 @@ export default class Calendar extends Component<CalendarProps> {
 
   pickDateTime(slot: Moment) {
     this.setState({
-      rezervaciaDatum: `${slot.format('YYYY-MM-DD')}`,
+      rezervaciaDatum: `${slot.format('DD.MM.YYYY')}`,
       rezervaciaCasOd: `${slot.format('HH:mm')}`
     });
 
@@ -462,7 +464,6 @@ export default class Calendar extends Component<CalendarProps> {
           ></FormCardButton>
         </Modal>
 
-
         <Modal
           uid={this.props.uid + '-trening-form-modal'}
           hideHeader={true}
@@ -471,13 +472,14 @@ export default class Calendar extends Component<CalendarProps> {
             uid={this.props.uid + '-trening-form'}
             showInModal={true}
             model="App/Widgets/Rozpis/Models/Trening"
-            onSaveCallback={() => this.closeAndLoadData('trening')}
-            onDeleteCallback={() => this.closeAndLoadData('trening')}
+            onSaveCallback={() => this.closeAndLoadData('trening-form-modal')}
+            onDeleteCallback={() => this.closeAndLoadData('trening-form-modal')}
             defaultValues={{
               datum: this.state.rezervaciaDatum,
               zaciatok: this.state.rezervaciaCasOd,
               id_tim: this.state.idTim,
-              id_cvicisko: this.state.idCvicisko
+              id_cvicisko: this.state.idCvicisko,
+              id_sportovisko: this.props.idSportovisko
             }}
           ></Form>
         </Modal>
