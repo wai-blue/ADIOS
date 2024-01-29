@@ -16,13 +16,9 @@ export default class Tags extends Component<TagsInputProps> {
     super(props);
 
     this.state = {
-      tags: [
-        { id: 'Thailand', text: 'Thailand' },
-        { id: 'India', text: 'India' },
-        { id: 'Vietnam', text: 'Vietnam' },
-        { id: 'Turkey', text: 'Turkey' }
-      ]
-    }
+      tags: this.props.parentForm.state.inputs[this.props.columnName],
+      suggestions: this.props.parentForm.state.inputs[this.props.columnName] // Ked sa nieco zmaze omylom
+    };
   }
 
   handleDelete = (tagIndex: string) => {
@@ -53,20 +49,25 @@ export default class Tags extends Component<TagsInputProps> {
   };
 
   handleTagClick = (index: number) => {
-    console.log('The tag at index ' + index + ' was clicked');
+    if (this.state.tags[index].className == 'ReactTags__active')
+      this.state.tags[index].className = '';
+    else
+      this.state.tags[index].className = "ReactTags__active";
+    this.forceUpdate();
   };
 
   render() {
     return (
       <ReactTags
         tags={this.state.tags}
-        //suggestions={this.state.suggestions}
+        suggestions={this.state.suggestions}
         //delimiters={this.state.delimiters}
         handleDelete={this.handleDelete}
         handleAddition={this.handleAddition}
         handleDrag={this.handleDrag}
         handleTagClick={this.handleTagClick}
         inputFieldPosition="bottom"
+        allowDeleteFromEmptyInput={false}
         autocomplete
       />
     );

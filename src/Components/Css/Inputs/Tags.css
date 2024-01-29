@@ -18,20 +18,21 @@
   width: 100%;
   margin-top: 10px;
 }
+
 .ReactTags__tagInput input.ReactTags__tagInputField,
 .ReactTags__tagInput input.ReactTags__tagInputField:focus {
-    width: 100%;
-    height: calc(1.5em + 0.75rem + 2px);
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #6e707e;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #d1d3e2;
-    border-radius: 0.35rem;
-    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  width: 100%;
+  height: calc(1.5em + 0.75rem + 2px);
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #6e707e;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #d1d3e2;
+  border-radius: 0.35rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
 .ReactTags__tagInput input.ReactTags__tagInputField:focus {
@@ -52,8 +53,9 @@
 
 /* Styles for selected tags */
 .ReactTags__selected span.ReactTags__tag {
+  border: 1px solid #f8f9fc;
   background: #f8f9fc;
-  color:#3a3b45;
+  color: #3a3b45;
   font-size: 0.8rem;
   display: inline-block;
   padding: 2px 0px 2px 10px;
@@ -61,9 +63,10 @@
   border-radius: 0.4rem;
 }
 
-.ReactTags__selected a.ReactTags__remove {
-  color: red;
-  margin-left: 2px;
+.ReactTags__remove:hover {
+  color: red !important;
+  border-color: red !important;
+  /*margin-left: 2px;*/
   cursor: pointer;
 }
 
@@ -71,22 +74,26 @@
 .ReactTags__suggestions {
   position: absolute;
 }
+
 .ReactTags__suggestions ul {
   list-style-type: none;
   box-shadow: 0.05em 0.01em 0.5em rgba(0, 0, 0, 0.2);
   background: white;
   width: 200px;
 }
+
 .ReactTags__suggestions li {
   border-bottom: 1px solid #ddd;
   padding: 5px 10px;
   margin: 0;
 }
+
 .ReactTags__suggestions li mark {
   text-decoration: underline;
   background: none;
   font-weight: 600;
 }
+
 .ReactTags__suggestions ul li.ReactTags__activeSuggestion {
   background: #b7cfe0;
   cursor: pointer;
@@ -98,4 +105,18 @@
   background: none;
   color: grey;
   padding: 3px 9px;
+}
+
+.ReactTags__active {
+  background-color: #5b72a4 !important;
+  color: white !important;
+  border: 1px solid #5b72a4 !important;
+}
+
+.ReactTags__active .ReactTags__remove {
+  color: white;
+}
+
+.ReactTags__tag:hover {
+  border: 1px solid #5b72a4 !important;
 }
