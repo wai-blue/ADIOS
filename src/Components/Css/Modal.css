@@ -79,3 +79,7 @@
    border-bottom-color: #EEEEEE;
    background-color: #FAFAFA;
  }
+
+ .max-w-250 {
+   max-width: 250px;
+ }

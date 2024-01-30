@@ -1,14 +1,14 @@
-import React, { Component, JSXElementConstructor } from "react";
+import React, {Component} from "react";
 
 import axios from "axios";
 
 import Notification from "./Notification";
 
-import ReactQuill, { Value } from 'react-quill';
+import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import Swal, { SweetAlertOptions } from "sweetalert2";
+import Swal, {SweetAlertOptions} from "sweetalert2";
 
-import { deepObjectMerge, adiosError } from "./Helper";
+import {adiosError, deepObjectMerge} from "./Helper";
 
 /** Components */
 import InputLookup from "./Inputs/Lookup";
@@ -24,7 +24,7 @@ import InputDateTime from "./Inputs/DateTime";
 import InputEnumValues from "./Inputs/EnumValues";
 
 interface Content {
-  [key: string]: ContentCard|any;
+  [key: string]: ContentCard | any;
 }
 
 interface ContentCard {
@@ -74,7 +74,7 @@ export interface FormColumnParams {
   description?: string,
   disabled?: boolean,
   model?: string,
-  enumValues?: Array<string|number>,
+  enumValues?: Array<string | number>,
   unit?: string,
   defaultValue?: any,
   viewParams: any
@@ -85,7 +85,7 @@ export interface FormColumns {
 }
 
 interface FormInputs {
-  [key: string]: string|number;
+  [key: string]: string | number;
 }
 
 export default class Form extends Component<FormProps> {
@@ -179,7 +179,7 @@ export default class Form extends Component<FormProps> {
     //@ts-ignore
     axios.post(_APP_URL + '/Components/Form/OnSave', {
       model: this.props.model,
-      inputs: this.state.inputs 
+      inputs: this.state.inputs
     }).then((res: any) => {
       Notification.success(res.data.message);
       if (this.props.onSaveCallback) this.props.onSaveCallback();
@@ -189,7 +189,7 @@ export default class Form extends Component<FormProps> {
 
         if (res.response.status == 422) {
           this.setState({
-            invalidInputs: res.response.data.invalidInputs 
+            invalidInputs: res.response.data.invalidInputs
           });
         }
       }
@@ -214,17 +214,17 @@ export default class Form extends Component<FormProps> {
           model: this.props.model,
           id: id
         }).then(() => {
-            Notification.success("Záznam zmazaný");
-            if (this.props.onDeleteCallback) this.props.onDeleteCallback();
-          }).catch((res) => {
-            Notification.error(res.response.data.message);
+          Notification.success("Záznam zmazaný");
+          if (this.props.onDeleteCallback) this.props.onDeleteCallback();
+        }).catch((res) => {
+          Notification.error(res.response.data.message);
 
-            if (res.response.status == 422) {
-              this.setState({
-                invalidInputs: res.response.data.invalidInputs 
-              });
-            }
-          });
+          if (res.response.status == 422) {
+            this.setState({
+              invalidInputs: res.response.data.invalidInputs
+            });
+          }
+        });
       }
     })
   }
@@ -237,17 +237,17 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-    * Input onChange with event parameter 
-    */
+   * Input onChange with event parameter
+   */
   inputOnChange(columnName: string, event: React.FormEvent<HTMLInputElement>) {
-    let inputValue: string|number = event.currentTarget.value;
+    let inputValue: string | number = event.currentTarget.value;
 
     this.inputOnChangeRaw(columnName, inputValue);
   }
 
   /**
-    * Input onChange with raw input value, change inputs (React state)
-    */
+   * Input onChange with raw input value, change inputs (React state)
+   */
   inputOnChangeRaw(columnName: string, inputValue: any) {
     let changedInput: any = {};
     changedInput[columnName] = inputValue;
@@ -258,8 +258,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-    * Dynamically initialize inputs (React state) from model columns
-    */
+   * Dynamically initialize inputs (React state) from model columns
+   */
   initInputs(columns?: FormColumns, inputsValues: Object = {}) {
     let inputs: any = {};
 
@@ -281,10 +281,10 @@ export default class Form extends Component<FormProps> {
           break;
         case 'tags':  // Testing
           inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, [
-            { id: 'Thailand', text: 'Thailand' },
-            { id: 'India', text: 'India' },
-            { id: 'Vietnam', text: 'Vietnam' },
-            { id: 'Turkey', text: 'Turkey', className: 'red' }
+            {id: 'Thailand', text: 'Thailand'},
+            {id: 'India', text: 'India'},
+            {id: 'Vietnam', text: 'Vietnam'},
+            {id: 'Turkey', text: 'Turkey', className: 'red'}
           ]);
           break;
         default:
@@ -332,7 +332,7 @@ export default class Form extends Component<FormProps> {
 
     Object.keys(this.state.content?.tabs).map((tabName: string) => {
       tabs[tabName] = {
-        active: firstIteration 
+        active: firstIteration
       };
 
       firstIteration = false;
@@ -340,7 +340,7 @@ export default class Form extends Component<FormProps> {
 
     this.setState({
       tabs: tabs
-    });  
+    });
   }
 
   convertLayoutToString(layout?: Array<Array<string>>): string {
@@ -351,8 +351,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-    * Render tab
-    */
+   * Render tab
+   */
   _renderTab(): JSX.Element {
     if (this.state.content?.tabs) {
       let tabs: any = Object.keys(this.state.content.tabs).map((tabName: string) => {
@@ -362,7 +362,7 @@ export default class Form extends Component<FormProps> {
       return tabs;
     } else {
       return this._renderTabContent("default", this.state.content);
-    } 
+    }
   }
 
   /*
@@ -371,27 +371,27 @@ export default class Form extends Component<FormProps> {
     */
   _renderTabContent(tabName: string, content: any) {
     if (
-      tabName == "default" 
-        || (this.state.tabs && this.state.tabs[tabName]['active'])
+      tabName == "default"
+      || (this.state.tabs && this.state.tabs[tabName]['active'])
     ) {
       return (
-        <div 
+        <div
           style={{
-            display: 'grid', 
-            gridTemplateRows: 'auto', 
-            gridTemplateAreas: this.state.layout, 
+            display: 'grid',
+            gridTemplateRows: 'auto',
+            gridTemplateAreas: this.state.layout,
             gridGap: '15px'
           }}
         >
-          {this.state.content != null ? 
+          {this.state.content != null ?
             Object.keys(content).map((contentArea: string) => {
-              return this._renderContentItem(contentArea, content[contentArea]); 
+              return this._renderContentItem(contentArea, content[contentArea]);
             })
             : this.state.inputs != null ? (
               Object.keys(this.state.inputs).map((inputName: string) => {
                 if (
-                  this.state.columns == null 
-                    || this.state.columns[inputName] == null
+                  this.state.columns == null
+                  || this.state.columns[inputName] == null
                 ) return <strong style={{color: 'red'}}>Not defined params for {inputName}</strong>;
 
                 return this._renderInput(inputName)
@@ -405,21 +405,21 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-    * Render content item 
-    */
-  _renderContentItem(contentItemArea: string, contentItemParams: undefined|string|Object|Array<string>): JSX.Element {
+   * Render content item
+   */
+  _renderContentItem(contentItemArea: string, contentItemParams: undefined | string | Object | Array<string>): JSX.Element {
     if (contentItemParams == undefined) return <b style={{color: 'red'}}>Content item params are not defined</b>;
 
     let contentItemKeys = Object.keys(contentItemParams);
     if (contentItemKeys.length == 0) return <b style={{color: 'red'}}>Bad content item definition</b>;
 
-    let contentItemName = contentItemArea == "inputs" 
+    let contentItemName = contentItemArea == "inputs"
       ? contentItemArea : contentItemKeys[0];
 
     let contentItem: JSX.Element;
 
     switch (contentItemName) {
-      case 'input': 
+      case 'input':
         contentItem = this._renderInput(contentItemParams['input'] as string);
         break;
       case 'inputs':
@@ -427,10 +427,10 @@ export default class Form extends Component<FormProps> {
           return this._renderInput(input)
         });
         break;
-      case 'html': 
-        contentItem = (<div dangerouslySetInnerHTML={{ __html: contentItemParams['html'] }} />);
+      case 'html':
+        contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
-      default: 
+      default:
         contentItem = window.getComponent(contentItemName, contentItemParams[contentItemName]);
     }
 
@@ -442,8 +442,8 @@ export default class Form extends Component<FormProps> {
   }
 
   /**
-    * Render different input types
-    */
+   * Render different input types
+   */
   _renderInput(columnName: string): JSX.Element {
     if (this.state.columns == null) return <></>;
     if (!this.state.columns[columnName]) return adiosError(`Column: <b>${columnName}</b> doesn't exist in model or is not shown`);
@@ -461,14 +461,14 @@ export default class Form extends Component<FormProps> {
         inputToRender = React.createElement(
           window['App']['reactElements'][inputJSX],
           {
-           parentForm: this,
-           columnName: columnName
+            parentForm: this,
+            columnName: columnName
           }
         );
       } else {
         switch (this.state.columns[columnName].type) {
           case 'text':
-            inputToRender = <InputTextarea 
+            inputToRender = <InputTextarea
               parentForm={this}
               columnName={columnName}
               params={this.state.columns[columnName].viewParams?.Form}
@@ -476,21 +476,21 @@ export default class Form extends Component<FormProps> {
             break;
           case 'float':
           case 'int':
-            inputToRender = <InputInt 
+            inputToRender = <InputInt
               parentForm={this}
               columnName={columnName}
               params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'boolean':
-            inputToRender = <InputBoolean 
+            inputToRender = <InputBoolean
               parentForm={this}
               columnName={columnName}
               params={this.state.columns[columnName].viewParams?.Form}
             />;
             break;
           case 'lookup':
-            inputToRender = <InputLookup 
+            inputToRender = <InputLookup
               parentForm={this}
               {...this.state.columns[columnName]}
               columnName={columnName}
@@ -537,12 +537,13 @@ export default class Form extends Component<FormProps> {
             break;
           case 'editor':
             inputToRender = (
-              <div className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
-                <ReactQuill 
-                  theme="snow" 
-                  value={this.inputs[columnName] as Value} 
+              <div
+                className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
+                <ReactQuill
+                  theme="snow"
+                  value={this.inputs[columnName] as Value}
                   onChange={(value) => this.inputOnChangeRaw(columnName, value)}
-                  className="w-100" 
+                  className="w-100"
                 />
               </div>
             );
@@ -558,7 +559,7 @@ export default class Form extends Component<FormProps> {
     }
 
     return columnName != 'id' ? (
-      <div 
+      <div
         className="input-form mb-3"
         key={columnName}
       >
@@ -567,8 +568,12 @@ export default class Form extends Component<FormProps> {
           {this.state.columns[columnName].required == true ? <b className="text-danger"> *</b> : ""}
         </label>
 
-        <div 
-          className="input-group"
+        <div
+          className={"input-group " + (
+            this.state.columns[columnName].unit ||
+            this.state.columns[columnName].type == 'time' ||
+            this.state.columns[columnName].type == 'date' ||
+            this.state.columns[columnName].type == 'datetime' ? "max-w-250" : "")}
           key={columnName}
         >
           {inputToRender}
@@ -576,6 +581,22 @@ export default class Form extends Component<FormProps> {
           {this.state.columns[columnName].unit ? (
             <div className="input-group-append">
               <span className="input-group-text">{this.state.columns[columnName].unit}</span>
+            </div>
+          ) : ''}
+
+          {this.state.columns[columnName].type == 'time' ? (
+            <div className="input-group-append">
+              <span className="input-group-text">
+                <i className="fas fa-clock"></i>
+              </span>
+            </div>
+          ) : ''}
+
+          {this.state.columns[columnName].type == 'date' || this.state.columns[columnName].type == 'datetime' ? (
+            <div className="input-group-append">
+              <span className="input-group-text">
+                <i className="fas fa-calendar"></i>
+              </span>
             </div>
           ) : ''}
         </div>
@@ -595,7 +616,7 @@ export default class Form extends Component<FormProps> {
           aria-label="Close"
         ><span>&times;</span></button>
 
-        <button 
+        <button
           onClick={() => this.saveRecord()}
           className="btn btn-sm btn-success btn-icon-split"
         >
@@ -621,7 +642,7 @@ export default class Form extends Component<FormProps> {
   _renderButtonsRight(): JSX.Element {
     return (
       <div className="d-flex">
-        {this.state.isEdit ? <button 
+        {this.state.isEdit ? <button
           onClick={() => this.deleteRecord(this.props.id ?? 0)}
           className="btn btn-danger btn-sm btn-icon-split"
         >
@@ -632,8 +653,6 @@ export default class Form extends Component<FormProps> {
       </div>
     );
   }
-
-
 
 
   render() {
@@ -664,46 +683,46 @@ export default class Form extends Component<FormProps> {
           id={"adios-form-" + this.props.uid}
           className="adios react ui form"
         >
-            {this.props.showInModal ? (
-              <div className="modal-body">
+          {this.props.showInModal ? (
+            <div className="modal-body">
+              {this._renderTab()}
+            </div>
+          ) : (
+            <div className="card w-100">
+              <div className="card-header">
+                <div className="row">
+                  <div className="col-lg-12 m-0 p-0">
+                    <h3 className="card-title">
+                      {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
+                    </h3>
+                  </div>
+
+                  {this._renderButtonsLeft()}
+
+                  {this.state.tabs != undefined ? (
+                    <ul className="nav nav-tabs card-header-tabs mt-3">
+                      {Object.keys(this.state.tabs).map((tabName: string) => {
+                        return (
+                          <li className="nav-item">
+                            <button
+                              className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
+                              onClick={() => this.changeTab(tabName)}
+                            >{tabName}</button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : ''}
+
+                  {this._renderButtonsRight()}
+                </div>
+              </div>
+
+              <div className="card-body">
                 {this._renderTab()}
               </div>
-            ) : (
-              <div className="card w-100">
-                <div className="card-header">
-                  <div className="row">
-                    <div className="col-lg-12 m-0 p-0">
-                      <h3 className="card-title">
-                        {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
-                      </h3>
-                    </div>
-
-                    {this._renderButtonsLeft()}
-
-                    {this.state.tabs != undefined ? (
-                      <ul className="nav nav-tabs card-header-tabs mt-3">
-                        {Object.keys(this.state.tabs).map((tabName: string) => {
-                          return (
-                            <li className="nav-item"> 
-                              <button 
-                                className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
-                                onClick={() => this.changeTab(tabName)}
-                              >{ tabName }</button> 
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : ''}
-
-                    {this._renderButtonsRight()}
-                  </div>
-                </div>
-
-                <div className="card-body">
-                  {this._renderTab()}
-                </div>
-              </div>
-            )}
+            </div>
+          )}
         </div>
       </>
     );
