@@ -32,7 +32,8 @@ interface CalendarState {
   isReadonly: boolean,
   warning?: string,
   rezervaciaDatum?: string,
-  rezervaciaCasOd?: string
+  rezervaciaCasOd?: string,
+  casUprava?: number
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -109,7 +110,8 @@ export default class Calendar extends Component<CalendarProps> {
         rok: data.rok,
         tyzden: data.tyzden,
         isReadonly: isReadonly,
-        warning: warning
+        warning: warning,
+        casUprava: data.cvicisko.cas_uprava
       }, () => {
         //@ts-ignore
         this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
@@ -431,7 +433,9 @@ export default class Calendar extends Component<CalendarProps> {
                 datum: this.state.rezervaciaDatum,
                 zaciatok: this.state.rezervaciaCasOd,
                 id_tim: this.state.idTim,
-                id_cvicisko: this.state.idCvicisko
+                id_cvicisko: this.state.idCvicisko,
+                vyuzitie: 1, //cela plocha default,
+                cas_uprava: this.state.casUprava
               }
             }}
           ></FormCardButton>
@@ -486,7 +490,9 @@ export default class Calendar extends Component<CalendarProps> {
               zaciatok: this.state.rezervaciaCasOd,
               id_tim: this.state.idTim,
               id_cvicisko: this.state.idCvicisko,
-              id_sportovisko: this.props.idSportovisko
+              id_sportovisko: this.props.idSportovisko,
+              vyuzitie: 1, //cela plocha default
+              trvanie_uprava: this.state.casUprava
             }}
           ></Form>
         </Modal>
@@ -613,17 +619,6 @@ export default class Calendar extends Component<CalendarProps> {
               </>
             ) : ''}
           </div>
-        </div>
-
-        <div>
-          isReadonly = {this.state.isReadonly};
-          idCvicisko = {this.state.idCvicisko};
-          idTim = {this.state.idTim};
-          datumOd = {this.state.datumOd.getDate()}.{this.state.datumOd.getMonth()+1}.{this.state.datumOd.getFullYear()};
-          datumDo = {this.state.datumDo.getDate()}.{this.state.datumDo.getMonth()+1}.{this.state.datumDo.getFullYear()};
-          rok = {this.state.rok};
-          tyzden = {this.state.tyzden};
-          poradie = {this.state.poradie};
         </div>
       </>
     );
