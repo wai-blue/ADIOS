@@ -121,7 +121,6 @@ export default class Form extends Component<FormProps> {
     }
 
     if (prevProps.defaultValues != this.props.defaultValues) {
-      // console.log(this.props.defaultValues);
       this.initInputs(this.state.columns, this.props.defaultValues);
     }
   }
