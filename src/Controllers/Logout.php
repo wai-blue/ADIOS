@@ -6,6 +6,9 @@ namespace ADIOS\Controllers;
  * @package Components\Controllers
  */
 class Logout extends \ADIOS\Core\Controller {
+  public static bool $requiresUserAuthentication = FALSE;
+  public static bool $hideDefaultDesktop = TRUE;
+
   public function preRender() {
     unset($_SESSION[_ADIOS_ID]['userProfile']);
 

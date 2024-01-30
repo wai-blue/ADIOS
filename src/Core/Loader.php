@@ -585,6 +585,26 @@ class Loader
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction(
+          'hasPermission',
+          function (string $permission, array $idUserRoles = []) {
+            return $this->permissions->has($permission, $idUserRoles);
+          }
+        ));
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'hasRole',
+          function (int|string $role) {
+            if (is_string($role)) {
+              $userRoleModel = $this->getCoreClass('Models\\UserRole');
+              $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
+              $idRole = (int) $idUserRoleByRoleName[$role];
+            } else {
+              $idRole = (int) $role;
+            }
+
+            return in_array($idRole, $this->userProfile['roles']);
+          }
+        ));
+        $this->twig->addFunction(new \Twig\TwigFunction(
           'translate',
           function ($string, $objectClassName = "") {
             if (!class_exists($objectClassName)) {
@@ -1168,18 +1188,16 @@ class Loader
       $this->dispatchEventToPlugins("onADIOSBeforeRender", ["adios" => $this]);
 
       try {
-        // Kontrola permissions, krok 2
-        // Tu sa permissions kontroluju na zaklade povoleni pre konkretnu akciu
-        // (renderovana akcia nemusi byt to iste, ako REQUESTED_URI, pretoze routing
-        // to moze zmenit)
-        if ($controllerClassName::$requiresUserAuthentication) {
-          $this->checkPermissionsForController($this->controller, $this->params);
-        }
-
-        // permissions granted
         if ($this->controllerExists($this->controller)) {
 
           $this->controllerObject = new $controllerClassName($this, $this->params);
+
+          if (
+            $controllerClassName::$requiresUserAuthentication
+            && !$this->permissions->has($this->controllerObject->permissionName)
+          ) {
+            throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException($this->controllerObject->permissionName);
+          }
 
           $this->onBeforeRender();
 
@@ -1207,9 +1225,6 @@ class Loader
                 $html = $this->twig->render(
                   $view,
                   [
-                    'USER_ROLES' => ($this->getCoreClass('Models\\UserRole'))::USER_ROLES,
-                    'USER_ROLE_NAMES' => ($this->getCoreClass('Models\\UserRole'))::USER_ROLE_NAMES,
-
                     'uid' => $this->uid,
                     'user' => $this->userProfile,
                     'config' => $this->config,
@@ -1246,7 +1261,7 @@ class Loader
           }
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-        $return = $this->renderFatal($e->getMessage());
+        $return = $this->renderFatal("Not enough permissions: ".$e->getMessage());
       } catch (
         \Exception
         // | \Throwable

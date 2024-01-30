@@ -1,6 +1,20 @@
 /* button */
 
-.adios.ui.button {color:#616161;font-size:11pt;padding: 2px 15px 0px 15px; display: inline-block;transition: 0.3s;background: rgba(255, 255, 255, 0);cursor:pointer;line-height:30px; white-space: nowrap;text-decoration: none !important; height:40px;box-sizing:border-box;height:40px;}
+.adios.ui.button {
+  /* color:#616161;
+  font-size:11pt;
+  padding: 2px 15px 0px 15px;
+  display: inline-block;
+  transition: 0.3s;
+  background: rgba(255, 255, 255, 0);
+  cursor:pointer;
+  line-height:30px;
+  white-space: nowrap;
+  text-decoration: none !important;
+  height:40px;
+  box-sizing:border-box;
+  height:40px; */
+}
 .adios.ui.button:disabled {opacity:0.3;}
 .adios.ui.button.underline {border-bottom: solid 3px #9E9E9E;}
 .adios.ui.button:hover:enabled, .adios.ui.button.active {background: #9E9E9E;color: white;}

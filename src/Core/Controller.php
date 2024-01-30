@@ -55,6 +55,7 @@ class Controller {
 
   public string $name = "";
   public string $shortName = "";
+  public string $permissionName = "";
   public string $uid = "";
   public string $controller = "";
   public string $myRootFolder = "";
@@ -64,12 +65,17 @@ class Controller {
   function __construct(\ADIOS\Core\Loader $adios, array $params = [])
   {
     $this->name = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
-    $this->shortName = end(explode("/", $this->name));
     $this->adios = $adios;
     $this->params = $params;
     $this->uid = $this->adios->uid;
     $this->gtp = $this->adios->gtp;
     $this->controller = $this->adios->controller;
+
+    $this->shortName = $this->name;
+    $this->shortName = str_replace('App/Widgets/', '', $this->shortName);
+    $this->shortName = str_replace('Controllers/', '', $this->shortName);
+
+    $this->permissionName = $this->shortName;
 
     $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 

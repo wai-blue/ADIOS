@@ -350,7 +350,7 @@ class Builder {
       }
 
       if (is_array($widgetConfig['permissions'] ?? NULL)) {
-        $permissions = array_merge($permissions, $widgetConfig['permissions']);
+        $permissions = array_merge_recursive($permissions, $widgetConfig['permissions']);
       }
 
       if (is_array($widgetConfig['models'] ?? NULL)) {

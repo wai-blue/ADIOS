@@ -16,6 +16,9 @@ namespace ADIOS\Controllers;
  * @package Components\Controllers
  */
 class Login extends \ADIOS\Core\Controller {
+  public static bool $requiresUserAuthentication = FALSE;
+  public static bool $hideDefaultDesktop = TRUE;
+
   public function preRender() {
     return [
       "login" => $_POST['login'],

@@ -5,11 +5,21 @@
 namespace App\Core;
 
 class Permissions extends \ADIOS\Core\Permissions {
-  public function __construct(\ADIOS\Core\Loader $adios) {
-    parent::__construct($adios);
+  public function loadPermissions(): array {
+    $permissions = parent::loadPermissions();
 
-    $this->enabledPermissions = array_merge($this->enabledPermissions,
+    $prototypePermissionsByRoleNames =
 {{ varExport(permissions, "      ")|raw }}
-    );
+    ;
+
+    $userRoleModel = $this->adios->getCoreClass('Models\\UserRole');
+    $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
+
+    $prototypePermissions = [];
+    foreach ($prototypePermissionsByRoleNames as $roleName => $rolePermissions) {
+      $prototypePermissions[$idUserRoleByRoleName[$roleName]] = $rolePermissions;
+    }
+
+    return \ADIOS\Core\HelperFunctions::arrayMergeRecursively($permissions, $prototypePermissions);
   }
 }

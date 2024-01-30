@@ -16,6 +16,12 @@ namespace ADIOS\Controllers\Components\Form;
 class OnLoadData extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
+  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
+    parent::__construct($adios, $params);
+
+    $this->permissionName = $this->permissionName . ':' . $this->params['model'];
+  }
+
   public function renderJson() { 
     try {
       $tmpModel = $this->adios->getModel($this->params['model']);

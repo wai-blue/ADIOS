@@ -21,6 +21,12 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public \ADIOS\Core\Model $model;
   public array $data = [];
 
+  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
+    parent::__construct($adios, $params);
+
+    $this->permissionName = $this->permissionName . ':' . $this->params['model'];
+  }
+
   public function prepareQuery(): \Illuminate\Database\Eloquent\Builder {
     $params = $this->params;
     $pageLength = (int) $params['pageLength'] ?? 15;

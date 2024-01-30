@@ -19,11 +19,7 @@ class UserRole extends \ADIOS\Core\Model {
   const ADMINISTRATOR = 1;
 
   const USER_ROLES = [
-    'ADMINISTRATOR' => self::ADMINISTRATOR,
-  ];
-
-  const USER_ROLE_NAMES = [
-    self::ADMINISTRATOR => 'Administrator'
+    self::ADMINISTRATOR => 'ADMINISTRATOR',
   ];
 
   public string $urlBase = "user-roles";

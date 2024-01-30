@@ -121,7 +121,7 @@ export default class Table extends Component<TableProps> {
                 case 'color': {
                   return this._commonCellRenderer(
                     column._adiosColumnDef,
-                    <span 
+                    <div 
                       style={{ width: '20px', height: '20px', background: params.value }} 
                       className="rounded" 
                     />

@@ -16,6 +16,12 @@ namespace ADIOS\Controllers\Components\Table;
 class OnLoadParams extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
+  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
+    parent::__construct($adios, $params);
+
+    $this->permissionName = $this->permissionName . ':' . $this->params['model'];
+  }
+
   /**
   * React component take this argument type for displaying in table
   * so in some case replace type for own custom type

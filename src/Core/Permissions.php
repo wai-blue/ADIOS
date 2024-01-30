@@ -15,24 +15,32 @@ class Permissions {
    */
   protected $adios;
 
-  protected array $enabledPermissions = [];
+  protected array $permissions = [];
     
   function __construct($adios)
   {
     $this->adios = $adios;
 
+    $this->permissions = $this->loadPermissions();
+
+  }
+
+  function loadPermissions(): array {
+    $permissions = [];
     if (is_array($this->adios->config['permissions'] ?? [])) {
       foreach ($this->adios->config['permissions'] ?? [] as $idUserRole => $permissionsByRole) {
-        $this->enabledPermissions[$idUserRole] = [];
+        $permissions[$idUserRole] = [];
         foreach ($permissionsByRole as $permissionPath => $isEnabled) {
           if ((bool) $isEnabled) {
-            $this->enabledPermissions[$idUserRole][] = str_replace(":", "/", $permissionPath);
+            $permissions[$idUserRole][] = str_replace(":", "/", $permissionPath);
           }
         }
-        $this->enabledPermissions[$idUserRole] = array_unique($this->enabledPermissions[$idUserRole]);
+        $permissions[$idUserRole] = array_unique($permissions[$idUserRole]);
       }
 
     }
+
+    return $permissions;
   }
 
   public function set(string $permission, int $idUserRole, bool $isEnabled)
@@ -47,7 +55,7 @@ class Permissions {
   {
     if ($idUserRole <= 0) $idUserRole = (int) reset($this->adios->userProfile['roles']);
 
-    return (bool) in_array($permission, $this->enabledPermissions[$idUserRole]);
+    return (bool) in_array($permission, $this->permissions[$idUserRole]);
   }
   
   public function has(string $permission, array $idUserRoles = []) : bool
@@ -55,6 +63,7 @@ class Permissions {
     if (count($idUserRoles) == 0) $idUserRoles = $this->adios->userProfile['roles'];
 
     // TODO: Docasne. Ked bude fungovat, vymazat.
+    if (strpos($permission, "Desktop") === 0) return TRUE;
     if (strpos($permission, "Administrator/Permission") === 0) return TRUE;
     if (strpos($permission, "Core/Models") === 0) return TRUE;
 
@@ -63,7 +72,7 @@ class Permissions {
       if ($idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR) {
         $permissionGranted = TRUE;
       } else {
-        $permissionGranted = (bool) in_array($permission, (array) $this->enabledPermissions[$idUserRole]);
+        $permissionGranted = (bool) in_array($permission, (array) $this->permissions[$idUserRole]);
       }
 
       if ($permissionGranted) break;
