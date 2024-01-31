@@ -18,8 +18,7 @@ class OnLoadParams extends \ADIOS\Core\Controller {
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
-
-    $this->permissionName = $this->permissionName . ':' . $this->params['model'];
+    $this->permissionName = $this->params['model'] . ':Read';
   }
 
   /**

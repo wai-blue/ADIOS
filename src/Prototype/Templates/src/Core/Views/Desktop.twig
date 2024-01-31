@@ -220,11 +220,7 @@
                 <li class="nav-item dropdown no-arrow">
                   <a class="nav-link dropdown-toggle " href="javascript:void(0)" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{ user.name }} {{ user.surname }}</span>
-                    {% if updates_available %}
-                      <i class='btn btn-warning btn-sm btn-circle fas fa-exclamation-triangle' style='font-weight:900'></i>
-                    {% else %}
-                      <i class='btn btn-primary btn-sm btn-circle fas fa-user-tie' style='font-weight:900'></i>
-                    {% endif %}
+                    <i class='btn btn-primary btn-sm btn-circle fas fa-user-tie' style='font-weight:900'></i>
                   </a>
                   <!-- Dropdown - User Information -->
                   <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">

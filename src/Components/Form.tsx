@@ -138,6 +138,7 @@ export default class Form extends Component<FormProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadParamsController, {
       params: {
+        __IS_AJAX__: '1',
         model: this.props.model,
         columns: this.props.columns
       }
@@ -162,6 +163,7 @@ export default class Form extends Component<FormProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Form/OnLoadData', {
       params: {
+        __IS_AJAX__: '1',
         model: this.props.model,
         id: this.props.id
       }
@@ -177,8 +179,9 @@ export default class Form extends Component<FormProps> {
 
     //@ts-ignore
     axios.post(_APP_URL + '/Components/Form/OnSave', {
+      __IS_AJAX__: '1',
       model: this.props.model,
-      inputs: this.state.inputs
+      inputs: {...this.state.inputs, id: this.props.id ?? 0}
     }).then((res: any) => {
       Notification.success(res.data.message);
       if (this.props.onSaveCallback) this.props.onSaveCallback();
@@ -210,6 +213,7 @@ export default class Form extends Component<FormProps> {
       if (result.isConfirmed) {
         //@ts-ignore
         axios.patch(_APP_URL + '/Components/Form/OnDelete', {
+          __IS_AJAX__: '1',
           model: this.props.model,
           id: id
         }).then(() => {

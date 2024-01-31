@@ -35,6 +35,7 @@ export default class Lookup extends Component<LookupInputProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/Components/Inputs/Lookup/OnLoadData', {
       params: {
+        __IS_AJAX__: '1',
         model: this.model,
         search: inputValue
       }

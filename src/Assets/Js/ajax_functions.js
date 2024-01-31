@@ -203,14 +203,14 @@ function _ajax_read(controller, params, onsuccess, onreadystatechange) {
           onsuccess(res);
         }
       } else {
-        switch (resJson.result) {
-          case 'WARNING':
+        switch (resJson.status) {
+          case 'warning':
             _warning(resJson.content);
           break;
-          case 'FATAL':
+          case 'error':
             _fatal(resJson.content);
           break;
-          case 'SUCCESS':
+          case 'success':
           default:
             if (typeof onsuccess == 'function') {
               onsuccess(resJson.content);
@@ -257,23 +257,23 @@ function _ajax_read_json(controller, params, onsuccess, onwarning, onfatal) {
 
     'dataType': 'json',
     'success': function(res) {
-      if (res.result == 'SUCCESS') {
+      if (res.status == 'success') {
         if (typeof onsuccess == 'function') {
           onsuccess(res.content);
         } else {
           _alert('SUCCESS\n\n' + JSON.stringify(res.content));
         }
-      } else if (res.result == 'WARNING') {
+      } else if (res.status == 'warning') {
         if (typeof onwarning == 'function') {
           onwarning(res.content);
         } else {
           _alert('WARNING\n\n' + JSON.stringify(res.content));
         }
-      } else if (res.result == 'FATAL') {
+      } else if (res.status == 'error') {
         if (typeof onfatal == 'function') {
           onfatal(res.content);
         } else {
-          _alert('FATAL\n\n' + JSON.stringify(res.content));
+          _alert('ERROR\n\n' + JSON.stringify(res.content));
         }
       }
     }

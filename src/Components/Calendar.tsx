@@ -57,7 +57,7 @@ export default class Calendar extends Component<CalendarProps> {
 
     this.state = {
       rCnt: 0,
-      idCvicisko: this.props.cviciska[0].id,
+      idCvicisko: this.props.cviciska[0]?.id ?? 0,
       idTim: this.props.timy.length != 0 ? this.props.timy[Object.keys(this.props.timy)[0]].id : 0,
       poradie: 0,
       calendarTitle: 'def',
@@ -79,6 +79,7 @@ export default class Calendar extends Component<CalendarProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/' + this.url, {
       params: {
+        __IS_AJAX__: '1',
         idTim: this.state.idTim,
         idCvicisko: this.state.idCvicisko,
         datumOd: this.state.datumOd,
@@ -111,7 +112,7 @@ export default class Calendar extends Component<CalendarProps> {
         tyzden: data.tyzden,
         isReadonly: isReadonly,
         warning: warning,
-        casUprava: data.cvicisko.cas_uprava
+        casUprava: data.cvicisko?.cas_uprava ?? 0
       }, () => {
         //@ts-ignore
         this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
@@ -458,15 +459,15 @@ export default class Calendar extends Component<CalendarProps> {
           ></FormCardButton>
 
           <FormCardButton
-            uid={this.props.uid + '-komercia'}
-            text="Komercia"
+            uid={this.props.uid + '-prenajom'}
+            text="Prenájom"
             css="btn-light m-1"
             icon="fas fa-euro-sign"
             form={{
-              uid: this.props.uid + '-komercia',
-              model: "App/Widgets/Rozpis/Models/Komercia",
-              onSaveCallback: () => this.closeAndLoadData('komercia'),
-              onDeleteCallback: () => this.closeAndLoadData('komercia'),
+              uid: this.props.uid + '-prenajom',
+              model: "App/Widgets/Rozpis/Models/Prenajom",
+              onSaveCallback: () => this.closeAndLoadData('prenajom'),
+              onDeleteCallback: () => this.closeAndLoadData('prenajom'),
               defaultValues: {
                 datum: this.state.rezervaciaDatum,
                 zaciatok: this.state.rezervaciaCasOd

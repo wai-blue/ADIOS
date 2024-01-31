@@ -16,9 +16,14 @@ namespace ADIOS\Controllers\Components\Form;
 class OnCreate extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
-  public function renderJson() { 
+  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
+    parent::__construct($adios, $params);
+    $this->permissionName = $this->params['model'] . ':Create';
+  }
+
+  public function renderJson() {
     try {
-      $params = $this->getRequestParams();
+      $params = $this->params;
 
       $tmpModel = $this->adios->getModel($params['model']);
 

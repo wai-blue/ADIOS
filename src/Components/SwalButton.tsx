@@ -72,8 +72,10 @@ export default class SwalButton extends Component<SwalButtonProps> {
     Swal.fire(this.swal as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
         //@ts-ignore
-        axios.post(_APP_URL + '/' + this.props.confirmUrl, this.props.confirmParams)
-        .then((res) => {
+        axios.post(
+          _APP_URL + '/' + this.props.confirmUrl,
+          {...this.props.confirmParams, __IS_AJAX__: '1'}
+        ).then((res) => {
           Notification.success(this.props.successMessage ?? 'Confirmed');
           if (this.props.onConfirmCallback) this.props.onConfirmCallback(res.data);
         }).catch((res) => {

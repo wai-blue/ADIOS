@@ -98,6 +98,7 @@ export default class Table extends Component<TableProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadParamsController, {
       params: {
+        __IS_AJAX__: '1',
         model: this.props.model,
         tag: this.props.tag,
         columns: this.props.columns
@@ -213,6 +214,7 @@ export default class Table extends Component<TableProps> {
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadDataController, {
       params: {
+        __IS_AJAX__: '1',
         page: page,
         pageLength: this.state.pageLength,
         model: this.props.model,

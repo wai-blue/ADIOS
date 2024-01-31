@@ -1101,7 +1101,12 @@ class Loader
           $this->controller = $_SERVER['argv'][1] ?? "";
         } else {
           $this->controller = $_REQUEST['controller'] ?? '';
-          $params = $_REQUEST;
+          // $params = $_REQUEST;
+          $params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+            array_merge($_GET, $_POST),
+            json_decode(file_get_contents("php://input"), true) ?? []
+          );
+          // echo"x---"; var_dump(json_decode(file_get_contents("php://input"), true) ?? []);exit;
           unset($params['controller']);
         }
       } else {
@@ -1189,7 +1194,6 @@ class Loader
 
       try {
         if ($this->controllerExists($this->controller)) {
-
           $this->controllerObject = new $controllerClassName($this, $this->params);
 
           if (
@@ -1261,7 +1265,8 @@ class Loader
           }
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-        $return = $this->renderFatal("Not enough permissions: ".$e->getMessage());
+        $return = $this->renderFatal($e->getMessage(), FALSE);
+        header('HTTP/1.1 401 Unauthorized', true, 401);
       } catch (\Exception $e) {
         $error = error_get_last();
 
@@ -1278,12 +1283,15 @@ class Loader
         } else {
           $return = $this->renderFatal($this->renderExceptionHtml($e));
         }
+
+        header('HTTP/1.1 400 Bad Request', true, 400);
       }
 
       return $return;
 
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      return $this->renderFatal($e->getMessage());
+      header('HTTP/1.1 401 Unauthorized', true, 401);
+      return $this->renderFatal($e->getMessage(), FALSE);
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
@@ -1293,6 +1301,7 @@ class Loader
         $lines[] = "SERVER.REQUEST_URI = {$this->config['requestUri']}";
       }
 
+      header('HTTP/1.1 400 Bad Request', true, 400);
       return join(" ", $lines);
     }
   }
@@ -1355,8 +1364,8 @@ class Loader
   public function renderReturn($return) {
     // if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
-        "result" => "SUCCESS",
-        "content" => $return,
+        "result" => "success",
+        "message" => $return,
       ]);
     // } else {
     //   return $return;
@@ -1366,8 +1375,8 @@ class Loader
   public function renderWarning($message, $isHtml = TRUE) {
     if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
-        "result" => "WARNING",
-        "content" => $message,
+        "status" => "warning",
+        "message" => $message,
       ]);
     } else {
       return "
@@ -1381,8 +1390,8 @@ class Loader
   public function renderFatal($message, $isHtml = TRUE) {
     if ($this->isAjax() && !$this->isWindow()) {
       return json_encode([
-        "result" => "FATAL",
-        "content" => $message,
+        "status" => "error",
+        "message" => $message,
       ]);
     } else {
       return "

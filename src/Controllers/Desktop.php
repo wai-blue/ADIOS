@@ -65,21 +65,21 @@ class Desktop extends \ADIOS\Core\Controller {
       "onclick" => "window.open('{$this->adios->config['url']}');",
     ];
 
-    $settingsMenuItems[] = [
-      "faIcon" => "fas fa-bolt",
-      "text" => $this->translate("Restart"),
-      "onclick" => "
-        if (window.location.href.indexOf('restart=1') == '-1') {
-          if (window.location.href.indexOf('?') == -1) {
-            window.location.href = window.location.href + '?restart=1';
-          } else {
-            window.location.href = window.location.href + '&restart=1';
-          }
-        } else {
-          window.location.reload();
-        }
-      ",
-    ];
+    // $settingsMenuItems[] = [
+    //   "faIcon" => "fas fa-bolt",
+    //   "text" => $this->translate("Restart"),
+    //   "onclick" => "
+    //     if (window.location.href.indexOf('restart=1') == '-1') {
+    //       if (window.location.href.indexOf('?') == -1) {
+    //         window.location.href = window.location.href + '?restart=1';
+    //       } else {
+    //         window.location.href = window.location.href + '&restart=1';
+    //       }
+    //     } else {
+    //       window.location.reload();
+    //     }
+    //   ",
+    // ];
 
     $settingsLogoutItems = [
       "faIcon" => "fas fa-sign-out-alt",
