@@ -150,7 +150,7 @@ export default class Calendar extends Component<CalendarProps> {
     if (!this.state.isReadonly) {
       this.setState({
         idZaznam: id,
-        rezervaciaDatum: `${slot.format('DD.MM.YYYY')}`,
+        rezervaciaDatum: `${slot.format('YYYY-MM-DD')}`,
         rezervaciaCasOd: `${slot.format('HH:mm')}`
       });
 

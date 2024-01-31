@@ -1,21 +1,29 @@
 import React, { Component } from 'react'
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
+import moment, { Moment } from "moment";
 
 export const dateToEUFormat = (dateString: string): string => {
   let d = new Date(dateString);
 
-  return ('0' + d.getDate()).slice(-2) + "."
-    + ('0' + (d.getMonth() + 1)).slice(-2)
-    + "." + d.getFullYear()
-  ;
+  if (dateString.length != 10) {
+    return '';
+  } else {
+    return ('0' + d.getDate()).slice(-2) + "."
+      + ('0' + (d.getMonth() + 1)).slice(-2)
+      + "." + d.getFullYear()
+    ;
+  }
 }
 
 export const timeToEUFormat = (dateString: string): string => {
   let d = new Date(dateString);
 
-  return ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2)
-  ;
+  if (dateString.length != 5) {
+    return '';
+  } else {
+    return ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2);
+  }
 }
 
 export const datetimeToEUFormat = (dateString: string): string => {
@@ -74,9 +82,24 @@ export default class DateTime extends Component<DateTimeInputProps> {
   }
 
   render() {
+    let value: string = this.props.parentForm.state.inputs[this.props.columnName] ?? "";
+
+    switch (this.props.type) {
+      case 'datetime': 
+        value = dateToEUFormat(value) + ' ' + timeToEUFormat(value);
+      break;
+      case 'date':
+        value = dateToEUFormat(value);
+      break;
+      case 'time':
+        value = value;
+      break;
+    }
+    console.log(this.props.type, this.props.parentForm.state.inputs[this.props.columnName] ?? "", value);
+    
     return (
       <Flatpickr
-        value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
+        value={value}
         onChange={(data: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, data[0] ?? null)}
         className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
         disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].readonly}
