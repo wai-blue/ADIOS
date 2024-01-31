@@ -10,7 +10,7 @@ use ADIOS\Core\View;
 class Chart extends View
 {
 
-  public string $twigTemplate = "Core/Components/Chart";
+  public string $twigTemplate = "ADIOS/Core/Components/Chart";
   private ?Model $model = null;
 
   public function __construct(?Loader $adios, array $params = []) {

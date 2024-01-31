@@ -19,7 +19,7 @@ namespace ADIOS\Core\ViewsWithController;
  */
 class Grid extends \ADIOS\Core\ViewWithController {
 
-  public string $twigTemplate = "Core/Components/Grid";
+  public string $twigTemplate = "ADIOS/Core/Components/Grid";
 
   /**
    * @internal

@@ -12,7 +12,7 @@ namespace ADIOS\Core\ViewsWithController;
 
 class Dashboard extends \ADIOS\Core\ViewWithController
 {
-  public string $twigTemplate = "Core/Components/Dashboard";
+  public string $twigTemplate = "ADIOS/Core/Components/Dashboard";
 
   public function __construct($adios, array $params = []) {
     $this->adios = $adios;

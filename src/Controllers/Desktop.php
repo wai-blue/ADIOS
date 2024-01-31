@@ -25,6 +25,7 @@ namespace ADIOS\Controllers;
  */
 class Desktop extends \ADIOS\Core\Controller {
 
+  public string $twigTemplate = "App/Core/Views/Desktop";
   public string $contentController = '';
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = [])

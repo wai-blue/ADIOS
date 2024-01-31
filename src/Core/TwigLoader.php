@@ -26,19 +26,13 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $action = substr($templateName, strpos($templateName, "/") + 1);
 
       $templateFile = $this->adios->widgetsDir."/{$widget}/Templates/{$action}.twig";
-    } else if (strpos($templateName, "App/Widgets/") === 0) {
-      $templateName = str_replace('App/Widgets/', '', $templateName);
+    } else if (strpos($templateName, "App/") === 0) {
+      $templateName = str_replace('App/', '', $templateName);
 
-      foreach ($this->adios->widgets as $widgetName => $widgetData) {
-        if (strpos(strtolower($templateName), strtolower($widgetName)) === 0) {
-          $templateFile = 
-            $this->adios->widgetsDir
-            . '/' . $widgetName . '/'
-            . substr($templateName, strlen($widgetName) + 1)
-            . '.twig'
-          ;
-        }
-      }
+      $templateFile = 
+        $this->adios->config['dir']
+        . '/src/' . $templateName . '.twig'
+      ;
     } else if (strpos($templateName, "ADIOS/Templates/") === 0) {
       $templateName = str_replace("ADIOS/Templates/", "", $templateName);
 

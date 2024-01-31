@@ -1262,10 +1262,7 @@ class Loader
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
         $return = $this->renderFatal("Not enough permissions: ".$e->getMessage());
-      } catch (
-        \Exception
-        // | \Throwable
-        $e) {
+      } catch (\Exception $e) {
         $error = error_get_last();
 
         if ($error['type'] == E_ERROR) {

@@ -5,7 +5,7 @@ namespace ADIOS\Core\ViewsWithController;
 
 class DataTable extends \ADIOS\Core\ViewWithController {
 
-  public string $twigTemplate = "Core/Components/DataTable";
+  public string $twigTemplate = "ADIOS/Core/Components/DataTable";
   private ?\ADIOS\Core\Model $model = null;
 
   public function __construct(?\ADIOS\Core\Loader $adios, array $params = []) {
