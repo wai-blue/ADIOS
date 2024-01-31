@@ -1,12 +1,18 @@
-import React, { Component } from "react";
+import React, { Component, FC, useState, forwardRef } from "react";
 import axios from "axios";
 import moment, { Moment } from "moment";
 import { dateToString, numberToStringTime } from "./Helper";
 import Notification from "./Notification";
+import { ReactSortable } from "react-sortablejs";
 
 import Form from './Form';
 import Modal from './Modal';
+
 import SwalButton from "./SwalButton";
+
+const CustomComponent = forwardRef<HTMLDivElement, any>((props, ref) => {
+  return <React.Fragment ref={ref}>{props.children}</React.Fragment>;
+});
 
 
 interface CalendarProps {
@@ -35,7 +41,8 @@ interface CalendarState {
   rezervaciaDatum?: string,
   rezervaciaCasOd?: string,
   casUprava?: number,
-  idZaznam?: null
+  idZaznam?: null,
+  xxx: Array<any>
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -65,7 +72,11 @@ export default class Calendar extends Component<CalendarProps> {
       calendarTitle: 'def',
       datumOd: lastMonday,
       datumDo: lastDayInWeek,
-      isReadonly: false
+      isReadonly: false,
+      xxx:  [
+        { id: 1, name: "shrek" },
+        { id: 2, name: "fiona" }
+      ]
     };
 
     // console.log(this.state);
@@ -119,9 +130,9 @@ export default class Calendar extends Component<CalendarProps> {
         casUprava: data.cvicisko?.cas_uprava ?? 0
       }, () => {
         //@ts-ignore
-        this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
-          console.log(item);
-        });
+        //this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
+        //  console.log(item);
+        //});
       })
     });
   }
@@ -249,133 +260,6 @@ export default class Calendar extends Component<CalendarProps> {
     });
   }
 
-  _addOpacity(color: string, opacity: string): string {
-    return color + opacity;
-  }
-
-  _renderCalendar(): JSX.Element {
-    if (!this.state.data) return <p>Loading</p>;
-
-    return (
-      <>
-        {Array.from({ length: 7 }, (_, d) => (
-          <React.Fragment key={d}>
-            {(() => {
-              let slot = moment(this.state.datumOd).add(d, 'days').startOf('day').set({hour: 6});
-              // let hh = 0;
-              // let mm = 0;
-
-              // console.log('|', this.state.datumOd, slot, slot.format());
-
-              if (!this.state.data) return;
-
-              let dayLine =
-                <React.Fragment>
-                  <div className="header">{slot.format('D.M.YYYY')}</div>
-                  <div className="header">{dni[d]}</div>
-
-                  {this.state.data[d]
-                    ? (this.state.data[d].map((r: any) => {
-                      // console.log(r);
-                      if (r[1] === 0 && r[2] === '' && r[3] === '') {
-                        return Array.from({ length: r[0] / 15 }, (_, v) => {
-                          // let hh = slot.hours();
-                          // let mm = slot.minutes();
-                          const _slot = moment(slot);
-
-                          // console.log('A', slot, hh, mm);
-
-                          let div = (
-                            <div
-                              id={`rezervacka-${this.state.rCnt++}`}
-                              key={this.state.rCnt}
-                              className={
-                                "rezervacka volne "
-                                + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")
-                                + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
-                              }
-                              title={slot.format('D.M.YYYY HH:mm')}
-                              data-den={d}
-                              onClick={() => this.pickDateTime(_slot)}
-                            ></div>
-                          );
-
-                          slot = slot.add(15, 'minutes');
-
-                          return div;
-
-                        });
-                      } else {
-                        const _slot = moment(slot);
-                        const span = (r[0] + r[1]) / 15;
-                        const gridColumn = `span ${span}`;
-
-                        this.state.rCnt += span;
-
-                        // let hh = slot.hours();
-                        // let mm = slot.minutes();
-
-                        let div = (
-                          <div
-                            id={`rezervacka-${this.state.rCnt}`}
-                            key={this.state.rCnt}
-                            className={
-                              "rezervacka"
-                              + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
-                            }
-                            title={slot.format('D.M.YYYY HH:mm')}
-                            data-den={d}
-                            style={{ gridColumn }}
-                          >
-                            <div className="rezervacka-inner" style={{ flex: r[0] / 15 }}>
-                              {Array.isArray(r[2]) ? (
-                                r[2].map((rr) => (
-                                  <div
-                                    key={rr[1]}
-                                    className="cast-cviciska"
-                                    style={{ background: this._addOpacity(rr[0], '60') }}
-                                    onClick={() => {
-                                    }}
-                                  >
-                                    {rr[1]}
-                                  </div>
-                                ))
-                              ) : (
-                                <div
-                                  className="cast-cviciska"
-                                  style={{ background: this._addOpacity(r[2], '60') }}
-                                  onClick={() => {
-                                    if (r[7] == this.state.idTim) {
-                                        this.pickDateTime(_slot, r[6]);
-                                    }
-                                  }}
-                                >
-                                  <div className="cas">{numberToStringTime(_slot.hours()) + ':' + numberToStringTime(_slot.minutes())}</div>
-                                  <div className="nazov">{r[3]}</div>
-                                  <div className="trener">{r[4]}</div>
-                                </div>
-                              )}
-                            </div>
-                            <div className="rolba" style={{ flex: r[1] / 15 }}></div>
-                          </div>
-                        );
-
-                        slot = slot.add(span*15, 'minutes');
-
-                        return div;
-                      }
-                    })
-                  ) : ''}
-                </React.Fragment>
-              ;
-
-              return dayLine;
-            })()}
-          </React.Fragment>
-        ))}
-      </>
-    );
-  }
 
   getWeekNumber(date: Date) {
     let newDate = new Date(date);
@@ -408,6 +292,132 @@ export default class Calendar extends Component<CalendarProps> {
     ADIOS.modalToggle(this.props.uid + '-' + modalUid);
     //@ts-ignore
     ADIOS.modalToggle(this.props.uid);
+  }
+
+  _addOpacity(color: string, opacity: string): string {
+    return color + opacity;
+  }
+
+  _renderCalendar(): JSX.Element {
+    if (!this.state.data) return <p>Loading</p>;
+
+    return (
+      <>
+        {Array.from({ length: 7 }, (_, d) => (
+          <>
+            {(() => {
+              let slot = moment(this.state.datumOd).add(d, 'days').startOf('day').set({hour: 6});
+              if (!this.state.data) return;
+
+              let dayLine =
+                <>
+                  <div className="header">{slot.format('D.M.YYYY')}</div>
+                  <div className="header">{dni[d]}</div>
+
+                  <ReactSortable
+                    list={this.state.data}
+                    setList={() => console.log(1)}
+                    tag={CustomComponent}
+                  >
+                  {this.state.data[d] ? (this.state.data[d].map((r: any) => (
+                      <>{(r[1] === 0 && r[2] === '' && r[3] === '') ? (
+                        Array.from({ length: r[0] / 15 }, (_, v) => {
+                          const _slot = moment(slot);
+
+                          let div = (
+                            <div
+                              id={`rezervacka-${this.state.rCnt++}`}
+                              key={this.state.rCnt}
+                              className={
+                                "rezervacka volne "
+                                + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")
+                                + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
+                              }
+                              title={slot.format('D.M.YYYY HH:mm')}
+                              data-den={d}
+                              onClick={() => this.pickDateTime(_slot)}
+                            ></div>
+                          );
+
+                          slot = slot.add(15, 'minutes');
+
+                          return div
+                        })
+                      ) : (
+                        <>
+                          {(() => {
+                            const _slot = moment(slot);
+                            const span = (r[0] + r[1]) / 15;
+                            const gridColumn = `span ${span}`;
+
+                            this.state.rCnt += span;
+
+                            // let hh = slot.hours();
+                            // let mm = slot.minutes();
+
+                            let div = (
+                              <div
+                                id={`rezervacka-${this.state.rCnt}`}
+                                key={this.state.rCnt}
+                                className={
+                                  "rezervacka"
+                                  + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
+                                }
+                                title={slot.format('D.M.YYYY HH:mm')}
+                                data-den={d}
+                                style={{ gridColumn }}
+                              >
+                                <div className="rezervacka-inner" style={{ flex: r[0] / 15 }}>
+                                  {Array.isArray(r[2]) ? (
+                                    r[2].map((rr) => (
+                                      <div
+                                        key={rr[1]}
+                                        className="cast-cviciska"
+                                        style={{ background: this._addOpacity(rr[0], '60') }}
+                                        onClick={() => {
+                                        }}
+                                      >
+                                        {rr[1]}
+                                      </div>
+                                    ))
+                                  ) : (
+                                    <div
+                                      className="cast-cviciska"
+                                      style={{ background: this._addOpacity(r[2], '60') }}
+                                      onClick={() => {
+                                        if (r[7] == this.state.idTim) {
+                                            this.pickDateTime(_slot, r[6]);
+                                        }
+                                      }}
+                                    >
+                                      <div className="cas">{numberToStringTime(_slot.hours()) + ':' + numberToStringTime(_slot.minutes())}</div>
+                                      <div className="nazov">{r[3]}</div>
+                                      <div className="trener">{r[4]}</div>
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="rolba" style={{ flex: r[1] / 15 }}></div>
+                              </div>
+                            );
+
+                            slot = slot.add(span*15, 'minutes');
+
+                            return div;
+                          })()}
+                        </>
+                      )}
+                  </>))) : ''}
+
+                    </ReactSortable>
+                </>
+              ;
+
+              return dayLine;
+            })()}
+          </>
+        ))}
+      </>
+    );
   }
 
   render() {
@@ -477,6 +487,15 @@ export default class Calendar extends Component<CalendarProps> {
             }}
           ></FormCardButton>
         </Modal>*/}
+
+        <ReactSortable
+          list={this.state.xxx}
+          setList={(newState) => this.setState({ xxx: newState })}
+        >
+          {this.state.xxx.map((item) => (
+            <div key={item.id}>{item.name}</div>
+          ))}
+        </ReactSortable>
 
         <Modal
           uid={this.props.uid + '-trening-form-modal'}
