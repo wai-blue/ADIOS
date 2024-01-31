@@ -57,7 +57,19 @@ class Permissions {
 
     return (bool) in_array($permission, $this->permissions[$idUserRole]);
   }
-  
+
+  public function hasRole(int|string $role) {
+    if (is_string($role)) {
+      $userRoleModel = $this->adios->getCoreClass('Models\\UserRole');
+      $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
+      $idRole = (int) $idUserRoleByRoleName[$role];
+    } else {
+      $idRole = (int) $role;
+    }
+
+    return in_array($idRole, $this->adios->userProfile['roles']);
+  }
+
   public function has(string $permission, array $idUserRoles = []) : bool
   {
     if (count($idUserRoles) == 0) $idUserRoles = $this->adios->userProfile['roles'];

@@ -593,15 +593,7 @@ class Loader
         $this->twig->addFunction(new \Twig\TwigFunction(
           'hasRole',
           function (int|string $role) {
-            if (is_string($role)) {
-              $userRoleModel = $this->getCoreClass('Models\\UserRole');
-              $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
-              $idRole = (int) $idUserRoleByRoleName[$role];
-            } else {
-              $idRole = (int) $role;
-            }
-
-            return in_array($idRole, $this->userProfile['roles']);
+            return $this->permissions->hasRole($role);
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction(

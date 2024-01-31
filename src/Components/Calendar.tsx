@@ -15,7 +15,8 @@ interface CalendarProps {
   loadDataUrl?: string,
   cviciska: Array<any>,
   timy: Array<any>,
-  idSportovisko: number
+  idSportovisko: number,
+  jeKoordinator: boolean
 }
 
 interface CalendarState {
@@ -90,19 +91,21 @@ export default class Calendar extends Component<CalendarProps> {
       let isReadonly = false;
       let warning = '';
 
-      if (
-        data.tyzden < this.getWeekNumber(new Date())
-        || data.rok < (new Date()).getFullYear()
-      ) {
-        isReadonly = true;
-        warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
-      } else if (this.state.idTim) {
-        if (this.props.timy[this.state.idTim].poradie != data.poradie) {
-          isReadonly = true;
-          warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
-        }
+      if (this.props.jeKoordinator) {
+        isReadonly = false;
       } else {
-        warning = 'Môžete upravovať rozpis.';
+        if (
+          data.tyzden < this.getWeekNumber(new Date())
+          || data.rok < (new Date()).getFullYear()
+        ) {
+          isReadonly = true;
+          warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
+        } else if (this.state.idTim) {
+          if (this.props.timy[this.state.idTim].poradie != data.poradie) {
+            isReadonly = true;
+            warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
+          }
+        }
       }
 
       this.setState({
@@ -498,19 +501,6 @@ export default class Calendar extends Component<CalendarProps> {
           ></Form>
         </Modal>
 
-        {this.state.isReadonly ? (
-          <div className='alert alert-danger' role='alert'>
-            <i className='fas fa-exclamation-triangle mr-4 align-self-center'></i>
-            {this.state.warning}
-          </div>
-        ) : (
-            <div className='alert alert-success' role='alert'>
-              <i className='fas fa-check mr-4 align-self-center'></i>
-              Rozpis môžete upravovať
-            </div>
-          )
-        }
-
         <div className="row mt-1 mb-2">
           <div className="col-lg-6 pl-0">
             <div className="d-flex flex-row align-items-center">
@@ -539,7 +529,7 @@ export default class Calendar extends Component<CalendarProps> {
                   <option
                     key={this.props.timy[key].id}
                     value={this.props.timy[key].id}
-                  >{this.props.timy[key].nazov} (poradie: {this.props.timy[key].poradie})</option>
+                  >[{this.props.timy[key].poradie}] {this.props.timy[key].nazov}</option>
                 ))}
               </select>
             </div>
@@ -572,7 +562,20 @@ export default class Calendar extends Component<CalendarProps> {
         </div>
 
         <div className="row mt-4">
-          <div className="col-lg-8"></div>
+          <div className="col-lg-8">
+            {this.state.isReadonly ? (
+              <div className='alert alert-danger' role='alert'>
+                <i className='fas fa-exclamation-triangle mr-4 align-self-center'></i>
+                {this.state.warning}
+              </div>
+            ) : (
+                <div className='alert alert-success' role='alert'>
+                  <i className='fas fa-check mr-4 align-self-center'></i>
+                  Rozpis môžete upravovať (aktuálne poradie je {this.state.poradie}).
+                </div>
+              )
+            }
+          </div>
           <div className="col-lg-4 text-right">
             {!this.state.isReadonly ? (
               <>
