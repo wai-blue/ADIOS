@@ -10,13 +10,13 @@ interface FormCardButtonProps {
   text: string,
   icon: string,
   subtitle?: string,
-  css?: string,
+  cssClass?: string,
   formId?: number,
   form?: FormProps
 }
 
 interface FormCardButtonState {
-  css: string,
+  cssClass: string,
   icon: string,
 }
 
@@ -27,7 +27,7 @@ export default class FormCardButton extends Component<FormCardButtonProps> {
     super(props);
 
     this.state = {
-      css: props.css ?? 'btn-primary',
+      cssClass: props.cssClass ?? 'btn-primary',
       icon: props.icon ?? 'fas fa-check',
     }
   }
@@ -52,7 +52,7 @@ export default class FormCardButton extends Component<FormCardButtonProps> {
         <button
           id={"adios-card-button-" + this.props.uid}
           onClick={() => ADIOS.modalToggle(this.props.uid)}
-          className={"btn " + this.state.css + " shadow-sm mb-1 p-4"}
+          className={"btn " + this.state.cssClass + " shadow-sm mb-1 p-4"}
           style={{width: '14em'}}
         >
           <i 

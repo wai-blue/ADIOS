@@ -7,12 +7,12 @@ interface ButtonProps {
   href?: string,
   text?: string,
   icon?: string,
-  css?: string
+  cssClass?: string
 }
 
 interface ButtonState {
   icon: string,
-  css: string
+  cssClass: string
 }
 
 export default class Button extends Component<ButtonProps> {
@@ -22,7 +22,7 @@ export default class Button extends Component<ButtonProps> {
     super(props);
 
     this.state = {
-      css: props.css ?? 'btn-primary',
+      cssClass: props.cssClass ?? 'btn-primary',
       icon: props.icon ?? 'fas fa-check',
     };
 
@@ -30,19 +30,19 @@ export default class Button extends Component<ButtonProps> {
       case 'save':
         this.state = {
           icon: 'fas fa-check',
-          css: 'btn-success'
+          cssClass: 'btn-success'
         }
       break;
       case 'delete':
         this.state = {
           icon: 'fas fa-check',
-          css: 'btn-danger'
+          cssClass: 'btn-danger'
         }
       break;
       case 'close':
         this.state = {
           icon: 'fas fa-times',
-          css: 'btn-light'
+          cssClass: 'btn-light'
         }
       break;
     }
@@ -55,7 +55,7 @@ export default class Button extends Component<ButtonProps> {
         className="adios react ui button"
       >
         <a 
-          className={"adios ui Button btn " + this.state.css + " btn-icon-split"}
+          className={"adios ui Button btn " + this.state.cssClass + " btn-icon-split"}
           href={
             this.props.href ? (
               this.props.href.startsWith('/') 

@@ -1257,7 +1257,7 @@ class Loader
           }
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-        $return = $this->renderFatal($e->getMessage(), FALSE);
+        $return = $this->renderFatal("Not enough permissions: ".$e->getMessage(), FALSE);
         header('HTTP/1.1 401 Unauthorized', true, 401);
       } catch (\Exception $e) {
         $error = error_get_last();

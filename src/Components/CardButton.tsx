@@ -8,7 +8,7 @@ interface CardButtonProps {
   text: string,
   icon: string,
   subtitle?: string,
-  css?: string,
+  cssClass?: string,
 }
 
 export default class CardButton extends Component<CardButtonProps> {
@@ -28,7 +28,7 @@ export default class CardButton extends Component<CardButtonProps> {
               : window.location.href + '/' + this.props.href
           ) : '#'
         }
-        className={"btn " + this.props.css + " shadow-sm mb-1 p-4"}
+        className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4"}
         style={{width: '14em'}}
       >
         <i 
