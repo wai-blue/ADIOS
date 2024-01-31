@@ -76,6 +76,7 @@ export interface FormColumnParams {
   model?: string,
   enumValues?: Array<string | number>,
   unit?: string,
+  step?: number,
   defaultValue?: any,
   viewParams: any
 }
@@ -120,7 +121,7 @@ export default class Form extends Component<FormProps> {
       });
     }
 
-    if (prevProps.defaultValues != this.props.defaultValues) {
+    if (!this.state.isEdit  && prevProps.defaultValues != this.props.defaultValues) {
       this.initInputs(this.state.columns, this.props.defaultValues);
     }
   }
@@ -181,7 +182,7 @@ export default class Form extends Component<FormProps> {
     axios.post(_APP_URL + '/Components/Form/OnSave', {
       __IS_AJAX__: '1',
       model: this.props.model,
-      inputs: {...this.state.inputs, id: this.props.id ?? 0}
+      inputs: {...this.state.inputs, id: this.props.id}
     }).then((res: any) => {
       Notification.success(res.data.message);
       if (this.props.onSaveCallback) this.props.onSaveCallback();
