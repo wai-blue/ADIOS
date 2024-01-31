@@ -121,8 +121,8 @@ export default class Form extends Component<FormProps> {
       });
     }
 
-    if (!this.state.isEdit  && prevProps.defaultValues != this.props.defaultValues) {
-      this.initInputs(this.state.columns, this.props.defaultValues);
+    if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
+      this.initInputs(this.state.columns ?? {}, this.props.defaultValues);
     }
   }
 
@@ -169,7 +169,7 @@ export default class Form extends Component<FormProps> {
         id: this.props.id
       }
     }).then(({data}: any) => {
-      this.initInputs(this.state.columns, data.inputs);
+      this.initInputs(this.state.columns ?? {}, data.inputs);
     });
   }
 
@@ -237,7 +237,9 @@ export default class Form extends Component<FormProps> {
    * Check if is id = undefined or id is > 0
    */
   checkIfIsEdit() {
-    this.state.isEdit = this.props.id && this.props.id > 0 ? true : false;
+    this.setState({
+      isEdit: this.props.id && this.props.id > 0
+    });
   }
 
   /**
@@ -264,10 +266,13 @@ export default class Form extends Component<FormProps> {
   /**
    * Dynamically initialize inputs (React state) from model columns
    */
-  initInputs(columns?: FormColumns, inputsValues: Object = {}) {
+  initInputs(columns: FormColumns, inputsValues: Object = {}) {
     let inputs: any = {};
 
-    if (!columns) return;
+    // If is new form and defaultValues props is set
+    if (Object.keys(inputsValues).length == 0 && this.props.defaultValues) {
+      inputsValues = this.props.defaultValues;
+    }
 
     Object.keys(columns).map((columnName: string) => {
       switch (columns[columnName]['type']) {
@@ -278,11 +283,11 @@ export default class Form extends Component<FormProps> {
               ? this.state.folderUrl + '/' + inputsValues[columnName]
               : null
           };
-          break;
+        break;
         case 'bool':
         case 'boolean':
           inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
-          break;
+        break;
         case 'tags':  // Testing
           inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, [
             {id: 'Thailand', text: 'Thailand'},
@@ -290,13 +295,11 @@ export default class Form extends Component<FormProps> {
             {id: 'Vietnam', text: 'Vietnam'},
             {id: 'Turkey', text: 'Turkey', className: 'red'}
           ]);
-          break;
+        break;
         default:
           inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
       }
     });
-
-    console.log(inputs);
 
     this.setState({
       inputs: inputs

@@ -148,18 +148,22 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   pickDateTime(slot: Moment, id?: number) {
-    if (!this.state.isReadonly) {
-      this.setState({
-        idZaznam: id,
-        rezervaciaDatum: `${slot.format('DD.MM.YYYY')}`,
-        rezervaciaCasOd: `${slot.format('HH:mm')}`
-      });
+    this.setState({
+      idZaznam: id
+    }, () => {
+      if (!this.state.isReadonly) {
+        this.setState({
+          idZaznam: id,
+          rezervaciaDatum: `${slot.format('DD.MM.YYYY')}`,
+          rezervaciaCasOd: `${slot.format('HH:mm')}`
+        });
 
-      //@ts-ignore
-      ADIOS.modalToggle(this.props.uid + '-trening-form-modal');
-    } else {
-      Notification.error(this.state.warning ?? '');
-    }
+        //@ts-ignore
+        ADIOS.modalToggle(this.props.uid + '-trening-form-modal');
+      } else {
+        Notification.error(this.state.warning ?? '');
+      }
+    });
   }
 
   sortable(section: any, onUpdate: any) {
