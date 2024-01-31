@@ -1,6 +1,6 @@
-import React, { Component } from "react";
+import React, { Component, MouseEvent } from "react";
 import axios from "axios";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import { dateToString } from "./Helper";
 import Notification from "./Notification";
 
@@ -8,6 +8,7 @@ import FormCardButton from './FormCardButton';
 import Form from './Form';
 import Modal from './Modal';
 import SwalButton from "./SwalButton";
+
 
 interface CalendarProps {
   uid: string,
@@ -33,7 +34,8 @@ interface CalendarState {
   warning?: string,
   rezervaciaDatum?: string,
   rezervaciaCasOd?: string,
-  casUprava?: number
+  casUprava?: number,
+  idZaznam?: null
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -142,9 +144,10 @@ export default class Calendar extends Component<CalendarProps> {
     return `${number < 10 ? '0' : ''}${number}`;
   }
 
-  pickDateTime(slot: Moment) {
+  pickDateTime(slot: Moment, id?: number) {
     if (!this.state.isReadonly) {
       this.setState({
+        idZaznam: id,
         rezervaciaDatum: `${slot.format('DD.MM.YYYY')}`,
         rezervaciaCasOd: `${slot.format('HH:mm')}`
       });
@@ -330,9 +333,6 @@ export default class Calendar extends Component<CalendarProps> {
                                     className="cast-cviciska"
                                     style={{ background: this._addOpacity(rr[0], '60') }}
                                     onClick={() => {
-                                      //@ts-ignore
-                                      // TODO EDIT
-                                      ADIOS.modalToggle(this.props.uid);
                                     }}
                                   >
                                     {rr[1]}
@@ -344,7 +344,7 @@ export default class Calendar extends Component<CalendarProps> {
                                   style={{ background: this._addOpacity(r[2], '60') }}
                                   onClick={() => {
                                     if (r[7] == this.state.idTim) {
-                                      this.pickDateTime(_slot);
+                                        this.pickDateTime(_slot, r[6]);
                                     }
                                   }}
                                 >
@@ -411,7 +411,7 @@ export default class Calendar extends Component<CalendarProps> {
   render() {
     return (
       <>
-        <Modal
+        {/*<Modal
           title={
             "Rezervácia cvičiska "
             + (this.state.rezervaciaDatum ? this.state.rezervaciaDatum : '')
@@ -474,7 +474,7 @@ export default class Calendar extends Component<CalendarProps> {
               }
             }}
           ></FormCardButton>
-        </Modal>
+        </Modal>*/}
 
         <Modal
           uid={this.props.uid + '-trening-form-modal'}
@@ -486,6 +486,7 @@ export default class Calendar extends Component<CalendarProps> {
             model="App/Widgets/Rozpis/Models/Trening"
             onSaveCallback={() => this.closeAndLoadData('trening-form-modal')}
             onDeleteCallback={() => this.closeAndLoadData('trening-form-modal')}
+            id={this.state.idZaznam ?? undefined}
             defaultValues={{
               datum: this.state.rezervaciaDatum,
               zaciatok: this.state.rezervaciaCasOd,
