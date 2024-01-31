@@ -1,10 +1,9 @@
-import React, { Component, MouseEvent } from "react";
+import React, { Component } from "react";
 import axios from "axios";
 import moment, { Moment } from "moment";
-import { dateToString } from "./Helper";
+import { dateToString, numberToStringTime } from "./Helper";
 import Notification from "./Notification";
 
-import FormCardButton from './FormCardButton';
 import Form from './Form';
 import Modal from './Modal';
 import SwalButton from "./SwalButton";
@@ -355,7 +354,7 @@ export default class Calendar extends Component<CalendarProps> {
                                     }
                                   }}
                                 >
-                                  <div className="cas">{`${_slot.hours()}:${_slot.minutes()}`}</div>
+                                  <div className="cas">{numberToStringTime(_slot.hours()) + ':' + numberToStringTime(_slot.minutes())}</div>
                                   <div className="nazov">{r[3]}</div>
                                   <div className="trener">{r[4]}</div>
                                 </div>

@@ -30,3 +30,7 @@ export function adiosError(htmlText: string): JSX.Element {
 export function dateToString(date: Date): string {
   return `${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`;
 }
+
+export function numberToStringTime(number: number): string {
+  return String(number).padStart(2, '0');
+}

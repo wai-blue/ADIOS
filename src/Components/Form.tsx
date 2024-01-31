@@ -110,7 +110,7 @@ export default class Form extends Component<FormProps> {
   /**
    * This function trigger if something change, for Form id of record
    */
-  componentDidUpdate(prevProps: any) {
+  componentDidUpdate(prevProps: FormProps) {
     if (prevProps.id !== this.props.id) {
       this.checkIfIsEdit();
       this.loadData();
