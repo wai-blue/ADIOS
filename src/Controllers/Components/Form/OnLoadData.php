@@ -36,7 +36,15 @@ class OnLoadData extends \ADIOS\Core\Controller {
           }
         }
 
-        $inputs = $tmpModel->selectRaw($columnsToShowAsString)->find($this->params['id']);
+        $query = $tmpModel->selectRaw($columnsToShowAsString);
+
+        foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+          if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
+            $query->with($tmpColumnDefinition['relationship']);
+          }
+        }
+
+        $inputs = $query->find($this->params['id'])->toArray();
       }
 
       return [

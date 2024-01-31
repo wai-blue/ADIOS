@@ -16,8 +16,8 @@ export default class Tags extends Component<TagsInputProps> {
     super(props);
 
     this.state = {
-      tags: this.props.parentForm.state.inputs[this.props.columnName],
-      suggestions: this.props.parentForm.state.inputs[this.props.columnName] // Ked sa nieco zmaze omylom
+      tags: this.props.parentForm.state.inputs[this.props.columnName] ?? [],
+      suggestions: this.props.parentForm.state.inputs[this.props.columnName] ?? []// Ked sa nieco zmaze omylom
     };
   }
 
@@ -54,6 +54,8 @@ export default class Tags extends Component<TagsInputProps> {
     else
       this.state.tags[index].className = "ReactTags__active";
     this.forceUpdate();
+
+    this.props.parentForm.inputOnChange(this.props.columnName, e)
   };
 
   render() {
