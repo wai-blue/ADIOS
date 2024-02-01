@@ -44,7 +44,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
           }
         }
 
-        $inputs = $query->find($this->params['id'])->toArray();
+        $inputs = $query->find($this->params['id']);
       }
 
       return [
