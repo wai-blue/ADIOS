@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
-import moment, { Moment } from "moment";
 
 export const dateToEUFormat = (dateString: string): string => {
   if (!dateString || dateString.length != 10) {
@@ -95,7 +94,6 @@ export default class DateTime extends Component<DateTimeInputProps> {
         value = value;
       break;
     }
-    // console.log(this.props.type, this.props.parentForm.state.inputs[this.props.columnName] ?? "", value);
     
     return (
       <Flatpickr

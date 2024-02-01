@@ -25,6 +25,10 @@ interface TableProps {
   loadParamsController?: string,
   loadDataController?: string
   rowHeight: number,
+  canCreate?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
+  canDelete?: boolean,
 
   //TODO
   //showPaging?: boolean,
@@ -64,7 +68,11 @@ interface TableState {
   filterBy?: GridFilterModel,
   search?: string,
   addButtonText?: string,
-  title?: string
+  title?: string,
+  canCreate?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
+  canDelete?: boolean
 }
 
 export default class Table extends Component<TableProps> {
@@ -72,9 +80,14 @@ export default class Table extends Component<TableProps> {
 
   constructor(props: TableProps) {
     super(props);
+
     this.state = {
       page: 1,
       pageLength: 15,
+      canCreate: props.canCreate ?? true,
+      canRead: props.canRead ?? true,
+      canUpdate: props.canUpdate ?? true,
+      canDelete: props.canDelete ?? true,
       form: {
         uid: props.uid,
         model: props.model,
@@ -199,7 +212,11 @@ export default class Table extends Component<TableProps> {
         this.setState({
           columns: columns,
           title: this.props.title ?? data.tableTitle,
-          addButtonText: this.props.addButtonText ?? data.addButtonText
+          addButtonText: this.props.addButtonText ?? data.addButtonText,
+          canCreate: data.canCreate ?? true,
+          canRead: data.canRead ?? true,
+          canUpdate: data.canUpdate ?? true,
+          canDelete: data.canDelete ?? true
         });
       });
   }
@@ -210,7 +227,7 @@ export default class Table extends Component<TableProps> {
     this.setState({
       page: page
     });
-
+console.log(this.props.formParams);
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadDataController, {
       params: {
@@ -222,7 +239,8 @@ export default class Table extends Component<TableProps> {
         filterBy: this.state.filterBy,
         search: this.state.search,
         where: this.props.where,
-        tag: this.props.tag
+        tag: this.props.tag,
+        formParams: this.props.formParams
       }
     }).then(({data}: any) => {
         this.setState({
@@ -307,17 +325,19 @@ export default class Table extends Component<TableProps> {
                 </div>
 
                 <div className="col-lg-6 m-0 p-0">
-                  <button
-                    className="btn btn-primary btn-icon-split"
-                    onClick={() => this.onAddClick()}
-                  >
-                    <span className="icon">
-                      <i className="fas fa-plus"/>
-                    </span>
-                    <span className="text">
-                      {this.state.addButtonText}
-                    </span>
-                  </button>
+                  {this.state.canCreate ?
+                    <button
+                      className="btn btn-primary btn-icon-split"
+                      onClick={() => this.onAddClick()}
+                    >
+                      <span className="icon">
+                        <i className="fas fa-plus"/>
+                      </span>
+                      <span className="text">
+                        {this.state.addButtonText}
+                      </span>
+                    </button>
+                  : ""}
                 </div>
 
                 <div className="col-lg-6 m-0 p-0">

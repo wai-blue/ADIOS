@@ -54,6 +54,7 @@ export interface FormProps {
 interface FormState {
   readonly?: boolean,
   canCreate?: boolean,
+  canRead?: boolean,
   canUpdate?: boolean,
   canDelete?: boolean,
   content?: Content,
@@ -82,7 +83,8 @@ export interface FormColumnParams {
   unit?: string,
   step?: number,
   defaultValue?: any,
-  viewParams: any
+  viewParams: any,
+  min?: number
 }
 
 export interface FormColumns {
@@ -105,6 +107,7 @@ export default class Form extends Component<FormProps> {
     this.state = {
       readonly: props.readonly,
       canCreate: props.readonly,
+      canRead: props.readonly,
       canUpdate: props.readonly,
       canDelete: props.readonly,
       content: props.content,
@@ -360,9 +363,7 @@ export default class Form extends Component<FormProps> {
 
   convertLayoutToString(layout?: Array<Array<string>>): string {
     //@ts-ignore
-    let l = layout?.map(row => `"${row.join(' ')}"`).join('\n');
-    // console.log(l);
-    return l;
+    return layout?.map(row => `"${row}"`).join('\n');
   }
 
   /**
@@ -389,6 +390,7 @@ export default class Form extends Component<FormProps> {
       tabName == "default"
       || (this.state.tabs && this.state.tabs[tabName]['active'])
     ) {
+
       return (
         <div
           style={{
@@ -446,7 +448,19 @@ export default class Form extends Component<FormProps> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
-        contentItem = window.getComponent(contentItemName, contentItemParams[contentItemName]);
+        contentItem = window.getComponent(
+          contentItemName,
+          {
+            ...contentItemParams[contentItemName],
+            ...{
+              formParams: {
+                uid: this.props.uid,
+                id: this.props.id,
+                model: this.props.model
+              }
+            }
+          }
+        );
     }
 
     return (
@@ -482,7 +496,7 @@ export default class Form extends Component<FormProps> {
         );
       } else {
         let inputParams = {...this.state.columns[columnName].viewParams?.Form, ...{readonly: this.state.readonly}};
-        console.log(columnName, inputParams);
+
         switch (this.state.columns[columnName].type) {
           case 'text':
             inputToRender = <InputTextarea
@@ -624,6 +638,7 @@ export default class Form extends Component<FormProps> {
   }
 
   _renderButtonsLeft(): JSX.Element {
+    let id = this.props.id ?? 0;
     return (
       <div className="d-flex">
         <button
@@ -635,7 +650,10 @@ export default class Form extends Component<FormProps> {
 
         <button
           onClick={() => this.saveRecord()}
-          className={"btn btn-sm btn-success btn-icon-split " + this.state.canCreate || this.state.canUpdate ? "d-none" : "d-block"}
+          className={
+            "btn btn-sm btn-success btn-icon-split "
+            + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
+          }
         >
           {this.state.isEdit
             ? (
@@ -661,7 +679,7 @@ export default class Form extends Component<FormProps> {
       <div className="d-flex">
         {this.state.isEdit ? <button
           onClick={() => this.deleteRecord(this.props.id ?? 0)}
-          className={"btn btn-sm btn-danger btn-icon-split " + this.state.canDelete ? "d-none" : "d-block"}
+          className={"btn btn-sm btn-danger btn-icon-split " + (this.state.canDelete ? "d-block" : "d-none")}
         >
           <span className="icon"><i className="fas fa-trash"></i></span>
           <span className="text">Delete</span>

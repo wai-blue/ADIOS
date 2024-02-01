@@ -23,7 +23,11 @@ export default class Textarea extends Component<TextareaInputProps> {
     let columnName = props.columnName;
 
     this.state = {
-      readonly: props.params.readonly ?? (pfProps?.readonly ?? (pfState.columns[columnName].disabled ?? false))
+      readonly:
+        (props.params.readonly ?? false)
+        || (pfProps?.readonly ?? false)
+        || (pfState.columns[columnName].disabled ?? false)
+        || (pfState.columns[columnName].readonly ?? false)
     }
   }
 
