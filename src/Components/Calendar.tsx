@@ -16,7 +16,8 @@ interface CalendarProps {
   cviciska: Array<any>,
   timy: Array<any>,
   idSportovisko: number,
-  jeKoordinator: boolean
+  jeKoordinator: boolean,
+  jeSpravca: boolean
 }
 
 interface CalendarState {
@@ -32,6 +33,7 @@ interface CalendarState {
   tyzden?: number,
   isReadonly: boolean,
   warning?: string,
+  info?: string,
   rezervaciaDatum?: string,
   rezervaciaCasOd?: string,
   casUprava?: number,
@@ -91,9 +93,14 @@ export default class Calendar extends Component<CalendarProps> {
 
       let isReadonly = false;
       let warning = '';
+      let info = '';
 
-      if (this.props.jeKoordinator) {
+      if (this.props.jeSpravca) {
         isReadonly = false;
+        info = 'Rozpis môžete upravovať ako správca.';
+      } else if (this.props.jeKoordinator) {
+        isReadonly = false;
+        info = 'Rozpis môžete upravovať ako koordinátor.';
       } else {
         if (
           data.tyzden < this.getWeekNumber(new Date())
@@ -116,6 +123,7 @@ export default class Calendar extends Component<CalendarProps> {
         tyzden: data.tyzden,
         isReadonly: isReadonly,
         warning: warning,
+        info: info,
         casUprava: data.cvicisko?.cas_uprava ?? 0
       }, () => {
         //@ts-ignore
@@ -571,10 +579,16 @@ export default class Calendar extends Component<CalendarProps> {
             ) : (
                 <div className='alert alert-success' role='alert'>
                   <i className='fas fa-check mr-4 align-self-center'></i>
-                  Rozpis môžete upravovať (aktuálne poradie je {this.state.poradie}).
+                  {this.state.info}<br/>
                 </div>
               )
             }
+
+            <div className='alert alert-info' role='alert'>
+              <i className='fas fa-info mr-4 align-self-center'></i>
+              Aktuálne poradie pre zvolené cvičisko a týždeň je [{this.state.poradie}].
+            </div>
+
           </div>
           <div className="col-lg-4 text-right">
             {!this.state.isReadonly ? (
@@ -588,6 +602,7 @@ export default class Calendar extends Component<CalendarProps> {
                   successMessage="Rozpis úspešne ukončený"
                   confirmParams={{
                     idSportovisko: this.props.idSportovisko,
+                    idCvicisko: this.state.idCvicisko,
                     rok: this.state.rok,
                     tyzden: this.state.tyzden
                   }}
@@ -597,7 +612,7 @@ export default class Calendar extends Component<CalendarProps> {
                     html:`
                       <p>
                         Chystáte sa ukončiť tvorbu rozpisu v týždni <b>${dateToString(this.state.datumOd)} - ${dateToString(this.state.datumDo)}</b>
-                        na všetkých cvičiskách.<br/>
+                        na cvičisku ${this.state.idCvicisko}.<br/>
                       </p>
 
                       <div class='alert alert-danger' role='alert'>
