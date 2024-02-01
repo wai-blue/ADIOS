@@ -17,14 +17,19 @@ interface TableProps {
   showTitle?: boolean,
   modal?: ModalProps,
   formId?: number,
-  formParams?: FormProps
-  addButtonText?: string
-  columns?: FormColumns
+  formParams?: FormProps,
+  addButtonText?: string,
+  columns?: FormColumns,
   where?: Array<any>,
   tag?: string,
   loadParamsController?: string,
   loadDataController?: string
   rowHeight: number,
+  canCreate?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
+  canDelete?: boolean,
+  parentForm?: Component<FormProps>,
 
   //TODO
   //showPaging?: boolean,
@@ -59,12 +64,16 @@ interface TableState {
   pageLength: number,
   columns?: Array<GridColDef>,
   data?: TableData,
-  form?: FormProps,
+  formParams?: FormProps,
   orderBy?: GridSortModel,
   filterBy?: GridFilterModel,
   search?: string,
   addButtonText?: string,
-  title?: string
+  title?: string,
+  canCreate?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
+  canDelete?: boolean
 }
 
 export default class Table extends Component<TableProps> {
@@ -72,13 +81,18 @@ export default class Table extends Component<TableProps> {
 
   constructor(props: TableProps) {
     super(props);
+
     this.state = {
       page: 1,
       pageLength: 15,
-      form: {
-        uid: props.uid,
+      canCreate: props.canCreate ?? true,
+      canRead: props.canRead ?? true,
+      canUpdate: props.canUpdate ?? true,
+      canDelete: props.canDelete ?? true,
+      formParams: {
+        uid: props.uid + '-form',
         model: props.model,
-        id: props.formId
+        id: props.formId ? props.formId : 0,
       }
     };
   }
@@ -86,6 +100,14 @@ export default class Table extends Component<TableProps> {
   componentDidMount() {
     this.loadParams();
     this.loadData();
+  }
+
+  componentDidUpdate(prevProps: TableProps) {
+    if (prevProps.formParams?.id != this.props.formParams?.id) {
+      this.state.formParams = this.props.formParams;
+      this.loadParams();
+      this.loadData();
+    }
   }
 
   _commonCellRenderer(column, content): JSX.Element {
@@ -199,7 +221,11 @@ export default class Table extends Component<TableProps> {
         this.setState({
           columns: columns,
           title: this.props.title ?? data.tableTitle,
-          addButtonText: this.props.addButtonText ?? data.addButtonText
+          addButtonText: this.props.addButtonText ?? data.addButtonText,
+          canCreate: data.canCreate ?? true,
+          canRead: data.canRead ?? true,
+          canUpdate: data.canUpdate ?? true,
+          canDelete: data.canDelete ?? true
         });
       });
   }
@@ -222,7 +248,8 @@ export default class Table extends Component<TableProps> {
         filterBy: this.state.filterBy,
         search: this.state.search,
         where: this.props.where,
-        tag: this.props.tag
+        tag: this.props.tag,
+        formParams: this.state.formParams
       }
     }).then(({data}: any) => {
         this.setState({
@@ -234,14 +261,14 @@ export default class Table extends Component<TableProps> {
   onAddClick() {
     ADIOS.modalToggle(this.props.uid);
     this.setState({
-      form: {...this.state.form, id: undefined }
+      formParams: {...this.state.formParams, id: undefined }
     })
   }
 
   onRowClick(id: number) {
     ADIOS.modalToggle(this.props.uid);
     this.setState({
-      form: {...this.state.form, id: id}
+      formParams: {...this.state.formParams, id: id}
     })
   }
 
@@ -268,31 +295,40 @@ export default class Table extends Component<TableProps> {
       return <Loader />;
     }
 
+    // let formId = this.state.formParams?.id;
+    // console.log('formId', this.state.formParams, formId);
+
+    let parentFormUid = (this.props.parentForm?.props.uid ? this.props.parentForm?.props.uid : '');
+
     return (
       <>
-        <Modal 
-          uid={this.props.uid}
-          {...this.props.modal}
-          hideHeader={true}
-          isOpen={this.props.formId ? true : false}
-        >
-          <Form 
+        {parentFormUid == '' ?
+          <Modal 
             uid={this.props.uid}
-            model={this.props.model}
-            id={this.state.form?.id}
-            showInModal={true}
-            onSaveCallback={() => {
-              this.loadData();
-              ADIOS.modalToggle(this.props.uid);
-            }}
-            onDeleteCallback={() => {
-              this.loadData();
-              ADIOS.modalToggle(this.props.uid);
-            }}
-            {...this.props.formParams}
-            columns={this.props.columns}
-          />
-        </Modal>
+            {...this.props.modal}
+            hideHeader={true}
+            isOpen={this.props.formParams?.id ? true : false}
+          >
+            <Form
+              uid={this.state.formParams?.uid ?? ''}
+              model={this.state.formParams?.model ?? ''}
+              id={this.state.formParams?.id}
+              showInModal={true}
+              onSaveCallback={() => {
+                this.loadData();
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid);
+              }}
+              onDeleteCallback={() => {
+                this.loadData();
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid);
+              }}
+              {...this.props.formParams}
+              columns={this.props.columns}
+            />
+          </Modal>
+        : ''}
 
         <div
           id={"adios-table-" + this.props.uid}
@@ -307,17 +343,19 @@ export default class Table extends Component<TableProps> {
                 </div>
 
                 <div className="col-lg-6 m-0 p-0">
-                  <button
-                    className="btn btn-primary btn-icon-split"
-                    onClick={() => this.onAddClick()}
-                  >
-                    <span className="icon">
-                      <i className="fas fa-plus"/>
-                    </span>
-                    <span className="text">
-                      {this.state.addButtonText}
-                    </span>
-                  </button>
+                  {this.state.canCreate ?
+                    <button
+                      className="btn btn-primary btn-icon-split"
+                      onClick={() => this.onAddClick()}
+                    >
+                      <span className="icon">
+                        <i className="fas fa-plus"/>
+                      </span>
+                      <span className="text">
+                        {this.state.addButtonText}
+                      </span>
+                    </button>
+                  : ""}
                 </div>
 
                 <div className="col-lg-6 m-0 p-0">

@@ -10,7 +10,8 @@ interface LookupInputProps extends FormColumnParams {
 }
 
 interface LookupInputState {
-  data: Array<any> 
+  data: Array<any>,
+  readonly?: boolean
 }
 
 export default class Lookup extends Component<LookupInputProps> {
@@ -22,9 +23,19 @@ export default class Lookup extends Component<LookupInputProps> {
 
     if (props.model != undefined) this.model = props.model;
 
+    let parentForm = props.parentForm;
+    let pfState = parentForm.state;
+    let pfProps = parentForm.props;
+    let columnName = props.columnName;
+
     this.state = {
-      data: [] 
-    };
+      data: [],
+      readonly:
+        (props.params.readonly ?? false)
+        || (pfProps?.readonly ?? false)
+        || (pfState.columns[columnName].disabled ?? false)
+        || (pfState.columns[columnName].readonly ?? false)
+  };
   }
 
   componentDidMount() {
@@ -70,9 +81,12 @@ export default class Lookup extends Component<LookupInputProps> {
         getOptionLabel={this.getOptionLabel}
         getOptionValue={this.getOptionValue}
         onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}
-        isDisabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].readonly}
+        isDisabled={this.state.readonly}
         placeholder=""
-        className="w-100"
+        className={
+          "w-100"
+          + " " + (this.state.readonly ? "bg-muted" : "")
+        }
         styles={{
           control: (baseStyles, state) => ({
             ...baseStyles,
