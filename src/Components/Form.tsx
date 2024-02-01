@@ -267,7 +267,6 @@ export default class Form extends Component<FormProps> {
    * Dynamically initialize inputs (React state) from model columns
    */
   initInputs(columns: FormColumns, inputsValues: Object = {}) {
-    console.log(inputsValues);
 
     let inputs: any = {};
 
@@ -292,6 +291,10 @@ export default class Form extends Component<FormProps> {
         break;
         case 'tags':
           inputs[columnName] = inputsValues[columnName]
+          inputs[columnName + "_all"] = inputsValues[columnName + "_all"]
+          /*
+          { values: ..., all: ... }
+           */
 
           /*
           [

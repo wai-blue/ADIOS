@@ -16,8 +16,8 @@ export default class Tags extends Component<TagsInputProps> {
     super(props);
 
     this.state = {
-      tags: this.props.parentForm.state.inputs[this.props.columnName] ?? [],
-      suggestions: this.props.parentForm.state.inputs[this.props.columnName] ?? []// Ked sa nieco zmaze omylom
+      tags: [],
+      suggestions: [] // Ked sa nieco zmaze omylom
     };
   }
 
@@ -59,10 +59,21 @@ export default class Tags extends Component<TagsInputProps> {
   };
 
   render() {
+
+    let tags = [];
+    let suggestions = this.props.parentForm.state.inputs[this.props.columnName + "_all"] ?? [];
+
+    (this.props.parentForm.state.inputs[this.props.columnName] ?? []).forEach((role) => {
+      tags.push({id: role.name, text: role.name, className: "ReactTags__active"})
+    })
+
+    console.log(tags);
+    console.log(suggestions);
+
     return (
       <ReactTags
-        tags={this.state.tags}
-        suggestions={this.state.suggestions}
+        tags={tags}
+        suggestions={tags}
         //delimiters={this.state.delimiters}
         handleDelete={this.handleDelete}
         handleAddition={this.handleAddition}
@@ -73,5 +84,5 @@ export default class Tags extends Component<TagsInputProps> {
         autocomplete
       />
     );
-  } 
+  }
 }

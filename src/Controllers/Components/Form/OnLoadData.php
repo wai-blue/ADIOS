@@ -10,6 +10,8 @@
 
 namespace ADIOS\Controllers\Components\Form;
 
+use ADIOS\Core\DB\DataTypes\DataTypeColor;
+
 /**
  * @package Components\Controllers\Form
  */
@@ -26,6 +28,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
       $tmpModel = $this->adios->getModel($this->params['model']);
 
       $inputs = [];
+      $details = [];
       if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
         $columnsToShowAsString = '';
         $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
@@ -41,10 +44,11 @@ class OnLoadData extends \ADIOS\Core\Controller {
         foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
           if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
             $query->with($tmpColumnDefinition['relationship']);
+            $details[$tmpColumnDefinition['relationship'] . '_all'] = $query->first()->roles()->getRelated()->get()->toArray();
           }
         }
 
-        $inputs = $query->find($this->params['id']);
+        $inputs = array_merge($query->find($this->params['id'])->toArray(), $details);
       }
 
       return [
