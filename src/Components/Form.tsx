@@ -179,17 +179,18 @@ export default class Form extends Component<FormProps> {
     let id = this.state.id ? this.state.id : 0;
 
     if (id > 0) {
-      //@ts-ignore
-      axios.get(_APP_URL + '/' + loadDataController, {
-        params: {
+      request.get(
+        '/' + loadDataController,
+        {
           __IS_AJAX__: '1',
           model: this.props.model,
           id: id
+        },
+        (data: any) => {
+          this.initInputs(this.state.columns ?? {}, data.inputs);
+          this.setState({id: id});
         }
-      }).then(({data}: any) => {
-        this.initInputs(this.state.columns ?? {}, data.inputs);
-        this.setState({id: id});
-      });
+      );
     } else {
       this.initInputs(this.state.columns ?? {}, {});
       this.setState({id: id});
@@ -202,24 +203,26 @@ export default class Form extends Component<FormProps> {
     });
 
     //@ts-ignore
-    axios.post(_APP_URL + '/Components/Form/OnSave', {
-      __IS_AJAX__: '1',
-      model: this.props.model,
-      inputs: {...this.state.inputs, id: this.state.id}
-    }).then((res: any) => {
-      Notification.success(res.data.message);
-      if (this.props.onSaveCallback) this.props.onSaveCallback();
-    }).catch((res) => {
-      if (res.response) {
-        Notification.error(res.response.data.message);
-
-        if (res.response.status == 422) {
+    request.post(
+      '/Components/Form/OnSave',
+      {
+        inputs: {...this.state.inputs, id: this.state.id}
+      },
+      {
+        __IS_AJAX__: '1',
+        model: this.props.model,
+      },
+      () => {
+        if (this.props.onSaveCallback) this.props.onSaveCallback();
+      },
+      (err: any) => {
+        if (err.status == 422) {
           this.setState({
             invalidInputs: err.data.invalidInputs
           });
         }
       }
-    )
+    );
   }
 
   deleteRecord(id: number) {
