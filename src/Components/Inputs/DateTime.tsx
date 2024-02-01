@@ -4,11 +4,11 @@ import Flatpickr from "react-flatpickr";
 import moment, { Moment } from "moment";
 
 export const dateToEUFormat = (dateString: string): string => {
-  let d = new Date(dateString);
-
-  if (dateString.length != 10) {
+  if (!dateString || dateString.length != 10) {
     return '';
   } else {
+    let d = new Date(dateString);
+
     return ('0' + d.getDate()).slice(-2) + "."
       + ('0' + (d.getMonth() + 1)).slice(-2)
       + "." + d.getFullYear()
@@ -19,7 +19,7 @@ export const dateToEUFormat = (dateString: string): string => {
 export const timeToEUFormat = (dateString: string): string => {
   let d = new Date(dateString);
 
-  if (dateString.length != 5) {
+  if (!dateString || dateString.length != 5) {
     return '';
   } else {
     return ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2);
@@ -95,7 +95,7 @@ export default class DateTime extends Component<DateTimeInputProps> {
         value = value;
       break;
     }
-    console.log(this.props.type, this.props.parentForm.state.inputs[this.props.columnName] ?? "", value);
+    // console.log(this.props.type, this.props.parentForm.state.inputs[this.props.columnName] ?? "", value);
     
     return (
       <Flatpickr
