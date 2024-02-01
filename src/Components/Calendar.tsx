@@ -11,7 +11,7 @@ import Modal from './Modal';
 import SwalButton from "./SwalButton";
 
 const CustomComponent = forwardRef<HTMLDivElement, any>((props, ref) => {
-  return <React.Fragment ref={ref}>{props.children}</React.Fragment>;
+  return <div ref={ref}>{props.children}</div>;
 });
 
 
@@ -308,18 +308,19 @@ export default class Calendar extends Component<CalendarProps> {
             {(() => {
               let slot = moment(this.state.datumOd).add(d, 'days').startOf('day').set({hour: 6});
               if (!this.state.data) return;
-
+console.log(this.state.data[d]);
               let dayLine =
                 <>
                   <div className="header">{slot.format('D.M.YYYY')}</div>
                   <div className="header">{dni[d]}</div>
 
                   <ReactSortable
-                    list={this.state.data}
+                    list={this.state.data[d]}
                     setList={() => console.log(1)}
                     tag={CustomComponent}
                   >
                   {this.state.data[d] ? (this.state.data[d].map((r: any) => (
+
                       <>{(r[1] === 0 && r[2] === '' && r[3] === '') ? (
                         Array.from({ length: r[0] / 15 }, (_, v) => {
                           const _slot = moment(slot);
