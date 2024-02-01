@@ -48,10 +48,12 @@ export interface FormProps {
   saveButtonText?: string,
   addButtonText?: string,
   loadParamsController?: string,
-  defaultValues: Object
+  loadDataController?: string,
+  defaultValues?: Object
 }
 
 interface FormState {
+  id?: number,
   readonly?: boolean,
   canCreate?: boolean,
   canRead?: boolean,
@@ -100,11 +102,13 @@ export default class Form extends Component<FormProps> {
 
   model: String;
   inputs: FormInputs = {};
+  components: Array<React.JSX.Element> = [];
 
   constructor(props: FormProps) {
     super(props);
 
     this.state = {
+      id: props.id,
       readonly: props.readonly,
       canCreate: props.readonly,
       canRead: props.readonly,
@@ -124,8 +128,7 @@ export default class Form extends Component<FormProps> {
   componentDidUpdate(prevProps: FormProps) {
     if (prevProps.id !== this.props.id) {
       this.checkIfIsEdit();
-      this.loadData();
-
+      this.loadParams();
       this.setState({
         invalidInputs: {},
         isEdit: this.props.id ? this.props.id > 0 : false
@@ -166,22 +169,30 @@ export default class Form extends Component<FormProps> {
 
       this.setState(newState, () => {
         this.loadData();
-        // this.updateLayout();
       });
     });
   }
 
   loadData() {
-    //@ts-ignore
-    axios.get(_APP_URL + '/Components/Form/OnLoadData', {
-      params: {
-        __IS_AJAX__: '1',
-        model: this.props.model,
-        id: this.props.id
-      }
-    }).then(({data}: any) => {
-      this.initInputs(this.state.columns ?? {}, data.inputs);
-    });
+    let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Form/OnLoadData';
+    let id = this.state.id ? this.state.id : 0;
+
+    if (id > 0) {
+      //@ts-ignore
+      axios.get(_APP_URL + '/' + loadDataController, {
+        params: {
+          __IS_AJAX__: '1',
+          model: this.props.model,
+          id: id
+        }
+      }).then(({data}: any) => {
+        this.initInputs(this.state.columns ?? {}, data.inputs);
+        this.setState({id: id});
+      });
+    } else {
+      this.initInputs(this.state.columns ?? {}, {});
+      this.setState({id: id});
+    }
   }
 
   saveRecord() {
@@ -193,7 +204,7 @@ export default class Form extends Component<FormProps> {
     axios.post(_APP_URL + '/Components/Form/OnSave', {
       __IS_AJAX__: '1',
       model: this.props.model,
-      inputs: {...this.state.inputs, id: this.props.id}
+      inputs: {...this.state.inputs, id: this.state.id}
     }).then((res: any) => {
       Notification.success(res.data.message);
       if (this.props.onSaveCallback) this.props.onSaveCallback();
@@ -249,7 +260,7 @@ export default class Form extends Component<FormProps> {
    */
   checkIfIsEdit() {
     this.setState({
-      isEdit: this.props.id && this.props.id > 0
+      isEdit: this.state.id && this.state.id > 0
     });
   }
 
@@ -453,14 +464,19 @@ export default class Form extends Component<FormProps> {
           {
             ...contentItemParams[contentItemName],
             ...{
+              parentForm: this,
               formParams: {
                 uid: this.props.uid,
-                id: this.props.id,
+                id: this.state.id,
                 model: this.props.model
               }
             }
           }
         );
+
+        this.components.push(contentItem);
+
+        break;
     }
 
     return (
@@ -638,7 +654,7 @@ export default class Form extends Component<FormProps> {
   }
 
   _renderButtonsLeft(): JSX.Element {
-    let id = this.props.id ?? 0;
+    let id = this.state.id ? this.state.id : 0;
     return (
       <div className="d-flex">
         <button
@@ -678,7 +694,7 @@ export default class Form extends Component<FormProps> {
     return (
       <div className="d-flex">
         {this.state.isEdit ? <button
-          onClick={() => this.deleteRecord(this.props.id ?? 0)}
+          onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
           className={"btn btn-sm btn-danger btn-icon-split " + (this.state.canDelete ? "d-block" : "d-none")}
         >
           <span className="icon"><i className="fas fa-trash"></i></span>

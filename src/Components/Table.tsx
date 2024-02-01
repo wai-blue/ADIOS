@@ -17,9 +17,9 @@ interface TableProps {
   showTitle?: boolean,
   modal?: ModalProps,
   formId?: number,
-  formParams?: FormProps
-  addButtonText?: string
-  columns?: FormColumns
+  formParams?: FormProps,
+  addButtonText?: string,
+  columns?: FormColumns,
   where?: Array<any>,
   tag?: string,
   loadParamsController?: string,
@@ -29,6 +29,7 @@ interface TableProps {
   canRead?: boolean,
   canUpdate?: boolean,
   canDelete?: boolean,
+  parentForm?: Component<FormProps>,
 
   //TODO
   //showPaging?: boolean,
@@ -63,7 +64,7 @@ interface TableState {
   pageLength: number,
   columns?: Array<GridColDef>,
   data?: TableData,
-  form?: FormProps,
+  formParams?: FormProps,
   orderBy?: GridSortModel,
   filterBy?: GridFilterModel,
   search?: string,
@@ -88,10 +89,10 @@ export default class Table extends Component<TableProps> {
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
       canDelete: props.canDelete ?? true,
-      form: {
-        uid: props.uid,
+      formParams: {
+        uid: props.uid + '-form',
         model: props.model,
-        id: props.formId
+        id: props.formId ? props.formId : 0,
       }
     };
   }
@@ -99,6 +100,14 @@ export default class Table extends Component<TableProps> {
   componentDidMount() {
     this.loadParams();
     this.loadData();
+  }
+
+  componentDidUpdate(prevProps: TableProps) {
+    if (prevProps.formParams?.id != this.props.formParams?.id) {
+      this.state.formParams = this.props.formParams;
+      this.loadParams();
+      this.loadData();
+    }
   }
 
   _commonCellRenderer(column, content): JSX.Element {
@@ -227,7 +236,7 @@ export default class Table extends Component<TableProps> {
     this.setState({
       page: page
     });
-console.log(this.props.formParams);
+
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadDataController, {
       params: {
@@ -240,7 +249,7 @@ console.log(this.props.formParams);
         search: this.state.search,
         where: this.props.where,
         tag: this.props.tag,
-        formParams: this.props.formParams
+        formParams: this.state.formParams
       }
     }).then(({data}: any) => {
         this.setState({
@@ -252,14 +261,14 @@ console.log(this.props.formParams);
   onAddClick() {
     ADIOS.modalToggle(this.props.uid);
     this.setState({
-      form: {...this.state.form, id: undefined }
+      formParams: {...this.state.formParams, id: undefined }
     })
   }
 
   onRowClick(id: number) {
     ADIOS.modalToggle(this.props.uid);
     this.setState({
-      form: {...this.state.form, id: id}
+      formParams: {...this.state.formParams, id: id}
     })
   }
 
@@ -286,31 +295,40 @@ console.log(this.props.formParams);
       return <Loader />;
     }
 
+    // let formId = this.state.formParams?.id;
+    // console.log('formId', this.state.formParams, formId);
+
+    let parentFormUid = (this.props.parentForm?.props.uid ? this.props.parentForm?.props.uid : '');
+
     return (
       <>
-        <Modal 
-          uid={this.props.uid}
-          {...this.props.modal}
-          hideHeader={true}
-          isOpen={this.props.formId ? true : false}
-        >
-          <Form 
+        {parentFormUid == '' ?
+          <Modal 
             uid={this.props.uid}
-            model={this.props.model}
-            id={this.state.form?.id}
-            showInModal={true}
-            onSaveCallback={() => {
-              this.loadData();
-              ADIOS.modalToggle(this.props.uid);
-            }}
-            onDeleteCallback={() => {
-              this.loadData();
-              ADIOS.modalToggle(this.props.uid);
-            }}
-            {...this.props.formParams}
-            columns={this.props.columns}
-          />
-        </Modal>
+            {...this.props.modal}
+            hideHeader={true}
+            isOpen={this.props.formParams?.id ? true : false}
+          >
+            <Form
+              uid={this.state.formParams?.uid ?? ''}
+              model={this.state.formParams?.model ?? ''}
+              id={this.state.formParams?.id}
+              showInModal={true}
+              onSaveCallback={() => {
+                this.loadData();
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid);
+              }}
+              onDeleteCallback={() => {
+                this.loadData();
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid);
+              }}
+              {...this.props.formParams}
+              columns={this.props.columns}
+            />
+          </Modal>
+        : ''}
 
         <div
           id={"adios-table-" + this.props.uid}
