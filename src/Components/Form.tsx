@@ -1,8 +1,7 @@
 import React, {Component} from "react";
 
-import axios from "axios";
-
 import Notification from "./Notification";
+import request from "./Request";
 
 import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -137,40 +136,42 @@ export default class Form extends Component<FormProps> {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Form/OnLoadParams';
 
     //@ts-ignore
-    axios.get(_APP_URL + '/' + loadParamsController, {
-      params: {
+    request.get(
+      '/' + loadParamsController,
+      {
         __IS_AJAX__: '1',
         model: this.props.model,
         columns: this.props.columns
+      },
+      (data: any) => {
+        data = deepObjectMerge(data, this.props);
+        data.layout = this.convertLayoutToString(data.layout);
+
+        let newState = {
+          columns: data.columns,
+          folderUrl: data.folderUrl,
+          ...data
+        };
+
+        this.setState(newState, () => {
+          this.loadData();
+        });
       }
-    }).then(({data}: any) => {
-      data = deepObjectMerge(data, this.props);
-      data.layout = this.convertLayoutToString(data.layout);
-
-      let newState = {
-        columns: data.columns,
-        folderUrl: data.folderUrl,
-        ...data
-      };
-
-      this.setState(newState, () => {
-        this.loadData();
-        // this.updateLayout();
-      });
-    });
+    );
   }
 
   loadData() {
-    //@ts-ignore
-    axios.get(_APP_URL + '/Components/Form/OnLoadData', {
-      params: {
+    request.get(
+      '/Components/Form/OnLoadData',
+      {
         __IS_AJAX__: '1',
         model: this.props.model,
         id: this.props.id
+      },
+      (data: any) => {
+        this.initInputs(this.state.columns ?? {}, data.inputs);
       }
-    }).then(({data}: any) => {
-      this.initInputs(this.state.columns ?? {}, data.inputs);
-    });
+    );
   }
 
   saveRecord() {
@@ -178,25 +179,26 @@ export default class Form extends Component<FormProps> {
       invalidInputs: {}
     });
 
-    //@ts-ignore
-    axios.post(_APP_URL + '/Components/Form/OnSave', {
-      __IS_AJAX__: '1',
-      model: this.props.model,
-      inputs: {...this.state.inputs, id: this.props.id}
-    }).then((res: any) => {
-      Notification.success(res.data.message);
-      if (this.props.onSaveCallback) this.props.onSaveCallback();
-    }).catch((res) => {
-      if (res.response) {
-        Notification.error(res.response.data.message);
-
-        if (res.response.status == 422) {
+    request.post(
+      '/Components/Form/OnSave',
+      {
+        inputs: {...this.state.inputs, id: this.props.id}
+      },
+      {
+        __IS_AJAX__: '1',
+        model: this.props.model,
+      },
+      () => {
+        if (this.props.onSaveCallback) this.props.onSaveCallback();
+      },
+      (err) => {
+        if (err.status == 422) {
           this.setState({
-            invalidInputs: res.response.data.invalidInputs
+            invalidInputs: err.data.invalidInputs
           });
         }
       }
-    });
+    )
   }
 
   deleteRecord(id: number) {
@@ -212,23 +214,18 @@ export default class Form extends Component<FormProps> {
       reverseButtons: false,
     } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
-        //@ts-ignore
-        axios.patch(_APP_URL + '/Components/Form/OnDelete', {
-          __IS_AJAX__: '1',
-          model: this.props.model,
-          id: id
-        }).then(() => {
-          Notification.success("Záznam zmazaný");
-          if (this.props.onDeleteCallback) this.props.onDeleteCallback();
-        }).catch((res) => {
-          Notification.error(res.response.data.message);
-
-          if (res.response.status == 422) {
-            this.setState({
-              invalidInputs: res.response.data.invalidInputs
-            });
+        request.delete(
+          '/Components/Form/OnDelete',
+          {
+            __IS_AJAX__: '1',
+            model: this.props.model,
+            id: id
+          },
+          () => {
+            Notification.success("Záznam zmazaný");
+            if (this.props.onDeleteCallback) this.props.onDeleteCallback();
           }
-        });
+        );
       }
     })
   }

@@ -3,17 +3,11 @@ import axios from "axios";
 import moment, { Moment } from "moment";
 import { dateToString, numberToStringTime } from "./Helper";
 import Notification from "./Notification";
-import { ReactSortable } from "react-sortablejs";
 
 import Form from './Form';
 import Modal from './Modal';
 
 import SwalButton from "./SwalButton";
-
-const CustomComponent = forwardRef<HTMLDivElement, any>((props, ref) => {
-  return <div ref={ref}>{props.children}</div>;
-});
-
 
 interface CalendarProps {
   uid: string,
@@ -138,9 +132,9 @@ export default class Calendar extends Component<CalendarProps> {
         casUprava: data.cvicisko?.cas_uprava ?? 0
       }, () => {
         //@ts-ignore
-        //this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
-        //  console.log(item);
-        //});
+        this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
+          console.log(item);
+        });
       })
     });
   }
@@ -315,20 +309,15 @@ export default class Calendar extends Component<CalendarProps> {
           <>
             {(() => {
               let slot = moment(this.state.datumOd).add(d, 'days').startOf('day').set({hour: 6});
+
               if (!this.state.data) return;
-console.log(this.state.data[d]);
+
               let dayLine =
                 <>
                   <div className="header">{slot.format('D.M.YYYY')}</div>
                   <div className="header">{dni[d]}</div>
 
-                  <ReactSortable
-                    list={this.state.data[d]}
-                    setList={() => console.log(1)}
-                    tag={CustomComponent}
-                  >
                   {this.state.data[d] ? (this.state.data[d].map((r: any) => (
-
                       <>{(r[1] === 0 && r[2] === '' && r[3] === '') ? (
                         Array.from({ length: r[0] / 15 }, (_, v) => {
                           const _slot = moment(slot);
@@ -416,8 +405,6 @@ console.log(this.state.data[d]);
                         </>
                       )}
                   </>))) : ''}
-
-                    </ReactSortable>
                 </>
               ;
 
@@ -496,15 +483,6 @@ console.log(this.state.data[d]);
             }}
           ></FormCardButton>
         </Modal>*/}
-
-        <ReactSortable
-          list={this.state.xxx}
-          setList={(newState) => this.setState({ xxx: newState })}
-        >
-          {this.state.xxx.map((item) => (
-            <div key={item.id}>{item.name}</div>
-          ))}
-        </ReactSortable>
 
         <Modal
           uid={this.props.uid + '-trening-form-modal'}
