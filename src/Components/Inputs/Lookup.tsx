@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import AsyncSelect from 'react-select/async'
 import axios from 'axios'
 import { FormColumnParams } from '../Form' 
+import request from '../Request'
 
 interface LookupInputProps extends FormColumnParams {
   parentForm: any,
@@ -43,20 +44,21 @@ export default class Lookup extends Component<LookupInputProps> {
   }
 
   loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
-    //@ts-ignore
-    axios.get(_APP_URL + '/Components/Inputs/Lookup/OnLoadData', {
-      params: {
+    request.get(
+      '/Components/Inputs/Lookup/OnLoadData',
+      {
         __IS_AJAX__: '1',
         model: this.model,
         search: inputValue
-      }
-    }).then(({data}: any) => {
-      this.setState({
-        data: data.data
-      });
+      },
+      (data: any) => {
+        this.setState({
+          data: data.data
+        });
 
-      if (callback) callback(Object.values(data.data ?? {}));
-    });
+        if (callback) callback(Object.values(data.data ?? {}));
+      }
+    );
   }
 
   getOptionValue(option: any) {
@@ -68,7 +70,6 @@ export default class Lookup extends Component<LookupInputProps> {
   }
 
   render() {
-  // console.log(input, this.state.data);
     let input = this.props.parentForm.state.inputs[this.props.columnName];
     let data = this.state.data ?? {};
     let value = (input in data ? data[input] : 0);
