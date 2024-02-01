@@ -32,10 +32,20 @@ class OnLoadParams extends \ADIOS\Core\Controller {
           $this->params['columns']);
       }
 
+      $canRead = $this->adios->permissions->has($this->params['model'] . ':Read');
+      $canCreate = $this->adios->permissions->has($this->params['model'] . ':Create');
+      $canUpdate = $this->adios->permissions->has($this->params['model'] . ':Update');
+      $canDelete = $this->adios->permissions->has($this->params['model'] . ':Delete');
+
       return array_merge(
         [
           'columns' => $tmpColumns,
           'folderUrl' => $tmpModel->getFolderUrl(),
+          'canRead' => $canRead,
+          'canCreate' => $canCreate,
+          'canUpdate' => $canUpdate,
+          'canDelete' => $canDelete,
+          'readonly' => !($canUpdate || $canCreate),
         ],
         $tmpModel->defaultFormParams ?? []
       );

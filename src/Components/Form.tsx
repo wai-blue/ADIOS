@@ -52,6 +52,10 @@ export interface FormProps {
 }
 
 interface FormState {
+  readonly?: boolean,
+  canCreate?: boolean,
+  canUpdate?: boolean,
+  canDelete?: boolean,
   content?: Content,
   columns?: FormColumns,
   inputs?: FormInputs,
@@ -99,6 +103,10 @@ export default class Form extends Component<FormProps> {
     super(props);
 
     this.state = {
+      readonly: props.readonly,
+      canCreate: props.readonly,
+      canUpdate: props.readonly,
+      canDelete: props.readonly,
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
       isEdit: props.id ? props.id > 0 : false,
@@ -473,12 +481,14 @@ export default class Form extends Component<FormProps> {
           }
         );
       } else {
+        let inputParams = {...this.state.columns[columnName].viewParams?.Form, ...{readonly: this.state.readonly}};
+        console.log(columnName, inputParams);
         switch (this.state.columns[columnName].type) {
           case 'text':
             inputToRender = <InputTextarea
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'float':
@@ -486,14 +496,14 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputInt
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'boolean':
             inputToRender = <InputBoolean
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'lookup':
@@ -501,35 +511,35 @@ export default class Form extends Component<FormProps> {
               parentForm={this}
               {...this.state.columns[columnName]}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'MapPoint':
             inputToRender = <InputMapPoint
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'color':
             inputToRender = <InputColor
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'tags':
             inputToRender = <InputTags
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'image':
             inputToRender = <InputImage
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'datetime':
@@ -539,7 +549,7 @@ export default class Form extends Component<FormProps> {
               parentForm={this}
               columnName={columnName}
               type={this.state.columns[columnName].type}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'editor':
@@ -559,7 +569,7 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputVarchar
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />
         }
       }
@@ -625,7 +635,7 @@ export default class Form extends Component<FormProps> {
 
         <button
           onClick={() => this.saveRecord()}
-          className="btn btn-sm btn-success btn-icon-split"
+          className={"btn btn-sm btn-success btn-icon-split " + this.state.canCreate || this.state.canUpdate ? "d-none" : "d-block"}
         >
           {this.state.isEdit
             ? (
@@ -651,7 +661,7 @@ export default class Form extends Component<FormProps> {
       <div className="d-flex">
         {this.state.isEdit ? <button
           onClick={() => this.deleteRecord(this.props.id ?? 0)}
-          className="btn btn-danger btn-sm btn-icon-split"
+          className={"btn btn-sm btn-danger btn-icon-split " + this.state.canDelete ? "d-none" : "d-block"}
         >
           <span className="icon"><i className="fas fa-trash"></i></span>
           <span className="text">Delete</span>
