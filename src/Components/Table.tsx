@@ -318,33 +318,34 @@ export default class Table extends Component<TableProps> {
 
     return (
       <>
-        {true ?
-          <Modal 
+        <Modal 
+          uid={this.props.uid}
+          model={this.props.model}
+          {...this.props.modal}
+          hideHeader={true}
+          isOpen={this.props.formParams?.id ? true : false}
+        >
+          <Form
             uid={this.props.uid}
-            {...this.props.modal}
-            hideHeader={true}
-            isOpen={this.props.formParams?.id ? true : false}
-          >
-            <Form
-              uid={this.props.uid}
-              model={this.props.model}
-              id={this.state.formParams?.id}
-              showInModal={true}
-              onSaveCallback={() => {
-                this.loadData();
-                //@ts-ignore
-                ADIOS.modalToggle(this.props.uid);
-              }}
-              onDeleteCallback={() => {
-                this.loadData();
-                //@ts-ignore
-                ADIOS.modalToggle(this.props.uid);
-              }}
-              {...this.props.formParams}
-              columns={this.props.columns}
-            />
-          </Modal>
-        : ''}
+            model={this.props.model}
+            id={this.state.formParams?.id}
+            showInModal={true}
+            onSaveCallback={() => {
+              this.loadData();
+              //@ts-ignore
+              ADIOS.modalToggle(this.props.uid);
+            }}
+            onDeleteCallback={() => {
+              this.loadData();
+              //@ts-ignore
+              ADIOS.modalToggle(this.props.uid);
+            }}
+            {...this.props.formParams}
+            columns={this.props.columns}
+          />
+        </Modal>
+
+        <div>--{this.props.uid}--</div>
 
         <div
           id={"adios-table-" + this.props.uid}

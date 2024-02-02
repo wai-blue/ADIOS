@@ -13,6 +13,7 @@ export interface ModalProps {
   title?: string;
   hideHeader?: boolean;
   isOpen?: boolean;
+  model?: string;
 }
 
 interface ModalState {
@@ -29,9 +30,11 @@ export default class Modal extends Component<ModalProps> {
   constructor(props: ModalProps) {
     super(props);
 
+    console.log('modal construct ' + this.props.uid + ' ' + this.props.model);
+
     this.state = {
-      uid: this.props.uid ?? uuid.v4(),
-      type: this.props.type ?? "right",
+      uid: props.uid ?? uuid.v4(),
+      type: props.type ?? "right",
       isActive: true,
       title: props.title
     };
@@ -45,6 +48,7 @@ export default class Modal extends Component<ModalProps> {
   }
 
   componentDidMount() {
+    console.log('modal did mount ' + this.props.uid + ' ' + this.props.model);
     if (this.props.isOpen === true) {
       ADIOS.modalToggle(this.state.uid);
     }
@@ -54,6 +58,7 @@ export default class Modal extends Component<ModalProps> {
    * This function trigger if something change, for Form id of record
    */
   componentDidUpdate(prevProps: any) {
+    console.log('modal did update ' + this.props.uid + ' ' + this.props.model);
     if (prevProps.title != this.props.title) {
       this.setState({
         title: this.props.title

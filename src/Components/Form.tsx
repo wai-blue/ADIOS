@@ -2,6 +2,7 @@ import React, {Component} from "react";
 
 import Notification from "./Notification";
 import request from "./Request";
+import * as uuid from 'uuid';
 
 import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -103,6 +104,9 @@ export default class Form extends Component<FormProps> {
   model: String;
   inputs: FormInputs = {};
   components: Array<React.JSX.Element> = [];
+
+  jsxContentRendered: boolean = false;
+  jsxContent: JSX.Element;
 
   constructor(props: FormProps) {
     super(props);
@@ -490,6 +494,7 @@ export default class Form extends Component<FormProps> {
         break;
       default:
         console.log('window.getComponent', contentItemName, this.props.uid, this.props.model, contentItemParams[contentItemName]);
+
         contentItem = window.getComponent(
           contentItemName,
           // contentItemParams[contentItemName]
@@ -501,6 +506,8 @@ export default class Form extends Component<FormProps> {
             }
           }
         );
+
+        console.log('rendered component uid ' + contentItem.props.uid);
 
         this.components.push(contentItem);
 
@@ -735,7 +742,7 @@ export default class Form extends Component<FormProps> {
 
 
   render() {
-    console.log('form render', this.props.model);
+    console.log('form render', this.props.uid, this.props.model);
 
     return (
       <>
