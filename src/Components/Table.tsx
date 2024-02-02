@@ -29,7 +29,8 @@ interface TableProps {
   canRead?: boolean,
   canUpdate?: boolean,
   canDelete?: boolean,
-  parentForm?: Component<FormProps>,
+  parentFormId?: number,
+  parentFormModel?: string,
 
   //TODO
   //showPaging?: boolean,
@@ -90,7 +91,7 @@ export default class Table extends Component<TableProps> {
       canUpdate: props.canUpdate ?? true,
       canDelete: props.canDelete ?? true,
       formParams: {
-        uid: props.uid + '-form',
+        uid: props.uid,
         model: props.model,
         id: props.formId ? props.formId : 0,
       }
@@ -98,12 +99,17 @@ export default class Table extends Component<TableProps> {
   }
 
   componentDidMount() {
+    console.log('table did mount', this.props.model);
     this.loadParams();
     this.loadData();
   }
 
-  componentDidUpdate(prevProps: TableProps) {
-    if (prevProps.formParams?.id != this.props.formParams?.id) {
+  componentDidUpdate(prevProps: TableProps, prevState: TableState) {
+    console.log('table did update', this.props.model, prevProps.formParams?.id, this.props.formParams?.id, prevProps.parentFormId, this.props.parentFormId);
+    if (
+      (prevProps.formParams?.id != this.props.formParams?.id)
+      || (prevProps.parentFormId != this.props.parentFormId)
+    ) {
       this.state.formParams = this.props.formParams;
       this.loadParams();
       this.loadData();
@@ -116,6 +122,8 @@ export default class Table extends Component<TableProps> {
 
   loadParams() {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadParams';
+
+    console.log('table load params', this.props.model);
 
     //@ts-ignore
     axios.get(_APP_URL + '/' + loadParamsController, {
@@ -233,6 +241,8 @@ export default class Table extends Component<TableProps> {
   loadData(page: number = 1) {
     let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Table/OnLoadData';
 
+    console.log('table load data', this.props.model);
+
     this.setState({
       page: page
     });
@@ -249,16 +259,18 @@ export default class Table extends Component<TableProps> {
         search: this.state.search,
         where: this.props.where,
         tag: this.props.tag,
-        formParams: this.state.formParams
+        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : ''
       }
     }).then(({data}: any) => {
-        this.setState({
-          data: data.data
-        });
+      this.setState({
+        data: data.data
       });
+    });
   }
 
   onAddClick() {
+    //@ts-ignore
     ADIOS.modalToggle(this.props.uid);
     this.setState({
       formParams: {...this.state.formParams, id: undefined }
@@ -266,9 +278,13 @@ export default class Table extends Component<TableProps> {
   }
 
   onRowClick(id: number) {
+    //@ts-ignore
     ADIOS.modalToggle(this.props.uid);
+
+    let newFormParams = {...this.state.formParams, id: id};
+    console.log('table onRowClick', this.state.formParams, newFormParams);
     this.setState({
-      formParams: {...this.state.formParams, id: id}
+      formParams: newFormParams
     })
   }
 
@@ -291,6 +307,8 @@ export default class Table extends Component<TableProps> {
   }
 
   render() {
+    console.log('table render', this.props.model, this.state.formParams?.model);
+
     if (!this.state.data || !this.state.columns) {
       return <Loader />;
     }
@@ -298,11 +316,9 @@ export default class Table extends Component<TableProps> {
     // let formId = this.state.formParams?.id;
     // console.log('formId', this.state.formParams, formId);
 
-    let parentFormUid = (this.props.parentForm?.props.uid ? this.props.parentForm?.props.uid : '');
-
     return (
       <>
-        {parentFormUid == '' ?
+        {true ?
           <Modal 
             uid={this.props.uid}
             {...this.props.modal}
@@ -310,8 +326,8 @@ export default class Table extends Component<TableProps> {
             isOpen={this.props.formParams?.id ? true : false}
           >
             <Form
-              uid={this.state.formParams?.uid ?? ''}
-              model={this.state.formParams?.model ?? ''}
+              uid={this.props.uid}
+              model={this.props.model}
               id={this.state.formParams?.id}
               showInModal={true}
               onSaveCallback={() => {

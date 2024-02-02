@@ -98,6 +98,7 @@ interface FormInputs {
 
 export default class Form extends Component<FormProps> {
   state: FormState;
+  newState: any;
 
   model: String;
   inputs: FormInputs = {};
@@ -121,17 +122,26 @@ export default class Form extends Component<FormProps> {
     };
   }
 
+
+  // shouldComponentUpdate(nextProps: FormProps, nextState: FormState) {
+  //   console.log('form should update', this.props.model, this.props.id, nextProps.id, this.state.id, nextState.id);
+  //   return this.props.id != nextProps.id;
+  // }
+
   /**
    * This function trigger if something change, for Form id of record
    */
-  componentDidUpdate(prevProps: FormProps) {
+  componentDidUpdate(prevProps: FormProps, prevState: FormState) {
+    console.log('form did update', this.props.model, this.props.id, prevProps.id);
     if (prevProps.id !== this.props.id) {
+      console.log('...updating');
       this.checkIfIsEdit();
       this.loadParams();
       this.setState({
         invalidInputs: {},
         isEdit: this.props.id ? this.props.id > 0 : false
       });
+
     }
 
     if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
@@ -140,6 +150,7 @@ export default class Form extends Component<FormProps> {
   }
 
   componentDidMount() {
+    console.log('form did mount', this.props.model);
     this.checkIfIsEdit();
     this.initTabs();
 
@@ -148,6 +159,7 @@ export default class Form extends Component<FormProps> {
 
   loadParams() {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Form/OnLoadParams';
+    console.log('form load params', this.props.model);
 
     //@ts-ignore
     request.get(
@@ -161,13 +173,17 @@ export default class Form extends Component<FormProps> {
         data = deepObjectMerge(data, this.props);
         data.layout = this.convertLayoutToString(data.layout);
 
-        let newState = {
+        // this.newState = {
+        //   columns: data.columns,
+        //   folderUrl: data.folderUrl,
+        //   ...data
+        // };
+
+        this.setState({
           columns: data.columns,
           folderUrl: data.folderUrl,
           ...data
-        };
-
-        this.setState(newState, () => {
+        }, () => {
           this.loadData();
         });
       }
@@ -177,6 +193,8 @@ export default class Form extends Component<FormProps> {
   loadData() {
     let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Form/OnLoadData';
     let id = this.state.id ? this.state.id : 0;
+
+    console.log('form load data', this.props.model, id);
 
     if (id > 0) {
       request.get(
@@ -189,13 +207,26 @@ export default class Form extends Component<FormProps> {
         (data: any) => {
           this.initInputs(this.state.columns ?? {}, data.inputs);
           this.setState({id: id});
+          // this.newState.id = id;
+          // this._updateState();
         }
       );
     } else {
       this.initInputs(this.state.columns ?? {}, {});
       this.setState({id: id});
+      // this.newState.id = id;
+      // this._updateState();
     }
   }
+
+  // _updateState() {
+  //   console.log('form update state', this.props.model, this.newState);
+  //   if (this.newState) {
+  //     this.setState(this.newState, () => {
+  //       this.newState = null;
+  //     });
+  //   }
+  // }
 
   saveRecord() {
     this.setState({
@@ -458,17 +489,15 @@ export default class Form extends Component<FormProps> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
+        console.log('window.getComponent', contentItemName, this.props.uid, this.props.model, contentItemParams[contentItemName]);
         contentItem = window.getComponent(
           contentItemName,
+          // contentItemParams[contentItemName]
           {
             ...contentItemParams[contentItemName],
             ...{
-              parentForm: this,
-              formParams: {
-                uid: this.props.uid,
-                id: this.state.id,
-                model: this.props.model
-              }
+              parentFormId: this.state.id,
+              parentFormModel: this.props.model,
             }
           }
         );
@@ -706,6 +735,8 @@ export default class Form extends Component<FormProps> {
 
 
   render() {
+    console.log('form render', this.props.model);
+
     return (
       <>
         {this.props.showInModal ? (
