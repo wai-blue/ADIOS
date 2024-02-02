@@ -167,7 +167,7 @@ export default class Form extends Component<FormProps> {
 
     //@ts-ignore
     request.get(
-      '/' + loadParamsController,
+      loadParamsController,
       {
         __IS_AJAX__: '1',
         model: this.props.model,
@@ -202,7 +202,7 @@ export default class Form extends Component<FormProps> {
 
     if (id > 0) {
       request.get(
-        '/' + loadDataController,
+        loadDataController,
         {
           __IS_AJAX__: '1',
           model: this.props.model,
@@ -239,7 +239,7 @@ export default class Form extends Component<FormProps> {
 
     //@ts-ignore
     request.post(
-      '/Components/Form/OnSave',
+      'Components/Form/OnSave',
       {
         inputs: {...this.state.inputs, id: this.state.id}
       },
@@ -274,7 +274,7 @@ export default class Form extends Component<FormProps> {
     } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
         request.delete(
-          '/Components/Form/OnDelete',
+          'Components/Form/OnDelete',
           {
             __IS_AJAX__: '1',
             model: this.props.model,
