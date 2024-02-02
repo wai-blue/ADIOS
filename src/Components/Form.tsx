@@ -770,7 +770,7 @@ export default class Form extends Component<FormProps> {
 
         <div
           id={"adios-form-" + this.props.uid}
-          className="adios react ui form"
+          className="adios-react-ui form"
         >
           {this.props.showInModal ? (
             <div className="modal-body">

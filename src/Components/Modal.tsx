@@ -24,13 +24,13 @@ interface ModalState {
 }
 
 export default class Modal extends Component<ModalProps> {
-  private modalRoot: HTMLDivElement;
+  // private modalRoot: HTMLDivElement;
   state: ModalState;
 
   constructor(props: ModalProps) {
     super(props);
 
-    console.log('modal construct ' + this.props.uid + ' ' + this.props.model);
+    // console.log('modal construct ' + this.props.uid + ' ' + this.props.model);
 
     this.state = {
       uid: props.uid ?? uuid.v4(),
@@ -39,12 +39,12 @@ export default class Modal extends Component<ModalProps> {
       title: props.title
     };
 
-    this.modalRoot = document.createElement('div');
-    document.body.appendChild(this.modalRoot);
+    // this.modalRoot = document.createElement('div');
+    // document.body.appendChild(this.modalRoot);
   };
 
   componentWillUnmount() {
-    document.body.removeChild(this.modalRoot);
+    // document.body.removeChild(this.modalRoot);
   }
 
   componentDidMount() {
@@ -58,7 +58,7 @@ export default class Modal extends Component<ModalProps> {
    * This function trigger if something change, for Form id of record
    */
   componentDidUpdate(prevProps: any) {
-    console.log('modal did update ' + this.props.uid + ' ' + this.props.model);
+    // console.log('modal did update ' + this.props.uid + ' ' + this.props.model);
 
     if (prevProps.title != this.props.title) {
       this.setState({
@@ -71,7 +71,7 @@ export default class Modal extends Component<ModalProps> {
     return ReactDOM.createPortal(
       <div
         id={'adios-modal-' + this.props.uid} 
-        className={"modal " + this.state.type + " fade"}
+        className={"adios-react-ui modal " + this.state.type + " fade"}
         role="dialog"
       >
         <div className="modal-dialog" role="document">
@@ -119,7 +119,7 @@ export default class Modal extends Component<ModalProps> {
           </div>
         </div>
       </div>,
-      this.modalRoot
+      document.getElementsByTagName('body')[0]
     );
   } 
 }

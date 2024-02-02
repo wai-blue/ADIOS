@@ -1789,6 +1789,7 @@ class Loader
       //dirname(__FILE__)."/../Assets/Css/bootstrapmd.min.css",
       dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
       dirname(__FILE__)."/../Assets/Css/responsive.css",
+      dirname(__FILE__)."/../Assets/Css/adios-react-ui.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",
       dirname(__FILE__)."/../Assets/Css/desktop.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.structure.css",

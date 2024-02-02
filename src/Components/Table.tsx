@@ -10,27 +10,27 @@ import { adiosError } from "./Helper";
 import request from "./Request";
 
 interface TableProps {
-  uid: string,
-  model: string,
-  formModal?: ModalProps,
-  title?: string,
-  showTitle?: boolean,
-  modal?: ModalProps,
-  formId?: number,
-  formParams?: FormProps,
   addButtonText?: string,
-  columns?: FormColumns,
-  where?: Array<any>,
-  tag?: string,
-  loadParamsController?: string,
-  loadDataController?: string
-  rowHeight: number,
   canCreate?: boolean,
+  canDelete?: boolean,
   canRead?: boolean,
   canUpdate?: boolean,
-  canDelete?: boolean,
+  columns?: FormColumns,
+  formId?: number,
+  formModal?: ModalProps,
+  formParams?: FormProps,
+  loadDataController?: string
+  loadParamsController?: string,
+  modal?: ModalProps,
+  model: string,
   parentFormId?: number,
   parentFormModel?: string,
+  rowHeight: number,
+  showHeader?: boolean,
+  tag?: string,
+  title?: string,
+  uid: string,
+  where?: Array<any>,
 
   //TODO
   //showPaging?: boolean,
@@ -49,8 +49,8 @@ interface TableData {
   data: Array<any>,
   first_page_url: string,
   from: number,
-  last_page: number,
   last_page_url: string,
+  last_page: number,
   links: Array<any>,
   next_page_url: string|null,
   path: string,
@@ -61,20 +61,21 @@ interface TableData {
 }
 
 interface TableState {
-  page: number,
-  pageLength: number,
-  columns?: Array<GridColDef>,
-  data?: TableData,
-  formParams?: FormProps,
-  orderBy?: GridSortModel,
-  filterBy?: GridFilterModel,
-  search?: string,
   addButtonText?: string,
-  title?: string,
   canCreate?: boolean,
+  canDelete?: boolean,
   canRead?: boolean,
   canUpdate?: boolean,
-  canDelete?: boolean
+  columns?: Array<GridColDef>,
+  data?: TableData,
+  filterBy?: GridFilterModel,
+  formParams?: FormProps,
+  orderBy?: GridSortModel,
+  page: number,
+  pageLength: number,
+  search?: string,
+  showHeader?: boolean,
+  title?: string,
 }
 
 export default class Table extends Component<TableProps> {
@@ -84,17 +85,18 @@ export default class Table extends Component<TableProps> {
     super(props);
 
     this.state = {
-      page: 1,
-      pageLength: 15,
       canCreate: props.canCreate ?? true,
+      canDelete: props.canDelete ?? true,
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
-      canDelete: props.canDelete ?? true,
       formParams: {
-        uid: props.uid,
-        model: props.model,
         id: props.formId ? props.formId : 0,
-      }
+        model: props.model,
+        uid: props.uid,
+      },
+      page: 1,
+      pageLength: 15,
+      showHeader: props.showHeader ?? true,
     };
   }
 
@@ -129,9 +131,11 @@ export default class Table extends Component<TableProps> {
       loadParamsController,
       {
         __IS_AJAX__: '1',
+        columns: this.props.columns,
         model: this.props.model,
+        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
         tag: this.props.tag,
-        columns: this.props.columns
       },
       (data: any) => {
         let columns: Array<any> = [];
@@ -227,13 +231,14 @@ export default class Table extends Component<TableProps> {
         };
 
         this.setState({
-          columns: columns,
-          title: this.props.title ?? data.tableTitle,
           addButtonText: this.props.addButtonText ?? data.addButtonText,
           canCreate: data.canCreate ?? true,
+          canDelete: data.canDelete ?? true,
           canRead: data.canRead ?? true,
           canUpdate: data.canUpdate ?? true,
-          canDelete: data.canDelete ?? true
+          columns: columns,
+          showHeader: data.showHeader ?? true,
+          title: this.props.title ?? data.tableTitle,
         });
       }
     );
@@ -252,16 +257,16 @@ export default class Table extends Component<TableProps> {
       loadDataController,
       {
         __IS_AJAX__: '1',
-        page: page,
-        pageLength: this.state.pageLength,
+        filterBy: this.state.filterBy,
         model: this.props.model,
         orderBy: this.state.orderBy,
-        filterBy: this.state.filterBy,
-        search: this.state.search,
-        where: this.props.where,
-        tag: this.props.tag,
+        page: page,
+        pageLength: this.state.pageLength,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
-        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : ''
+        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
+        search: this.state.search,
+        tag: this.props.tag,
+        where: this.props.where,
       },
       (data: any) => {
         this.setState({
@@ -348,70 +353,70 @@ export default class Table extends Component<TableProps> {
           />
         </Modal>
 
-        <div>--{this.props.uid}--</div>
-
         <div
           id={"adios-table-" + this.props.uid}
-          className="adios react ui table"
+          className="adios-react-ui table"
         >
           <div className="card border-0">
-            <div className="card-header mb-2">
-              <div className="row m-0">
+            {this.state.showHeader ?
+              <div className="card-header mb-2">
+                <div className="row m-0">
 
-                <div className="col-lg-12 p-0 m-0">
-                  <h3 className="card-title m-0">{this.state.title}</h3>
-                </div>
+                  <div className="col-lg-12 p-0 m-0">
+                    <h3 className="card-title m-0">{this.state.title}</h3>
+                  </div>
 
-                <div className="col-lg-6 m-0 p-0">
-                  {this.state.canCreate ?
-                    <button
-                      className="btn btn-primary btn-icon-split"
-                      onClick={() => this.onAddClick()}
-                    >
-                      <span className="icon">
-                        <i className="fas fa-plus"/>
-                      </span>
-                      <span className="text">
-                        {this.state.addButtonText}
-                      </span>
-                    </button>
-                  : ""}
-                </div>
-
-                <div className="col-lg-6 m-0 p-0">
-                  <div className="d-flex flex-row-reverse">
-                    <div className="dropdown no-arrow">
-                      <button 
-                        className="btn btn-light dropdown-toggle" 
-                        type="button"
-                        data-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
+                  <div className="col-lg-6 m-0 p-0">
+                    {this.state.canCreate ?
+                      <button
+                        className="btn btn-primary btn-icon-split"
+                        onClick={() => this.onAddClick()}
                       >
-                        <i className="fas fa-ellipsis-v"/>
+                        <span className="icon">
+                          <i className="fas fa-plus"/>
+                        </span>
+                        <span className="text">
+                          {this.state.addButtonText}
+                        </span>
                       </button>
-                      <div className="dropdown-menu">
-                        <button className="dropdown-item" type="button">
-                          <i className="fas fa-file-export mr-2"/> Exportovať do CSV
-                        </button>
-                        <button className="dropdown-item" type="button">
-                          <i className="fas fa-print mr-2"/> Tlačiť
-                        </button>
-                      </div>
-                    </div>
+                    : ""}
+                  </div>
 
-                    <input 
-                      className="mr-2 form-control border-end-0 border rounded-pill"
-                      style={{maxWidth: '250px'}}
-                      type="search"
-                      placeholder="Start typing to search..."
-                      value={this.state.search} 
-                      onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
-                    />
+                  <div className="col-lg-6 m-0 p-0">
+                    <div className="d-flex flex-row-reverse">
+                      <div className="dropdown no-arrow">
+                        <button 
+                          className="btn btn-light dropdown-toggle" 
+                          type="button"
+                          data-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                        >
+                          <i className="fas fa-ellipsis-v"/>
+                        </button>
+                        <div className="dropdown-menu">
+                          <button className="dropdown-item" type="button">
+                            <i className="fas fa-file-export mr-2"/> Exportovať do CSV
+                          </button>
+                          <button className="dropdown-item" type="button">
+                            <i className="fas fa-print mr-2"/> Tlačiť
+                          </button>
+                        </div>
+                      </div>
+
+                      <input 
+                        className="mr-2 form-control border-end-0 border rounded-pill"
+                        style={{maxWidth: '250px'}}
+                        type="search"
+                        placeholder="Start typing to search..."
+                        value={this.state.search} 
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            : ''}
            
             <DataGrid
               localeText={skSK.components.MuiDataGrid.defaultProps.localeText}

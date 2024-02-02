@@ -52,7 +52,7 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
     return (
       <div
         id={"adios-breadcrumbs-" + this.props.uid}
-        className="adios react ui breadcrumbs"
+        className="adios-react-ui breadcrumbs"
       >
         <nav
           aria-label="breadcrumb"

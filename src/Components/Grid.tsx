@@ -61,7 +61,7 @@ export default class Grid extends Component<GridProps> {
     return (
       <div  
         id={"adios-button-" + this.props.uid}
-        className="adios react ui button"
+        className="adios-react-ui button"
       >
         <a 
           className={"adios ui Grid btn " + this.params.cssClass + " btn-icon-split"}
