@@ -21,6 +21,8 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public \ADIOS\Core\Model $model;
   public array $data = [];
 
+  private int $pageLength = 15;
+
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
     $this->permissionName = $this->params['model'] . ':Read';
@@ -28,7 +30,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
   public function prepareQuery(): \Illuminate\Database\Eloquent\Builder {
     $params = $this->params;
-    $pageLength = (int) $params['pageLength'] ?? 15;
+    $this->pageLength = (int) $params['pageLength'] ?? 15;
 
     $this->model = $this->adios->getModel($this->params['model']);
 
@@ -101,7 +103,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public function loadData(): array {
     // Laravel pagination
     return $this->query->paginate(
-      $pageLength, ['*'],
+      $this->pageLength, ['*'],
       'page',
       $this->params['page'])->toArray();
   }
@@ -121,8 +123,20 @@ class OnLoadData extends \ADIOS\Core\Controller {
         'data' => $data,
         'title' => $tableTitle,
       ];
-    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
-      // TODO: Error
+    } catch (QueryException $e) {
+      http_response_code(500);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
+    } catch (\Exception $e) {
+      http_response_code(400);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
     }
   }
 

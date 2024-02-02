@@ -49,8 +49,13 @@ class OnLoadParams extends \ADIOS\Core\Controller {
         ],
         $tmpModel->defaultFormParams ?? []
       );
-    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
-      // TODO: Error
+    } catch (\Exception $e) {
+      http_response_code(400);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
     }
   }
 

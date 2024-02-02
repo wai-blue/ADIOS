@@ -43,6 +43,13 @@ class OnSave extends \ADIOS\Core\Controller {
         'message' => 'Neboli vyplnené všetky povinné polia',
         'invalidInputs' => $invalidInputs
       ];
+    } catch (QueryException $e) {
+      http_response_code(500);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
     } catch (\Exception $e) {
       http_response_code(400);
 
