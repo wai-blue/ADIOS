@@ -1,8 +1,8 @@
 import React, { Component, FC, useState, forwardRef } from "react";
-import axios from "axios";
 import moment, { Moment } from "moment";
 import { dateToString, numberToStringTime } from "./Helper";
 import Notification from "./Notification";
+import request from "./Request";
 
 import Form from './Form';
 import Modal from './Modal';
@@ -37,8 +37,7 @@ interface CalendarState {
   rezervaciaDatum?: string,
   rezervaciaCasOd?: string,
   casUprava?: number,
-  idZaznam?: null,
-  xxx: Array<any>
+  idZaznam?: null
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -68,14 +67,8 @@ export default class Calendar extends Component<CalendarProps> {
       calendarTitle: 'def',
       datumOd: lastMonday,
       datumDo: lastDayInWeek,
-      isReadonly: false,
-      xxx:  [
-        { id: 1, name: "shrek" },
-        { id: 2, name: "fiona" }
-      ]
+      isReadonly: false
     };
-
-    // console.log(this.state);
 
     this.url = props.loadDataController ?? props.loadDataUrl ?? '';
   }
@@ -85,58 +78,58 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   loadData() {
-    //@ts-ignore
-    axios.get(_APP_URL + '/' + this.url, {
-      params: {
+    request.get(
+      this.url,
+      {
         __IS_AJAX__: '1',
         idTim: this.state.idTim,
         idCvicisko: this.state.idCvicisko,
         datumOd: this.state.datumOd,
         datumDo: this.state.datumDo
-      }
-    }).then(({data}: any) => {
+      },
+      (data: any) => {
+        let isReadonly = false;
+        let warning = '';
+        let info = '';
 
-      let isReadonly = false;
-      let warning = '';
-      let info = '';
-
-      if (this.props.jeSpravca) {
-        isReadonly = false;
-        info = 'Rozpis môžete upravovať ako správca.';
-      } else if (this.props.jeKoordinator) {
-        isReadonly = false;
-        info = 'Rozpis môžete upravovať ako koordinátor.';
-      } else {
-        if (
-          data.tyzden < this.getWeekNumber(new Date())
-          || data.rok < (new Date()).getFullYear()
-        ) {
-          isReadonly = true;
-          warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
-        } else if (this.state.idTim) {
-          if (this.props.timy[this.state.idTim].poradie != data.poradie) {
+        if (this.props.jeSpravca) {
+          isReadonly = false;
+          info = 'Rozpis môžete upravovať ako správca.';
+        } else if (this.props.jeKoordinator) {
+          isReadonly = false;
+          info = 'Rozpis môžete upravovať ako koordinátor.';
+        } else {
+          if (
+            data.tyzden < this.getWeekNumber(new Date())
+            || data.rok < (new Date()).getFullYear()
+          ) {
             isReadonly = true;
-            warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
+            warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
+          } else if (this.state.idTim) {
+            if (this.props.timy[this.state.idTim].poradie != data.poradie) {
+              isReadonly = true;
+              warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
+            }
           }
         }
-      }
 
-      this.setState({
-        data: data.data,
-        poradie: data.poradie,
-        rok: data.rok,
-        tyzden: data.tyzden,
-        isReadonly: isReadonly,
-        warning: warning,
-        info: info,
-        casUprava: data.cvicisko?.cas_uprava ?? 0
-      }, () => {
-        //@ts-ignore
-        this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
-          console.log(item);
-        });
-      })
-    });
+        this.setState({
+          data: data.data,
+          poradie: data.poradie,
+          rok: data.rok,
+          tyzden: data.tyzden,
+          isReadonly: isReadonly,
+          warning: warning,
+          info: info,
+          casUprava: data.cvicisko?.cas_uprava ?? 0
+        }, () => {
+          //@ts-ignore
+          this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
+            console.log(item);
+          });
+        })
+      }
+    );
   }
 
   idTimOnChange(event: React.ChangeEvent<HTMLInputElement>) {

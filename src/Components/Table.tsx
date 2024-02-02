@@ -1,6 +1,5 @@
 import React, { ChangeEvent, Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
-import axios from "axios";
 
 import Modal, { ModalProps } from "./Modal";
 import Form, { FormProps, FormColumns } from "./Form";
@@ -8,6 +7,7 @@ import { dateToEUFormat, timeToEUFormat, datetimeToEUFormat } from "./Inputs/Dat
 
 import Loader from "./Loader";
 import { adiosError } from "./Helper";
+import request from "./Request";
 
 interface TableProps {
   uid: string,
@@ -125,15 +125,15 @@ export default class Table extends Component<TableProps> {
 
     console.log('table load params', this.props.model);
 
-    //@ts-ignore
-    axios.get(_APP_URL + '/' + loadParamsController, {
-      params: {
+    request.get(
+      loadParamsController,
+      {
         __IS_AJAX__: '1',
         model: this.props.model,
         tag: this.props.tag,
         columns: this.props.columns
-      }
-    }).then(({data}: any) => {
+      },
+      (data: any) => {
         let columns: Array<any> = [];
 
         if (data.columns.length == 0) adiosError("Any column to show. Set showColumn param for column");
@@ -235,7 +235,8 @@ export default class Table extends Component<TableProps> {
           canUpdate: data.canUpdate ?? true,
           canDelete: data.canDelete ?? true
         });
-      });
+      }
+    );
   }
 
   loadData(page: number = 1) {
@@ -247,9 +248,9 @@ export default class Table extends Component<TableProps> {
       page: page
     });
 
-    //@ts-ignore
-    axios.get(_APP_URL + '/' + loadDataController, {
-      params: {
+    request.get(
+      loadDataController,
+      {
         __IS_AJAX__: '1',
         page: page,
         pageLength: this.state.pageLength,
@@ -261,12 +262,13 @@ export default class Table extends Component<TableProps> {
         tag: this.props.tag,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
         parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : ''
+      },
+      (data: any) => {
+        this.setState({
+          data: data.data
+        });
       }
-    }).then(({data}: any) => {
-      this.setState({
-        data: data.data
-      });
-    });
+    );
   }
 
   onAddClick() {

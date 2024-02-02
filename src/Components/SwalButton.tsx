@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Swal, { SweetAlertOptions } from "sweetalert2";
 import Notification from "./Notification";
-import axios from "axios";
+import request from "./Request";
 
 interface SwalButtonProps {
   uid: string,
@@ -71,22 +71,17 @@ export default class SwalButton extends Component<SwalButtonProps> {
     //@ts-ignore
     Swal.fire(this.swal as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
-        //@ts-ignore
-        axios.post(
-          _APP_URL + '/' + this.props.confirmUrl,
-          {...this.props.confirmParams, __IS_AJAX__: '1'}
-        ).then((res) => {
-          Notification.success(this.props.successMessage ?? 'Confirmed');
-          if (this.props.onConfirmCallback) this.props.onConfirmCallback(res.data);
-        }).catch((res) => {
-          Notification.error(res.response.data.message);
-
-          if (res.response.status == 422) {
-            this.setState({
-              invalidInputs: res.response.data.invalidInputs 
-            });
+        request.post(
+          this.props.confirmUrl,
+          this.props.confirmParams ?? {},
+          {
+            __IS_AJAX__: '1'
+          },
+          (data: any) => {
+            Notification.success(this.props.successMessage ?? 'Confirmed');
+            if (this.props.onConfirmCallback) this.props.onConfirmCallback(data);
           }
-        });
+        );
       }
     })
   }
