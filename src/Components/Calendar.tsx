@@ -36,6 +36,7 @@ interface CalendarState {
   info?: string,
   rezervaciaDatum?: string,
   rezervaciaCasOd?: string,
+  rezervaciaVyuzitie?: number,
   casUprava?: number,
   idZaznam?: number,
   cvicisko?: any
@@ -154,12 +155,13 @@ export default class Calendar extends Component<CalendarProps> {
     return `${number < 10 ? '0' : ''}${number}`;
   }
 
-  pickDateTime(slot: Moment, id?: number) {
+  pickDateTime(slot: Moment, id?: null|number, vyuzitie?: number) {
     if (!this.state.isReadonly) {
       this.setState({
         idZaznam: id,
         rezervaciaDatum: `${slot.format('YYYY-MM-DD')}`,
-        rezervaciaCasOd: `${slot.format('HH:mm')}`
+        rezervaciaCasOd: `${slot.format('HH:mm')}`,
+        rezervaciaVyuzitie: vyuzitie,
       });
 
       //@ts-ignore
@@ -313,7 +315,7 @@ export default class Calendar extends Component<CalendarProps> {
                   <div className="header">{dni[d]}</div>
 
                   {this.state.data[d] ? (this.state.data[d].map((r: any) => (
-                      <>{(r[1] === 0 && r[2] === '' && r[3] === '') ? (
+                      <>{(r[1] === 0 && r[2] === 0) ? (
                         Array.from({ length: r[0] / 15 }, (_, v) => {
                           const _slot = moment(slot);
 
@@ -328,7 +330,7 @@ export default class Calendar extends Component<CalendarProps> {
                               }
                               title={slot.format('D.M.YYYY HH:mm')}
                               data-den={d}
-                              onClick={() => this.pickDateTime(_slot)}
+                              onClick={() => this.pickDateTime(_slot, null, 1)}
                             ></div>
                           );
 
@@ -343,7 +345,11 @@ export default class Calendar extends Component<CalendarProps> {
                             const span = (r[0] + r[1]) / 15;
                             const gridColumn = `span ${span}`;
 
+                            let vyuzitie = 0;
+
                             this.state.rCnt += span;
+
+                            // console.log(r);
 
                             // let hh = slot.hours();
                             // let mm = slot.minutes();
@@ -352,42 +358,40 @@ export default class Calendar extends Component<CalendarProps> {
                               <div
                                 id={`rezervacka-${this.state.rCnt}`}
                                 key={this.state.rCnt}
-                                className={
-                                  "rezervacka"
-                                  + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
-                                }
+                                className={"rezervacka typ-" + r[2]}
                                 title={slot.format('D.M.YYYY HH:mm')}
                                 data-den={d}
                                 style={{ gridColumn }}
                               >
                                 <div className="rezervacka-inner" style={{ flex: r[0] / 15 }}>
-                                  {Array.isArray(r[2]) ? (
-                                    r[2].map((rr) => (
+                                  {r[3].map((rr) => {
+                                    vyuzitie += rr[3];
+                                    return (
                                       <div
-                                        key={rr[1]}
-                                        className="cast-cviciska"
-                                        style={{ background: this._addOpacity(rr[0], '60') }}
+                                        className={
+                                          "cast-cviciska"
+                                          + " " + (rr[5] == this.state.idTim ? "zvyraznene" : "")
+                                          + " " + (rr[5] == 0 ? "volne" : "")
+                                        }
+                                        style={{
+                                          background: this._addOpacity(rr[0], '60'),
+                                          flex: rr[3]
+                                        }}
                                         onClick={() => {
+                                          console.log(rr);
+                                          if (rr[5] == this.state.idTim) {
+                                            this.pickDateTime(_slot, rr[4]);
+                                          } else if (rr[5] == 0) {
+                                            this.pickDateTime(_slot, null, 2);
+                                          }
                                         }}
                                       >
-                                        {rr[1]}
+                                        <div className="cas">{numberToStringTime(_slot.hours()) + ':' + numberToStringTime(_slot.minutes())}</div>
+                                        <div className="nazov">{rr[1]}</div>
+                                        <div className="trener">{rr[2]}</div>
                                       </div>
-                                    ))
-                                  ) : (
-                                    <div
-                                      className="cast-cviciska"
-                                      style={{ background: this._addOpacity(r[2], '60') }}
-                                      onClick={() => {
-                                        if (r[7] == this.state.idTim) {
-                                            this.pickDateTime(_slot, r[6]);
-                                        }
-                                      }}
-                                    >
-                                      <div className="cas">{numberToStringTime(_slot.hours()) + ':' + numberToStringTime(_slot.minutes())}</div>
-                                      <div className="nazov">{r[3]}</div>
-                                      <div className="trener">{r[4]}</div>
-                                    </div>
-                                  )}
+                                    );
+                                  })}
                                 </div>
                                 <div className="rolba" style={{ flex: r[1] / 15 }}></div>
                               </div>
@@ -496,7 +500,7 @@ export default class Calendar extends Component<CalendarProps> {
               id_tim: this.state.idTim,
               id_cvicisko: this.state.idCvicisko,
               id_sportovisko: this.props.idSportovisko,
-              vyuzitie: 1, //cela plocha default
+              vyuzitie: this.state.rezervaciaVyuzitie,
               trvanie_uprava: this.state.casUprava
             }}
           ></Form>

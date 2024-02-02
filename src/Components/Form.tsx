@@ -211,14 +211,14 @@ export default class Form extends Component<FormProps> {
         },
         (data: any) => {
           this.initInputs(this.state.columns ?? {}, data.inputs);
-          this.setState({id: id});
+          // this.setState({id: id});
           // this.newState.id = id;
           // this._updateState();
         }
       );
     } else {
       this.initInputs(this.state.columns ?? {}, {});
-      this.setState({id: id});
+      // this.setState({id: id});
       // this.newState.id = id;
       // this._updateState();
     }
