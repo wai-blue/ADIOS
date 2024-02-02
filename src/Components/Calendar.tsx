@@ -37,7 +37,8 @@ interface CalendarState {
   rezervaciaDatum?: string,
   rezervaciaCasOd?: string,
   casUprava?: number,
-  idZaznam?: null
+  idZaznam?: number,
+  cvicisko?: any
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
@@ -118,6 +119,7 @@ export default class Calendar extends Component<CalendarProps> {
           poradie: data.poradie,
           rok: data.rok,
           tyzden: data.tyzden,
+          cvicisko: data.cvicisko,
           isReadonly: isReadonly,
           warning: warning,
           info: info,
@@ -582,6 +584,7 @@ export default class Calendar extends Component<CalendarProps> {
 
           </div>
           <div className="col-lg-4 text-right">
+            {this.state.cvicisko?.nazov}
             {!this.state.isReadonly ? (
               <>
                 <SwalButton
@@ -603,7 +606,7 @@ export default class Calendar extends Component<CalendarProps> {
                     html:`
                       <p>
                         Chystáte sa ukončiť tvorbu rozpisu v týždni <b>${dateToString(this.state.datumOd)} - ${dateToString(this.state.datumDo)}</b>
-                        na cvičisku ${this.state.idCvicisko}.<br/>
+                        na cvičisku <b>${this.state.cvicisko?.nazov}</b>.<br/>
                       </p>
 
                       <div class='alert alert-danger' role='alert'>

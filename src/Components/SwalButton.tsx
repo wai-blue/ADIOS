@@ -25,7 +25,6 @@ interface SwalButtonState {
 
 export default class SwalButton extends Component<SwalButtonProps> {
   state: SwalButtonState;
-  swal: SweetAlertOptions;
 
   constructor(props: SwalButtonProps) {
     super(props);
@@ -34,16 +33,6 @@ export default class SwalButton extends Component<SwalButtonProps> {
       css: props.css ?? 'btn-primary',
       icon: props.icon ?? 'fas fa-check',
     };
-
-    this.swal = {
-      title: this.props.swal.title ?? 'Title',
-      html: this.props.swal.html ?? 'body',
-      icon: this.props.swal.icon ?? 'info',
-      showCancelButton: this.props.swal.showCancelButton ?? true,
-      cancelButtonText: this.props.swal.cancelButtonText ?? 'No',
-      confirmButtonText: this.props.swal.confirmButtonText ?? 'Yes',
-      confirmButtonColor: this.props.swal.confirmButtonColor ?? '#dc4c64'
-    }
 
     switch (this.props.type) {
       case 'save':
@@ -68,8 +57,15 @@ export default class SwalButton extends Component<SwalButtonProps> {
   }
 
   onClick() {
-    //@ts-ignore
-    Swal.fire(this.swal as SweetAlertOptions).then((result) => {
+    Swal.fire({
+      title: this.props.swal.title ?? 'Title',
+      html: this.props.swal.html ?? 'body',
+      icon: this.props.swal.icon ?? 'info',
+      showCancelButton: this.props.swal.showCancelButton ?? true,
+      cancelButtonText: this.props.swal.cancelButtonText ?? 'No',
+      confirmButtonText: this.props.swal.confirmButtonText ?? 'Yes',
+      confirmButtonColor: this.props.swal.confirmButtonColor ?? '#dc4c64'
+    } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
         request.post(
           this.props.confirmUrl,
