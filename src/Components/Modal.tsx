@@ -48,7 +48,7 @@ export default class Modal extends Component<ModalProps> {
   }
 
   componentDidMount() {
-    console.log('modal did mount ' + this.props.uid + ' ' + this.props.model);
+    //console.log('modal did mount ' + this.props.uid + ' ' + this.props.model);
     if (this.props.isOpen === true) {
       ADIOS.modalToggle(this.state.uid);
     }
@@ -59,6 +59,7 @@ export default class Modal extends Component<ModalProps> {
    */
   componentDidUpdate(prevProps: any) {
     console.log('modal did update ' + this.props.uid + ' ' + this.props.model);
+
     if (prevProps.title != this.props.title) {
       this.setState({
         title: this.props.title
@@ -69,7 +70,7 @@ export default class Modal extends Component<ModalProps> {
   render() {
     return ReactDOM.createPortal(
       <div
-        id={'adios-modal-' + this.state.uid} 
+        id={'adios-modal-' + this.props.uid} 
         className={"modal " + this.state.type + " fade"}
         role="dialog"
       >

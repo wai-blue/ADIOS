@@ -55,7 +55,7 @@ export default class Calendar extends Component<CalendarProps> {
   constructor(props: CalendarProps) {
     super(props);
 
-    console.log(props);
+    //console.log(props);
     let now: Date = new Date();
     let lastMonday: Date = new Date(now.getTime() - (now.getDay() - 1) * 24 * 60 * 60 * 1000);
     let lastDayInWeek = new Date(lastMonday.getTime() + 6 * 24 * 60 * 60 * 1000);
@@ -127,7 +127,7 @@ export default class Calendar extends Component<CalendarProps> {
         }, () => {
           //@ts-ignore
           this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
-            console.log(item);
+            //console.log(item);
           });
         })
       }
@@ -224,7 +224,7 @@ export default class Calendar extends Component<CalendarProps> {
           return pos;
         }
       });
-      console.log(newPos);
+      //console.log(newPos);
       dragEl.classList.remove('ghost');
       section.removeEventListener('dragover', _onDragOver, false);
       section.removeEventListener('dragend', _onDragEnd, false);

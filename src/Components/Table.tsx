@@ -99,13 +99,13 @@ export default class Table extends Component<TableProps> {
   }
 
   componentDidMount() {
-    console.log('table did mount', this.props.model);
+    //console.log('table did mount', this.props.model);
     this.loadParams();
     this.loadData();
   }
 
   componentDidUpdate(prevProps: TableProps, prevState: TableState) {
-    console.log('table did update', this.props.model, prevProps.formParams?.id, this.props.formParams?.id, prevProps.parentFormId, this.props.parentFormId);
+    //console.log('table did update', this.props.model, prevProps.formParams?.id, this.props.formParams?.id, prevProps.parentFormId, this.props.parentFormId);
     if (
       (prevProps.formParams?.id != this.props.formParams?.id)
       || (prevProps.parentFormId != this.props.parentFormId)
@@ -123,7 +123,7 @@ export default class Table extends Component<TableProps> {
   loadParams() {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadParams';
 
-    console.log('table load params', this.props.model);
+    //console.log('table load params', this.props.model);
 
     request.get(
       loadParamsController,
@@ -242,7 +242,7 @@ export default class Table extends Component<TableProps> {
   loadData(page: number = 1) {
     let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Table/OnLoadData';
 
-    console.log('table load data', this.props.model);
+    //console.log('table load data', this.props.model);
 
     this.setState({
       page: page
@@ -272,6 +272,7 @@ export default class Table extends Component<TableProps> {
   }
 
   onAddClick() {
+    console.log(this.props.uid); 
     //@ts-ignore
     ADIOS.modalToggle(this.props.uid);
     this.setState({
@@ -284,7 +285,7 @@ export default class Table extends Component<TableProps> {
     ADIOS.modalToggle(this.props.uid);
 
     let newFormParams = {...this.state.formParams, id: id};
-    console.log('table onRowClick', this.state.formParams, newFormParams);
+    //console.log('table onRowClick', this.state.formParams, newFormParams);
     this.setState({
       formParams: newFormParams
     })
@@ -309,7 +310,7 @@ export default class Table extends Component<TableProps> {
   }
 
   render() {
-    console.log('table render', this.props.model, this.state.formParams?.model);
+    //console.log('table render', this.props.model, this.state.formParams?.model);
 
     if (!this.state.data || !this.state.columns) {
       return <Loader />;

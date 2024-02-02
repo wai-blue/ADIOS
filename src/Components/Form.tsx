@@ -136,11 +136,12 @@ export default class Form extends Component<FormProps> {
    * This function trigger if something change, for Form id of record
    */
   componentDidUpdate(prevProps: FormProps, prevState: FormState) {
-    console.log('form did update', this.props.model, this.props.id, prevProps.id);
+    //console.log('form did update', this.props.model, this.props.id, prevProps.id);
     if (prevProps.id !== this.props.id) {
-      console.log('...updating');
       this.checkIfIsEdit();
       this.loadParams();
+      
+      //this.loadData();
       this.setState({
         invalidInputs: {},
         isEdit: this.props.id ? this.props.id > 0 : false
@@ -154,7 +155,7 @@ export default class Form extends Component<FormProps> {
   }
 
   componentDidMount() {
-    console.log('form did mount', this.props.model);
+    //console.log('form did mount', this.props.model);
     this.checkIfIsEdit();
     this.initTabs();
 
@@ -163,7 +164,7 @@ export default class Form extends Component<FormProps> {
 
   loadParams() {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Form/OnLoadParams';
-    console.log('form load params', this.props.model);
+    //console.log('form load params', this.props.model);
 
     //@ts-ignore
     request.get(
@@ -198,7 +199,7 @@ export default class Form extends Component<FormProps> {
     let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Form/OnLoadData';
     let id = this.state.id ? this.state.id : 0;
 
-    console.log('form load data', this.props.model, id);
+    //console.log('form load data', this.props.model, id);
 
     if (id > 0) {
       request.get(
@@ -493,7 +494,7 @@ export default class Form extends Component<FormProps> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
-        console.log('window.getComponent', contentItemName, this.props.uid, this.props.model, contentItemParams[contentItemName]);
+        //console.log('window.getComponent', contentItemName, this.props.uid, this.props.model, contentItemParams[contentItemName]);
 
         contentItem = window.getComponent(
           contentItemName,
@@ -507,7 +508,7 @@ export default class Form extends Component<FormProps> {
           }
         );
 
-        console.log('rendered component uid ' + contentItem.props.uid);
+        //console.log('rendered component uid ' + contentItem.props.uid);
 
         this.components.push(contentItem);
 
@@ -742,7 +743,7 @@ export default class Form extends Component<FormProps> {
 
 
   render() {
-    console.log('form render', this.props.uid, this.props.model);
+    //console.log('form render', this.props.uid, this.props.model);
 
     return (
       <>
