@@ -349,7 +349,6 @@ export default class Table extends Component<TableProps> {
               ADIOS.modalToggle(this.props.uid);
             }}
             {...this.props.formParams}
-            columns={this.props.columns}
           />
         </Modal>
 

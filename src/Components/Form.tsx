@@ -179,7 +179,6 @@ export default class Form extends Component<FormProps> {
       (data: any) => {
         data = deepObjectMerge(data, this.props);
         data.layout = this.convertLayoutToString(data.layout);
-
         // this.newState = {
         //   columns: data.columns,
         //   folderUrl: data.folderUrl,
