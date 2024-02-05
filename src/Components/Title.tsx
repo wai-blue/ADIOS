@@ -17,7 +17,7 @@ export default class Title extends Component<TitleProps> {
     return (
       <div 
         id={"adios-title-" + this.props.uid}
-        className="adios react ui Title p-4"
+        className="adios-react-ui Title p-4"
       >
         <div className="row">
           <div className="col-lg-12 p-0">

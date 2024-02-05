@@ -1,6 +1,5 @@
 import React, { ChangeEvent, Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
-import axios from "axios";
 
 import Modal, { ModalProps } from "./Modal";
 import Form, { FormProps, FormColumns } from "./Form";
@@ -8,23 +7,30 @@ import { dateToEUFormat, timeToEUFormat, datetimeToEUFormat } from "./Inputs/Dat
 
 import Loader from "./Loader";
 import { adiosError } from "./Helper";
+import request from "./Request";
 
 interface TableProps {
-  uid: string,
-  model: string,
-  formModal?: ModalProps,
-  title?: string,
-  showTitle?: boolean,
-  modal?: ModalProps,
+  addButtonText?: string,
+  canCreate?: boolean,
+  canDelete?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
+  columns?: FormColumns,
   formId?: number,
-  formParams?: FormProps
-  addButtonText?: string
-  columns?: FormColumns
-  where?: Array<any>,
-  tag?: string,
-  loadParamsController?: string,
+  formModal?: ModalProps,
+  formParams?: FormProps,
   loadDataController?: string
+  loadParamsController?: string,
+  modal?: ModalProps,
+  model: string,
+  parentFormId?: number,
+  parentFormModel?: string,
   rowHeight: number,
+  showHeader?: boolean,
+  tag?: string,
+  title?: string,
+  uid: string,
+  where?: Array<any>,
 
   //TODO
   //showPaging?: boolean,
@@ -43,8 +49,8 @@ interface TableData {
   data: Array<any>,
   first_page_url: string,
   from: number,
-  last_page: number,
   last_page_url: string,
+  last_page: number,
   links: Array<any>,
   next_page_url: string|null,
   path: string,
@@ -55,16 +61,21 @@ interface TableData {
 }
 
 interface TableState {
-  page: number,
-  pageLength: number,
+  addButtonText?: string,
+  canCreate?: boolean,
+  canDelete?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
   columns?: Array<GridColDef>,
   data?: TableData,
-  form?: FormProps,
-  orderBy?: GridSortModel,
   filterBy?: GridFilterModel,
+  formParams?: FormProps,
+  orderBy?: GridSortModel,
+  page: number,
+  pageLength: number,
   search?: string,
-  addButtonText?: string,
-  title?: string
+  showHeader?: boolean,
+  title?: string,
 }
 
 export default class Table extends Component<TableProps> {
@@ -72,20 +83,39 @@ export default class Table extends Component<TableProps> {
 
   constructor(props: TableProps) {
     super(props);
+
     this.state = {
+      canCreate: props.canCreate ?? true,
+      canDelete: props.canDelete ?? true,
+      canRead: props.canRead ?? true,
+      canUpdate: props.canUpdate ?? true,
+      formParams: {
+        id: props.formId ? props.formId : 0,
+        model: props.model,
+        uid: props.uid,
+      },
       page: 1,
       pageLength: 15,
-      form: {
-        uid: props.uid,
-        model: props.model,
-        id: props.formId
-      }
+      showHeader: props.showHeader ?? true,
     };
   }
 
   componentDidMount() {
+    //console.log('table did mount', this.props.model);
     this.loadParams();
     this.loadData();
+  }
+
+  componentDidUpdate(prevProps: TableProps, prevState: TableState) {
+    //console.log('table did update', this.props.model, prevProps.formParams?.id, this.props.formParams?.id, prevProps.parentFormId, this.props.parentFormId);
+    if (
+      (prevProps.formParams?.id != this.props.formParams?.id)
+      || (prevProps.parentFormId != this.props.parentFormId)
+    ) {
+      this.state.formParams = this.props.formParams;
+      this.loadParams();
+      this.loadData();
+    }
   }
 
   _commonCellRenderer(column, content): JSX.Element {
@@ -95,15 +125,19 @@ export default class Table extends Component<TableProps> {
   loadParams() {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadParams';
 
-    //@ts-ignore
-    axios.get(_APP_URL + '/' + loadParamsController, {
-      params: {
+    //console.log('table load params', this.props.model);
+
+    request.get(
+      loadParamsController,
+      {
         __IS_AJAX__: '1',
+        columns: this.props.columns,
         model: this.props.model,
+        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
         tag: this.props.tag,
-        columns: this.props.columns
-      }
-    }).then(({data}: any) => {
+      },
+      (data: any) => {
         let columns: Array<any> = [];
 
         if (data.columns.length == 0) adiosError("Any column to show. Set showColumn param for column");
@@ -197,51 +231,68 @@ export default class Table extends Component<TableProps> {
         };
 
         this.setState({
+          addButtonText: this.props.addButtonText ?? data.addButtonText,
+          canCreate: data.canCreate ?? true,
+          canDelete: data.canDelete ?? true,
+          canRead: data.canRead ?? true,
+          canUpdate: data.canUpdate ?? true,
           columns: columns,
+          showHeader: data.showHeader ?? true,
           title: this.props.title ?? data.tableTitle,
-          addButtonText: this.props.addButtonText ?? data.addButtonText
         });
-      });
+      }
+    );
   }
 
   loadData(page: number = 1) {
     let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Table/OnLoadData';
 
+    //console.log('table load data', this.props.model);
+
     this.setState({
       page: page
     });
 
-    //@ts-ignore
-    axios.get(_APP_URL + '/' + loadDataController, {
-      params: {
+    request.get(
+      loadDataController,
+      {
         __IS_AJAX__: '1',
-        page: page,
-        pageLength: this.state.pageLength,
+        filterBy: this.state.filterBy,
         model: this.props.model,
         orderBy: this.state.orderBy,
-        filterBy: this.state.filterBy,
+        page: page,
+        pageLength: this.state.pageLength,
+        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
         search: this.state.search,
+        tag: this.props.tag,
         where: this.props.where,
-        tag: this.props.tag
-      }
-    }).then(({data}: any) => {
+      },
+      (data: any) => {
         this.setState({
           data: data.data
         });
-      });
+      }
+    );
   }
 
   onAddClick() {
+    console.log(this.props.uid); 
+    //@ts-ignore
     ADIOS.modalToggle(this.props.uid);
     this.setState({
-      form: {...this.state.form, id: undefined }
+      formParams: {...this.state.formParams, id: undefined }
     })
   }
 
   onRowClick(id: number) {
+    //@ts-ignore
     ADIOS.modalToggle(this.props.uid);
+
+    let newFormParams = {...this.state.formParams, id: id};
+    //console.log('table onRowClick', this.state.formParams, newFormParams);
     this.setState({
-      form: {...this.state.form, id: id}
+      formParams: newFormParams
     })
   }
 
@@ -264,96 +315,107 @@ export default class Table extends Component<TableProps> {
   }
 
   render() {
+    //console.log('table render', this.props.model, this.state.formParams?.model);
+
     if (!this.state.data || !this.state.columns) {
       return <Loader />;
     }
+
+    // let formId = this.state.formParams?.id;
+    // console.log('formId', this.state.formParams, formId);
 
     return (
       <>
         <Modal 
           uid={this.props.uid}
+          model={this.props.model}
           {...this.props.modal}
           hideHeader={true}
-          isOpen={this.props.formId ? true : false}
+          isOpen={this.props.formParams?.id ? true : false}
         >
-          <Form 
+          <Form
             uid={this.props.uid}
             model={this.props.model}
-            id={this.state.form?.id}
+            id={this.state.formParams?.id}
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
+              //@ts-ignore
               ADIOS.modalToggle(this.props.uid);
             }}
             onDeleteCallback={() => {
               this.loadData();
+              //@ts-ignore
               ADIOS.modalToggle(this.props.uid);
             }}
             {...this.props.formParams}
-            columns={this.props.columns}
           />
         </Modal>
 
         <div
           id={"adios-table-" + this.props.uid}
-          className="adios react ui table"
+          className="adios-react-ui table"
         >
           <div className="card border-0">
-            <div className="card-header mb-2">
-              <div className="row m-0">
+            {this.state.showHeader ?
+              <div className="card-header mb-2">
+                <div className="row m-0">
 
-                <div className="col-lg-12 p-0 m-0">
-                  <h3 className="card-title m-0">{this.state.title}</h3>
-                </div>
+                  <div className="col-lg-12 p-0 m-0">
+                    <h3 className="card-title m-0">{this.state.title}</h3>
+                  </div>
 
-                <div className="col-lg-6 m-0 p-0">
-                  <button
-                    className="btn btn-primary btn-icon-split"
-                    onClick={() => this.onAddClick()}
-                  >
-                    <span className="icon">
-                      <i className="fas fa-plus"/>
-                    </span>
-                    <span className="text">
-                      {this.state.addButtonText}
-                    </span>
-                  </button>
-                </div>
-
-                <div className="col-lg-6 m-0 p-0">
-                  <div className="d-flex flex-row-reverse">
-                    <div className="dropdown no-arrow">
-                      <button 
-                        className="btn btn-light dropdown-toggle" 
-                        type="button"
-                        data-toggle="dropdown"
-                        aria-haspopup="true"
-                        aria-expanded="false"
+                  <div className="col-lg-6 m-0 p-0">
+                    {this.state.canCreate ?
+                      <button
+                        className="btn btn-primary btn-icon-split"
+                        onClick={() => this.onAddClick()}
                       >
-                        <i className="fas fa-ellipsis-v"/>
+                        <span className="icon">
+                          <i className="fas fa-plus"/>
+                        </span>
+                        <span className="text">
+                          {this.state.addButtonText}
+                        </span>
                       </button>
-                      <div className="dropdown-menu">
-                        <button className="dropdown-item" type="button">
-                          <i className="fas fa-file-export mr-2"/> Exportovať do CSV
-                        </button>
-                        <button className="dropdown-item" type="button">
-                          <i className="fas fa-print mr-2"/> Tlačiť
-                        </button>
-                      </div>
-                    </div>
+                    : ""}
+                  </div>
 
-                    <input 
-                      className="mr-2 form-control border-end-0 border rounded-pill"
-                      style={{maxWidth: '250px'}}
-                      type="search"
-                      placeholder="Start typing to search..."
-                      value={this.state.search} 
-                      onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
-                    />
+                  <div className="col-lg-6 m-0 p-0">
+                    <div className="d-flex flex-row-reverse">
+                      <div className="dropdown no-arrow">
+                        <button 
+                          className="btn btn-light dropdown-toggle" 
+                          type="button"
+                          data-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                        >
+                          <i className="fas fa-ellipsis-v"/>
+                        </button>
+                        <div className="dropdown-menu">
+                          <button className="dropdown-item" type="button">
+                            <i className="fas fa-file-export mr-2"/> Exportovať do CSV
+                          </button>
+                          <button className="dropdown-item" type="button">
+                            <i className="fas fa-print mr-2"/> Tlačiť
+                          </button>
+                        </div>
+                      </div>
+
+                      <input 
+                        className="mr-2 form-control border-end-0 border rounded-pill"
+                        style={{maxWidth: '250px'}}
+                        type="search"
+                        placeholder="Start typing to search..."
+                        value={this.state.search} 
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            : ''}
            
             <DataGrid
               localeText={skSK.components.MuiDataGrid.defaultProps.localeText}

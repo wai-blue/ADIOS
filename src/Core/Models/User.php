@@ -18,6 +18,14 @@ namespace ADIOS\Core\Models;
 class User extends \ADIOS\Core\Model {
   const TOKEN_TYPE_USER_FORGOT_PASSWORD = 551155;
 
+  protected $hidden = [
+    'password',
+    'last_access_time',
+    'last_access_ip',
+    'last_login_time',
+    'last_login_ip',
+  ];
+
   public string $urlBase = "users";
   public ?string $lookupSqlValue = "{%TABLE%}.login";
 
@@ -223,13 +231,14 @@ class User extends \ADIOS\Core\Model {
         ->where('login', '=', $login)
         ->where('is_active', '<>', 0)
         ->get()
+        ->makeVisible(['password'])
         ->toArray()
       ;
 
       foreach ($users as $user) {
         $passwordMatch = FALSE;
 
-        if (!empty($password) && password_verify($password, $user['password'])) {
+        if (!empty($password) && password_verify($password, $user['password'] ?? "")) {
           // plain text
           $passwordMatch = TRUE;
         } else if (

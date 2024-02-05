@@ -54,8 +54,20 @@ class OnLoadData extends \ADIOS\Core\Controller {
       return [
         'inputs' => $inputs
       ];
-    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
-      // TODO: Error
+    } catch (QueryException $e) {
+      http_response_code(500);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
+    } catch (\Exception $e) {
+      http_response_code(400);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
     }
   }
 

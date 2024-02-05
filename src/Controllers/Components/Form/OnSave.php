@@ -18,7 +18,7 @@ class OnSave extends \ADIOS\Core\Controller {
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
-    $this->permissionName = $this->params['model'] . ':Update';
+    $this->permissionName = $this->params['model'] . ':'. ($this->params['id'] <= 0 ? 'Create' : 'Update');
   }
 
   public function renderJson() {
@@ -42,6 +42,13 @@ class OnSave extends \ADIOS\Core\Controller {
         'status' => 'error',
         'message' => 'Neboli vyplnené všetky povinné polia',
         'invalidInputs' => $invalidInputs
+      ];
+    } catch (QueryException $e) {
+      http_response_code(500);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
       ];
     } catch (\Exception $e) {
       http_response_code(400);

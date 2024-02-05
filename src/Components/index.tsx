@@ -57,36 +57,42 @@ const attributesToSkip = [
 /**
 * Get specific ADIOS component with destructed params 
 */
-const getComponent = (componentName: string, params: Object) => {
+const getComponent = (componentName: string, props: Object) => {
+
+  // Check if uid exists or create custom
+  if (props['uid'] == undefined) {
+    props['uid'] = uuid.v4();
+  }
+
   switch (componentName) {
     //@ts-ignore
-    case 'form': return <Form {...params} />;
+    case 'form': return <Form {...props} />;
     //@ts-ignore
-    case 'table': return <Table {...params} />;
+    case 'table': return <Table {...props} />;
     //@ts-ignore
-    case 'card-button': return <CardButton {...params} />;
+    case 'card-button': return <CardButton {...props} />;
     //@ts-ignore
-    case 'card': return <Card {...params} />;
+    case 'card': return <Card {...props} />;
     //@ts-ignore
-    case 'calendar': return <Calendar {...params} />;
+    case 'calendar': return <Calendar {...props} />;
     //@ts-ignore
-    case 'title': return <Title {...params} />;
+    case 'title': return <Title {...props} />;
     //@ts-ignore
-    case 'breadcrumbs': return <Breadcrumbs {...params} />;
+    case 'breadcrumbs': return <Breadcrumbs {...props} />;
     //@ts-ignore
-    case 'button': return <Button {...params} />;
+    case 'button': return <Button {...props} />;
     //@ts-ignore
-    case 'modal': return <Modal {...params} ></Modal>;
+    case 'modal': return <Modal {...props} ></Modal>;
     //@ts-ignore
-    case 'form-button': return <FormButton {...params} />;
+    case 'form-button': return <FormButton {...props} />;
     //@ts-ignore
-    case 'form-card-button': return <FormCardButton {...params} />;
+    case 'form-card-button': return <FormCardButton {...props} />;
     //@ts-ignore
-    case 'swal-button': return <SwalButton {...params} />;
+    case 'swal-button': return <SwalButton {...props} />;
 
     // Examples
-    case 'example': return <Example {...params} />;
-    case 'example-model-hover': return <ExampleModelHover {...params} />;
+    case 'example': return <Example {...props} />;
+    case 'example-model-hover': return <ExampleModelHover {...props} />;
     default: return <b style={{color: 'red'}}>Component {componentName} doesn't exist</b>; 
   }
 };
@@ -130,11 +136,6 @@ const renderComponent = (specificHtmlElement: string, component: string) => {
 
       // Remove attributes from HTML DOM
       element.removeAttribute(element.attributes[i].name);
-    }
-
-    // Check if uid exists or create custom
-    if (componentProps['uid'] == undefined) {
-      componentProps['uid'] = uuid.v4();
     }
 
     let componentBuildElement = createRoot(element);

@@ -3,7 +3,7 @@ import React, { Component } from "react";
 interface GridProps {
   uid: string,
   type?: string,
-  onClick?: string,
+  onClick?: string, // TODO: nepouziva sa
   href?: string,
   text: string,
   icon: string,
@@ -13,7 +13,7 @@ interface GridProps {
 interface GridParams {
   uid: string,
   type?: string,
-  onClick?: string,
+  onClick?: string, // TODO: preverit sposob pouzitia
   href?: string,
   text: string,
   icon: string,
@@ -61,7 +61,7 @@ export default class Grid extends Component<GridProps> {
     return (
       <div  
         id={"adios-button-" + this.props.uid}
-        className="adios react ui button"
+        className="adios-react-ui button"
       >
         <a 
           className={"adios ui Grid btn " + this.params.cssClass + " btn-icon-split"}

@@ -1,13 +1,15 @@
-import React, { Component } from "react";
-import axios from "axios";
+import React, { Component, FC, useState, forwardRef } from "react";
 import moment, { Moment } from "moment";
 import { dateToString, numberToStringTime } from "./Helper";
 import Notification from "./Notification";
+import request from "./Request";
 
 import Form from './Form';
+import Button from './Button';
+import FormCardButton from './FormCardButton';
 import Modal from './Modal';
-import SwalButton from "./SwalButton";
 
+import SwalButton from "./SwalButton";
 
 interface CalendarProps {
   uid: string,
@@ -15,15 +17,18 @@ interface CalendarProps {
   loadDataUrl?: string,
   cviciska: Array<any>,
   timy: Array<any>,
+  typ: number,
   idSportovisko: number,
-  jeKoordinator: boolean
+  jeKoordinator: boolean,
+  jeSpravca: boolean
 }
 
 interface CalendarState {
   rCnt: number,
   data?: Array<Array<Array<any>>>,
-  idTim?: number,
   idCvicisko?: number,
+  idTim?: number,
+  typ?: number,
   poradie?: number,
   calendarTitle: string,
   datumOd: Date,
@@ -32,16 +37,24 @@ interface CalendarState {
   tyzden?: number,
   isReadonly: boolean,
   warning?: string,
+  info?: string,
   rezervaciaDatum?: string,
   rezervaciaCasOd?: string,
+  rezervaciaVyuzitie?: number,
   casUprava?: number,
-  idZaznam?: null
+  idZaznam?: number,
+  cvicisko?: any
 }
 
 const hoursRange = Array.from({ length: 17 }, (_, index) => index + 6);
 const hodiny = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
 
 const dni = ['Po', 'Ut', 'St', 'Št', 'Pi', 'So', 'Ne'];
+
+const REZERVACIA_TYP_VOLNE = 0;
+const REZERVACIA_TYP_TRENING = 1;
+const REZERVACIA_TYP_ZAPAS = 2;
+const REZERVACIA_TYP_PRENAJOM = 3;
 
 export default class Calendar extends Component<CalendarProps> {
   state: CalendarState;
@@ -52,7 +65,7 @@ export default class Calendar extends Component<CalendarProps> {
   constructor(props: CalendarProps) {
     super(props);
 
-    console.log(props);
+    //console.log(props);
     let now: Date = new Date();
     let lastMonday: Date = new Date(now.getTime() - (now.getDay() - 1) * 24 * 60 * 60 * 1000);
     let lastDayInWeek = new Date(lastMonday.getTime() + 6 * 24 * 60 * 60 * 1000);
@@ -61,14 +74,13 @@ export default class Calendar extends Component<CalendarProps> {
       rCnt: 0,
       idCvicisko: this.props.cviciska[0]?.id ?? 0,
       idTim: this.props.timy.length != 0 ? this.props.timy[Object.keys(this.props.timy)[0]].id : 0,
+      typ: this.props.typ ?? REZERVACIA_TYP_TRENING,
       poradie: 0,
       calendarTitle: 'def',
       datumOd: lastMonday,
       datumDo: lastDayInWeek,
       isReadonly: false
     };
-
-    // console.log(this.state);
 
     this.url = props.loadDataController ?? props.loadDataUrl ?? '';
   }
@@ -78,57 +90,73 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   loadData() {
-    //@ts-ignore
-    axios.get(_APP_URL + '/' + this.url, {
-      params: {
+    request.get(
+      this.url,
+      {
         __IS_AJAX__: '1',
         idTim: this.state.idTim,
         idCvicisko: this.state.idCvicisko,
+        typ: this.state.typ,
         datumOd: this.state.datumOd,
         datumDo: this.state.datumDo
-      }
-    }).then(({data}: any) => {
+      },
+      (data: any) => {
+        let isReadonly = false;
+        let warning = '';
+        let info = '';
 
-      let isReadonly = false;
-      let warning = '';
-
-      if (this.props.jeKoordinator) {
-        isReadonly = false;
-      } else {
-        if (
-          data.tyzden < this.getWeekNumber(new Date())
-          || data.rok < (new Date()).getFullYear()
-        ) {
-          isReadonly = true;
-          warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
-        } else if (this.state.idTim) {
-          if (this.props.timy[this.state.idTim].poradie != data.poradie) {
+        if (this.props.jeSpravca) {
+          isReadonly = false;
+          info = 'Rozpis môžete upravovať ako správca.';
+        } else if (this.props.jeKoordinator) {
+          isReadonly = false;
+          info = 'Rozpis môžete upravovať ako koordinátor.';
+        } else {
+          if (
+            data.tyzden < this.getWeekNumber(new Date())
+            || data.rok < (new Date()).getFullYear()
+          ) {
             isReadonly = true;
-            warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
+            warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
+          } else if (this.state.idTim) {
+            if (this.props.timy[this.state.idTim].poradie != data.poradie) {
+              isReadonly = true;
+              warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
+            }
           }
         }
-      }
 
-      this.setState({
-        data: data.data,
-        poradie: data.poradie,
-        rok: data.rok,
-        tyzden: data.tyzden,
-        isReadonly: isReadonly,
-        warning: warning,
-        casUprava: data.cvicisko?.cas_uprava ?? 0
-      }, () => {
-        //@ts-ignore
-        this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
-          console.log(item);
-        });
-      })
-    });
+        this.setState({
+          data: data.data,
+          poradie: data.poradie,
+          rok: data.rok,
+          tyzden: data.tyzden,
+          cvicisko: data.cvicisko,
+          isReadonly: isReadonly,
+          warning: warning,
+          info: info,
+          casUprava: data.cvicisko?.cas_uprava ?? 0
+        }, () => {
+          //@ts-ignore
+          this.sortable(document.getElementById('adios-calendar-' + this.props.uid), function(item: any) {
+            //console.log(item);
+          });
+        })
+      }
+    );
   }
 
   idTimOnChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({
       idTim: event.target.value
+    }, () => {
+      this.loadData();
+    });
+  }
+
+  typOnChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      typ: event.target.value
     }, () => {
       this.loadData();
     });
@@ -146,16 +174,34 @@ export default class Calendar extends Component<CalendarProps> {
     return `${number < 10 ? '0' : ''}${number}`;
   }
 
-  pickDateTime(slot: Moment, id?: number) {
+  pickDateTime(slot: Moment, id?: null|number, typ?: null|number, vyuzitie?: number) {
     if (!this.state.isReadonly) {
       this.setState({
         idZaznam: id,
         rezervaciaDatum: `${slot.format('YYYY-MM-DD')}`,
-        rezervaciaCasOd: `${slot.format('HH:mm')}`
+        rezervaciaCasOd: `${slot.format('HH:mm')}`,
+        rezervaciaVyuzitie: vyuzitie,
       });
 
+      let modalUid = 'zvolit-typ-rezervacie';
+
+      if (id === null) {
+        // ak pridava novu rezervaciu, pouzije nastaveny typ
+        modalUid = 'form-modal-' + this.state.typ;
+        // if (this.props.jeKoordinator || this.props.jeSpravca) {
+        //   // ak pridava koordinator alebo spravca, ponukne mu na vyber, co chce pridat
+        //   modalUid = 'zvolit-typ-rezervacie';
+        // } else {
+        //   // ak pridava trener, rovno mu zobrazi formular pre trening
+        //   modalUid = 'form-modal-' + REZERVACIA_TYP_TRENING;
+        // }
+      } else {
+        // ak upravuje existujucu rezervaciu, otvori formular prislusneho typu
+        modalUid = 'form-modal-' + typ;
+      }
+
       //@ts-ignore
-      ADIOS.modalToggle(this.props.uid + '-trening-form-modal');
+      ADIOS.modalToggle(this.props.uid + '-' + modalUid);
     } else {
       Notification.error(this.state.warning ?? '');
     }
@@ -216,7 +262,7 @@ export default class Calendar extends Component<CalendarProps> {
           return pos;
         }
       });
-      console.log(newPos);
+      //console.log(newPos);
       dragEl.classList.remove('ghost');
       section.removeEventListener('dragover', _onDragOver, false);
       section.removeEventListener('dragend', _onDragEnd, false);
@@ -249,133 +295,6 @@ export default class Calendar extends Component<CalendarProps> {
     });
   }
 
-  _addOpacity(color: string, opacity: string): string {
-    return color + opacity;
-  }
-
-  _renderCalendar(): JSX.Element {
-    if (!this.state.data) return <p>Loading</p>;
-
-    return (
-      <>
-        {Array.from({ length: 7 }, (_, d) => (
-          <React.Fragment key={d}>
-            {(() => {
-              let slot = moment(this.state.datumOd).add(d, 'days').startOf('day').set({hour: 6});
-              // let hh = 0;
-              // let mm = 0;
-
-              // console.log('|', this.state.datumOd, slot, slot.format());
-
-              if (!this.state.data) return;
-
-              let dayLine =
-                <React.Fragment>
-                  <div className="header">{slot.format('D.M.YYYY')}</div>
-                  <div className="header">{dni[d]}</div>
-
-                  {this.state.data[d]
-                    ? (this.state.data[d].map((r: any) => {
-                      // console.log(r);
-                      if (r[1] === 0 && r[2] === '' && r[3] === '') {
-                        return Array.from({ length: r[0] / 15 }, (_, v) => {
-                          // let hh = slot.hours();
-                          // let mm = slot.minutes();
-                          const _slot = moment(slot);
-
-                          // console.log('A', slot, hh, mm);
-
-                          let div = (
-                            <div
-                              id={`rezervacka-${this.state.rCnt++}`}
-                              key={this.state.rCnt}
-                              className={
-                                "rezervacka volne "
-                                + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")
-                                + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
-                              }
-                              title={slot.format('D.M.YYYY HH:mm')}
-                              data-den={d}
-                              onClick={() => this.pickDateTime(_slot)}
-                            ></div>
-                          );
-
-                          slot = slot.add(15, 'minutes');
-
-                          return div;
-
-                        });
-                      } else {
-                        const _slot = moment(slot);
-                        const span = (r[0] + r[1]) / 15;
-                        const gridColumn = `span ${span}`;
-
-                        this.state.rCnt += span;
-
-                        // let hh = slot.hours();
-                        // let mm = slot.minutes();
-
-                        let div = (
-                          <div
-                            id={`rezervacka-${this.state.rCnt}`}
-                            key={this.state.rCnt}
-                            className={
-                              "rezervacka"
-                              + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
-                            }
-                            title={slot.format('D.M.YYYY HH:mm')}
-                            data-den={d}
-                            style={{ gridColumn }}
-                          >
-                            <div className="rezervacka-inner" style={{ flex: r[0] / 15 }}>
-                              {Array.isArray(r[2]) ? (
-                                r[2].map((rr) => (
-                                  <div
-                                    key={rr[1]}
-                                    className="cast-cviciska"
-                                    style={{ background: this._addOpacity(rr[0], '60') }}
-                                    onClick={() => {
-                                    }}
-                                  >
-                                    {rr[1]}
-                                  </div>
-                                ))
-                              ) : (
-                                <div
-                                  className="cast-cviciska"
-                                  style={{ background: this._addOpacity(r[2], '60') }}
-                                  onClick={() => {
-                                    if (r[7] == this.state.idTim) {
-                                        this.pickDateTime(_slot, r[6]);
-                                    }
-                                  }}
-                                >
-                                  <div className="cas">{numberToStringTime(_slot.hours()) + ':' + numberToStringTime(_slot.minutes())}</div>
-                                  <div className="nazov">{r[3]}</div>
-                                  <div className="trener">{r[4]}</div>
-                                </div>
-                              )}
-                            </div>
-                            <div className="rolba" style={{ flex: r[1] / 15 }}></div>
-                          </div>
-                        );
-
-                        slot = slot.add(span*15, 'minutes');
-
-                        return div;
-                      }
-                    })
-                  ) : ''}
-                </React.Fragment>
-              ;
-
-              return dayLine;
-            })()}
-          </React.Fragment>
-        ))}
-      </>
-    );
-  }
 
   getWeekNumber(date: Date) {
     let newDate = new Date(date);
@@ -410,22 +329,201 @@ export default class Calendar extends Component<CalendarProps> {
     ADIOS.modalToggle(this.props.uid);
   }
 
+  _addOpacity(color: string, opacity: string): string {
+    return color + opacity;
+  }
+
+  _renderCalendar(): JSX.Element {
+    if (!this.state.data) return <p>Loading</p>;
+
+    return (
+      <>
+        {Array.from({ length: 7 }, (_, d) => (
+          <>
+            {(() => {
+              let slot = moment(this.state.datumOd).add(d, 'days').startOf('day').set({hour: 6});
+
+              if (!this.state.data) return;
+
+              let dayLine =
+                <>
+                  <div className="header">{slot.format('D.M.YYYY')}</div>
+                  <div className="header">{dni[d]}</div>
+
+                  {this.state.data[d] ? (this.state.data[d].map((r: any) => (
+                    <>
+                      {(r[1] === 0 && r[2] === 0) ? (
+                        Array.from({ length: r[0] / 15 }, (_, v) => {
+                          const _slot = moment(slot);
+
+                          let div = (
+                            <div
+                              id={`rezervacka-${this.state.rCnt++}`}
+                              key={this.state.rCnt}
+                              className={
+                                "rezervacka typ-" + REZERVACIA_TYP_VOLNE
+                                + " " + (this.state.rCnt % 4 == 0 ? "cela-hodina" : "")
+                                // + " " + (r[7] == this.state.idTim ? "zvyraznene" : "")
+                              }
+                              title={slot.format('D.M.YYYY HH:mm')}
+                              data-den={d}
+                              onClick={() => this.pickDateTime(_slot, null, null, 1)}
+                            ></div>
+                          );
+
+                          slot = slot.add(15, 'minutes');
+
+                          return div
+                        })
+                      ) : (
+                        <>
+                          {(() => {
+                            const _slot = moment(slot);
+                            const span = (r[0] + r[1]) / 15;
+                            const gridColumn = `span ${span}`;
+
+                            let typ = r[2];
+
+                            this.state.rCnt += span;
+
+                            let div = (
+                              <div
+                                id={`rezervacka-${this.state.rCnt}`}
+                                key={this.state.rCnt}
+                                className={"rezervacka typ-" + typ}
+                                title={slot.format('D.M.YYYY HH:mm')}
+                                data-den={d}
+                                style={{ gridColumn }}
+                              >
+                                <div className="rezervacka-inner" style={{ flex: r[0] / 15 }}>
+                                  {r[3].map((rr) => {
+                                    let idTim = rr[5];
+                                    let readonly = true;
+
+                                    if (typ == this.state.typ) {
+                                      if (this.state.typ == REZERVACIA_TYP_TRENING) {
+                                        if (this.state.idTim == 0 || idTim == this.state.idTim) readonly = false;
+                                      } else {
+                                        readonly = false;
+                                      }
+                                    }
+
+                                    return (
+                                      <div
+                                        className={
+                                          "cast-cviciska"
+                                          + " " + (readonly ? "" : "zvyraznene")
+                                          + " " + (idTim == 0 ? "volne" : "")
+                                        }
+                                        style={{
+                                          background: rr[0], //this._addOpacity(rr[0], '60'),
+                                          flex: rr[3]
+                                        }}
+                                        onClick={() => {
+                                          if (!readonly) {
+                                            // ak klikol na slot, v ktorom je uz cosi rezervovane
+                                            if (rr[4] > 0) {
+                                              // upravit rezervaciu
+                                              this.pickDateTime(_slot, rr[4], typ);
+                                            } else if (idTim == 0) {
+                                              // pridat rezervaciu na ciastocne vyuzitie plochy
+                                              this.pickDateTime(_slot, null, null, 2);
+                                            }
+                                          }
+                                        }}
+                                      >
+                                        <div className="cas">{numberToStringTime(_slot.hours()) + ':' + numberToStringTime(_slot.minutes())}</div>
+                                        <div className="nazov">{rr[1]}</div>
+                                        <div className="trener">{rr[2]}</div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                                <div className="uprava" style={{ flex: r[1] / 15 }}></div>
+                              </div>
+                            );
+
+                            slot = slot.add(span*15, 'minutes');
+
+                            return div;
+                          })()}
+                        </>
+                      )}
+                    </>
+                  ))) : ''}
+                </>
+              ;
+
+              return dayLine;
+            })()}
+          </>
+        ))}
+      </>
+    );
+  }
+
   render() {
     return (
       <>
-        {/*<Modal
+        {<Modal
           title={
-            "Rezervácia cvičiska "
+            "Rezervácia "
             + (this.state.rezervaciaDatum ? this.state.rezervaciaDatum : '')
             + ' '
             + (this.state.rezervaciaCasOd ? this.state.rezervaciaCasOd : '')
           }
           uid={this.props.uid + '-zvolit-typ-rezervacie'}
+          type="center"
         >
-          <FormCardButton
+          <Button
             uid={this.props.uid + '-trening'}
             text="Tréning"
-            css="btn-primary m-1"
+            cssClass="btn-light m-1"
+            cssStyle={{borderLeft: "3px solid #5858ff"}}
+            icon="fas fa-running"
+            onClick={() => {
+              //@ts-ignore
+              ADIOS.modalToggle(this.props.uid + '-form-modal-' + REZERVACIA_TYP_TRENING);
+              //@ts-ignore
+              ADIOS.modalToggle(this.props.uid + '-zvolit-typ-rezervacie');
+            }}
+          ></Button>
+
+          {this.props.jeKoordinator || this.props.jeSpravca ?
+            <Button
+              uid={this.props.uid + '-zapas'}
+              text="Zápas"
+              cssClass="btn-light m-1"
+              cssStyle={{borderLeft: "3px solid #ff6262"}}
+              icon="fas fa-people-arrows"
+              onClick={() => {
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid + '-form-modal-' + REZERVACIA_TYP_ZAPAS);
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid + '-zvolit-typ-rezervacie');
+              }}
+            ></Button>
+          : ''}
+
+          {this.props.jeSpravca ?
+            <Button
+              uid={this.props.uid + '-prenajom'}
+              text="Prenájom"
+              cssClass="btn-primary m-1"
+              icon="fas fa-euro-sign"
+              onClick={() => {
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid + '-form-modal-' + REZERVACIA_TYP_PRENAJOM);
+                //@ts-ignore
+                ADIOS.modalToggle(this.props.uid + '-zvolit-typ-rezervacie');
+              }}
+            ></Button>
+          : ''}
+
+          {/* <FormCardButton
+            uid={this.props.uid + '-trening'}
+            text="Tréning"
+            cssClass="btn-primary m-1"
             icon="fas fa-running"
             form={{
               uid: this.props.uid + '-trening',
@@ -443,51 +541,56 @@ export default class Calendar extends Component<CalendarProps> {
             }}
           ></FormCardButton>
 
-          <FormCardButton
-            uid={this.props.uid + '-zapas'}
-            text="Zápas"
-            css="btn-light"
-            icon="fas fa-people-arrows m-1"
-            form={{
-              uid: this.props.uid + '-zapas',
-              model: "App/Widgets/Rozpis/Models/Zapas",
-              onSaveCallback: () => this.closeAndLoadData('zapas'),
-              onDeleteCallback: () => this.closeAndLoadData('zapas'),
-              defaultValues: {
-                datum: this.state.rezervaciaDatum,
-                zaciatok: this.state.rezervaciaCasOd
-              }
-            }}
-          ></FormCardButton>
+          {this.props.jeKoordinator || this.props.jeSpravca ?
+            <FormCardButton
+              uid={this.props.uid + '-zapas'}
+              text="Zápas"
+              cssClass="btn-light"
+              icon="fas fa-people-arrows m-1"
+              form={{
+                uid: this.props.uid + '-zapas',
+                model: "App/Widgets/Rozpis/Models/Zapas",
+                onSaveCallback: () => this.closeAndLoadData('zapas'),
+                onDeleteCallback: () => this.closeAndLoadData('zapas'),
+                defaultValues: {
+                  datum: this.state.rezervaciaDatum,
+                  zaciatok: this.state.rezervaciaCasOd
+                }
+              }}
+            ></FormCardButton>
+          : ''}
 
-          <FormCardButton
-            uid={this.props.uid + '-prenajom'}
-            text="Prenájom"
-            css="btn-light m-1"
-            icon="fas fa-euro-sign"
-            form={{
-              uid: this.props.uid + '-prenajom',
-              model: "App/Widgets/Rozpis/Models/Prenajom",
-              onSaveCallback: () => this.closeAndLoadData('prenajom'),
-              onDeleteCallback: () => this.closeAndLoadData('prenajom'),
-              defaultValues: {
-                datum: this.state.rezervaciaDatum,
-                zaciatok: this.state.rezervaciaCasOd
-              }
-            }}
-          ></FormCardButton>
-        </Modal>*/}
+          {this.props.jeSpravca ?
+            <FormCardButton
+              uid={this.props.uid + '-prenajom'}
+              text="Prenájom"
+              cssClass="btn-light m-1"
+              icon="fas fa-euro-sign"
+              form={{
+                uid: this.props.uid + '-prenajom',
+                model: "App/Widgets/Rozpis/Models/Prenajom",
+                onSaveCallback: () => this.closeAndLoadData('prenajom'),
+                onDeleteCallback: () => this.closeAndLoadData('prenajom'),
+                defaultValues: {
+                  datum: this.state.rezervaciaDatum,
+                  zaciatok: this.state.rezervaciaCasOd
+                }
+              }}
+            ></FormCardButton>
+          : ''} */}
+        </Modal>}
 
         <Modal
-          uid={this.props.uid + '-trening-form-modal'}
+          uid={this.props.uid + '-form-modal-' + REZERVACIA_TYP_TRENING}
           hideHeader={true}
         >
           <Form
-            uid={this.props.uid + '-trening-form'}
+            uid={this.props.uid + '-form-' + REZERVACIA_TYP_TRENING}
             showInModal={true}
+            onClose={() => { this.setState({idZaznam: 0}); }}
             model="App/Widgets/Rozpis/Models/Trening"
-            onSaveCallback={() => this.closeAndLoadData('trening-form-modal')}
-            onDeleteCallback={() => this.closeAndLoadData('trening-form-modal')}
+            onSaveCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_TRENING)}
+            onDeleteCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_TRENING)}
             id={this.state.idZaznam ?? undefined}
             defaultValues={{
               datum: this.state.rezervaciaDatum,
@@ -495,46 +598,105 @@ export default class Calendar extends Component<CalendarProps> {
               id_tim: this.state.idTim,
               id_cvicisko: this.state.idCvicisko,
               id_sportovisko: this.props.idSportovisko,
-              vyuzitie: 1, //cela plocha default
+              vyuzitie: this.state.rezervaciaVyuzitie,
+              trvanie_uprava: this.state.casUprava
+            }}
+          ></Form>
+        </Modal>
+
+        <Modal
+          uid={this.props.uid + '-form-modal-' + REZERVACIA_TYP_ZAPAS}
+          hideHeader={true}
+        >
+          <Form
+            uid={this.props.uid + '-form-' + REZERVACIA_TYP_ZAPAS}
+            showInModal={true}
+            onClose={() => { this.setState({idZaznam: 0}); }}
+            model="App/Widgets/Rozpis/Models/Zapas"
+            onSaveCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_ZAPAS)}
+            onDeleteCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_ZAPAS)}
+            id={this.state.idZaznam ?? undefined}
+            defaultValues={{
+              datum: this.state.rezervaciaDatum,
+              zaciatok: this.state.rezervaciaCasOd,
+              id_cvicisko: this.state.idCvicisko,
+              id_sportovisko: this.props.idSportovisko,
+              trvanie_uprava: this.state.casUprava
+            }}
+          ></Form>
+        </Modal>
+
+        <Modal
+          uid={this.props.uid + '-form-modal-' + REZERVACIA_TYP_PRENAJOM}
+          hideHeader={true}
+        >
+          <Form
+            uid={this.props.uid + '-form-' + REZERVACIA_TYP_PRENAJOM}
+            showInModal={true}
+            onClose={() => { this.setState({idZaznam: 0}); }}
+            model="App/Widgets/Rozpis/Models/Prenajom"
+            onSaveCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_PRENAJOM)}
+            onDeleteCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_PRENAJOM)}
+            id={this.state.idZaznam ?? undefined}
+            defaultValues={{
+              datum: this.state.rezervaciaDatum,
+              zaciatok: this.state.rezervaciaCasOd,
+              id_cvicisko: this.state.idCvicisko,
+              id_sportovisko: this.props.idSportovisko,
               trvanie_uprava: this.state.casUprava
             }}
           ></Form>
         </Modal>
 
         <div className="row mt-1 mb-2">
-          <div className="col-lg-6 pl-0">
+          <div className="col-lg-8 pl-0">
             <div className="d-flex flex-row align-items-center">
-              <select
-                className="form-control rounded-sm"
-                style={{maxWidth: '250px'}}
-                onChange={(event: any) => this.idCviciskoOnChange(event)}
-                value={this.state.idCvicisko}
-              >
-                {this.props.cviciska.map((cvicisko: any) => (
-                  <option
-                    key={cvicisko.id}
-                    value={cvicisko.id}
-                  >{cvicisko.nazov}</option>
-                ))}
-              </select>
+              <div className={"d-block w-100 mr-2"}>
+                <select
+                  className="form-control rounded-sm mr-2"
+                  onChange={(event: any) => this.idCviciskoOnChange(event)}
+                  value={this.state.idCvicisko}
+                >
+                  {this.props.cviciska.map((cvicisko: any) => (
+                    <option
+                      key={cvicisko.id}
+                      value={cvicisko.id}
+                    >{cvicisko.nazov}</option>
+                  ))}
+                </select>
+              </div>
 
-              <span className="ml-2 mr-2">&raquo;</span>
+              <div className={"d-block w-100 mr-2"}>
+                <select
+                  className="form-control rounded-sm"
+                  onChange={(event: any) => this.typOnChange(event)}
+                  value={this.state.typ}
+                >
+                  <option value={REZERVACIA_TYP_TRENING}>Tréning</option>
+                  {this.props.jeSpravca || this.props.jeKoordinator ? <option value={REZERVACIA_TYP_ZAPAS}>Zápas</option> : ""}
+                  {this.props.jeSpravca ? <option value={REZERVACIA_TYP_PRENAJOM}>Prenájom</option> : ""}
+                </select>
+              </div>
 
-              <select
-                className="form-control rounded-sm"
-                onChange={(event: any) => this.idTimOnChange(event)}
-                value={this.state.idTim}
-              >
-                {Object.keys(this.props.timy).map((key: any) => (
-                  <option
-                    key={this.props.timy[key].id}
-                    value={this.props.timy[key].id}
-                  >[{this.props.timy[key].poradie}] {this.props.timy[key].nazov}</option>
-                ))}
-              </select>
+              <div className={"d-block w-100 " + (this.state.typ == REZERVACIA_TYP_TRENING ? "" : "invisible")}>
+                <select
+                  className="form-control rounded-sm"
+                  onChange={(event: any) => this.idTimOnChange(event)}
+                  value={this.state.idTim}
+                >
+                  {this.props.jeSpravca || this.props.jeKoordinator ? <option value={0}>Všetky tímy</option> : ""}
+                  {Object.keys(this.props.timy).map((key: any) => (
+                    <option
+                      key={this.props.timy[key].id}
+                      value={this.props.timy[key].id}
+                    >[{this.props.timy[key].poradie}] {this.props.timy[key].nazov}</option>
+                  ))}
+                </select>
+              </div>
+
             </div>
           </div>
-          <div className="col-lg-6 pr-0">
+          <div className="col-lg-4 pr-0">
             <div className="d-flex flex-row justify-content-end align-items-center">
               <a href="#" onClick={() => this.calculateWeeks('previous')} className="btn btn-primary">«</a>
               <div className="text-primary text-center" style={{margin: "0 0.5em", width: "200px"}}>
@@ -553,7 +715,7 @@ export default class Calendar extends Component<CalendarProps> {
 
           {hoursRange.map((h) => (
             <div key={h} className="header hodiny">
-              {h} - {h + 1}
+              {h < 10 ? "0" : ""}{h}:00
             </div>
           ))}
 
@@ -569,12 +731,19 @@ export default class Calendar extends Component<CalendarProps> {
                 {this.state.warning}
               </div>
             ) : (
-                <div className='alert alert-success' role='alert'>
-                  <i className='fas fa-check mr-4 align-self-center'></i>
-                  Rozpis môžete upravovať (aktuálne poradie je {this.state.poradie}).
-                </div>
-              )
-            }
+              <div className='alert alert-success' role='alert'>
+                <i className='fas fa-check mr-4 align-self-center'></i>
+                {this.state.info}<br/>
+              </div>
+            )}
+
+            <div className='alert alert-info' role='alert'>
+              <i className='fas fa-info mr-4 align-self-center'></i>
+              {this.state.cvicisko?.nazov}, {dateToString(this.state.datumOd)} - {dateToString(this.state.datumDo)}<br/>
+              Aktuálne poradie: [{this.state.poradie}]<br/>
+              Koordinátor: {this.state.cvicisko?.id_koordinator?.meno} {this.state.cvicisko?.id_koordinator?.priezvisko}
+            </div>
+
           </div>
           <div className="col-lg-4 text-right">
             {!this.state.isReadonly ? (
@@ -588,6 +757,7 @@ export default class Calendar extends Component<CalendarProps> {
                   successMessage="Rozpis úspešne ukončený"
                   confirmParams={{
                     idSportovisko: this.props.idSportovisko,
+                    idCvicisko: this.state.idCvicisko,
                     rok: this.state.rok,
                     tyzden: this.state.tyzden
                   }}
@@ -597,7 +767,7 @@ export default class Calendar extends Component<CalendarProps> {
                     html:`
                       <p>
                         Chystáte sa ukončiť tvorbu rozpisu v týždni <b>${dateToString(this.state.datumOd)} - ${dateToString(this.state.datumDo)}</b>
-                        na všetkých cvičiskách.<br/>
+                        na cvičisku <b>${this.state.cvicisko?.nazov}</b>.<br/>
                       </p>
 
                       <div class='alert alert-danger' role='alert'>
@@ -607,7 +777,7 @@ export default class Calendar extends Component<CalendarProps> {
 
                       <div class='alert alert-success' role='alert'>
                         <i class='fas fa-check mr-4 align-self-center'></i>
-                        Potvrdením umožníte tvoriť rozpis ďalšiemu trénerovi v poradí.
+                        Potvrdením umožníte tvoriť rozpis pre ďalší tím v poradí.
                       </div>
                     `,
                     icon: "info",
@@ -618,7 +788,7 @@ export default class Calendar extends Component<CalendarProps> {
                 ></SwalButton>
 
                 <div className="mt-2">
-                  Umožníte tvoriť rozpis ďalšiemu trénerovi v poradí.
+                  Umožníte tvoriť rozpis pre ďalší tím v poradí.
                 </div>
               </>
             ) : ''}

@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 
-import axios from "axios";
-
 import Notification from "./Notification";
+import request from "./Request";
+import * as uuid from 'uuid';
 
 import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -38,6 +38,7 @@ export interface FormProps {
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
+  onClose?: () => void;
   onSaveCallback?: () => void,
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
@@ -48,10 +49,17 @@ export interface FormProps {
   saveButtonText?: string,
   addButtonText?: string,
   loadParamsController?: string,
-  defaultValues: Object
+  loadDataController?: string,
+  defaultValues?: Object
 }
 
-interface FormState {
+export interface FormState {
+  id?: number,
+  readonly?: boolean,
+  canCreate?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
+  canDelete?: boolean,
   content?: Content,
   columns?: FormColumns,
   inputs?: FormInputs,
@@ -78,7 +86,9 @@ export interface FormColumnParams {
   unit?: string,
   step?: number,
   defaultValue?: any,
-  viewParams: any
+  viewParams: any,
+  min?: number,
+  readonly?: boolean,
 }
 
 export interface FormColumns {
@@ -91,14 +101,25 @@ interface FormInputs {
 
 export default class Form extends Component<FormProps> {
   state: FormState;
+  newState: any;
 
   model: String;
   inputs: FormInputs = {};
+  components: Array<React.JSX.Element> = [];
+
+  jsxContentRendered: boolean = false;
+  jsxContent: JSX.Element;
 
   constructor(props: FormProps) {
     super(props);
 
     this.state = {
+      id: props.id,
+      readonly: props.readonly,
+      canCreate: props.readonly,
+      canRead: props.readonly,
+      canUpdate: props.readonly,
+      canDelete: props.readonly,
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
       isEdit: props.id ? props.id > 0 : false,
@@ -107,18 +128,27 @@ export default class Form extends Component<FormProps> {
     };
   }
 
+
+  // shouldComponentUpdate(nextProps: FormProps, nextState: FormState) {
+  //   console.log('form should update', this.props.model, this.props.id, nextProps.id, this.state.id, nextState.id);
+  //   return this.props.id != nextProps.id;
+  // }
+
   /**
    * This function trigger if something change, for Form id of record
    */
-  componentDidUpdate(prevProps: FormProps) {
+  componentDidUpdate(prevProps: FormProps, prevState: FormState) {
+    //console.log('form did update', this.props.model, this.props.id, prevProps.id);
     if (prevProps.id !== this.props.id) {
       this.checkIfIsEdit();
-      this.loadData();
-
+      this.loadParams();
+      
+      //this.loadData();
       this.setState({
         invalidInputs: {},
         isEdit: this.props.id ? this.props.id > 0 : false
       });
+
     }
 
     if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
@@ -127,6 +157,7 @@ export default class Form extends Component<FormProps> {
   }
 
   componentDidMount() {
+    //console.log('form did mount', this.props.model);
     this.checkIfIsEdit();
     this.initTabs();
 
@@ -135,43 +166,73 @@ export default class Form extends Component<FormProps> {
 
   loadParams() {
     let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Form/OnLoadParams';
+    //console.log('form load params', this.props.model);
 
     //@ts-ignore
-    axios.get(_APP_URL + '/' + loadParamsController, {
-      params: {
+    request.get(
+      loadParamsController,
+      {
         __IS_AJAX__: '1',
         model: this.props.model,
         columns: this.props.columns
+      },
+      (data: any) => {
+        data = deepObjectMerge(data, this.props);
+        data.layout = this.convertLayoutToString(data.layout);
+        // this.newState = {
+        //   columns: data.columns,
+        //   folderUrl: data.folderUrl,
+        //   ...data
+        // };
+
+        this.setState({
+          columns: data.columns,
+          folderUrl: data.folderUrl,
+          ...data
+        }, () => {
+          this.loadData();
+        });
       }
-    }).then(({data}: any) => {
-      data = deepObjectMerge(data, this.props);
-      data.layout = this.convertLayoutToString(data.layout);
-
-      let newState = {
-        columns: data.columns,
-        folderUrl: data.folderUrl,
-        ...data
-      };
-
-      this.setState(newState, () => {
-        this.loadData();
-        // this.updateLayout();
-      });
-    });
+    );
   }
 
   loadData() {
-    //@ts-ignore
-    axios.get(_APP_URL + '/Components/Form/OnLoadData', {
-      params: {
-        __IS_AJAX__: '1',
-        model: this.props.model,
-        id: this.props.id
-      }
-    }).then(({data}: any) => {
-      this.initInputs(this.state.columns ?? {}, data.inputs);
-    });
+    let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Form/OnLoadData';
+    let id = this.state.id ? this.state.id : 0;
+
+    //console.log('form load data', this.props.model, id);
+
+    if (id > 0) {
+      request.get(
+        loadDataController,
+        {
+          __IS_AJAX__: '1',
+          model: this.props.model,
+          id: id
+        },
+        (data: any) => {
+          this.initInputs(this.state.columns ?? {}, data.inputs);
+          // this.setState({id: id});
+          // this.newState.id = id;
+          // this._updateState();
+        }
+      );
+    } else {
+      this.initInputs(this.state.columns ?? {}, {});
+      // this.setState({id: id});
+      // this.newState.id = id;
+      // this._updateState();
+    }
   }
+
+  // _updateState() {
+  //   console.log('form update state', this.props.model, this.newState);
+  //   if (this.newState) {
+  //     this.setState(this.newState, () => {
+  //       this.newState = null;
+  //     });
+  //   }
+  // }
 
   saveRecord() {
     this.setState({
@@ -179,24 +240,26 @@ export default class Form extends Component<FormProps> {
     });
 
     //@ts-ignore
-    axios.post(_APP_URL + '/Components/Form/OnSave', {
-      __IS_AJAX__: '1',
-      model: this.props.model,
-      inputs: {...this.state.inputs, id: this.props.id}
-    }).then((res: any) => {
-      Notification.success(res.data.message);
-      if (this.props.onSaveCallback) this.props.onSaveCallback();
-    }).catch((res) => {
-      if (res.response) {
-        Notification.error(res.response.data.message);
-
-        if (res.response.status == 422) {
+    request.post(
+      'Components/Form/OnSave',
+      {
+        inputs: {...this.state.inputs, id: this.state.id}
+      },
+      {
+        __IS_AJAX__: '1',
+        model: this.props.model,
+      },
+      () => {
+        if (this.props.onSaveCallback) this.props.onSaveCallback();
+      },
+      (err: any) => {
+        if (err.status == 422) {
           this.setState({
-            invalidInputs: res.response.data.invalidInputs
+            invalidInputs: err.data.invalidInputs
           });
         }
       }
-    });
+    );
   }
 
   deleteRecord(id: number) {
@@ -212,23 +275,18 @@ export default class Form extends Component<FormProps> {
       reverseButtons: false,
     } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
-        //@ts-ignore
-        axios.patch(_APP_URL + '/Components/Form/OnDelete', {
-          __IS_AJAX__: '1',
-          model: this.props.model,
-          id: id
-        }).then(() => {
-          Notification.success("Záznam zmazaný");
-          if (this.props.onDeleteCallback) this.props.onDeleteCallback();
-        }).catch((res) => {
-          Notification.error(res.response.data.message);
-
-          if (res.response.status == 422) {
-            this.setState({
-              invalidInputs: res.response.data.invalidInputs
-            });
+        request.delete(
+          'Components/Form/OnDelete',
+          {
+            __IS_AJAX__: '1',
+            model: this.props.model,
+            id: id
+          },
+          () => {
+            Notification.success("Záznam zmazaný");
+            if (this.props.onDeleteCallback) this.props.onDeleteCallback();
           }
-        });
+        );
       }
     })
   }
@@ -238,7 +296,7 @@ export default class Form extends Component<FormProps> {
    */
   checkIfIsEdit() {
     this.setState({
-      isEdit: this.props.id && this.props.id > 0
+      isEdit: this.state.id && this.state.id > 0
     });
   }
 
@@ -361,9 +419,7 @@ export default class Form extends Component<FormProps> {
 
   convertLayoutToString(layout?: Array<Array<string>>): string {
     //@ts-ignore
-    let l = layout?.map(row => `"${row.join(' ')}"`).join('\n');
-    // console.log(l);
-    return l;
+    return layout?.map(row => `"${row}"`).join('\n');
   }
 
   /**
@@ -390,6 +446,7 @@ export default class Form extends Component<FormProps> {
       tabName == "default"
       || (this.state.tabs && this.state.tabs[tabName]['active'])
     ) {
+
       return (
         <div
           style={{
@@ -447,7 +504,25 @@ export default class Form extends Component<FormProps> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
-        contentItem = window.getComponent(contentItemName, contentItemParams[contentItemName]);
+        //console.log('window.getComponent', contentItemName, this.props.uid, this.props.model, contentItemParams[contentItemName]);
+
+        contentItem = window.getComponent(
+          contentItemName,
+          // contentItemParams[contentItemName]
+          {
+            ...contentItemParams[contentItemName],
+            ...{
+              parentFormId: this.state.id,
+              parentFormModel: this.props.model,
+            }
+          }
+        );
+
+        //console.log('rendered component uid ' + contentItem.props.uid);
+
+        this.components.push(contentItem);
+
+        break;
     }
 
     return (
@@ -482,12 +557,14 @@ export default class Form extends Component<FormProps> {
           }
         );
       } else {
+        let inputParams = {...this.state.columns[columnName].viewParams?.Form, ...{readonly: this.state.readonly}};
+
         switch (this.state.columns[columnName].type) {
           case 'text':
             inputToRender = <InputTextarea
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'float':
@@ -495,14 +572,14 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputInt
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'boolean':
             inputToRender = <InputBoolean
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'lookup':
@@ -510,35 +587,35 @@ export default class Form extends Component<FormProps> {
               parentForm={this}
               {...this.state.columns[columnName]}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'MapPoint':
             inputToRender = <InputMapPoint
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'color':
             inputToRender = <InputColor
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'tags':
             inputToRender = <InputTags
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'image':
             inputToRender = <InputImage
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'datetime':
@@ -548,7 +625,7 @@ export default class Form extends Component<FormProps> {
               parentForm={this}
               columnName={columnName}
               type={this.state.columns[columnName].type}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />;
             break;
           case 'editor':
@@ -568,7 +645,7 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputVarchar
               parentForm={this}
               columnName={columnName}
-              params={this.state.columns[columnName].viewParams?.Form}
+              params={inputParams}
             />
         }
       }
@@ -584,37 +661,8 @@ export default class Form extends Component<FormProps> {
           {this.state.columns[columnName].required == true ? <b className="text-danger"> *</b> : ""}
         </label>
 
-        <div
-          className={"input-group " + (
-            this.state.columns[columnName].unit ||
-            this.state.columns[columnName].type == 'time' ||
-            this.state.columns[columnName].type == 'date' ||
-            this.state.columns[columnName].type == 'datetime' ? "max-w-250" : "")}
-          key={columnName}
-        >
+        <div key={columnName}>
           {inputToRender}
-
-          {this.state.columns[columnName].unit ? (
-            <div className="input-group-append">
-              <span className="input-group-text">{this.state.columns[columnName].unit}</span>
-            </div>
-          ) : ''}
-
-          {this.state.columns[columnName].type == 'time' ? (
-            <div className="input-group-append">
-              <span className="input-group-text">
-                <i className="fas fa-clock"></i>
-              </span>
-            </div>
-          ) : ''}
-
-          {this.state.columns[columnName].type == 'date' || this.state.columns[columnName].type == 'datetime' ? (
-            <div className="input-group-append">
-              <span className="input-group-text">
-                <i className="fas fa-calendar"></i>
-              </span>
-            </div>
-          ) : ''}
         </div>
 
         <small className="form-text text-muted">{this.state.columns[columnName].description}</small>
@@ -623,6 +671,7 @@ export default class Form extends Component<FormProps> {
   }
 
   _renderButtonsLeft(): JSX.Element {
+    let id = this.state.id ? this.state.id : 0;
     return (
       <div className="d-flex">
         <button
@@ -630,11 +679,15 @@ export default class Form extends Component<FormProps> {
           type="button"
           data-dismiss="modal"
           aria-label="Close"
+          onClick={this.props.onClose}
         ><span>&times;</span></button>
 
         <button
           onClick={() => this.saveRecord()}
-          className="btn btn-sm btn-success btn-icon-split"
+          className={
+            "btn btn-sm btn-success btn-icon-split "
+            + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
+          }
         >
           {this.state.isEdit
             ? (
@@ -659,8 +712,8 @@ export default class Form extends Component<FormProps> {
     return (
       <div className="d-flex">
         {this.state.isEdit ? <button
-          onClick={() => this.deleteRecord(this.props.id ?? 0)}
-          className="btn btn-danger btn-sm btn-icon-split"
+          onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
+          className={"btn btn-sm btn-danger btn-icon-split " + (this.state.canDelete ? "d-block" : "d-none")}
         >
           <span className="icon"><i className="fas fa-trash"></i></span>
           <span className="text">Delete</span>
@@ -672,6 +725,8 @@ export default class Form extends Component<FormProps> {
 
 
   render() {
+    //console.log('form render', this.props.uid, this.props.model);
+
     return (
       <>
         {this.props.showInModal ? (
@@ -697,7 +752,7 @@ export default class Form extends Component<FormProps> {
 
         <div
           id={"adios-form-" + this.props.uid}
-          className="adios react ui form"
+          className="adios-react-ui form"
         >
           {this.props.showInModal ? (
             <div className="modal-body">

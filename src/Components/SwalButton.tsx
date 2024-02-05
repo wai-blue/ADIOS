@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import Swal, { SweetAlertOptions } from "sweetalert2";
 import Notification from "./Notification";
-import axios from "axios";
+import request from "./Request";
 
 interface SwalButtonProps {
   uid: string,
@@ -10,7 +10,7 @@ interface SwalButtonProps {
   onConfirmCallback?: (data: any) => void,
   swal: SweetAlertOptions,
   type?: string,
-  onclick?: string,
+  onclick?: string, // TODO: nepouziva sa
   href?: string,
   text?: string,
   icon?: string,
@@ -25,7 +25,6 @@ interface SwalButtonState {
 
 export default class SwalButton extends Component<SwalButtonProps> {
   state: SwalButtonState;
-  swal: SweetAlertOptions;
 
   constructor(props: SwalButtonProps) {
     super(props);
@@ -34,16 +33,6 @@ export default class SwalButton extends Component<SwalButtonProps> {
       css: props.css ?? 'btn-primary',
       icon: props.icon ?? 'fas fa-check',
     };
-
-    this.swal = {
-      title: this.props.swal.title ?? 'Title',
-      html: this.props.swal.html ?? 'body',
-      icon: this.props.swal.icon ?? 'info',
-      showCancelButton: this.props.swal.showCancelButton ?? true,
-      cancelButtonText: this.props.swal.cancelButtonText ?? 'No',
-      confirmButtonText: this.props.swal.confirmButtonText ?? 'Yes',
-      confirmButtonColor: this.props.swal.confirmButtonColor ?? '#dc4c64'
-    }
 
     switch (this.props.type) {
       case 'save':
@@ -68,25 +57,27 @@ export default class SwalButton extends Component<SwalButtonProps> {
   }
 
   onClick() {
-    //@ts-ignore
-    Swal.fire(this.swal as SweetAlertOptions).then((result) => {
+    Swal.fire({
+      title: this.props.swal.title ?? 'Title',
+      html: this.props.swal.html ?? 'body',
+      icon: this.props.swal.icon ?? 'info',
+      showCancelButton: this.props.swal.showCancelButton ?? true,
+      cancelButtonText: this.props.swal.cancelButtonText ?? 'No',
+      confirmButtonText: this.props.swal.confirmButtonText ?? 'Yes',
+      confirmButtonColor: this.props.swal.confirmButtonColor ?? '#dc4c64'
+    } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
-        //@ts-ignore
-        axios.post(
-          _APP_URL + '/' + this.props.confirmUrl,
-          {...this.props.confirmParams, __IS_AJAX__: '1'}
-        ).then((res) => {
-          Notification.success(this.props.successMessage ?? 'Confirmed');
-          if (this.props.onConfirmCallback) this.props.onConfirmCallback(res.data);
-        }).catch((res) => {
-          Notification.error(res.response.data.message);
-
-          if (res.response.status == 422) {
-            this.setState({
-              invalidInputs: res.response.data.invalidInputs 
-            });
+        request.post(
+          this.props.confirmUrl,
+          this.props.confirmParams ?? {},
+          {
+            __IS_AJAX__: '1'
+          },
+          (data: any) => {
+            Notification.success(this.props.successMessage ?? 'Confirmed');
+            if (this.props.onConfirmCallback) this.props.onConfirmCallback(data);
           }
-        });
+        );
       }
     })
   }
@@ -95,7 +86,7 @@ export default class SwalButton extends Component<SwalButtonProps> {
     return (
       <div
         id={"adios-button-" + this.props.uid}
-        className="adios react ui button"
+        className="adios-react-ui button"
       >
         <button
           className={"adios ui Button btn " + this.state.css + " btn-icon-split"}

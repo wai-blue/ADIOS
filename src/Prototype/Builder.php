@@ -452,8 +452,8 @@ class Builder {
       // render controllers
       if (is_array($widgetConfig['controllers'] ?? NULL)) {
         $this->createFolder($widgetRootDir . '/Controllers');
-        $this->createFolder($widgetRootDir . '/Traits');
-        $this->createFolder($widgetRootDir . '/Traits/Controllers');
+        // $this->createFolder($widgetRootDir . '/Traits');
+        // $this->createFolder($widgetRootDir . '/Traits/Controllers');
         $this->createFolder($widgetRootDir . '/Views');
 
         foreach ($widgetConfig['controllers'] as $controllerName => $controllerConfig) {
@@ -473,7 +473,7 @@ class Builder {
                   $controllerHtmlFileView = 'src/Widgets/ControllerTemplates/DefaultEmpty.html.twig';
                 }
 
-                $traitPhpFileTemplate = 'src/Widgets/Traits/ViewRender.php.twig';
+                // $traitPhpFileTemplate = 'src/Widgets/Traits/ViewRender.php.twig';
               break;
             }
           } else {
@@ -492,7 +492,7 @@ class Builder {
 
           if (strpos($controllerName, '/') !== FALSE) {
             $controllerRootDir = $widgetRootDir . '/Controllers';
-            $traitRootDir = $widgetRootDir . '/Traits/Controllers';
+            // $traitRootDir = $widgetRootDir . '/Traits/Controllers';
             $viewRootDir = $widgetRootDir . '/Views';
 
             $tmpDirs = explode('/', $controllerName);
@@ -501,7 +501,7 @@ class Builder {
 
             foreach ($tmpDirs as $level => $tmpDir) {
               $controllerRootDir .= '/' . $tmpDir;
-              $traitRootDir .= '/' . $tmpDir;
+              // $traitRootDir .= '/' . $tmpDir;
               $viewRootDir .= '/' . $tmpDir;
 
               if ($level != count($tmpDirs) - 1) {
@@ -509,7 +509,7 @@ class Builder {
                 $traitNamespace .= '\\' . $tmpDir;
 
                 $this->createFolder($controllerRootDir);
-                $this->createFolder($traitRootDir);
+                // $this->createFolder($traitRootDir);
                 $this->createFolder($viewRootDir);
               }
 
@@ -543,13 +543,13 @@ class Builder {
             $tmpControllerParams
           );
 
-          if (!empty($traitPhpFileTemplate)) {
-            $this->renderPhpFile(
-              $widgetRootDir . '/Traits/Controllers/' . $controllerName . '.php',
-              $traitPhpFileTemplate,
-              $tmpControllerParams
-            );
-          }
+          // if (!empty($traitPhpFileTemplate)) {
+          //   $this->renderPhpFile(
+          //     $widgetRootDir . '/Traits/Controllers/' . $controllerName . '.php',
+          //     $traitPhpFileTemplate,
+          //     $tmpControllerParams
+          //   );
+          // }
 
           // At some situations, the controller may be configured to use
           // only the Twig template, instead of the View

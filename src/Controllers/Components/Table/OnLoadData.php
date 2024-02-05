@@ -22,6 +22,8 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public array $data = [];
   private int $pageLength = 15;
 
+  private int $pageLength = 15;
+
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
     $this->permissionName = $this->params['model'] . ':Read';
@@ -121,8 +123,20 @@ class OnLoadData extends \ADIOS\Core\Controller {
       return [
         'data' => $data
       ];
-    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
-      // TODO: Error
+    } catch (QueryException $e) {
+      http_response_code(500);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
+    } catch (\Exception $e) {
+      http_response_code(400);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
     }
   }
 

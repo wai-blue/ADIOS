@@ -159,6 +159,8 @@ class Loader
 
   public ?\Twig\Environment $twig = NULL;
 
+  public ?\PDO $pdo = NULL;
+
   public array $assetsUrlMap = [];
 
   public int $controllerNestingLevel = 0;
@@ -370,6 +372,19 @@ class Loader
       $dbProvider = $this->getConfig('db/provider', '');
       $dbProviderClass = $this->getCoreClass('DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
       $this->db = new $dbProviderClass($this);
+
+      $dbHost = $this->getConfig('db_host', '');
+      $dbPort = $this->getConfig('db_port', '');
+      $dbUser = $this->getConfig('db_user', '');
+      $dbPassword = $this->getConfig('db_password', '');
+      $dbName = $this->getConfig('db_name', '');
+      $dbCodepage = $this->getConfig('db_codepage', 'utf8mb4');
+
+      $this->pdo = new \PDO(
+        "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset={$dbCodepage}",
+        $dbUser,
+        $dbPassword
+      );
 
       $this->onBeforeConfigLoaded();
 
@@ -1789,6 +1804,7 @@ class Loader
       //dirname(__FILE__)."/../Assets/Css/bootstrapmd.min.css",
       dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
       dirname(__FILE__)."/../Assets/Css/responsive.css",
+      dirname(__FILE__)."/../Assets/Css/adios-react-ui.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",
       dirname(__FILE__)."/../Assets/Css/desktop.css",
       dirname(__FILE__)."/../Assets/Css/jquery-ui.structure.css",
@@ -1802,6 +1818,7 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/jquery-ui.min.css",
       dirname(__FILE__)."/../Assets/Css/multi-select.dist.css",
       dirname(__FILE__)."/../Assets/Css/datatables.css",
+      dirname(__FILE__)."/../Components/Css/Modal.css",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {

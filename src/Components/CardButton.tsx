@@ -3,7 +3,7 @@ import './Css/CardButton.css';
 
 interface CardButtonProps {
   uid: string,
-  onClick?: string,
+  onClick?: string, // TODO: nepouziva sa
   href?: string,
   text: string,
   icon: string,
@@ -23,8 +23,9 @@ export default class CardButton extends Component<CardButtonProps> {
         id={"adios-card-button-" + this.props.uid}
         href={
           this.props.href ? (
-            this.props.href.startsWith('/') 
-              ? window._APP_URL + this.props.href 
+            this.props.href.startsWith('/')
+                //@ts-ignore
+              ? window._APP_URL + this.props.href
               : window.location.href + '/' + this.props.href
           ) : '#'
         }

@@ -3,16 +3,18 @@ import React, { Component } from "react";
 interface ButtonProps {
   uid: string,
   type?: string,
-  onclick?: string,
+  onClick?: any,
   href?: string,
   text?: string,
   icon?: string,
   cssClass?: string
+  cssStyle?: object
 }
 
 interface ButtonState {
   icon: string,
   cssClass: string
+  cssStyle?: object
 }
 
 export default class Button extends Component<ButtonProps> {
@@ -23,6 +25,7 @@ export default class Button extends Component<ButtonProps> {
 
     this.state = {
       cssClass: props.cssClass ?? 'btn-primary',
+      cssStyle: props.cssStyle,
       icon: props.icon ?? 'fas fa-check',
     };
 
@@ -52,17 +55,20 @@ export default class Button extends Component<ButtonProps> {
     return (
       <div
         id={"adios-button-" + this.props.uid}
-        className="adios react ui button"
+        className="adios-react-ui button"
       >
         <a 
           className={"adios ui Button btn " + this.state.cssClass + " btn-icon-split"}
+          style={this.state.cssStyle}
           href={
             this.props.href ? (
               this.props.href.startsWith('/') 
+                  //@ts-ignore
                 ? window._APP_URL + this.props.href 
                 : window.location.href + '/' + this.props.href
             ) : '#'
           }
+          onClick={this.props.onClick}
         >
           <span className="icon">
             <i className={this.state.icon}></i>
