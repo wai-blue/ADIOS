@@ -175,7 +175,6 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   pickDateTime(slot: Moment, id?: null|number, typ?: null|number, vyuzitie?: number) {
-    console.log(slot, id, typ, vyuzitie);
     if (!this.state.isReadonly) {
       this.setState({
         idZaznam: id,
@@ -588,6 +587,7 @@ export default class Calendar extends Component<CalendarProps> {
           <Form
             uid={this.props.uid + '-form-' + REZERVACIA_TYP_TRENING}
             showInModal={true}
+            onClose={() => { this.setState({idZaznam: 0}); }}
             model="App/Widgets/Rozpis/Models/Trening"
             onSaveCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_TRENING)}
             onDeleteCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_TRENING)}
@@ -611,6 +611,7 @@ export default class Calendar extends Component<CalendarProps> {
           <Form
             uid={this.props.uid + '-form-' + REZERVACIA_TYP_ZAPAS}
             showInModal={true}
+            onClose={() => { this.setState({idZaznam: 0}); }}
             model="App/Widgets/Rozpis/Models/Zapas"
             onSaveCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_ZAPAS)}
             onDeleteCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_ZAPAS)}
@@ -632,6 +633,7 @@ export default class Calendar extends Component<CalendarProps> {
           <Form
             uid={this.props.uid + '-form-' + REZERVACIA_TYP_PRENAJOM}
             showInModal={true}
+            onClose={() => { this.setState({idZaznam: 0}); }}
             model="App/Widgets/Rozpis/Models/Prenajom"
             onSaveCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_PRENAJOM)}
             onDeleteCallback={() => this.closeAndLoadData('form-modal-' + REZERVACIA_TYP_PRENAJOM)}
@@ -775,7 +777,7 @@ export default class Calendar extends Component<CalendarProps> {
 
                       <div class='alert alert-success' role='alert'>
                         <i class='fas fa-check mr-4 align-self-center'></i>
-                        Potvrdením umožníte tvoriť rozpis ďalšiemu trénerovi v poradí.
+                        Potvrdením umožníte tvoriť rozpis pre ďalší tím v poradí.
                       </div>
                     `,
                     icon: "info",
@@ -786,7 +788,7 @@ export default class Calendar extends Component<CalendarProps> {
                 ></SwalButton>
 
                 <div className="mt-2">
-                  Umožníte tvoriť rozpis ďalšiemu trénerovi v poradí.
+                  Umožníte tvoriť rozpis pre ďalší tím v poradí.
                 </div>
               </>
             ) : ''}

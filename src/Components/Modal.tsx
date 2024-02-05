@@ -5,7 +5,7 @@ import * as uuid from 'uuid';
 // import './Css/Modal.css';
 
 export interface ModalProps {
-  //onClose?: () => void;
+  onClose?: () => void;
   uid: string,
   type?: string,
   children?: any;
@@ -102,9 +102,10 @@ export default class Modal extends Component<ModalProps> {
                     <div className="col-lg-4 d-flex flex-row-reverse">
                       <button 
                         className="btn btn-light"
-                        type="button" 
-                        data-dismiss="modal" 
+                        type="button"
+                        data-dismiss="modal"
                         aria-label="Close"
+                        onClick={this.props.onClose}
                       ><span>&times;</span></button>
                     </div>
                   </div>

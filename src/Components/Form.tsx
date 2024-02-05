@@ -38,6 +38,7 @@ export interface FormProps {
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
+  onClose?: () => void;
   onSaveCallback?: () => void,
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
@@ -652,9 +653,7 @@ export default class Form extends Component<FormProps> {
           {this.state.columns[columnName].required == true ? <b className="text-danger"> *</b> : ""}
         </label>
 
-        <div
-          key={columnName}
-        >
+        <div key={columnName}>
           {inputToRender}
         </div>
 
@@ -672,6 +671,7 @@ export default class Form extends Component<FormProps> {
           type="button"
           data-dismiss="modal"
           aria-label="Close"
+          onClick={this.props.onClose}
         ><span>&times;</span></button>
 
         <button
