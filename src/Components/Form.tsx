@@ -52,7 +52,7 @@ export interface FormProps {
   defaultValues?: Object
 }
 
-interface FormState {
+export interface FormState {
   id?: number,
   readonly?: boolean,
   canCreate?: boolean,
@@ -86,7 +86,8 @@ export interface FormColumnParams {
   step?: number,
   defaultValue?: any,
   viewParams: any,
-  min?: number
+  min?: number,
+  readonly?: boolean,
 }
 
 export interface FormColumns {
@@ -652,36 +653,9 @@ export default class Form extends Component<FormProps> {
         </label>
 
         <div
-          className={"input-group " + (
-            this.state.columns[columnName].unit ||
-            this.state.columns[columnName].type == 'time' ||
-            this.state.columns[columnName].type == 'date' ||
-            this.state.columns[columnName].type == 'datetime' ? "max-w-250" : "")}
           key={columnName}
         >
           {inputToRender}
-
-          {this.state.columns[columnName].unit ? (
-            <div className="input-group-append">
-              <span className="input-group-text">{this.state.columns[columnName].unit}</span>
-            </div>
-          ) : ''}
-
-          {this.state.columns[columnName].type == 'time' ? (
-            <div className="input-group-append">
-              <span className="input-group-text">
-                <i className="fas fa-clock"></i>
-              </span>
-            </div>
-          ) : ''}
-
-          {this.state.columns[columnName].type == 'date' || this.state.columns[columnName].type == 'datetime' ? (
-            <div className="input-group-append">
-              <span className="input-group-text">
-                <i className="fas fa-calendar"></i>
-              </span>
-            </div>
-          ) : ''}
         </div>
 
         <small className="form-text text-muted">{this.state.columns[columnName].description}</small>

@@ -10,7 +10,7 @@ interface SwalButtonProps {
   onConfirmCallback?: (data: any) => void,
   swal: SweetAlertOptions,
   type?: string,
-  onclick?: string,
+  onclick?: string, // TODO: nepouziva sa
   href?: string,
   text?: string,
   icon?: string,

@@ -5,7 +5,7 @@ import Form, { FormProps } from "./Form";
 
 interface FormCardButtonProps {
   uid: string,
-  onClick?: string,
+  onClick?: string, // TODO: nepouziva sa
   href?: string,
   text: string,
   icon: string,
@@ -51,6 +51,7 @@ export default class FormCardButton extends Component<FormCardButtonProps> {
 
         <button
           id={"adios-card-button-" + this.props.uid}
+          //@ts-ignore
           onClick={() => ADIOS.modalToggle(this.props.uid)}
           className={"btn " + this.state.cssClass + " shadow-sm mb-1 p-4"}
           style={{width: '14em'}}

@@ -3,7 +3,7 @@ import React, { Component } from "react";
 interface GridProps {
   uid: string,
   type?: string,
-  onClick?: string,
+  onClick?: string, // TODO: nepouziva sa
   href?: string,
   text: string,
   icon: string,
@@ -13,7 +13,7 @@ interface GridProps {
 interface GridParams {
   uid: string,
   type?: string,
-  onClick?: string,
+  onClick?: string, // TODO: preverit sposob pouzitia
   href?: string,
   text: string,
   icon: string,

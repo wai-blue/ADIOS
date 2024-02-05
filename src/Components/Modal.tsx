@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import * as uuid from 'uuid';
 
-import './Css/Modal.css';
+// import './Css/Modal.css';
 
 export interface ModalProps {
   //onClose?: () => void;
@@ -50,6 +50,7 @@ export default class Modal extends Component<ModalProps> {
   componentDidMount() {
     //console.log('modal did mount ' + this.props.uid + ' ' + this.props.model);
     if (this.props.isOpen === true) {
+      //@ts-ignore
       ADIOS.modalToggle(this.state.uid);
     }
   }
@@ -91,6 +92,7 @@ export default class Modal extends Component<ModalProps> {
                         <h3
                           id={'adios-modal-title-' + this.props.uid}
                           className="m-0 p-0"
+                          style={{whiteSpace: "nowrap"}}
                         >
                           {this.state.title}
                         </h3>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
+import { FormColumnParams } from '../Form'
 
 export const dateToEUFormat = (dateString: string): string => {
   if (!dateString || dateString.length != 10) {
@@ -83,6 +84,11 @@ export default class DateTime extends Component<DateTimeInputProps> {
   render() {
     let value: string = this.props.parentForm.state.inputs[this.props.columnName] ?? "";
 
+    let parentForm = this.props.parentForm;
+    let pfState = parentForm.state;
+    let columnName = this.props.columnName;
+    let column: FormColumnParams = pfState.columns[columnName];
+
     switch (this.props.type) {
       case 'datetime': 
         value = dateToEUFormat(value) + ' ' + timeToEUFormat(value);
@@ -96,13 +102,24 @@ export default class DateTime extends Component<DateTimeInputProps> {
     }
     
     return (
-      <Flatpickr
-        value={value}
-        onChange={(data: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, data[0] ?? null)}
-        className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
-        disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].readonly}
-        options={this.options}
-      />
+      <>
+        <div className={"max-w-250 input-group"}>
+          <Flatpickr
+            value={value}
+            onChange={(data: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, data[0] ?? null)}
+            className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
+            disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].readonly}
+            options={this.options}
+          />
+          <div className="input-group-append">
+            <span className="input-group-text">
+              {this.props.type == 'datetime' ? <i className="fas fa-calendar"></i> : ''}
+              {this.props.type == 'date' ? <i className="fas fa-calendar"></i> : ''}
+              {this.props.type == 'time' ? <i className="fas fa-clock"></i> : ''}
+            </span>
+          </div>
+        </div>
+      </>
     );
   } 
 }
