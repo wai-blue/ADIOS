@@ -767,7 +767,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'title' => 'ID',
         'readonly' => 'yes',
         'viewParams' => [
-          'Table' => ['showColumn' => TRUE]
+          'Table' => ['showColumn' => TRUE],
+          'Form' => ['showColumn' => TRUE]
         ],
       ];
     }

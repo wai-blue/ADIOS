@@ -16,8 +16,8 @@ export default class Tags extends Component<TagsInputProps> {
     super(props);
 
     this.state = {
-      tags: this.props.parentForm.state.inputs[this.props.columnName],
-      suggestions: this.props.parentForm.state.inputs[this.props.columnName] // Ked sa nieco zmaze omylom
+      tags: [],
+      suggestions: [] // Ked sa nieco zmaze omylom
     };
   }
 
@@ -54,13 +54,31 @@ export default class Tags extends Component<TagsInputProps> {
     else
       this.state.tags[index].className = "ReactTags__active";
     this.forceUpdate();
+
+    this.props.parentForm.inputOnChange(this.props.columnName, e)
   };
 
   render() {
+
+    const params = this.props.parentForm.state.inputs[this.props.columnName] ?? {all: [], values: []};
+
+    let tags = [];
+    let suggestions = params['all'];
+
+    suggestions.forEach((role) => {
+      role.id = role.name;
+      if (params['values'].find((r) => r.name === role.name) !== undefined) {
+        tags.push({id: role.name, name: role.name, className: "ReactTags__active"});
+      } else {
+        tags.push({id: role.name, name: role.name, className: ""});
+      }
+    });
+
     return (
       <ReactTags
-        tags={this.state.tags}
-        suggestions={this.state.suggestions}
+        tags={tags}
+        suggestions={suggestions}
+        labelField={'name'}
         //delimiters={this.state.delimiters}
         handleDelete={this.handleDelete}
         handleAddition={this.handleAddition}
@@ -71,5 +89,5 @@ export default class Tags extends Component<TagsInputProps> {
         autocomplete
       />
     );
-  } 
+  }
 }

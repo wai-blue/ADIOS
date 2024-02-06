@@ -20,7 +20,6 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
   public \ADIOS\Core\Model $model;
   public array $data = [];
-
   private int $pageLength = 15;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
@@ -120,8 +119,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
       $data['data'] = $this->postprocessData($data['data']);
 
       return [
-        'data' => $data,
-        'title' => $tableTitle,
+        'data' => $data
       ];
     } catch (QueryException $e) {
       http_response_code(500);
