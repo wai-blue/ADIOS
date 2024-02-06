@@ -325,6 +325,7 @@ export default class Form extends Component<FormProps> {
    * Dynamically initialize inputs (React state) from model columns
    */
   initInputs(columns: FormColumns, inputsValues: Object = {}) {
+
     let inputs: any = {};
 
     // If is new form and defaultValues props is set
@@ -346,13 +347,20 @@ export default class Form extends Component<FormProps> {
         case 'boolean':
           inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
         break;
-        case 'tags':  // Testing
-          inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, [
+        case 'tags':
+          inputs[columnName] = inputsValues[columnName]
+          /*
+          { values: ..., all: ... }
+           */
+
+          /*
+          [
             {id: 'Thailand', text: 'Thailand'},
             {id: 'India', text: 'India'},
             {id: 'Vietnam', text: 'Vietnam'},
             {id: 'Turkey', text: 'Turkey', className: 'red'}
-          ]);
+          ]
+           */
         break;
         default:
           inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
