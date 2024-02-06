@@ -19,8 +19,8 @@ interface TableProps {
   formId?: number,
   formModal?: ModalProps,
   formParams?: FormProps,
-  loadDataController?: string
-  loadParamsController?: string,
+  dataController?: string
+  paramsController?: string,
   modal?: ModalProps,
   model: string,
   parentFormId?: number,
@@ -123,12 +123,12 @@ export default class Table extends Component<TableProps> {
   }
 
   loadParams() {
-    let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Table/OnLoadParams';
+    let paramsController = this.props.paramsController ? this.props.paramsController : 'Components/Table/OnLoadParams';
 
     //console.log('table load params', this.props.model);
 
     request.get(
-      loadParamsController,
+      paramsController,
       {
         __IS_AJAX__: '1',
         columns: this.props.columns,
@@ -140,7 +140,7 @@ export default class Table extends Component<TableProps> {
       (data: any) => {
         let columns: Array<any> = [];
 
-        if (data.columns.length == 0) adiosError("Any column to show. Set showColumn param for column");
+        if (data.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
 
         for (let columnName in data.columns) {
           let origColumn = data.columns[columnName];
@@ -238,14 +238,14 @@ export default class Table extends Component<TableProps> {
           canUpdate: data.canUpdate ?? true,
           columns: columns,
           showHeader: data.showHeader ?? true,
-          title: this.props.title ?? data.tableTitle,
+          title: this.props.title ?? data.title,
         });
       }
     );
   }
 
   loadData(page: number = 1) {
-    let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Table/OnLoadData';
+    let dataController = this.props.dataController ? this.props.dataController : 'Components/Table/OnLoadData';
 
     //console.log('table load data', this.props.model);
 
@@ -254,7 +254,7 @@ export default class Table extends Component<TableProps> {
     });
 
     request.get(
-      loadDataController,
+      dataController,
       {
         __IS_AJAX__: '1',
         filterBy: this.state.filterBy,

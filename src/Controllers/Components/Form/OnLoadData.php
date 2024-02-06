@@ -31,7 +31,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
       $details = [];
       if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
         $columnsToShowAsString = '';
-        $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
+        $tmpColumns = $tmpModel->columns();//getColumnsToShowInView('Form');
 
         foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
           if (!isset($tmpColumnDefinition['relationship'])) {

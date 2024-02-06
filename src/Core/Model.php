@@ -80,21 +80,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public ?array $crud = [];
 
   /**
-   * Readable title for the table listing.
-   */
-  public string $tableTitle = "";
-
-  /**
-   * Readable title for the form when editing content.
-   */
-  public string $formTitleForEditing = "";
-
-  /**
-   * Readable title for the form when inserting content.
-   */
-  public string $formTitleForInserting = "";
-
-  /**
    * SQL-compatible string used to render displayed value of the record when used
    * as a lookup.
    */
@@ -104,6 +89,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * If set to TRUE, the SQL table will not contain the ID autoincrement column
    */
   public bool $isJunctionTable = FALSE;
+
+
+
+  public ?array $defaultTableParams = NULL;
+  public ?array $defaultFormParams = NULL;
+
 
   /**
    * If set to TRUE, the SQL table will contain the `record_info` column of type JSON
@@ -125,9 +116,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public ?array $junctions = [];
 
-  public ?string $addButtonText = null;
-  public ?string $formSaveButtonText = null;
-  public ?string $formAddButtonText = null;
 
   /**
    * Creates instance of model's object.
@@ -673,7 +661,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
-          "searchGroup" => $this->tableTitle ?? $urlBase,
+          "searchGroup" => $this->defaultTableParams['title'] ?? $urlBase,
           "displayMode" => "window",
           "windowParams" => [
             "modal" => TRUE,

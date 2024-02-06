@@ -13,8 +13,8 @@ import SwalButton from "./SwalButton";
 
 interface CalendarProps {
   uid: string,
-  loadDataController?: string,
-  loadDataUrl?: string,
+  dataController?: string,
+  dataUrl?: string,
   cviciska: Array<any>,
   timy: Array<any>,
   typ: number,
@@ -82,7 +82,7 @@ export default class Calendar extends Component<CalendarProps> {
       isReadonly: false
     };
 
-    this.url = props.loadDataController ?? props.loadDataUrl ?? '';
+    this.url = props.dataController ?? props.dataUrl ?? '';
   }
 
   componentDidMount() {

@@ -1,8 +1,8 @@
 import React, {Component} from "react";
 
 import Notification from "./Notification";
+import Loader from "./Loader";
 import request from "./Request";
-import * as uuid from 'uuid';
 
 import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
@@ -48,8 +48,8 @@ export interface FormProps {
   titleForEditing?: string,
   saveButtonText?: string,
   addButtonText?: string,
-  loadParamsController?: string,
-  loadDataController?: string,
+  paramsController?: string,
+  dataController?: string,
   defaultValues?: Object
 }
 
@@ -165,12 +165,12 @@ export default class Form extends Component<FormProps> {
   }
 
   loadParams() {
-    let loadParamsController = this.props.loadParamsController ? this.props.loadParamsController : 'Components/Form/OnLoadParams';
+    let paramsController = this.props.paramsController ? this.props.paramsController : 'Components/Form/OnLoadParams';
     //console.log('form load params', this.props.model);
 
     //@ts-ignore
     request.get(
-      loadParamsController,
+      paramsController,
       {
         __IS_AJAX__: '1',
         model: this.props.model,
@@ -198,14 +198,14 @@ export default class Form extends Component<FormProps> {
   }
 
   loadData() {
-    let loadDataController = this.props.loadDataController ? this.props.loadDataController : 'Components/Form/OnLoadData';
+    let dataController = this.props.dataController ? this.props.dataController : 'Components/Form/OnLoadData';
     let id = this.state.id ? this.state.id : 0;
 
     //console.log('form load data', this.props.model, id);
 
     if (id > 0) {
       request.get(
-        loadDataController,
+        dataController,
         {
           __IS_AJAX__: '1',
           model: this.props.model,
@@ -426,6 +426,10 @@ export default class Form extends Component<FormProps> {
    * Render tab
    */
   _renderTab(): JSX.Element {
+    if (this.state.columns == null) {
+      return adiosError(`No columns specified for ${this.props.model}. Did the controller return definition of columns?`);
+    }
+
     if (this.state.content?.tabs) {
       let tabs: any = Object.keys(this.state.content.tabs).map((tabName: string) => {
         return this._renderTabContent(tabName, this.state.content?.tabs[tabName]);
@@ -496,6 +500,7 @@ export default class Form extends Component<FormProps> {
         contentItem = this._renderInput(contentItemParams['input'] as string);
         break;
       case 'inputs':
+        //@ts-ignore
         contentItem = (contentItemParams['inputs'] as Array<string>).map((input: string) => {
           return this._renderInput(input)
         });
@@ -504,11 +509,9 @@ export default class Form extends Component<FormProps> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
-        //console.log('window.getComponent', contentItemName, this.props.uid, this.props.model, contentItemParams[contentItemName]);
-
+        //@ts-ignore
         contentItem = window.getComponent(
           contentItemName,
-          // contentItemParams[contentItemName]
           {
             ...contentItemParams[contentItemName],
             ...{
@@ -517,8 +520,6 @@ export default class Form extends Component<FormProps> {
             }
           }
         );
-
-        //console.log('rendered component uid ' + contentItem.props.uid);
 
         this.components.push(contentItem);
 
@@ -536,30 +537,36 @@ export default class Form extends Component<FormProps> {
    * Render different input types
    */
   _renderInput(columnName: string): JSX.Element {
-    if (this.state.columns == null) return <></>;
-    if (!this.state.columns[columnName]) return adiosError(`Column: <b>${columnName}</b> doesn't exist in model or is not shown`);
+    let colDef = this.state.columns ? this.state.columns[columnName] : null;
+
+    if (!colDef) {
+      return adiosError(`Column '${columnName}' is not available for Form component. Check definiton of columns in the model '${this.props.model}'.`);
+    }
 
     let inputToRender: JSX.Element;
-    if (this.state.columns[columnName].enumValues) {
+    let inputParams = {...colDef.viewParams?.Form, ...{readonly: this.state.readonly}};
+
+    if (colDef.enumValues) {
 
       inputToRender = <InputEnumValues
         parentForm={this}
         columnName={columnName}
+        params={inputParams}
       />
     } else {
-      if (this.state.columns[columnName].viewParams?.Form?.inputJSX) {
-        let inputJSX = this.state.columns[columnName].viewParams.Form.inputJSX;
+      if (colDef.viewParams?.Form?.inputJSX) {
+        let inputJSX = colDef.viewParams.Form.inputJSX;
         inputToRender = React.createElement(
           window['App']['reactElements'][inputJSX],
           {
             parentForm: this,
-            columnName: columnName
+            columnName: columnName,
+            params: inputParams
           }
         );
       } else {
-        let inputParams = {...this.state.columns[columnName].viewParams?.Form, ...{readonly: this.state.readonly}};
 
-        switch (this.state.columns[columnName].type) {
+        switch (colDef.type) {
           case 'text':
             inputToRender = <InputTextarea
               parentForm={this}
@@ -585,7 +592,7 @@ export default class Form extends Component<FormProps> {
           case 'lookup':
             inputToRender = <InputLookup
               parentForm={this}
-              {...this.state.columns[columnName]}
+              {...colDef}
               columnName={columnName}
               params={inputParams}
             />;
@@ -624,7 +631,7 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputDateTime
               parentForm={this}
               columnName={columnName}
-              type={this.state.columns[columnName].type}
+              type={colDef.type}
               params={inputParams}
             />;
             break;
@@ -657,15 +664,15 @@ export default class Form extends Component<FormProps> {
         key={columnName}
       >
         <label className="text-dark">
-          {this.state.columns[columnName].title}
-          {this.state.columns[columnName].required == true ? <b className="text-danger"> *</b> : ""}
+          {colDef.title}
+          {colDef.required == true ? <b className="text-danger"> *</b> : ""}
         </label>
 
         <div key={columnName}>
           {inputToRender}
         </div>
 
-        <small className="form-text text-muted">{this.state.columns[columnName].description}</small>
+        <small className="form-text text-muted">{colDef.description}</small>
       </div>
     ) : <></>;
   }
@@ -727,6 +734,8 @@ export default class Form extends Component<FormProps> {
   render() {
     //console.log('form render', this.props.uid, this.props.model);
 
+    let formContent = this.state.columns == null ? <Loader/> : this._renderTab();
+
     return (
       <>
         {this.props.showInModal ? (
@@ -756,7 +765,7 @@ export default class Form extends Component<FormProps> {
         >
           {this.props.showInModal ? (
             <div className="modal-body">
-              {this._renderTab()}
+              {formContent}
             </div>
           ) : (
             <div className="card w-100">
@@ -790,7 +799,7 @@ export default class Form extends Component<FormProps> {
               </div>
 
               <div className="card-body">
-                {this._renderTab()}
+                {formContent}
               </div>
             </div>
           )}

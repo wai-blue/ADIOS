@@ -21,15 +21,26 @@ class OnLoadParams extends \ADIOS\Core\Controller {
     $this->permissionName = $this->params['model'] . ':Read';
   }
 
-  public function renderJson() { 
+  public function getFormParams(array $customParams = []) {
     try {
-      $tmpModel = $this->adios->getModel($this->params['model']);
-      $tmpColumns = $tmpModel->getColumnsToShowInView('Form');
+      $model = $this->adios->getModel($this->params['model']);
+      $columns = $model->columns();//getColumnsToShowInView('Form');
 
-      if (is_array($this->params['columns'])) {
-        $tmpColumns = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
-          $tmpColumns,
-          $this->params['columns']);
+      $customParams = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+        $customParams,
+        $model->defaultFormParams
+      );
+
+      if (is_array($customParams['columns'])) {
+        foreach ($columns as $colName => $colDef) {
+          if (!($customParams['columns'][$colName]['show'] ?? FALSE)) {
+            unset($columns[$colName]);
+          } else {
+            $columns[$colName]['viewParams']['Form'] = $customParams['columns'][$colName];
+          }
+        }
+
+        unset($customParams['columns']);
       }
 
       $canRead = $this->adios->permissions->has($this->params['model'] . ':Read');
@@ -37,18 +48,20 @@ class OnLoadParams extends \ADIOS\Core\Controller {
       $canUpdate = $this->adios->permissions->has($this->params['model'] . ':Update');
       $canDelete = $this->adios->permissions->has($this->params['model'] . ':Delete');
 
-      return array_merge(
+      return \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+        $customParams,
         [
-          'columns' => $tmpColumns,
-          'folderUrl' => $tmpModel->getFolderUrl(),
+          'columns' => $columns,
+          'folderUrl' => $model->getFolderUrl(),
           'canRead' => $canRead,
           'canCreate' => $canCreate,
           'canUpdate' => $canUpdate,
           'canDelete' => $canDelete,
           'readonly' => !($canUpdate || $canCreate),
-        ],
-        $tmpModel->defaultFormParams ?? []
+        ]
       );
+      //   $tmpModel->defaultFormParams ?? []
+      // );
     } catch (\Exception $e) {
       http_response_code(400);
 
@@ -57,6 +70,10 @@ class OnLoadParams extends \ADIOS\Core\Controller {
         'message' => $e->getMessage() 
       ];
     }
+  }
+
+  public function renderJson() {
+    return $this->getFormParams();
   }
 
 }

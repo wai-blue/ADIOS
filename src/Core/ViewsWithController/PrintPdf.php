@@ -28,7 +28,7 @@ class PrintPdf extends \ADIOS\Core\ViewWithController
     $uiTable = new \ADIOS\Core\ViewsWithController\Table($adios, $tableParams);
     $data = $uiTable->data;
 
-    $this->pdf = new PDF('L', 'mm', 'A4', true, tableTitle: $modelParams->title);
+    $this->pdf = new PDF('L', 'mm', 'A4', true, $modelParams->title);
     $this->pdf->SetPageOrientation('L');
     $this->pdf->setHeaderMargin(10);
     $this->pdf->setMargins(10, 20, 10);
@@ -161,18 +161,18 @@ class PrintPdf extends \ADIOS\Core\ViewWithController
 class PDF extends \TCPDF
 {
 
-  public string $tableTitle;
+  public string $title;
 
-  public function __construct($orientation = 'L', $unit = 'mm', $format = 'A4', $unicode = true, $encoding = 'UTF-8', $diskcache = false, $pdfa = false, $tableTitle = '')
+  public function __construct($orientation = 'L', $unit = 'mm', $format = 'A4', $unicode = true, $encoding = 'UTF-8', $diskcache = false, $pdfa = false, $title = '')
   {
-    $this->tableTitle = $tableTitle;
+    $this->title = $title;
     parent::__construct();
   }
 
   public function Header()
   {
     $this->SetFont('helvetica', 'B', 20);
-    $this->Cell(0, 15, 'BladeERP >> ' . $this->tableTitle, 0, false, 'L', 0, '', 0, false, 'M', 'M');
+    $this->Cell(0, 15, 'BladeERP >> ' . $this->title, 0, false, 'L', 0, '', 0, false, 'M', 'M');
   }
 
   public function Footer() {

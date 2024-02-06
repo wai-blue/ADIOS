@@ -41,10 +41,10 @@
   <adios-table
     model="{{ viewParams.model }}"
     tag="{{ viewParams.tag }}"
-    load-data-controller='{{ viewParams.loadDataController }}'
-    load-params-controller='{{ viewParams.loadParamsController }}'
+    data-controller='{{ ADIOS_Core_Model_getDefaultTableParams(viewParams.model).dataController }}'
+    params-controller='{{ ADIOS_Core_Model_getDefaultTableParams(viewParams.model).paramsController }}'
     form-id="{{ viewParams.id | default(null) }}"
-    form-params='{{ viewParams.formParams|json_encode }}'
+    form-params='{{ ADIOS_Core_Model_getDefaultFormParams(viewParams.model)|json_encode|raw }}'
     row-height=30
   ></adios-table>
 #}

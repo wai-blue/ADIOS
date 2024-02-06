@@ -17,12 +17,14 @@ export function deepObjectMerge(target: any, source: any): Object {
   return target;
 }
 
-export function adiosError(htmlText: string): JSX.Element {
-  Notification.error(htmlText);
+export function adiosError(message: string): JSX.Element {
+  // Notification.error(htmlText);
+
+  console.error('ADIOS: ' + message);
 
   return (
     <div className="alert alert-danger" role="alert">
-      <div dangerouslySetInnerHTML={{ __html: htmlText }} />
+      {message}
     </div>
   );
 }

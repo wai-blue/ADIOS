@@ -33,8 +33,7 @@ class OnLoadData extends \ADIOS\Core\Controller {
 
     $this->model = $this->adios->getModel($this->params['model']);
 
-    $tableTitle = $this->model->tableTitle;
-    $tmpColumns = $this->model->getColumnsToShowInView('Table');
+    $tmpColumns = $this->model->columns();//getColumnsToShowInView('Table');
 
     $columnsToShowAsString = '';
     foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {

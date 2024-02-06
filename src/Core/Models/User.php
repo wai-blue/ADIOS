@@ -29,16 +29,20 @@ class User extends \ADIOS\Core\Model {
   public string $urlBase = "users";
   public ?string $lookupSqlValue = "{%TABLE%}.login";
 
-  public string $tableTitle = "Users";
-  public string $formTitleForInserting = "New user";
-  public string $formTitleForEditing = "User";
+  public ?array $defaultTableParams = [
+    "title" => "Users",
+  ];
+  public ?array $defaultFormParams = [
+   "titleForInserting" => "New user",
+   "titleForEditing" => "User",
+  ];
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "_users";
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
     if (is_object($adiosOrAttributes)) {
-      $this->tableTitle = $this->translate("Users");
+      $this->defaultTableParams['title'] = $this->translate("Users");
       $tokenModel = $adiosOrAttributes->getModel("ADIOS/Core/Models/Token");
 
       if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {

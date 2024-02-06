@@ -8,15 +8,9 @@ class {{ thisController.class }} extends \ADIOS\Controllers\Components\Table\OnL
 
   public static bool $hideDefaultDesktop = true;
 
-  public function renderJson() { 
-    $parentTableParams = parent::renderJson();
-
-    try {
-      return array_merge($parentTableParams,
+  public function renderJson() {
+    return $this->getTableParams(
 {{ varExport(thisController.config.params, "      ")|raw }} ?? []
-      );
-    } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
-      // TODO: Error
-    }
+    );
   }
 }

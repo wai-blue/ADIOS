@@ -18,9 +18,13 @@ namespace ADIOS\Core\Models;
 class UserHasRole extends \ADIOS\Core\Model {
   public bool $isJunctionTable = FALSE;
 
-  public string $tableTitle = "User - Roles";
-  public string $formTitleForInserting = "New User - Eole";
-  public string $formTitleForEditing = "User - Role";
+  public ?array $defaultTableParams = [
+    "title" => "Users - Roles",
+  ];
+  public ?array $defaultFormParams = [
+   "titleForInserting" => "New assignment of role to user",
+   "titleForEditing" => "Assignemtn of role to role",
+  ];
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "_user_has_roles";

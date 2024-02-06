@@ -374,6 +374,7 @@ class Loader
       $this->db = new $dbProviderClass($this);
 
       $this->pdo = new \ADIOS\Core\PDO($this);
+      $this->pdo->connect();
 
       $this->onBeforeConfigLoaded();
 
@@ -582,6 +583,26 @@ class Loader
         $this->twig->addExtension(new \Twig\Extension\StringLoaderExtension());
         $this->twig->addExtension(new \Twig\Extension\DebugExtension());
 
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'ADIOS_Core_Model_getDefaultTableParams',
+          function (string $model) {
+            $tmpModel = $this->getModel($model);
+            return ($tmpModel instanceof \ADIOS\Core\Model ?
+              $tmpModel->defaultTableParams
+              : ""
+            );
+          }
+        ));
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'ADIOS_Core_Model_getDefaultFormParams',
+          function (string $model) {
+            $tmpModel = $this->getModel($model);
+            return ($tmpModel instanceof \ADIOS\Core\Model ?
+              $tmpModel->defaultFormParams
+              : ""
+            );
+          }
+        ));
         $this->twig->addFunction(new \Twig\TwigFunction(
           'str2url',
           function ($string) {
@@ -1299,6 +1320,10 @@ class Loader
 
       header('HTTP/1.1 400 Bad Request', true, 400);
       return join(" ", $lines);
+    } catch (\ArgumentCountError $e) {
+      echo $e->getMessage();
+      // var_dump(debug_backtrace());
+      header('HTTP/1.1 400 Bad Request', true, 400);
     }
   }
 

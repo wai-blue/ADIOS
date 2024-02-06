@@ -16,7 +16,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
 
     $tabs = [];
     $tabs[$model->fullName] = [];
-    $tabs[$model->fullName]["title"] = $model->tableTitle;
+    $tabs[$model->fullName]["title"] = $model->defaultTableParams['title'];
     $tabs[$model->fullName]["items"] = [];
 
     foreach ($model->columns() as $colName => $colDef) {
@@ -26,7 +26,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
         $lookupModelName = $colDef['model'];
         $lookupModel = $this->adios->getModel($lookupModelName);
         $tabs[$lookupModel->fullName] = [];
-        $tabs[$lookupModel->fullName]["title"] = $lookupModel->tableTitle;
+        $tabs[$lookupModel->fullName]["title"] = $lookupModel->defaultTableParams['title'];
 
         foreach ($lookupModel->columns() as $lookupColName => $lookupColDef) {
           if (!($colDef["is_searchable"] ?? TRUE)) continue;

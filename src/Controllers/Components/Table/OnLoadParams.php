@@ -34,16 +34,26 @@ class OnLoadParams extends \ADIOS\Core\Controller {
     }
   }
 
-  public function renderJson() { 
+  public function getTableParams(array $customParams = []) {
     try {
-      $tmpModel = $this->adios->getModel($this->params['model']);
+      $model = $this->adios->getModel($this->params['model']);
+      $columns = $model->columns();//getColumnsToShowInView('Table');
 
-      $columns = $tmpModel->getColumnsToShowInView('Table');
+      $customParams = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+        $customParams,
+        $model->defaultTableParams
+      );
 
-      if (is_array($this->params['columns'])) {
-        $columns = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
-          $columns,
-          $this->params['columns']);
+      if (is_array($customParams['columns'])) {
+        foreach ($columns as $colName => $colDef) {
+          if (!($customParams['columns'][$colName]['show'] ?? FALSE)) {
+            unset($columns[$colName]);
+          } else {
+            $columns[$colName]['viewParams']['Table'] = $customParams['columns'][$colName];
+          }
+        }
+
+        unset($customParams['columns']);
       }
 
       $canRead = $this->adios->permissions->has($this->params['model'] . ':Read');
@@ -51,16 +61,19 @@ class OnLoadParams extends \ADIOS\Core\Controller {
       $canUpdate = $this->adios->permissions->has($this->params['model'] . ':Update');
       $canDelete = $this->adios->permissions->has($this->params['model'] . ':Delete');
 
-      return [
-        'columns' => $columns, 
-        'tableTitle' => $tmpModel->tableTitle,
-        'folderUrl' => $tmpModel->getFolderUrl(),
-        'addButtonText' => $tmpModel->addButtonText ?? "Add new record",
-        'canRead' => $canRead,
-        'canCreate' => $canCreate,
-        'canUpdate' => $canUpdate,
-        'canDelete' => $canDelete,
-      ];
+      return \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+        $customParams,
+        [
+          'columns' => $columns,
+          'title' => $model->defaultTableParams['title'],
+          'folderUrl' => $model->getFolderUrl(),
+          'addButtonText' => $model->defaultTableParams['addButtonText'] ?? "Add new record",
+          'canRead' => $canRead,
+          'canCreate' => $canCreate,
+          'canUpdate' => $canUpdate,
+          'canDelete' => $canDelete,
+        ]
+      );
     } catch (\Exception $e) {
       http_response_code(400);
 
@@ -69,6 +82,10 @@ class OnLoadParams extends \ADIOS\Core\Controller {
         'message' => $e->getMessage() 
       ];
     }
+  }
+
+  public function renderJson() {
+    return $this->getTableParams();
   }
 
 }

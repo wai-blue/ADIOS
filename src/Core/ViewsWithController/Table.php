@@ -139,7 +139,7 @@ class Table extends \ADIOS\Core\ViewWithController
     }
 
     if (empty($params['title'])) {
-      $params['title'] = $this->model->tableTitle;
+      $params['title'] = $this->model->defaultTableParams['title'];
     }
 
     if (!empty($params['search'])) {
@@ -716,7 +716,7 @@ class Table extends \ADIOS\Core\ViewWithController
               $tmpSrcColumn = $tmpColumns[$tmpSrcColName];
               $tmpLookupModel = $this->adios->getModel($tmpSrcColumn["model"]);
               $tmpColumn = $tmpLookupModel->columns()[$tmpLookupColName];
-              $tmpTitle = $tmpLookupModel->tableTitle . " / " . $tmpColumn["title"];
+              $tmpTitle = $tmpLookupModel->defaultTableParams['title'] . " / " . $tmpColumn["title"];
             } else if ($tmpColumn["type"] == "lookup" && is_numeric($searchValue)) {
               $tmpLookupModel = $this->adios->getModel($tmpColumn["model"]);
 

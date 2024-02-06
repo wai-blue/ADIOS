@@ -18,10 +18,7 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
 
   public bool $isJunctionTable = {{ thisModel.config.isJunctionTable ? 'TRUE' : 'FALSE' }};
 
-  public ?string $addButtonText = {% if thisModel.config.addButtonText %} "{{ thisModel.config.addButtonText|raw }}" {% else %} null {% endif %};
-  public ?string $formAddButtonText = {% if thisModel.config.formAddButtonText %} "{{ thisModel.config.formAddButtonText|raw }}" {% else %} null {% endif %};
-  public ?string $formSaveButtonText = {% if thisModel.config.formSaveButtonText %} "{{ thisModel.config.formSaveButtonText|raw }}" {% else %} null {% endif %};
-
+  public ?array $defaultTableParams = NULL;
   public ?array $defaultFormParams = NULL;
 
   public string $sqlName = "{{ thisModel.config.sqlName|raw }}";
@@ -29,9 +26,6 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   public ?array $crud =
 {{ varExport(thisModel.config.crud, "    ")|raw }}
   ;
-  public string $tableTitle = "{{ thisModel.config.tableTitle|raw }}";
-  public string $formTitleForInserting = "{{ thisModel.config.formTitleForInserting|raw }}";
-  public string $formTitleForEditing = "{{ thisModel.config.formTitleForEditing|raw }}";
   {% if thisModel.config.lookupSqlValue %}public ?string $lookupSqlValue = "{{ thisModel.config.lookupSqlValue|raw }}";{% endif %}
 
   public ?array $junctions =
@@ -43,6 +37,9 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
+    $this->defaultTableParams = 
+      {{ varExport(thisModel.config.defaultTableParams | default(null), "    ")|raw }}
+    ;
     $this->defaultFormParams = 
       {{ varExport(thisModel.config.defaultFormParams | default(null), "    ")|raw }}
     ;

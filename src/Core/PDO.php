@@ -26,12 +26,18 @@ class PDO {
     $dbName = $this->adios->config['db_name'] ?? '';
     $dbCodepage = $this->adios->config['db_codepage'] ?? 'utf8mb4';
 
-    $this->pdo = new \PDO(
+    $this->connection = new \PDO(
       "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset={$dbCodepage}",
       $dbUser,
       $dbPassword
     );
 
+  }
+
+  public function fetchAll($query, $data) {
+    $stmt = $this->connection->prepare($query);
+    $stmt->execute($data);
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
   }
 
 }
