@@ -349,7 +349,6 @@ export default class Form extends Component<FormProps> {
         break;
         case 'tags':
           inputs[columnName] = inputsValues[columnName]
-          inputs[columnName + "_all"] = inputsValues[columnName + "_all"]
           /*
           { values: ..., all: ... }
            */

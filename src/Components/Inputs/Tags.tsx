@@ -60,20 +60,25 @@ export default class Tags extends Component<TagsInputProps> {
 
   render() {
 
+    const params = this.props.parentForm.state.inputs[this.props.columnName] ?? {all: [], values: []};
+
     let tags = [];
-    let suggestions = this.props.parentForm.state.inputs[this.props.columnName + "_all"] ?? [];
+    let suggestions = params['all'];
 
-    (this.props.parentForm.state.inputs[this.props.columnName] ?? []).forEach((role) => {
-      tags.push({id: role.name, text: role.name, className: "ReactTags__active"})
-    })
-
-    console.log(tags);
-    console.log(suggestions);
+    suggestions.forEach((role) => {
+      role.id = role.name;
+      if (params['values'].find((r) => r.name === role.name) !== undefined) {
+        tags.push({id: role.name, name: role.name, className: "ReactTags__active"});
+      } else {
+        tags.push({id: role.name, name: role.name, className: ""});
+      }
+    });
 
     return (
       <ReactTags
         tags={tags}
-        suggestions={tags}
+        suggestions={suggestions}
+        labelField={'name'}
         //delimiters={this.state.delimiters}
         handleDelete={this.handleDelete}
         handleAddition={this.handleAddition}

@@ -44,11 +44,18 @@ class OnLoadData extends \ADIOS\Core\Controller {
         foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
           if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
             $query->with($tmpColumnDefinition['relationship']);
-            $details[$tmpColumnDefinition['relationship'] . '_all'] = $query->first()->roles()->getRelated()->get()->toArray();
+            $details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
           }
         }
 
-        $inputs = array_merge($query->find($this->params['id'])->toArray(), $details);
+        $inputs = $query->find($this->params['id'])->toArray();
+
+        foreach ($details as $key => $value) {
+          $inputs[$key] = [
+            'values' => $inputs[$key],
+            'all' => $value
+          ];
+        }
       }
 
       return [
