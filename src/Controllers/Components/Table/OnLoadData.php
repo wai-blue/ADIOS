@@ -22,8 +22,6 @@ class OnLoadData extends \ADIOS\Core\Controller {
   public array $data = [];
   private int $pageLength = 15;
 
-  private int $pageLength = 15;
-
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
     $this->permissionName = $this->params['model'] . ':Read';
