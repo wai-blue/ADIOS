@@ -29,7 +29,7 @@ export default class CardButton extends Component<CardButtonProps> {
               : window.location.href + '/' + this.props.href
           ) : '#'
         }
-        className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4"}
+        className={"btn " + this.props.cssClass + " shadow-sm mb-1 p-4 d-inline-flex flex-column"}
         style={{width: '14em'}}
       >
         <i 
@@ -37,8 +37,8 @@ export default class CardButton extends Component<CardButtonProps> {
           style={{fontSize: '4em'}}
         ></i>
 
-        <div className="text-center pt-4 mt-4 h5">{ this.props.text }</div>
-        { this.props.subtitle ? (
+        <div className="mt-4 h5 d-flex justify-content-center align-items-center" style={{height: '2.5em'}}>{this.props.text}</div>
+        {this.props.subtitle ? (
           <div className="text-center small">{ this.props.subtitle }</div>
         ) : ''}
       </a>

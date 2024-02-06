@@ -18,6 +18,7 @@ import FormButton from "./FormButton";
 import FormCardButton from "./FormCardButton";
 import Calendar from "./Calendar";
 import SwalButton from "./SwalButton";
+import View from "./View";
 
 /**
 * Examples
@@ -41,6 +42,7 @@ const initializeComponents = [
   'form-button',
   'form-card-button',
   'swal-button',
+  'view',
   
   // Examples
   'example',
@@ -89,6 +91,8 @@ const getComponent = (componentName: string, props: Object) => {
     case 'form-card-button': return <FormCardButton {...props} />;
     //@ts-ignore
     case 'swal-button': return <SwalButton {...props} />;
+    //@ts-ignore
+    case 'view': return <View {...props} />;
 
     // Examples
     case 'example': return <Example {...props} />;

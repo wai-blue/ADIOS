@@ -174,7 +174,8 @@ export default class Form extends Component<FormProps> {
       {
         __IS_AJAX__: '1',
         model: this.props.model,
-        columns: this.props.columns
+        columns: this.props.columns,
+        id: this.props.id
       },
       (data: any) => {
         data = deepObjectMerge(data, this.props);

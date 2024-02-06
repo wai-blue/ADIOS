@@ -13,7 +13,7 @@ class {{ thisController.class }} extends \ADIOS\Controllers\Components\Form\OnLo
 
     try {
       return array_merge($parentFormParams,
-{{ varExport(thisController.config.params, "      ")|raw }} ?? []
+{{ varExport(thisController.config.params, "        ")|raw }} ?? []
       );
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       // TODO: Error
