@@ -317,9 +317,12 @@ export default class Form extends Component<FormProps> {
     let changedInput: any = {};
     changedInput[columnName] = inputValue;
 
-    this.setState({
-      inputs: {...this.state.inputs, ...changedInput}
-    });
+    this.setState(prevState => ({
+      inputs: {
+        ...prevState.inputs,
+        [columnName]: inputValue
+      }
+    }));
   }
 
   /**

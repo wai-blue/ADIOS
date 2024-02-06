@@ -10,56 +10,34 @@ interface TagsInputProps {
 }
 
 export default class Tags extends Component<TagsInputProps> {
-  state: any;
 
   constructor(props: TagsInputProps) {
     super(props);
-
-    this.state = {
-      tags: [],
-      suggestions: [] // Ked sa nieco zmaze omylom
-    };
   }
 
   handleDelete = (tagIndex: string) => {
-    let newTags: Array<any> = this.state.tags.filter((_, index) => index !== tagIndex);
-
-    this.setState({
-      tags: newTags
-    });
+    console.log('remove tag ' + tagIndex);
   };
 
   handleAddition = (tag: {id: string, text: string}) => {
-    this.setState({
-      tags: [...this.state.tags, tag]
-    });
-
-    this.props.parentForm.inputOnChangeRaw(this.props.columnName, JSON.stringify(this.state.tags));
+    console.log('add tag ' + tag);
   };
 
   handleDrag = (tag: {id: string, text: string}, currPos: number, newPos: number) => {
-    let newTags: Array<any> = this.state.tags.slice();
-
-    newTags.splice(currPos, 1);
-    newTags.splice(newPos, 0, tag);
-
-    this.setState({
-      tags: newTags
-    });
+    console.log('drag tag' + tag)
   };
 
-  handleTagClick = (index: number) => {
-    if (this.state.tags[index].className == 'ReactTags__active')
-      this.state.tags[index].className = '';
-    else
-      this.state.tags[index].className = "ReactTags__active";
-    this.forceUpdate();
+  handleTagClick = (index: string, input: { all: object, values: object }) => {
+    const tag = input['all'][index];
+    const tagIndex = input['values'].findIndex((t) => t.name === tag.name);
 
-    this.props.parentForm.inputOnChange(this.props.columnName, e)
+    if (tagIndex === -1) input['values'].push({id: undefined, name: tag.name});
+    else input['values'].splice(tagIndex, 1);
+
+    this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
   };
 
   render() {
-
     const params = this.props.parentForm.state.inputs[this.props.columnName] ?? {all: [], values: []};
 
     let tags = [];
@@ -83,7 +61,7 @@ export default class Tags extends Component<TagsInputProps> {
         handleDelete={this.handleDelete}
         handleAddition={this.handleAddition}
         handleDrag={this.handleDrag}
-        handleTagClick={this.handleTagClick}
+        handleTagClick={(i) => this.handleTagClick(i, params)}
         inputFieldPosition="bottom"
         allowDeleteFromEmptyInput={false}
         autocomplete
