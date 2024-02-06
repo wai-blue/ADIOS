@@ -159,7 +159,7 @@ class Loader
 
   public ?\Twig\Environment $twig = NULL;
 
-  public ?\PDO $pdo = NULL;
+  public ?\ADIOS\Core\PDO $pdo = NULL;
 
   public array $assetsUrlMap = [];
 
@@ -373,18 +373,7 @@ class Loader
       $dbProviderClass = $this->getCoreClass('DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
       $this->db = new $dbProviderClass($this);
 
-      $dbHost = $this->getConfig('db_host', '');
-      $dbPort = $this->getConfig('db_port', '');
-      $dbUser = $this->getConfig('db_user', '');
-      $dbPassword = $this->getConfig('db_password', '');
-      $dbName = $this->getConfig('db_name', '');
-      $dbCodepage = $this->getConfig('db_codepage', 'utf8mb4');
-
-      $this->pdo = new \PDO(
-        "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset={$dbCodepage}",
-        $dbUser,
-        $dbPassword
-      );
+      $this->pdo = new \ADIOS\Core\PDO($this);
 
       $this->onBeforeConfigLoaded();
 
@@ -1581,7 +1570,6 @@ class Loader
         $retval = null;
       }
     }
-
     return ($retval === NULL ? $default : $retval);
   }
 
