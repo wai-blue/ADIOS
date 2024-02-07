@@ -514,10 +514,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function routing(array $routing = [])
   {
-    return $this->adios->dispatchEventToPlugins("onModelAfterRouting", [
-      "model" => $this,
-      "routing" => $this->addStandardCRUDRouting($routing),
-    ])["routing"];
+    // return $this->adios->dispatchEventToPlugins("onModelAfterRouting", [
+    //   "model" => $this,
+    //   "routing" => $this->addStandardCRUDRouting($routing),
+    // ])["routing"];
   }
 
   public function addStandardCRUDRouting($routing = [], $params = [])

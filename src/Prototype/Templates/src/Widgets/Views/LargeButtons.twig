@@ -1,0 +1,13 @@
+{# builderInfo #}
+
+<div class="h3 text-primary mb-0">{{ params.title }}</div>
+<div class='row p-4'>
+  {% for button in params.buttons %}
+    <div class='col-2 m-4'>
+      <a
+        class='btn btn-primary btn-lg d-block p-4'
+        href='{{ config.url }}/{{ button.url }}'
+      >{{ button.title }}</a>
+    </div>
+  {% endfor %}
+</div>

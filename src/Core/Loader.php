@@ -315,13 +315,12 @@ class Loader
       }
 
       // inicializacia core modelov
-
-      $this->registerModel("ADIOS/Core/Models/Config");
-      $this->registerModel("ADIOS/Core/Models/Translate");
-      $this->registerModel("ADIOS/Core/Models/User");
-      $this->registerModel("ADIOS/Core/Models/UserRole");
-      $this->registerModel("ADIOS/Core/Models/UserHasRole");
-      $this->registerModel("ADIOS/Core/Models/Token");
+      $this->registerModel($this->getCoreClass("Models\\Config"));
+      $this->registerModel($this->getCoreClass("Models\\Translate"));
+      $this->registerModel($this->getCoreClass("Models\\User"));
+      $this->registerModel($this->getCoreClass("Models\\UserRole"));
+      $this->registerModel($this->getCoreClass("Models\\UserHasRole"));
+      $this->registerModel($this->getCoreClass("Models\\Token"));
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
 

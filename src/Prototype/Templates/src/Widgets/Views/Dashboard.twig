@@ -1,0 +1,141 @@
+{# builderInfo #}
+
+<h1>{{ params.title ?? "Default Title"  }}</h1>
+<div class="row">
+  <div class="col-md-6">
+    <div class="card shadow-sm mb-2">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Monthly turnover</h6>
+      </div>
+      <div class="card-body">
+
+        <canvas id="myChart2"></canvas>
+
+        <script>
+          var labels = [
+            "jan", 
+            "feb", 
+            "mar", 
+            "apr", 
+            "may", 
+            "jun", 
+            "jul", 
+            "aug", 
+            "sep", 
+            "oct", 
+            "nov", 
+            "dec"
+          ];
+
+          var data = {
+            labels: labels,
+            datasets: [{
+              label: "Monthly turnover",
+              data: {'jan': 300, 'feb': 520, 'mar': 600, 'apr': 800, 'may': 650, 'jun': 420, 'jul': 680, 'aug': 890, 'sep': 250, 'oct': 290, 'nov': 480, 'dec': 940},
+              fill: false,
+              borderColor: 'rgb(75, 192, 192)',
+              tension: 0.1
+            }]
+          };
+
+          var config = {
+            type: 'line',
+            data: data,
+          };
+
+          new Chart(document.getElementById('myChart2').getContext('2d'), config);
+        </script>
+
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-2">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Best sold products</h6>
+      </div>
+      <div class="card-body">
+
+        <canvas id="myChart3"></canvas>
+
+        <script>
+          var data = {
+            labels: ['Outdoor camera', 'Office 365', 'Laptop', 'e-Bike', 'Smart watch'],
+            datasets: [
+              {
+                label: 'Best sold products',
+                data: [10, 20, 30, 40, 50],
+                backgroundColor: [
+                  'rgb(255, 99, 132)',
+                  'rgb(255, 159, 64)',
+                  'rgb(255, 205, 86)',
+                  'rgb(75, 192, 192)',
+                  'rgb(54, 162, 235)',
+                  'rgb(153, 102, 255)',
+                  'rgb(201, 203, 207)'
+                ],
+              }
+            ]
+          };
+
+          var config = {
+            type: 'pie',
+            data: data,
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: 'top',
+                },
+                {# title: {
+                  display: true,
+                  text: 'Chart.js Pie Chart'
+                } #}
+              }
+            },
+          };
+
+          new Chart(document.getElementById('myChart3').getContext('2d'), config);
+        </script>
+
+      </div>
+    </div>
+
+  </div>
+
+  <div class="col-md-6">
+    <div class="card shadow-sm mb-2">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Feedback</h6>
+      </div>
+      <div class="card-body text-justify">
+        Need help? Found a bug? Want new features?<br/>
+        <br/>
+        <a href='javascript:void(0)' onclick='ADIOS.renderWindow("HelpAndSupport/ContactForm");' class='btn btn-info btn-icon-split'>
+          <span class='icon'><i class='fas fa-bolt'></i></span>
+          <span class='text'>Ask for help, report a bug or request new feature</span>
+        </a>
+        </p>
+      </div>
+    </div>
+
+    <div class="card shadow-sm mb-2">
+      <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Did you know?</h6>
+      </div>
+      <div class="card-body text-justify">
+        <a href="https://en.wikipedia.org/wiki/Meerkat" target=_blank>
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Meerkat_%28Suricata_suricatta%29_Tswalu.jpg/330px-Meerkat_%28Suricata_suricatta%29_Tswalu.jpg"
+            style="width:6em;float:left;margin:0 1em 1em 0"
+          >
+        </a>
+        The <b>meerkat</b> <i>Suricata suricatta</i> or <b>suricate</b> is a small mongoose found in southern Africa.
+        It is characterised by a broad head, large eyes, a pointed snout, long legs, a thin tapering tail, and a brindled coat pattern. The head-and-body length is around 24–35 cm (9.4–13.8 in), and the weight is typically between 0.62 and 0.97 kg (1.4 and 2.1 lb). The coat is light grey to yellowish brown with alternate, poorly defined light and dark bands on the back. Meerkats have foreclaws adapted for digging and have the ability to thermoregulate to survive in their harsh, dry habitat. Three subspecies are recognised.<br/>
+        <br/>
+        Learn more at <a href="https://en.wikipedia.org/wiki/Meerkat" target=_blank>Wikipedia</a>.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</div>

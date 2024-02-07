@@ -334,7 +334,7 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   _renderCalendar(): JSX.Element {
-    if (!this.state.data) return <p>Loading</p>;
+    if (!this.state.data) return <p className="d-block text-center pt-4 mt-4 h4" style={{gridColumn: "span 70"}}>Načítavam rozpis, čakajte prosím...</p>;
 
     return (
       <>
@@ -583,6 +583,7 @@ export default class Calendar extends Component<CalendarProps> {
         <Modal
           uid={this.props.uid + '-form-modal-' + REZERVACIA_TYP_TRENING}
           hideHeader={true}
+          type="right trening"
         >
           <Form
             uid={this.props.uid + '-form-' + REZERVACIA_TYP_TRENING}
@@ -607,6 +608,7 @@ export default class Calendar extends Component<CalendarProps> {
         <Modal
           uid={this.props.uid + '-form-modal-' + REZERVACIA_TYP_ZAPAS}
           hideHeader={true}
+          type="right zapas"
         >
           <Form
             uid={this.props.uid + '-form-' + REZERVACIA_TYP_ZAPAS}
@@ -629,6 +631,7 @@ export default class Calendar extends Component<CalendarProps> {
         <Modal
           uid={this.props.uid + '-form-modal-' + REZERVACIA_TYP_PRENAJOM}
           hideHeader={true}
+          type="right prenajom"
         >
           <Form
             uid={this.props.uid + '-form-' + REZERVACIA_TYP_PRENAJOM}
@@ -709,7 +712,10 @@ export default class Calendar extends Component<CalendarProps> {
           </div>
         </div>
 
-        <div id={'adios-calendar-' + this.props.uid} className="rezervacny-kalendar rounded-sm">
+        <div
+          id={'adios-calendar-' + this.props.uid}
+          className={"rezervacny-kalendar rounded-sm"}
+        >
           <div className="header" style={{ gridRow: 'span 2' }}>Dátum</div>
           <div className="header">Hodina</div>
 
@@ -739,9 +745,9 @@ export default class Calendar extends Component<CalendarProps> {
 
             <div className='alert alert-info' role='alert'>
               <i className='fas fa-info mr-4 align-self-center'></i>
-              {this.state.cvicisko?.nazov}, {dateToString(this.state.datumOd)} - {dateToString(this.state.datumDo)}<br/>
-              Aktuálne poradie: [{this.state.poradie}]<br/>
-              Koordinátor: {this.state.cvicisko?.id_koordinator?.meno} {this.state.cvicisko?.id_koordinator?.priezvisko}
+              {this.state.cvicisko?.nazov}, {dateToString(this.state.datumOd)} - {dateToString(this.state.datumDo)}.
+              Aktuálne poradie: [{this.state.poradie}].
+              Koordinátor: {this.state.cvicisko?.id_koordinator?.meno} {this.state.cvicisko?.id_koordinator?.priezvisko}.
             </div>
 
           </div>
