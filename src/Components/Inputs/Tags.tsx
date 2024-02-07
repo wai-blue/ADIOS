@@ -15,8 +15,15 @@ export default class Tags extends Component<TagsInputProps> {
     super(props);
   }
 
-  handleDelete = (tagIndex: string) => {
-    console.log('remove tag ' + tagIndex);
+  handleDelete = (index: number, input: {all: object, values: object}) => {
+    const tag = input['all'][index];
+    const tagIndex = input['values'].findIndex((t) => t.name === tag.name);
+
+    if (tagIndex !== -1) input['values'].splice(tagIndex, 1);
+
+    input['all'].splice(index, 1);
+
+    this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
   };
 
   handleAddition = (tag: {id: string, name: string}, input: {all: object, values: object}) => {
@@ -60,7 +67,7 @@ export default class Tags extends Component<TagsInputProps> {
         suggestions={suggestions}
         labelField={'name'}
         //delimiters={this.state.delimiters}
-        handleDelete={this.handleDelete}
+        handleDelete={(tag) => this.handleDelete(tag, params)}
         handleAddition={(tag) => this.handleAddition(tag, params)}
         handleDrag={this.handleDrag}
         handleTagClick={(i) => this.handleTagClick(i, params)}
