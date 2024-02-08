@@ -67,7 +67,7 @@ class Permissions {
       $idRole = (int) $role;
     }
 
-    return in_array($idRole, $this->adios->userProfile['roles']);
+    return in_array($idRole, $this->adios->userProfile['roles'] ?? []);
   }
 
   public function has(string $permission, array $idUserRoles = []) : bool

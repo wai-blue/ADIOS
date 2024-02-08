@@ -37,16 +37,19 @@ class OnLoadParams extends \ADIOS\Core\Controller {
   public function getTableParams(array $customParams = []) {
     try {
       $model = $this->adios->getModel($this->params['model']);
-      $columns = $model->columns();//getColumnsToShowInView('Table');
+      $columns = $model->getColumnsToShowInView('Table');
 
       $customParams = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
         $customParams,
-        $model->defaultTableParams
+        $model->defaultTableParams ?? []
       );
 
       if (is_array($customParams['columns'])) {
         foreach ($columns as $colName => $colDef) {
-          if (!($customParams['columns'][$colName]['show'] ?? FALSE)) {
+          if (
+            isset($customParams['columns'][$colName]['show'])
+            && !$customParams['columns'][$colName]['show']
+          ) {
             unset($columns[$colName]);
           } else {
             $columns[$colName]['viewParams']['Table'] = $customParams['columns'][$colName];

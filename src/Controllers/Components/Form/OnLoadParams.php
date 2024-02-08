@@ -24,16 +24,19 @@ class OnLoadParams extends \ADIOS\Core\Controller {
   public function getFormParams(array $customParams = []) {
     try {
       $model = $this->adios->getModel($this->params['model']);
-      $columns = $model->columns();//getColumnsToShowInView('Form');
+      $columns = $model->getColumnsToShowInView('Form');
 
       $customParams = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
         $customParams,
-        $model->defaultFormParams
+        $model->defaultFormParams ?? []
       );
 
       if (is_array($customParams['columns'])) {
         foreach ($columns as $colName => $colDef) {
-          if (!($customParams['columns'][$colName]['show'] ?? FALSE)) {
+          if (
+            isset($customParams['columns'][$colName]['show'])
+            && !$customParams['columns'][$colName]['show']
+          ) {
             unset($columns[$colName]);
           } else {
             $columns[$colName]['viewParams']['Form'] = $customParams['columns'][$colName];
