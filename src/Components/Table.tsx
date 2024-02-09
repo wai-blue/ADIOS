@@ -17,10 +17,10 @@ interface TableProps {
   canUpdate?: boolean,
   columns?: FormColumns,
   formId?: number,
+  formEndpoint?: string,
   formModal?: ModalProps,
   formParams?: FormProps,
-  dataEndpoint?: string
-  paramsEndpoint?: string,
+  endpoint?: string
   modal?: ModalProps,
   model: string,
   parentFormId?: number,
@@ -61,6 +61,7 @@ interface TableData {
 }
 
 interface TableState {
+  endpoint: string,
   addButtonText?: string,
   canCreate?: boolean,
   canDelete?: boolean,
@@ -85,6 +86,7 @@ export default class Table extends Component<TableProps> {
     super(props);
 
     this.state = {
+      endpoint: props.endpoint ? props.endpoint : 'components/table',
       canCreate: props.canCreate ?? true,
       canDelete: props.canDelete ?? true,
       canRead: props.canRead ?? true,
@@ -93,6 +95,7 @@ export default class Table extends Component<TableProps> {
         id: props.formId ? props.formId : 0,
         model: props.model,
         uid: props.uid,
+        endpoint: props.formEndpoint ? props.formEndpoint : 'components/form',
       },
       page: 1,
       pageLength: 15,
@@ -123,27 +126,27 @@ export default class Table extends Component<TableProps> {
   }
 
   loadParams() {
-    let paramsEndpoint = this.props.paramsEndpoint ? this.props.paramsEndpoint : 'Components/Table/Params';
-
     //console.log('table load params', this.props.model);
 
     request.get(
-      paramsEndpoint,
+      this.state.endpoint,
       {
-        __IS_AJAX__: '1',
+        returnParams: '1',
         columns: this.props.columns,
         model: this.props.model,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
         parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
         tag: this.props.tag,
+        __IS_AJAX__: '1',
       },
       (data: any) => {
+        let params = data.params ?? {};
         let columns: Array<any> = [];
 
-        if (data.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
+        if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
 
-        for (let columnName in data.columns) {
-          let origColumn = data.columns[columnName];
+        for (let columnName in params.columns) {
+          let origColumn = params.columns[columnName];
           let newColumn = {
             _adiosColumnDef: origColumn,
             field: columnName,
@@ -174,7 +177,7 @@ export default class Table extends Component<TableProps> {
                     column._adiosColumnDef,
                     <img 
                       style={{ width: '30px', height: '30px' }}
-                      src={data.folderUrl + "/" + params.value}
+                      src={params.folderUrl + "/" + params.value}
                       className="rounded"
                     />
                   );
@@ -231,32 +234,28 @@ export default class Table extends Component<TableProps> {
         };
 
         this.setState({
-          addButtonText: this.props.addButtonText ?? data.addButtonText,
-          canCreate: data.canCreate ?? true,
-          canDelete: data.canDelete ?? true,
-          canRead: data.canRead ?? true,
-          canUpdate: data.canUpdate ?? true,
+          addButtonText: this.props.addButtonText ?? params.addButtonText,
+          canCreate: params.canCreate ?? true,
+          canDelete: params.canDelete ?? true,
+          canRead: params.canRead ?? true,
+          canUpdate: params.canUpdate ?? true,
           columns: columns,
-          showHeader: data.showHeader ?? true,
-          title: this.props.title ?? data.title,
+          showHeader: params.showHeader ?? true,
+          title: this.props.title ?? params.title,
         });
       }
     );
   }
 
   loadData(page: number = 1) {
-    let dataEndpoint = this.props.dataEndpoint ? this.props.dataEndpoint : 'Components/Table/Data';
-
-    //console.log('table load data', this.props.model);
-
     this.setState({
       page: page
     });
 
     request.get(
-      dataEndpoint,
+      this.state.endpoint,
       {
-        __IS_AJAX__: '1',
+        returnData: '1',
         filterBy: this.state.filterBy,
         model: this.props.model,
         orderBy: this.state.orderBy,
@@ -267,6 +266,7 @@ export default class Table extends Component<TableProps> {
         search: this.state.search,
         tag: this.props.tag,
         where: this.props.where,
+        __IS_AJAX__: '1',
       },
       (data: any) => {
         this.setState({
@@ -337,6 +337,7 @@ export default class Table extends Component<TableProps> {
             uid={this.props.uid}
             model={this.props.model}
             id={this.state.formParams?.id}
+            endpoint={this.state.formParams?.endpoint ?? ''}
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();

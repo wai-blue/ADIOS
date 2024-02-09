@@ -8,12 +8,12 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components;
+namespace ADIOS\Controllers\Components\Table;
 
 /**
  * @package Components\Controllers\Table
  */
-class Table extends \ADIOS\Core\Controller {
+class Endpoint extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
   protected ?\Illuminate\Database\Eloquent\Builder $query = null;

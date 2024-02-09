@@ -50,39 +50,22 @@ class Router {
 
   public function applyRouting(string $route, array $params): array {
     $controller = "";
-  // _var_dump($route);_var_dump($this->routing);exit;
-    // if (!empty($route)) {
-      // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim controller a params.
-      // Ak pre $params['controller'] neexistuje vhodny routing, nemenim nic - pouzije sa
-      // povodne $params['controller'], cize requestovana URLka.
+// _var_dump($this->routing);exit;
+    foreach ($this->routing as $routePattern => $tmpRoute) {
+      if (preg_match($routePattern.'i', $route, $m)) {
 
-      foreach ($this->routing as $routePattern => $tmpRoute) {
-// _var_dump($routePattern);_var_dump($tmpRoute);
-        if (preg_match($routePattern, $route, $m)) {
-          // povodny $controller nahradim novym $tmpRoute['controller']
-          $controller = $tmpRoute['controller'];
-          $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'], $m);
+        $controller = $tmpRoute['controller'];
+        $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'], $m);
 
-          foreach ($tmpRoute['params'] as $k => $v) {
-            $params[$k] = $v;
-          }
+        foreach ($tmpRoute['params'] as $k => $v) {
+          $params[$k] = $v;
         }
       }
-    // }
-
-    // var_dump($controller);exit;
-
-    // if (empty($controller) && php_sapi_name() !== 'cli') {
-    //   // $controller = $this->adios->config['defaultController'];
-    //   header("Location: {$this->adios->config['url']}");
-    //   exit;
-    // }
-
-    if (empty($controller)) {
-      // throw new \ADIOS\Core\Exceptions\GeneralException("No controller specified.");
-      throw new \ADIOS\Core\Exceptions\ControllerNotFound("No controller specified.");
     }
 
+    if (empty($controller)) {
+      throw new \ADIOS\Core\Exceptions\ControllerNotFound;
+    }
 
     return [$controller, $params];
   }

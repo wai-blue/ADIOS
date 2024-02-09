@@ -184,7 +184,7 @@ class Loader
       $mode = self::ADIOS_MODE_FULL;
     }
 
-    $this->test = new ($this->getCoreClass('Test'))($this);
+    $this->test = new ($this->getCoreClass('Core\\Test'))($this);
 
     if (is_array($config)) {
       $this->config = $config;
@@ -265,7 +265,7 @@ class Loader
     try {
 
       // inicializacia debug konzoly
-      $this->console = new ($this->getCoreClass('Console'))($this);
+      $this->console = new ($this->getCoreClass('Core\\Console'))($this);
       $this->console->clearLog("timestamps", "info");
 
       // global $gtp; - pouziva sa v basic_functions.php
@@ -315,12 +315,12 @@ class Loader
       }
 
       // inicializacia core modelov
-      $this->registerModel($this->getCoreClass("Models\\Config"));
-      $this->registerModel($this->getCoreClass("Models\\Translate"));
-      $this->registerModel($this->getCoreClass("Models\\User"));
-      $this->registerModel($this->getCoreClass("Models\\UserRole"));
-      $this->registerModel($this->getCoreClass("Models\\UserHasRole"));
-      $this->registerModel($this->getCoreClass("Models\\Token"));
+      $this->registerModel($this->getCoreClass('Core\\Models\\Config'));
+      $this->registerModel($this->getCoreClass('Core\\Models\\Translate'));
+      $this->registerModel($this->getCoreClass('Core\\Models\\User'));
+      $this->registerModel($this->getCoreClass('Core\\Models\\UserRole'));
+      $this->registerModel($this->getCoreClass('Core\\Models\\UserHasRole'));
+      $this->registerModel($this->getCoreClass('Core\\Models\\Token'));
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
 
@@ -355,21 +355,21 @@ class Loader
       }
 
       // inicializacia routera
-      $this->router = new ($this->getCoreClass('Router'))($this);
+      $this->router = new ($this->getCoreClass('Core\\Router'))($this);
 
       // inicializacia locale objektu
-      $this->locale = new ($this->getCoreClass('Locale'))($this);
+      $this->locale = new ($this->getCoreClass('Core\\Locale'))($this);
 
       // inicializacia objektu notifikacii
-      $this->userNotifications = new ($this->getCoreClass('UserNotifications'))($this);
+      $this->userNotifications = new ($this->getCoreClass('Core\\UserNotifications'))($this);
 
       // inicializacia mailera
-      $this->email = new ($this->getCoreClass('Email'))($this);
+      $this->email = new ($this->getCoreClass('Core\\Email'))($this);
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
       $dbProvider = $this->getConfig('db/provider', '');
-      $dbProviderClass = $this->getCoreClass('DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
+      $dbProviderClass = $this->getCoreClass('Core\\DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
       $this->db = new $dbProviderClass($this);
 
       $this->pdo = new \ADIOS\Core\PDO($this);
@@ -404,18 +404,18 @@ class Loader
       $this->onAfterConfigLoaded();
 
       // object pre kontrolu permissions
-      $this->permissions = new ($this->getCoreClass('Permissions'))($this);
+      $this->permissions = new ($this->getCoreClass('Core\\Permissions'))($this);
 
       // inicializacia web renderera (byvala CASCADA)
       if (isset($this->config['web']) && is_array($this->config['web'])) {
-        $this->web = new ($this->getCoreClass('Web\\Loader'))($this, $this->config['web']);
+        $this->web = new ($this->getCoreClass('Core\\Web\\Loader'))($this, $this->config['web']);
       }
 
       // timezone
       date_default_timezone_set($this->config['timezone']);
 
       if ($mode == self::ADIOS_MODE_FULL) {
-        $userModel = new ($this->getCoreClass('Models\\User'))($this);
+        $userModel = new ($this->getCoreClass('Core\\Models\\User'))($this);
 
         if (isset($_POST['passwordReset'])) {
           $email = isset($_POST["email"]) ? $_POST["email"] : "";
@@ -585,7 +585,7 @@ class Loader
 
         // inicializacia twigu
 
-        $twigLoader = new ($this->getCoreClass('TwigLoader'))($this);
+        $twigLoader = new ($this->getCoreClass('Core\\TwigLoader'))($this);
         $this->twig = new \Twig\Environment($twigLoader, array(
           'cache' => FALSE,
           'debug' => TRUE,
@@ -663,7 +663,7 @@ class Loader
         ));
 
         // inicializacia view
-        $this->view = new ($this->getCoreClass('ViewWithController'))($this);
+        $this->view = new ($this->getCoreClass('Core\\ViewWithController'))($this);
       }
 
       $this->dispatchEventToPlugins("onADIOSAfterInit", ["adios" => $this]);
@@ -687,7 +687,7 @@ class Loader
   }
 
   public function getCoreClass($class): string {
-    return $this->config['coreClasses'][$class] ?? ('\\ADIOS\\Core\\' . $class);
+    return $this->config['coreClasses'][$class] ?? ('\\ADIOS\\' . $class);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -1086,24 +1086,17 @@ class Loader
     $this->console->info("Core installation done in ".round((microtime(true) - $installationStart), 2)." seconds.");
   }
 
-  // funkcia render() zabezpecuje:
-  //   - routing podla a) (ne)prihlaseny user, b) $this->requestedController, c) $_REQUEST['__IS_AJAX__']
-  //   - kontrolu requestu podla $_REQUEST['c']
-  //   - vygenerovanie UID
-  //   - renderovanie naroutovanej akcie
-
   /**
    * Renders the requested content. It can be the (1) whole desktop with complete <html>
    * content; (2) the HTML of a controller requested dynamically using AJAX; or (3) a JSON
    * string requested dynamically using AJAX and further processed in Javascript.
    *
    * @param  mixed $params Parameters (a.k.a. arguments) of the requested controller.
-   * @throws \ADIOS\Core\Exception When no controller is specified or requested controller is unknown.
    * @throws \ADIOS\Core\Exception When running in CLI and requested controller is blocked for the CLI.
    * @throws \ADIOS\Core\Exception When running in SAPI and requested controller is blocked for the SAPI.
    * @return string Rendered content.
    */
-  public function render(string $controller = '', array $params = []) {
+  public function render(string $route = '', array $params = []) {
 
     if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedUri, $m)) {
       $cronClassName = str_replace("/", "\\", "/App/Widgets/{$m[0]}");
@@ -1119,28 +1112,25 @@ class Loader
 
     try {
 
-      if (empty($controller)) {
+      if (empty($route)) {
         if (php_sapi_name() === 'cli') {
           $params = @json_decode($_SERVER['argv'][2] ?? "", TRUE);
           if (!is_array($params)) { // toto nastane v pripade, ked $_SERVER['argv'] nie je JSON string
             $params = $_SERVER['argv'];
           }
-          $this->controller = $_SERVER['argv'][1] ?? "";
+          $this->route = $_SERVER['argv'][1] ?? "";
         } else {
           $this->route = $_REQUEST['controller'] ?? '';
-          // $params = $_REQUEST;
-          $params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+          $this->params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
             array_merge($_GET, $_POST),
             json_decode(file_get_contents("php://input"), true) ?? []
           );
-          // echo"x---"; var_dump(json_decode(file_get_contents("php://input"), true) ?? []);exit;
-          unset($params['controller']);
+          unset($this->params['controller']);
         }
       } else {
-        $this->controller = $controller;
+        $this->route = $route;
       }
-
-      list($this->controller, $this->params) = $this->router->applyRouting($this->route, $params);
+      list($this->controller, $this->params) = $this->router->applyRouting($this->route, $this->params);
 
       $controllerClassName = $this->getControllerClassName($this->controller);
 
@@ -1150,11 +1140,11 @@ class Loader
 
       if (php_sapi_name() === 'cli') {
         if (!$controllerClassName::$cliSAPIEnabled) {
-          throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not available for CLI interface.");
+          throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not enabled in CLI interface.");
         }
       } else {
         if (!$controllerClassName::$webSAPIEnabled) {
-          throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not available for WEB interface.");
+          throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not enabled in WEB interface.");
         }
       }
 
@@ -1162,18 +1152,23 @@ class Loader
       $this->config = $controllerClassName::overrideConfig($this->config, $this->params);
 
       if ($this->params['__IS_AJAX__']) {
-        // tak nic
+        $desktopView = "";
+        $desktopParams = [];
       } else if (
         !$this->getConfig("hideDesktop", FALSE)
         && !$controllerClassName::$hideDefaultDesktop
         && $this->controllerNestingLevel == 0
       ) {
         // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
-        $this->params['contentController'] = $this->controller;
-        $this->params['config'] = $this->config;
-        $this->params['_COOKIE'] = $_COOKIE;
+        // $this->params['contentController'] = $this->controller;
+        // $this->params['config'] = $this->config;
+        // $this->params['_COOKIE'] = $_COOKIE;
 
-        $this->controller = $this->config['defaultDesktopController'] ?? 'Desktop';
+        // $this->controller = $this->config['defaultDesktopController'] ?? 'Desktop';
+
+        $desktop = new ($this->getCoreClass('Controllers\\Desktop'))($this);
+        [$desktopView, $desktopParams] = $desktop->prepareViewAndParams();
+        // _var_dump($desktopParams);exit;
       }
 
       if (
@@ -1253,7 +1248,7 @@ class Loader
               }
 
               if ($canUseTwig) {
-                $html = $this->twig->render(
+                $contentHtml = $this->twig->render(
                   $view,
                   [
                     'uid' => $this->uid,
@@ -1264,11 +1259,18 @@ class Loader
                   ]
                 );
               } else {
-                $html = $this->view->create(
+                $contentHtml = $this->view->create(
                   $view,
                   $viewParams
                 )->render();
               };
+
+              if (!empty($desktopView)) {
+                $desktopParams['contentHtml'] = $contentHtml;
+                $html = $this->twig->render($desktopView, $desktopParams);
+              } else {
+                $html = $contentHtml;
+              }
 
               return $html;
             } else {
