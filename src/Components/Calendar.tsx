@@ -14,7 +14,6 @@ import SwalButton from "./SwalButton";
 interface CalendarProps {
   uid: string,
   dataEndpoint?: string,
-  dataUrl?: string,
   cviciska: Array<any>,
   timy: Array<any>,
   typ: number,
@@ -59,7 +58,7 @@ const REZERVACIA_TYP_PRENAJOM = 3;
 
 export default class Calendar extends Component<CalendarProps> {
   state: CalendarState;
-  url: string;
+  dataEndpoint: string;
 
   title: JSX.Element;
 
@@ -83,7 +82,7 @@ export default class Calendar extends Component<CalendarProps> {
       isReadonly: false
     };
 
-    this.url = props.dataEndpoint ?? props.dataUrl ?? '';
+    this.dataEndpoint = props.dataEndpoint ?? '';
   }
 
   componentDidMount() {
@@ -97,7 +96,7 @@ export default class Calendar extends Component<CalendarProps> {
       this.state.idTim = Object.values(this.props.timy)[0].id;
 
     request.get(
-      this.url,
+      this.dataEndpoint,
       {
         __IS_AJAX__: '1',
         idTim: this.state.idTim,
@@ -795,7 +794,7 @@ export default class Calendar extends Component<CalendarProps> {
                       && this.props.timy[this.state.idTim].id_trener == this.props.userId && this.state.poradie == this.props.timy[this.state.idTim].poradie) ? 'd-none' : ''}'
                       role='alert'>
                         <i class='fas fa-exclamation mr-4 align-self-center'></i>
-                        Konáte ako ${this.props.jeSpravca ? "správca" : "koordinátor"} v mene trénera, ktorý je v poradí. Ste si istý?<br/>
+                        Konáte ako ${this.props.jeSpravca ? "správca" : "koordinátor"} v mene trénera, ktorý je v poradí. Určite chcete ukončiť tvorbu rozpisu?<br/>
                       </div>
 
                       <div class='alert alert-danger' role='alert'>

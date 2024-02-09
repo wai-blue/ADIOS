@@ -44,7 +44,7 @@ export default class Lookup extends Component<LookupInputProps> {
 
   loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
     request.get(
-      '/Components/Inputs/Lookup/OnLoadData',
+      '/Components/Inputs/Lookup/Data',
       {
         __IS_AJAX__: '1',
         model: this.model,
