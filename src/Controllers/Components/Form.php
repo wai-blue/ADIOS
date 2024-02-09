@@ -24,28 +24,28 @@ class Form extends \ADIOS\Core\Controller {
     $this->permissionName = $this->params['model'] . ':Read';
   }
 
-public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
-  $columnsToShowAsString = '';
-  $tmpColumns = $this->model->columns();//getColumnsToShowInView('Form');
+  public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
+    $columnsToShowAsString = '';
+    $tmpColumns = $this->model->columns();//getColumnsToShowInView('Form');
 
-  foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-    if (!isset($tmpColumnDefinition['relationship'])) {
-      $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
+    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+      if (!isset($tmpColumnDefinition['relationship'])) {
+        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
+      }
     }
-  }
 
-  // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-  $query = $this->model->selectRaw($columnsToShowAsString);
+    // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
+    $query = $this->model->selectRaw($columnsToShowAsString);
 
-  foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-    if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
-      $query->with($tmpColumnDefinition['relationship']);
-      $details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
+    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+      if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
+        $query->with($tmpColumnDefinition['relationship']);
+        $details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
+      }
     }
-  }
 
-  return $query;
-}
+    return $query;
+  }
 
   public function loadData() {
     $this->model = $this->adios->getModel($this->params['model']);

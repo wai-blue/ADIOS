@@ -179,17 +179,8 @@ export default class Form extends Component<FormProps> {
       (data: any) => {
         let params : any = deepObjectMerge(data.params, this.props);
         params.layout = this.convertLayoutToString(params.layout);
-        // this.newState = {
-        //   columns: data.columns,
-        //   folderUrl: data.folderUrl,
-        //   ...data
-        // };
 
-        this.setState({
-          columns: params.columns,
-          folderUrl: params.folderUrl,
-          ...params
-        }, () => {
+        this.setState(params, () => {
           this.loadData();
         });
       }
@@ -241,7 +232,7 @@ export default class Form extends Component<FormProps> {
 
     //@ts-ignore
     request.post(
-      'Components/Form/OnSave',
+      'components/form/onsave',
       {
         inputs: {...this.state.inputs, id: this.state.id}
       },
@@ -276,7 +267,7 @@ export default class Form extends Component<FormProps> {
     } as SweetAlertOptions).then((result) => {
       if (result.isConfirmed) {
         request.delete(
-          'Components/Form/OnDelete',
+          'components/form/ondelete',
           {
             model: this.props.model,
             id: id,
