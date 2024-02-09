@@ -20,7 +20,8 @@ interface CalendarProps {
   typ: number,
   idSportovisko: number,
   jeKoordinator: boolean,
-  jeSpravca: boolean
+  jeSpravca: boolean,
+  userId: number
 }
 
 interface CalendarState {
@@ -90,6 +91,11 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   loadData() {
+    const selectedCvicisko = this.props.cviciska.find((cvicisko) => cvicisko.id == this.state.idCvicisko);
+    if (this.state.idTim == 0 && (!this.props.jeKoordinator || selectedCvicisko.id_koordinator != this.props.userId) &&
+    !this.props.jeSpravca)
+      this.state.idTim = Object.values(this.props.timy)[0].id;
+
     request.get(
       this.url,
       {
@@ -108,7 +114,7 @@ export default class Calendar extends Component<CalendarProps> {
         if (this.props.jeSpravca) {
           isReadonly = false;
           info = 'Rozpis môžete upravovať ako správca.';
-        } else if (this.props.jeKoordinator) {
+        } else if (this.props.jeKoordinator && selectedCvicisko.id_koordinator == this.props.userId) {
           isReadonly = false;
           info = 'Rozpis môžete upravovať ako koordinátor.';
         } else {
@@ -118,11 +124,17 @@ export default class Calendar extends Component<CalendarProps> {
           ) {
             isReadonly = true;
             warning = 'Nemôžete upravovať rozpis, pretože je zobrazený týždeň v minulosti.';
-          } else if (this.state.idTim) {
+          } else if (this.state.idTim && this.props.timy[this.state.idTim].id_trener == this.props.userId) {
             if (this.props.timy[this.state.idTim].poradie != data.poradie) {
               isReadonly = true;
               warning = 'Nemôžete upravovať rozpis, pretože nie ste v poradí. Aktuálne poradie pre tento týždeň je ' + data.poradie + '.';
+            } else {
+              isReadonly = false;
+              info = 'Rozpis môžete upravovať ako tréner. Ste na rade, aby ste zadali svoj rozpis.'
             }
+          } else {
+            isReadonly = true;
+            warning = "Nemáte oprávnenie upravovať tento rozpis.";
           }
         }
 
@@ -463,6 +475,8 @@ export default class Calendar extends Component<CalendarProps> {
   }
 
   render() {
+    const selectedCvicisko = this.props.cviciska.find((cvicisko) => cvicisko.id == this.state.idCvicisko);
+
     return (
       <>
         {<Modal
@@ -489,7 +503,7 @@ export default class Calendar extends Component<CalendarProps> {
             }}
           ></Button>
 
-          {this.props.jeKoordinator || this.props.jeSpravca ?
+          {(this.props.jeKoordinator && selectedCvicisko.id_koordinator == this.props.userId) || this.props.jeSpravca ?
             <Button
               uid={this.props.uid + '-zapas'}
               text="Zápas"
@@ -676,7 +690,7 @@ export default class Calendar extends Component<CalendarProps> {
                   value={this.state.typ}
                 >
                   <option value={REZERVACIA_TYP_TRENING}>Tréning</option>
-                  {this.props.jeSpravca || this.props.jeKoordinator ? <option value={REZERVACIA_TYP_ZAPAS}>Zápas</option> : ""}
+                  {this.props.jeSpravca || (this.props.jeKoordinator && selectedCvicisko.id_koordinator == this.props.userId) ? <option value={REZERVACIA_TYP_ZAPAS}>Zápas</option> : ""}
                   {this.props.jeSpravca ? <option value={REZERVACIA_TYP_PRENAJOM}>Prenájom</option> : ""}
                 </select>
               </div>
@@ -687,7 +701,7 @@ export default class Calendar extends Component<CalendarProps> {
                   onChange={(event: any) => this.idTimOnChange(event)}
                   value={this.state.idTim}
                 >
-                  {this.props.jeSpravca || this.props.jeKoordinator ? <option value={0}>Všetky tímy</option> : ""}
+                  {this.props.jeSpravca || (this.props.jeKoordinator && selectedCvicisko.id_koordinator == this.props.userId) ? <option value={0}>Všetky tímy</option> : ""}
                   {Object.keys(this.props.timy).map((key: any) => (
                     <option
                       key={this.props.timy[key].id}
@@ -775,10 +789,18 @@ export default class Calendar extends Component<CalendarProps> {
                         Chystáte sa ukončiť tvorbu rozpisu v týždni <b>${dateToString(this.state.datumOd)} - ${dateToString(this.state.datumDo)}</b>
                         na cvičisku <b>${this.state.cvicisko?.nazov}</b>.<br/>
                       </p>
+                      
+                      <div class='alert alert-warning ${(!this.props.jeSpravca &&
+                      !(this.props.jeKoordinator && selectedCvicisko.id_koordinator !== this.props.userId)) || (this.props.timy[this.state.idTim] != undefined 
+                      && this.props.timy[this.state.idTim].id_trener == this.props.userId && this.state.poradie == this.props.timy[this.state.idTim].poradie) ? 'd-none' : ''}'
+                      role='alert'>
+                        <i class='fas fa-exclamation mr-4 align-self-center'></i>
+                        Konáte ako ${this.props.jeSpravca ? "správca" : "koordinátor"} v mene trénera, ktorý je v poradí. Ste si istý?<br/>
+                      </div>
 
                       <div class='alert alert-danger' role='alert'>
                         <i class='fas fa-exclamation-triangle mr-4 align-self-center'></i>
-                        Krok sa nedá vrátiť späť. Ďalšie zmeny v rozpise bude môcť vykonať iba klubový koordinátor.<br/>
+                        Krok sa nedá vrátiť späť. Ďalšie zmeny v rozpise bude môcť vykonať iba koordinátor.<br/>
                       </div>
 
                       <div class='alert alert-success' role='alert'>
