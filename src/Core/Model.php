@@ -1468,19 +1468,22 @@ class Model extends \Illuminate\Database\Eloquent\Model
     foreach ($this->junctions as $jName => $jParams) {
       if (!isset($data[$jName])) continue;
 
-      $assignments = @json_decode($data[$jName], TRUE);
+      $junctions = $data[$jName] ?? NULL;
+      if (!is_array($junctions)) {
+        $junctions = @json_decode($data[$jName], TRUE);
+      }
 
-      if (is_array($assignments)) {
+      if (is_array($junctions)) {
         $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
 
-        foreach ($assignments as $assignment) {
+        foreach ($junctions as $junction) {
           $this->adios->db->query("
             insert into `{$junctionModel->getFullTableSqlName()}` (
               `{$jParams['masterKeyColumn']}`,
               `{$jParams['optionKeyColumn']}`
             ) values (
               {$id},
-              '" . $this->adios->db->escape($assignment) . "'
+              '" . $this->adios->db->escape($junction) . "'
             )
             on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
           ");

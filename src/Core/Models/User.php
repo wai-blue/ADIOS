@@ -37,6 +37,14 @@ class User extends \ADIOS\Core\Model {
    "titleForEditing" => "User",
   ];
 
+  public ?array $junctions = [
+    'roles' => [
+      'junctionModel' => 'ADIOS/Core/Models/UserHasRole',
+      'masterKeyColumn' => 'id_user',
+      'optionKeyColumn' => 'id_role',
+    ],
+  ];
+
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "_users";
     parent::__construct($adiosOrAttributes, $eloquentQuery);
