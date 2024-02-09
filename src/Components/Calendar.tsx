@@ -475,6 +475,12 @@ export default class Calendar extends Component<CalendarProps> {
 
   render() {
     const selectedCvicisko = this.props.cviciska.find((cvicisko) => cvicisko.id == this.state.idCvicisko);
+    let accessibleTimy = Object.entries(this.props.timy);
+    if (selectedCvicisko.id_koordinator != this.props.userId && !this.props.jeSpravca)
+      accessibleTimy = accessibleTimy.filter(([key, tim]) => tim['id_trener'] == this.props.userId)
+    accessibleTimy = Object.keys(Object.fromEntries(accessibleTimy));
+
+    if (accessibleTimy.length == 0) this.state.idTim = 0;
 
     return (
       <>
@@ -701,12 +707,14 @@ export default class Calendar extends Component<CalendarProps> {
                   value={this.state.idTim}
                 >
                   {this.props.jeSpravca || (this.props.jeKoordinator && selectedCvicisko.id_koordinator == this.props.userId) ? <option value={0}>Všetky tímy</option> : ""}
-                  {Object.keys(this.props.timy).map((key: any) => (
+                  {accessibleTimy.length != 0 ? accessibleTimy.map((key: any) => (
                     <option
                       key={this.props.timy[key].id}
                       value={this.props.timy[key].id}
                     >[{this.props.timy[key].poradie}] {this.props.timy[key].nazov}</option>
-                  ))}
+                  )) : (
+                    <option value={0} disabled>-</option>
+                  )}
                 </select>
               </div>
 
