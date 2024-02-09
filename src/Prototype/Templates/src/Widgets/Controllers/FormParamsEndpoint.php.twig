@@ -1,0 +1,16 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace {{ thisController.namespace }};
+
+class {{ thisController.class }} extends \ADIOS\Controllers\Components\Form\Params {
+
+  public static bool $hideDefaultDesktop = true;
+
+  public function renderJson() {
+    return $this->getFormParams(
+{{ varExport(thisController.config.params, "      ")|raw }} ?? []
+    );
+  }
+}

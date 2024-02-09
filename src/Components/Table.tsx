@@ -19,8 +19,8 @@ interface TableProps {
   formId?: number,
   formModal?: ModalProps,
   formParams?: FormProps,
-  dataController?: string
-  paramsController?: string,
+  dataEndpoint?: string
+  paramsEndpoint?: string,
   modal?: ModalProps,
   model: string,
   parentFormId?: number,
@@ -123,12 +123,12 @@ export default class Table extends Component<TableProps> {
   }
 
   loadParams() {
-    let paramsController = this.props.paramsController ? this.props.paramsController : 'Components/Table/OnLoadParams';
+    let paramsEndpoint = this.props.paramsEndpoint ? this.props.paramsEndpoint : 'Components/Table/Params';
 
     //console.log('table load params', this.props.model);
 
     request.get(
-      paramsController,
+      paramsEndpoint,
       {
         __IS_AJAX__: '1',
         columns: this.props.columns,
@@ -245,7 +245,7 @@ export default class Table extends Component<TableProps> {
   }
 
   loadData(page: number = 1) {
-    let dataController = this.props.dataController ? this.props.dataController : 'Components/Table/OnLoadData';
+    let dataEndpoint = this.props.dataEndpoint ? this.props.dataEndpoint : 'Components/Table/Data';
 
     //console.log('table load data', this.props.model);
 
@@ -254,7 +254,7 @@ export default class Table extends Component<TableProps> {
     });
 
     request.get(
-      dataController,
+      dataEndpoint,
       {
         __IS_AJAX__: '1',
         filterBy: this.state.filterBy,

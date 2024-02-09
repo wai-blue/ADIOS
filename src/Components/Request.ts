@@ -1,5 +1,4 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import Notification from "./Notification";
 
 import Swal from "sweetalert2";
 

@@ -572,6 +572,17 @@ class Loader
           $this->getModel($modelName);
         }
 
+        // pridam routing pre ADIOS default controllers
+        $adiosControllers = \ADIOS\Core\HelperFunctions::scanDirRecursively(__DIR__ . '/../Controllers');
+        $tmpRouting = [];
+        foreach ($adiosControllers as $tmpController) {
+          $tmpController = str_replace(".php", "", $tmpController);
+          $tmpRouting["/^".str_replace("/", "\\/", $tmpController)."$/"] = [
+            "controller" => $tmpController,
+          ];
+        }
+        $this->router->addRouting($tmpRouting);
+
         // inicializacia twigu
 
         $twigLoader = new ($this->getCoreClass('TwigLoader'))($this);
@@ -1116,7 +1127,7 @@ class Loader
           }
           $this->controller = $_SERVER['argv'][1] ?? "";
         } else {
-          $this->controller = $_REQUEST['controller'] ?? '';
+          $this->route = $_REQUEST['controller'] ?? '';
           // $params = $_REQUEST;
           $params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
             array_merge($_GET, $_POST),
@@ -1129,7 +1140,7 @@ class Loader
         $this->controller = $controller;
       }
 
-      list($this->controller, $this->params) = $this->router->applyRouting($this->controller, $params);
+      list($this->controller, $this->params) = $this->router->applyRouting($this->route, $params);
 
       $controllerClassName = $this->getControllerClassName($this->controller);
 
@@ -1305,6 +1316,9 @@ class Loader
 
       return $return;
 
+    } catch (\ADIOS\Core\Exceptions\ControllerNotFound $e) {
+      header("Location: {$this->config['url']}");
+      exit;
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
       header('HTTP/1.1 401 Unauthorized', true, 401);
       return $this->renderFatal($e->getMessage(), FALSE);

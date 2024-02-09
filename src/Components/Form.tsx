@@ -48,8 +48,8 @@ export interface FormProps {
   titleForEditing?: string,
   saveButtonText?: string,
   addButtonText?: string,
-  paramsController?: string,
-  dataController?: string,
+  paramsEndpoint?: string,
+  dataEndpoint?: string,
   defaultValues?: Object
 }
 
@@ -165,12 +165,12 @@ export default class Form extends Component<FormProps> {
   }
 
   loadParams() {
-    let paramsController = this.props.paramsController ? this.props.paramsController : 'Components/Form/OnLoadParams';
+    let paramsEndpoint = this.props.paramsEndpoint ? this.props.paramsEndpoint : 'Components/Form/Params';
     //console.log('form load params', this.props.model);
 
     //@ts-ignore
     request.get(
-      paramsController,
+      paramsEndpoint,
       {
         __IS_AJAX__: '1',
         model: this.props.model,
@@ -198,14 +198,14 @@ export default class Form extends Component<FormProps> {
   }
 
   loadData() {
-    let dataController = this.props.dataController ? this.props.dataController : 'Components/Form/OnLoadData';
+    let dataEndpoint = this.props.dataEndpoint ? this.props.dataEndpoint : 'Components/Form/Data';
     let id = this.state.id ? this.state.id : 0;
 
     //console.log('form load data', this.props.model, id);
 
     if (id > 0) {
       request.get(
-        dataController,
+        dataEndpoint,
         {
           __IS_AJAX__: '1',
           model: this.props.model,

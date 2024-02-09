@@ -48,32 +48,39 @@ class Router {
     return $routeParams;
   }
 
-  public function applyRouting(string $controller, array $params): array {
-    if (!empty($controller)) {
+  public function applyRouting(string $route, array $params): array {
+    $controller = "";
+  // _var_dump($route);_var_dump($this->routing);exit;
+    // if (!empty($route)) {
       // Prejdem routovaciu tabulku, ak najdem prislusny zaznam, nastavim controller a params.
       // Ak pre $params['controller'] neexistuje vhodny routing, nemenim nic - pouzije sa
       // povodne $params['controller'], cize requestovana URLka.
 
-      foreach ($this->routing as $routePattern => $route) {
-        if (preg_match($routePattern, $controller, $m)) {
-          // povodny $controller nahradim novym $route['controller']
-          $controller = $route['controller'];
+      foreach ($this->routing as $routePattern => $tmpRoute) {
+// _var_dump($routePattern);_var_dump($tmpRoute);
+        if (preg_match($routePattern, $route, $m)) {
+          // povodny $controller nahradim novym $tmpRoute['controller']
+          $controller = $tmpRoute['controller'];
+          $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'], $m);
 
-          $route['params'] = $this->replaceRouteVariables($route['params'], $m);
-
-          foreach ($route['params'] as $k => $v) {
+          foreach ($tmpRoute['params'] as $k => $v) {
             $params[$k] = $v;
           }
         }
       }
-    }
+    // }
+
+    // var_dump($controller);exit;
+
+    // if (empty($controller) && php_sapi_name() !== 'cli') {
+    //   // $controller = $this->adios->config['defaultController'];
+    //   header("Location: {$this->adios->config['url']}");
+    //   exit;
+    // }
 
     if (empty($controller)) {
-      $controller = (php_sapi_name() === 'cli' ? "" : $this->adios->config['defaultController']);
-    }
-
-    if (empty($controller)) {
-      throw new \ADIOS\Core\Exceptions\GeneralException("No controller specified.");
+      // throw new \ADIOS\Core\Exceptions\GeneralException("No controller specified.");
+      throw new \ADIOS\Core\Exceptions\ControllerNotFound("No controller specified.");
     }
 
 
