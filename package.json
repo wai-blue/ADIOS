@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/wai-blue/ADIOS#readme",
   "dependencies": {
+    "@babel/preset-env": "^7.23.9",
     "@babel/preset-typescript": "^7.23.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",

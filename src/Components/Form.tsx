@@ -48,9 +48,8 @@ export interface FormProps {
   titleForEditing?: string,
   saveButtonText?: string,
   addButtonText?: string,
-  paramsEndpoint?: string,
-  dataEndpoint?: string,
   defaultValues?: Object
+  endpoint: string,
 }
 
 export interface FormState {
@@ -71,7 +70,8 @@ export interface FormState {
   saveButtonText?: string,
   titleForEditing?: string,
   titleForInserting?: string,
-  layout?: string
+  layout?: string,
+  endpoint: string,
 }
 
 export interface FormColumnParams {
@@ -114,6 +114,7 @@ export default class Form extends Component<FormProps> {
     super(props);
 
     this.state = {
+      endpoint: props.endpoint ? props.endpoint : 'components/form',
       id: props.id,
       readonly: props.readonly,
       canCreate: props.readonly,
@@ -165,21 +166,19 @@ export default class Form extends Component<FormProps> {
   }
 
   loadParams() {
-    let paramsEndpoint = this.props.paramsEndpoint ? this.props.paramsEndpoint : 'Components/Form/Params';
-    //console.log('form load params', this.props.model);
-
     //@ts-ignore
     request.get(
-      paramsEndpoint,
+      this.state.endpoint,
       {
-        __IS_AJAX__: '1',
+        returnParams: '1',
         model: this.props.model,
         columns: this.props.columns,
-        id: this.props.id
+        id: this.props.id,
+        __IS_AJAX__: '1',
       },
       (data: any) => {
-        data = deepObjectMerge(data, this.props);
-        data.layout = this.convertLayoutToString(data.layout);
+        let params : any = deepObjectMerge(data.params, this.props);
+        params.layout = this.convertLayoutToString(params.layout);
         // this.newState = {
         //   columns: data.columns,
         //   folderUrl: data.folderUrl,
@@ -187,9 +186,9 @@ export default class Form extends Component<FormProps> {
         // };
 
         this.setState({
-          columns: data.columns,
-          folderUrl: data.folderUrl,
-          ...data
+          columns: params.columns,
+          folderUrl: params.folderUrl,
+          ...params
         }, () => {
           this.loadData();
         });
@@ -198,18 +197,18 @@ export default class Form extends Component<FormProps> {
   }
 
   loadData() {
-    let dataEndpoint = this.props.dataEndpoint ? this.props.dataEndpoint : 'Components/Form/Data';
     let id = this.state.id ? this.state.id : 0;
 
     //console.log('form load data', this.props.model, id);
 
     if (id > 0) {
       request.get(
-        dataEndpoint,
+        this.state.endpoint,
         {
-          __IS_AJAX__: '1',
+          returnData: '1',
           model: this.props.model,
-          id: id
+          id: id,
+          __IS_AJAX__: '1',
         },
         (data: any) => {
           this.initInputs(this.state.columns ?? {}, data.inputs);
@@ -247,8 +246,8 @@ export default class Form extends Component<FormProps> {
         inputs: {...this.state.inputs, id: this.state.id}
       },
       {
-        __IS_AJAX__: '1',
         model: this.props.model,
+        __IS_AJAX__: '1',
       },
       () => {
         if (this.props.onSaveCallback) this.props.onSaveCallback();
@@ -279,9 +278,9 @@ export default class Form extends Component<FormProps> {
         request.delete(
           'Components/Form/OnDelete',
           {
-            __IS_AJAX__: '1',
             model: this.props.model,
-            id: id
+            id: id,
+            __IS_AJAX__: '1',
           },
           () => {
             Notification.success("Záznam zmazaný");

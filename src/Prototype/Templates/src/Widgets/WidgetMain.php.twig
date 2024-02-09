@@ -5,32 +5,25 @@
 namespace {{ thisWidget.namespace }};
 
 class {{ thisWidget.class }} extends \ADIOS\Core\Widget {
-  public function onBeforeRender() {
-    if (
-      $this->adios->controllerObject::class == "ADIOS\\Controllers\\Desktop"
-      && $this->adios->permissions->has(self::class)
-    ) {
-      $desktop = $this->adios->controllerObject;
-
+  public function onBeforeDesktopParams(\ADIOS\Controllers\Desktop $desktop) {
 {% for itemTitle, itemConfig in thisWidget.config.sidebar %}
-      $desktop->addSidebarItem($this, [
-        {% if itemConfig.icon %} "icon" => "{{ itemConfig.icon }}", {% endif %}
-        "title" => "{{ itemTitle }}",
+    $desktop->addSidebarItem($this, [
+      {% if itemConfig.icon %} "icon" => "{{ itemConfig.icon }}", {% endif %}
+      "title" => "{{ itemTitle }}",
 {% if itemConfig.url %}
-        "onclick" => "ADIOS.renderDesktop('{{ itemConfig.url }}');",
+      "onclick" => "ADIOS.renderDesktop('{{ itemConfig.url }}');",
 {% endif %}
 {% if itemConfig.sub is iterable %}
-        "sub" => [
+      "sub" => [
 {% for subItemTitle, subItemConfig in itemConfig.sub %}
-          [
-            "title" => "{{ subItemTitle }}",
-            "onclick" => "ADIOS.renderDesktop('{{ subItemConfig.url }}');",
-          ],
-{% endfor %}
+        [
+          "title" => "{{ subItemTitle }}",
+          "onclick" => "ADIOS.renderDesktop('{{ subItemConfig.url }}');",
         ],
-{% endif %}
-      ]);
 {% endfor %}
-    }
+      ],
+{% endif %}
+    ]);
+{% endfor %}
   }
 }

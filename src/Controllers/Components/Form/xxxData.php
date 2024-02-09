@@ -8,54 +8,46 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components;
+namespace ADIOS\Controllers\Components\Form;
+
+use ADIOS\Core\DB\DataTypes\DataTypeColor;
 
 /**
  * @package Components\Controllers\Form
  */
-class Form extends \ADIOS\Core\Controller {
+class Data extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
-
-  protected ?\Illuminate\Database\Eloquent\Builder $query = null;
-  public \ADIOS\Core\Model $model;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
     $this->permissionName = $this->params['model'] . ':Read';
   }
 
-public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
-  $columnsToShowAsString = '';
-  $tmpColumns = $this->model->columns();//getColumnsToShowInView('Form');
-
-  foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-    if (!isset($tmpColumnDefinition['relationship'])) {
-      $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
-    }
-  }
-
-  // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-  $query = $this->model->selectRaw($columnsToShowAsString);
-
-  foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-    if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
-      $query->with($tmpColumnDefinition['relationship']);
-      $details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
-    }
-  }
-
-  return $query;
-}
-
   public function loadData() {
-    $this->model = $this->adios->getModel($this->params['model']);
+    $tmpModel = $this->adios->getModel($this->params['model']);
 
-    $data = [];
+    $inputs = [];
     $details = [];
-
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
-      $this->query = $this->prepareDataQuery();
-      $data = $this->query->find($this->params['id'])->toArray();
+      $columnsToShowAsString = '';
+      $tmpColumns = $tmpModel->columns();//getColumnsToShowInView('Form');
+
+      foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+        if (!isset($tmpColumnDefinition['relationship'])) {
+          $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
+        }
+      }
+
+      $query = $tmpModel->selectRaw($columnsToShowAsString);
+
+      foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+        if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
+          $query->with($tmpColumnDefinition['relationship']);
+          $details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
+        }
+      }
+
+      $data = $query->find($this->params['id'])->toArray();
 
       foreach ($details as $key => $value) {
         $data[$key] = [
@@ -111,7 +103,7 @@ public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
           'readonly' => !($canUpdate || $canCreate),
         ]
       );
-      //   $this->model->defaultFormParams ?? []
+      //   $tmpModel->defaultFormParams ?? []
       // );
     } catch (\Exception $e) {
       http_response_code(400);

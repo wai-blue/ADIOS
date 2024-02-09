@@ -25,22 +25,27 @@ namespace ADIOS\Controllers;
  */
 class Desktop extends \ADIOS\Core\Controller {
 
-  public string $twigTemplate = "App/Core/Views/Desktop";
-  public string $contentController = '';
+  // public string $twigTemplate = "App/Core/Views/Desktop";
+  // public string $contentController = '';
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = [])
-  {
-    parent::__construct($adios, $params);
+  // function __construct(\ADIOS\Core\Loader $adios, array $params = [])
+  // {
+  //   parent::__construct($adios, $params);
 
-    $this->contentController = $params['contentController'] ?? '';
-  }
+  //   $this->contentController = $params['contentController'] ?? '';
+  // }
 
   public function addSidebarItem($widget, $item) {
     $item['___widgetClassName'] = get_class($widget);
     $this->adios->config['desktop']['sidebarItems'][] = $item;
   }
 
-  public function preRender() {
+  public function prepareViewAndParams(): array {
+
+    foreach ($this->adios->widgets as $widget) {
+      $widget->onBeforeDesktopParams($this);
+    }
+
     $settingsMenuItems = [];
 
     $settingsMenuItems[] = [
@@ -89,43 +94,45 @@ class Desktop extends \ADIOS\Core\Controller {
     ];
 
     // develMenuItems
-    $develMenuItems = [];
+    // $develMenuItems = [];
 
-    if ($this->adios->config['develMode']) {
-      // $develMenuItems[] = [
-      //   "text" => $this->translate("Show console"),
-      //   "faIcon" => "fas fa-terminal",
-      //   "onclick" => "desktop_show_console();",
-      // ];
-      /*$develMenuItems[] = [
-        "text" => $this->translate("Examples of UI"),
-        "faIcon" => "fas fa-hammer",
-        "onclick" => "desktop_render('SkinSamples');",
-      ];*/
-    }
+    // if ($this->adios->config['develMode']) {
+    //   // $develMenuItems[] = [
+    //   //   "text" => $this->translate("Show console"),
+    //   //   "faIcon" => "fas fa-terminal",
+    //   //   "onclick" => "desktop_show_console();",
+    //   // ];
+    //   /*$develMenuItems[] = [
+    //     "text" => $this->translate("Examples of UI"),
+    //     "faIcon" => "fas fa-hammer",
+    //     "onclick" => "desktop_render('SkinSamples');",
+    //   ];*/
+    // }
 
-    if (
-      !empty($this->contentController)
-      && $this->contentController != 'Desktop'
-    ) {
-      $contentHtml = $this->adios->render($this->contentController, $this->params);
-    } else {
-      $contentHtml = '';
-    }
+    // if (
+    //   !empty($this->contentController)
+    //   && $this->contentController != 'Desktop'
+    // ) {
+    //   $contentHtml = $this->adios->render($this->contentController, $this->params);
+    // } else {
+    //   $contentHtml = '';
+    // }
 
-    $params = [
+    $this->viewParams = [
+      "config" => $this->adios->config,
+      "user" => $this->adios->userProfile,
       "console" => $this->adios->console->getLogs(),
       "settingsMenuItems" => $settingsMenuItems,
       "settingsLogoutItems" => $settingsLogoutItems,
-      "searchQuery" => $_GET['search'],
-      "develMenuItems" => $develMenuItems,
-      "contentHtml" => $contentHtml,
+      // "contentHtml" => $contentHtml,
     ];
 
     // $desktopContentActionClassName = $this->adios->getActionClassName($this->adios->desktopContentAction);
     // $desktopContentActionObject = new $desktopContentActionClassName($this->adios);
     // $params = $desktopContentActionObject->onAfterDesktopPreRender($params);
 
-    return $params;
+    $this->view = 'App/Core/Views/Desktop';
+
+    return [$this->view, $this->viewParams];
   }
 }

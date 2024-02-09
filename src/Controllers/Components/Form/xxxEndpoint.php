@@ -8,12 +8,14 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components;
+namespace ADIOS\Controllers\Components\Form;
+
+// use ADIOS\Core\DB\DataTypes\DataTypeColor;
 
 /**
  * @package Components\Controllers\Form
  */
-class Form extends \ADIOS\Core\Controller {
+class Endpoint extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
   protected ?\Illuminate\Database\Eloquent\Builder $query = null;

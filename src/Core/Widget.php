@@ -83,6 +83,10 @@ class Widget {
     ])["routing"];
   }
 
+  public function onBeforeDesktopParams(\ADIOS\Controllers\Desktop $desktop) {
+    // to be overriden
+  }
+
   public function translate(string $string, array $vars = []): string
   {
     return $this->adios->translate($string, $vars, $this);

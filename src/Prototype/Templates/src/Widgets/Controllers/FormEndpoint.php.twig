@@ -1,0 +1,25 @@
+<?php
+
+{{ builderInfo.php|raw }}
+
+namespace {{ thisController.namespace }};
+
+class {{ thisController.class }} extends \ADIOS\Controllers\Components\Form {
+
+  public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
+    $query = parent::prepareDataQuery();
+
+    // Modify the $query here
+    // You can use $this->model property to get the model for which the query is built.
+    // !!! DO NOT FORGET TO DELETE THE prototypeBuilderRegenerateAllowed TAG !!!
+
+    return $query;
+  }
+
+  public function getParams(array $customParams = []) {
+    return parent::getParams(
+{{ varExport(thisController.config.params, "      ")|raw }} ?? []
+    );
+  }
+
+}

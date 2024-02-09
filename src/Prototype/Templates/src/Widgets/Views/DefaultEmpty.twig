@@ -43,8 +43,7 @@
   <adios-table
     model="{{ viewParams.model }}"
     tag="{{ viewParams.tag }}"
-    data-endpoint='{{ ADIOS_Core_Model_getDefaultTableParams(viewParams.model).dataEndpoint | default(viewParams.dataEndpoint) }}'
-    params-endpoint='{{ ADIOS_Core_Model_getDefaultTableParams(viewParams.model).paramsEndpoint | default(viewParams.paramsEndpoint) }}'
+    endpoint='{{ ADIOS_Core_Model_getDefaultTableParams(viewParams.model).endpoint | default(viewParams.endpoint) }}'
     form-id="{{ viewParams.id | default(null) }}"
     form-params="{{ ADIOS_Core_Model_getDefaultFormParams(viewParams.model)|json_encode|raw }}"
   ></adios-table>

@@ -8,12 +8,12 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components\Inputs\Lookup;
+namespace ADIOS\Controllers\Components\Inputs;
 
 /**
  * @package Components\Controllers\Table
  */
-class Data extends \ADIOS\Core\Controller {
+class Lookup extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {

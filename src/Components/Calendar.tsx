@@ -98,12 +98,12 @@ export default class Calendar extends Component<CalendarProps> {
     request.get(
       this.dataEndpoint,
       {
-        __IS_AJAX__: '1',
         idTim: this.state.idTim,
         idCvicisko: this.state.idCvicisko,
         typ: this.state.typ,
         datumOd: this.state.datumOd,
-        datumDo: this.state.datumDo
+        datumDo: this.state.datumDo,
+        __IS_AJAX__: '1',
       },
       (data: any) => {
         let isReadonly = false;
