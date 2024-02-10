@@ -594,23 +594,9 @@ class Loader
         $this->twig->addExtension(new \Twig\Extension\DebugExtension());
 
         $this->twig->addFunction(new \Twig\TwigFunction(
-          'ADIOS_Core_Model_getDefaultTableParams',
+          'adiosModel',
           function (string $model) {
-            $tmpModel = $this->getModel($model);
-            return ($tmpModel instanceof \ADIOS\Core\Model ?
-              $tmpModel->defaultTableParams
-              : ""
-            );
-          }
-        ));
-        $this->twig->addFunction(new \Twig\TwigFunction(
-          'ADIOS_Core_Model_getDefaultFormParams',
-          function (string $model) {
-            $tmpModel = $this->getModel($model);
-            return ($tmpModel instanceof \ADIOS\Core\Model ?
-              $tmpModel->defaultFormParams
-              : ""
-            );
+            return $this->getModel($model);
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction(

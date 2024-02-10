@@ -92,8 +92,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
 
 
-  public ?array $defaultTableParams = NULL;
-  public ?array $defaultFormParams = NULL;
+  public ?array $tableParams = NULL;
+  public ?array $formParams = NULL;
+
+  public string $tableEndpoint;
+  public string $formEndpoint;
 
 
   /**

@@ -18,8 +18,15 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
 
   public bool $isJunctionTable = {{ thisModel.config.isJunctionTable ? 'TRUE' : 'FALSE' }};
 
-  public ?array $defaultTableParams = NULL;
-  public ?array $defaultFormParams = NULL;
+  public ?array $tableParams =
+{{ varExport(thisModel.config.tableParams, "    ")|raw }}
+  ;
+  public ?array $formParams =
+{{ varExport(thisModel.config.formParams, "    ")|raw }}
+  ;
+
+  public string $tableEndpoint = "{{ thisModel.config.tableEndpoint }}";
+  public string $formEndpoint = "{{ thisModel.config.formEndpoint }}";
 
   public string $sqlName = "{{ thisModel.config.sqlName|raw }}";
   public string $urlBase = "{{ thisModel.config.urlBase|raw }}";

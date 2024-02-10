@@ -49,7 +49,7 @@ class Table extends \ADIOS\Core\Controller {
         $customParams,
         $model->defaultTableParams ?? []
       );
-
+// _var_dump($customParams);
       if (is_array($customParams['columns'])) {
         foreach ($columns as $colName => $colDef) {
           if (
@@ -74,9 +74,9 @@ class Table extends \ADIOS\Core\Controller {
         $customParams,
         [
           'columns' => $columns,
-          'title' => $model->defaultTableParams['title'],
+          // 'title' => $model->defaultTableParams['title'],
           'folderUrl' => $model->getFolderUrl(),
-          'addButtonText' => $model->defaultTableParams['addButtonText'] ?? "Add new record",
+          // 'addButtonText' => $model->defaultTableParams['addButtonText'] ?? "Add new record",
           'canRead' => $canRead,
           'canCreate' => $canCreate,
           'canUpdate' => $canUpdate,

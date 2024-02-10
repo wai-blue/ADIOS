@@ -21,7 +21,7 @@
   {{ dump(windowParams) }}
 #}
 
-{# Sample code for breadcrumbs
+{# Sample code to render breadcrumbs
   <adios-breadcrumbs
     items="[
       {'url': '', 'text': 'Home'},
@@ -32,24 +32,29 @@
   ></adios-breadcrumbs>
 #}
 
-{# Sample code for view
+{# Sample code to render a include another view loaded asynchroneously
   <adios-view
     controller="Campaigns/Statistics"
     eval-script-tags="1"
   ></adios-view>
 #}
 
-{# Sample code for table
+{# Sample code to render table
+  {% set model = adiosModel(viewParams.model) %}
+  {% set tableParams = null; %}
+  {% set formParams = null; %}
+
   <adios-table
     model="{{ viewParams.model }}"
     tag="{{ viewParams.tag }}"
-    endpoint='{{ ADIOS_Core_Model_getDefaultTableParams(viewParams.model).endpoint | default(viewParams.endpoint) }}'
-    form-id="{{ viewParams.id | default(null) }}"
-    form-params="{{ ADIOS_Core_Model_getDefaultFormParams(viewParams.model)|json_encode|raw }}"
+    endpoint="{{ viewParams.endpoint | default(model.tableEndpoint) }}"
+    form-id="{{ viewParams.id }}"
+    form-endpoint="{{ viewParams.formEndpoint | default(model.formEndpoint) }}"
+    form-params='{{ (formParams | default(viewParams.formParams) | default(model.formParams))|json_encode|raw }}'
   ></adios-table>
 #}
 
-{# Sample code for form
+{# Sample code to render form
   <adios-form
     model="{{ viewParams.model }}"
     id="{{ viewParams.id }}"

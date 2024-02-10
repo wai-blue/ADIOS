@@ -70,6 +70,8 @@ interface TableState {
   columns?: Array<GridColDef>,
   data?: TableData,
   filterBy?: GridFilterModel,
+  formId?: number,
+  formEndpoint?: string,
   formParams?: FormProps,
   orderBy?: GridSortModel,
   page: number,
@@ -91,11 +93,11 @@ export default class Table extends Component<TableProps> {
       canDelete: props.canDelete ?? true,
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
+      formId: props.formId ? props.formId : 0,
+      formEndpoint: props.formEndpoint ? props.formEndpoint : 'components/form',
       formParams: {
-        id: props.formId ? props.formId : 0,
         model: props.model,
         uid: props.uid,
-        endpoint: props.formEndpoint ? props.formEndpoint : 'components/form',
       },
       page: 1,
       pageLength: 15,
@@ -104,13 +106,11 @@ export default class Table extends Component<TableProps> {
   }
 
   componentDidMount() {
-    //console.log('table did mount', this.props.model);
     this.loadParams();
     this.loadData();
   }
 
   componentDidUpdate(prevProps: TableProps, prevState: TableState) {
-    //console.log('table did update', this.props.model, prevProps.formParams?.id, this.props.formParams?.id, prevProps.parentFormId, this.props.parentFormId);
     if (
       (prevProps.formParams?.id != this.props.formParams?.id)
       || (prevProps.parentFormId != this.props.parentFormId)
@@ -126,8 +126,6 @@ export default class Table extends Component<TableProps> {
   }
 
   loadParams() {
-    //console.log('table load params', this.props.model);
-
     request.get(
       this.state.endpoint,
       {
@@ -321,9 +319,6 @@ export default class Table extends Component<TableProps> {
       return <Loader />;
     }
 
-    // let formId = this.state.formParams?.id;
-    // console.log('formId', this.state.formParams, formId);
-
     return (
       <>
         <Modal 
@@ -336,8 +331,8 @@ export default class Table extends Component<TableProps> {
           <Form
             uid={this.props.uid}
             model={this.props.model}
-            id={this.state.formParams?.id}
-            endpoint={this.state.formParams?.endpoint ?? ''}
+            id={this.state.formId ?? 0}
+            endpoint={this.state.formEndpoint ?? ''}
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();

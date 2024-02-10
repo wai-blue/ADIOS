@@ -376,7 +376,12 @@ class Builder {
       );
 
       if (is_array($widgetConfig['routing'] ?? NULL)) {
-        $routing = array_merge($routing, $widgetConfig['routing']);
+        $widgetRouting = [];
+        foreach ($widgetConfig['routing'] as $key => $value) {
+          $key = '/' . str_replace('/', '\/', $key) . '/';
+          $widgetRouting[$key] = $value;
+        }
+        $routing = array_merge($routing, $widgetRouting);
       }
 
       if (is_array($widgetConfig['permissions'] ?? NULL)) {
