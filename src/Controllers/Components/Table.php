@@ -100,36 +100,52 @@ class Table extends \ADIOS\Core\Controller {
 
     $this->model = $this->adios->getModel($this->params['model']);
 
-    $tmpColumns = $this->model->columns();//getColumnsToShowInView('Table');
+    $tmpColumns = $this->model->columns();
 
-    $columnsToShowAsString = '';
+    $selectRaw = [];
+    $withs = [];
+    $joins = [];
+
     foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
       if (!isset($tmpColumnDefinition['relationship'])) {
-        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
+        $selectRaw[] = $this->model->getFullTableSqlName().'.'.$tmpColumnName;
       }
     }
-
-    // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-    $query = $this->model->selectRaw($columnsToShowAsString);
 
     // LOOKUPS and RELATIONSHIPS
     foreach ($tmpColumns as $columnName => $column) {
       if ($column['type'] == 'lookup') {
         $lookupModel = $this->adios->getModel($column['model']);
-
+        $lookupTableName = $lookupModel->getFullTableSqlName();
+        $joinAlias = 'join_' . $columnName;
         $lookupSqlValue = "(" .
           str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
           . ") as lookupSqlValue";
 
-        $query->with([$columnName => function ($query) use ($lookupSqlValue) {
-          $query->selectRaw('id, ' . $lookupSqlValue);
-        }]);
-      }
+        $selectRaw[] = "(" .
+          str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
+          . ") as `{$columnName}:LOOKUP`"
+        ;
 
-      if (isset($column['relationship'])) {
-        $query->with($column['relationship']);
+        $joins[] = [
+          $lookupTableName . ' as ' . $joinAlias,
+          $joinAlias.'.id',
+          '=',
+          $this->model->getFullTableSqlName().'.'.$columnName
+        ];
+
+        $withs[$columnName] = function ($query) use ($lookupSqlValue) {
+          $query->selectRaw('id, ' . $lookupSqlValue);
+        };
       }
     }
+
+    $query = $this->model;
+    // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
+    $query = $query->selectRaw(implode(",", $selectRaw))->with($withs);
+    foreach ($joins as $join) {
+      $query->join($join[0], $join[1], $join[2], $join[3]);
+    };
 
     // FILTER BY
     if (isset($params['filterBy'])) {
@@ -145,14 +161,33 @@ class Table extends \ADIOS\Core\Controller {
 
     // Search
     if (isset($params['search'])) {
-      $query->where(function ($query) use ($params, $tmpColumns) {
         foreach ($tmpColumns as $columnName => $column) {
-          if (!isset($column['relationship'])) {
-            $query->orWhere($columnName, 'like', "%{$params['search']}%");
+          if ($column['type'] == 'lookup') {
+            $query->orHaving($columnName.':LOOKUP', 'like', "%{$params['search']}%");
+          } else {
+            $query->orHaving($columnName, 'like', "%{$params['search']}%");
           }
         }
-      });
+      // $query->where(function ($query) use ($params, $tmpColumns) {
+      //   foreach ($tmpColumns as $columnName => $column) {
+      //     if ($column['type'] == 'lookup') {
+      //       $query->orWhere($this->model->getFullTableSqlName().'.'.$columnName, 'like', "%{$params['search']}%");
+      //     } else {
+      //       $query->orWhere($this->model->getFullTableSqlName().'.'.$columnName, 'like', "%{$params['search']}%");
+      //     }
+      //   }
+      // });
+
+      // $query->having(function ($query) use ($params, $tmpColumns) {
+      //   foreach ($tmpColumns as $columnName => $column) {
+      //     if ($column['type'] == 'lookup') {
+      //       $query->orHaving($columnName.':LOOKUP', 'like', "%{$params['search']}%");
+      //     }
+      //   }
+      // });
     }
+    // _var_dump($query->toSql());
+
     // ORDER BY
     if (isset($params['orderBy'])) {
       $query->orderBy(
@@ -179,7 +214,7 @@ class Table extends \ADIOS\Core\Controller {
       'page',
       $this->params['page'])->toArray()
     ;
-
+// _var_dump($data);
     $data = $this->postprocessData($data);
 
     return $data;

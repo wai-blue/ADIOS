@@ -36,3 +36,25 @@ export function dateToString(date: Date): string {
 export function numberToStringTime(number: number): string {
   return String(number).padStart(2, '0');
 }
+
+/**
+ * Validate string if it is JSON
+ */
+export function isValidJson(jsonString: string) {
+  try {
+    let tmp = JSON.parse(jsonString);
+
+    if (tmp && typeof tmp === "object") {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return false;
+  }
+}
+
+export function capitalizeFirstLetter(s: string) { return s.charAt(0).toUpperCase() + s.slice(1) };
+export function kebabToCamel(s: string) { return s.replace(/-./g, x=>x[1].toUpperCase()) };
+export function kebabToPascal(s: string) { return capitalizeFirstLetter(kebabToCamel(s)) };
+export function camelToKebab(s: string) { return s.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? "-" : "") + $.toLowerCase()); }

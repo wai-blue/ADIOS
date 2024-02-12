@@ -8,7 +8,8 @@ import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Swal, {SweetAlertOptions} from "sweetalert2";
 
-import {adiosError, deepObjectMerge} from "./Helper";
+import { adios } from "./Adios";
+import { adiosError, deepObjectMerge } from "./Helper";
 
 /** Components */
 import InputLookup from "./Inputs/Lookup";
@@ -49,7 +50,7 @@ export interface FormProps {
   saveButtonText?: string,
   addButtonText?: string,
   defaultValues?: Object
-  endpoint: string,
+  endpoint?: string,
 }
 
 export interface FormState {
@@ -502,8 +503,7 @@ export default class Form extends Component<FormProps> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
-        //@ts-ignore
-        contentItem = window.getComponent(
+        contentItem = adios.getComponent(
           contentItemName,
           {
             ...contentItemParams[contentItemName],
@@ -549,8 +549,8 @@ export default class Form extends Component<FormProps> {
     } else {
       if (colDef.viewParams?.Form?.inputJSX) {
         let inputJSX = colDef.viewParams.Form.inputJSX;
-        inputToRender = React.createElement(
-          window['App']['reactElements'][inputJSX],
+        inputToRender = adios.getComponent(
+          inputJSX,
           {
             parentForm: this,
             columnName: columnName,
@@ -776,7 +776,7 @@ export default class Form extends Component<FormProps> {
                     <ul className="nav nav-tabs card-header-tabs mt-3">
                       {Object.keys(this.state.tabs).map((tabName: string) => {
                         return (
-                          <li className="nav-item">
+                          <li className="nav-item" key={tabName}>
                             <button
                               className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
                               onClick={() => this.changeTab(tabName)}

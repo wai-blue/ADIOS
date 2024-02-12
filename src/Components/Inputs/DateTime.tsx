@@ -16,16 +16,6 @@ export const dateToEUFormat = (dateString: string): string => {
   }
 }
 
-export const timeToEUFormat = (dateString: string): string => {
-  let d = new Date(dateString);
-
-  if (!dateString || dateString.length != 5) {
-    return '';
-  } else {
-    return ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2);
-  }
-}
-
 export const datetimeToEUFormat = (dateString: string): string => {
   let d = new Date(dateString);
 

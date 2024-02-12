@@ -1,9 +1,10 @@
 import React, { ChangeEvent, Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
+import { ProgressBar } from 'primereact/progressbar';
 
 import Modal, { ModalProps } from "./Modal";
 import Form, { FormProps, FormColumns } from "./Form";
-import { dateToEUFormat, timeToEUFormat, datetimeToEUFormat } from "./Inputs/DateTime";
+import { dateToEUFormat, datetimeToEUFormat } from "./Inputs/DateTime";
 
 import Loader from "./Loader";
 import { adiosError } from "./Helper";
@@ -209,7 +210,7 @@ export default class Table extends Component<TableProps> {
                   return this._commonCellRenderer(column._adiosColumnDef, dateToEUFormat(params.value));
                 }
                 case 'time': { 
-                  return this._commonCellRenderer(column._adiosColumnDef, timeToEUFormat(params.value));
+                  return this._commonCellRenderer(column._adiosColumnDef, params.value);
                 }
                 case 'datetime': {
                   return this._commonCellRenderer(column._adiosColumnDef, datetimeToEUFormat(params.value));
@@ -287,10 +288,11 @@ export default class Table extends Component<TableProps> {
     //@ts-ignore
     ADIOS.modalToggle(this.props.uid);
 
-    let newFormParams = {...this.state.formParams, id: id};
-    //console.log('table onRowClick', this.state.formParams, newFormParams);
+    // let newFormParams = {...this.state.formParams, id: id};
+    // console.log('table onRowClick', this.state.formParams, newFormParams);
     this.setState({
-      formParams: newFormParams
+      formId: id
+      // formParams: newFormParams
     })
   }
 
@@ -313,10 +315,10 @@ export default class Table extends Component<TableProps> {
   }
 
   render() {
-    //console.log('table render', this.props.model, this.state.formParams?.model);
+    // console.log('table render', this.props.model, this.state.formParams?.model);
 
     if (!this.state.data || !this.state.columns) {
-      return <Loader />;
+      return <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar>;
     }
 
     return (
@@ -404,7 +406,7 @@ export default class Table extends Component<TableProps> {
                         style={{maxWidth: '250px'}}
                         type="search"
                         placeholder="Start typing to search..."
-                        value={this.state.search} 
+                        value={this.state.search}
                         onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
                       />
                     </div>

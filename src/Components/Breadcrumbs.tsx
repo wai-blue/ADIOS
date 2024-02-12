@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { adios } from "./Adios";
 
 interface BreadcrumbsProps {
   uid: string,
@@ -30,16 +31,16 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
     // syntax error v JSON v <adios-breadcrumbs>),
     // tak by malo vypisat dajaku error hlasku
 
-    let html = '';
+    let html: any;
 
     if (Array.isArray(this.state.items)) {
       html = this.state.items.map((item, i) => (
-        <li className="breadcrumb-item">
+        <li className="breadcrumb-item" key={i}>
           {this.state.items.length - 1 === i ? (
             <span style={{color: '#e78b00'}}>{item.text}</span>
           ) : (
             <a
-              href={window._APP_URL + '/' + item.url}
+              href={adios.APP_URL + '/' + item.url}
               className="text-primary"
             >{item.text}</a>
           )}
