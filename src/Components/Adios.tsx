@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import React from "react";
 import * as uuid from 'uuid';
-import { isValidJson, kebabToPascal, camelToKebab } from './helper';
+import { isValidJson, kebabToPascal, camelToKebab } from './Helper';
 
 /**
  * Components
