@@ -33,7 +33,7 @@ var ADIOS = {
       {
         success: () => {
           $('#adios-modal-global').modal();
-          window.renderComponents('#adios-modal-body-global');
+          globalThis.adios.renderReactComponents('#adios-modal-body-global');
         }
       }
     );

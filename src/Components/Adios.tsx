@@ -81,8 +81,8 @@ export class ADIOS {
   /**
   * Render React component (create HTML tag root and render) 
   */
-  renderReactComponentsIntoBody() {
-    document.querySelectorAll('body *').forEach((element, _index) => {
+  renderReactComponents(renderIntoElement: string = 'body') {
+    document.querySelectorAll(renderIntoElement + ' *').forEach((element, _index) => {
       let component: string = '';
       let componentProps: Object = {};
       let _this = this;
@@ -123,7 +123,6 @@ console.log(element.tagName, component);
           i++;
           continue;
         }
-
         // Remove attributes from HTML DOM
         element.removeAttribute(element.attributes[i].name);
       }
