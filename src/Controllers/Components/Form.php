@@ -17,6 +17,7 @@ class Form extends \ADIOS\Core\Controller {
   public static bool $hideDefaultDesktop = true;
 
   protected ?\Illuminate\Database\Eloquent\Builder $query = null;
+  private $details = [];
   public \ADIOS\Core\Model $model;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
@@ -40,7 +41,7 @@ class Form extends \ADIOS\Core\Controller {
     foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
       if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
         $query->with($tmpColumnDefinition['relationship']);
-        $details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
+        $this->details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
       }
     }
 
@@ -51,13 +52,12 @@ class Form extends \ADIOS\Core\Controller {
     $this->model = $this->adios->getModel($this->params['model']);
 
     $data = [];
-    $details = [];
 
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
       $this->query = $this->prepareDataQuery();
       $data = $this->query->find($this->params['id'])->toArray();
 
-      foreach ($details as $key => $value) {
+      foreach ($this->details as $key => $value) {
         $data[$key] = [
           'values' => $data[$key],
           'all' => $value
