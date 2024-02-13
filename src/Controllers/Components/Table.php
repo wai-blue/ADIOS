@@ -138,11 +138,17 @@ class Table extends \ADIOS\Core\Controller {
           $query->selectRaw('id, ' . $lookupSqlValue);
         };
       }
+      else if (isset($column['relationship'])) {
+        $withs[$columnName] = function ($query) {
+          $query->pluck('name');
+        };
+      }
     }
 
     $query = $this->model;
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
     $query = $query->selectRaw(implode(",", $selectRaw))->with($withs);
+
     foreach ($joins as $join) {
       $query->join($join[0], $join[1], $join[2], $join[3]);
     };
