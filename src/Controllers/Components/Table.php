@@ -144,7 +144,7 @@ class Table extends \ADIOS\Core\Controller {
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
     $query = $query->selectRaw(implode(",", $selectRaw))->with($withs);
     foreach ($joins as $join) {
-      $query->join($join[0], $join[1], $join[2], $join[3]);
+      $query->leftJoin($join[0], $join[1], $join[2], $join[3]);
     };
 
     // FILTER BY

@@ -105,7 +105,7 @@ export default class Form extends Component<FormProps> {
   newState: any;
 
   model: String;
-  inputs: FormInputs = {};
+  // inputs: FormInputs = {};
   components: Array<React.JSX.Element> = [];
 
   jsxContentRendered: boolean = false;
@@ -131,16 +131,10 @@ export default class Form extends Component<FormProps> {
   }
 
 
-  // shouldComponentUpdate(nextProps: FormProps, nextState: FormState) {
-  //   console.log('form should update', this.props.model, this.props.id, nextProps.id, this.state.id, nextState.id);
-  //   return this.props.id != nextProps.id;
-  // }
-
   /**
    * This function trigger if something change, for Form id of record
    */
   componentDidUpdate(prevProps: FormProps, prevState: FormState) {
-    //console.log('form did update', this.props.model, this.props.id, prevProps.id);
     if (prevProps.id !== this.props.id) {
       this.checkIfIsEdit();
       this.loadParams();
@@ -159,7 +153,6 @@ export default class Form extends Component<FormProps> {
   }
 
   componentDidMount() {
-    //console.log('form did mount', this.props.model);
     this.checkIfIsEdit();
     this.initTabs();
 
@@ -191,8 +184,6 @@ export default class Form extends Component<FormProps> {
   loadData() {
     let id = this.state.id ? this.state.id : 0;
 
-    //console.log('form load data', this.props.model, id);
-
     if (id > 0) {
       request.get(
         this.state.endpoint,
@@ -204,27 +195,12 @@ export default class Form extends Component<FormProps> {
         },
         (data: any) => {
           this.initInputs(this.state.columns ?? {}, data.inputs);
-          // this.setState({id: id});
-          // this.newState.id = id;
-          // this._updateState();
         }
       );
     } else {
       this.initInputs(this.state.columns ?? {}, {});
-      // this.setState({id: id});
-      // this.newState.id = id;
-      // this._updateState();
     }
   }
-
-  // _updateState() {
-  //   console.log('form update state', this.props.model, this.newState);
-  //   if (this.newState) {
-  //     this.setState(this.newState, () => {
-  //       this.newState = null;
-  //     });
-  //   }
-  // }
 
   saveRecord() {
     this.setState({
@@ -487,7 +463,7 @@ export default class Form extends Component<FormProps> {
     let contentItemName = contentItemArea == "inputs"
       ? contentItemArea : contentItemKeys[0];
 
-    let contentItem: JSX.Element;
+    let contentItem: JSX.Element | null;
 
     switch (contentItemName) {
       case 'input':
@@ -514,7 +490,9 @@ export default class Form extends Component<FormProps> {
           }
         );
 
-        this.components.push(contentItem);
+        if (contentItem !== null) {
+          this.components.push(contentItem);
+        }
 
         break;
     }
@@ -536,7 +514,7 @@ export default class Form extends Component<FormProps> {
       return adiosError(`Column '${columnName}' is not available for Form component. Check definiton of columns in the model '${this.props.model}'.`);
     }
 
-    let inputToRender: JSX.Element;
+    let inputToRender: JSX.Element | null;
     let inputParams = {...colDef.viewParams?.Form, ...{readonly: this.state.readonly}};
 
     if (colDef.enumValues) {
@@ -549,6 +527,7 @@ export default class Form extends Component<FormProps> {
     } else {
       if (colDef.viewParams?.Form?.inputJSX) {
         let inputJSX = colDef.viewParams.Form.inputJSX;
+
         inputToRender = adios.getComponent(
           inputJSX,
           {
@@ -629,17 +608,19 @@ export default class Form extends Component<FormProps> {
             />;
             break;
           case 'editor':
-            inputToRender = (
-              <div
-                className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
-                <ReactQuill
-                  theme="snow"
-                  value={this.inputs[columnName] as Value}
-                  onChange={(value) => this.inputOnChangeRaw(columnName, value)}
-                  className="w-100"
-                />
-              </div>
-            );
+            if (this.state.inputs) {
+              inputToRender = (
+                <div
+                  className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
+                  <ReactQuill
+                    theme="snow"
+                    value={this.state.inputs[columnName] as Value}
+                    onChange={(value) => this.inputOnChangeRaw(columnName, value)}
+                    className="w-100"
+                  />
+                </div>
+              );
+            }
             break;
           default:
             inputToRender = <InputVarchar
@@ -725,8 +706,6 @@ export default class Form extends Component<FormProps> {
 
 
   render() {
-    //console.log('form render', this.props.uid, this.props.model);
-
     let formContent = this.state.columns == null ? <Loader/> : this._renderTab();
 
     return (
