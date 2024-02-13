@@ -10,7 +10,17 @@
 
 namespace ADIOS\Core;
 
-use Illuminate\Pagination\Paginator;
+use ADIOS\Core\Db\DataType;
+use ADIOS\Core\DB\Query;
+use ADIOS\Core\Exceptions\DBException;
+use ADIOS\Core\Exceptions\RecordDeleteException;
+use ADIOS\Core\Exceptions\RecordSaveException;
+use ADIOS\Core\ViewsWithController\Form;
+use ADIOS\Core\ViewsWithController\Table;
+use Closure;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use ReflectionClass;
 
 /**
  * Core implementation of database model. Extends from Eloquent's model and adds own
@@ -27,7 +37,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   protected $guarded = [];
 
-  protected ?\Illuminate\Database\Eloquent\Builder $eloquentQuery = null;
+  protected ?Builder $eloquentQuery = null;
 
   /**
    * ADIOS model does not use time stamps
@@ -58,7 +68,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @var mixed
    */
-  public ?\ADIOS\Core\Loader $adios = NULL;
+  public ?Loader $adios = NULL;
 
   /**
    * Shorthand for "global table prefix"
@@ -89,7 +99,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * If set to TRUE, the SQL table will not contain the ID autoincrement column
    */
   public bool $isJunctionTable = FALSE;
-
 
 
   public ?array $tableParams = NULL;
@@ -123,8 +132,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * Creates instance of model's object.
    *
-   * @param  mixed $adiosOrAttributes
-   * @param  mixed $eloquentQuery
+   * @param mixed $adiosOrAttributes
+   * @param mixed $eloquentQuery
    * @return void
    */
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL)
@@ -141,7 +150,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $this->shortName = end(explode("/", $this->fullName));
       $this->adios = $adiosOrAttributes;
 
-      $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
+      $this->myRootFolder = str_replace("\\", "/", dirname((new ReflectionClass(get_class($this)))->getFileName()));
 
       if ($eloquentQuery === NULL) {
         $this->eloquentQuery = $this->select('id');
@@ -156,7 +165,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // method uses data from DB, $this->init() call would fail.
       try {
         $this->init();
-      } catch (\Exception $e) {
+      } catch (Exception $e) {
         //
       }
 
@@ -167,7 +176,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       );
     }
 
-    $currentVersion = (int) $this->getCurrentInstalledVersion();
+    $currentVersion = (int)$this->getCurrentInstalledVersion();
     $lastVersion = $this->getLastAvailableVersion();
 
     if ($this->lastVersion == 0) {
@@ -250,9 +259,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * Shorthand for ADIOS core translate() function. Uses own language dictionary.
    *
-   * @param  string $string String to be translated
-   * @param  string $context Context where the string is used
-   * @param  string $toLanguage Output language
+   * @param string $string String to be translated
+   * @param string $context Context where the string is used
+   * @param string $toLanguage Output language
    * @return string Translated string.
    */
   public function translate(string $string, array $vars = []): string
@@ -282,7 +291,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function getCurrentInstalledVersion(): int
   {
-    return (int) ($this->getConfig('installed-version') ?? 0);
+    return (int)($this->getConfig('installed-version') ?? 0);
   }
 
   public function getLastAvailableVersion(): int
@@ -337,8 +346,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
           $tmpColumns .=
             ($tmpColumns == '' ? '' : ', ')
             . '`' . $tmpColumnName . '`'
-            . (empty($tmpOrder) ? '' : ' '.$tmpOrder)
-          ;
+            . (empty($tmpOrder) ? '' : ' ' . $tmpOrder);
         }
 
         switch ($indexDef["type"]) {
@@ -376,13 +384,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * Installs all upgrades of the model. Internaly stores current version and
    * compares it to list of available upgrades.
    *
-   * @throws \ADIOS\Core\Exceptions\DBException When an error occured during the upgrade.
    * @return void
+   * @throws DBException When an error occured during the upgrade.
    */
   public function installUpgrades(): void
   {
     if ($this->hasAvailableUpgrades()) {
-      $currentVersion = (int) $this->getCurrentInstalledVersion();
+      $currentVersion = (int)$this->getCurrentInstalledVersion();
       $lastVersion = $this->getLastAvailableVersion();
 
       try {
@@ -400,9 +408,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
         $this->adios->db->commit();
         $this->saveConfig('installed-version', $lastVersion);
-      } catch (\ADIOS\Core\Exceptions\DBException $e) {
+      } catch (DBException $e) {
         $this->adios->db->rollback();
-        throw new \ADIOS\Core\Exceptions\DBException($e->getMessage());
+        throw new DBException($e->getMessage());
       }
     }
   }
@@ -441,7 +449,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
    * Returns full relative URL path for model. Used when generating URL
    * paths for tables, forms, etc...
    *
-   * @param  mixed $params
+   * @param mixed $params
    * @return void
    */
   public function getFullUrlBase($params)
@@ -450,7 +458,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if (is_array($params)) {
       foreach ($params as $key => $value) {
         if (is_array($value)) continue;
-        $urlBase = str_replace("{{ {$key} }}", (string) $value, $urlBase);
+        $urlBase = str_replace("{{ {$key} }}", (string)$value, $urlBase);
       }
     }
 
@@ -568,7 +576,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
   {
     if (empty($urlBase)) return [];
-    
+
     $routing = [
 
       // Default
@@ -596,7 +604,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
-            "uid" => \ADIOS\Core\HelperFunctions::str2uid($this->fullName) . '_edit',
+            "uid" => HelperFunctions::str2uid($this->fullName) . '_edit',
           ],
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
@@ -610,7 +618,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
-            "uid" => \ADIOS\Core\HelperFunctions::str2uid($this->fullName) . '_add',
+            "uid" => HelperFunctions::str2uid($this->fullName) . '_add',
             "modal" => TRUE,
           ],
           "model" => $this->fullName,
@@ -720,7 +728,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Api/Get/<ID>
       '/^Api\/' . $urlBase . '\/Get\/(\d+)$/i' => [
         "permission" => "{$this->fullName}/Api/Get",
-        "controller" => ($this->crud['api']['controller'] ?? "Api")."/Get",
+        "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
@@ -730,7 +738,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Api/Get:<column>=<value>
       '/^Api\/' . $urlBase . '\/Get:(.+)=(.+)$/i' => [
         "permission" => "{$this->fullName}/Api/Get",
-        "controller" => ($this->crud['api']['controller'] ?? "Api")."/Get",
+        "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
           "column" => '$' . ($varsInUrl + 1),
@@ -775,15 +783,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
       switch ($colDefinition["type"]) {
         case "int":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 8;
-        break;
+          break;
         case "float":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 14;
           $newColumns[$colName]["decimals"] = $colDefinition["decimals"] ?? 2;
-        break;
+          break;
         case "varchar":
         case "password":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 255;
-        break;
+          break;
       }
     }
 
@@ -797,7 +805,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     foreach ($newColumns as $colName => $colDef) {
       $colObject = $this->adios->db->columnTypes[$colDef['type']];
 
-      if ($colObject instanceof \ADIOS\Core\Db\DataType) {
+      if ($colObject instanceof DataType) {
         $newColumns[$colName] = $colObject->columnDefinitionPostProcess($colDef);
       }
     }
@@ -812,7 +820,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $newColumns;
   }
 
-  public function getColumnsToShow(): array {
+  public function getColumnsToShow(): array
+  {
     $columnsToShow = [];
     foreach ($this->columns() as $columnName => $columnValue) {
       if (isset($columnValue['showColumn']) && $columnValue['showColumn'] === false) continue;
@@ -822,7 +831,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $columnsToShow;
   }
 
-  public function getColumnsToShowInView(string $view, array|null $columns = NULL): array {
+  public function getColumnsToShowInView(string $view, array|null $columns = NULL): array
+  {
     if ($columns === NULL) {
       $columns = $this->columns();
     }
@@ -872,11 +882,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
    *
    * @return [type]
    */
-  public function normalizeRowData(array $data, string $lookupKeyPrefix = "") {
+  public function normalizeRowData(array $data, string $lookupKeyPrefix = "")
+  {
     foreach ($this->columns() as $column => $columnDefinition) {
       $columnType = $columnDefinition['type'];
       if (isset($this->adios->db->columnTypes[$columnType])) {
-        $data[$lookupKeyPrefix.$column] = $this->adios->db->columnTypes[$columnType]->fromString($data[$lookupKeyPrefix.$column]);
+        $data[$lookupKeyPrefix . $column] = $this->adios->db->columnTypes[$columnType]->fromString($data[$lookupKeyPrefix . $column]);
       }
 
       if ($columnType == 'lookup' && empty($lookupKeyPrefix)) {
@@ -920,14 +931,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $item;
   }
 
-  public function getLookupSqlValueById(int $id) {
+  public function getLookupSqlValueById(int $id)
+  {
     $row = $this->adios->db->select($this)
       ->columns([
-        [ $this->lookupSqlValue($this->fullTableSqlName), 'lookup_value' ]
+        [$this->lookupSqlValue($this->fullTableSqlName), 'lookup_value']
       ])
       ->where([['id', '=', $id]])
-      ->fetch()
-    ;
+      ->fetch();
 
     return $row[0]['lookup_value'] ?? '';
   }
@@ -963,7 +974,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $query = $this->getQuery();
     $this->addLookupsToQuery($query);
 
-    if ($callback !== NULL && $callback instanceof \Closure) {
+    if ($callback !== NULL && $callback instanceof Closure) {
       $query = $callback($this, $query);
     }
 
@@ -983,16 +994,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     return $this->adios->db->insert($this)
       ->set($data)
-      ->execute()
-    ;
+      ->execute();
   }
 
   public function insertRowWithId($data)
   {
     return $this->adios->db->insert($this)
       ->set($data)
-      ->execute()
-    ;
+      ->execute();
   }
 
   public function insertOrUpdateRow($data)
@@ -1004,8 +1013,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $this->adios->db->insert($this)
       ->set($data)
       ->onDuplicateKey($duplicateKeyData)
-      ->execute()
-    ;
+      ->execute();
   }
 
   public function insertRandomRow($data = [], $dictionary = [])
@@ -1019,9 +1027,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     $queryOk = $this->adios->db->update($this)
       ->set($data)
-      ->whereId((int) $id)
-      ->execute()
-    ;
+      ->whereId((int)$id)
+      ->execute();
 
     return ($queryOk ? $id : FALSE);
   }
@@ -1029,20 +1036,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function deleteRow($id)
   {
     return $this->adios->db->delete($this)
-      ->whereId((int) $id)
-      ->execute()
-    ;
+      ->whereId((int)$id)
+      ->execute();
   }
 
   public function copyRow($id)
   {
     $row = $this->adios->db->select($this)
-      ->columns([\ADIOS\Core\DB\Query::allColumnsWithoutLookups])
+      ->columns([Query::allColumnsWithoutLookups])
       ->where([
-        ['id', '=', (int) $id]
+        ['id', '=', (int)$id]
       ])
-      ->fetchOne()
-    ;
+      ->fetchOne();
 
     unset($row['id']);
 
@@ -1103,7 +1108,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $params = []
   )
   {
-    return [ ['input_lookup_value', 'asc'] ];
+    return [['input_lookup_value', 'asc']];
   }
 
   // $initiatingModel = model formulara, v ramci ktoreho je lookup generovany
@@ -1115,20 +1120,19 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $formData = [],
     $params = [],
     $having = "TRUE"
-  ): \ADIOS\Core\DB\Query
+  ): Query
   {
     $where = $params['where'] ?? $this->lookupWhere($initiatingModel, $initiatingColumn, $formData, $params);
     $order = $params['order'] ?? $this->lookupOrder($initiatingModel, $initiatingColumn, $formData, $params);
 
     return $this->adios->db->select($this)
       ->columns([
-        [ 'id', 'id' ],
-        [ $this->lookupSqlValue($this->fullTableSqlName), 'input_lookup_value' ]
+        ['id', 'id'],
+        [$this->lookupSqlValue($this->fullTableSqlName), 'input_lookup_value']
       ])
       ->where($where)
       ->havingRaw($having)
-      ->order($order)
-    ;
+      ->order($order);
   }
 
   // $initiatingModel = model formulara, v ramci ktoreho je lookup generovany
@@ -1166,13 +1170,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableParams
    *
-   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
+   * @param Table $tableObject
    *
    * @return array Modified table params
    */
-  public function onTableParams(\ADIOS\Core\ViewsWithController\Table $tableObject, array $params): array
+  public function onTableParams(Table $tableObject, array $params): array
   {
-    return (array) $this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
+    return (array)$this->adios->dispatchEventToPlugins("onModelAfterTableParams", [
       "tableObject" => $tableObject,
       "params" => $params,
     ])["params"];
@@ -1181,13 +1185,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableRowParams
    *
-   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
+   * @param Table $tableObject
    *
    * @return array Modified row params
    */
-  public function onTableRowParams(\ADIOS\Core\ViewsWithController\Table $tableObject, array $params, array $data): array
+  public function onTableRowParams(Table $tableObject, array $params, array $data): array
   {
-    return (array) $this->adios->dispatchEventToPlugins("onModelAfterTableRowParams", [
+    return (array)$this->adios->dispatchEventToPlugins("onModelAfterTableRowParams", [
       "tableObject" => $tableObject,
       "params" => $params,
       "data" => $data
@@ -1195,33 +1199,33 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
 
-  public function onTableRowCssFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
+  public function onTableRowCssFormatter(Table $tableObject, array $data): string
   {
-    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableRowCssFormatter", [
+    return (string)$this->adios->dispatchEventToPlugins("onModelAfterTableRowCssFormatter", [
       "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["css"];
   }
 
-  public function onTableCellCssFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
+  public function onTableCellCssFormatter(Table $tableObject, array $data): string
   {
-    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellCssFormatter", [
+    return (string)$this->adios->dispatchEventToPlugins("onModelAfterTableCellCssFormatter", [
       "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["css"];
   }
 
-  public function onTableCellHtmlFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
+  public function onTableCellHtmlFormatter(Table $tableObject, array $data): string
   {
-    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellHtmlFormatter", [
+    return (string)$this->adios->dispatchEventToPlugins("onModelAfterTableCellHtmlFormatter", [
       "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["html"];
   }
 
-  public function onTableCellCsvFormatter(\ADIOS\Core\ViewsWithController\Table $tableObject, array $data): string
+  public function onTableCellCsvFormatter(Table $tableObject, array $data): string
   {
-    return (string) $this->adios->dispatchEventToPlugins("onModelAfterTableCellCsvFormatter", [
+    return (string)$this->adios->dispatchEventToPlugins("onModelAfterTableCellCsvFormatter", [
       "tableObject" => $tableObject,
       "data" => $data,
     ])["data"]["csv"];
@@ -1230,11 +1234,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableBeforeInit
    *
-   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
+   * @param Table $tableObject
    *
    * @return void
    */
-  public function onTableBeforeInit(\ADIOS\Core\ViewsWithController\Table $tableObject): void
+  public function onTableBeforeInit(Table $tableObject): void
   {
     $this->adios->dispatchEventToPlugins("onModelAfterTableBeforeInit", [
       "tableObject" => $tableObject,
@@ -1244,11 +1248,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableAfterInit
    *
-   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
+   * @param Table $tableObject
    *
    * @return void
    */
-  public function onTableAfterInit(\ADIOS\Core\ViewsWithController\Table $tableObject): void
+  public function onTableAfterInit(Table $tableObject): void
   {
     $this->adios->dispatchEventToPlugins("onModelAfterTableAfterInit", [
       "tableObject" => $tableObject,
@@ -1258,11 +1262,11 @@ class Model extends \Illuminate\Database\Eloquent\Model
   /**
    * onTableAfterDataLoaded
    *
-   * @param \ADIOS\Core\ViewsWithController\Table $tableObject
+   * @param Table $tableObject
    *
    * @return void
    */
-  public function onTableAfterDataLoaded(\ADIOS\Core\ViewsWithController\Table $tableObject): void
+  public function onTableAfterDataLoaded(Table $tableObject): void
   {
     $this->adios->dispatchEventToPlugins("onModelAfterTableAfterDataLoaded", [
       "tableObject" => $tableObject,
@@ -1272,7 +1276,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
   //////////////////////////////////////////////////////////////////
   // Components/Form methods
 
-  public function columnValidate(string $column, $value): bool {
+  public function columnValidate(string $column, $value): bool
+  {
     $valid = TRUE;
 
     $colDefinition = $this->columns()[$column] ?? [];
@@ -1307,9 +1312,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
   }
 
-  public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject, array $params): array
+  public function onFormParams(Form $formObject, array $params): array
   {
-    return (array) $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
+    return (array)$this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
       "formObject" => $formObject,
       "params" => $params,
     ])["params"];
@@ -1340,18 +1345,18 @@ class Model extends \Illuminate\Database\Eloquent\Model
       ) {
         $invalidInputs[$column] = $this->adios->translate(
           "`{{ colTitle }}` is required.",
-          [ 'colTitle' => $colDefinition['title'] ]
+          ['colTitle' => $colDefinition['title']]
         );
       } else if (!$this->columnValidate($column, $data[$column])) {
         $invalidInputs[$column] = $this->adios->translate(
           "`{{ colTitle }}` contains invalid value.",
-          [ 'colTitle' => $colDefinition['title'] ]
+          ['colTitle' => $colDefinition['title']]
         );
       }
     }
 
     if (!empty($invalidInputs)) {
-      throw new \ADIOS\Core\Exceptions\RecordSaveException(
+      throw new RecordSaveException(
         json_encode($invalidInputs)
       );
     }
@@ -1361,16 +1366,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "data" => $data
     ])['params'];
   }
-  
+
   /**
-  * Check if the lookup table needs the id of the inserted record from this model  
-  */
-  private function ___getInsertedIdForLookupColumn(array $lookupColumns, array $lookupData, int $insertedRecordId): array {
+   * Check if the lookup table needs the id of the inserted record from this model
+   */
+  private function ___getInsertedIdForLookupColumn(array $lookupColumns, array $lookupData, int $insertedRecordId): array
+  {
     foreach ($lookupColumns as $lookupColumnName => $lookupColumnData) {
-      if ($lookupColumnData['type'] != 'lookup') continue; 
+      if ($lookupColumnData['type'] != 'lookup') continue;
 
       if ($lookupColumnData['model'] == $this->fullName) {
-        $lookupData[$lookupColumnName]  = $insertedRecordId; 
+        $lookupData[$lookupColumnName] = $insertedRecordId;
         break;
       }
     }
@@ -1378,14 +1384,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $lookupData;
   }
 
-  private function ___validateBase64Image(string $base64String) {
+  private function ___validateBase64Image(string $base64String)
+  {
     $pattern = '/^data:image\/[^;]+;base64,/';
     return preg_match($pattern, $base64String);
-}
+  }
 
   public function recordSave(array $data)
   {
-    $id = (int) $data['id'];
+    $id = (int)$data['id'];
 
     $this->recordSaveOriginalData = $data;
 
@@ -1403,12 +1410,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
       // Upload image
       if ($this->columns()[$key]['type'] == 'image') {
         // If is not base64 (new image, skip)
-        if ($this->___validateBase64Image((string) $data[$key]['fileData']) == 0) {
+        if ($this->___validateBase64Image((string)$data[$key]['fileData']) == 0) {
           unset($dataForThisModel[$key]);
           continue;
         }
 
-        $folderPath = $this->getFolderPath(); 
+        $folderPath = $this->getFolderPath();
         $fileName = bin2hex(random_bytes(10)) . '-' . $data[$key]['fileName'];
 
         // Replace just with filePath to save in DB
@@ -1420,7 +1427,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $image = base64_decode($imageData);
 
         if (file_put_contents($folderPath . "/{$fileName}", $image) === false) {
-          throw new \Exception($this->translate("Upload file error"));
+          throw new Exception($this->translate("Upload file error"));
         }
       }
     }
@@ -1437,7 +1444,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     if ($id <= 0) {
       $returnValue = $this->insertRow($dataForThisModel);
-      $data['id'] = (int) $returnValue;
+      $data['id'] = (int)$returnValue;
     } else {
       $returnValue = $this->updateRow($dataForThisModel, $id);
     }
@@ -1461,7 +1468,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $lookupData = $this->onBeforeSave($lookupData);
 
       if ($data[$lookupColumnName] <= 0) {
-        $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
+        $data[$lookupColumnName] = (int)$lookupModel->insertRow($lookupData);
       } else {
         $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
       }
@@ -1481,20 +1488,26 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
         foreach ($junctions as $junction) {
           $this->adios->db->query("
-            insert into `{$junctionModel->getFullTableSqlName()}` (
+          insert into `{$junctionModel->getFullTableSqlName()}` (
               `{$jParams['masterKeyColumn']}`,
               `{$jParams['optionKeyColumn']}`
-            ) values (
-              {$id},
-              '" . $this->adios->db->escape($junction) . "'
-            )
-            on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
+          ) 
+          select {$id}, '" . $this->adios->db->escape($junction) . "'
+          where not exists (
+              select 1
+              from `{$junctionModel->getFullTableSqlName()}`
+              where 
+                  `{$jParams['masterKeyColumn']}` = {$id} 
+                  and `{$jParams['optionKeyColumn']}` = '" . $this->adios->db->escape($junction) . "'
+          )
+          on duplicate key update 
+              `{$jParams['masterKeyColumn']}` = {$id};
           ");
         }
 
         $junctionModel
           ->where($jParams['masterKeyColumn'], $id)
-          ->whereNotIn($jParams['optionKeyColumn'], $assignments)
+          ->whereNotIn($jParams['optionKeyColumn'], $junctions)
           ->delete();
       }
     }
@@ -1512,14 +1525,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function recordDelete(int $id)
   {
-    $id = (int) $id;
+    $id = (int)$id;
 
     try {
       $this->onBeforeDelete($id);
       $returnValue = $this->deleteRow($id);
       $returnValue = $this->onAfterDelete($id);
       return $returnValue;
-    } catch (\ADIOS\Core\Exceptions\RecordDeleteException $e) {
+    } catch (RecordDeleteException $e) {
       return $this->adios->renderHtmlWarning($e->getMessage());
     }
   }
@@ -1676,7 +1689,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "returnValue" => $returnValue,
     ])["returnValue"];
   }
-
 
 
   public function onBeforeDelete(int $id): int
@@ -1851,8 +1863,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return count($rows);
   }
 
-  public function getNewRecordInfo(): array {
-    return [  
+  public function getNewRecordInfo(): array
+  {
+    return [
       'id_created_by' => [
         'type' => 'lookup',
         'title' => 'Created By',
@@ -1865,9 +1878,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
       'created_at' => [
         'title' => 'Created At',
         'type' => 'datetime',
-        'value' => null, 
+        'value' => null,
         'readonly' => true,
-      ], 
+      ],
       'id_updated_by' => [
         'type' => 'lookup',
         'title' => 'Updated By',
@@ -1883,17 +1896,19 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'value' => null,
         'readonly' => true
       ]
-    ];  
+    ];
   }
 
-  public function setRecordInfoCreated(array $recordInfo): array {
+  public function setRecordInfoCreated(array $recordInfo): array
+  {
     $recordInfo['id_created_by']['value'] = $this->adios->userProfile['id'];
     $recordInfo['created_at']['value'] = date('Y-m-d H:i:s');
 
     return $recordInfo;
   }
 
-  public function setRecordInfoUpdated(array $data): array {
+  public function setRecordInfoUpdated(array $data): array
+  {
     $tmpData = $this->find($data['id']);
     $recordInfo = json_decode($tmpData->record_info, true);
 
@@ -1903,16 +1918,19 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return $recordInfo;
   }
 
-  public function getFolderUrl(): string {
+  public function getFolderUrl(): string
+  {
     return "{$this->adios->config['uploadUrl']}/" . str_replace('/', '-', $this->fullName);
   }
 
-  public function getFolderPath(): string {
+  public function getFolderPath(): string
+  {
     return "{$this->adios->config['uploadDir']}/" . str_replace('/', '-', $this->fullName);
   }
 
 
-  public function relationships(): array {
+  public function relationships(): array
+  {
     $relationships = [];
 
     foreach ($this->columns() as $columnName => $columnDefinition) {

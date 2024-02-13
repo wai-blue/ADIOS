@@ -207,11 +207,22 @@ export default class Form extends Component<FormProps> {
       invalidInputs: {}
     });
 
+    let formattedInputs = {...this.state.inputs};
+
+    Object.entries(this.state.columns).forEach(([key, value]) => {
+      if(value['relationship'] != undefined) {
+        Object.entries(formattedInputs[key]['values']).forEach(([i, role]) => {
+          formattedInputs[key]['values'][i] = role.id;
+        })
+        formattedInputs[key] = formattedInputs[key]['values'];
+      }
+    });
+
     //@ts-ignore
     request.post(
       'components/form/onsave',
       {
-        inputs: {...this.state.inputs, id: this.state.id}
+        inputs: {...formattedInputs, id: this.state.id}
       },
       {
         model: this.props.model,

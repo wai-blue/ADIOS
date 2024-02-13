@@ -40,7 +40,7 @@ export default class Tags extends Component<TagsInputProps> {
     const tag = input['all'][index];
     const tagIndex = input['values'].findIndex((t) => t.name === tag.name);
 
-    if (tagIndex === -1) input['values'].push({id: undefined, name: tag.name});
+    if (tagIndex === -1) input['values'].push({id: tag.id, name: tag.name});
     else input['values'].splice(tagIndex, 1);
 
     this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
@@ -50,10 +50,10 @@ export default class Tags extends Component<TagsInputProps> {
     const params = this.props.parentForm.state.inputs[this.props.columnName] ?? {all: [], values: []};
 
     let tags = [];
-    let suggestions = params['all'];
+    let suggestions = [];
 
-    suggestions.forEach((role) => {
-      role.id = role.name;
+    params['all'].forEach((role) => {
+      suggestions.push({id: role.name, name: role.name, db_id: role.id});
       if (params['values'].find((r) => r.name === role.name) !== undefined) {
         tags.push({id: role.name, name: role.name, className: "ReactTags__active"});
       } else {
