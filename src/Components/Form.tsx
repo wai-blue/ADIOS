@@ -617,6 +617,7 @@ export default class Form extends Component<FormProps> {
               parentForm={this}
               columnName={columnName}
               params={inputParams}
+              dataKey={this.state.columns[columnName]['dataKey']}
             />;
             break;
           case 'image':

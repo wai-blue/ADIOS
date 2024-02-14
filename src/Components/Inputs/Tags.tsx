@@ -9,7 +9,8 @@ import Notification from "../Notification";
 interface TagsInputProps {
   parentForm: any,
   columnName: string,
-  params: any
+  params: any,
+  dataKey: string
 }
 
 export default class Tags extends Component<TagsInputProps> {
@@ -20,7 +21,7 @@ export default class Tags extends Component<TagsInputProps> {
 
   handleDelete = (index: number, input: {all: object, values: object}) => {
     const tag = input['all'][index];
-    const tagIndex = input['values'].findIndex((t) => t.name === tag.name);
+    const tagIndex = input['values'].findIndex((t) => t[this.props.dataKey] === tag[this.props.dataKey]);
     const model = this.props.parentForm.props.model + capitalizeFirstLetter(this.props.parentForm.state.columns[this.props.columnName].relationship).slice(0, -1);
 
     request.delete(
@@ -41,14 +42,14 @@ export default class Tags extends Component<TagsInputProps> {
     );
   };
 
-  handleAddition = (tag: {id: string, name: string}, input: {all: object, values: object}) => {
+  handleAddition = (tag: object, input: {all: object, values: object}) => {
     const model = this.props.parentForm.props.model + capitalizeFirstLetter(this.props.parentForm.state.columns[this.props.columnName].relationship).slice(0, -1);
-
+    let tagInput = {}; tagInput[this.props.dataKey] = tag[this.props.dataKey];
     //@ts-ignore
     request.post(
       'components/form/onsave',
       {
-        inputs: {name: tag.name}
+        inputs: tagInput
       },
       {
         model: model,
@@ -68,9 +69,9 @@ export default class Tags extends Component<TagsInputProps> {
 
   handleTagClick = (index: string, input: { all: object, values: object }) => {
     const tag = input['all'][index];
-    const tagIndex = input['values'].findIndex((t) => t.name === tag.name);
-
-    if (tagIndex === -1) input['values'].push({id: tag.id, name: tag.name});
+    const tagIndex = input['values'].findIndex((t) => t[this.props.dataKey] === tag[this.props.dataKey]);
+    const tagInput = {id: tag.id}; tagInput[this.props.dataKey] = tag[this.props.dataKey];
+    if (tagIndex === -1) input['values'].push(tagInput);
     else input['values'].splice(tagIndex, 1);
 
     this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
@@ -83,19 +84,21 @@ export default class Tags extends Component<TagsInputProps> {
     let suggestions = [];
 
     params['all'].forEach((role) => {
-      suggestions.push({id: role.name, name: role.name, db_id: role.id});
-      if (params['values'].find((r) => r.name === role.name) !== undefined) {
-        tags.push({id: role.name, name: role.name, className: "ReactTags__active"});
-      } else {
-        tags.push({id: role.name, name: role.name, className: ""});
+      let suggestionsInput = {id: role[this.props.dataKey], db_id: role.id};
+      suggestionsInput[this.props.dataKey] = role[this.props.dataKey];
+      suggestions.push(suggestionsInput);
+      let tagInput = {id: role[this.props.dataKey]}; tagInput[this.props.dataKey] = role[this.props.dataKey]
+      if (params['values'].find((r) => r[this.props.dataKey] === role[this.props.dataKey]) !== undefined) {
+        tagInput['className'] = "ReactTags__active";
       }
+      tags.push(tagInput);
     });
 
     return (
       <ReactTags
         tags={tags}
         suggestions={suggestions}
-        labelField={'name'}
+        labelField={this.props.dataKey}
         //delimiters={this.state.delimiters}
         handleDelete={(tag) => this.handleDelete(tag, params)}
         handleAddition={(tag) => this.handleAddition(tag, params)}
