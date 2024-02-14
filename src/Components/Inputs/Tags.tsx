@@ -103,7 +103,7 @@ export default class Tags extends Component<TagsInputProps> {
         inputFieldPosition="bottom"
         allowDeleteFromEmptyInput={false}
         autocomplete
-        readOnly={this.props.params['editable'] != undefined }
+        readOnly={this.props.params['addNewTags'] != undefined }
       />
     );
   }
