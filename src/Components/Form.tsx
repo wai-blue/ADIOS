@@ -207,7 +207,7 @@ export default class Form extends Component<FormProps> {
       invalidInputs: {}
     });
 
-    let formattedInputs = {...this.state.inputs};
+    let formattedInputs = JSON.parse(JSON.stringify(this.state.inputs));
 
     Object.entries(this.state.columns).forEach(([key, value]) => {
       if(value['relationship'] != undefined) {
