@@ -10,7 +10,7 @@ interface TagsInputProps {
   parentForm: any,
   columnName: string,
   params: any,
-  dataKey: string
+  dataKey: string,
 }
 
 export default class Tags extends Component<TagsInputProps> {
@@ -87,6 +87,7 @@ export default class Tags extends Component<TagsInputProps> {
       if (params['values'].find((r) => r[this.props.dataKey] === role[this.props.dataKey]) !== undefined) {
         tagInput['className'] = "ReactTags__active";
       }
+      if (this.props.params.readonly) tagInput['className'] += ' ReactTags__disabled'
       tags.push(tagInput);
     });
 
@@ -95,15 +96,14 @@ export default class Tags extends Component<TagsInputProps> {
         tags={tags}
         suggestions={suggestions}
         labelField={this.props.dataKey}
-        //delimiters={this.state.delimiters}
-        handleDelete={(tag) => this.handleDelete(tag, params)}
-        handleAddition={(tag) => this.handleAddition(tag, params)}
+        handleDelete={(tag) => this.props.params.readonly ? undefined : this.handleDelete(tag, params)}
+        handleAddition={(tag) => this.props.params.readonly ? undefined : this.handleAddition(tag, params)}
         allowDragDrop={false}
-        handleTagClick={(i) => this.handleTagClick(i, params)}
+        handleTagClick={(i) => this.props.params.readonly ? undefined : this.handleTagClick(i, params)}
         inputFieldPosition="bottom"
         allowDeleteFromEmptyInput={false}
         autocomplete
-        readOnly={this.props.params['addNewTags'] != undefined }
+        readOnly={this.props.params['addNewTags'] != undefined || this.props.params.readonly}
       />
     );
   }
