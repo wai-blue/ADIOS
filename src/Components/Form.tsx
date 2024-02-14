@@ -354,6 +354,24 @@ export default class Form extends Component<FormProps> {
     });
   }
 
+  fetchColumnData (columnName: string) {
+    let id = this.state.id ? this.state.id : 0;
+
+    request.get(
+      this.state.endpoint,
+      {
+        returnData: '1',
+        model: this.props.model,
+        id: id,
+        __IS_AJAX__: '1',
+      },
+      (data: any) => {
+        const input = data.inputs[columnName];
+        this.inputOnChangeRaw(columnName, input);
+      }
+    );
+  }
+
   /**
    * Get default value form Model definition
    */
