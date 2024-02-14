@@ -28,6 +28,8 @@ export default class Lookup extends Component<LookupInputProps> {
     let pfProps = parentForm.props;
     let columnName = props.columnName;
 
+
+
     this.state = {
       data: [],
       readonly:

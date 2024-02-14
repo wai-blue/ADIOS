@@ -544,7 +544,7 @@ export default class Form extends Component<FormProps> {
     }
 
     let inputToRender: JSX.Element | null;
-    let inputParams = {...colDef.viewParams?.Form, ...{readonly: this.state.readonly}};
+    let inputParams = {...{readonly: this.state.readonly || (this.props.columns?.[columnName]?.readonly ?? false)}, ...colDef.viewParams?.Form};
 
     if (colDef.enumValues) {
 
