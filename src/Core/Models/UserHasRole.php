@@ -39,14 +39,18 @@ class UserHasRole extends \ADIOS\Core\Model {
         'title' => $this->translate('User'),
         'model' => "ADIOS/Core/Models/User",
         'input_style' => 'select',
-        'show' => false
+        'show' => false,
+        'foreignKeyOnUpdate' => 'CASCADE',
+        'foreignKeyOnDelete' => 'CASCADE',
       ],
       'id_role' => [
         'type' => 'lookup',
         'title' => $this->translate('Role'),
         'model' => "ADIOS/Core/Models/UserRole",
         'input_style' => 'select',
-        'show' => false
+        'show' => false,
+        'foreignKeyOnUpdate' => 'CASCADE',
+        'foreignKeyOnDelete' => 'CASCADE',
       ],
     ]);
   }
