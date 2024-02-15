@@ -91,9 +91,14 @@ export default class ExportButton extends Component<ExportButtonProps> {
         case 'pdf':
           html2canvas(imgElement).then((canvas: any) => {
             const imageDataURL = canvas.toDataURL("image/png");
-            const doc = new jsPDF('landscape');
-            doc.addImage(imageDataURL, 'PNG', 10, 10, 200, 200);
-            doc.save('sample-file.pdf');
+            const pdf = new jsPDF('l', 'mm', 'a4');
+
+            const props = pdf.getImageProperties(imageDataURL);
+            const width = pdf.internal.pageSize.getWidth();
+            const height = (props.height * width) / props.width;
+
+            pdf.addImage(imageDataURL, 'PNG', 5, 5, width - 20, height);
+            pdf.save(this.props.exportFileName ?? uuid.v4() + '.pdf');
           });
         break;
         default:
