@@ -17,6 +17,7 @@ import Modal from "./Modal";
 import FormButton from "./FormButton";
 import FormCardButton from "./FormCardButton";
 import View from "./View";
+import ExportButton from "./ExportButton";
 
 export class ADIOS {
   APP_URL: string = '';
@@ -42,9 +43,10 @@ export class ADIOS {
     this.registerReactElement('FormButton', FormButton);
     this.registerReactElement('FormCardButton', FormCardButton);
     this.registerReactElement('View', View);
+    this.registerReactElement('ExportButton', ExportButton);
   }
   
-  registerReactElement(elementName, elementObject) {
+  registerReactElement(elementName: string, elementObject: any) {
     this.reactElements[elementName] = elementObject;
   }
 

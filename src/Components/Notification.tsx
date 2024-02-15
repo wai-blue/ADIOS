@@ -1,5 +1,43 @@
-import { Notyf } from "notyf";
+import { Notyf, NotyfNotification } from "notyf";
 import 'notyf/notyf.min.css';
 
-const Notification = new Notyf();
-export default Notification;
+export interface NotificationOptions {
+  type: string,
+  message: string,
+  dissmisible?: boolean,
+  duration?: number
+}
+
+class Notification extends Notyf {
+
+  constructor() {
+    super({
+      types: [
+        {
+          type: 'info',
+          background: '#54b4d3',
+          icon: {
+            className: 'fas fa-info',
+            tagName: 'i',
+            color: '#fff'
+          },
+          dismissible: false
+        }
+      ]
+    });
+  }
+
+  custom(options: NotificationOptions): NotyfNotification {
+    const notification = this.open({
+      type: options.type,
+      message: options.message,
+      dismissible: options.dissmisible ?? false,
+      duration: options.duration ?? 3000
+    });
+
+    return notification;
+  }
+
+}
+
+export default new Notification();

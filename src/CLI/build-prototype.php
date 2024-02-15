@@ -144,7 +144,6 @@ if (
 require_once($autoloaderFile);
 
 $builder = new \ADIOS\Prototype\Builder($inputFile, $outputFolder, $sessionSalt, $logFile);
-
 $builder->setConfigEnv([
   "db" => [
     "host" => $dbHost,
