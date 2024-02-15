@@ -602,24 +602,28 @@ class Loader
 
         $this->twig->addFunction(new \Twig\TwigFunction(
           'adiosHtmlAttributes',
-          function (array $attributes) {
-            $attrsStr = join(
-              ' ',
-              array_map(
-                function($key) use ($attributes) {
-                  if (is_bool($attributes[$key])){
-                    return $attributes[$key] ? $key : '';
-                  } else if (is_array($attributes[$key])) {
-                    return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='".json_encode($attributes[$key])."'";
-                  } else {
-                    return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='{$attributes[$key]}'";
-                  }
-                },
-                array_keys($attributes)
-              )
-            );
+          function (?array $attributes) {
+            if (!is_array($attributes)) {
+              return '';
+            } else {
+              $attrsStr = join(
+                ' ',
+                array_map(
+                  function($key) use ($attributes) {
+                    if (is_bool($attributes[$key])){
+                      return $attributes[$key] ? $key : '';
+                    } else if (is_array($attributes[$key])) {
+                      return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='".json_encode($attributes[$key])."'";
+                    } else {
+                      return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='{$attributes[$key]}'";
+                    }
+                  },
+                  array_keys($attributes)
+                )
+              );
 
-            return $attrsStr;
+              return $attrsStr;
+            }
           }
         ));
 

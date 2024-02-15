@@ -29,14 +29,6 @@ class User extends \ADIOS\Core\Model {
   public string $urlBase = "users";
   public ?string $lookupSqlValue = "{%TABLE%}.login";
 
-  public ?array $tableParams = [
-    "title" => "Users",
-  ];
-  public ?array $formParams = [
-   "titleForInserting" => "New user",
-   "titleForEditing" => "User",
-  ];
-
   public ?array $junctions = [
     'roles' => [
       'junctionModel' => 'ADIOS/Core/Models/UserHasRole',
@@ -50,7 +42,6 @@ class User extends \ADIOS\Core\Model {
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
     if (is_object($adiosOrAttributes)) {
-      $this->tableParams['title'] = $this->translate("Users");
       $tokenModel = $adiosOrAttributes->getModel("ADIOS/Core/Models/Token");
 
       if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
