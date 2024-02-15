@@ -17,8 +17,6 @@ export default class Tags extends Component<TagsInputProps> {
 
   constructor(props: TagsInputProps) {
     super(props);
-
-    this.props.params.addNewTags = true;
   }
 
   handleDelete = (index: number, input: {all: object, values: object}) => {
