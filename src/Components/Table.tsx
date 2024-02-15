@@ -323,6 +323,7 @@ console.log('table params', data.params.title, this.props.title, params.title);
     let params = {...this.props.formParams};
     params.defaultValues = {...params.defaultValues};
     params.columns = {...params.columns};
+
     if (this.props.parentFormId != undefined) {
       const lastSlashIndex = this.props.parentFormModel.lastIndexOf("/");
       const modelString = this.props.parentFormModel.substring(lastSlashIndex + 1);
@@ -359,7 +360,7 @@ console.log('table params', data.params.title, this.props.title, params.title);
               //@ts-ignore
               ADIOS.modalToggle(this.props.uid);
             }}
-            {...this.props.formParams}
+            {...params}
           />
         </Modal>
 
