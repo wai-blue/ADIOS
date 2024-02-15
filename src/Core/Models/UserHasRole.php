@@ -23,7 +23,7 @@ class UserHasRole extends \ADIOS\Core\Model {
   ];
   public ?array $formParams = [
    "titleForInserting" => "New assignment of role to user",
-   "titleForEditing" => "Assignemtn of role to role",
+   "titleForEditing" => "Assignment of role to role",
   ];
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
