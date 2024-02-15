@@ -129,8 +129,12 @@
 }
 
 .ReactTags__disabled, .ReactTags__disabled:hover {
-  opacity: 0.9 !important;
+  opacity: 0.7 !important;
   cursor: default !important;
   border: none !important;
+  padding: 2px 10px 2px 10px !important;
+}
+
+.ReactTags__not_removable {
   padding: 2px 10px 2px 10px !important;
 }

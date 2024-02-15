@@ -17,6 +17,8 @@ export default class Tags extends Component<TagsInputProps> {
 
   constructor(props: TagsInputProps) {
     super(props);
+
+    this.props.params.addNewTags = true;
   }
 
   handleDelete = (index: number, input: {all: object, values: object}) => {
@@ -88,6 +90,7 @@ export default class Tags extends Component<TagsInputProps> {
         tagInput['className'] = "ReactTags__active";
       }
       if (this.props.params.readonly) tagInput['className'] += ' ReactTags__disabled'
+      else if (this.props.params['addNewTags'] != undefined) tagInput['className'] += ' ReactTags__not_removable'
       tags.push(tagInput);
     });
 
@@ -96,8 +99,8 @@ export default class Tags extends Component<TagsInputProps> {
         tags={tags}
         suggestions={suggestions}
         labelField={this.props.dataKey}
-        handleDelete={(tag) => this.props.params.readonly ? undefined : this.handleDelete(tag, params)}
-        handleAddition={(tag) => this.props.params.readonly ? undefined : this.handleAddition(tag, params)}
+        handleDelete={(tag) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.handleDelete(tag, params)}
+        handleAddition={(tag) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.handleAddition(tag, params)}
         allowDragDrop={false}
         handleTagClick={(i) => this.props.params.readonly ? undefined : this.handleTagClick(i, params)}
         inputFieldPosition="bottom"
