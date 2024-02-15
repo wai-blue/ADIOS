@@ -6,8 +6,7 @@ import Modal, { ModalProps } from "./Modal";
 import Form, { FormProps, FormColumns } from "./Form";
 import { dateToEUFormat, datetimeToEUFormat } from "./Inputs/DateTime";
 
-import Loader from "./Loader";
-import { adiosError } from "./Helper";
+import { adiosError, deepObjectMerge } from "./Helper";
 import request from "./Request";
 
 interface TableProps {
@@ -32,6 +31,7 @@ interface TableProps {
   title?: string,
   uid: string,
   where?: Array<any>,
+  params?: any,
 
   //TODO
   //showPaging?: boolean,
@@ -123,15 +123,16 @@ export default class Table extends Component<TableProps> {
   }
 
   _commonCellRenderer(column, content): JSX.Element {
-    return <div className={column.viewParams?.Table?.cssClass}>{content}</div>
+    return <div className={column.cssClass}>{content}</div>
   }
 
   loadParams() {
+    let propsColumns = this.props.columns ?? {};
+
     request.get(
       this.state.endpoint,
       {
         returnParams: '1',
-        columns: this.props.columns,
         model: this.props.model,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
         parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
@@ -139,25 +140,25 @@ export default class Table extends Component<TableProps> {
         __IS_AJAX__: '1',
       },
       (data: any) => {
-        let params = data.params ?? {};
+        let params: any = deepObjectMerge(data.params, this.props);
         let columns: Array<any> = [];
-
+console.log('table params', data.params.title, this.props.title, params.title);
         if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
 
         for (let columnName in params.columns) {
-          let origColumn = params.columns[columnName];
+          let adiosColumnDef = {...params.columns[columnName], ...(propsColumns[columnName] ?? {})};
           let newColumn = {
-            _adiosColumnDef: origColumn,
+            adiosColumnDef: adiosColumnDef,
             field: columnName,
-            headerName: origColumn['title'],
+            headerName: adiosColumnDef['title'],
             flex: 1,
             renderCell: (params: any) => {
               let column = params.api.getColumn(params.field);
 
-              switch (column._adiosColumnDef['type']) {
+              switch (column.adiosColumnDef['type']) {
                 case 'color': {
                   return this._commonCellRenderer(
-                    column._adiosColumnDef,
+                    column.adiosColumnDef,
                     <div 
                       style={{ width: '20px', height: '20px', background: params.value }} 
                       className="rounded" 
@@ -167,13 +168,13 @@ export default class Table extends Component<TableProps> {
                 case 'image': {
                   if (!params.value) {
                     return this._commonCellRenderer(
-                      column._adiosColumnDef,
+                      column.adiosColumnDef,
                       <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
                     );
                   }
 
                   return this._commonCellRenderer(
-                    column._adiosColumnDef,
+                    column.adiosColumnDef,
                     <img 
                       style={{ width: '30px', height: '30px' }}
                       src={params.folderUrl + "/" + params.value}
@@ -183,47 +184,48 @@ export default class Table extends Component<TableProps> {
                 }
                 case 'lookup': { 
                   return this._commonCellRenderer(
-                    column._adiosColumnDef,
+                    column.adiosColumnDef,
                     <span style={{
                       color: '#2d4a8a'
                     }}>{params.value?.lookupSqlValue}</span>
                   );
                 }
                 case 'enum': { 
-                  return this._commonCellRenderer(column._adiosColumnDef, column._adiosColumnDef['enumValues'][params.value]);
+                  return this._commonCellRenderer(column.adiosColumnDef, column.adiosColumnDef['enumValues'][params.value]);
                 }
                 case 'bool':
                 case 'boolean': { 
                   if (params.value) {
                     return this._commonCellRenderer(
-                      column._adiosColumnDef,
+                      column.adiosColumnDef,
                       <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
                     );
                   } else {
                     return this._commonCellRenderer(
-                      origColumn,
+                      column.adiosColumnDef,
                       <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
                     );
                   }
                 }
                 case 'date': { 
-                  return this._commonCellRenderer(column._adiosColumnDef, dateToEUFormat(params.value));
+                  return this._commonCellRenderer(column.adiosColumnDef, dateToEUFormat(params.value));
                 }
                 case 'time': { 
-                  return this._commonCellRenderer(column._adiosColumnDef, params.value);
+                  return this._commonCellRenderer(column.adiosColumnDef, params.value);
                 }
                 case 'datetime': {
-                  return this._commonCellRenderer(column._adiosColumnDef, datetimeToEUFormat(params.value));
+                  return this._commonCellRenderer(column.adiosColumnDef, datetimeToEUFormat(params.value));
                 }
                 case 'tags': {
+                  let key = 0;
                   return <div>
                     {params.value.map((value) => {
-                      return <span className="badge badge-info mx-1">{value[column._adiosColumnDef.dataKey]}</span>;
+                      return <span className="badge badge-info mx-1" key={key++}>{value[column.adiosColumnDef.dataKey]}</span>;
                     })}
                   </div>
                 }
                 default: {
-                  return this._commonCellRenderer(column._adiosColumnDef, params.value);
+                  return this._commonCellRenderer(column.adiosColumnDef, params.value);
                 }
               }
             }
@@ -275,25 +277,22 @@ export default class Table extends Component<TableProps> {
     );
   }
 
+  openForm(id: number) {
+    this.setState(
+      { formId: id },
+      () => {
+        //@ts-ignore
+        ADIOS.modalToggle(this.props.uid);
+      }
+    )
+  }
+
   onAddClick() {
-    console.log(this.props.uid); 
-    //@ts-ignore
-    ADIOS.modalToggle(this.props.uid);
-    this.setState({
-      formParams: {...this.state.formParams, id: undefined }
-    })
+    this.openForm(0);
   }
 
   onRowClick(id: number) {
-    //@ts-ignore
-    ADIOS.modalToggle(this.props.uid);
-
-    // let newFormParams = {...this.state.formParams, id: id};
-    // console.log('table onRowClick', this.state.formParams, newFormParams);
-    this.setState({
-      formId: id
-      // formParams: newFormParams
-    })
+    this.openForm(id);
   }
 
   onFilterChange(data: GridFilterModel) {
@@ -333,6 +332,7 @@ export default class Table extends Component<TableProps> {
           <Form
             uid={this.props.uid}
             model={this.props.model}
+            tag={this.props.tag}
             id={this.state.formId ?? 0}
             endpoint={this.state.formEndpoint ?? ''}
             showInModal={true}
@@ -454,7 +454,7 @@ export default class Table extends Component<TableProps> {
                 }
               }}
               //loading={false}
-              //pageSizeOptions={[5, 10]}
+              pageSizeOptions={[5, 10, 15, 30, 50, 100]}
               //checkboxSelection
             />
           </div>

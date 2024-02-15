@@ -13,10 +13,10 @@ class User extends \ADIOS\Core\Models\User {
         'title' => $this->translate('Given name'),
         'viewParams' => [
           'Table' => [
-            'showColumn' => true
+            'show' => true
           ],
           'Form' => [
-            'showColumn' => true
+            'show' => true
           ],
         ],
       ],
@@ -27,12 +27,12 @@ class User extends \ADIOS\Core\Models\User {
       'email' => [
         'type' => 'varchar',
         'title' => $this->translate('Email'),
-        'showColumn' => false
+        'show' => false
       ],
       'phone_number' => [
         'type' => 'varchar',
         'title' => $this->translate('Phone number'),
-        'showColumn' => false
+        'show' => false
       ],
       'photo' => [
         'type' => 'image',

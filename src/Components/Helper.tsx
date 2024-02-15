@@ -1,20 +1,28 @@
 import React from "react";
-import Notification from "./Notification";
+// import Notification from "./Notification";
 
 export function deepObjectMerge(target: any, source: any): Object {
+  let result: any = target;
+  
   for (const key in source) {
-    if (source.hasOwnProperty(key)) {
-      if (source[key] instanceof Object && key in target) {
-        deepObjectMerge(target[key], source[key]);
-      } else if (source[key] != undefined) {
-        target[key] = source[key];
+    if (source[key] instanceof Object) {
+      if (!(result[key] instanceof Object)) {
+        result[key] = source[key];
       } else {
-        target[key] = target[key];
+        result[key] = deepObjectMerge(result[key], source[key]);
       }
+    } else {
+      result[key] = source[key]; // result will be overwritten by source
     }
   }
 
-  return target;
+  // for (const key in source) {
+  //   if (target[key] == undefined) {
+  //     result[key] = source[key]; // target will be overwritten by source
+  //   }
+  // }
+
+  return result;
 }
 
 export function adiosError(message: string): JSX.Element {

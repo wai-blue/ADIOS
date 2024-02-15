@@ -69,50 +69,27 @@ class Form extends \ADIOS\Core\Controller {
   }
 
 
-  public function getParams(array $customParams = []) {
+  public function getParams() {
     try {
+      $params = $this->params;
       $model = $this->adios->getModel($this->params['model']);
-      $columns = $model->getColumnsToShowInView('Form');
 
-      $customParams = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
-        $customParams,
-        $model->defaultFormParams ?? []
-      );
+      $params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params, $model->formParams ?? []);
 
-      if (is_array($customParams['columns'])) {
-        foreach ($columns as $colName => $colDef) {
-          if (
-            isset($customParams['columns'][$colName]['show'])
-            && !$customParams['columns'][$colName]['show']
-          ) {
-            unset($columns[$colName]);
-          } else {
-            $columns[$colName]['viewParams']['Form'] = $customParams['columns'][$colName];
-          }
-        }
+      $params['columns'] = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
+      $params['columns'] = array_filter($params['columns'], function($column) {
+        return ($column['show'] ?? FALSE);
+      });
 
-        unset($customParams['columns']);
-      }
+      $params['canRead'] = $this->adios->permissions->has($this->params['model'] . ':Read');
+      $params['canCreate'] = $this->adios->permissions->has($this->params['model'] . ':Create');
+      $params['canUpdate'] = $this->adios->permissions->has($this->params['model'] . ':Update');
+      $params['canDelete'] = $this->adios->permissions->has($this->params['model'] . ':Delete');
+      $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
 
-      $canRead = $this->adios->permissions->has($this->params['model'] . ':Read');
-      $canCreate = $this->adios->permissions->has($this->params['model'] . ':Create');
-      $canUpdate = $this->adios->permissions->has($this->params['model'] . ':Update');
-      $canDelete = $this->adios->permissions->has($this->params['model'] . ':Delete');
+      $params['folderUrl'] = $model->getFolderUrl();
 
-      return \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
-        $customParams,
-        [
-          'columns' => $columns,
-          'folderUrl' => $model->getFolderUrl(),
-          'canRead' => $canRead,
-          'canCreate' => $canCreate,
-          'canUpdate' => $canUpdate,
-          'canDelete' => $canDelete,
-          'readonly' => !($canUpdate || $canCreate),
-        ]
-      );
-      //   $this->model->defaultFormParams ?? []
-      // );
+      return $params;
     } catch (\Exception $e) {
       http_response_code(400);
 

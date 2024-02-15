@@ -129,7 +129,7 @@ class PrintPdf extends \ADIOS\Core\ViewWithController
   {
     $header = '';
     foreach ($columns as $key => $col) {
-      if ($col['show_column'] || $col['showColumn']) {
+      if ($col['show_column'] || $col['show']) {
         if ($orderBy != '' && explode(" ", $orderBy)[0] == $key) {
           $header .= '<th class="blue">' . (explode(" ", $orderBy)[1] == 'asc' ? '▲' : '▼') 
             . " " . $col['title'] . '</th>'

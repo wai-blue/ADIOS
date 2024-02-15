@@ -29,10 +29,10 @@ class User extends \ADIOS\Core\Model {
   public string $urlBase = "users";
   public ?string $lookupSqlValue = "{%TABLE%}.login";
 
-  public ?array $defaultTableParams = [
+  public ?array $tableParams = [
     "title" => "Users",
   ];
-  public ?array $defaultFormParams = [
+  public ?array $formParams = [
    "titleForInserting" => "New user",
    "titleForEditing" => "User",
   ];
@@ -50,7 +50,7 @@ class User extends \ADIOS\Core\Model {
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
     if (is_object($adiosOrAttributes)) {
-      $this->defaultTableParams['title'] = $this->translate("Users");
+      $this->tableParams['title'] = $this->translate("Users");
       $tokenModel = $adiosOrAttributes->getModel("ADIOS/Core/Models/Token");
 
       if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
@@ -65,7 +65,7 @@ class User extends \ADIOS\Core\Model {
       'login' => [
         'type' => 'varchar',
         'title' => $this->translate('Login'),
-        'showColumn' => true,
+        'show' => true,
       ],
       'password' => [
         'type' => 'password',
@@ -100,7 +100,7 @@ class User extends \ADIOS\Core\Model {
       //  'model' => "ADIOS/Core/Models/Token",
       //  'title' => $this->translate('Reset password token'),
       //  'readonly' => TRUE,
-      //  'showColumn' => false,
+      //  'show' => false,
       //]
     ]));
   }

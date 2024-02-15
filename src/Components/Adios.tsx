@@ -96,8 +96,8 @@ export class ADIOS {
       } else {
         component = '';
       }
-console.log(element.tagName, component);
-      // Find attribute and also delete him using [0] index
+
+      // Find attribute and also delete it using [0] index
       let i: number = 0
       while (element.attributes.length > i) {
         let attributeName: string = element.attributes[i].name.replace(/-([a-z])/g, (_: any, letter: string) => letter.toUpperCase());

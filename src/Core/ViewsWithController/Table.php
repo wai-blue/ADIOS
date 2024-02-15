@@ -139,7 +139,7 @@ class Table extends \ADIOS\Core\ViewWithController
     }
 
     if (empty($params['title'])) {
-      $params['title'] = $this->model->defaultTableParams['title'];
+      $params['title'] = $this->model->tableParams['title'];
     }
 
     if (!empty($params['search'])) {
@@ -181,14 +181,14 @@ class Table extends \ADIOS\Core\ViewWithController
 
     if (_count($this->params['showColumns']) > 0) {
       //foreach ($this->columns as $key => $value) {
-      //  $this->columns[$key]['viewParams']['Table']['showColumn'] = FALSE;
+      //  $this->columns[$key]['viewParams']['Table']['show'] = FALSE;
       //}
 
       $columns = [];
       foreach ($this->params['showColumns'] as $value) {
         if (isset($this->columns[$value])) {
           $columns[$value] = $this->columns[$value];
-          $columns[$value]['viewParams']['Table']['showColumn'] = TRUE;
+          $columns[$value]['viewParams']['Table']['show'] = TRUE;
         }
       }
 
@@ -215,7 +215,7 @@ class Table extends \ADIOS\Core\ViewWithController
       !empty($this->params['foreignKey'])
       && isset($this->columns[$this->params['foreignKey']])
     ) {
-      $this->columns[$this->params['foreignKey']]['viewParams']['Table']['showColumn'] = FALSE;
+      $this->columns[$this->params['foreignKey']]['viewParams']['Table']['show'] = FALSE;
     }
 
     //
@@ -716,7 +716,7 @@ class Table extends \ADIOS\Core\ViewWithController
               $tmpSrcColumn = $tmpColumns[$tmpSrcColName];
               $tmpLookupModel = $this->adios->getModel($tmpSrcColumn["model"]);
               $tmpColumn = $tmpLookupModel->columns()[$tmpLookupColName];
-              $tmpTitle = $tmpLookupModel->defaultTableParams['title'] . " / " . $tmpColumn["title"];
+              $tmpTitle = $tmpLookupModel->tableParams['title'] . " / " . $tmpColumn["title"];
             } else if ($tmpColumn["type"] == "lookup" && is_numeric($searchValue)) {
               $tmpLookupModel = $this->adios->getModel($tmpColumn["model"]);
 
@@ -793,7 +793,7 @@ class Table extends \ADIOS\Core\ViewWithController
 
     if (_count($this->columns)) {
       foreach ($this->columns as $col_name => $col_def) {
-        if (!$col_def['viewParams']['Table']['showColumn']) {
+        if (!$col_def['viewParams']['Table']['show']) {
           unset($this->columns[$col_name]);
         }
       }

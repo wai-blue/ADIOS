@@ -44,11 +44,11 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
-    $this->defaultTableParams = 
-      {{ varExport(thisModel.config.defaultTableParams | default(null), "    ")|raw }}
+    $this->tableParams = 
+      {{ varExport(thisModel.config.tableParams | default(null), "    ")|raw }}
     ;
-    $this->defaultFormParams = 
-      {{ varExport(thisModel.config.defaultFormParams | default(null), "    ")|raw }}
+    $this->formParams = 
+      {{ varExport(thisModel.config.formParams | default(null), "    ")|raw }}
     ;
   }
 
