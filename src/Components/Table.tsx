@@ -320,6 +320,19 @@ console.log('table params', data.params.title, this.props.title, params.title);
       return <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar>;
     }
 
+    let params = {...this.props.formParams};
+    params.defaultValues = {...params.defaultValues};
+    params.columns = {...params.columns};
+    if (this.props.parentFormId != undefined) {
+      const lastSlashIndex = this.props.parentFormModel.lastIndexOf("/");
+      const modelString = this.props.parentFormModel.substring(lastSlashIndex + 1);
+      const targetColumn = 'id_' + modelString.toLowerCase(); /* TODO: Nemusi vzdy fungovat? Treba asi lepsie vyriesit... */
+
+      params.defaultValues[targetColumn] = this.props.parentFormId;
+      params.columns[targetColumn] = {...params.columns[targetColumn]};
+      params.columns[targetColumn].readonly = true;
+    }
+
     return (
       <>
         <Modal 
