@@ -51,6 +51,7 @@ export interface FormProps {
   addButtonText?: string,
   defaultValues?: Object
   endpoint?: string,
+  tag?: string,
 }
 
 export interface FormState {
@@ -87,9 +88,9 @@ export interface FormColumnParams {
   unit?: string,
   step?: number,
   defaultValue?: any,
-  viewParams: any,
   min?: number,
   readonly?: boolean,
+  inputJSX?: string,
 }
 
 export interface FormColumns {
@@ -168,13 +169,18 @@ export default class Form extends Component<FormProps> {
         model: this.props.model,
         columns: this.props.columns,
         id: this.props.id,
+        tag: this.props.tag,
         __IS_AJAX__: '1',
       },
       (data: any) => {
-        let params : any = deepObjectMerge(data.params, this.props);
-        params.layout = this.convertLayoutToString(params.layout);
+        let newState: any = deepObjectMerge(data.params, this.props);
+        if (newState.layout) {
+          newState.layout = this.convertLayoutToString(newState.layout);
+        }
 
-        this.setState(params, () => {
+      console.log(data.params, this.props);
+      console.log(newState);
+        this.setState(newState, () => {
           this.loadData();
         });
       }
@@ -191,6 +197,7 @@ export default class Form extends Component<FormProps> {
           returnData: '1',
           model: this.props.model,
           id: id,
+          tag: this.props.tag,
           __IS_AJAX__: '1',
         },
         (data: any) => {
@@ -209,8 +216,8 @@ export default class Form extends Component<FormProps> {
 
     let formattedInputs = JSON.parse(JSON.stringify(this.state.inputs));
 
-    Object.entries(this.state.columns).forEach(([key, value]) => {
-      if(value['relationship'] != undefined) {
+    Object.entries(this.state.columns ?? {}).forEach(([key, value]) => {
+      if (value['relationship'] != undefined) {
         Object.entries(formattedInputs[key]['values']).forEach(([i, role]) => {
           formattedInputs[key]['values'][i] = role.id;
         })
@@ -295,7 +302,7 @@ export default class Form extends Component<FormProps> {
     let changedInput: any = {};
     changedInput[columnName] = inputValue;
 
-    this.setState(prevState => ({
+    this.setState((prevState: FormState) => ({
       inputs: {
         ...prevState.inputs,
         [columnName]: inputValue
@@ -540,11 +547,11 @@ export default class Form extends Component<FormProps> {
     let colDef = this.state.columns ? this.state.columns[columnName] : null;
 
     if (!colDef) {
-      return adiosError(`Column '${columnName}' is not available for Form component. Check definiton of columns in the model '${this.props.model}'.`);
+      return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);
     }
 
     let inputToRender: JSX.Element | null;
-    let inputParams = {...{readonly: this.state.readonly || (this.props.columns?.[columnName]?.readonly ?? false)}, ...colDef.viewParams?.Form};
+    let inputParams = {...colDef, ...{readonly: this.state.readonly}};
 
     if (colDef.enumValues) {
 
@@ -554,8 +561,8 @@ export default class Form extends Component<FormProps> {
         params={inputParams}
       />
     } else {
-      if (colDef.viewParams?.Form?.inputJSX) {
-        let inputJSX = colDef.viewParams.Form.inputJSX;
+      if (colDef.inputJSX) {
+        let inputJSX = colDef.inputJSX;
 
         inputToRender = adios.getComponent(
           inputJSX,

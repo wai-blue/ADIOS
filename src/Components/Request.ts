@@ -100,6 +100,7 @@ class Request {
         if (errorCallback) errorCallback(err.response);
       }
     } else {
+      console.error('ADIOS: Request unknown error', err);
       this.fatalErrorNotification("Unknown error");
     }
   }

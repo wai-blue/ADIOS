@@ -18,10 +18,10 @@ namespace ADIOS\Core\Models;
 class Config extends \ADIOS\Core\Model {
 
   public string $urlBase = "core/config";
-  public ?array $defaultTableParams = [
+  public ?array $tableParams = [
     "title" => "Configuration",
   ];
-  public ?array $defaultFormParams = [
+  public ?array $formParams = [
    "titleForInserting" => "New configuration parameter",
    "titleForEditing" => "Configuration parameter",
   ];

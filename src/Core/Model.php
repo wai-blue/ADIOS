@@ -672,7 +672,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
         "params" => array_merge($urlParams, [
           "model" => $this->fullName,
-          "searchGroup" => $this->defaultTableParams['title'] ?? $urlBase,
+          "searchGroup" => $this->tableParams['title'] ?? $urlBase,
           "displayMode" => "window",
           "windowParams" => [
             "modal" => TRUE,
@@ -766,8 +766,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
         'title' => 'ID',
         'readonly' => 'yes',
         'viewParams' => [
-          'Table' => ['showColumn' => TRUE],
-          'Form' => ['showColumn' => TRUE]
+          'Table' => ['show' => TRUE],
+          'Form' => ['show' => TRUE]
         ],
       ];
     }
@@ -824,7 +824,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   {
     $columnsToShow = [];
     foreach ($this->columns() as $columnName => $columnValue) {
-      if (isset($columnValue['showColumn']) && $columnValue['showColumn'] === false) continue;
+      if (isset($columnValue['show']) && $columnValue['show'] === false) continue;
       $columnsToShow[$columnName] = $columnValue;
     }
 
@@ -841,10 +841,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     foreach ($columns as $columnName => $columnValue) {
       if (
-        (isset($columnValue['showColumn']) && $columnValue['showColumn'] === true)
+        (isset($columnValue['show']) && $columnValue['show'] === true)
         || (
-          isset($columnValue['viewParams'][$view]['showColumn'])
-          && $columnValue['viewParams'][$view]['showColumn'] === true
+          isset($columnValue['viewParams'][$view]['show'])
+          && $columnValue['viewParams'][$view]['show'] === true
         )
       ) {
         $columnsToShow[$columnName] = $columnValue;

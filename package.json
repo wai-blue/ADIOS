@@ -8,11 +8,11 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "npx babel --watch src/Components --out-dir .",
-    "build": "npx webpack --mode development",
-    "build:prod": "npx webpack --mode production",
-    "build:component": "npx webpack --mode development --env"
+    "xxx-test": "echo \"Error: no test specified\" && exit 1",
+    "xxx-watch": "npx babel --watch src/Components --out-dir .",
+    "xxx-build": "npx webpack --mode development",
+    "xxx-build:prod": "npx webpack --mode production",
+    "xxx-build:component": "npx webpack --mode development --env"
   },
   "browser": {
     "react": "./node_modules/react/cjs/react.production.min.js"

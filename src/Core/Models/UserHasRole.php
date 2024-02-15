@@ -18,10 +18,10 @@ namespace ADIOS\Core\Models;
 class UserHasRole extends \ADIOS\Core\Model {
   public bool $isJunctionTable = FALSE;
 
-  public ?array $defaultTableParams = [
+  public ?array $tableParams = [
     "title" => "Users - Roles",
   ];
-  public ?array $defaultFormParams = [
+  public ?array $formParams = [
    "titleForInserting" => "New assignment of role to user",
    "titleForEditing" => "Assignemtn of role to role",
   ];
@@ -39,14 +39,14 @@ class UserHasRole extends \ADIOS\Core\Model {
         'title' => $this->translate('User'),
         'model' => "ADIOS/Core/Models/User",
         'input_style' => 'select',
-        'showColumn' => false
+        'show' => false
       ],
       'id_role' => [
         'type' => 'lookup',
         'title' => $this->translate('Role'),
         'model' => "ADIOS/Core/Models/UserRole",
         'input_style' => 'select',
-        'showColumn' => false
+        'show' => false
       ],
     ]);
   }

@@ -599,6 +599,34 @@ class Loader
             return $this->getModel($model);
           }
         ));
+
+        $this->twig->addFunction(new \Twig\TwigFunction(
+          'adiosHtmlAttributes',
+          function (?array $attributes) {
+            if (!is_array($attributes)) {
+              return '';
+            } else {
+              $attrsStr = join(
+                ' ',
+                array_map(
+                  function($key) use ($attributes) {
+                    if (is_bool($attributes[$key])){
+                      return $attributes[$key] ? $key : '';
+                    } else if (is_array($attributes[$key])) {
+                      return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='".json_encode($attributes[$key])."'";
+                    } else {
+                      return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='{$attributes[$key]}'";
+                    }
+                  },
+                  array_keys($attributes)
+                )
+              );
+
+              return $attrsStr;
+            }
+          }
+        ));
+
         $this->twig->addFunction(new \Twig\TwigFunction(
           'str2url',
           function ($string) {
@@ -1202,6 +1230,8 @@ class Loader
 
       try {
         if ($this->controllerExists($this->controller)) {
+          
+          unset($this->params['__IS_AJAX__']);
           $this->controllerObject = new $controllerClassName($this, $this->params);
 
           if (

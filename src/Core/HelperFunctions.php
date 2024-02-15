@@ -203,4 +203,23 @@ class HelperFunctions {
 
     return $orig;
   }
+
+
+  public static function capitalizeFirstLetter(string $s) { 
+    return \strtoupper(substr($s, 0, 1)) . substr($s, 1);
+  }
+
+  public static function kebabToCamel(string $s) {
+    $str = str_replace('-', '', ucwords($s, '-'));
+    $str[0] = strtolower($str[0]);
+    return $str;
+  }
+
+  public static function kebabToPascal(string $s) {
+    return self::capitalizeFirstLetter(self::kebabToCamel($s));
+  }
+  
+  public static function camelToKebab(string $s) {
+    return strtolower(preg_replace("/[A-Z]/", "-$0", $s));
+  }
 }

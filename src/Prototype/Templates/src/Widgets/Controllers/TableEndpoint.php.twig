@@ -16,10 +16,13 @@ class {{ thisController.class }} extends \ADIOS\Controllers\Components\Table {
     return $query;
   }
 
-  public function getParams(array $customParams = []) {
-    return parent::getParams(
-{{ varExport(thisController.config.params, "      ")|raw }} ?? []
-    );
+  public function getParams() {
+    $params = parent::getParams();
+
+    // Modify the $params here
+    // !!! DO NOT FORGET TO DELETE THE prototypeBuilderRegenerateAllowed TAG !!!
+
+    return $params;
   }
 
 }
