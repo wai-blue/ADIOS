@@ -293,23 +293,21 @@
           <div class="windows">
             <div class="windows-content"></div>
           </div>
-          <div class="desktop">
-            <div class="desktop-content">
-              {# {% if desktopContentController != "" %}
-                <script>
-                  _ajax_update(
-                    '{{ desktopContentController }}',
-                    {},
-                    '.desktop-content'
-                  );
-                </script>
-              {% endif %} #}
-              {# {% if desktopContentController != "" %}
-                {{ adiosRender(desktopContentController, desktopContentControllerParams)|raw }}
-              {% endif %} #}
+          <div class="p-2">
+            {# {% if desktopContentController != "" %}
+              <script>
+                _ajax_update(
+                  '{{ desktopContentController }}',
+                  {},
+                  '.desktop-content'
+                );
+              </script>
+            {% endif %} #}
+            {# {% if desktopContentController != "" %}
+              {{ adiosRender(desktopContentController, desktopContentControllerParams)|raw }}
+            {% endif %} #}
 
-              {{ contentHtml|raw }}
-            </div>
+            {{ contentHtml|raw }}
           </div>
         </div>
         <!-- /.container-fluid -->

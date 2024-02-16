@@ -3,9 +3,6 @@ import React from "react";
 import * as uuid from 'uuid';
 import { isValidJson, kebabToPascal, camelToKebab } from './Helper';
 
-import 'primereact/resources/primereact.css';
-import 'primereact/resources/themes/lara-light-indigo/theme.css';
-
 /**
  * Components
  */
