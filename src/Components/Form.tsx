@@ -49,7 +49,7 @@ export interface FormProps {
   titleForEditing?: string,
   saveButtonText?: string,
   addButtonText?: string,
-  defaultValues?: Object
+  defaultValues?: Object,
   endpoint?: string,
   tag?: string,
 }
