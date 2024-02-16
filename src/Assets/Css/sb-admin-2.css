@@ -4576,11 +4576,10 @@ input[type="button"].btn-block {
 .breadcrumb {
   display: flex;
   flex-wrap: wrap;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
+  padding: 0.5rem 0rem;
+  margin: 0;
   list-style: none;
-  background-color: #eaecf4;
-  border-radius: 0.35rem;
+  background-color: transparent;
 }
 
 .breadcrumb-item + .breadcrumb-item {
