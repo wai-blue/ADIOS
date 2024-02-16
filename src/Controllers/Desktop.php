@@ -118,14 +118,15 @@ class Desktop extends \ADIOS\Core\Controller {
     //   $contentHtml = '';
     // }
 
-    $this->viewParams = [
-      "config" => $this->adios->config,
-      "user" => $this->adios->userProfile,
-      "console" => $this->adios->console->getLogs(),
-      "settingsMenuItems" => $settingsMenuItems,
-      "settingsLogoutItems" => $settingsLogoutItems,
-      // "contentHtml" => $contentHtml,
-    ];
+    $this->viewParams = array_merge($this->params ?? [],
+      [
+        "config" => $this->adios->config,
+        "user" => $this->adios->userProfile,
+        "console" => $this->adios->console->getLogs(),
+        "settingsMenuItems" => $settingsMenuItems,
+        "settingsLogoutItems" => $settingsLogoutItems,
+      ]
+    );
 
     // $desktopContentActionClassName = $this->adios->getActionClassName($this->adios->desktopContentAction);
     // $desktopContentActionObject = new $desktopContentActionClassName($this->adios);

@@ -14,7 +14,7 @@ namespace ADIOS\Controllers\Components\Inputs;
  * @package Components\Controllers\Table
  */
 class Lookup extends \ADIOS\Core\Controller {
-  public static bool $hideDefaultDesktop = true;
+  public bool $hideDefaultDesktop = true;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);

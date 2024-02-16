@@ -61,7 +61,7 @@ export default class ExportButton extends Component<ExportButtonProps> {
 
   export() {
     if (!this.props.exportElementId) {
-      Notification.error('export-element-id not inicialized');
+      Notification.error('export-element-id not initialized');
       return;
     }
 
@@ -71,61 +71,81 @@ export default class ExportButton extends Component<ExportButtonProps> {
       return;
     }
 
-    let infoNotification: NotyfNotification = Notification.custom({
-      type: "info",
-      message: "Exporting file",
-      duration: 0
-    } as NotificationOptions);
+    $('#adios-export-overlay-' + this.props.uid).fadeIn(180, () => {
+      $(imgElement).addClass('export-img');
+      let infoNotification: NotyfNotification = Notification.custom({
+        type: "info",
+        message: "Exporting file",
+        duration: 0
+      } as NotificationOptions);
 
-    setTimeout(() => {
-      switch (this.props.exportType) {
-        case 'image':
-          html2canvas(imgElement).then((canvas: any) => {
-            const imageDataURL = canvas.toDataURL("image/png");
-            const a = document.createElement("a");
-            a.href = imageDataURL;
-            a.download = this.props.exportFileName ?? uuid.v4();
-            a.click();
-          });
-        break;
-        case 'pdf':
-          html2canvas(imgElement).then((canvas: any) => {
-            const imageDataURL = canvas.toDataURL("image/png");
-            const pdf = new jsPDF('l', 'mm', 'a4');
+      setTimeout(() => {
+        switch (this.props.exportType) {
+          case 'image':
+            html2canvas(imgElement).then((canvas: any) => {
+              const imageDataURL = canvas.toDataURL("image/png");
+              const a = document.createElement("a");
+              a.href = imageDataURL;
+              a.download = this.props.exportFileName ?? uuid.v4();
+              a.click();
+            });
 
-            const props = pdf.getImageProperties(imageDataURL);
-            const width = pdf.internal.pageSize.getWidth();
-            const height = (props.height * width) / props.width;
+            $(imgElement).removeClass('export-img');
+            $('#adios-export-overlay-' + this.props.uid).fadeOut();
+          break;
+          case 'pdf':
+            html2canvas(imgElement).then((canvas: any) => {
+              const imageDataURL = canvas.toDataURL("image/png");
+              const pdf = new jsPDF('l', 'mm', 'a4');
 
-            pdf.addImage(imageDataURL, 'PNG', 5, 5, width - 20, height);
-            pdf.save(this.props.exportFileName ?? uuid.v4() + '.pdf');
-          });
-        break;
-        default:
-          Notification.error('export-type must be pdf or image');
-      }
+              const props = pdf.getImageProperties(imageDataURL);
+              const width = pdf.internal.pageSize.getWidth() - 10;
+              const height = (props.height * width) / props.width;
 
-      Notification.dismiss(infoNotification);
-    }, 500);
+              pdf.addImage(imageDataURL, 'PNG', 5, 5, width, height);
+              pdf.save(this.props.exportFileName ?? uuid.v4() + '.pdf');
+            });
+
+            $(imgElement).removeClass('export-img');
+            $('#adios-export-overlay-' + this.props.uid).fadeOut();
+          break;
+          default:
+            Notification.error('export-type must be pdf or image');
+        }
+
+        Notification.dismiss(infoNotification);
+      }, 500);
+    });
   }
 
   render() {
     return (
-      <div
-        id={"adios-export-button-" + this.props.uid}
-        className="adios-react-ui button"
-      >
-        <button
-          className={"adios ui Button btn " + this.state.cssClass + " btn-icon-split"}
-          style={this.state.cssStyle}
-          onClick={() => this.export()}
+      <>
+        <div
+          id={"adios-export-overlay-" + this.props.uid}
+          style={{ position: 'fixed', left: '0', top: '0', width: '100vw', height: '100vh', background: 'white', zIndex: '1000', display: 'none' }}
         >
-          <span className="icon">
-            <i className={this.state.icon}></i>
-          </span>
-          <span className="text">{this.props.text}</span>
-        </button>
-      </div>
+          <div className='alert alert-success' role='alert'>
+            <i className='fas fa-check mr-4 align-self-center'></i>
+            Exportujem rozpis do obrázku<br/>
+          </div>
+        </div>
+        <div
+          id={"adios-export-button-" + this.props.uid}
+          className="adios-react-ui button"
+        >
+          <button
+            className={"adios ui Button btn " + this.state.cssClass + " btn-icon-split"}
+            style={this.state.cssStyle}
+            onClick={() => this.export()}
+          >
+            <span className="icon">
+              <i className={this.state.icon}></i>
+            </span>
+            <span className="text">{this.props.text}</span>
+          </button>
+        </div>
+      </>
     );
   }
 }

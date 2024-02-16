@@ -6,7 +6,7 @@ namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 
-  public static bool $hideDefaultDesktop = true;
+  public bool $hideDefaultDesktop = true;
 
   public function renderJson() { 
     try {

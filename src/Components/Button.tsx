@@ -7,6 +7,7 @@ interface ButtonProps {
   href?: string,
   text?: string,
   icon?: string,
+  target?: string,
   cssClass?: string
   cssStyle?: object
 }
@@ -62,13 +63,15 @@ export default class Button extends Component<ButtonProps> {
           style={this.state.cssStyle}
           href={
             this.props.href ? (
-              this.props.href.startsWith('/') 
-                  //@ts-ignore
-                ? window._APP_URL + this.props.href 
-                : window.location.href + '/' + this.props.href
+              this.props.href.startsWith('/')
+                ? globalThis.adios._APP_URL + this.props.href
+                : this.props.href.startsWith('?')
+                  ? window.location.href + this.props.href
+                  : window.location.href + '/' + this.props.href
             ) : '#'
           }
           onClick={this.props.onClick}
+          target={this.props.target}
         >
           <span className="icon">
             <i className={this.state.icon}></i>

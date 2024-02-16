@@ -17,7 +17,7 @@ namespace ADIOS\Controllers;
  */
 class PasswordReset extends \ADIOS\Core\Controller {
   public static bool $requiresUserAuthentication = FALSE;
-  public static bool $hideDefaultDesktop = TRUE;
+  public bool $hideDefaultDesktop = TRUE;
 
   public function preRender() {
     $token = $this->params["token"];

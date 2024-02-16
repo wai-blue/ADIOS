@@ -14,7 +14,7 @@ namespace ADIOS\Controllers\Components;
  * @package Components\Controllers\Form
  */
 class Form extends \ADIOS\Core\Controller {
-  public static bool $hideDefaultDesktop = true;
+  public bool $hideDefaultDesktop = true;
 
   protected ?\Illuminate\Database\Eloquent\Builder $query = null;
   private $details = [];

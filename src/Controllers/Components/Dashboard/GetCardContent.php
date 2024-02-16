@@ -14,7 +14,7 @@ namespace ADIOS\Controllers\Components\Dashboard;
  * @package Components\Controllers
  */
 class GetCardContent extends \ADIOS\Core\Controller {
-  public static bool $hideDefaultDesktop = TRUE;
+  public bool $hideDefaultDesktop = TRUE;
 
   function render() {
     $dashboard = new \ADIOS\Core\ViewsWithController\Dashboard($this->adios);

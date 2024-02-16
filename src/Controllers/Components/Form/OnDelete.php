@@ -17,7 +17,7 @@ use Illuminate\Database\QueryException;
  * @package Components\Controllers\Table
  */
 class OnDelete extends \ADIOS\Core\Controller {
-  public static bool $hideDefaultDesktop = true;
+  public bool $hideDefaultDesktop = true;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);

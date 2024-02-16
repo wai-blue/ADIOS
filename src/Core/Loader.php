@@ -127,7 +127,7 @@ class Loader
   public string $uid = "";
   public string $srcDir = "";
 
-  public $controllerObject;
+  public ?\ADIOS\Core\Controller $controllerObject;
 
   public bool $logged = FALSE;
 
@@ -163,7 +163,6 @@ class Loader
 
   public array $assetsUrlMap = [];
 
-  public int $controllerNestingLevel = 0;
   public array $controllerStack = [];
 
   public string $dictionaryFilename = "Core-Loader";
@@ -692,10 +691,6 @@ class Loader
     return isset($_REQUEST['__IS_AJAX__']) && $_REQUEST['__IS_AJAX__'] == "1";
   }
 
-  public function isNestedController() {
-    return ($this->controllerNestingLevel > 2);
-  }
-
   public function isWindow() {
     return isset($_REQUEST['__IS_WINDOW__']) && $_REQUEST['__IS_WINDOW__'] == "1";
   }
@@ -1165,26 +1160,6 @@ class Loader
       // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
       $this->config = $controllerClassName::overrideConfig($this->config, $this->params);
 
-      if ($this->params['__IS_AJAX__']) {
-        $desktopView = "";
-        $desktopParams = [];
-      } else if (
-        !$this->getConfig("hideDesktop", FALSE)
-        && !$controllerClassName::$hideDefaultDesktop
-        && $this->controllerNestingLevel == 0
-      ) {
-        // treba nacitat cely desktop, ak to nie je zakazane v config alebo v akcii
-        // $this->params['contentController'] = $this->controller;
-        // $this->params['config'] = $this->config;
-        // $this->params['_COOKIE'] = $_COOKIE;
-
-        // $this->controller = $this->config['defaultDesktopController'] ?? 'Desktop';
-
-        $desktop = new ($this->getCoreClass('Controllers\\Desktop'))($this);
-        [$desktopView, $desktopParams] = $desktop->prepareViewAndParams();
-        // _var_dump($desktopParams);exit;
-      }
-
       if (
         !$this->userLogged
         && $controllerClassName::$requiresUserAuthentication
@@ -1219,7 +1194,6 @@ class Loader
 
 
 
-      $this->controllerNestingLevel++;
       $this->controllerStack[] = $this->controller;
 
       $controllerClassName = $this->getControllerClassName($this->controller);
@@ -1280,6 +1254,14 @@ class Loader
                   $viewParams
                 )->render();
               };
+
+              if ($this->params['__IS_AJAX__']) {
+                $desktopView = "";
+                $desktopParams = [];
+              } else if (!$this->controllerObject->hideDefaultDesktop) {
+                $desktop = $this->controllerObject->getDesktop($this->params);
+                [$desktopView, $desktopParams] = $desktop->prepareViewAndParams();
+              }
 
               if (!empty($desktopView)) {
                 $desktopParams['contentHtml'] = $contentHtml;

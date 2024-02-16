@@ -14,7 +14,7 @@ namespace ADIOS\Controllers\Components\Table\Import\CSV;
  * @package Components\Controllers
  */
 class DownloadTemplate extends \ADIOS\Core\Controller {
-  public static bool $hideDefaultDesktop = TRUE;
+  public bool $hideDefaultDesktop = TRUE;
 
   public function render() {
     $model = $this->params['model'];

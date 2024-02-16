@@ -17,7 +17,7 @@ namespace ADIOS\Controllers;
  */
 class Login extends \ADIOS\Core\Controller {
   public static bool $requiresUserAuthentication = FALSE;
-  public static bool $hideDefaultDesktop = TRUE;
+  public bool $hideDefaultDesktop = TRUE;
 
   public function preRender() {
     return [

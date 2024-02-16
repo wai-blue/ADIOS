@@ -38,7 +38,7 @@ class Controller {
   /**
    * If set to TRUE, the default ADIOS desktop will not be added to the rendered content
    */
-  public static bool $hideDefaultDesktop = FALSE;
+  public bool $hideDefaultDesktop = FALSE;
 
   /**
    * If set to FALSE, the controller will not be rendered in CLI
@@ -93,7 +93,11 @@ class Controller {
   public function init() {
     //
   }
-  
+
+  public function getDesktop(array $desktopParams = []): \ADIOS\Core\Controller {
+    return new ($this->adios->getCoreClass('Controllers\\Desktop'))($this->adios, $desktopParams);
+  }
+
   /**
    * Used to change ADIOS configuration before calling preRender()
    *

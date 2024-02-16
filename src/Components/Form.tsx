@@ -178,8 +178,6 @@ export default class Form extends Component<FormProps> {
           newState.layout = this.convertLayoutToString(newState.layout);
         }
 
-      console.log(data.params, this.props);
-      console.log(newState);
         this.setState(newState, () => {
           this.loadData();
         });

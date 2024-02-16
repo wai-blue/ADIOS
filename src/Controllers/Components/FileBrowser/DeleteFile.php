@@ -14,7 +14,7 @@ namespace ADIOS\Controllers\Components\FileBrowser;
  * @package Components\Controllers\FileBrowser
  */
 class DeleteFile extends \ADIOS\Core\Controller {
-  public static bool $hideDefaultDesktop = TRUE;
+  public bool $hideDefaultDesktop = TRUE;
 
   public function render() {
     unlink(realpath($this->adios->config['uploadDir'])."/".$this->params['folderPath']."/".trim((string) $this->params['fileName']));

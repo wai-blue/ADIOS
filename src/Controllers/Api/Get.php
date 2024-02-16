@@ -11,7 +11,7 @@
 namespace ADIOS\Controllers\Api;
 
 class Get extends \ADIOS\Core\Controller {
-  public static bool $hideDefaultDesktop = true;
+  public bool $hideDefaultDesktop = true;
 
   public function renderJson() {
     $record = [];
