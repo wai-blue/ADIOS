@@ -18,6 +18,7 @@ import FormButton from "./FormButton";
 import FormCardButton from "./FormCardButton";
 import View from "./View";
 import ExportButton from "./ExportButton";
+import MuiDataGrid from "./Table/MuiDataGrid";
 
 export class ADIOS {
   APP_URL: string = '';
@@ -44,6 +45,7 @@ export class ADIOS {
     this.registerReactElement('FormCardButton', FormCardButton);
     this.registerReactElement('View', View);
     this.registerReactElement('ExportButton', ExportButton);
+    this.registerReactElement('TableMuiDataGrid', MuiDataGrid);
   }
   
   registerReactElement(elementName: string, elementObject: any) {
