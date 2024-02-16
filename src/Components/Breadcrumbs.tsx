@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { adios } from "./Adios";
 
 interface BreadcrumbsProps {
   uid: string,
@@ -40,7 +39,7 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
             <span style={{color: '#e78b00'}}>{item.text}</span>
           ) : (
             <a
-              href={adios.APP_URL + '/' + item.url}
+              href={globalThis._APP_URL + '/' + item.url}
               className="text-primary"
             >{item.text}</a>
           )}

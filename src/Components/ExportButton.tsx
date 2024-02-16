@@ -82,7 +82,9 @@ export default class ExportButton extends Component<ExportButtonProps> {
       setTimeout(() => {
         switch (this.props.exportType) {
           case 'image':
-            html2canvas(imgElement).then((canvas: any) => {
+            html2canvas(imgElement, {
+              scale: window.devicePixelRatio * 1.35
+            }).then((canvas: any) => {
               const imageDataURL = canvas.toDataURL("image/png");
               const a = document.createElement("a");
               a.href = imageDataURL;
