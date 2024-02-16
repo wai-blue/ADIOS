@@ -6,6 +6,7 @@ interface ButtonProps {
   onClick?: any,
   href?: string,
   text?: string,
+  title?: string,
   icon?: string,
   target?: string,
   cssClass?: string
@@ -59,7 +60,7 @@ export default class Button extends Component<ButtonProps> {
         className="adios-react-ui button"
       >
         <a 
-          className={"adios ui Button btn " + this.state.cssClass + " btn-icon-split"}
+          className={"adios ui Button btn " + this.state.cssClass + (this.props.icon && this.props.text ? " btn-icon-split" : "")}
           style={this.state.cssStyle}
           href={
             this.props.href ? (
@@ -72,11 +73,12 @@ export default class Button extends Component<ButtonProps> {
           }
           onClick={this.props.onClick}
           target={this.props.target}
+          title={this.props.title}
         >
           <span className="icon">
             <i className={this.state.icon}></i>
           </span>
-          <span className="text">{this.props.text}</span>
+          {this.props.text ? <span className="text">{this.props.text}</span> : null}
         </a>
       </div>
     );

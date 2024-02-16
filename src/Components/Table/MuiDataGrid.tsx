@@ -167,7 +167,7 @@ export default class MuiDataGrid extends Table {
                 <div className="row m-0">
 
                   <div className="col-lg-12 p-0 m-0">
-                    <h3 className="card-title m-0">{this.state.title}</h3>
+                    <h3 className="card-title m-0 text-primary mb-2">{this.state.title}</h3>
                   </div>
 
                   <div className="col-lg-6 m-0 p-0">
