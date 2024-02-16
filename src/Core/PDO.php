@@ -26,7 +26,7 @@ class PDO {
     $dbName = $this->adios->config['db_name'] ?? '';
     $dbCodepage = $this->adios->config['db_codepage'] ?? 'utf8mb4';
 
-    if (!empty($dbHost) && !empty($dbPort) && !empty($dbName) && !empty($dbCodepage)) {
+    if (!empty($dbHost) && !empty($dbName) && !empty($dbCodepage)) {
       $this->connection = new \PDO(
         "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset={$dbCodepage}",
         $dbUser,
