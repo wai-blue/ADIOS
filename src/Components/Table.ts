@@ -136,19 +136,22 @@ export default class Table extends Component<TableProps> {
       },
       (data: any) => {
         let params: any = deepObjectMerge(data.params, this.props);
+        let tmpColumns = params.columns;
         let columns: Array<any> = [];
 
         if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
 
         if (successCallback) successCallback(data, params, columns, propsColumns);
 
+console.log(tmpColumns);
+console.log(columns);
         this.setState({
           addButtonText: this.props.addButtonText ?? params.addButtonText,
           canCreate: params.canCreate ?? true,
           canDelete: params.canDelete ?? true,
           canRead: params.canRead ?? true,
           canUpdate: params.canUpdate ?? true,
-          columns: columns,
+          columns: columns.length != 0 ? columns : tmpColumns,
           showHeader: params.showHeader ?? true,
           title: this.props.title ?? params.title,
         });

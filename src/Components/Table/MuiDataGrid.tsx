@@ -104,6 +104,7 @@ export default class MuiDataGrid extends Table {
         columns.push(newColumn);
       };
     });
+
   }
 
   render() {
