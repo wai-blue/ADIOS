@@ -1,54 +1,28 @@
 import React, { Component } from 'react'
+import { Input, InputProps } from '../Input'
+import * as uuid from 'uuid';
 
 interface VarcharInputProps {
-  parentForm: any,
-  columnName: string,
-  params: any,
-  readonly?: boolean
+  placeholder?: string,
 }
 
-interface VarcharInputState {
-  readonly?: boolean,
-}
-
-export default class Varchar extends Component<VarcharInputProps> {
-  state: VarcharInputState;
-
-  constructor(props: VarcharInputProps) {
-    super(props);
-
-    let parentForm = props.parentForm;
-    let pfState = parentForm.state;
-    let pfProps = parentForm.props;
-    let columnName = props.columnName;
-
-    this.state = {
-      readonly:
-        (props.params.readonly ?? false)
-        || (pfProps?.readonly ?? false)
-        || (pfState.columns[columnName].disabled ?? false)
-        || (pfState.columns[columnName].readonly ?? false)
-    }
-  }
-
+export default class Varchar extends Input<InputProps & VarcharInputProps> {
   render() {
-    let parentForm = this.props.parentForm;
-    let pfState = parentForm.state;
-    let columnName = this.props.columnName;
-
     return (
-      <input 
-        type="text" 
-        value={pfState.inputs[this.props.columnName] ?? ""}
-        onChange={(e) => parentForm.inputOnChange(columnName, e)}
+      <input
+        type="text"
+        id={this.props.uid ?? uuid.v4()}
+        value={this.state.value}
+        onChange={(e) => this.state.onChange(this.props.columnName, e)}
+        placeholder={this.props.placeholder}
         className={
           "form-control"
-          + " " + (pfState.invalidInputs[columnName] ? 'is-invalid' : '')
+          + " " + (this.state.isInvalid ? 'is-invalid' : '')
           + " " + (this.props.params?.cssClass ?? "")
           + " " + (this.state.readonly ? "bg-muted" : "")
         }
         disabled={this.state.readonly}
       />
     );
-  } 
+  }
 }

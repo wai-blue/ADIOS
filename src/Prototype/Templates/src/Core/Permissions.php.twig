@@ -17,7 +17,7 @@ class Permissions extends \ADIOS\Core\Permissions {
 
     $prototypePermissions = [];
     foreach ($prototypePermissionsByRoleNames as $roleName => $rolePermissions) {
-      $prototypePermissions[$idUserRoleByRoleName[$roleName]] = $rolePermissions;
+      $prototypePermissions[$idUserRoleByRoleName[$roleName] ?? 0] = $rolePermissions;
     }
 
     return \ADIOS\Core\HelperFunctions::arrayMergeRecursively($permissions, $prototypePermissions);

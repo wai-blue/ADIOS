@@ -1,6 +1,6 @@
 import request from "./Request";
 import React, { Component, RefObject, useRef, useEffect } from "react";
-import Loader from "./Loader";
+import { ProgressBar } from 'primereact/progressbar';
 
 interface ViewProps {
   uid: string,
@@ -69,7 +69,8 @@ export default class View extends Component<ViewProps> {
 
   render() {
 
-    if (this.state.html == '') return <Loader />;
+    if (this.state.html == '') return <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar>;
+;
 
     return (
       <div

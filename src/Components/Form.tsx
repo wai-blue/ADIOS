@@ -1,14 +1,14 @@
 import React, {Component} from "react";
 
 import Notification from "./Notification";
-import Loader from "./Loader";
+import { ProgressBar } from 'primereact/progressbar';
 import request from "./Request";
 
 import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Swal, {SweetAlertOptions} from "sweetalert2";
 
-import { adios } from "./Adios";
+import { adios } from "./Loader";
 import { adiosError, deepObjectMerge } from "./Helper";
 
 /** Components */
@@ -741,7 +741,7 @@ export default class Form extends Component<FormProps> {
 
 
   render() {
-    let formContent = this.state.columns == null ? <Loader/> : this._renderTab();
+    let formContent = this.state.columns == null ?  <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar> : this._renderTab();
 
     return (
       <>

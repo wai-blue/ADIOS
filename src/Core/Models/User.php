@@ -41,6 +41,7 @@ class User extends \ADIOS\Core\Model {
     $this->sqlName = "_users";
     parent::__construct($adiosOrAttributes, $eloquentQuery);
 
+
     if (is_object($adiosOrAttributes)) {
       $tokenModel = $adiosOrAttributes->getModel("ADIOS/Core/Models/Token");
 
@@ -230,7 +231,6 @@ class User extends \ADIOS\Core\Model {
 
     if (!empty($login)) {
       $users = $this
-        ->with('roles')
         ->where('login', '=', $login)
         ->where('is_active', '<>', 0)
         ->get()
@@ -250,13 +250,7 @@ class User extends \ADIOS\Core\Model {
         }
 
         if ($passwordMatch) {
-          $authResult = $user;
-
-          $tmpRoles = [];
-          foreach ($authResult['roles'] as $role) {
-            $tmpRoles[] = (int) $role['pivot']['id_role'];
-          }
-          $authResult['roles'] = $tmpRoles;
+          $authResult = $this->loadUser($user['id']);
 
           if ($rememberLogin) {
             setcookie(
@@ -330,9 +324,28 @@ class User extends \ADIOS\Core\Model {
     $this->adios->userLogged = FALSE;
   }
 
+  public function getQueryForUser(int $idUser) {
+    return $this
+      ->with('roles')
+      ->where('id', $idUser)
+      ->where('is_active', '<>', 0)
+    ;
+  }
+
+  public function loadUser(int $idUser) {
+    $user = $this->getQueryForUser($idUser)->first()->toArray();
+
+    $tmpRoles = [];
+    foreach ($user['roles'] as $role) {
+      $tmpRoles[] = (int) $role['pivot']['id_role'];
+    }
+    $user['roles'] = $tmpRoles;
+
+    return $user;
+  }
+
   public function loadUserFromSession() {
-    $this->adios->userProfile = $_SESSION[_ADIOS_ID]['userProfile'];
-    $this->adios->userLogged = TRUE;
+    return $this->loadUser((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
   }
 
   public function getByEmail(string $email) {
@@ -369,10 +382,6 @@ class User extends \ADIOS\Core\Model {
       'id_role'
     );
   }
-
-  // public function id_role(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
-  //   return $this->BelongsTo(\ADIOS\Core\Models\UserRole::class, 'id_role');
-  // }
 
   public function id_token_reset_password(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
     return $this->BelongsTo(\ADIOS\Core\Models\Token::class, 'id_token_reset_password');

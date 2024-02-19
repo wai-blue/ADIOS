@@ -595,6 +595,7 @@ class Builder {
     ]);
     $this->renderPhpFile('src/Core/Models/User.php', 'src/Core/Models/User.php.twig', []);
     $this->renderPhpFile('src/Core/Models/UserRole.php', 'src/Core/Models/UserRole.php.twig', []);
+    $this->renderPhpFile('src/Core/Models/UserHasRole.php', 'src/Core/Models/UserHasRole.php.twig', []);
   }
 
   // public function createEmptyDatabase() {

@@ -24,6 +24,8 @@ import ExportButton from "./ExportButton";
 import MuiDataGrid from "./Table/MuiDataGrid";
 import PrimeReactDataTable from "./Table/PrimeReactDataTable";
 
+import InputVarchar from "./Inputs/Varchar";
+
 export class ADIOS {
   APP_URL: string = '';
 
@@ -51,6 +53,7 @@ export class ADIOS {
     this.registerReactElement('ExportButton', ExportButton);
     this.registerReactElement('TableMuiDataGrid', MuiDataGrid);
     this.registerReactElement('TablePrimeReactDataTable', PrimeReactDataTable);
+    this.registerReactElement('InputVarchar', InputVarchar);
   }
   
   registerReactElement(elementName: string, elementObject: any) {

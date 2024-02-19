@@ -14,7 +14,7 @@ class Permissions extends \ADIOS\Core\Controller {
   public function preRender() {
     $idUserRole = (int) $this->params['idUserRole'];
 
-    $userRoleModel = (new \ADIOS\Core\Models\UserRole($this->adios));
+    $userRoleModel = (new ($this->adios->getCoreClass('Core\\Models\\UserRole'))($this->adios));
 
     if ($idUserRole > 0) {
       $userRoles = [ $userRoleModel->getById($idUserRole) ];

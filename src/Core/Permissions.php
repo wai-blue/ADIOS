@@ -90,6 +90,10 @@ class Permissions {
       if ($permissionGranted) break;
     }
 
+    if (!$permissionGranted) {
+      $permissionGranted = (bool) in_array($permission, (array) $this->permissions[0]);
+    }
+
     return $permissionGranted;
   }
   

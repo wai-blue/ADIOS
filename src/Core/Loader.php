@@ -537,8 +537,16 @@ class Loader
           if ($user['is_active'] != 1) {
             $userModel->logoutUser();
           } else {
-            $userModel->loadUserFromSession();
-            $userModel->updateAccessInformation((int) $this->userProfile['id']);
+            $user = $userModel->loadUserFromSession();
+
+            if (is_array($user)) {
+              $userModel->updateAccessInformation((int) $user['id']);
+              $this->userProfile = $user;
+              $this->userLogged = TRUE;
+            } else {
+              $this->userProfile = NULL;
+              $this->userLogged = FALSE;
+            }
           }
         } else if (!empty($_POST['login']) && !empty($_POST['password'])) {
           $userModel->authUser(
@@ -1292,7 +1300,11 @@ class Loader
           }
         }
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-        $return = $this->renderFatal("Not enough permissions: ".$e->getMessage(), FALSE);
+        $message = "Not enough permissions: ".$e->getMessage();
+        if ($this->userLogged) {
+          $message .= " Hint: Sign out and sign in again.";
+        }
+        $return = $this->renderFatal($message, FALSE);
         header('HTTP/1.1 401 Unauthorized', true, 401);
       } catch (\Exception $e) {
         $error = error_get_last();

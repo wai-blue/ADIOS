@@ -13,9 +13,9 @@ try {
   $app->install();
 
   // user roles and users
-  $userModel = $app->getModel("ADIOS/Core/Models/User");
-  $userRoleModel = $app->getModel("ADIOS/Core/Models/UserRole");
-  $userHasRoleModel = $app->getModel("ADIOS/Core/Models/UserHasRole");
+  $userModel = new ($app->getCoreClass('Core\\Models\\User'))($app);
+  $userRoleModel = new ($app->getCoreClass('Core\\Models\\UserRole'))($app);
+  $userHasRoleModel = new ($app->getCoreClass('Core\\Models\\UserHasRole'))($app);
 
   $idRoleAdministrator = $userRoleModel->insertRow(["name" => "Administrator"]);
 
