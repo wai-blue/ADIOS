@@ -1210,6 +1210,10 @@ export const ProductService = {
             return Promise.resolve(this.getProductsData());
         },
 
+        getProductsArray() {
+            return this.getProductsData();
+        },
+
         getProductsWithOrdersSmall() {
             return Promise.resolve(this.getProductsWithOrdersData().slice(0, 10));
         },
