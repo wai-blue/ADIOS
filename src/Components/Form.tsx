@@ -288,7 +288,7 @@ export default class Form extends Component<FormProps> {
    * Input onChange with event parameter
    */
   inputOnChange(columnName: string, event: React.FormEvent<HTMLInputElement>) {
-    let inputValue: string | number = event.currentTarget.value;
+    let inputValue: string | number = event?.currentTarget?.value ?? null;
 
     this.inputOnChangeRaw(columnName, inputValue);
   }
