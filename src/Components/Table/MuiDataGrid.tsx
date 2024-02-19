@@ -118,14 +118,13 @@ export default class MuiDataGrid extends Table {
     params.defaultValues = params.defaultValues ?? {};
     params.columns = {...params.columns};
 
-    if (this.props.parentFormId != undefined) {
-      const lastSlashIndex = this.props.parentFormModel?.lastIndexOf("/") ?? 0;
-      const modelString = this.props.parentFormModel?.substring(lastSlashIndex + 1) ?? '';
+    if (this.props.parentFormId != undefined && this.props.parentFormModel != undefined) {
+      const lastSlashIndex = this.props.parentFormModel.lastIndexOf("/");
+      const modelString = this.props.parentFormModel.substring(lastSlashIndex + 1);
       const targetColumn = 'id_' + modelString.toLowerCase(); /* TODO: Nemusi vzdy fungovat? Treba asi lepsie vyriesit... */
 
       params.defaultValues[targetColumn] = this.props.parentFormId;
-      params.columns[targetColumn] = params.columns[targetColumn] ?? {};
-      params.columns[targetColumn].readonly = true;
+      params.columns[targetColumn] = {readonly: true, ...params.columns[targetColumn]};
     }
 
     return (
