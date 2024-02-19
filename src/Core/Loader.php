@@ -1252,6 +1252,7 @@ class Loader
                     'uid' => $this->uid,
                     'user' => $this->userProfile,
                     'config' => $this->config,
+                    'session' => $_SESSION[_ADIOS_ID],
                     'viewParams' => $viewParams,
                     'windowParams' => $viewParams['windowParams'] ?? NULL,
                   ]

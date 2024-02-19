@@ -6,33 +6,19 @@ namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 
-  // use \{{ thisController.traitNamespace }}\{{ thisController.class }};
-
   public function prepareViewAndParams(): array {
 
-    // prepare view
+    // configure view to be used
     $this->view = '{{ thisController.config.view }}';
 
-    // call onBeforePrepareViewAndParams, if it exists
-    if (method_exists($this, 'onBeforePrepareViewAndParams')) {
-      $this->onBeforePrepareViewAndParams();
-    }
-
     // build-up view params
-    $this->viewParams = array_merge(
+    {% if thisController.config.params %}$this->viewParams = array_merge(
       $this->params,
-      [
-        'windowParams' => $this->params['windowParams'] ?? [],
-      ],
 {{ varExport(thisController.config.params, "      ")|raw }} ?? []
-    );
+    );{% else %}$this->viewParams = $this->params;{% endif %}
 
-    // call onAfterPrepareViewAndParams, if it exists
-    if (method_exists($this, 'onAfterPrepareViewAndParams')) {
-      $this->onAfterPrepareViewAndParams();
-    }
 
-    // render view
+    // return view and viewParams for ADIOS Twig renderer
     return [$this->view, $this->viewParams];
   }
 }
