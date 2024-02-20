@@ -20,6 +20,8 @@ export default class MuiTable extends Table {
   }
 
   _renderCellBody(column: MuiTableColumn, params: any): JSX.Element {
+    const columnValue: any = params.value;
+
     switch (column.adiosColumnDef.type) {
       case 'color':
         return <div 
@@ -27,13 +29,7 @@ export default class MuiTable extends Table {
           className="rounded" 
         />;
       case 'image': 
-        if (!params.value) {
-          return this._commonCellRenderer(
-            column.adiosColumnDef,
-            <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
-          );
-        }
-
+        if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
         return <img 
           style={{ width: '30px', height: '30px' }}
           src={params.folderUrl + "/" + params.value}
@@ -42,27 +38,17 @@ export default class MuiTable extends Table {
       case 'lookup':
         return <span style={{
           color: '#2d4a8a'
-        }}>{params.value?.lookupSqlValue}</span>;
+        }}>{columnValue?.lookupSqlValue}</span>;
       case 'enum':
         const enumValues = column.adiosColumnDef.enumValues;
         if (!enumValues) return <></>;
-        return <>{enumValues[params.value]}</>;
+        return <>{enumValues[columnValue]}</>;
       case 'bool':
       case 'boolean':
-        if (params.value) {
-          return this._commonCellRenderer(
-            column.adiosColumnDef,
-            <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
-          );
-        } else {
-          return this._commonCellRenderer(
-            column.adiosColumnDef,
-            <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
-          );
-        }
-      case 'date': return <>{dateToEUFormat(params.value)}</>;
-      case 'time': return <>{params.value}</>;
-      case 'datetime': return <>{datetimeToEUFormat(params.value)}</>;
+        if (columnValue) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
+        return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
+      case 'date': return <>{dateToEUFormat(columnValue)}</>;
+      case 'datetime': return <>{datetimeToEUFormat(columnValue)}</>;
       case 'tags': {
         let key = 0;
         return <div>
@@ -71,7 +57,7 @@ export default class MuiTable extends Table {
           })}
         </div>
       }
-      default: return params.value;
+      default: return columnValue;
     }
   }
 
@@ -103,6 +89,12 @@ export default class MuiTable extends Table {
 
       params.columns = newColumns;
     });
+  }
+
+  onPaginationChangeCustom(event: any) {
+    const page = event.page + 1;
+    const itemsPerPage = event.pageSize;
+    this.onPaginationChange(page, itemsPerPage);
   }
 
   render() {
@@ -228,25 +220,22 @@ export default class MuiTable extends Table {
               initialState={{
                 pagination: {
                   paginationModel: {
-                    page: (this.state.page - 1), 
-                    pageSize: this.state.pageLength
+                    page: (this.state.page - 1),
+                    pageSize: this.state.itemsPerPage
                   },
                 },
               }}
               paginationMode="server"
-              onPaginationModelChange={(pagination) => this.loadData(pagination.page + 1)}
               sortingMode="server"
-              onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
               filterMode="server"
-              onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
               rowCount={this.state.data.total}
-              onRowClick={(item) => this.onRowClick(item.id as number)}
               rowHeight={this.props.rowHeight ? this.props.rowHeight : 30}
-
+              onPaginationModelChange={(pagination) => this.onPaginationChangeCustom(pagination)}
+              onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
+              onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
+              onRowClick={(item) => this.onRowClick(item.id as number)}
               // stripped rows
               getRowClassName={ (params) => params.indexRelativeToCurrentPage % 2 === 0 ? '' : 'bg-light' }
-
-
               // disableColumnFilter
               // disableColumnSelector
               // disableDensitySelector

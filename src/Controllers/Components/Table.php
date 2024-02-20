@@ -20,7 +20,7 @@ class Table extends \ADIOS\Core\Controller {
 
   public \ADIOS\Core\Model $model;
   public array $data = [];
-  private int $pageLength = 15;
+  private int $itemsPerPage = 15;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
@@ -74,7 +74,7 @@ class Table extends \ADIOS\Core\Controller {
 
   public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
     $params = $this->params;
-    $this->pageLength = (int) $params['pageLength'] ?? 15;
+    $this->itemsPerPage = (int) $params['itemsPerPage'] ?? 15;
 
     $this->model = $this->adios->getModel($this->params['model']);
 
@@ -193,7 +193,7 @@ class Table extends \ADIOS\Core\Controller {
 
     // Laravel pagination
     $data = $this->query->paginate(
-      $this->pageLength,
+      $this->itemsPerPage,
       ['*'],
       'page',
       $this->params['page'])->toArray()

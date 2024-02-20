@@ -81,13 +81,10 @@ export default class DateTime extends Component<DateTimeInputProps> {
 
     switch (this.props.type) {
       case 'datetime': 
-        value = dateToEUFormat(value) + ' ' + timeToEUFormat(value);
+        //value = datetimeToEUFormat(value);
       break;
       case 'date':
-        value = dateToEUFormat(value);
-      break;
-      case 'time':
-        value = value;
+        //value = dateToEUFormat(value);
       break;
     }
     

@@ -74,7 +74,7 @@ interface TableState {
   formParams?: FormProps,
   orderBy?: GridSortModel,
   page: number,
-  pageLength: number,
+  itemsPerPage: number,
   search?: string,
   showHeader?: boolean,
   title?: string,
@@ -99,7 +99,7 @@ export default class Table extends Component<TableProps> {
         uid: props.uid,
       },
       page: 1,
-      pageLength: 15,
+      itemsPerPage: 15,
       showHeader: props.showHeader ?? true,
     };
   }
@@ -153,11 +153,7 @@ export default class Table extends Component<TableProps> {
     );
   }
 
-  loadData(page: number = 1) {
-    this.setState({
-      page: page
-    });
-
+  loadData(page: number = 1, itemsPerPage = 15) {
     request.get(
       this.state.endpoint,
       {
@@ -166,7 +162,7 @@ export default class Table extends Component<TableProps> {
         model: this.props.model,
         orderBy: this.state.orderBy,
         page: page,
-        pageLength: this.state.pageLength,
+        itemsPerPage: itemsPerPage,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
         parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
         search: this.state.search,
@@ -176,7 +172,9 @@ export default class Table extends Component<TableProps> {
       },
       (data: any) => {
         this.setState({
-          data: data.data
+          data: data.data,
+          page: page,
+          itemsPerPage: itemsPerPage
         });
       }
     );
@@ -198,6 +196,10 @@ export default class Table extends Component<TableProps> {
 
   onRowClick(id: number) {
     this.openForm(id);
+  }
+
+  onPaginationChange(page: number, itemsPerPage: number) {
+    this.loadData(page, itemsPerPage);
   }
 
   onFilterChange(data: GridFilterModel) {

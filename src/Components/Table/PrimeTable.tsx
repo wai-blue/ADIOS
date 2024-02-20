@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef, createRef } from 'react';
+import React, { ChangeEvent, createRef } from 'react';
 import { classNames } from 'primereact/utils';
-import { DataTable, DataTableRowClickEvent } from 'primereact/datatable';
+import { DataTable, DataTableRowClickEvent, DataTablePageEvent } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ProductService } from './test';
 import { Toast } from 'primereact/toast';
@@ -18,6 +18,7 @@ import { Tag } from 'primereact/tag';
 import Table from './../Table';
 import Modal from '../Modal';
 import Form, { FormColumnParams } from '../Form';
+import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
 export default class PrimeTable extends Table {
   dt: HTMLInputElement|null;
@@ -333,31 +334,22 @@ export default class PrimeTable extends Table {
   //<Column field="inventoryStatus" header="Status" body={this._renderStatusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
   //<Column body={this._renderActionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
 
-  openForm(id: number) {
-    console.log(id);
-    this.setState(
-      { formId: id },
-      () => {
-        //@ts-ignore
-        ADIOS.modalToggle(this.props.uid);
-      }
-    )
+  onPaginationChangeCustom(event: DataTablePageEvent) {
+    const page: number = (event.page ?? 0) + 1;
+    const itemsPerPage: number = event.rows;
+    this.onPaginationChange(page, itemsPerPage);
   }
 
-  onAddClick() {
-    this.openForm(0);
+  onOrderByChangeCustom(event: any) {
+    console.log(event);
   }
 
-  onRowClick(data: DataTableRowClickEvent) {
-    this.openForm(data.data.id as number);
-  }
-
-  _renderColumnBodyImage(rowData): JSX.Element {
-    return <img
-      src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
-      alt={rowData.image}
-      className="shadow-2 border-round"
-      style={{ width: '64px' }} 
+  _renderColumnBodyImage(columnValue?: any): JSX.Element {
+    if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+    return <img 
+      style={{ width: '30px', height: '30px' }}
+      src={params.folderUrl + "/" + params.value}
+      className="rounded"
     />;
   };
 
@@ -382,8 +374,44 @@ export default class PrimeTable extends Table {
    * Render body for Column (PrimeReact column)
    */
   _renderColumnBody(columnName: string, column: FormColumnParams, data: any, options: any): JSX.Element {
+    const columnValue: any = data[columnName];
+
     switch (column.type) {
-      default: return data[columnName];
+      case 'color':
+        return <div 
+          style={{ width: '20px', height: '20px', background: columnValue }} 
+          className="rounded" 
+        />;
+      case 'image': 
+        if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+        return <img 
+          style={{ width: '30px', height: '30px' }}
+          src={this.state.params.folderUrl + "/" + columnValue}
+          className="rounded"
+        />;
+      case 'lookup':
+        return <span style={{
+          color: '#2d4a8a'
+        }}>{columnValue?.lookupSqlValue}</span>;
+      case 'enum':
+        const enumValues = column.enumValues;
+        if (!enumValues) return <></>;
+        return <>{enumValues[columnValue]}</>;
+      case 'bool':
+      case 'boolean':
+        if (columnValue) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
+        return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
+      case 'date': return <>{dateToEUFormat(columnValue)}</>;
+      case 'datetime': return <>{datetimeToEUFormat(columnValue)}</>;
+      case 'tags': {
+        //let key = 0;
+        //return <div>
+        //  {columnValue.map((value: any) => {
+        //    return <span className="badge badge-info mx-1" key={key++}>{value[column.dataKey]}</span>;
+        //  })}
+        //</div>
+      }
+      default: return columnValue;
     }
   }
 
@@ -432,19 +460,89 @@ export default class PrimeTable extends Table {
         </Modal>
 
         <div>
-          <div className="card">
+          <div className="card border-0">
+            {this.state.showHeader ?
+              <div className="card-header mb-2">
+                <div className="row m-0">
+
+                  <div className="col-lg-12 p-0 m-0">
+                    <h3 className="card-title m-0 text-primary mb-2">{this.state.title}</h3>
+                  </div>
+
+                  <div className="col-lg-6 m-0 p-0">
+                    {this.state.canCreate ?
+                      <button
+                        className="btn btn-primary btn-icon-split"
+                        onClick={() => this.onAddClick()}
+                      >
+                        <span className="icon">
+                          <i className="fas fa-plus"/>
+                        </span>
+                        <span className="text">
+                          {this.state.addButtonText}
+                        </span>
+                      </button>
+                    : ""}
+                  </div>
+
+                  <div className="col-lg-6 m-0 p-0">
+                    <div className="d-flex flex-row-reverse">
+                      <div className="dropdown no-arrow">
+                        <button 
+                          className="btn btn-light dropdown-toggle" 
+                          type="button"
+                          data-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-expanded="false"
+                        >
+                          <i className="fas fa-ellipsis-v"/>
+                        </button>
+                        <div className="dropdown-menu">
+                          <button className="dropdown-item" type="button">
+                            <i className="fas fa-file-export mr-2"/> Exportovať do CSV
+                          </button>
+                          <button className="dropdown-item" type="button">
+                            <i className="fas fa-print mr-2"/> Tlačiť
+                          </button>
+                        </div>
+                      </div>
+
+                      <input 
+                        className="mr-2 form-control border-end-0 border rounded-pill"
+                        style={{maxWidth: '250px'}}
+                        type="search"
+                        placeholder="Start typing to search..."
+                        value={this.state.search}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            : ''}
+
             {/*<Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>*/}
 
             {this.state.data && this.state.columns ? (
               <DataTable
                 ref={this.dt}
                 value={this.state.data.data}
-                onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data)}
+                lazy={true}
+                dataKey="id"
+                first={(this.state.page - 1)}
+                paginator
+                rows={this.state.itemsPerPage}
+                totalRecords={this.state.data.total}
+                rowsPerPageOptions={[15, 30, 50, 100]}
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                currentPageReportTemplate="{first}-{last} of {totalRecords} records"
+                onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
+                onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
+                onSort={(event: any) => this.onOrderByChangeCustom(event)}
+                //globalFilter={globalFilter}
+                //header={header}
                 //selection={selectedProducts}
                 //onSelectionChange={(e) => setSelectedProducts(e.value)}
-                //dataKey="id"  paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
-                //paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                //currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}
               >
                 <Column selectionMode="multiple" exportable={false}></Column>
                 {this._renderRows()}
