@@ -66,7 +66,7 @@ interface TableState {
   canDelete?: boolean,
   canRead?: boolean,
   canUpdate?: boolean,
-  columns?: Array<GridColDef>,
+  columns?: any, //Array<GridColDef>,
   data?: TableData,
   filterBy?: GridFilterModel,
   formId?: number,
@@ -121,7 +121,7 @@ export default class Table extends Component<TableProps> {
   }
 
   // TODO: TOTO VYLEPSIT
-  loadParams(successCallback?: (data: any, params: any, columns: any, propsColumns: any) => void) {
+  loadParams(successCallback?: (params: any) => void) {
     let propsColumns = this.props.columns ?? {};
 
     request.get(
@@ -136,22 +136,16 @@ export default class Table extends Component<TableProps> {
       },
       (data: any) => {
         let params: any = deepObjectMerge(data.params, this.props);
-        let tmpColumns = params.columns;
-        let columns: Array<any> = [];
-
         if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
+        if (successCallback) successCallback(params);
 
-        if (successCallback) successCallback(data, params, columns, propsColumns);
-
-console.log(tmpColumns);
-console.log(columns);
         this.setState({
           addButtonText: this.props.addButtonText ?? params.addButtonText,
           canCreate: params.canCreate ?? true,
           canDelete: params.canDelete ?? true,
           canRead: params.canRead ?? true,
           canUpdate: params.canUpdate ?? true,
-          columns: columns.length != 0 ? columns : tmpColumns,
+          columns: params.columns,
           showHeader: params.showHeader ?? true,
           title: this.props.title ?? params.title,
         });

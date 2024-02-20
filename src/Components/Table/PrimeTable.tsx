@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, createRef } from 'react';
 import { classNames } from 'primereact/utils';
-import { DataTable } from 'primereact/datatable';
+import { DataTable, DataTableRowClickEvent } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ProductService } from './test';
 import { Toast } from 'primereact/toast';
@@ -16,8 +16,10 @@ import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
 
 import Table from './../Table';
+import Modal from '../Modal';
+import Form, { FormColumnParams } from '../Form';
 
-export default class PrimeReactDataTable extends Table {
+export default class PrimeTable extends Table {
   dt: HTMLInputElement|null;
   products: Array<any>;
 
@@ -27,14 +29,6 @@ export default class PrimeReactDataTable extends Table {
     this.dt = createRef();
     this.products = ProductService.getProductsArray();
   }
-
-  //componentDidMount(): void {
-  //  //ProductService.getProducts().then((data) => {
-  //  //  this.setState({
-  //  //    data: data
-  //  //  })
-  //  //});
-  //}
 
   //let emptyProduct = {
   //  id: null,
@@ -202,31 +196,6 @@ export default class PrimeReactDataTable extends Table {
   //  return <Button label="Export" icon="pi pi-upload" className="p-button-help" onClick={exportCSV} />;
   //};
   //
-  _renderImageBodyTemplate(rowData) {
-    return <img src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`} alt={rowData.image} className="shadow-2 border-round" style={{ width: '64px' }} />;
-  };
-
-  _renderPriceBodyTemplate(rowData) {
-    return rowData;
-  };
-
-  _renderRatingBodyTemplate(rowData) {
-    return <Rating value={rowData.rating} readOnly cancel={false} />;
-  };
-
-  _renderStatusBodyTemplate(rowData) {
-    return <Tag value={rowData.inventoryStatus} severity={getSeverity(rowData)}></Tag>;
-  };
-
-  _renderActionBodyTemplate(rowData) {
-    return <b>xxx</b>;
-    //return (
-    //  <React.Fragment>
-    //    <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
-    //    <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
-    //  </React.Fragment>
-    //);
-  };
   //
   //const getSeverity = (product) => {
   //  switch (product.inventoryStatus) {
@@ -354,63 +323,136 @@ export default class PrimeReactDataTable extends Table {
     //);
   }
 
-  loadParams() {
-    super.loadParams((data: any, params: any, columns: any, propsColumns: any) => {
-      for (let columnName in params.columns) {
-        columns.push(params.columns[columnName]);
+  //<Column selectionMode="multiple" exportable={false}></Column>
+  //<Column field="code" header="Code" sortable style={{ minWidth: '12rem' }}></Column>
+  //<Column field="name" header="Name" sortable style={{ minWidth: '16rem' }}></Column>
+  //<Column field="image" header="Image" body={this._renderImageBodyTemplate}></Column>
+  //<Column field="price" header="Price" body={this._renderPriceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
+  //<Column field="category" header="Category" sortable style={{ minWidth: '10rem' }}></Column>
+  //<Column field="rating" header="Reviews" body={this._renderRatingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
+  //<Column field="inventoryStatus" header="Status" body={this._renderStatusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
+  //<Column body={this._renderActionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
+
+  openForm(id: number) {
+    console.log(id);
+    this.setState(
+      { formId: id },
+      () => {
+        //@ts-ignore
+        ADIOS.modalToggle(this.props.uid);
       }
-    })
+    )
   }
 
-  _rendeColumns(column: any) {
-
-    console.log(column);
-    //<Column selectionMode="multiple" exportable={false}></Column>
-    //<Column field="code" header="Code" sortable style={{ minWidth: '12rem' }}></Column>
-    //<Column field="name" header="Name" sortable style={{ minWidth: '16rem' }}></Column>
-    //<Column field="image" header="Image" body={this._renderImageBodyTemplate}></Column>
-    //<Column field="price" header="Price" body={this._renderPriceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>
-    //<Column field="category" header="Category" sortable style={{ minWidth: '10rem' }}></Column>
-    //<Column field="rating" header="Reviews" body={this._renderRatingBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-    //<Column field="inventoryStatus" header="Status" body={this._renderStatusBodyTemplate} sortable style={{ minWidth: '12rem' }}></Column>
-    //<Column body={this._renderActionBodyTemplate} exportable={false} style={{ minWidth: '12rem' }}></Column>
+  onAddClick() {
+    this.openForm(0);
   }
 
-  _renderRows() {
-    if (!this.state.columns) return;
+  onRowClick(data: DataTableRowClickEvent) {
+    this.openForm(data.data.id as number);
+  }
 
+  _renderColumnBodyImage(rowData): JSX.Element {
+    return <img
+      src={`https://primefaces.org/cdn/primereact/images/product/${rowData.image}`}
+      alt={rowData.image}
+      className="shadow-2 border-round"
+      style={{ width: '64px' }} 
+    />;
+  };
+
+  _renderColumnBodyRating(rowData): JSX.Element {
+    return <Rating value={rowData.rating} readOnly cancel={false} />;
+  };
+
+  _renderColumnBodyTag(rowData): JSX.Element {
+    return <Tag value={rowData.inventoryStatus} severity={getSeverity(rowData)}></Tag>;
+  };
+
+  _renderColumnBodyAction(rowData): JSX.Element {
     return (
-      <div>
-        {this.state.columns.map((column: any) => {
-          console.log(column);
-          return <Column field="price" header="Price" body={this._renderPriceBodyTemplate} sortable style={{ minWidth: '8rem' }}></Column>;
-        })}
-      </div>
+      <>
+        <Button icon="pi pi-pencil" rounded outlined className="mr-2" onClick={() => editProduct(rowData)} />
+        <Button icon="pi pi-trash" rounded outlined severity="danger" onClick={() => confirmDeleteProduct(rowData)} />
+      </>
     );
+  };
+
+  /*
+   * Render body for Column (PrimeReact column)
+   */
+  _renderColumnBody(columnName: string, column: FormColumnParams, data: any, options: any): JSX.Element {
+    switch (column.type) {
+      default: return data[columnName];
+    }
   }
 
-  render(): JSX.Element {
-    return (
-      <div>
-        <div className="card">
-          {/*<Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>*/}
+  _renderRows(): JSX.Element {
+    return Object.keys(this.state.columns).map((columnName: string) => {
+      const column: FormColumnParams = this.state.columns[columnName];
+      return <Column
+        key={columnName}
+        field={columnName}
+        header={column.title}
+        body={(data: any, options: any) => this._renderColumnBody(columnName, column, data, options)}
+        sortable
+        style={{ minWidth: '8rem' }}
+      ></Column>;
+    });
+  }
 
-          {this.state.data && this.state.columns ? (
-            <DataTable
-              ref={this.dt}
-              value={this.state.data.data}
-              //selection={selectedProducts}
-              //onSelectionChange={(e) => setSelectedProducts(e.value)}
-              //dataKey="id"  paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
-              //paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-              //currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}
-            >
-              <Column selectionMode="multiple" exportable={false}></Column>
-              {this._renderRows()}
-            </DataTable>
-          ) : ''}
+  render() {
+    return (
+      <>
+        <Modal 
+          uid={this.props.uid}
+          model={this.props.model}
+          {...this.props.modal}
+          hideHeader={true}
+          isOpen={this.props.formParams?.id ? true : false}
+        >
+          <Form
+            uid={this.props.uid}
+            model={this.props.model}
+            tag={this.props.tag}
+            id={this.state.formId ?? 0}
+            endpoint={this.state.formEndpoint ?? ''}
+            showInModal={true}
+            onSaveCallback={() => {
+              this.loadData();
+              //@ts-ignore
+              ADIOS.modalToggle(this.props.uid);
+            }}
+            onDeleteCallback={() => {
+              this.loadData();
+              //@ts-ignore
+              ADIOS.modalToggle(this.props.uid);
+            }}
+          />
+        </Modal>
+
+        <div>
+          <div className="card">
+            {/*<Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>*/}
+
+            {this.state.data && this.state.columns ? (
+              <DataTable
+                ref={this.dt}
+                value={this.state.data.data}
+                onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data)}
+                //selection={selectedProducts}
+                //onSelectionChange={(e) => setSelectedProducts(e.value)}
+                //dataKey="id"  paginator rows={10} rowsPerPageOptions={[5, 10, 25]}
+                //paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                //currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products" globalFilter={globalFilter} header={header}
+              >
+                <Column selectionMode="multiple" exportable={false}></Column>
+                {this._renderRows()}
+              </DataTable>
+            ) : ''}
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 }

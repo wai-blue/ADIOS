@@ -91,6 +91,7 @@ export interface FormColumnParams {
   min?: number,
   readonly?: boolean,
   inputJSX?: string,
+  cssClass?: string
 }
 
 export interface FormColumns {

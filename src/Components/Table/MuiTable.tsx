@@ -4,107 +4,105 @@ import { ProgressBar } from 'primereact/progressbar';
 
 import Table from '../Table';
 import Modal from "./../Modal";
-import Form from "./../Form";
+import Form, { FormColumnParams } from "./../Form";
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
-export default class MuiDataGrid extends Table {
+interface MuiTableColumn extends Omit<GridColDef, 'field' | 'headerName'> {
+  adiosColumnDef: FormColumnParams,
+  field: string;
+  headerName: string;
+}
 
-  _commonCellRenderer(column: any, content: any): JSX.Element {
+export default class MuiTable extends Table {
+
+  _commonCellRenderer(column: FormColumnParams, content: JSX.Element): JSX.Element {
     return <div className={column.cssClass}>{content}</div>
   }
 
+  _renderCellBody(column: MuiTableColumn, params: any): JSX.Element {
+    switch (column.adiosColumnDef.type) {
+      case 'color':
+        return <div 
+          style={{ width: '20px', height: '20px', background: params.value }} 
+          className="rounded" 
+        />;
+      case 'image': 
+        if (!params.value) {
+          return this._commonCellRenderer(
+            column.adiosColumnDef,
+            <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+          );
+        }
+
+        return <img 
+          style={{ width: '30px', height: '30px' }}
+          src={params.folderUrl + "/" + params.value}
+          className="rounded"
+        />;
+      case 'lookup':
+        return <span style={{
+          color: '#2d4a8a'
+        }}>{params.value?.lookupSqlValue}</span>;
+      case 'enum':
+        const enumValues = column.adiosColumnDef.enumValues;
+        if (!enumValues) return <></>;
+        return <>{enumValues[params.value]}</>;
+      case 'bool':
+      case 'boolean':
+        if (params.value) {
+          return this._commonCellRenderer(
+            column.adiosColumnDef,
+            <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
+          );
+        } else {
+          return this._commonCellRenderer(
+            column.adiosColumnDef,
+            <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
+          );
+        }
+      case 'date': return <>{dateToEUFormat(params.value)}</>;
+      case 'time': return <>{params.value}</>;
+      case 'datetime': return <>{datetimeToEUFormat(params.value)}</>;
+      case 'tags': {
+        let key = 0;
+        return <div>
+          {params.value.map((value: any) => {
+            return <span className="badge badge-info mx-1" key={key++}>{value[column.adiosColumnDef.dataKey]}</span>;
+          })}
+        </div>
+      }
+      default: return params.value;
+    }
+  }
+
   loadParams() {
-    super.loadParams((data: any, params: any, columns: any, propsColumns: any) => {
+    super.loadParams((params: any) => {
+      let newColumns: Array<GridColDef> = [];
+
       for (let columnName in params.columns) {
-        let adiosColumnDef = {...params.columns[columnName], ...(propsColumns[columnName] ?? {})};
+        const column: FormColumnParams = {...params.columns[columnName], ...this.props.columns};
+
         let newColumn = {
-          adiosColumnDef: adiosColumnDef,
+          adiosColumnDef: column,
+          headerName: column.title,
           field: columnName,
-          headerName: adiosColumnDef['title'],
           flex: 1,
           renderCell: (params: any) => {
-            let column = params.api.getColumn(params.field);
+            const column: MuiTableColumn = params.api.getColumn(params.field);
+            const cellBody: JSX.Element = this._renderCellBody(column, params);
 
-            switch (column.adiosColumnDef['type']) {
-              case 'color': {
-                return this._commonCellRenderer(
-                  column.adiosColumnDef,
-                  <div 
-                    style={{ width: '20px', height: '20px', background: params.value }} 
-                    className="rounded" 
-                  />
-                );
-              }
-              case 'image': {
-                if (!params.value) {
-                  return this._commonCellRenderer(
-                    column.adiosColumnDef,
-                    <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
-                  );
-                }
-
-                return this._commonCellRenderer(
-                  column.adiosColumnDef,
-                  <img 
-                    style={{ width: '30px', height: '30px' }}
-                    src={params.folderUrl + "/" + params.value}
-                    className="rounded"
-                  />
-                );
-              }
-              case 'lookup': { 
-                return this._commonCellRenderer(
-                  column.adiosColumnDef,
-                  <span style={{
-                    color: '#2d4a8a'
-                  }}>{params.value?.lookupSqlValue}</span>
-                );
-              }
-              case 'enum': { 
-                return this._commonCellRenderer(column.adiosColumnDef, column.adiosColumnDef['enumValues'][params.value]);
-              }
-              case 'bool':
-              case 'boolean': { 
-                if (params.value) {
-                  return this._commonCellRenderer(
-                    column.adiosColumnDef,
-                    <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
-                  );
-                } else {
-                  return this._commonCellRenderer(
-                    column.adiosColumnDef,
-                    <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
-                  );
-                }
-              }
-              case 'date': { 
-                return this._commonCellRenderer(column.adiosColumnDef, dateToEUFormat(params.value));
-              }
-              case 'time': { 
-                return this._commonCellRenderer(column.adiosColumnDef, params.value);
-              }
-              case 'datetime': {
-                return this._commonCellRenderer(column.adiosColumnDef, datetimeToEUFormat(params.value));
-              }
-              case 'tags': {
-                let key = 0;
-                return <div>
-                  {params.value.map((value) => {
-                    return <span className="badge badge-info mx-1" key={key++}>{value[column.adiosColumnDef.dataKey]}</span>;
-                  })}
-                </div>
-              }
-              default: {
-                return this._commonCellRenderer(column.adiosColumnDef, params.value);
-              }
-            }
+            return this._commonCellRenderer(
+              column.adiosColumnDef,
+              cellBody
+            );
           }
         };
 
-        columns.push(newColumn);
+        newColumns.push(newColumn);
       };
-    });
 
+      params.columns = newColumns;
+    });
   }
 
   render() {
