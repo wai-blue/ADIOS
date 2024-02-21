@@ -58,6 +58,16 @@ export class Input<P, S> extends Component<InputProps, InputState> {
     }
   }
 
+  getClassName(inputType: string) {
+    return (
+      "adios-react-ui input"
+      + " " + inputType
+      + " " + (this.state.isInvalid ? 'is-invalid' : '')
+      + " " + (this.props.params?.cssClass ?? "")
+      + " " + (this.state.readonly ? "bg-muted" : "")
+    );
+  }
+
   onChange(columnName: string, value: any) {
     this.setState({value: value});
 

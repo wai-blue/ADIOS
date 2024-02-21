@@ -32,7 +32,8 @@ import InputImage from "./Inputs/Image";
 export class ADIOS {
   APP_URL: string = '';
 
-  reactElements: any = {};
+  reactComponents: any = {};
+  reactComponentsWaitingForRender: number = 0;
 
   /**
   * Define attributes which will not removed
@@ -42,28 +43,28 @@ export class ADIOS {
   ];
 
   constructor() {
-    this.registerReactElement('Form', Form);
-    this.registerReactElement('Table', Table);
-    this.registerReactElement('CardButton', CardButton);
-    this.registerReactElement('Title', Title);
-    this.registerReactElement('Breadcrumbs', Breadcrumbs);
-    this.registerReactElement('Card', Card);
-    this.registerReactElement('Button', Button);
-    this.registerReactElement('Modal', Modal);
-    this.registerReactElement('FormButton', FormButton);
-    this.registerReactElement('FormCardButton', FormCardButton);
-    this.registerReactElement('View', View);
-    this.registerReactElement('ExportButton', ExportButton);
-    this.registerReactElement('TableMui', MuiTable);
-    this.registerReactElement('TablePrime', PrimeTable);
-    this.registerReactElement('InputVarchar', InputVarchar);
-    this.registerReactElement('InputInt', InputInt);
-    this.registerReactElement('InputLookup', InputLookup);
-    this.registerReactElement('InputImage', InputImage);
+    this.registerReactComponent('Form', Form);
+    this.registerReactComponent('Table', Table);
+    this.registerReactComponent('CardButton', CardButton);
+    this.registerReactComponent('Title', Title);
+    this.registerReactComponent('Breadcrumbs', Breadcrumbs);
+    this.registerReactComponent('Card', Card);
+    this.registerReactComponent('Button', Button);
+    this.registerReactComponent('Modal', Modal);
+    this.registerReactComponent('FormButton', FormButton);
+    this.registerReactComponent('FormCardButton', FormCardButton);
+    this.registerReactComponent('View', View);
+    this.registerReactComponent('ExportButton', ExportButton);
+    this.registerReactComponent('TableMui', MuiTable);
+    this.registerReactComponent('TablePrime', PrimeTable);
+    this.registerReactComponent('InputVarchar', InputVarchar);
+    this.registerReactComponent('InputInt', InputInt);
+    this.registerReactComponent('InputLookup', InputLookup);
+    this.registerReactComponent('InputImage', InputImage);
   }
   
-  registerReactElement(elementName: string, elementObject: any) {
-    this.reactElements[elementName] = elementObject;
+  registerReactComponent(elementName: string, elementObject: any) {
+    this.reactComponents[elementName] = elementObject;
   }
 
   /**
@@ -77,12 +78,12 @@ export class ADIOS {
     
     let componentNamePascalCase = kebabToPascal(componentName);
 
-    if (!this.reactElements[componentNamePascalCase]) {
-      console.error('ADIOS: getComponent(' + componentNamePascalCase + '). Component does not exist. Use `adios.registerReactElement()` in your project\'s index.tsx file.');
+    if (!this.reactComponents[componentNamePascalCase]) {
+      console.error('ADIOS: getComponent(' + componentNamePascalCase + '). Component does not exist. Use `adios.registerReactComponent()` in your project\'s index.tsx file.');
       return null;
     } else {
       return React.createElement(
-        this.reactElements[componentNamePascalCase],
+        this.reactComponents[componentNamePascalCase],
         props
       );
     }
@@ -100,10 +101,12 @@ export class ADIOS {
   * Render React component (create HTML tag root and render) 
   */
   renderReactComponents(renderIntoElement: string = 'body') {
+
     document.querySelectorAll(renderIntoElement + ' *').forEach((element, _index) => {
       let component: string = '';
       let componentProps: Object = {};
       let _this = this;
+      let _element = element;
 
       if (element.tagName.substring(0, 6) != 'ADIOS-' && element.tagName.substring(0, 4) != 'APP-') return;
 
@@ -146,7 +149,21 @@ export class ADIOS {
       }
 
       let componentBuildElement = createRoot(element);
+      this.reactComponentsWaitingForRender++;
       componentBuildElement.render(this.getComponent(component, componentProps));
+
+      // https://stackoverflow.com/questions/75388021/migrate-reactdom-render-with-async-callback-to-createroot
+      // https://blog.saeloun.com/2021/07/15/react-18-adds-new-root-api/
+      requestIdleCallback(() => {
+        this.reactComponentsWaitingForRender--;
+
+        if (this.reactComponentsWaitingForRender <= 0) {
+          $(renderIntoElement)
+            .removeClass('react-components-rendering')
+            .addClass('react-components-rendered')
+          ;
+        }
+      });
     });
   }
 }

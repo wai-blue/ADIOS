@@ -47,27 +47,19 @@ export default class Lookup extends Input<InputProps & LookupInputProps, InputSt
   }
 
   render() {
-  console.log('lookup render', this.state.value, this.state.data);
     return (
-      <>
-        ==={this.state.value}===
+      <div className={this.getClassName("lookup")}>
         <AsyncSelect
           loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
           defaultOptions={Object.values(this.state.data ?? {})}
-          value={this.state.value}
+          value={{id: this.state.value, text: this.state.data[this.state.value]?.text}}
           getOptionLabel={(option: any) => { return option.text }}
           getOptionValue={(option: any) => { return option.id }}
           onChange={(item: any) => this.onChange(this.props.columnName, item.id)}
           isDisabled={this.state.readonly}
           placeholder={this.props.placeholder}
-          className={
-            "w-100"
-            + " " + (this.state.isInvalid ? 'is-invalid' : '')
-            + " " + (this.props.params?.cssClass ?? "")
-            + " " + (this.state.readonly ? "bg-muted" : "")
-          }
         />
-      </>
+      </div>
     )
   } 
 }

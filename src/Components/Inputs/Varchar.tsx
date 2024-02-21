@@ -11,20 +11,22 @@ export default class Varchar extends Input<InputProps & VarcharInputProps, Input
 
   render() {
     return (
-      <input
-        type="text"
-        id={this.props.uid ?? uuid.v4()}
-        value={this.state.value}
-        onChange={(e) => this.onChange(this.props.columnName, e.currentTarget.value)}
-        placeholder={this.props.placeholder}
-        className={
-          "form-control"
-          + " " + (this.state.isInvalid ? 'is-invalid' : '')
-          + " " + (this.props.params?.cssClass ?? "")
-          + " " + (this.state.readonly ? "bg-muted" : "")
-        }
-        disabled={this.state.readonly}
-      />
+      <div className={this.getClassName("varchar")}>
+        <input
+          type="text"
+          id={this.props.uid ?? uuid.v4()}
+          value={this.state.value}
+          onChange={(e) => this.onChange(this.props.columnName, e.currentTarget.value)}
+          placeholder={this.props.placeholder}
+          className={
+            "form-control"
+            + " " + (this.state.isInvalid ? 'is-invalid' : '')
+            + " " + (this.props.params?.cssClass ?? "")
+            + " " + (this.state.readonly ? "bg-muted" : "")
+          }
+          disabled={this.state.readonly}
+        />
+      </div>
     );
   }
 }
