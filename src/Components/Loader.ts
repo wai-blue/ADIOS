@@ -22,8 +22,12 @@ import FormCardButton from "./FormCardButton";
 import View from "./View";
 import ExportButton from "./ExportButton";
 import MuiTable from "./Table/MuiTable";
-import InputVarchar from "./Inputs/Varchar";
 import PrimeTable from "./Table/PrimeTable";
+
+import InputVarchar from "./Inputs/Varchar";
+import InputInt from "./Inputs/Int";
+import InputLookup from "./Inputs/Lookup";
+import InputImage from "./Inputs/Image";
 
 export class ADIOS {
   APP_URL: string = '';
@@ -53,6 +57,9 @@ export class ADIOS {
     this.registerReactElement('TableMui', MuiTable);
     this.registerReactElement('TablePrime', PrimeTable);
     this.registerReactElement('InputVarchar', InputVarchar);
+    this.registerReactElement('InputInt', InputInt);
+    this.registerReactElement('InputLookup', InputLookup);
+    this.registerReactElement('InputImage', InputImage);
   }
   
   registerReactElement(elementName: string, elementObject: any) {

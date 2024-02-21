@@ -15,46 +15,21 @@
   <script src="https://cdn.jsdelivr.net/npm/@shopify/draggable@1.0.0-beta.11/lib/draggable.bundle.js"></script> {# TODO: Lepsia implementacia Draggable #}
 
   <script src='{{ config.url }}/adios/cache.js'></script>
-  <script defer src='{{ config.url }}/adios/react.js'></script>
+  <script defer src='{{ config.url }}/src/Assets/Js/React/app.js'></script>
 
   <link rel=stylesheet type='text/css' href='{{ config.url }}/adios/cache.css' rel="stylesheet">
-
-  <script>
-    var _APP_URL = '{{ config.url }}';
-    var _DEVEL_MODE = {% if config.devel_mode %} true {% else %} false {% endif %};
-
-    {# if (_DEVEL_MODE) {
-      setTimeout(desktop_console_update, 300);
-    } #}
-
-    var _LANG = '{{ config.language }}';
-    var _TRANSLATIONS = adios_language_translations[_LANG];
-
-  </script>
   {% if config.skin != '' %}
     <link rel=stylesheet type='text/css' href='{{ config.url }}/adios/assets/css/Skins/{{ config.skin }}.css' rel="stylesheet">
   {% endif %}
+
+  <script>
+    var _APP_URL = '{{ config.url }}';
+    {# var _LANG = '{{ config.language }}'; #}
+    {# var _TRANSLATIONS = adios_language_translations[_LANG]; #}
+  </script>
 </head>
 
 <body id="page-top">
-  {# <div id='adios_loader_line'></div> #}
-  <!-- <div id='adios_window_wrapper'></div> -->
-
-  <!-- <div id='adios_console'>
-    <div id='adios_console_close' onclick='desktop_hide_console();'>
-      <i class="fas fa-times" title="Close console"></i>
-    </div>
-    <div id='adios_console_clear' onclick='desktop_clear_console();'>
-      <i class="fas fa-trash-alt" title="Clear console"></i>
-    </div>
-
-    <div id='adios_console_header' onclick='desktop_toggle_console();'>
-      <span id='adios_console_title'>Console</span>
-    </div>
-    <div id='adios_console_content'>
-    </div>
-  </div> -->
-
   {% if userNotifications|length > 0 %}
     <div id='adios_user_notifications'>
       {% for notification in userNotifications %}
@@ -240,7 +215,7 @@
                       {% endfor %}
                     {% endif %}
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#logoutModal">
+                    <a class="dropdown-item" href="{{ config.url }}/?logout">
                       <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                       {{ translate("Sign out") }}
                     </a>
@@ -292,19 +267,6 @@
             <div class="windows-content"></div>
           </div>
           <div class="p-3">
-            {# {% if desktopContentController != "" %}
-              <script>
-                _ajax_update(
-                  '{{ desktopContentController }}',
-                  {},
-                  '.desktop-content'
-                );
-              </script>
-            {% endif %} #}
-            {# {% if desktopContentController != "" %}
-              {{ adiosRender(desktopContentController, desktopContentControllerParams)|raw }}
-            {% endif %} #}
-
             {{ contentHtml|raw }}
           </div>
         </div>
@@ -318,35 +280,6 @@
 
   </div>
   <!-- End of Page Wrapper -->
-
-  <!-- Scroll to Top Button-->
-  <a class="scroll-to-top rounded" href="#page-top">
-    <i class="fas fa-angle-up"></i>
-  </a>
-
-  <!-- Logout Modal-->
-  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">{{ settingsSignoutItems.text }}</h5>
-          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">×</span>
-          </button>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-secondary btn-icon-split" type="button" data-dismiss="modal">
-            <span class="icon"><i class="fas fa-long-arrow-alt-left"></i></span>
-            <span class="text">{{ settingsSignoutItems.decline }}</span>
-          </button>
-          <a class="btn btn-primary btn-icon-split" href="{{ config.url }}/?logout">
-            <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-            <span class="text">{{ settingsSignoutItems.confirm }}</span>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <adios-modal
     uid="global"

@@ -7,6 +7,8 @@ export interface InputProps {
   params: any,
   readonly?: boolean,
   value?: any,
+  onChange?: any,
+  isInvalid: boolean,
 }
 
 export interface InputState {
@@ -16,7 +18,7 @@ export interface InputState {
   onChange?: any,
 }
 
-export class Input<P> extends Component<InputProps> {
+export class Input<P, S> extends Component<InputProps, InputState> {
   state: InputState;
 
   constructor(props: InputProps) {
@@ -41,7 +43,11 @@ export class Input<P> extends Component<InputProps> {
 
       isInvalid = pfState.invalidInputs[columnName];
       value = pfState.inputs[this.props.columnName] ?? "";
-      onChange = parentForm.inputOnChange();
+      onChange = parentForm.inputOnChangeRaw();
+    } else {
+      value = props.value;
+      onChange = props.onChange;
+      isInvalid = props.isInvalid;
     }
 
     this.state = {
@@ -49,6 +55,17 @@ export class Input<P> extends Component<InputProps> {
       isInvalid: isInvalid,
       value: value,
       onChange: onChange,
+    }
+  }
+
+  onChange(columnName: string, value: any) {
+    this.setState({value: value});
+
+    if (typeof this.state.onChange === 'function') {
+      this.state.onChange(columnName, value);
+    } else if (typeof this.state.onChange === 'string') {
+      let func = new Function(this.state.onChange);
+      func.apply(this);
     }
   }
 }

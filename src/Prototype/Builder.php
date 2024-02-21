@@ -237,7 +237,14 @@ class Builder {
         $prototype = json_decode(file_get_contents($file), TRUE);
       break;
       case 'yml':
-        $prototype = \Symfony\Component\Yaml\Yaml::parse(file_get_contents($file));
+        $ymlContent = file_get_contents($file);
+        if (is_array($this->prototype['_replacements'])) {
+        var_dump($this->prototype['_replacements']);
+          foreach ($this->prototype['_replacements'] as $from => $to) {
+            $ymlContent = str_replace($from, $to, $ymlContent);
+          }
+        }
+        $prototype = \Symfony\Component\Yaml\Yaml::parse($ymlContent);
       break;
       default:
         $prototype = [];

@@ -1,43 +1,26 @@
 import React, { Component } from 'react'
 import AsyncSelect from 'react-select/async'
 import { FormColumnParams } from '../Form' 
+import { Input, InputProps, InputState } from '../Input'
 import request from '../Request'
 
-interface LookupInputProps extends FormColumnParams {
-  parentForm: any,
-  columnName: string,
-  params: any
+interface LookupInputProps {
+  placeholder?: string,
+  model?: string,
 }
 
 interface LookupInputState {
   data: Array<any>,
-  readonly?: boolean
 }
 
-export default class Lookup extends Component<LookupInputProps> {
-  state: LookupInputState;
-  model: string;
+export default class Lookup extends Input<InputProps & LookupInputProps, InputState & LookupInputState> {
+  props: InputProps & LookupInputProps;
+  state: InputState & LookupInputState;
 
-  constructor(props: LookupInputProps) {
+  constructor(props: InputProps & LookupInputProps) {
     super(props);
 
-    if (props.model != undefined) this.model = props.model;
-
-    let parentForm = props.parentForm;
-    let pfState = parentForm.state;
-    let pfProps = parentForm.props;
-    let columnName = props.columnName;
-
-
-
-    this.state = {
-      data: [],
-      readonly:
-        (props.params.readonly ?? false)
-        || (pfProps?.readonly ?? false)
-        || (pfState.columns[columnName].disabled ?? false)
-        || (pfState.columns[columnName].readonly ?? false)
-  };
+    this.state.data = [];
   }
 
   componentDidMount() {
@@ -46,14 +29,15 @@ export default class Lookup extends Component<LookupInputProps> {
 
   loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
     request.get(
-      '/components/inputs/lookup',
+      'components/inputs/lookup',
       {
-        model: this.model,
+        model: this.props.model,
         search: inputValue,
         __IS_AJAX__: '1',
       },
       (data: any) => {
         this.setState({
+          //@ts-ignore
           data: data.data
         });
 
@@ -62,40 +46,28 @@ export default class Lookup extends Component<LookupInputProps> {
     );
   }
 
-  getOptionValue(option: any) {
-    return option.id;
-  }
-
-  getOptionLabel(option: any) {
-    return option.lookupSqlValue;
-  }
-
   render() {
-    let input = this.props.parentForm.state.inputs[this.props.columnName];
-    let data = this.state.data ?? {};
-    let value = (input in data ? data[input] : 0);
-
+  console.log('lookup render', this.state.value, this.state.data);
     return (
-      <AsyncSelect
-        loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
-        defaultOptions={Object.values(this.state.data ?? {})}
-        value={value}
-        getOptionLabel={this.getOptionLabel}
-        getOptionValue={this.getOptionValue}
-        onChange={(item: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, item.id)}
-        isDisabled={this.state.readonly}
-        placeholder=""
-        className={
-          "w-100"
-          + " " + (this.state.readonly ? "bg-muted" : "")
-        }
-        styles={{
-          control: (baseStyles, state) => ({
-            ...baseStyles,
-            borderColor: this.props.parentForm.state.invalidInputs[this.props.columnName] ? '#e74a3b' : '#d1d3e2',
-          }),
-        }}
-      />
+      <>
+        ==={this.state.value}===
+        <AsyncSelect
+          loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
+          defaultOptions={Object.values(this.state.data ?? {})}
+          value={this.state.value}
+          getOptionLabel={(option: any) => { return option.text }}
+          getOptionValue={(option: any) => { return option.id }}
+          onChange={(item: any) => this.onChange(this.props.columnName, item.id)}
+          isDisabled={this.state.readonly}
+          placeholder={this.props.placeholder}
+          className={
+            "w-100"
+            + " " + (this.state.isInvalid ? 'is-invalid' : '')
+            + " " + (this.props.params?.cssClass ?? "")
+            + " " + (this.state.readonly ? "bg-muted" : "")
+          }
+        />
+      </>
     )
   } 
 }
