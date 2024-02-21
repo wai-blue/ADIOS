@@ -14,15 +14,13 @@ namespace ADIOS\Controllers\Components;
  * @package Components\Controllers\Form
  */
 class Form extends \ADIOS\Core\Controller {
-  public bool $hideDefaultDesktop = true;
-
   protected ?\Illuminate\Database\Eloquent\Builder $query = null;
   private $details = [];
   public \ADIOS\Core\Model $model;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
-    $this->permissionName = $this->params['model'] . ':Read';
+    $this->permission = $this->params['model'] . ':Read';
   }
 
   public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
@@ -73,7 +71,6 @@ class Form extends \ADIOS\Core\Controller {
     try {
       $params = $this->params;
       $model = $this->adios->getModel($this->params['model']);
-
       $params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params, $model->formParams ?? []);
 
       $params['columns'] = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
@@ -103,26 +100,50 @@ class Form extends \ADIOS\Core\Controller {
 
 
   public function renderJson() {
-    try {
-      return [
-        'params' => ($this->params['returnParams'] ? $this->getParams() : []),
-        'inputs' => ($this->params['returnData'] ? $this->loadData() : []),
-      ];
-    } catch (QueryException $e) {
-      http_response_code(500);
+    if (empty($this->params['view'])) {
+      try {
+        return [
+          'params' => ($this->params['returnParams'] ? $this->getParams() : []),
+          'inputs' => ($this->params['returnData'] ? $this->loadData() : []),
+        ];
+      } catch (QueryException $e) {
+        http_response_code(500);
 
-      return [
-        'status' => 'error',
-        'message' => $e->getMessage() 
-      ];
-    } catch (\Exception $e) {
-      http_response_code(400);
+        return [
+          'status' => 'error',
+          'message' => $e->getMessage() 
+        ];
+      } catch (\Exception $e) {
+        http_response_code(400);
 
-      return [
-        'status' => 'error',
-        'message' => $e->getMessage() 
-      ];
+        return [
+          'status' => 'error',
+          'message' => $e->getMessage() 
+        ];
+      }
+    } else {
+      return null;
     }
   }
+
+  public function prepareViewAndParams(): array {
+
+    // configure view to be used
+    $this->view = $this->params['view'];
+
+    // build-up view params
+    unset($this->params['view']);
+    $this->viewParams = array_merge(
+      $this->params,
+      [
+        'params' => $this->getParams(),
+        'inputs' => $this->loadData(),
+      ]
+    );
+
+    // return view and viewParams for ADIOS Twig renderer
+    return [$this->view, $this->viewParams];
+  }
+
 
 }

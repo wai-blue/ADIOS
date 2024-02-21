@@ -16,13 +16,22 @@ namespace ADIOS\Controllers;
  * @package Components\Controllers
  */
 class Login extends \ADIOS\Core\Controller {
-  public static bool $requiresUserAuthentication = FALSE;
+  public bool $requiresUserAuthentication = FALSE;
   public bool $hideDefaultDesktop = TRUE;
 
-  public function preRender() {
-    return [
+  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
+    parent::__construct($adios, $params);
+
+    $this->permission = "";
+  }
+
+  public function prepareViewAndParams(): array {
+    $this->view = 'App/Core/Views/Login';
+    $this->viewParams = [
       "login" => $_POST['login'],
       "userLogged" => $this->adios->userLogged,
     ];
+
+    return [$this->view, $this->viewParams];
   }
 }

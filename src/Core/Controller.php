@@ -33,7 +33,7 @@ class Controller {
   /**
    * If set to FALSE, the rendered content of controller is available to public
    */
-  public static bool $requiresUserAuthentication = TRUE;
+  public bool $requiresUserAuthentication = TRUE;
 
   /**
    * If set to TRUE, the default ADIOS desktop will not be added to the rendered content
@@ -55,7 +55,7 @@ class Controller {
 
   public string $name = "";
   public string $shortName = "";
-  public string $permissionName = "";
+  public string $permission = "";
   public string $uid = "";
   public string $controller = "";
   public string $myRootFolder = "";
@@ -75,7 +75,7 @@ class Controller {
     $this->shortName = str_replace('App/Widgets/', '', $this->shortName);
     $this->shortName = str_replace('Controllers/', '', $this->shortName);
 
-    $this->permissionName = $this->shortName;
+    $this->permission = $this->shortName;
 
     $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 

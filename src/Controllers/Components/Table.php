@@ -24,7 +24,7 @@ class Table extends \ADIOS\Core\Controller {
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
-    $this->permissionName = $this->params['model'] . ':Read';
+    $this->permission = $this->params['model'] . ':Read';
   }
 
   /**

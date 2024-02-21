@@ -86,11 +86,10 @@ class Desktop extends \ADIOS\Core\Controller {
     //   ",
     // ];
 
-    $settingsLogoutItems = [
-      "faIcon" => "fas fa-sign-out-alt",
-      "text" => $this->translate("Log out"),
-      "consent" => $this->translate("Are you sure to log out?"),
-      "not_logout" => $this->translate("Do not logout"),
+    $settingsSignoutItems = [
+      "confirm" => $this->translate("Sign out"),
+      "text" => $this->translate("Are you sure to sign out?"),
+      "decline" => $this->translate("Stay here"),
     ];
 
     // develMenuItems
@@ -124,7 +123,7 @@ class Desktop extends \ADIOS\Core\Controller {
         "user" => $this->adios->userProfile,
         "console" => $this->adios->console->getLogs(),
         "settingsMenuItems" => $settingsMenuItems,
-        "settingsLogoutItems" => $settingsLogoutItems,
+        "settingsSignoutItems" => $settingsSignoutItems,
       ]
     );
 

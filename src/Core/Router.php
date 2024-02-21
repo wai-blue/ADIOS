@@ -50,11 +50,13 @@ class Router {
 
   public function applyRouting(string $route, array $params): array {
     $controller = "";
-// _var_dump($this->routing);exit;
+    $permission = "";
+
     foreach ($this->routing as $routePattern => $tmpRoute) {
       if (preg_match($routePattern.'i', $route, $m)) {
 
         $controller = $tmpRoute['controller'];
+        $permission = $tmpRoute['permission'] ?? '';
         $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'], $m);
 
         foreach ($tmpRoute['params'] as $k => $v) {
@@ -66,23 +68,21 @@ class Router {
     if (empty($controller)) {
       throw new \ADIOS\Core\Exceptions\ControllerNotFound;
     }
+    
 
-    return [$controller, $params];
-  }
-
-  public function checkPermissions(string $controller) {
-    $permissionForRequestedUri = "";
-    foreach ($this->routing as $routePattern => $route) {
-      if (preg_match((string) $routePattern, $controller, $m)) {
-        $permissionForRequestedUri = $route['permission'];
-      }
+    if (empty($permission)) {
+      $permission = $controller;
     }
 
+    return [$controller, $permission, $params];
+  }
+
+  public function checkPermission(string $permission) {
     if (
-      !empty($permissionForRequestedUri)
-      && !$this->adios->permissions->has($permissionForRequestedUri)
+      !empty($permission)
+      && !$this->adios->permissions->has($permission)
     ) {
-      throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permissionForRequestedUri}).");
+      throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permission}).");
     }
   }
 

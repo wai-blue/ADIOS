@@ -282,6 +282,7 @@ class Builder {
     $this->renderPhpFile('web.php', 'web.php.twig');
     $this->renderPhpFile('ConfigEnv.php', 'ConfigEnv.php.twig');
     $this->renderTwigFile('src/Core/Views/Desktop.twig', 'src/Core/Views/Desktop.twig');
+    $this->renderTwigFile('src/Core/Views/Login.twig', 'src/Core/Views/Login.twig');
 
     $this->renderPhpFile(
       'install.php',

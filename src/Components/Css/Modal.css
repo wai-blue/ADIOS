@@ -1,4 +1,4 @@
-.modal .modal-dialog {
+.adios-react-ui.modal .modal-dialog {
   position: fixed;
   margin: auto;
   -webkit-transform: translate3d(0%, 0, 0);
@@ -8,13 +8,13 @@
   max-width: none;
 }
 
-.modal.left .modal-dialog,
-.modal.right .modal-dialog {
+.adios-react-ui.modal.left .modal-dialog,
+.adios-react-ui.modal.right .modal-dialog {
   width: 65%;
   height: 100%;
 }
 
-.modal.center .modal-dialog {
+.adios-react-ui.modal.center .modal-dialog {
   width: auto;
   height: auto;
 }
@@ -28,39 +28,40 @@
 } */
 
 @media screen and (max-width: 700px) {
-  .modal .modal-dialog {
+  .adios-react-ui.modal .modal-dialog {
     width: 100%;
   }
 }
 
-.modal .modal-content {
+.adios-react-ui.modal .modal-content {
   height: 100%;
   overflow-y: auto;
   border-radius: var(--mdb-modal-border-radius);
+  border: none;
 }
 
-.modal .modal-header .close {
+.adios-react-ui.modal .modal-header .close {
   margin: 0;
 }
 
-.modal .modal-body {
+.adios-react-ui.modal .modal-body {
   padding: 15px 15px 80px;
 }
 
 /*Left*/
-.modal.left.fade .modal-dialog {
+.adios-react-ui.modal.left.fade .modal-dialog {
   -webkit-transition: opacity 0.3s linear, left 0.3s ease-out;
   -moz-transition: opacity 0.3s linear, left 0.3s ease-out;
   -o-transition: opacity 0.3s linear, left 0.3s ease-out;
   transition: opacity 0.3s linear, left 0.3s ease-out;
 }
 
-.modal.left.fade.in .modal-dialog {
+.adios-react-ui.modal.left.fade.in .modal-dialog {
   left: 0;
 }
 
 /*Right*/
-.modal.right.fade .modal-dialog {
+.adios-react-ui.modal.right.fade .modal-dialog {
   right: 0px;
   -webkit-transition: opacity 0.3s linear, right 0.3s ease-out;
   -moz-transition: opacity 0.3s linear, right 0.3s ease-out;
@@ -68,19 +69,19 @@
   transition: opacity 0.3s linear, right 0.3s ease-out;
 }
 
-.modal.right.fade.in .modal-dialog {
+.adios-react-ui.modal.right.fade.in .modal-dialog {
   right: 0;
 }
 
 /*Center*/
-.modal.center.fade .modal-dialog {
+.adios-react-ui.modal.center.fade .modal-dialog {
   -webkit-transition: opacity 0.3s linear, left 0.3s ease-out;
   -moz-transition: opacity 0.3s linear, left 0.3s ease-out;
   -o-transition: opacity 0.3s linear, left 0.3s ease-out;
   transition: opacity 0.3s linear, left 0.3s ease-out;
 }
 
-.modal.center.fade .modal-dialog {
+.adios-react-ui.modal.center.fade .modal-dialog {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -89,13 +90,13 @@
 
 
 /* ----- MODAL STYLE ----- */
-.modal-content {
+.adios-react-ui.modal-content {
   border-radius: 0;
   border: none;
   z-index: 99999;
 }
 
-.modal-header {
+.adios-react-ui.modal-header {
   border-bottom-color: #EEEEEE;
   background-color: #FAFAFA;
 }

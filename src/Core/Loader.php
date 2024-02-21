@@ -124,6 +124,7 @@ class Loader
   public string $requestedUri = "";
   public string $requestedController = "";
   public string $controller = "";
+  public string $permission = "";
   public string $uid = "";
   public string $srcDir = "";
 
@@ -163,18 +164,14 @@ class Loader
 
   public array $assetsUrlMap = [];
 
-  public array $controllerStack = [];
-
   public string $dictionaryFilename = "Core-Loader";
   public array $dictionary = [];
-
-  public bool $forceUserLogout = FALSE;
 
   public string $desktopContentController = "";
 
   public string $widgetsDir = "";
 
-  public function __construct($config = NULL, $mode = NULL, $forceUserLogout = FALSE) {
+  public function __construct($config = NULL, $mode = NULL) {
 
     global $___ADIOSObject;
     $___ADIOSObject = $this;
@@ -195,7 +192,6 @@ class Loader
 
     $this->gtp = $this->config['global_table_prefix'] ?? "";
     $this->requestedController = $_REQUEST['controller'] ?? "";
-    $this->forceUserLogout = $forceUserLogout;
 
     if (empty($this->config['dir'])) $this->config['dir'] = "";
     if (empty($this->config['url'])) $this->config['url'] = "";
@@ -529,7 +525,6 @@ class Loader
         }
 
         // user authentication
-        if ($this->forceUserLogout) unset($_SESSION[_ADIOS_ID]['userProfile']);
 
         if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
           $user = $userModel->find((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
@@ -1114,7 +1109,6 @@ class Loader
    * @return string Rendered content.
    */
   public function render(string $route = '', array $params = []) {
-
     if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedUri, $m)) {
       $cronClassName = str_replace("/", "\\", "/App/Widgets/{$m[0]}");
 
@@ -1128,6 +1122,8 @@ class Loader
     }
 
     try {
+
+      // Find-out which route is used for rendering
 
       if (empty($route)) {
         if (php_sapi_name() === 'cli') {
@@ -1147,14 +1143,34 @@ class Loader
       } else {
         $this->route = $route;
       }
-      list($this->controller, $this->params) = $this->router->applyRouting($this->route, $this->params);
 
-      $controllerClassName = $this->getControllerClassName($this->controller);
+      // Apply routing and find-out which controller, permision and rendering params will be used
+      list($this->controller, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
 
-      if (!class_exists($controllerClassName)) {
+      if (isset($this->params['logout'])) {
+        unset($_SESSION[_ADIOS_ID]);
+
+        setcookie(_ADIOS_ID.'-user', '', 0);
+        setcookie(_ADIOS_ID.'-language', '', 0);
+
+        header("Location: {$this->adios->config['url']}?");
+        exit();
+      }
+
+      // Check if controller exists or if it can be used
+      if (!$this->controllerExists($this->controller)) {
         throw new \ADIOS\Core\Exceptions\GeneralException("Unknown controller '{$this->controller}'.");
       }
 
+      // Create the object for the controller
+      $controllerClassName = $this->getControllerClassName($this->controller);
+      $this->controllerObject = new $controllerClassName($this, $this->params);
+
+      if (!empty($this->controllerObject->permission)) {
+        $this->permission = $this->controllerObject->permission;
+      }
+
+      // Perform some basic checks
       if (php_sapi_name() === 'cli') {
         if (!$controllerClassName::$cliSAPIEnabled) {
           throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not enabled in CLI interface.");
@@ -1170,18 +1186,15 @@ class Loader
 
       if (
         !$this->userLogged
-        && $controllerClassName::$requiresUserAuthentication
+        && $this->controllerObject->requiresUserAuthentication
       ) {
-        $this->controller = "Login";
-      }
-
-      if (empty($this->controller)) {
-        $this->controller = $this->config['defaultDesktopController'] ?? 'Desktop';
+        $this->controllerObject = new \ADIOS\Controllers\Login($this);
+        $this->permission = "";
       }
 
       // Kontrola permissions
 
-      $this->router->checkPermissions($this->controller);
+      $this->router->checkPermission($this->permission);
 
       // All OK, rendering content...
 
@@ -1194,112 +1207,74 @@ class Loader
 
       $this->setUid($uid);
 
-      if (in_array($this->controller, array_keys($this->config['widgets']))) {
-        $this->controller = "{$this->controller}/Main";
-      }
-
-
-
-
-
-      $this->controllerStack[] = $this->controller;
-
-      $controllerClassName = $this->getControllerClassName($this->controller);
-
       $return = '';
 
       $this->dispatchEventToPlugins("onADIOSBeforeRender", ["adios" => $this]);
 
       try {
-        if ($this->controllerExists($this->controller)) {
           
-          unset($this->params['__IS_AJAX__']);
-          $this->controllerObject = new $controllerClassName($this, $this->params);
+        unset($this->params['__IS_AJAX__']);
 
-          if (
-            $controllerClassName::$requiresUserAuthentication
-            && !$this->permissions->has($this->controllerObject->permissionName)
-          ) {
-            throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException($this->controllerObject->permissionName);
-          }
+        $this->onBeforeRender();
 
-          $this->onBeforeRender();
+        $json = $this->controllerObject->renderJson();
 
-          foreach ($this->widgets as $widget) {
-            $widget->onBeforeRender();
-          }
+        // Either the renderJson returns some array and this will be echoed as a JSON string ...
+        if (is_array($json)) {
+          $return = json_encode($json);
 
-          $json = $this->controllerObject->renderJson();
+        // ... Or a view must be applied.
+        } else {
+          [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
 
-          if (is_array($json)) {
-            $return = json_encode($json);
+          if (substr($view, 0, 3) == 'App') {
+            $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
+          } else if (substr($view, 0, 5) == 'ADIOS') {
+            $canUseTwig = is_file(__DIR__ . '/..' . str_replace('ADIOS', '', $view) . '.twig');
           } else {
-            [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
-
-            if (is_string($view)) {
-              if (substr($view, 0, 3) == 'App') {
-                $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
-              } else if (substr($view, 0, 5) == 'ADIOS') {
-                $canUseTwig = is_file(__DIR__ . '/..' . str_replace('ADIOS', '', $view) . '.twig');
-              } else {
-                $canUseTwig = FALSE;
-              }
-
-              if ($canUseTwig) {
-                $contentHtml = $this->twig->render(
-                  $view,
-                  [
-                    'uid' => $this->uid,
-                    'user' => $this->userProfile,
-                    'config' => $this->config,
-                    'session' => $_SESSION[_ADIOS_ID],
-                    'viewParams' => $viewParams,
-                    'windowParams' => $viewParams['windowParams'] ?? NULL,
-                  ]
-                );
-              } else {
-                $contentHtml = $this->view->create(
-                  $view,
-                  $viewParams
-                )->render();
-              };
-
-              if ($this->params['__IS_AJAX__']) {
-                $desktopView = "";
-                $desktopParams = [];
-              } else if (!$this->controllerObject->hideDefaultDesktop) {
-                $desktop = $this->controllerObject->getDesktop($this->params);
-                [$desktopView, $desktopParams] = $desktop->prepareViewAndParams();
-              }
-
-              if (!empty($desktopView)) {
-                $desktopParams['contentHtml'] = $contentHtml;
-                $html = $this->twig->render($desktopView, $desktopParams);
-              } else {
-                $html = $contentHtml;
-              }
-
-              return $html;
-            } else {
-              $renderReturn = $this->controllerObject->render($this->params);
-
-              if ($renderReturn === NULL) {
-                // akcia nic nereturnovala, iba robila echo
-                $return = "";
-              } else if (is_string($renderReturn)) {
-                $return = $renderReturn;
-              } else {
-                $return = $this->renderReturn($renderReturn);
-              }
-            }
+            $canUseTwig = FALSE;
           }
 
-          $this->onAfterRender();
+          // Either the view will be rendered using Twig ...
+          if ($canUseTwig) {
+            $contentHtml = $this->twig->render(
+              $view,
+              [
+                'uid' => $this->uid,
+                'user' => $this->userProfile,
+                'config' => $this->config,
+                'session' => $_SESSION[_ADIOS_ID],
+                'viewParams' => $viewParams,
+                'windowParams' => $viewParams['windowParams'] ?? NULL,
+              ]
+            );
 
-          foreach ($this->widgets as $widget) {
-            $widget->onAfterRender();
+          // ... Or it will be rendered using \ADIOS\Core\View class.
+          } else {
+            $contentHtml = $this->view->create(
+              $view,
+              $viewParams
+            )->render();
+          };
+
+          // In some cases the result of the view will be used as-is ...
+          if ($this->params['__IS_AJAX__'] || $this->controllerObject->hideDefaultDesktop) {
+            $html = $contentHtml;
+          
+          // ... But mostly be "encapsulated" in the desktop.
+          } else {
+            $desktop = $this->controllerObject->getDesktop($this->params);
+            [$desktopView, $desktopParams] = $desktop->prepareViewAndParams();
+
+            $desktopParams['contentHtml'] = $contentHtml;
+            $html = $this->twig->render($desktopView, $desktopParams);
           }
+
+          return $html;
         }
+
+        $this->onAfterRender();
+
       } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
         $message = "Not enough permissions: ".$e->getMessage();
         if ($this->userLogged) {
@@ -1391,32 +1366,11 @@ class Loader
     return class_exists($this->getControllerClassName($controller));
   }
 
-  /**
-   * Checks user permissions before rendering requested controller.
-   * Original implementation does nothing. Must be overriden
-   * the application's main class.
-   *
-   * Does not return anything, only throws exceptions.
-   *
-   * @abstract
-   * @param string $controller Name of the controller to be rendered.
-   * @param array $params Parameters (a.k.a. arguments) of the controller.
-   * @throws \ADIOS\Core\NotEnoughPermissionsException When the signed user does not have enough permissions.
-   * @return void
-   */
-  public function checkPermissionsForController($controller, $params = NULL) {
-    // to be overriden
-  }
-
   public function renderReturn($return) {
-    // if ($this->isAjax() && !$this->isWindow()) {
-      return json_encode([
-        "result" => "success",
-        "message" => $return,
-      ]);
-    // } else {
-    //   return $return;
-    // }
+    return json_encode([
+      "result" => "success",
+      "message" => $return,
+    ]);
   }
 
   public function renderWarning($message, $isHtml = TRUE) {
@@ -1782,11 +1736,15 @@ class Loader
   }
 
   public function onBeforeRender() {
-    // to be overriden
+    foreach ($this->widgets as $widget) {
+      $widget->onBeforeRender();
+    }
   }
 
   public function onAfterRender() {
-    // to be overriden
+    foreach ($this->widgets as $widget) {
+      $widget->onAfterRender();
+    }
   }
 
   ////////////////////////////////////////////////
