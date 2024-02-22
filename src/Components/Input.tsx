@@ -1,7 +1,9 @@
-import { Component } from 'react'
+import React, { Component } from 'react'
+import * as uuid from 'uuid';
 
 export interface InputProps {
-  uid?: string,
+  inputClassName: string,
+  id?: string,
   parentForm: any,
   columnName: string,
   params: any,
@@ -19,9 +21,15 @@ export interface InputState {
 }
 
 export class Input<P, S> extends Component<InputProps, InputState> {
+  static defaultProps = {
+    inputClassName: '',
+    id: uuid.v4(),
+  };
+
   state: InputState;
 
   constructor(props: InputProps) {
+
     super(props);
 
     let readonly: boolean = false;
@@ -58,10 +66,10 @@ export class Input<P, S> extends Component<InputProps, InputState> {
     }
   }
 
-  getClassName(inputType: string) {
+  getClassName() {
     return (
       "adios-react-ui input"
-      + " " + inputType
+      + " " + this.props.inputClassName
       + " " + (this.state.isInvalid ? 'is-invalid' : '')
       + " " + (this.props.params?.cssClass ?? "")
       + " " + (this.state.readonly ? "bg-muted" : "")
@@ -77,5 +85,29 @@ export class Input<P, S> extends Component<InputProps, InputState> {
       let func = new Function(this.state.onChange);
       func.apply(this);
     }
+  }
+
+  serialize(): string {
+    return this.state.value.toString();
+  }
+
+  renderInputElement() {
+    return <input type="text" value={this.state.value}></input>;
+  }
+
+  render() {
+    return (
+      <div className={this.getClassName()}>
+        <input
+          id={this.props.id}
+          type="text"
+          value={this.serialize()}
+          style={{width: "100%", fontSize: "0.4em"}}
+          className="value bg-light"
+          disabled
+        ></input>
+        {this.renderInputElement()}
+      </div>
+    );
   }
 }
