@@ -17,7 +17,7 @@ export default class EnumValues extends Component<EnumValuesInputProps> {
 
     return (
       <select
-        value={parentForm.state.inputs[this.props.columnName] ?? 0}
+        value={parentForm.state.data[this.props.columnName] ?? 0}
         onChange={(e) => parentForm.inputOnChange(this.props.columnName, e)}
         className={`form-control ${parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
         disabled={parentForm.props.readonly || parentForm.state.columns[this.props.columnName].disabled}

@@ -39,7 +39,7 @@ export default class Textarea extends Component<TextareaInputProps> {
 
     return (
       <textarea
-        value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
+        value={this.props.parentForm.state.data[this.props.columnName] ?? ""}
         onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
         aria-describedby="passwordHelpInline"
         rows={5}

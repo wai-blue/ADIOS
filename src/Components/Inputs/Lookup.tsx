@@ -16,7 +16,7 @@ interface LookupInputState {
 export default class Lookup extends Input<InputProps & LookupInputProps, InputState & LookupInputState> {
   static defaultProps = {
     inputClassName: 'lookup',
-    id: uuid.v4,
+    id: uuid.v4(),
   }
 
   props: InputProps & LookupInputProps;
@@ -59,7 +59,7 @@ export default class Lookup extends Input<InputProps & LookupInputProps, InputSt
         value={{id: this.state.value, text: this.state.data[this.state.value]?.text}}
         getOptionLabel={(option: any) => { return option.text }}
         getOptionValue={(option: any) => { return option.id }}
-        onChange={(item: any) => this.onChange(this.props.columnName, item.id)}
+        onChange={(item: any) => { this.onChange(item.id); }}
         isDisabled={this.state.readonly}
         placeholder={this.props.placeholder}
       />

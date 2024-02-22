@@ -72,7 +72,7 @@ export default class DateTime extends Component<DateTimeInputProps> {
   }
 
   render() {
-    let value: string = this.props.parentForm.state.inputs[this.props.columnName] ?? "";
+    let value: string = this.props.parentForm.state.data[this.props.columnName] ?? "";
 
     let parentForm = this.props.parentForm;
     let pfState = parentForm.state;

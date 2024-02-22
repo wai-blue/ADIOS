@@ -63,7 +63,7 @@ export interface FormState {
   canDelete?: boolean,
   content?: Content,
   columns?: FormColumns,
-  inputs?: FormInputs,
+  data?: FormInputs,
   isEdit: boolean,
   invalidInputs: Object,
   tabs?: any,
@@ -108,7 +108,6 @@ export default class Form extends Component<FormProps> {
   newState: any;
 
   model: String;
-  // inputs: FormInputs = {};
   components: Array<React.JSX.Element> = [];
 
   jsxContentRendered: boolean = false;
@@ -129,7 +128,7 @@ export default class Form extends Component<FormProps> {
       layout: this.convertLayoutToString(props.layout),
       isEdit: props.id ? props.id > 0 : false,
       invalidInputs: {},
-      inputs: {}
+      data: {}
     };
   }
 
@@ -201,7 +200,7 @@ export default class Form extends Component<FormProps> {
           __IS_AJAX__: '1',
         },
         (data: any) => {
-          this.initInputs(this.state.columns ?? {}, data.inputs);
+          this.initInputs(this.state.columns ?? {}, data.data);
         }
       );
     } else {
@@ -214,7 +213,7 @@ export default class Form extends Component<FormProps> {
       invalidInputs: {}
     });
 
-    let formattedInputs = JSON.parse(JSON.stringify(this.state.inputs));
+    let formattedInputs = JSON.parse(JSON.stringify(this.state.data));
 
     Object.entries(this.state.columns ?? {}).forEach(([key, value]) => {
       if (value['relationship'] != undefined) {
@@ -229,7 +228,7 @@ export default class Form extends Component<FormProps> {
     request.post(
       'components/form/onsave',
       {
-        inputs: {...formattedInputs, id: this.state.id}
+        data: {...formattedInputs, id: this.state.id}
       },
       {
         model: this.props.model,
@@ -303,8 +302,8 @@ export default class Form extends Component<FormProps> {
     changedInput[columnName] = inputValue;
 
     this.setState((prevState: FormState) => ({
-      inputs: {
-        ...prevState.inputs,
+      data: {
+        ...prevState.data,
         [columnName]: inputValue
       }
     }));
@@ -315,7 +314,7 @@ export default class Form extends Component<FormProps> {
    */
   initInputs(columns: FormColumns, inputsValues: Object = {}) {
 
-    let inputs: any = {};
+    let data: any = {};
 
     // If is new form and defaultValues props is set
     if (Object.keys(inputsValues).length == 0 && this.props.defaultValues) {
@@ -325,7 +324,7 @@ export default class Form extends Component<FormProps> {
     Object.keys(columns).map((columnName: string) => {
       switch (columns[columnName]['type']) {
         case 'image':
-          inputs[columnName] = {
+          data[columnName] = {
             fileName: inputsValues[columnName] ?? inputsValues[columnName],
             fileData: inputsValues[columnName] != undefined && inputsValues[columnName] != ""
               ? this.state.folderUrl + '/' + inputsValues[columnName]
@@ -334,30 +333,18 @@ export default class Form extends Component<FormProps> {
         break;
         case 'bool':
         case 'boolean':
-          inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
+          data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
         break;
         case 'tags':
-          inputs[columnName] = inputsValues[columnName]
-          /*
-          { values: ..., all: ... }
-           */
-
-          /*
-          [
-            {id: 'Thailand', text: 'Thailand'},
-            {id: 'India', text: 'India'},
-            {id: 'Vietnam', text: 'Vietnam'},
-            {id: 'Turkey', text: 'Turkey', className: 'red'}
-          ]
-           */
+          data[columnName] = inputsValues[columnName]
         break;
         default:
-          inputs[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
+          data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
       }
     });
 
     this.setState({
-      inputs: inputs
+      data: data
     });
   }
 
@@ -373,7 +360,7 @@ export default class Form extends Component<FormProps> {
         __IS_AJAX__: '1',
       },
       (data: any) => {
-        const input = data.inputs[columnName];
+        const input = data.data[columnName];
         this.inputOnChangeRaw(columnName, input);
       }
     );
@@ -457,8 +444,11 @@ export default class Form extends Component<FormProps> {
       || (this.state.tabs && this.state.tabs[tabName]['active'])
     ) {
 
+      let key = 0;
+
       return (
         <div
+          key={tabName}
           style={{
             display: 'grid',
             gridTemplateRows: 'auto',
@@ -468,16 +458,20 @@ export default class Form extends Component<FormProps> {
         >
           {this.state.content != null ?
             Object.keys(content).map((contentArea: string) => {
-              return this._renderContentItem(contentArea, content[contentArea]);
+              return (
+                <div key={key++}>
+                  {this._renderContentItem(key++, contentArea, content[contentArea])}
+                </div>
+              )
             })
-            : this.state.inputs != null ? (
-              Object.keys(this.state.inputs).map((inputName: string) => {
+            : this.state.data != null ? (
+              Object.keys(this.state.data).map((inputName: string) => {
                 if (
                   this.state.columns == null
                   || this.state.columns[inputName] == null
                 ) return <strong style={{color: 'red'}}>Not defined params for {inputName}</strong>;
 
-                return this._renderInput(inputName)
+                return <span key={key++}>{this._renderInput(inputName)}</span>;
               })
             ) : ''}
         </div>
@@ -490,7 +484,7 @@ export default class Form extends Component<FormProps> {
   /**
    * Render content item
    */
-  _renderContentItem(contentItemArea: string, contentItemParams: undefined | string | Object | Array<string>): JSX.Element {
+  _renderContentItem(key: number, contentItemArea: string, contentItemParams: undefined | string | Object | Array<string>): JSX.Element {
     if (contentItemParams == undefined) return <b style={{color: 'red'}}>Content item params are not defined</b>;
 
     let contentItemKeys = Object.keys(contentItemParams);
@@ -534,7 +528,7 @@ export default class Form extends Component<FormProps> {
     }
 
     return (
-      <div style={{gridArea: contentItemArea}}>
+      <div key={key} style={{gridArea: contentItemArea}}>
         {contentItem}
       </div>
     );
@@ -552,72 +546,52 @@ export default class Form extends Component<FormProps> {
 
     let inputToRender: JSX.Element | null;
     let inputParams = {...colDef, ...{readonly: this.state.readonly}};
+    let data = this.state.data ?? {};
+
+    let columns = this.state.columns ?? {};
+    let inputProps: any = {
+      parentForm: this,
+      columnName: columnName,
+      params: inputParams,
+      value: data[columnName] ?? '',
+      isInvalid: this.state.invalidInputs[columnName] ?? false,
+      readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
+      cssClass: colDef.cssClass ?? '',
+      onChange: (value) => { return this.inputOnChangeRaw(columnName, value) },
+    };
 
     if (colDef.enumValues) {
-
-      inputToRender = <InputEnumValues
-        parentForm={this}
-        columnName={columnName}
-        params={inputParams}
-      />
+      inputToRender = <InputEnumValues {...inputProps} />
     } else {
       if (colDef.inputJSX) {
         let inputJSX = colDef.inputJSX;
 
         inputToRender = adios.getComponent(
           inputJSX,
-          {
-            parentForm: this,
-            columnName: columnName,
-            params: inputParams
-          }
+          inputProps
         );
       } else {
 
         switch (colDef.type) {
           case 'text':
-            inputToRender = <InputTextarea
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-            />;
+            inputToRender = <InputTextarea {...inputProps} />;
             break;
           case 'float':
           case 'int':
-            inputToRender = <InputInt
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-            />;
+            inputToRender = <InputInt {...inputProps} />;
             break;
           case 'boolean':
-            inputToRender = <InputBoolean
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-            />;
+            inputToRender = <InputBoolean {...inputProps} />;
             break;
           case 'lookup':
-            inputToRender = <InputLookup
-              parentForm={this}
-              {...colDef}
-              columnName={columnName}
-              params={inputParams}
-            />;
+            inputProps.model = colDef.model;
+            inputToRender = <InputLookup {...inputProps} />;
             break;
           case 'MapPoint':
-            inputToRender = <InputMapPoint
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-            />;
+            inputToRender = <InputMapPoint {...inputProps} />;
             break;
           case 'color':
-            inputToRender = <InputColor
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-            />;
+            inputToRender = <InputColor {...inputProps} />;
             break;
           case 'tags':
             inputToRender = <InputTags
@@ -628,30 +602,22 @@ export default class Form extends Component<FormProps> {
             />;
             break;
           case 'image':
-            inputToRender = <InputImage
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-            />;
+            inputToRender = <InputImage {...inputProps} />;
             break;
           case 'datetime':
           case 'date':
           case 'time':
-            inputToRender = <InputDateTime
-              parentForm={this}
-              columnName={columnName}
-              type={colDef.type}
-              params={inputParams}
-            />;
+            inputProps.type = colDef.type;
+            inputToRender = <InputDateTime {...inputProps} />;
             break;
           case 'editor':
-            if (this.state.inputs) {
+            if (this.state.data) {
               inputToRender = (
                 <div
                   className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
                   <ReactQuill
                     theme="snow"
-                    value={this.state.inputs[columnName] as Value}
+                    value={this.state.data[columnName] as Value}
                     onChange={(value) => this.inputOnChangeRaw(columnName, value)}
                     className="w-100"
                   />
@@ -660,14 +626,11 @@ export default class Form extends Component<FormProps> {
             }
             break;
           default:
-            inputToRender = <InputVarchar
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-            />
+            inputToRender = <InputVarchar {...inputProps} />;
         }
       }
     }
+
 
     return columnName != 'id' ? (
       <div

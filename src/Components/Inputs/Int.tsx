@@ -37,13 +37,13 @@ export default class Int extends Component<IntInputProps> {
     let pfState = parentForm.state;
     let columnName = this.props.columnName;
     let column: FormColumnParams = pfState.columns[columnName];
-
+    
     return (
       <>
         <div className={"max-w-250 " + (column.unit ? "input-group" : "")}>
           <input
             type="number"
-            value={this.props.parentForm.state.inputs[this.props.columnName] ?? ""}
+            value={this.props.parentForm.state.data[this.props.columnName] ?? ""}
             onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
             step={column.step ?? 1}
             min={column.min ?? 0}

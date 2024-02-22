@@ -41,9 +41,9 @@ export default class Image extends Component<ImageInputProps> {
     return (
       <ImageUploading
         value={
-          this.props.parentForm.state.inputs[this.props.columnName]
-          && this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null
-          ? [this.props.parentForm.state.inputs[this.props.columnName]]
+          this.props.parentForm.state.data[this.props.columnName]
+          && this.props.parentForm.state.data[this.props.columnName]['fileData'] != null
+          ? [this.props.parentForm.state.data[this.props.columnName]]
           : []
         }
         onChange={this.onChange}
@@ -59,8 +59,8 @@ export default class Image extends Component<ImageInputProps> {
           dragProps,
         }) => (
           <div className="upload__image-wrapper">
-            {this.props.parentForm.state.inputs[this.props.columnName]
-              && this.props.parentForm.state.inputs[this.props.columnName]['fileData'] != null
+            {this.props.parentForm.state.data[this.props.columnName]
+              && this.props.parentForm.state.data[this.props.columnName]['fileData'] != null
               ? ''
               : (
                 <button

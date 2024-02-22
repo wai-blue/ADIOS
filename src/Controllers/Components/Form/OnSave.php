@@ -27,11 +27,11 @@ class OnSave extends \ADIOS\Core\Controller {
 
       $tmpModel = $this->adios->getModel($params['model']);
 
-      $tmpModel->recordSave($params['inputs']);
+      $tmpModel->recordSave($params['data']);
 
       return [
         'status' => 'success',
-        'message' => isset($params['inputs']['id']) ? 'Záznam uložený' : 'Pridaný nový záznam'
+        'message' => isset($params['data']['id']) ? 'Záznam uložený' : 'Pridaný nový záznam'
       ];
     } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
       http_response_code(422);

@@ -74,7 +74,7 @@ export default class Tags extends Component<TagsInputProps> {
   };
 
   render() {
-    const params = this.props.parentForm.state.inputs[this.props.columnName] ?? {all: [], values: []};
+    const params = this.props.parentForm.state.data[this.props.columnName] ?? {all: [], values: []};
 
     let tags = [];
     let suggestions = [];

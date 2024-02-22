@@ -16,7 +16,7 @@ export default class Color extends Component<BooleanInputProps> {
     return (
       <>
         <Block
-          color={this.props.parentForm.state.inputs[this.props.columnName] ?? "#fff"}
+          color={this.props.parentForm.state.data[this.props.columnName] ?? "#fff"}
           onChange={(color) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, color.hex)}
         />
       </>

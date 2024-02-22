@@ -104,7 +104,7 @@ class Form extends \ADIOS\Core\Controller {
       try {
         return [
           'params' => ($this->params['returnParams'] ? $this->getParams() : []),
-          'inputs' => ($this->params['returnData'] ? $this->loadData() : []),
+          'data' => ($this->params['returnData'] ? $this->loadData() : []),
         ];
       } catch (QueryException $e) {
         http_response_code(500);
@@ -137,7 +137,7 @@ class Form extends \ADIOS\Core\Controller {
       $this->params,
       [
         'params' => $this->getParams(),
-        'inputs' => $this->loadData(),
+        'data' => $this->loadData(),
       ]
     );
 
