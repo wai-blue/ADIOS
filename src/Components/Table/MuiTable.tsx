@@ -21,6 +21,9 @@ export default class MuiTable extends Table {
 
   _renderCellBody(column: MuiTableColumn, params: any): JSX.Element {
     const columnValue: any = params.value;
+    const enumValues = column.adiosColumnDef.enumValues;
+
+    if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
 
     switch (column.adiosColumnDef.type) {
       case 'color':
@@ -39,10 +42,6 @@ export default class MuiTable extends Table {
         return <span style={{
           color: '#2d4a8a'
         }}>{columnValue?.lookupSqlValue}</span>;
-      case 'enum':
-        const enumValues = column.adiosColumnDef.enumValues;
-        if (!enumValues) return <></>;
-        return <>{enumValues[columnValue]}</>;
       case 'bool':
       case 'boolean':
         if (columnValue) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
@@ -50,12 +49,12 @@ export default class MuiTable extends Table {
       case 'date': return <>{dateToEUFormat(columnValue)}</>;
       case 'datetime': return <>{datetimeToEUFormat(columnValue)}</>;
       case 'tags': {
-        let key = 0;
-        return <div>
-          {params.value.map((value: any) => {
-            return <span className="badge badge-info mx-1" key={key++}>{value[column.adiosColumnDef.dataKey]}</span>;
-          })}
-        </div>
+        //let key = 0;
+        //return <div>
+        //  {params.value.map((value: any) => {
+        //    return <span className="badge badge-info mx-1" key={key++}>{value[column.adiosColumnDef.dataKey]}</span>;
+        //  })}
+        //</div>
       }
       default: return columnValue;
     }
@@ -112,7 +111,7 @@ export default class MuiTable extends Table {
     // console.log('table render', this.props.model, this.state.formParams?.model);
 
     if (!this.state.data || !this.state.columns) {
-      return <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar>;
+      return <ProgressBar mode="indeterminate" style={{ height: '8px' }}></ProgressBar>;
     }
 
     let params = {...this.props.formParams};
@@ -146,20 +145,18 @@ export default class MuiTable extends Table {
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
-              //@ts-ignore
-              ADIOS.modalToggle(this.props.uid);
+              globalThis.adios.modalToggle(this.props.uid);
             }}
             onDeleteCallback={() => {
               this.loadData();
-              //@ts-ignore
-              ADIOS.modalToggle(this.props.uid);
+              globalThis.adios.modalToggle(this.props.uid);
             }}
             {...params}
           />
         </Modal>
 
         <div
-          id={"adios-table-" + this.props.uid}
+          id={"adios-table-mui-" + this.props.uid}
           className="adios-react-ui table"
         >
           <div className="card border-0">
@@ -210,7 +207,7 @@ export default class MuiTable extends Table {
                       </div>
 
                       <input 
-                        className="mr-2 form-control border-end-0 border rounded-pill"
+                        className="mr-2 form-control border-end-0 border"
                         style={{maxWidth: '250px'}}
                         type="search"
                         placeholder="Start typing to search..."
@@ -240,13 +237,13 @@ export default class MuiTable extends Table {
               sortingMode="server"
               filterMode="server"
               rowCount={this.state.data.total}
-              rowHeight={this.props.rowHeight ? this.props.rowHeight : 30}
+              rowHeight={this.props.rowHeight ?? 50}
               onPaginationModelChange={(pagination) => this.onPaginationChangeCustom(pagination)}
               onSortModelChange={(data: GridSortModel) => this.onSortByChangeCustom(data)}
               onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
               onRowClick={(item) => this.onRowClick(item.id as number)}
               // stripped rows
-              getRowClassName={ (params) => params.indexRelativeToCurrentPage % 2 === 0 ? '' : 'bg-light' }
+              getRowClassName={(params) => params.indexRelativeToCurrentPage % 2 === 0 ? '' : 'bg-light' }
               // disableColumnFilter
               // disableColumnSelector
               // disableDensitySelector

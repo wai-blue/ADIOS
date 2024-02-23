@@ -1,4 +1,4 @@
-import React, { ChangeEvent, createRef } from 'react';
+import React, { ChangeEvent, createRef, useRef } from 'react';
 import { classNames } from 'primereact/utils';
 import { DataTable, DataTableRowClickEvent, DataTablePageEvent, DataTableSortEvent, SortOrder, } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -14,6 +14,7 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
+import { ProgressBar } from 'primereact/progressbar';
 
 import Table, { SortBy, TableState, TableProps } from './../Table';
 import Modal from '../Modal';
@@ -26,7 +27,7 @@ interface PrimeTableState extends TableState {
 }
 
 export default class PrimeTable extends Table<PrimeTableState> {
-  dt: HTMLInputElement|null;
+  dt = createRef<DataTable<any[]>>();
 
   constructor(props: TableProps) {
     super(props);
@@ -35,8 +36,6 @@ export default class PrimeTable extends Table<PrimeTableState> {
       ...this.state,
       sortOrder: null,
     };
-
-    this.dt = createRef();
   }
 
   //const openNew = () => {
@@ -378,16 +377,19 @@ export default class PrimeTable extends Table<PrimeTableState> {
   /*
    * Render body for Column (PrimeReact column)
    */
-  _renderColumnBody(columnName: string, column: FormColumnParams, data: any, options: any): JSX.Element {
+  _renderColumnBody(columnName: string, column: FormColumnParams, data: any, options: any) {
     const columnValue: any = data[columnName];
+    const enumValues = column.enumValues;
+
+    if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
 
     switch (column.type) {
       case 'color':
-        return <div 
+        return <div
           style={{ width: '20px', height: '20px', background: columnValue }} 
           className="rounded" 
         />;
-      case 'image': 
+      case 'image':
         if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
         return <img 
           style={{ width: '30px', height: '30px' }}
@@ -400,14 +402,14 @@ export default class PrimeTable extends Table<PrimeTableState> {
         }}>{columnValue?.lookupSqlValue}</span>;
       case 'enum':
         const enumValues = column.enumValues;
-        if (!enumValues) return <></>;
-        return <>{enumValues[columnValue]}</>;
+        if (!enumValues) return;
+        return enumValues[columnValue];
       case 'bool':
       case 'boolean':
         if (columnValue) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
         return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
-      case 'date': return <>{dateToEUFormat(columnValue)}</>;
-      case 'datetime': return <>{datetimeToEUFormat(columnValue)}</>;
+      case 'date': return dateToEUFormat(columnValue);
+      case 'datetime': return datetimeToEUFormat(columnValue);
       case 'tags': {
         //let key = 0;
         //return <div>
@@ -420,7 +422,7 @@ export default class PrimeTable extends Table<PrimeTableState> {
     }
   }
 
-  _renderRows(): JSX.Element {
+  _renderRows(): JSX.Element[] {
     return Object.keys(this.state.columns).map((columnName: string) => {
       const column: FormColumnParams = this.state.columns[columnName];
       return <Column
@@ -428,16 +430,24 @@ export default class PrimeTable extends Table<PrimeTableState> {
         field={columnName}
         header={column.title}
         body={(data: any, options: any) => this._renderColumnBody(columnName, column, data, options)}
-        style={{ minWidth: '8rem' }}
+        style={{ width: 'auto' }}
         sortable
       ></Column>;
     });
   }
 
+  _rowClassName(rowData: any) {
+    return rowData.id % 2 === 0 ? '' : 'bg-light';
+  }
+
   render() {
+    if (!this.state.data || !this.state.columns) {
+      return <ProgressBar mode="indeterminate" style={{ height: '8px' }}></ProgressBar>;
+    }
+
     return (
       <>
-        <Modal 
+        <Modal
           uid={this.props.uid}
           model={this.props.model}
           {...this.props.modal}
@@ -453,18 +463,19 @@ export default class PrimeTable extends Table<PrimeTableState> {
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
-              //@ts-ignore
-              ADIOS.modalToggle(this.props.uid);
+              globalThis.adios.modalToggle(this.props.uid);
             }}
             onDeleteCallback={() => {
               this.loadData();
-              //@ts-ignore
-              ADIOS.modalToggle(this.props.uid);
+              globalThis.adios.modalToggle(this.props.uid);
             }}
           />
         </Modal>
 
-        <div>
+        <div
+          id={"adios-table-prime-" + this.props.uid}
+          className="adios-react-ui table"
+        >
           <div className="card border-0">
             {this.state.showHeader ?
               <div className="card-header mb-2">
@@ -513,7 +524,7 @@ export default class PrimeTable extends Table<PrimeTableState> {
                       </div>
 
                       <input 
-                        className="mr-2 form-control border-end-0 border rounded-pill"
+                        className="mr-2 form-control border-end-0 border"
                         style={{maxWidth: '250px'}}
                         type="search"
                         placeholder="Start typing to search..."
@@ -528,33 +539,33 @@ export default class PrimeTable extends Table<PrimeTableState> {
 
             {/*<Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>*/}
 
-            {this.state.data && this.state.columns ? (
-              <DataTable
-                ref={this.dt}
-                value={this.state.data.data}
-                lazy={true}
-                dataKey="id"
-                first={(this.state.page - 1)}
-                paginator
-                rows={this.state.itemsPerPage}
-                totalRecords={this.state.data.total}
-                rowsPerPageOptions={[15, 30, 50, 100]}
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                currentPageReportTemplate="{first}-{last} of {totalRecords} records"
-                onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
-                onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
-                onSort={(event: DataTableSortEvent) => this.onSortByChangeCustom(event)}
-                sortOrder={this.state.sortOrder}
-                sortField={this.state.sortField}
-                //globalFilter={globalFilter}
-                //header={header}
-                //selection={selectedProducts}
-                //onSelectionChange={(e) => setSelectedProducts(e.value)}
-              >
-                <Column selectionMode="multiple" exportable={false}></Column>
-                {this._renderRows()}
-              </DataTable>
-            ) : ''}
+            <DataTable
+              className="border rounded"
+              ref={this.dt}
+              value={this.state.data.data}
+              lazy={true}
+              dataKey="id"
+              first={(this.state.page - 1) * this.state.itemsPerPage}
+              paginator
+              rows={this.state.itemsPerPage}
+              totalRecords={this.state.data.total}
+              rowsPerPageOptions={[15, 30, 50, 100]}
+              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+              currentPageReportTemplate="{first}-{last} of {totalRecords} records"
+              onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
+              onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
+              onSort={(event: DataTableSortEvent) => this.onSortByChangeCustom(event)}
+              sortOrder={this.state.sortOrder}
+              sortField={this.state.sortField}
+              rowClassName={this._rowClassName}
+              //globalFilter={globalFilter}
+              //header={header}
+              //selection={selectedProducts}
+              //onSelectionChange={(e) => setSelectedProducts(e.value)}
+            >
+              {/*<Column selectionMode="multiple" exportable={false}></Column>*/}
+              {this._renderRows()}
+            </DataTable>
           </div>
         </div>
       </>

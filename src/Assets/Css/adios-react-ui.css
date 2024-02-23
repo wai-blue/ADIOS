@@ -1,3 +1,32 @@
 .adios-react-ui.table {
   margin-top: 1em;
 }
+
+/* Prime DataTable */
+.p-datatable tbody tr td {
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.p-datatable thead tr td {
+  font-size: 14px;
+}
+
+.p-paginator-bottom, .p-dropdown-label  {
+  font-size: 14px;
+}
+
+.p-datatable .p-datatable-thead > tr > th {
+  font-size: 16px;
+  font-weight: normal;
+}
+
+.p-column-header-content .p-icon  {
+}
+/* End Prime DataTable */
+
+/* Mui Grid Data */
+.MuiDataGrid-row {
+  height: 100px;
+}
+/* End Mui Grid Data */
