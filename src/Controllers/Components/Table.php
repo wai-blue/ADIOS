@@ -10,6 +10,8 @@
 
 namespace ADIOS\Controllers\Components;
 
+use Illuminate\Support\Str;
+
 /**
  * @package Components\Controllers\Table
  */
@@ -76,6 +78,11 @@ class Table extends \ADIOS\Core\Controller {
     $params = $this->params;
     $this->itemsPerPage = (int) $params['itemsPerPage'] ?? 15;
 
+    $search = null;
+    if (isset($params['search'])) {
+      $search = strtolower(Str::ascii($params['search']));
+    }
+
     $this->model = $this->adios->getModel($this->params['model']);
 
     $tmpColumns = $this->model->columns();
@@ -115,8 +122,7 @@ class Table extends \ADIOS\Core\Controller {
         $withs[$columnName] = function ($query) use ($lookupSqlValue) {
           $query->selectRaw('id, ' . $lookupSqlValue);
         };
-      }
-      else if (isset($column['relationship'])) {
+      } else if (isset($column['relationship'])) {
         $withs[$columnName] = function ($query) {
           $query->pluck('name');
         };
@@ -144,12 +150,20 @@ class Table extends \ADIOS\Core\Controller {
     }
 
     // Search
-    if (isset($params['search'])) {
+    if ($search !== null) {
         foreach ($tmpColumns as $columnName => $column) {
+          if (isset($column['enumValues'])) {
+            foreach ($column['enumValues'] as $enumValueKey => $enumValue) {
+              if (str_contains(strtolower(Str::ascii($enumValue)), $search)) {
+                $query->orHaving($columnName, $enumValueKey);
+              }
+            }
+          }
+
           if ($column['type'] == 'lookup') {
-            $query->orHaving($columnName.':LOOKUP', 'like', "%{$params['search']}%");
+            $query->orHaving($columnName.':LOOKUP', 'like', "%{$search}%");
           } else {
-            $query->orHaving($columnName, 'like', "%{$params['search']}%");
+            $query->orHaving($columnName, 'like', "%{$search}%");
           }
         }
       // $query->where(function ($query) use ($params, $tmpColumns) {
@@ -172,7 +186,6 @@ class Table extends \ADIOS\Core\Controller {
     }
     // _var_dump($query->toSql());
 
-    // SORT BY
     if (isset($params['sortBy'])) {
       $query->orderBy(
         $params['sortBy']['field'],

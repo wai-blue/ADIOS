@@ -31,9 +31,9 @@ export default class MuiTable extends Table {
           style={{ width: '20px', height: '20px', background: params.value }} 
           className="rounded" 
         />;
-      case 'image': 
+      case 'image':
         if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
-        return <img 
+        return <img
           style={{ width: '30px', height: '30px' }}
           src={params.folderUrl + "/" + params.value}
           className="rounded"
@@ -60,6 +60,15 @@ export default class MuiTable extends Table {
     }
   }
 
+  getColumnAlign(columnType: string): string {
+    switch (columnType) {
+      case 'bool':
+      case 'boolean':
+      case 'color': return 'center';
+      default: return 'left';
+    }
+  }
+
   loadParams() {
     super.loadParams((params: any) => {
       let newColumns: Array<GridColDef> = [];
@@ -72,6 +81,7 @@ export default class MuiTable extends Table {
           headerName: column.title,
           field: columnName,
           flex: 1,
+          //align: this.getColumnAlign(column.type),
           renderCell: (params: any) => {
             const column: MuiTableColumn = params.api.getColumn(params.field);
             const cellBody: JSX.Element = this._renderCellBody(column, params);
