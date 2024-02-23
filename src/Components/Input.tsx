@@ -1,16 +1,23 @@
 import React, { Component } from 'react'
 import * as uuid from 'uuid';
+import Form from './Form';
 
 export interface InputProps {
-  inputClassName: string,
-  // parentForm: any,
+  parentForm: Form,
+  params: any,
+  //inputClassName: string,
   columnName: string,
   id?: string,
   readonly?: boolean,
   value?: any,
-  onChange?: any,
-  invalid?: boolean,
+  onChange?: (value: string) => void,
+  isInvalid?: boolean,
   cssClass?: string,
+
+  // For lookup
+  model?: string,
+  // For datetime
+  type?: string
 }
 
 export interface InputState {
@@ -33,7 +40,7 @@ export class Input<P, S> extends Component<InputProps, InputState> {
     super(props);
 
     let readonly: boolean = props.readonly ?? false;
-    let invalid: boolean = props.invalid ?? false;
+    let invalid: boolean = props.isInvalid ?? false;
     let value: any = props.value ?? '';
     let onChange: any = props.onChange ?? null;
     let cssClass: string = props.cssClass ?? '';

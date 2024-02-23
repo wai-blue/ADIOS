@@ -23,6 +23,7 @@ import InputImage from "./Inputs/Image";
 import InputTags from "./Inputs/Tags";
 import InputDateTime from "./Inputs/DateTime";
 import InputEnumValues from "./Inputs/EnumValues";
+import { InputProps } from "./Input";
 
 interface Content {
   [key: string]: ContentCard | any;
@@ -538,18 +539,17 @@ export default class Form extends Component<FormProps> {
    * Render different input types
    */
   _renderInput(columnName: string): JSX.Element {
-    let colDef = this.state.columns ? this.state.columns[columnName] : null;
+    let inputToRender: JSX.Element | null = <></>;
+    const colDef = this.state.columns ? this.state.columns[columnName] : null;
 
     if (!colDef) {
       return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);
     }
 
-    let inputToRender: JSX.Element | null;
-    let inputParams = {...colDef, ...{readonly: this.state.readonly}};
-    let data = this.state.data ?? {};
-
-    let columns = this.state.columns ?? {};
-    let inputProps: any = {
+    const inputParams = {...colDef, ...{readonly: this.state.readonly}};
+    const data = this.state.data ?? {};
+    const columns = this.state.columns ?? {};
+    const inputProps: InputProps = {
       parentForm: this,
       columnName: columnName,
       params: inputParams,
@@ -557,7 +557,11 @@ export default class Form extends Component<FormProps> {
       isInvalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
       cssClass: colDef.cssClass ?? '',
-      onChange: (value) => { return this.inputOnChangeRaw(columnName, value) },
+      onChange: (value) => this.inputOnChangeRaw(columnName, value),
+      // Model for lookup
+      model: colDef.model,
+      // Type for datetiem
+      type:  colDef.type ?? 'date',
     };
 
     if (colDef.enumValues) {
@@ -594,12 +598,12 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputColor {...inputProps} />;
             break;
           case 'tags':
-            inputToRender = <InputTags
-              parentForm={this}
-              columnName={columnName}
-              params={inputParams}
-              dataKey={this.state.columns[columnName]['dataKey']}
-            />;
+            //inputToRender = <InputTags
+            //  parentForm={this}
+            //  columnName={columnName}
+            //  params={inputParams}
+            //  dataKey={this.state.columns[columnName]['dataKey']}
+            ///>;
             break;
           case 'image':
             inputToRender = <InputImage {...inputProps} />;
@@ -607,7 +611,6 @@ export default class Form extends Component<FormProps> {
           case 'datetime':
           case 'date':
           case 'time':
-            inputProps.type = colDef.type;
             inputToRender = <InputDateTime {...inputProps} />;
             break;
           case 'editor':
@@ -625,12 +628,10 @@ export default class Form extends Component<FormProps> {
               );
             }
             break;
-          default:
-            inputToRender = <InputVarchar {...inputProps} />;
+          default: inputToRender = <InputVarchar {...inputProps} />;
         }
       }
     }
-
 
     return columnName != 'id' ? (
       <div
