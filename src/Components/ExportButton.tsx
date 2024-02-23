@@ -13,6 +13,7 @@ interface ExportButtonProps {
   text?: string,
   icon?: string,
   cssClass?: string
+  customCssClass?: string
   cssStyle?: object,
   exportType: string,
   exportElementId: string,
@@ -132,21 +133,17 @@ export default class ExportButton extends Component<ExportButtonProps> {
             Exportujem rozpis do obrázku<br/>
           </div>
         </div>
-        <div
+        <button
           id={"adios-export-button-" + this.props.uid}
-          className="adios-react-ui button"
+          className={this.props.customCssClass ? this.props.customCssClass : ("adios ui Button btn " + this.state.cssClass + " btn-icon-split")}
+          style={this.state.cssStyle}
+          onClick={() => this.export()}
         >
-          <button
-            className={"adios ui Button btn " + this.state.cssClass + " btn-icon-split"}
-            style={this.state.cssStyle}
-            onClick={() => this.export()}
-          >
-            <span className="icon">
-              <i className={this.state.icon}></i>
-            </span>
-            <span className="text">{this.props.text}</span>
-          </button>
-        </div>
+          <span className="icon">
+            <i className={this.state.icon}></i>
+          </span>
+          <span className="text">{this.props.text}</span>
+        </button>
       </>
     );
   }

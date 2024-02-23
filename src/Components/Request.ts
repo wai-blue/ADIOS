@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
+import Notification from "./Notification";
 
 import Swal from "sweetalert2";
 
@@ -95,7 +96,7 @@ class Request {
       if (err.response.status == 500) {
         this.fatalErrorNotification(err.response.data.message);
       } else {
-        // Notification.error(err.response.data);
+        Notification.error(err.response.data);
         console.error('ADIOS: ' + err.code, err.config?.url, err.config?.params, err.response.data);
         if (errorCallback) errorCallback(err.response);
       }

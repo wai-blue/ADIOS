@@ -1,5 +1,5 @@
 import React from "react";
-// import Notification from "./Notification";
+import Notification from "./Notification";
 
 export function deepObjectMerge(target: any, source: any): Object {
   let result: any = target;
@@ -26,8 +26,7 @@ export function deepObjectMerge(target: any, source: any): Object {
 }
 
 export function adiosError(message: string): JSX.Element {
-  // Notification.error(htmlText);
-
+  //Notification.error(message);
   console.error('ADIOS: ' + message);
 
   return (

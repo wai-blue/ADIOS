@@ -5,6 +5,7 @@ import { ProgressBar } from 'primereact/progressbar';
 import Table, { SortBy } from '../Table';
 import Modal from "./../Modal";
 import Form, { FormColumnParams } from "./../Form";
+import ExportButton from "../ExportButton";
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
 interface MuiTableColumn extends Omit<GridColDef, 'field' | 'headerName'> {
@@ -207,11 +208,20 @@ export default class MuiTable extends Table {
                           <i className="fas fa-ellipsis-v"/>
                         </button>
                         <div className="dropdown-menu">
+                          <ExportButton
+                            uid={this.props.uid}
+                            exportType="image"
+                            exportElementId={'adios-table-mui-body-' + this.props.uid}
+                            exportFileName={this.state.title}
+                            text="Save as image"
+                            icon="fas fa-file-export mr-2"
+                            customCssClass="dropdown-item"
+                          />
                           <button className="dropdown-item" type="button">
-                            <i className="fas fa-file-export mr-2"/> Exportovať do CSV
+                            <i className="fas fa-file-export mr-2"/> Export to CSV
                           </button>
                           <button className="dropdown-item" type="button">
-                            <i className="fas fa-print mr-2"/> Tlačiť
+                            <i className="fas fa-print mr-2"/> Print
                           </button>
                         </div>
                       </div>
@@ -229,46 +239,48 @@ export default class MuiTable extends Table {
                 </div>
               </div>
             : ''}
-           
-            <DataGrid
-              localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
-              autoHeight={true}
-              rows={this.state.data.data}
-              columns={this.state.columns}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    page: (this.state.page - 1),
-                    pageSize: this.state.itemsPerPage
+          
+            <div id={"adios-table-mui-body-" + this.props.uid}>
+              <DataGrid
+                localeText={skSK.components.MuiDataGrid.defaultProps.localeText}
+                autoHeight={true}
+                rows={this.state.data.data}
+                columns={this.state.columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      page: (this.state.page - 1),
+                      pageSize: this.state.itemsPerPage
+                    },
                   },
-                },
-              }}
-              paginationMode="server"
-              sortingMode="server"
-              filterMode="server"
-              rowCount={this.state.data.total}
-              rowHeight={this.props.rowHeight ?? 50}
-              onPaginationModelChange={(pagination) => this.onPaginationChangeCustom(pagination)}
-              onSortModelChange={(data: GridSortModel) => this.onSortByChangeCustom(data)}
-              onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
-              onRowClick={(item) => this.onRowClick(item.id as number)}
-              // stripped rows
-              getRowClassName={(params) => params.indexRelativeToCurrentPage % 2 === 0 ? '' : 'bg-light' }
-              // disableColumnFilter
-              // disableColumnSelector
-              // disableDensitySelector
-              sx={{
-                '.MuiDataGrid-cell:focus': {
-                  outline: 'none'
-                },
-                '& .MuiDataGrid-row:hover': {
-                  cursor: 'pointer'
-                }
-              }}
-              //loading={false}
-              pageSizeOptions={[5, 10, 15, 30, 50, 100]}
-              //checkboxSelection
-            />
+                }}
+                paginationMode="server"
+                sortingMode="server"
+                filterMode="server"
+                rowCount={this.state.data.total}
+                rowHeight={this.props.rowHeight ?? 50}
+                onPaginationModelChange={(pagination) => this.onPaginationChangeCustom(pagination)}
+                onSortModelChange={(data: GridSortModel) => this.onSortByChangeCustom(data)}
+                onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
+                onRowClick={(item) => this.onRowClick(item.id as number)}
+                // stripped rows
+                getRowClassName={(params) => params.indexRelativeToCurrentPage % 2 === 0 ? '' : 'bg-light' }
+                // disableColumnFilter
+                // disableColumnSelector
+                // disableDensitySelector
+                sx={{
+                  '.MuiDataGrid-cell:focus': {
+                    outline: 'none'
+                  },
+                  '& .MuiDataGrid-row:hover': {
+                    cursor: 'pointer'
+                  }
+                }}
+                //loading={false}
+                pageSizeOptions={[5, 10, 15, 30, 50, 100]}
+                //checkboxSelection
+              />
+            </div>
           </div>
         </div>
       </>

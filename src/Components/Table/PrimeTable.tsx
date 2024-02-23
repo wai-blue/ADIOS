@@ -19,6 +19,7 @@ import { ProgressBar } from 'primereact/progressbar';
 import Table, { SortBy, TableState, TableProps } from './../Table';
 import Modal from '../Modal';
 import Form, { FormColumnParams } from '../Form';
+import ExportButton from '../ExportButton';
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
 interface PrimeTableState extends TableState {
@@ -514,6 +515,15 @@ export default class PrimeTable extends Table<PrimeTableState> {
                           <i className="fas fa-ellipsis-v"/>
                         </button>
                         <div className="dropdown-menu">
+                          <ExportButton
+                            uid={this.props.uid}
+                            exportType="image"
+                            exportElementId={'adios-table-prime-body-' + this.props.uid}
+                            exportFileName={this.state.title}
+                            text="Save as image"
+                            icon="fas fa-file-export mr-2"
+                            customCssClass="dropdown-item"
+                          />
                           <button className="dropdown-item" type="button">
                             <i className="fas fa-file-export mr-2"/> Exportovať do CSV
                           </button>
@@ -539,33 +549,35 @@ export default class PrimeTable extends Table<PrimeTableState> {
 
             {/*<Toolbar className="mb-4" left={leftToolbarTemplate} right={rightToolbarTemplate}></Toolbar>*/}
 
-            <DataTable
-              className="border rounded"
-              ref={this.dt}
-              value={this.state.data.data}
-              lazy={true}
-              dataKey="id"
-              first={(this.state.page - 1) * this.state.itemsPerPage}
-              paginator
-              rows={this.state.itemsPerPage}
-              totalRecords={this.state.data.total}
-              rowsPerPageOptions={[15, 30, 50, 100]}
-              paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-              currentPageReportTemplate="{first}-{last} of {totalRecords} records"
-              onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
-              onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
-              onSort={(event: DataTableSortEvent) => this.onSortByChangeCustom(event)}
-              sortOrder={this.state.sortOrder}
-              sortField={this.state.sortField}
-              rowClassName={this._rowClassName}
-              //globalFilter={globalFilter}
-              //header={header}
-              //selection={selectedProducts}
-              //onSelectionChange={(e) => setSelectedProducts(e.value)}
-            >
-              {/*<Column selectionMode="multiple" exportable={false}></Column>*/}
-              {this._renderRows()}
-            </DataTable>
+            <div id={"adios-table-prime-body-" + this.props.uid}>
+              <DataTable
+                className="border rounded"
+                ref={this.dt}
+                value={this.state.data.data}
+                lazy={true}
+                dataKey="id"
+                first={(this.state.page - 1) * this.state.itemsPerPage}
+                paginator
+                rows={this.state.itemsPerPage}
+                totalRecords={this.state.data.total}
+                rowsPerPageOptions={[15, 30, 50, 100]}
+                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                currentPageReportTemplate="{first}-{last} of {totalRecords} records"
+                onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
+                onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
+                onSort={(event: DataTableSortEvent) => this.onSortByChangeCustom(event)}
+                sortOrder={this.state.sortOrder}
+                sortField={this.state.sortField}
+                rowClassName={this._rowClassName}
+                //globalFilter={globalFilter}
+                //header={header}
+                //selection={selectedProducts}
+                //onSelectionChange={(e) => setSelectedProducts(e.value)}
+              >
+                {/*<Column selectionMode="multiple" exportable={false}></Column>*/}
+                {this._renderRows()}
+              </DataTable>
+            </div>
           </div>
         </div>
       </>
