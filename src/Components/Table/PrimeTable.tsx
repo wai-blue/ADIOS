@@ -393,7 +393,7 @@ export default class PrimeTable extends Table<PrimeTableState> {
         if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
         return <img 
           style={{ width: '30px', height: '30px' }}
-          src={this.state.params.folderUrl + "/" + columnValue}
+          src={this.state.folderUrl + "/" + columnValue}
           className="rounded"
         />;
       case 'lookup':

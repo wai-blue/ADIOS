@@ -64,6 +64,15 @@ interface TableData {
   total: number
 }
 
+//export interface TableParams {
+//  model: string,
+//  parentFormId: number,
+//  parentFormModel: string,
+//  tag: string,
+//  columns: FormColumnParams,
+//  folderUrl: string
+//}
+
 export interface TableState {
   endpoint: string,
   addButtonText?: string,
@@ -83,6 +92,7 @@ export interface TableState {
   search?: string,
   showHeader?: boolean,
   title?: string,
+  folderUrl?: string,
 }
 
 export default class Table<T extends TableState = TableState> extends Component<TableProps> {
@@ -153,6 +163,7 @@ export default class Table<T extends TableState = TableState> extends Component<
           columns: params.columns,
           showHeader: params.showHeader ?? true,
           title: this.props.title ?? params.title,
+          folderUrl: params.folderUrl,
         });
       }
     );

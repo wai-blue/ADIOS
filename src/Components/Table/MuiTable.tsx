@@ -35,7 +35,7 @@ export default class MuiTable extends Table {
         if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
         return <img
           style={{ width: '30px', height: '30px' }}
-          src={params.folderUrl + "/" + params.value}
+          src={this.state.folderUrl + "/" + params.value}
           className="rounded"
         />;
       case 'lookup':

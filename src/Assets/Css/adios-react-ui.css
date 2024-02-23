@@ -17,12 +17,20 @@
 }
 
 .p-datatable .p-datatable-thead > tr > th {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: normal;
 }
 
-.p-column-header-content .p-icon  {
+.p-column-header-content .p-icon {
+  width: 10px;
+  height: 10px;
 }
+
+.p-datatable-tbody tr:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
 /* End Prime DataTable */
 
 /* Mui Grid Data */
