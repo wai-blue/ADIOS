@@ -2,7 +2,7 @@ import React, { ChangeEvent, Component, useId } from "react";
 import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 import { ProgressBar } from 'primereact/progressbar';
 
-import Table from '../Table';
+import Table, { SortBy } from '../Table';
 import Modal from "./../Modal";
 import Form, { FormColumnParams } from "./../Form";
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
@@ -95,6 +95,17 @@ export default class MuiTable extends Table {
     const page = event.page + 1;
     const itemsPerPage = event.pageSize;
     this.onPaginationChange(page, itemsPerPage);
+  }
+
+  onSortByChangeCustom(data: GridSortModel) {
+    if (data.length == 0) return this.onSortByChange();
+
+    const sortBy: SortBy = {
+      field: data[0].field,
+      sort: data[0].sort,
+    };
+
+    this.onSortByChange(sortBy);
   }
 
   render() {
@@ -231,7 +242,7 @@ export default class MuiTable extends Table {
               rowCount={this.state.data.total}
               rowHeight={this.props.rowHeight ? this.props.rowHeight : 30}
               onPaginationModelChange={(pagination) => this.onPaginationChangeCustom(pagination)}
-              onSortModelChange={(data: GridSortModel) => this.onOrderByChange(data)}
+              onSortModelChange={(data: GridSortModel) => this.onSortByChangeCustom(data)}
               onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}
               onRowClick={(item) => this.onRowClick(item.id as number)}
               // stripped rows

@@ -1,6 +1,6 @@
 import React, { ChangeEvent, createRef } from 'react';
 import { classNames } from 'primereact/utils';
-import { DataTable, DataTableRowClickEvent, DataTablePageEvent } from 'primereact/datatable';
+import { DataTable, DataTableRowClickEvent, DataTablePageEvent, DataTableSortEvent, SortOrder, } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ProductService } from './test';
 import { Toast } from 'primereact/toast';
@@ -15,46 +15,30 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Tag } from 'primereact/tag';
 
-import Table from './../Table';
+import Table, { SortBy, TableState, TableProps } from './../Table';
 import Modal from '../Modal';
 import Form, { FormColumnParams } from '../Form';
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
-export default class PrimeTable extends Table {
-  dt: HTMLInputElement|null;
-  products: Array<any>;
+interface PrimeTableState extends TableState {
+  sortOrder: SortOrder,
+  sortField?: string
+}
 
-  constructor(props) {
+export default class PrimeTable extends Table<PrimeTableState> {
+  dt: HTMLInputElement|null;
+
+  constructor(props: TableProps) {
     super(props);
 
+    this.state = {
+      ...this.state,
+      sortOrder: null,
+    };
+
     this.dt = createRef();
-    this.products = ProductService.getProductsArray();
   }
 
-  //let emptyProduct = {
-  //  id: null,
-  //  name: '',
-  //  image: null,
-  //  description: '',
-  //  category: null,
-  //  price: 0,
-  //  quantity: 0,
-  //  rating: 0,
-  //  inventoryStatus: 'INSTOCK'
-  //};
-  //
-  //const [products, setProducts] = useState(null);
-  //const [productDialog, setProductDialog] = useState(false);
-  //const [deleteProductDialog, setDeleteProductDialog] = useState(false);
-  //const [deleteProductsDialog, setDeleteProductsDialog] = useState(false);
-  //const [product, setProduct] = useState(emptyProduct);
-  //const [selectedProducts, setSelectedProducts] = useState(null);
-  //const [submitted, setSubmitted] = useState(false);
-  //const [globalFilter, setGlobalFilter] = useState(null);
-  //const toast = useRef(null);
-  //
-  //
-  //
   //const openNew = () => {
   //  setProduct(emptyProduct);
   //  setSubmitted(false);
@@ -340,8 +324,29 @@ export default class PrimeTable extends Table {
     this.onPaginationChange(page, itemsPerPage);
   }
 
-  onOrderByChangeCustom(event: any) {
-    console.log(event);
+  onSortByChangeCustom(event: DataTableSortEvent) {
+    let sortOrder: number | null = 1;
+
+    // Icons in PrimeTable changing
+    // 1 == ASC
+    // -1 == DESC
+    // null == neutral icons
+    if (event.sortField == this.state.sortField) {
+      sortOrder = (this.state.sortOrder === null ? 1 : (this.state.sortOrder === 1 ? -1 : null));
+    }
+
+    const sortBy: SortBy = {
+      field: event.sortField,
+      sort: event.sortOrder === 1 ? 'asc' : 'desc'
+    };
+
+    this.onSortByChange(
+      (sortOrder == null ? undefined : sortBy),
+      {
+        sortOrder: sortOrder,
+        sortField: sortOrder === null ? undefined : event.sortField
+      }
+    );
   }
 
   _renderColumnBodyImage(columnValue?: any): JSX.Element {
@@ -423,8 +428,8 @@ export default class PrimeTable extends Table {
         field={columnName}
         header={column.title}
         body={(data: any, options: any) => this._renderColumnBody(columnName, column, data, options)}
-        sortable
         style={{ minWidth: '8rem' }}
+        sortable
       ></Column>;
     });
   }
@@ -538,7 +543,9 @@ export default class PrimeTable extends Table {
                 currentPageReportTemplate="{first}-{last} of {totalRecords} records"
                 onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
                 onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
-                onSort={(event: any) => this.onOrderByChangeCustom(event)}
+                onSort={(event: DataTableSortEvent) => this.onSortByChangeCustom(event)}
+                sortOrder={this.state.sortOrder}
+                sortField={this.state.sortField}
                 //globalFilter={globalFilter}
                 //header={header}
                 //selection={selectedProducts}

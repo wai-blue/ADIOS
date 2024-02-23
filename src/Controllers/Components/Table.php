@@ -172,11 +172,11 @@ class Table extends \ADIOS\Core\Controller {
     }
     // _var_dump($query->toSql());
 
-    // ORDER BY
-    if (isset($params['orderBy'])) {
+    // SORT BY
+    if (isset($params['sortBy'])) {
       $query->orderBy(
-        $params['orderBy']['field'],
-        $params['orderBy']['sort']);
+        $params['sortBy']['field'],
+        $params['sortBy']['sort']);
     } else {
       $query->orderBy('id', 'DESC');
     }

@@ -7,7 +7,12 @@ import  { FormProps, FormColumns } from "./Form";
 import { adiosError, deepObjectMerge } from "./Helper";
 import request from "./Request";
 
-interface TableProps {
+export interface SortBy {
+  field: string,
+  sort?: string | null
+}
+
+export interface TableProps {
   addButtonText?: string,
   canCreate?: boolean,
   canDelete?: boolean,
@@ -59,7 +64,7 @@ interface TableData {
   total: number
 }
 
-interface TableState {
+export interface TableState {
   endpoint: string,
   addButtonText?: string,
   canCreate?: boolean,
@@ -72,7 +77,7 @@ interface TableState {
   formId?: number,
   formEndpoint?: string,
   formParams?: FormProps,
-  orderBy?: GridSortModel,
+  sortBy?: SortBy,
   page: number,
   itemsPerPage: number,
   search?: string,
@@ -80,8 +85,8 @@ interface TableState {
   title?: string,
 }
 
-export default class Table extends Component<TableProps> {
-  state: TableState;
+export default class Table<T extends TableState = TableState> extends Component<TableProps> {
+  state: T;
 
   constructor(props: TableProps) {
     super(props);
@@ -101,7 +106,7 @@ export default class Table extends Component<TableProps> {
       page: 1,
       itemsPerPage: 15,
       showHeader: props.showHeader ?? true,
-    };
+    } as T;
   }
 
   componentDidMount() {
@@ -160,7 +165,7 @@ export default class Table extends Component<TableProps> {
         returnData: '1',
         filterBy: this.state.filterBy,
         model: this.props.model,
-        orderBy: this.state.orderBy,
+        sortBy: this.state.sortBy,
         page: page,
         itemsPerPage: itemsPerPage,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
@@ -208,9 +213,11 @@ export default class Table extends Component<TableProps> {
     }, () => this.loadData());
   }
 
-  onOrderByChange(data: GridSortModel) {
+  onSortByChange(sortBy?: SortBy, stateParams?: any) {
+    console.log(stateParams);
     this.setState({
-      orderBy: data[0]
+      ...stateParams,
+      sortBy: sortBy,
     }, () => this.loadData());
   }
 
