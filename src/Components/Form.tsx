@@ -93,7 +93,8 @@ export interface FormColumnParams {
   readonly?: boolean,
   inputJSX?: string,
   cssClass?: string,
-  dataKey?: string
+  dataKey?: string,
+  placeholder?: string,
 }
 
 export interface FormColumns {
@@ -550,18 +551,20 @@ export default class Form extends Component<FormProps> {
     const data = this.state.data ?? {};
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
-      parentForm: this,
+      // parentForm: this,
       columnName: columnName,
       params: inputParams,
+      // placeholder: colDef.placeholder ?? '',
       value: data[columnName] ?? '',
-      isInvalid: this.state.invalidInputs[columnName] ?? false,
+      invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
       cssClass: colDef.cssClass ?? '',
       onChange: (value) => this.inputOnChangeRaw(columnName, value),
-      // Model for lookup
-      model: colDef.model,
-      // Type for datetiem
-      type:  colDef.type ?? 'date',
+      // colDef: colDef,
+      // // Model for lookup
+      // model: colDef.model,
+      // // Type for datetiem
+      // type:  colDef.type ?? 'date',
     };
 
     if (colDef.enumValues) {
@@ -588,7 +591,7 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputBoolean {...inputProps} />;
             break;
           case 'lookup':
-            inputProps.model = colDef.model;
+            // inputProps.model = colDef.model;
             inputToRender = <InputLookup {...inputProps} />;
             break;
           case 'MapPoint':

@@ -1,26 +1,25 @@
 import React, { Component } from 'react'
+import { Input, InputProps, InputState } from '../Input'
+import * as uuid from 'uuid';
 
-interface BooleanInputProps {
-  parentForm: any,
-  columnName: string,
-  params: any
-}
-
-export default class Boolean extends Component<BooleanInputProps> {
-  constructor(props: BooleanInputProps) {
-    super(props);
+export default class Boolean extends Input<InputProps, InputState> {
+  static defaultProps = {
+    inputClassName: 'boolean',
+    id: uuid.v4(),
   }
 
-  render() {
+  renderInputElement() {
     return (
       <div className="form-check mb-4">
         <input 
-          type="checkbox" 
-          value={this.props.parentForm.state.data[this.props.columnName]}
-          onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
-          className={`form-check-input ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
-          disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].disabled}
-          checked={this.props.parentForm.state.data[this.props.columnName]}
+          type="checkbox"
+          value={this.state.value ?? false}
+          onChange={(e) => {
+            let currValue = e.currentTarget.value == 'false';
+            this.onChange(currValue ? true : false);
+          }}
+          disabled={this.state.readonly}
+          checked={this.state.value}
         />
       </div>
     );

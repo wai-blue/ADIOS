@@ -28,6 +28,7 @@ import InputVarchar from "./Inputs/Varchar";
 import InputInt from "./Inputs/Int";
 import InputLookup from "./Inputs/Lookup";
 import InputImage from "./Inputs/Image";
+import InputBoolean from "./Inputs/Boolean";
 
 export class ADIOS {
   APP_URL: string = '';
@@ -60,6 +61,7 @@ export class ADIOS {
     this.registerReactComponent('InputVarchar', InputVarchar);
     this.registerReactComponent('InputInt', InputInt);
     this.registerReactComponent('InputLookup', InputLookup);
+    this.registerReactComponent('InputBoolean', InputBoolean);
     this.registerReactComponent('InputImage', InputImage);
   }
   

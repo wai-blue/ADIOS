@@ -1,23 +1,27 @@
 import React, { Component } from 'react'
 import * as uuid from 'uuid';
-import Form from './Form';
+// import Form, { FormColumnParams } from './Form';
 
 export interface InputProps {
-  parentForm: Form,
+  // parentForm: Form,
   params: any,
-  //inputClassName: string,
+  inputClassName?: string,
   columnName: string,
   id?: string,
   readonly?: boolean,
   value?: any,
   onChange?: (value: string) => void,
-  isInvalid?: boolean,
+  invalid?: boolean,
   cssClass?: string,
 
-  // For lookup
-  model?: string,
-  // For datetime
-  type?: string
+  // // For lookup
+  // model?: string,
+  // // For datetime
+  // type?: string
+
+  placeholder?: string,
+
+  // colDef: FormColumnParams,
 }
 
 export interface InputState {
@@ -40,8 +44,8 @@ export class Input<P, S> extends Component<InputProps, InputState> {
     super(props);
 
     let readonly: boolean = props.readonly ?? false;
-    let invalid: boolean = props.isInvalid ?? false;
-    let value: any = props.value ?? '';
+    let invalid: boolean = props.invalid ?? false;
+    let value: any = props.value;
     let onChange: any = props.onChange ?? null;
     let cssClass: string = props.cssClass ?? '';
 
@@ -109,7 +113,9 @@ export class Input<P, S> extends Component<InputProps, InputState> {
 
   onChange(value: any) {
     this.setState({value: value});
-    this.props.onChange(value);
+    if (typeof this.props.onChange == 'function') {
+      this.props.onChange(value);
+    }
   }
 
   serialize(): string {

@@ -4,25 +4,19 @@ import { Input, InputProps, InputState } from '../Input'
 import request from '../Request'
 import * as uuid from 'uuid';
 
-interface LookupInputProps {
-  placeholder?: string,
-  model?: string,
-}
-
 interface LookupInputState {
   data: Array<any>,
 }
 
-export default class Lookup extends Input<InputProps & LookupInputProps, InputState & LookupInputState> {
+export default class Lookup extends Input<InputProps, InputState & LookupInputState> {
   static defaultProps = {
     inputClassName: 'lookup',
     id: uuid.v4(),
   }
 
-  props: InputProps & LookupInputProps;
   state: InputState & LookupInputState;
 
-  constructor(props: InputProps & LookupInputProps) {
+  constructor(props: InputProps) {
     super(props);
 
     this.state.data = [];
@@ -36,7 +30,7 @@ export default class Lookup extends Input<InputProps & LookupInputProps, InputSt
     request.get(
       'components/inputs/lookup',
       {
-        model: this.props.model,
+        model: this.props.params?.model,
         search: inputValue,
         __IS_AJAX__: '1',
       },
@@ -61,7 +55,7 @@ export default class Lookup extends Input<InputProps & LookupInputProps, InputSt
         getOptionValue={(option: any) => { return option.id }}
         onChange={(item: any) => { this.onChange(item.id); }}
         isDisabled={this.state.readonly}
-        placeholder={this.props.placeholder}
+        placeholder={this.props.params?.placeholder}
       />
     )
   } 
