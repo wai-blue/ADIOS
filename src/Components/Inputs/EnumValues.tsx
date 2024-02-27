@@ -51,7 +51,7 @@ export default class EnumValues extends Input<EnumValuesInputProps, InputState> 
     return (
       <select
         value={this.state.value ?? 0}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => this.onChange(this.props.columnName, e.target.value)}
+        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => this.onChange(e.target.value)}
         className={
           "form-control"
           + " " + (this.state.invalid ? 'is-invalid' : '')

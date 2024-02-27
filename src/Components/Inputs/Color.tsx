@@ -13,7 +13,7 @@ export default class Color extends Input<InputProps, InputState> {
     return (
       <Block
         color={this.state.value}
-        onChange={(color: any) => this.onChange(this.props.columnName, color.hex)}
+        onChange={(color: any) => this.onChange(color.hex)}
       />
     );
   } 

@@ -68,7 +68,8 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
             dateFormat: 'H:i',
             enableTime: true,
             noCalendar: true,
-            time_24hr: true
+            time_24hr: true,
+            minuteIncrement: 15
           }
         };
       break;
@@ -88,8 +89,8 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
         <div className={"max-w-250 input-group"}>
           <Flatpickr
             value={this.state.value}
-            onChange={(data: Date[]) => this.onChange(this.props.columnName, data[0] ?? null)}
-            onBlur={(e: React.FocusEvent<HTMLInputElement>) => this.onChange(this.props.columnName, e.target.value)}
+            onChange={(data: Date[]) => this.onChange(data[0] ?? null)}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => this.onChange(e.target.value)}
             className={
               "form-control"
                 + " " + (this.state.invalid ? 'is-invalid' : '')

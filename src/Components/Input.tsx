@@ -7,7 +7,7 @@ export interface InputProps {
   columnName: string,
   id?: string,
   value?: any,
-  onChange?: (columnName: string, value: any) => void | string,
+  onChange?: (value: any) => void | string,
   readonly?: boolean,
   invalid?: boolean,
   cssClass?: string,
@@ -87,11 +87,10 @@ export class Input<P extends InputProps, S extends InputState> extends Component
     );
   }
 
-  onChange(columnName: string, value: any) {
-    console.log(value);
+  onChange(value: any) {
     this.setState({value: value});
     if (typeof this.props.onChange == 'function') {
-      this.props.onChange(columnName, value);
+      this.props.onChange(value);
     }
   }
 

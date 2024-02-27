@@ -557,7 +557,7 @@ export default class Form extends Component<FormProps> {
       invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
       cssClass: colDef.cssClass ?? '',
-      onChange: (columnName: string, value: any) => this.inputOnChangeRaw(columnName, value),
+      onChange: (value: any) => this.inputOnChangeRaw(columnName, value),
     };
 
     if (colDef.enumValues) {

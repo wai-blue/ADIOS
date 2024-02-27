@@ -25,7 +25,7 @@ export default class Image extends Input<InputProps, ImageInputState> {
   onImageChange(images: Array<ImageType>, addUpdateIndex: any) {
     let image: any = images[0];
 
-    this.onChange(this.props.columnName, {
+    this.onChange({
       fileName: image ? image.file.name : null,
       fileData: image ? image.fileData : null
       //fileSize: image.file.size,

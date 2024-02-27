@@ -13,7 +13,7 @@ export default class Varchar extends Input<InputProps, InputState> {
       <input
         type="text"
         value={this.state.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onChange(this.props.columnName, e.currentTarget.value)}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onChange(e.currentTarget.value)}
         placeholder={this.props.params?.placeholder}
         className={
           "form-control"
