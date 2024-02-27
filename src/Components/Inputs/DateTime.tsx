@@ -88,7 +88,8 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
         <div className={"max-w-250 input-group"}>
           <Flatpickr
             value={this.state.value}
-            onChange={(data: any) => this.onChange(this.props.columnName, data[0] ?? null)}
+            onChange={(data: Date[]) => this.onChange(this.props.columnName, data[0] ?? null)}
+            onBlur={(e: React.FocusEvent<HTMLInputElement>) => this.onChange(this.props.columnName, e.target.value)}
             className={
               "form-control"
                 + " " + (this.state.invalid ? 'is-invalid' : '')

@@ -4,22 +4,27 @@ import { Input, InputProps, InputState } from '../Input'
 import request from '../Request'
 import * as uuid from 'uuid';
 
-interface LookupInputState {
+interface LookupInputProps extends InputProps {
+  model?: string
+}
+
+interface LookupInputState extends InputState {
   data: Array<any>,
 }
 
-export default class Lookup extends Input<InputProps, InputState & LookupInputState> {
+export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   static defaultProps = {
     inputClassName: 'lookup',
     id: uuid.v4(),
   }
 
-  state: InputState & LookupInputState;
-
-  constructor(props: InputProps) {
+  constructor(props: LookupInputProps) {
     super(props);
 
-    this.state.data = [];
+    this.state = {
+      ...this.state, // Parent state
+      data: [],
+    };
   }
 
   componentDidMount() {
@@ -53,7 +58,7 @@ export default class Lookup extends Input<InputProps, InputState & LookupInputSt
         value={{id: this.state.value, text: this.state.data[this.state.value]?.text}}
         getOptionLabel={(option: any) => { return option.text }}
         getOptionValue={(option: any) => { return option.id }}
-        onChange={(item: any) => { this.onChange(item.id); }}
+        onChange={(item: any) => { this.onChange(this.props.columnName, item.id); }}
         isDisabled={this.state.readonly}
         placeholder={this.props.params?.placeholder}
       />

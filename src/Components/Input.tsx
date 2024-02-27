@@ -22,13 +22,13 @@ export interface InputState {
   cssClass: string,
 }
 
-export class Input<P extends InputProps, S> extends Component<P, InputState> {
+export class Input<P extends InputProps, S extends InputState> extends Component<P, S> {
   static defaultProps = {
     inputClassName: '',
     id: uuid.v4(),
   };
 
-  state: InputState;
+  state: S;
 
   constructor(props: P) {
     super(props);
@@ -45,25 +45,28 @@ export class Input<P extends InputProps, S> extends Component<P, InputState> {
       value: value,
       onChange: onChange,
       cssClass: cssClass,
-    }
+    } as S;
   }
 
   componentDidUpdate(prevProps: any): void {
     let newState: any = {};
-    let setNewState = false;
+    let setNewState: boolean = false;
 
     if (this.props.value != prevProps.value) {
       newState.value = this.props.value;
       setNewState = true;
     }
+
     if (this.props.cssClass != prevProps.cssClass) {
       newState.cssClass = this.props.cssClass;
       setNewState = true;
     }
+
     if (this.props.readonly != prevProps.readonly) {
       newState.readonly = this.props.readonly;
       setNewState = true;
     }
+
     if (this.props.invalid != prevProps.invalid) {
       newState.invalid = this.props.invalid;
       setNewState = true;
@@ -85,6 +88,7 @@ export class Input<P extends InputProps, S> extends Component<P, InputState> {
   }
 
   onChange(columnName: string, value: any) {
+    console.log(value);
     this.setState({value: value});
     if (typeof this.props.onChange == 'function') {
       this.props.onChange(columnName, value);

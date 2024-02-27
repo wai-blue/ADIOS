@@ -15,8 +15,8 @@ export default class Boolean extends Input<InputProps, InputState> {
           type="checkbox"
           value={this.state.value ?? false}
           onChange={(e) => {
-            let currValue = e.currentTarget.value == 'false';
-            this.onChange(currValue ? true : false);
+            const currValue: boolean = e.currentTarget.value == 'false';
+            this.onChange(this.props.columnName, currValue ? true : false);
           }}
           disabled={this.state.readonly}
           checked={this.state.value}
