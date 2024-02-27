@@ -79,6 +79,13 @@ class Permissions {
     if (strpos($permission, "Administrator/Permission") === 0) return TRUE;
     if (strpos($permission, "Core/Models") === 0) return TRUE;
 
+    $mUserHasRole = new \App\Core\Models\UserHasRole($this->adios);
+    $idUser = $this->adios->userProfile['id'];
+
+    $userRoles = $mUserHasRole->where('id_user', $idUser)->pluck('id_role')->toArray();
+    $jeAdministrator = in_array(\App\Core\Models\UserRole::ADMINISTRATOR, $userRoles);
+    if ($jeAdministrator) return TRUE;
+
     $permissionGranted = FALSE;
     foreach ($idUserRoles as $idUserRole) {
       if ($idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR) {
