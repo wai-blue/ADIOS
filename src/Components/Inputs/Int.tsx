@@ -1,67 +1,39 @@
-import React, { Component } from 'react'
-import { FormColumnParams } from '../Form'
+import React from 'react'
+import { Input, InputProps, InputState } from '../Input'
+import * as uuid from 'uuid';
 
-interface IntInputProps {
-  parentForm: any,
-  columnName: string,
-  params: any,
-  readonly?: boolean
+interface IntInputProps extends InputProps {
+  unit?: string
 }
 
-interface IntInputState {
-  readonly?: boolean,
-}
-
-export default class Int extends Component<IntInputProps> {
-  state: IntInputState;
-
-  constructor(props: IntInputProps) {
-    super(props);
-
-    let parentForm = props.parentForm;
-    let pfState = parentForm.state;
-    let pfProps = parentForm.props;
-    let columnName = props.columnName;
-
-    this.state = {
-      readonly:
-        (props.params.readonly ?? false)
-        || (pfProps?.readonly ?? false)
-        || (pfState.columns[columnName].disabled ?? false)
-        || (pfState.columns[columnName].readonly ?? false)
-    }
+export default class Int extends Input<IntInputProps, InputState> {
+  static defaultProps = {
+    inputClassName: 'int',
+    id: uuid.v4(),
   }
 
-  render() {
-    let parentForm = this.props.parentForm;
-    let pfState = parentForm.state;
-    let columnName = this.props.columnName;
-    let column: FormColumnParams = pfState.columns[columnName];
-    
+  renderInputElement() {
     return (
-      <>
-        <div className={"max-w-250 " + (column.unit ? "input-group" : "")}>
-          <input
-            type="number"
-            value={this.props.parentForm.state.data[this.props.columnName] ?? ""}
-            onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
-            step={column.step ?? 1}
-            min={column.min ?? 0}
-            className={
-              "form-control"
-              + " " + (pfState.invalidInputs[columnName] ? 'is-invalid' : '')
-              + " " + (this.props.params?.cssClass ?? "")
-              + " " + (this.state.readonly ? "bg-muted" : "")
-            }
-            disabled={this.state.readonly}
-          />
-          {column.unit ? (
+      <div className={"max-w-250 " + (this.props.unit ? "input-group" : "")}>
+        <input
+          type="number"
+          value={this.state.value}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onChange(e.currentTarget.value)}
+          placeholder={this.props.params?.placeholder}
+          className={
+            "form-control"
+            + " " + (this.state.invalid ? 'is-invalid' : '')
+            + " " + (this.props.cssClass ?? "")
+            + " " + (this.state.readonly ? "bg-muted" : "")
+          }
+          disabled={this.state.readonly}
+        />
+          {this.props.unit ? (
             <div className="input-group-append">
-              <span className="input-group-text">{column.unit}</span>
+              <span className="input-group-text">{this.props.unit}</span>
             </div>
           ) : ''}
-        </div>
-      </>
+      </div>
     );
-  } 
+  }
 }

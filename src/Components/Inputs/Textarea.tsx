@@ -1,56 +1,29 @@
-import React, { Component } from 'react'
+import React from 'react'
+import { Input, InputProps, InputState } from '../Input'
+import * as uuid from 'uuid';
 
-interface TextareaInputProps {
-  parentForm: any,
-  columnName: string,
-  params: any,
-  readonly?: boolean
-}
-
-interface TextareaInputState {
-  readonly?: boolean,
-}
-
-export default class Textarea extends Component<TextareaInputProps> {
-  state: TextareaInputState;
-
-  constructor(props: TextareaInputProps) {
-    super(props);
-
-    let parentForm = props.parentForm;
-    let pfState = parentForm.state;
-    let pfProps = parentForm.props;
-    let columnName = props.columnName;
-
-    this.state = {
-      readonly:
-        (props.params.readonly ?? false)
-        || (pfProps?.readonly ?? false)
-        || (pfState.columns[columnName].disabled ?? false)
-        || (pfState.columns[columnName].readonly ?? false)
-    }
+export default class Textarea extends Input<InputProps, InputState> {
+  static defaultProps = {
+    inputClassName: 'textarea',
+    id: uuid.v4(),
   }
 
-  render() {
-    let parentForm = this.props.parentForm;
-    let pfState = parentForm.state;
-    let pfProps = parentForm.props;
-    let columnName = this.props.columnName;
-
+  renderInputElement() {
     return (
       <textarea
-        value={this.props.parentForm.state.data[this.props.columnName] ?? ""}
-        onChange={(e) => this.props.parentForm.inputOnChange(this.props.columnName, e)}
+        value={this.state.value}
+        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => this.onChange(e.currentTarget.value)}
         aria-describedby="passwordHelpInline"
         rows={5}
+        placeholder={this.props.params?.placeholder}
         className={
           "form-control"
-          + " " + (pfState.invalidInputs[columnName] ? 'is-invalid' : '')
-          + " " + (this.props.params?.cssClass ?? "")
+          + " " + (this.state.invalid ? 'is-invalid' : '')
+          + " " + (this.props.cssClass ?? "")
           + " " + (this.state.readonly ? "bg-muted" : "")
         }
         disabled={this.state.readonly}
       />
     );
-  } 
+  }
 }

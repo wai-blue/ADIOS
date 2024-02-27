@@ -93,7 +93,8 @@ export interface FormColumnParams {
   readonly?: boolean,
   inputJSX?: string,
   cssClass?: string,
-  dataKey?: string
+  dataKey?: string,
+  placeholder?: string,
 }
 
 export interface FormColumns {
@@ -216,14 +217,14 @@ export default class Form extends Component<FormProps> {
 
     let formattedInputs = JSON.parse(JSON.stringify(this.state.data));
 
-    Object.entries(this.state.columns ?? {}).forEach(([key, value]) => {
-      if (value['relationship'] != undefined) {
-        Object.entries(formattedInputs[key]['values']).forEach(([i, role]) => {
-          formattedInputs[key]['values'][i] = role.id;
-        })
-        formattedInputs[key] = formattedInputs[key]['values'];
-      }
-    });
+    //Object.entries(this.state.columns ?? {}).forEach(([key, value]) => {
+    //  if (value['relationship'] != undefined) {
+    //    Object.entries(formattedInputs[key]['values']).forEach(([i, role]) => {
+    //      formattedInputs[key]['values'][i] = role.id;
+    //    })
+    //    formattedInputs[key] = formattedInputs[key]['values'];
+    //  }
+    //});
 
     //@ts-ignore
     request.post(
@@ -550,22 +551,17 @@ export default class Form extends Component<FormProps> {
     const data = this.state.data ?? {};
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
-      parentForm: this,
       columnName: columnName,
       params: inputParams,
       value: data[columnName] ?? '',
-      isInvalid: this.state.invalidInputs[columnName] ?? false,
+      invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
       cssClass: colDef.cssClass ?? '',
-      onChange: (value) => this.inputOnChangeRaw(columnName, value),
-      // Model for lookup
-      model: colDef.model,
-      // Type for datetiem
-      type:  colDef.type ?? 'date',
+      onChange: (value: any) => this.inputOnChangeRaw(columnName, value),
     };
 
     if (colDef.enumValues) {
-      inputToRender = <InputEnumValues {...inputProps} />
+      inputToRender = <InputEnumValues {...inputProps} enumValues={colDef.enumValues}/>
     } else {
       if (colDef.inputJSX) {
         let inputJSX = colDef.inputJSX;
@@ -582,17 +578,13 @@ export default class Form extends Component<FormProps> {
             break;
           case 'float':
           case 'int':
-            inputToRender = <InputInt {...inputProps} />;
+            inputToRender = <InputInt {...inputProps} unit={colDef.unit}/>;
             break;
           case 'boolean':
             inputToRender = <InputBoolean {...inputProps} />;
             break;
           case 'lookup':
-            inputProps.model = colDef.model;
-            inputToRender = <InputLookup {...inputProps} />;
-            break;
-          case 'MapPoint':
-            inputToRender = <InputMapPoint {...inputProps} />;
+            inputToRender = <InputLookup {...inputProps} model={colDef.model}/>;
             break;
           case 'color':
             inputToRender = <InputColor {...inputProps} />;
@@ -611,8 +603,11 @@ export default class Form extends Component<FormProps> {
           case 'datetime':
           case 'date':
           case 'time':
-            inputToRender = <InputDateTime {...inputProps} />;
+            inputToRender = <InputDateTime {...inputProps} type={colDef.type} />;
             break;
+          //case 'MapPoint':
+          //  inputToRender = <InputMapPoint {...inputProps} />;
+          //  break;
           case 'editor':
             if (this.state.data) {
               inputToRender = (

@@ -156,11 +156,11 @@ export default class MuiTable extends Table {
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
-              globalThis.adios.modalToggle(this.props.uid);
+              globalThis.ADIOS.modalToggle(this.props.uid);
             }}
             onDeleteCallback={() => {
               this.loadData();
-              globalThis.adios.modalToggle(this.props.uid);
+              globalThis.ADIOS.modalToggle(this.props.uid);
             }}
             {...params}
           />

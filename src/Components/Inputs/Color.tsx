@@ -1,25 +1,20 @@
-import React, { Component } from 'react'
+import React from 'react'
 import Block from '@uiw/react-color-block';
+import * as uuid from 'uuid';
+import { Input, InputProps, InputState } from '../Input'
 
-interface BooleanInputProps {
-  parentForm: any,
-  columnName: string,
-  params: any
-}
-
-export default class Color extends Component<BooleanInputProps> {
-  constructor(props: BooleanInputProps) {
-    super(props);
+export default class Color extends Input<InputProps, InputState> {
+  static defaultProps = {
+    inputClassName: 'color',
+    id: uuid.v4(),
   }
 
-  render() {
+  renderInputElement() {
     return (
-      <>
-        <Block
-          color={this.props.parentForm.state.data[this.props.columnName] ?? "#fff"}
-          onChange={(color) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, color.hex)}
-        />
-      </>
+      <Block
+        color={this.state.value}
+        onChange={(color: any) => this.onChange(color.hex)}
+      />
     );
   } 
 }

@@ -464,11 +464,11 @@ export default class PrimeTable extends Table<PrimeTableState> {
             showInModal={true}
             onSaveCallback={() => {
               this.loadData();
-              globalThis.adios.modalToggle(this.props.uid);
+              globalThis.ADIOS.modalToggle(this.props.uid);
             }}
             onDeleteCallback={() => {
               this.loadData();
-              globalThis.adios.modalToggle(this.props.uid);
+              globalThis.ADIOS.modalToggle(this.props.uid);
             }}
           />
         </Modal>

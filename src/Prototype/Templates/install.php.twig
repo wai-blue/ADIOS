@@ -10,6 +10,10 @@ require(__DIR__."/src/App.php");
 try {
 
   $app = new App($config, TRUE);
+
+  // Uncomment this line if you wish to see logs in the console
+  // $app->console->cliEchoEnabled = TRUE;
+
   $app->install();
 
   // user roles and users
