@@ -1,7 +1,9 @@
 import React, { Component } from 'react'
+import { Input, InputProps, InputState } from '../Input'
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
 import { FormColumnParams } from '../Form'
+import * as uuid from 'uuid';
 
 export const dateToEUFormat = (dateString: string): string => {
   if (!dateString || dateString.length != 10) {
@@ -12,7 +14,7 @@ export const dateToEUFormat = (dateString: string): string => {
     return ('0' + d.getDate()).slice(-2) + "."
       + ('0' + (d.getMonth() + 1)).slice(-2)
       + "." + d.getFullYear()
-    ;
+      ;
   }
 }
 
@@ -23,17 +25,19 @@ export const datetimeToEUFormat = (dateString: string): string => {
     + ('0' + (d.getMonth() + 1)).slice(-2)
     + "." + d.getFullYear()
     + " " + ('0' + d.getHours()).slice(-2) + ":" + ('0' + d.getMinutes()).slice(-2)
-  ;
+    ;
 }
 
-interface DateTimeInputProps {
-  parentForm: any,
-  columnName: string,
-  type: string,
-  params: any
+interface DateTimeInputProps extends InputProps {
+  type: string
 }
 
-export default class DateTime extends Component<DateTimeInputProps> {
+export default class DateTime extends Input<DateTimeInputProps, InputState> {
+  static defaultProps = {
+    inputClassName: 'datetime',
+    id: uuid.v4(),
+  }
+
   options: any = {
     dateFormat: 'd.m.Y',
     allowInput: true,
@@ -71,42 +75,37 @@ export default class DateTime extends Component<DateTimeInputProps> {
     }
   }
 
-  render() {
-    let value: string = this.props.parentForm.state.data[this.props.columnName] ?? "";
-
-    let parentForm = this.props.parentForm;
-    let pfState = parentForm.state;
-    let columnName = this.props.columnName;
-    let column: FormColumnParams = pfState.columns[columnName];
-
+  _renderIcon(): JSX.Element {
     switch (this.props.type) {
-      case 'datetime': 
-        //value = datetimeToEUFormat(value);
-      break;
-      case 'date':
-        //value = dateToEUFormat(value);
-      break;
+      case 'time': return <i className="fas fa-clock"></i>;
+      default: return <i className="fas fa-calendar"></i>;
     }
-    
+  }
+
+  renderInputElement() {
     return (
       <>
         <div className={"max-w-250 input-group"}>
           <Flatpickr
-            value={value}
-            onChange={(data: any) => this.props.parentForm.inputOnChangeRaw(this.props.columnName, data[0] ?? null)}
-            className={`form-control ${this.props.parentForm.state.invalidInputs[this.props.columnName] ? 'is-invalid' : ''}`}
-            disabled={this.props.parentForm.props.readonly || this.props.parentForm.state.columns[this.props.columnName].readonly}
+            value={this.state.value}
+            onChange={(data: any) => this.onChange(this.props.columnName, data[0] ?? null)}
+            className={
+              "form-control"
+                + " " + (this.state.invalid ? 'is-invalid' : '')
+                + " " + (this.props.cssClass ?? "")
+                + " " + (this.state.readonly ? "bg-muted" : "")
+            }
+            placeholder={this.props.params?.placeholder}
+            disabled={this.state.readonly}
             options={this.options}
           />
           <div className="input-group-append">
             <span className="input-group-text">
-              {this.props.type == 'datetime' ? <i className="fas fa-calendar"></i> : ''}
-              {this.props.type == 'date' ? <i className="fas fa-calendar"></i> : ''}
-              {this.props.type == 'time' ? <i className="fas fa-clock"></i> : ''}
+              {this._renderIcon()}
             </span>
           </div>
         </div>
       </>
     );
-  } 
+  }
 }

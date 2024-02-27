@@ -1,27 +1,17 @@
 import React, { Component } from 'react'
 import * as uuid from 'uuid';
-// import Form, { FormColumnParams } from './Form';
 
 export interface InputProps {
-  // parentForm: Form,
   params: any,
   inputClassName?: string,
   columnName: string,
   id?: string,
-  readonly?: boolean,
   value?: any,
-  onChange?: (value: string) => void,
+  onChange?: (columnName: string, value: any) => void | string,
+  readonly?: boolean,
   invalid?: boolean,
   cssClass?: string,
-
-  // // For lookup
-  // model?: string,
-  // // For datetime
-  // type?: string
-
   placeholder?: string,
-
-  // colDef: FormColumnParams,
 }
 
 export interface InputState {
@@ -32,7 +22,7 @@ export interface InputState {
   cssClass: string,
 }
 
-export class Input<P, S> extends Component<InputProps, InputState> {
+export class Input<P extends InputProps, S> extends Component<P, InputState> {
   static defaultProps = {
     inputClassName: '',
     id: uuid.v4(),
@@ -40,31 +30,14 @@ export class Input<P, S> extends Component<InputProps, InputState> {
 
   state: InputState;
 
-  constructor(props: InputProps) {
+  constructor(props: P) {
     super(props);
 
-    let readonly: boolean = props.readonly ?? false;
-    let invalid: boolean = props.invalid ?? false;
-    let value: any = props.value;
-    let onChange: any = props.onChange ?? null;
-    let cssClass: string = props.cssClass ?? '';
-
-    // if (props.parentForm) {
-    //   let parentForm = props.parentForm;
-    //   let pfState = parentForm.state;
-    //   let pfProps = parentForm.props;
-    //   let columnName = props.columnName;
-
-    //   readonly = (pfProps?.readonly ?? false)
-    //     || (pfState.columns[columnName].disabled ?? false)
-    //     || (pfState.columns[columnName].readonly ?? false)
-    //   ;
-
-    //   // invalid = pfState.invalidInputs[columnName] ?? false;
-    //   // value = pfState.data[this.props.columnName] ?? "";
-    //   // onChange = parentForm.inputOnChangeRaw();
-    // } else {
-    // }
+    const readonly: boolean = props.readonly ?? false;
+    const invalid: boolean = props.invalid ?? false;
+    const value: any = props.value;
+    const onChange: any = props.onChange ?? null;
+    const cssClass: string = props.cssClass ?? '';
 
     this.state = {
       readonly: readonly,
@@ -75,7 +48,7 @@ export class Input<P, S> extends Component<InputProps, InputState> {
     }
   }
 
-  componentDidUpdate(prevProps): void {
+  componentDidUpdate(prevProps: any): void {
     let newState: any = {};
     let setNewState = false;
 
@@ -111,10 +84,10 @@ export class Input<P, S> extends Component<InputProps, InputState> {
     );
   }
 
-  onChange(value: any) {
+  onChange(columnName: string, value: any) {
     this.setState({value: value});
     if (typeof this.props.onChange == 'function') {
-      this.props.onChange(value);
+      this.props.onChange(columnName, value);
     }
   }
 

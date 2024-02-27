@@ -559,7 +559,7 @@ export default class Form extends Component<FormProps> {
       invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
       cssClass: colDef.cssClass ?? '',
-      onChange: (value) => this.inputOnChangeRaw(columnName, value),
+      onChange: (columnName: string, value: any) => this.inputOnChangeRaw(columnName, value),
       // colDef: colDef,
       // // Model for lookup
       // model: colDef.model,
@@ -614,7 +614,7 @@ export default class Form extends Component<FormProps> {
           case 'datetime':
           case 'date':
           case 'time':
-            inputToRender = <InputDateTime {...inputProps} />;
+            inputToRender = <InputDateTime {...inputProps} type={colDef.type} />;
             break;
           case 'editor':
             if (this.state.data) {
