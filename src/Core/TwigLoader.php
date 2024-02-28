@@ -33,6 +33,10 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
         $this->adios->config['dir']
         . '/src/' . $templateName . '.twig'
       ;
+    } else if (strpos($templateName, "ADIOS/Views/") === 0) {
+      $templateName = str_replace('ADIOS/', '', $templateName);
+
+      $templateFile = __DIR__ . '/../' . $templateName . '.twig';
     } else if (strpos($templateName, "ADIOS/Templates/") === 0) {
       $templateName = str_replace("ADIOS/Templates/", "", $templateName);
 
