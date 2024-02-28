@@ -26,7 +26,7 @@ class Request {
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
       if (successCallback) successCallback(responseData);
-    }).catch((err: AxiosError<ApiError>) => this.catchHandler(err, errorCallback));
+    }).catch((err: AxiosError<ApiError>) => this.catchHandler(url, err, errorCallback));
   }
 
   public post<T>(
@@ -41,7 +41,7 @@ class Request {
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
       if (successCallback) successCallback(responseData);
-    }).catch((err: AxiosError<ApiError>) => this.catchHandler(err, errorCallback));
+    }).catch((err: AxiosError<ApiError>) => this.catchHandler(url, err, errorCallback));
   }
 
   public put<T>(
@@ -56,7 +56,7 @@ class Request {
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
       if (successCallback) successCallback(responseData);
-    }).catch((err: AxiosError<ApiError>) => this.catchHandler(err, errorCallback));
+    }).catch((err: AxiosError<ApiError>) => this.catchHandler(url, err, errorCallback));
   }
 
   public patch<T>(
@@ -71,7 +71,7 @@ class Request {
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
       if (successCallback) successCallback(responseData);
-    }).catch((err: AxiosError<ApiError>) => this.catchHandler(err, errorCallback));
+    }).catch((err: AxiosError<ApiError>) => this.catchHandler(url, err, errorCallback));
   }
 
   public delete<T>(
@@ -85,10 +85,11 @@ class Request {
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
       if (successCallback) successCallback(responseData);
-    }).catch((err: AxiosError<ApiError>) => this.catchHandler(err, errorCallback));
+    }).catch((err: AxiosError<ApiError>) => this.catchHandler(url, err, errorCallback));
   }
 
   private catchHandler(
+    url: string,
     err: AxiosError<ApiError>,
     errorCallback?: (data: any) => void
   ) {
@@ -101,7 +102,8 @@ class Request {
         if (errorCallback) errorCallback(err.response);
       }
     } else {
-      console.error('ADIOS: Request unknown error', err);
+      console.error('ADIOS: Request @ ' + url + ' unknown error.');
+      console.error(err);
       this.fatalErrorNotification("Unknown error");
     }
   }

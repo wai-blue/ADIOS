@@ -119,8 +119,6 @@ export default class MuiTable extends Table {
   }
 
   render() {
-    // console.log('table render', this.props.model, this.state.formParams?.model);
-
     if (!this.state.data || !this.state.columns) {
       return <ProgressBar mode="indeterminate" style={{ height: '8px' }}></ProgressBar>;
     }
@@ -145,7 +143,7 @@ export default class MuiTable extends Table {
           model={this.props.model}
           {...this.props.modal}
           hideHeader={true}
-          isOpen={this.props.formParams?.id ? true : false}
+          isOpen={this.state.formId ? true : false}
         >
           <Form
             uid={this.props.uid}
@@ -162,6 +160,7 @@ export default class MuiTable extends Table {
               this.loadData();
               globalThis.ADIOS.modalToggle(this.props.uid);
             }}
+            isInitialized={false}
             {...params}
           />
         </Modal>
@@ -258,7 +257,7 @@ export default class MuiTable extends Table {
                 sortingMode="server"
                 filterMode="server"
                 rowCount={this.state.data.total}
-                rowHeight={this.props.rowHeight ?? 50}
+                rowHeight={this.props.rowHeight ?? 35}
                 onPaginationModelChange={(pagination) => this.onPaginationChangeCustom(pagination)}
                 onSortModelChange={(data: GridSortModel) => this.onSortByChangeCustom(data)}
                 onFilterModelChange={(data: GridFilterModel) => this.onFilterChange(data)}

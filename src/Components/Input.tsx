@@ -12,6 +12,7 @@ export interface InputProps {
   invalid?: boolean,
   cssClass?: string,
   placeholder?: string,
+  isInitialized?: boolean,
 }
 
 export interface InputState {
@@ -20,6 +21,7 @@ export interface InputState {
   value: any,
   onChange?: any,
   cssClass: string,
+  isInitialized: boolean,
 }
 
 export class Input<P extends InputProps, S extends InputState> extends Component<P, S> {
@@ -33,6 +35,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
   constructor(props: P) {
     super(props);
 
+    const isInitialized: boolean = props.isInitialized ?? false;
     const readonly: boolean = props.readonly ?? false;
     const invalid: boolean = props.invalid ?? false;
     const value: any = props.value;
@@ -40,6 +43,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
     const cssClass: string = props.cssClass ?? '';
 
     this.state = {
+      isInitialized: isInitialized,
       readonly: readonly,
       invalid: invalid,
       value: value,
@@ -51,6 +55,11 @@ export class Input<P extends InputProps, S extends InputState> extends Component
   componentDidUpdate(prevProps: any): void {
     let newState: any = {};
     let setNewState: boolean = false;
+
+    if (this.props.isInitialized != prevProps.isInitialized) {
+      newState.isInitialized = this.props.isInitialized;
+      setNewState = true;
+    }
 
     if (this.props.value != prevProps.value) {
       newState.value = this.props.value;

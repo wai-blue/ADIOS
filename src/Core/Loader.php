@@ -112,6 +112,13 @@ spl_autoload_register(function ($class) {
   }
 });
 
+register_shutdown_function(function() {
+  $error = error_get_last();
+  if ($error !== NULL && $error['type'] == E_ERROR) {
+    header('HTTP/1.1 400 Bad Request', true, 400);
+  }
+});
+
 // ADIOS Loader class
 #[\AllowDynamicProperties]
 class Loader

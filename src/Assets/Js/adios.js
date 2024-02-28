@@ -40,7 +40,6 @@ var ADIOS = {
   },
 
   modalToggle(uid) {
-    // console.log('ADIOS.modal toggle', uid, $('#adios-modal-' + uid));
     $('#adios-modal-' + uid).modal('toggle');
   },
 

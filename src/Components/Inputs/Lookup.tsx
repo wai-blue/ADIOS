@@ -3,6 +3,7 @@ import AsyncSelect from 'react-select/async'
 import { Input, InputProps, InputState } from '../Input'
 import request from '../Request'
 import * as uuid from 'uuid';
+import { ProgressBar } from 'primereact/progressbar';
 
 interface LookupInputProps extends InputProps {
   model?: string
@@ -41,6 +42,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
       },
       (data: any) => {
         this.setState({
+          isInitialized: true,
           //@ts-ignore
           data: data.data
         });
@@ -51,6 +53,10 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   }
 
   renderInputElement() {
+    if (!this.state.isInitialized) {
+      return <ProgressBar mode="indeterminate" style={{ height: '3px' }}></ProgressBar>;
+    }
+
     return (
       <AsyncSelect
         loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}

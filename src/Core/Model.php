@@ -1392,7 +1392,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function recordSave(array $data)
   {
-    $id = (int)$data['id'];
+    $id = (int) $data['id'];
 
     $this->recordSaveOriginalData = $data;
 
@@ -1443,8 +1443,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $dataForThisModel = $this->onBeforeSave($dataForThisModel);
 
     if ($id <= 0) {
+      unset($dataForThisModel['id']);
       $returnValue = $this->insertRow($dataForThisModel);
-      $data['id'] = (int)$returnValue;
+      $data['id'] = (int) $returnValue;
     } else {
       $returnValue = $this->updateRow($dataForThisModel, $id);
     }

@@ -107,7 +107,7 @@ export default class Table<T extends TableState = TableState> extends Component<
       canDelete: props.canDelete ?? true,
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
-      formId: props.formId ? props.formId : 0,
+      formId: props.formId,
       formEndpoint: props.formEndpoint ? props.formEndpoint : 'components/form',
       formParams: {
         model: props.model,
@@ -200,8 +200,11 @@ export default class Table<T extends TableState = TableState> extends Component<
     this.setState(
       { formId: id },
       () => {
-        //@ts-ignore
-        ADIOS.modalToggle(this.props.uid);
+        let _this = this;
+        setTimeout(function() {
+          //@ts-ignore
+          ADIOS.modalToggle(_this.props.uid);
+        }, 280);
       }
     )
   }
@@ -225,7 +228,6 @@ export default class Table<T extends TableState = TableState> extends Component<
   }
 
   onSortByChange(sortBy?: SortBy, stateParams?: any) {
-    console.log(stateParams);
     this.setState({
       ...stateParams,
       sortBy: sortBy,

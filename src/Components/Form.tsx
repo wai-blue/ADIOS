@@ -34,6 +34,7 @@ interface ContentCard {
 }
 
 export interface FormProps {
+  isInitialized?: boolean,
   uid: string,
   model: string,
   id?: number,
@@ -56,6 +57,7 @@ export interface FormProps {
 }
 
 export interface FormState {
+  isInitialized: boolean,
   id?: number,
   readonly?: boolean,
   canCreate?: boolean,
@@ -119,6 +121,7 @@ export default class Form extends Component<FormProps> {
     super(props);
 
     this.state = {
+      isInitialized: false,
       endpoint: props.endpoint ? props.endpoint : 'components/form',
       id: props.id,
       readonly: props.readonly,
@@ -139,20 +142,30 @@ export default class Form extends Component<FormProps> {
    * This function trigger if something change, for Form id of record
    */
   componentDidUpdate(prevProps: FormProps, prevState: FormState) {
+    let newState: any = {};
+    let setNewState: boolean = false;
+
+    if (this.props.isInitialized != prevProps.isInitialized) {
+      newState.isInitialized = this.props.isInitialized;
+      setNewState = true;
+    }
+
     if (prevProps.id !== this.props.id) {
       this.checkIfIsEdit();
       this.loadParams();
       
-      //this.loadData();
-      this.setState({
-        invalidInputs: {},
-        isEdit: this.props.id ? this.props.id > 0 : false
-      });
-
+      newState.invalidInputs = {};
+      newState.isEdit = this.props.id ? this.props.id > 0 : false;
+      setNewState = true;
     }
 
     if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
-      this.initInputs(this.state.columns ?? {}, this.props.defaultValues);
+      newState.data = this.getDataState(this.state.columns ?? {}, this.props.defaultValues);
+      setNewState = true;
+    }
+
+    if (setNewState) {
+      this.setState(newState);
     }
   }
 
@@ -189,24 +202,24 @@ export default class Form extends Component<FormProps> {
   }
 
   loadData() {
-    let id = this.state.id ? this.state.id : 0;
-
-    if (id > 0) {
+    if (this.state.id) {
       request.get(
         this.state.endpoint,
         {
           returnData: '1',
           model: this.props.model,
-          id: id,
+          id: this.state.id,
           tag: this.props.tag,
           __IS_AJAX__: '1',
         },
         (data: any) => {
-          this.initInputs(this.state.columns ?? {}, data.data);
+          let newData = this.getDataState(this.state.columns ?? {}, data.data);
+          this.setState({isInitialized: true, data: newData});
         }
       );
     } else {
-      this.initInputs(this.state.columns ?? {}, {});
+      let newData = this.getDataState(this.state.columns ?? {}, {});
+      this.setState({isInitialized: true, data: newData});
     }
   }
 
@@ -314,7 +327,7 @@ export default class Form extends Component<FormProps> {
   /**
    * Dynamically initialize inputs (React state) from model columns
    */
-  initInputs(columns: FormColumns, inputsValues: Object = {}) {
+  getDataState(columns: FormColumns, inputsValues: Object = {}) {
 
     let data: any = {};
 
@@ -345,9 +358,7 @@ export default class Form extends Component<FormProps> {
       }
     });
 
-    this.setState({
-      data: data
-    });
+    return data;
   }
 
   fetchColumnData (columnName: string) {
@@ -460,11 +471,7 @@ export default class Form extends Component<FormProps> {
         >
           {this.state.content != null ?
             Object.keys(content).map((contentArea: string) => {
-              return (
-                <div key={key++}>
-                  {this._renderContentItem(key++, contentArea, content[contentArea])}
-                </div>
-              )
+              return this._renderContentItem(key++, contentArea, content[contentArea]);
             })
             : this.state.data != null ? (
               Object.keys(this.state.data).map((inputName: string) => {
@@ -558,6 +565,7 @@ export default class Form extends Component<FormProps> {
       readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
       cssClass: colDef.cssClass ?? '',
       onChange: (value: any) => this.inputOnChangeRaw(columnName, value),
+      isInitialized: false,
     };
 
     if (colDef.enumValues) {
@@ -662,7 +670,7 @@ export default class Form extends Component<FormProps> {
         <button
           onClick={() => this.saveRecord()}
           className={
-            "btn btn-sm btn-success btn-icon-split "
+            "btn btn-sm btn-success btn-icon-split mr-2"
             + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
           }
         >
@@ -688,21 +696,32 @@ export default class Form extends Component<FormProps> {
   _renderButtonsRight(): JSX.Element {
     return (
       <div className="d-flex">
-        {this.state.isEdit ? <button
-          onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
-          className={"btn btn-sm btn-danger btn-icon-split " + (this.state.canDelete ? "d-block" : "d-none")}
-        >
-          <span className="icon"><i className="fas fa-trash"></i></span>
-          <span className="text">Delete</span>
-        </button> : ''}
-
+        {this.state.isEdit ?
+          <button
+            onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
+            className={"btn btn-sm btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
+          >
+            <span className="icon"><i className="fas fa-trash"></i></span>
+            <span className="text">Delete</span>
+          </button>
+          : ''
+        }
       </div>
     );
   }
 
 
   render() {
-    let formContent = this.state.columns == null ?  <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar> : this._renderTab();
+
+    if (!this.state.isInitialized) {
+      return (
+        <div className="p-4">
+          <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar>
+        </div>
+      );
+    }
+
+    let formContent = this._renderTab();
 
     return (
       <>
@@ -744,25 +763,32 @@ export default class Form extends Component<FormProps> {
                       {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
                     </h3>
                   </div>
-
-                  {this._renderButtonsLeft()}
+                </div>
+                <div className="row">
+                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
+                    {this._renderButtonsLeft()}
+                  </div>
 
                   {this.state.tabs != undefined ? (
-                    <ul className="nav nav-tabs card-header-tabs mt-3">
-                      {Object.keys(this.state.tabs).map((tabName: string) => {
-                        return (
-                          <li className="nav-item" key={tabName}>
-                            <button
-                              className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
-                              onClick={() => this.changeTab(tabName)}
-                            >{tabName}</button>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    <div className={"col-lg-6 m-0 p-0"}>
+                      <ul className="nav nav-tabs card-header-tabs mt-3">
+                        {Object.keys(this.state.tabs).map((tabName: string) => {
+                          return (
+                            <li className="nav-item" key={tabName}>
+                              <button
+                                className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
+                                onClick={() => this.changeTab(tabName)}
+                              >{tabName}</button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
                   ) : ''}
 
-                  {this._renderButtonsRight()}
+                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
+                    {this._renderButtonsRight()}
+                  </div>
                 </div>
               </div>
 
