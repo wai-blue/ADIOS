@@ -271,7 +271,7 @@ class User extends \ADIOS\Core\Model {
       $this->adios->userLogged = TRUE;
       $_SESSION[_ADIOS_ID]['userProfile'] = $authResult;
     } else {
-      $this->logoutUser();
+      $this->signOut();
     }
   }
 
@@ -318,7 +318,7 @@ class User extends \ADIOS\Core\Model {
     return $userData;
   }
 
-  public function logoutUser() {
+  public function signOut() {
     unset($_SESSION[_ADIOS_ID]['userProfile']);
     $this->adios->userProfile = [];
     $this->adios->userLogged = FALSE;

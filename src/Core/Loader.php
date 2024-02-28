@@ -537,7 +537,7 @@ class Loader
           $user = $userModel->find((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
 
           if ($user['is_active'] != 1) {
-            $userModel->logoutUser();
+            $userModel->signOut();
           } else {
             $user = $userModel->loadUserFromSession();
 
@@ -1154,7 +1154,7 @@ class Loader
       // Apply routing and find-out which controller, permision and rendering params will be used
       list($this->controller, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
 
-      if (isset($this->params['logout'])) {
+      if (isset($this->params['sign-out'])) {
         unset($_SESSION[_ADIOS_ID]);
 
         setcookie(_ADIOS_ID.'-user', '', 0);
