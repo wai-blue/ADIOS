@@ -1174,7 +1174,7 @@ class Loader
       $controllerClassName = $this->getControllerClassName($this->controller);
       $this->controllerObject = new $controllerClassName($this, $this->params);
 
-      if (!empty($this->controllerObject->permission)) {
+      if (empty($this->permission) && !empty($this->controllerObject->permission)) {
         $this->permission = $this->controllerObject->permission;
       }
 

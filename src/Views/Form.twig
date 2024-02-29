@@ -1,9 +1,11 @@
 <adios-form
   model="{{ viewParams.model }}"
   id="{{ viewParams.id }}"
-  title-for-inserting="{{ viewParams.titleForInserting }}"
-  title-for-editing="{{ viewParams.titleForEditing }}"
-  layout='{{ viewParams.layout|json_encode|raw }}'
-  content='{{ viewParams.content|json_encode|raw }}'
-  columns='{{ viewParams.columns|json_encode|raw }}'
+  {% if viewParams.titleForInserting %} title-for-inserting="{{ viewParams.titleForInserting }}" {% endif %}
+  {% if viewParams.titleForEditing %} title-for-editing="{{ viewParams.titleForEditing }}" {% endif %}
+  {% if viewParams.layout %} layout='{{ viewParams.layout|json_encode|raw }}' {% endif %}
+  {% if viewParams.content %} content='{{ viewParams.content|json_encode|raw }}' {% endif %}
+  {% if viewParams.columns %} columns='{{ viewParams.columns|json_encode|raw }}' {% endif %}
+  {% if viewParams.defaultValues %} default-values='{{ viewParams.defaultValues|json_encode|raw }}' {% endif %}
+  {% if viewParams.addButtonText %} add-button-text='{{ viewParams.addButtonText }}' {% endif %}
 ></adios-form>

@@ -53,7 +53,7 @@ class Form extends \ADIOS\Core\Controller {
 
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
       $this->query = $this->prepareDataQuery();
-      $data = $this->query->find($this->params['id'])->toArray();
+      $data = $this->query->find($this->params['id'])?->toArray();
 
       foreach ($this->details as $key => $value) {
         $data[$key] = [

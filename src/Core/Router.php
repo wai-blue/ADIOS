@@ -70,9 +70,9 @@ class Router {
     }
     
 
-    if (empty($permission)) {
-      $permission = $controller;
-    }
+    // if (empty($permission)) {
+    //   $permission = $controller;
+    // }
 
     return [$controller, $permission, $params];
   }
