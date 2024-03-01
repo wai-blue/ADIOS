@@ -25,4 +25,23 @@ class {{ thisController.class }} extends \ADIOS\Controllers\Components\Form {
     return $params;
   }
 
+  public function prepareViewAndParams(): array {
+
+    // // configure view to be used
+    // $this->view = $this->params['view'];
+
+    // // build-up view params
+    // unset($this->params['view']);
+    // $this->viewParams = array_merge(
+    //   $this->params,
+    //   [
+    //     'params' => $this->getParams(),
+    //     'data' => $this->loadData(),
+    //   ]
+    // );
+
+    // // return view and viewParams for ADIOS Twig renderer
+    // return [$this->view, $this->viewParams];
+  }
+
 }

@@ -1153,7 +1153,7 @@ class Loader
       }
 
       // Apply routing and find-out which controller, permision and rendering params will be used
-      list($this->controller, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
+      list($this->controller, $this->view, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
 
       if (isset($this->params['sign-out'])) {
         unset($_SESSION[_ADIOS_ID]);
@@ -1167,11 +1167,13 @@ class Loader
 
       // Check if controller exists or if it can be used
       if (!$this->controllerExists($this->controller)) {
-        throw new \ADIOS\Core\Exceptions\GeneralException("Unknown controller '{$this->controller}'.");
+        // throw new \ADIOS\Core\Exceptions\GeneralException("Unknown controller '{$this->controller}'.");
+        $controllerClassName = \ADIOS\Core\Controller::class;
+      } else {
+        $controllerClassName = $this->getControllerClassName($this->controller);
       }
 
       // Create the object for the controller
-      $controllerClassName = $this->getControllerClassName($this->controller);
       $this->controllerObject = new $controllerClassName($this, $this->params);
 
       if (empty($this->permission) && !empty($this->controllerObject->permission)) {
@@ -1234,6 +1236,7 @@ class Loader
         // ... Or a view must be applied.
         } else {
           [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
+          if (empty($view)) $view = $this->view;
 
           if (substr($view, 0, 3) == 'App') {
             $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');

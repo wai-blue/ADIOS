@@ -50,12 +50,14 @@ class Router {
 
   public function applyRouting(string $route, array $params): array {
     $controller = "";
+    $view = "";
     $permission = "";
 
     foreach ($this->routing as $routePattern => $tmpRoute) {
       if (preg_match($routePattern.'i', $route, $m)) {
 
-        $controller = $tmpRoute['controller'];
+        $controller = $tmpRoute['controller'] ?? '';
+        $view = $tmpRoute['view'] ?? '';
         $permission = $tmpRoute['permission'] ?? '';
         $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'], $m);
 
@@ -65,16 +67,19 @@ class Router {
       }
     }
 
-    if (empty($controller)) {
-      throw new \ADIOS\Core\Exceptions\ControllerNotFound;
-    }
+    // if (empty($view)) {
+    //   $view = "";
+    // }
     
+    // if (empty($controller)) {
+    //   $controller = "";
+    // }
 
     // if (empty($permission)) {
     //   $permission = $controller;
     // }
 
-    return [$controller, $permission, $params];
+    return [$controller, $view, $permission, $params];
   }
 
   public function checkPermission(string $permission) {

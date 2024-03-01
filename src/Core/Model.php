@@ -873,6 +873,16 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   /**
+   * Returns the configuration of various inputs used in the form.
+   *
+   * @return array
+   */
+  public function inputs(): array
+  {
+    return [];
+  }
+
+  /**
    * Parses the $data containing strings as a result of DB fetch operation
    * and converts the value of each column to the appropriate PHP type.
    * E.g. columns of type 'int' or 'lookup' will have integer values.
@@ -1489,20 +1499,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
         foreach ($junctions as $junction) {
           $this->adios->db->query("
-          insert into `{$junctionModel->getFullTableSqlName()}` (
+            insert into `{$junctionModel->getFullTableSqlName()}` (
               `{$jParams['masterKeyColumn']}`,
               `{$jParams['optionKeyColumn']}`
-          ) 
-          select {$id}, '" . $this->adios->db->escape($junction) . "'
-          where not exists (
-              select 1
-              from `{$junctionModel->getFullTableSqlName()}`
-              where 
-                  `{$jParams['masterKeyColumn']}` = {$id} 
-                  and `{$jParams['optionKeyColumn']}` = '" . $this->adios->db->escape($junction) . "'
-          )
-          on duplicate key update 
-              `{$jParams['masterKeyColumn']}` = {$id};
+            ) values (
+              {$id},
+              '" . $this->adios->db->escape($junction) . "'
+            )
+            on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
           ");
         }
 

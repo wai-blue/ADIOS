@@ -76,10 +76,14 @@ class Form extends \ADIOS\Core\Controller {
   public function getParams() {
     try {
       $params = $this->params;
+      unset($params['returnParams']);
+      unset($params['__IS_AJAX__']);
+
       $model = $this->adios->getModel($this->params['model']);
       $params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params, $model->formParams ?? []);
 
       $params['columns'] = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
+      $params['columns'] = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params['columns'] ?? [], $model->inputs());
       $params['columns'] = array_filter($params['columns'], function($column) {
         return ($column['show'] ?? FALSE);
       });

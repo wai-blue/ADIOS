@@ -31,11 +31,12 @@ class User extends \ADIOS\Core\Model {
 
   public ?array $junctions = [
     'roles' => [
-      'junctionModel' => 'ADIOS/Core/Models/UserHasRole',
+      'junctionModel' => \ADIOS\Core\Models\UserHasRole::class,
       'masterKeyColumn' => 'id_user',
       'optionKeyColumn' => 'id_role',
     ],
   ];
+
 
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "_users";
@@ -95,6 +96,18 @@ class User extends \ADIOS\Core\Model {
       //  'show' => false,
       //]
     ]));
+  }
+
+  public function inputs(): array {
+    return [
+      'roles' => [
+        'type' => 'tags',
+        'relationship' => 'roles',
+        'title' => 'Pridelené role',
+        'dataKey' => 'name',
+        'show' => TRUE,
+      ],
+    ];
   }
 
   public function upgrades() : array {

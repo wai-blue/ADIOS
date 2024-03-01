@@ -124,10 +124,7 @@ class Controller {
    */
   public function prepareViewAndParams(): array
   {
-    return [
-      'view' => '',
-      'params' => [],
-    ];
+    return [$this->params['view'], $this->params];
   }
   
   /**
