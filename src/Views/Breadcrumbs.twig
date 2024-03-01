@@ -1,0 +1,17 @@
+<div class="adios-react-ui breadcrumbs">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      {% set i = 0 %}
+      {% if items is iterable %}{% for item in items %}
+        {% set i = i + 1 %}
+        <li class="breadcrumb-item">
+          {% if i == items|length %}
+            <span style="color: var(--cl-altr)">{{ item.text|raw }}</span>
+          {% else %}
+            <a href="{{ config.url }}/{{ item.url }}" class="text-primary">{{ item.text|raw }}</a>
+          {% endif %}
+        </li>
+      {% endfor %}{% endif %}
+    </ol>
+  </nav>
+</div>

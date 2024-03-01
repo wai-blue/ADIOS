@@ -599,6 +599,7 @@ class Loader
           'cache' => FALSE,
           'debug' => TRUE,
         ));
+        $this->twig->addGlobal('config', $this->config);
         $this->twig->addExtension(new \Twig\Extension\StringLoaderExtension());
         $this->twig->addExtension(new \Twig\Extension\DebugExtension());
 
@@ -1173,7 +1174,7 @@ class Loader
       $controllerClassName = $this->getControllerClassName($this->controller);
       $this->controllerObject = new $controllerClassName($this, $this->params);
 
-      if (!empty($this->controllerObject->permission)) {
+      if (empty($this->permission) && !empty($this->controllerObject->permission)) {
         $this->permission = $this->controllerObject->permission;
       }
 
@@ -1273,6 +1274,9 @@ class Loader
             $desktop = $this->controllerObject->getDesktop($this->params);
             [$desktopView, $desktopParams] = $desktop->prepareViewAndParams();
 
+            $desktopParams['user'] = $this->userProfile;
+            $desktopParams['config'] = $this->config;
+            $desktopParams['session'] = $_SESSION[_ADIOS_ID];
             $desktopParams['contentHtml'] = $contentHtml;
             $html = $this->twig->render($desktopView, $desktopParams);
           }

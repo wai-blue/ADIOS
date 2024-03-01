@@ -22,14 +22,12 @@
 #}
 
 {# Sample code to render breadcrumbs
-  <adios-breadcrumbs
-    items="[
-      {'url': '', 'text': 'Home'},
-      {'url': 'level-1', 'text': 'Level #1'},
-      {'url': 'level-2', 'text': 'Level #2'},
-      {'url': '', 'text': 'Level #3'}
-    ]"
-  ></adios-breadcrumbs>
+  {{ include('ADIOS/Views/Breadcrumbs', {'items': [
+    {'url': '', 'text': 'Home'},
+    {'url': 'level-1', 'text': 'Level #1'},
+    {'url': 'level-2', 'text': 'Level #2'},
+    {'url': '', 'text': 'Level #3'}
+  ]}) }}
 #}
 
 {# Sample code to render a include another view loaded asynchroneously

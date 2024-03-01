@@ -58,10 +58,13 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
     super(props);
 
     switch (props.type) {
-      case 'datetime': 
+      case 'datetime':
         this.options = {...this.options, ...{ dateFormat: 'd.m.Y H:i' }};
       break;
-      case 'time': 
+      case 'date':
+        this.options = {...this.options, ...{ dateFormat: 'd.m.Y' }};
+      break;
+      case 'time':
         this.options = {
           ...this.options,
           ...{
@@ -84,11 +87,34 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
   }
 
   renderInputElement() {
+    let value = this.state.value;
+
+    switch (this.props.type) {
+      case 'datetime':
+        value = datetimeToEUFormat(this.state.value);
+      break;
+      case 'date':
+        value = dateToEUFormat(this.state.value);
+      break;
+      case 'time':
+        this.options = {
+          ...this.options,
+          ...{
+            dateFormat: 'H:i',
+            enableTime: true,
+            noCalendar: true,
+            time_24hr: true,
+            minuteIncrement: 15
+          }
+        };
+      break;
+    }
+
     return (
       <>
         <div className={"max-w-250 input-group"}>
           <Flatpickr
-            value={this.state.value}
+            value={value}
             onChange={(data: Date[]) => this.onChange(data[0] ?? null)}
             onBlur={(e: React.FocusEvent<HTMLInputElement>) => this.onChange(e.target.value)}
             className={

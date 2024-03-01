@@ -84,15 +84,15 @@
                 aria-controls="collapse{{ loop.index }}"
               {% else %}
                 class="nav-link"
+                href="{% if shortcut.href == '' %}javascript:void(0){% else %}{{ shortcut.href }}{% endif %}"
+                onclick="
+                  if (typeof Cookies == 'object') {
+                    Cookies.set('sidebarActiveMainItem', '{{ loop.index }}', 1);
+                    Cookies.set('sidebarActiveSubItem', '0', 1);
+                  }
+                  {{ shortcut.onclick|raw }}
+                "
               {% endif %}
-              href="javascript:void(0)"
-              onclick="
-                if (typeof Cookies == 'object') {
-                  Cookies.set('sidebarActiveMainItem', '{{ loop.index }}', 1);
-                  Cookies.set('sidebarActiveSubItem', '0', 1);
-                }
-                {{ shortcut.onclick|raw }}
-              "
             >
               
               {% if shortcut.icon %}<i class="{{ shortcut.icon }}"></i>{% endif %}

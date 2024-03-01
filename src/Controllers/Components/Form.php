@@ -63,9 +63,9 @@ class Form extends \ADIOS\Core\Controller {
 
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
       $this->query = $this->prepareDataQuery();
-      $data = $this->query->find($this->params['id']);
-      //var_dump($data->roles()->pluck('_user_has_roles.id_role')->toArray()); exit;
+      $data = $this->query->find($this->params['id'])?->toArray();
 
+      //var_dump($data->roles()->pluck('_user_has_roles.id_role')->toArray()); exit;
       $this->setTagsLists($data);
     }
 

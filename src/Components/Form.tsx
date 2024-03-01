@@ -658,13 +658,15 @@ export default class Form extends Component<FormProps> {
     let id = this.state.id ? this.state.id : 0;
     return (
       <div className="d-flex">
-        <button
-          className="btn btn-sm btn-light mr-2"
-          type="button"
-          data-dismiss="modal"
-          aria-label="Close"
-          onClick={this.props.onClose}
-        ><span>&times;</span></button>
+        {this.props.showInModal ?
+          <button
+            className="btn btn-sm btn-light mr-2"
+            type="button"
+            data-dismiss="modal"
+            aria-label="Close"
+            onClick={this.props.onClose}
+          ><span>&times;</span></button>
+        : ''}
 
         <button
           onClick={() => this.saveRecord()}
@@ -754,47 +756,45 @@ export default class Form extends Component<FormProps> {
               {formContent}
             </div>
           ) : (
-            <div className="card w-100">
-              <div className="card-header">
-                <div className="row">
-                  <div className="col-lg-12 m-0 p-0">
-                    <h3 className="card-title">
-                      {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
-                    </h3>
-                  </div>
-                </div>
-                <div className="row">
-                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
-                    {this._renderButtonsLeft()}
-                  </div>
-
-                  {this.state.tabs != undefined ? (
-                    <div className={"col-lg-6 m-0 p-0"}>
-                      <ul className="nav nav-tabs card-header-tabs mt-3">
-                        {Object.keys(this.state.tabs).map((tabName: string) => {
-                          return (
-                            <li className="nav-item" key={tabName}>
-                              <button
-                                className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
-                                onClick={() => this.changeTab(tabName)}
-                              >{tabName}</button>
-                            </li>
-                          );
-                        })}
-                      </ul>
+            <>
+              <div className="py-4">
+                <h1>{this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}</h1>
+              </div>
+              <div className="card w-100">
+                <div className="card-header">
+                  <div className="row">
+                    <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
+                      {this._renderButtonsLeft()}
                     </div>
-                  ) : ''}
 
-                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
-                    {this._renderButtonsRight()}
+                    {this.state.tabs != undefined ? (
+                      <div className={"col-lg-6 m-0 p-0"}>
+                        <ul className="nav nav-tabs card-header-tabs mt-3">
+                          {Object.keys(this.state.tabs).map((tabName: string) => {
+                            return (
+                              <li className="nav-item" key={tabName}>
+                                <button
+                                  className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
+                                  onClick={() => this.changeTab(tabName)}
+                                >{tabName}</button>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
+                    ) : ''}
+
+                    <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
+                      {this._renderButtonsRight()}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="card-body">
-                {formContent}
+                <div className="card-body">
+                  {formContent}
+                </div>
               </div>
-            </div>
+            </>
           )}
         </div>
       </>

@@ -1,0 +1,12 @@
+<a 
+  id="adios-card-button-{{ uid }}"
+  {% if href == "" %} href="#" {% else %} href="{{ href }}" {% endif %}
+  class="btn {{ cssClass }} shadow-sm mb-1 p-4 d-inline-flex flex-column"
+  style="width:14em"
+>
+  <i class="{{ icon }}" style="font-size:4em"></i>
+  <div class="mt-4 h5 d-flex justify-content-center align-items-center" style="height:2.5em">{{ text }}</div>
+  {% if subtitle != "" %}
+    <div class="text-center small">{{ subtitle }}</div>
+  {% endif %}
+</a>
