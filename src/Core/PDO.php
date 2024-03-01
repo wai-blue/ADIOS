@@ -36,6 +36,24 @@ class PDO {
 
   }
 
+  public function keyBy(string $key, array $data): array {
+    $result = [];
+
+    foreach ($data as $item) {
+      $result[$item[$key]] = $item;
+    }
+
+    return $result;
+  }
+
+  public function debugQuery($query, $data) {
+    $stmt = $this->connection->prepare($query);
+    $stmt->execute($data);
+    ob_start();
+    $stmt->debugDumpParams();
+    return ob_get_clean();
+  }
+
   public function fetchAll($query, $data) {
     $stmt = $this->connection->prepare($query);
     $stmt->execute($data);

@@ -1238,16 +1238,18 @@ class Loader
           $view = $this->view;
           $viewParams = $this->controllerObject->getViewParams();
 
-          if (substr($view, 0, 3) == 'App') {
-            $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
-          } else if (substr($view, 0, 5) == 'ADIOS') {
-            $canUseTwig = is_file(__DIR__ . '/..' . str_replace('ADIOS', '', $view) . '.twig');
-          } else {
-            $canUseTwig = FALSE;
-          }
+          // if (substr($view, 0, 3) == 'App') {
+          //   $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
+          // } else if (substr($view, 0, 5) == 'ADIOS') {
+          //   $canUseTwig = is_file(__DIR__ . '/..' . str_replace('ADIOS', '', $view) . '.twig');
+          // } else {
+          //   $canUseTwig = FALSE;
+          // }
 
-          // Either the view will be rendered using Twig ...
-          if ($canUseTwig) {
+          // $canUseTwig = true;
+
+          // // Either the view will be rendered using Twig ...
+          // if ($canUseTwig) {
             $contentHtml = $this->twig->render(
               $view,
               [
@@ -1260,13 +1262,13 @@ class Loader
               ]
             );
 
-          // ... Or it will be rendered using \ADIOS\Core\View class.
-          } else {
-            $contentHtml = $this->view->create(
-              $view,
-              $viewParams
-            )->render();
-          };
+          // // ... Or it will be rendered using \ADIOS\Core\View class.
+          // } else {
+          //   $contentHtml = $this->view->create(
+          //     $view,
+          //     $viewParams
+          //   )->render();
+          // };
 
           // In some cases the result of the view will be used as-is ...
           if ($this->params['__IS_AJAX__'] || $this->controllerObject->hideDefaultDesktop) {
