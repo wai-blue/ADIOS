@@ -102,7 +102,8 @@ class User extends \ADIOS\Core\Model {
     return [
       'roles' => [
         'type' => 'tags',
-        'relationship' => 'roles',
+        'junction' => 'roles',
+        //'model' => 'ADIOS/Core/Models/UserRole',
         'title' => 'Pridelené role',
         'dataKey' => 'name',
         'show' => TRUE,

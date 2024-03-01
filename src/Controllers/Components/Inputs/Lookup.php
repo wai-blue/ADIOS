@@ -11,7 +11,7 @@
 namespace ADIOS\Controllers\Components\Inputs;
 
 /**
- * @package Components\Controllers\Table
+ * @package Components\Controllers\Lookup
  */
 class Lookup extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;

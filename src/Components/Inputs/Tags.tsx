@@ -4,30 +4,79 @@ import * as uuid from 'uuid';
 import { Input, InputProps, InputState } from '../Input'
 import { WithContext as ReactTags } from 'react-tag-input';
 import request from "../Request";
+import { ProgressBar } from 'primereact/progressbar';
 
 import './../Css/Inputs/Tags.css';
 import {capitalizeFirstLetter} from "../Helper";
 import Notification from "../Notification";
 
-interface TagsInputProps extends InputProps {
-  dataKey?: string,
-}
-
-interface TagsParams {
-  list: Array<any>,
-  selected: Array<any>
-}
-
 interface TagBadge {
-  id: number,
+  id: string,
   name: string,
   className: string
 }
 
-export default class Tags extends Input<TagsInputProps, InputState> {
+interface TagsInputProps extends InputProps {
+  dataKey?: string,
+  model?: string
+}
+
+interface TagsInputState extends InputState {
+  tags: Array<TagBadge>
+}
+
+export default class Tags extends Input<TagsInputProps, TagsInputState> {
   static defaultProps = {
     inputClassName: 'tags',
     id: uuid.v4(),
+  }
+
+  constructor(props: TagsInputProps) {
+    super(props);
+
+    this.state = {
+      ...this.state, // Parent state
+      tags: [],
+    };
+  }
+
+  componentDidMount() {
+    this.loadData();
+  }
+
+  loadData() {
+    request.get(
+      'components/inputs/tags',
+      {
+        model: this.props.model,
+        junction: this.props.params.junction,
+        __IS_AJAX__: '1',
+      },
+      (data: any) => {
+        const tmpTags: Array<any> = data.data;
+        let tags: Array<TagBadge> = [];
+
+        tmpTags.map((item: any) => {
+          const tagBadge: TagBadge = {
+            id: item.id + '',
+            name: item.name,
+            className: (this.isTagSelected(item.id) ? " ReactTags__active" : "")
+              + (this.props.readonly ? " ReactTags__disabled" : "")
+          };
+
+          tags.push(tagBadge);
+          //else if (this.props.params['addNewTags'] != undefined) tagInput['className'] += ' ReactTags__not_removable'
+        });
+
+        console.log(tags);
+
+
+        this.setState({
+          isInitialized: true,
+          tags: tags
+        });
+      }
+    );
   }
 
   handleDelete = (index: number, input: {all: object, values: object}) => {
@@ -85,7 +134,8 @@ export default class Tags extends Input<TagsInputProps, InputState> {
   };
 
   isTagSelected(idItem: number): boolean {
-    return this.state.value['selected'].find((selectedItem: any) => selectedItem.id === idItem);
+    return false;
+    //return this.state.value['selected'].find((selectedItem: any) => selectedItem.id === idItem);
   }
 
   onTagClick(tagIndex: number) {
@@ -98,38 +148,19 @@ export default class Tags extends Input<TagsInputProps, InputState> {
     //this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
   }
 
-  render() {
-    if (this.state.value == '') return <></>;
-    const tags: TagsParams = this.state.value ?? { list: [], selected: [] };
-    let tagsBadges: Array<TagBadge> = [];
+  renderInputElement() {
+    if (!this.state.isInitialized) {
+      return <ProgressBar mode="indeterminate" style={{ height: '3px' }}></ProgressBar>;
+    }
+
     let suggestions = [];
 
-    tags.list.map((item: any) => {
-      const tagBadge: TagBadge = {
-        id: item.id,
-        name: item.name,
-        className: (this.isTagSelected(item.id) ? " ReactTags__active" : "")
-          + (this.props.readonly ? " ReactTags__disabled" : "")
-      };
-
-      tagsBadges.push(tagBadge);
-      //let suggestionsInput = {id: role[this.props.dataKey], db_id: role.id};
-      //suggestionsInput[this.props.dataKey] = role[this.props.dataKey];
-      //suggestions.push(suggestionsInput);
-      //let tagInput = {id: role[this.props.dataKey]}; tagInput[this.props.dataKey] = role[this.props.dataKey]
-      //if (params['values'].find((r) => r[this.props.dataKey] === role[this.props.dataKey]) !== undefined) {
-      //  tagInput['className'] = "ReactTags__active";
-      //}
-      //if (this.props.params.readonly) tagInput['className'] += ' ReactTags__disabled'
-      //else if (this.props.params['addNewTags'] != undefined) tagInput['className'] += ' ReactTags__not_removable'
-     //console.log(role);
-    });
-
+    console.log(this.state.tags);
     return (
       <ReactTags
-        tags={tagsBadges}
+        tags={this.state.tags}
         suggestions={suggestions}
-        labelField={this.props.dataKey}
+        labelField={this.props.params.dataKey}
         //handleDelete={(tag) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.handleDelete(tag, params)}
         //handleAddition={(tag: any) => this.onClick(tag)}
         handleTagClick={(tag: any) => this.onTagClick(tag)}
@@ -139,8 +170,8 @@ export default class Tags extends Input<TagsInputProps, InputState> {
         inputFieldPosition="bottom"
         allowDeleteFromEmptyInput={false}
         autocomplete
-        readOnly={this.props.params['addNewTags'] != undefined || this.props.params.readonly}
+        //readOnly={this.props.params['addNewTags'] != undefined || this.props.params.readonly}
       />
     );
-  }
+  } 
 }
