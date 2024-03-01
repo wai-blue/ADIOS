@@ -15,12 +15,22 @@ namespace ADIOS\Controllers\Components;
  */
 class Form extends \ADIOS\Core\Controller {
   protected ?\Illuminate\Database\Eloquent\Builder $query = null;
-  private $details = [];
+  private array $tagsLists = [];
+
   public \ADIOS\Core\Model $model;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
     $this->permission = $this->params['model'] . ':Read';
+  }
+
+  private function setTagsLists(array &$data) {
+    foreach ($this->tagsLists as $tagListRelationship => $tagListData) {
+      $data[$tagListRelationship] = [
+        'selected' => $data[$tagListRelationship],
+        'list' => $tagListData
+      ];
+    }
   }
 
   public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
@@ -39,7 +49,7 @@ class Form extends \ADIOS\Core\Controller {
     foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
       if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
         $query->with($tmpColumnDefinition['relationship']);
-        $this->details[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get()->toArray();
+        $this->tagsLists[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get();
       }
     }
 
@@ -53,14 +63,10 @@ class Form extends \ADIOS\Core\Controller {
 
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
       $this->query = $this->prepareDataQuery();
-      $data = $this->query->find($this->params['id'])->toArray();
+      $data = $this->query->find($this->params['id']);
+      //var_dump($data->roles()->pluck('_user_has_roles.id_role')->toArray()); exit;
 
-      foreach ($this->details as $key => $value) {
-        $data[$key] = [
-          'values' => $data[$key],
-          'all' => $value
-        ];
-      }
+      $this->setTagsLists($data);
     }
 
     return $data;

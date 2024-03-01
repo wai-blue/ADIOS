@@ -598,12 +598,11 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputColor {...inputProps} />;
             break;
           case 'tags':
-            //inputToRender = <InputTags
-            //  parentForm={this}
-            //  columnName={columnName}
-            //  params={inputParams}
-            //  dataKey={this.state.columns[columnName]['dataKey']}
-            ///>;
+            inputToRender = <InputTags
+              {...inputProps}
+              dataKey={colDef.dataKey}
+              //relationship={colDef.r}
+            />;
             break;
           case 'image':
             inputToRender = <InputImage {...inputProps} />;

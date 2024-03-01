@@ -412,12 +412,12 @@ export default class PrimeTable extends Table<PrimeTableState> {
       case 'date': return dateToEUFormat(columnValue);
       case 'datetime': return datetimeToEUFormat(columnValue);
       case 'tags': {
-        //let key = 0;
-        //return <div>
-        //  {columnValue.map((value: any) => {
-        //    return <span className="badge badge-info mx-1" key={key++}>{value[column.dataKey]}</span>;
-        //  })}
-        //</div>
+        return <>
+          {columnValue.map((item: any) => {
+            if (!column.dataKey) return <></>;
+            return <span className="badge badge-info mx-1" key={item.id}>{item[column.dataKey]}</span>;
+          })}
+        </>
       }
       default: return columnValue;
     }
