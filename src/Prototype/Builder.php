@@ -270,7 +270,7 @@ class Builder {
     $this->createFolder('src/Assets/images');
     $this->createFolder('src/Core');
     $this->createFolder('src/Core/Models');
-    $this->createFolder('src/Core/Views');
+    $this->createFolder('src/Views');
     $this->createFolder('src/Widgets');
     $this->createFolder('log');
     $this->createFolder('tmp');
@@ -288,8 +288,8 @@ class Builder {
     $this->renderPhpFile('index.php', 'index.php.twig');
     $this->renderPhpFile('web.php', 'web.php.twig');
     $this->renderPhpFile('ConfigEnv.php', 'ConfigEnv.php.twig');
-    $this->renderTwigFile('src/Core/Views/Desktop.twig', 'src/Core/Views/Desktop.twig');
-    $this->renderTwigFile('src/Core/Views/Login.twig', 'src/Core/Views/Login.twig');
+    $this->renderTwigFile('src/Views/Desktop.twig', 'src/Views/Desktop.twig');
+    $this->renderTwigFile('src/Views/Login.twig', 'src/Views/Login.twig');
 
     $this->renderPhpFile(
       'install.php',

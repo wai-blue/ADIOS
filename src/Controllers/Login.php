@@ -25,13 +25,12 @@ class Login extends \ADIOS\Core\Controller {
     $this->permission = "";
   }
 
-  public function prepareViewAndParams(): array {
-    $this->view = 'App/Core/Views/Login';
+  public function getViewParams(): array {
     $this->viewParams = [
       "login" => $_POST['login'],
       "userLogged" => $this->adios->userLogged,
     ];
 
-    return [$this->view, $this->viewParams];
+    return $this->viewParams;
   }
 }

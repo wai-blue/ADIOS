@@ -122,9 +122,9 @@ class Controller {
    *
    * @return array View to be used to render the HTML.
    */
-  public function prepareViewAndParams(): array
+  public function getViewParams(): array
   {
-    return [$this->params['view'], $this->params];
+    return $this->params ?? [];
   }
   
   /**

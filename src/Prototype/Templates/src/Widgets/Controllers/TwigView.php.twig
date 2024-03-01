@@ -6,10 +6,7 @@ namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
 
-  public function prepareViewAndParams(): array {
-
-    // configure view to be used
-    $this->view = '{{ thisController.config.view }}';
+  public function getViewParams(): array {
 
     // build-up view params
     {% if thisController.config.params %}$this->viewParams = array_merge(
@@ -18,7 +15,7 @@ class {{ thisController.class }} extends \ADIOS\Core\Widget\Controller {
     );{% else %}$this->viewParams = $this->params;{% endif %}
 
 
-    // return view and viewParams for ADIOS Twig renderer
-    return [$this->view, $this->viewParams];
+    // return viewParams for ADIOS Twig renderer
+    return $this->viewParams;
   }
 }

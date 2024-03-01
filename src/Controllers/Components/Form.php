@@ -136,10 +136,7 @@ class Form extends \ADIOS\Core\Controller {
     }
   }
 
-  public function prepareViewAndParams(): array {
-
-    // configure view to be used
-    $this->view = $this->params['view'];
+  public function getViewParams(): array {
 
     // build-up view params
     unset($this->params['view']);
@@ -152,7 +149,7 @@ class Form extends \ADIOS\Core\Controller {
     );
 
     // return view and viewParams for ADIOS Twig renderer
-    return [$this->view, $this->viewParams];
+    return $this->viewParams;
   }
 
 

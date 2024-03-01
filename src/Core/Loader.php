@@ -1167,7 +1167,6 @@ class Loader
 
       // Check if controller exists or if it can be used
       if (!$this->controllerExists($this->controller)) {
-        // throw new \ADIOS\Core\Exceptions\GeneralException("Unknown controller '{$this->controller}'.");
         $controllerClassName = \ADIOS\Core\Controller::class;
       } else {
         $controllerClassName = $this->getControllerClassName($this->controller);
@@ -1199,6 +1198,7 @@ class Loader
         && $this->controllerObject->requiresUserAuthentication
       ) {
         $this->controllerObject = new \ADIOS\Controllers\Login($this);
+        $this->view = 'App/Views/Login';
         $this->permission = "";
       }
 
@@ -1227,16 +1227,16 @@ class Loader
 
         $this->onBeforeRender();
 
-        $json = $this->controllerObject->renderJson();
-
-        // Either the renderJson returns some array and this will be echoed as a JSON string ...
-        if (is_array($json)) {
+        // Either the there is no view specified => return JSON string ...
+        if (empty($this->view)) {
+          $json = $this->controllerObject->renderJson();
           $return = json_encode($json);
 
         // ... Or a view must be applied.
         } else {
-          [$view, $viewParams] = $this->controllerObject->prepareViewAndParams();
-          if (empty($view)) $view = $this->view;
+
+          $view = $this->view;
+          $viewParams = $this->controllerObject->getViewParams();
 
           if (substr($view, 0, 3) == 'App') {
             $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
@@ -1275,13 +1275,13 @@ class Loader
           // ... But mostly be "encapsulated" in the desktop.
           } else {
             $desktop = $this->controllerObject->getDesktop($this->params);
-            [$desktopView, $desktopParams] = $desktop->prepareViewAndParams();
+            $desktopParams = $desktop->getViewParams();
 
             $desktopParams['user'] = $this->userProfile;
             $desktopParams['config'] = $this->config;
             $desktopParams['session'] = $_SESSION[_ADIOS_ID];
             $desktopParams['contentHtml'] = $contentHtml;
-            $html = $this->twig->render($desktopView, $desktopParams);
+            $html = $this->twig->render('App/Views/Desktop', $desktopParams);
           }
 
           return $html;

@@ -40,7 +40,7 @@ class Desktop extends \ADIOS\Core\Controller {
     $this->adios->config['desktop']['sidebarItems'][] = $item;
   }
 
-  public function prepareViewAndParams(): array {
+  public function getViewParams(): array {
 
     foreach ($this->adios->widgets as $widget) {
       $widget->onBeforeDesktopParams($this);
@@ -131,8 +131,6 @@ class Desktop extends \ADIOS\Core\Controller {
     // $desktopContentActionObject = new $desktopContentActionClassName($this->adios);
     // $params = $desktopContentActionObject->onAfterDesktopPreRender($params);
 
-    $this->view = 'App/Core/Views/Desktop';
-
-    return [$this->view, $this->viewParams];
+    return $this->viewParams;
   }
 }
