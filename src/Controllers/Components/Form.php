@@ -15,22 +15,12 @@ namespace ADIOS\Controllers\Components;
  */
 class Form extends \ADIOS\Core\Controller {
   protected ?\Illuminate\Database\Eloquent\Builder $query = null;
-  private array $tagsLists = [];
 
   public \ADIOS\Core\Model $model;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
     $this->permission = $this->params['model'] . ':Read';
-  }
-
-  private function setTagsLists(array &$data) {
-    foreach ($this->tagsLists as $tagListRelationship => $tagListData) {
-      $data[$tagListRelationship] = [
-        'selected' => $data[$tagListRelationship],
-        'list' => $tagListData
-      ];
-    }
   }
 
   public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
@@ -46,12 +36,12 @@ class Form extends \ADIOS\Core\Controller {
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
     $query = $this->model->selectRaw($columnsToShowAsString);
 
-    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-      if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
-        $query->with($tmpColumnDefinition['relationship']);
-        $this->tagsLists[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get();
-      }
-    }
+    //foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+    //  if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
+    //    $query->with($tmpColumnDefinition['relationship']);
+    //    $this->tagsLists[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get();
+    //  }
+    //}
 
     return $query;
   }
@@ -64,9 +54,6 @@ class Form extends \ADIOS\Core\Controller {
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
       $this->query = $this->prepareDataQuery();
       $data = $this->query->find($this->params['id'])?->toArray();
-
-      //var_dump($data->roles()->pluck('_user_has_roles.id_role')->toArray()); exit;
-      $this->setTagsLists($data);
     }
 
     return $data;

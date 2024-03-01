@@ -87,6 +87,7 @@ export interface FormColumnParams {
   description?: string,
   disabled?: boolean,
   model?: string,
+  junction?: string,
   enumValues?: Array<string | number>,
   unit?: string,
   step?: number,
@@ -586,23 +587,19 @@ export default class Form extends Component<FormProps> {
             break;
           case 'float':
           case 'int':
-            inputToRender = <InputInt {...inputProps} unit={colDef.unit}/>;
+            inputToRender = <InputInt {...inputProps} />;
             break;
           case 'boolean':
             inputToRender = <InputBoolean {...inputProps} />;
             break;
           case 'lookup':
-            inputToRender = <InputLookup {...inputProps} model={colDef.model}/>;
+            inputToRender = <InputLookup {...inputProps} />;
             break;
           case 'color':
             inputToRender = <InputColor {...inputProps} />;
             break;
           case 'tags':
-            inputToRender = <InputTags
-              {...inputProps}
-              dataKey={colDef.dataKey}
-              //relationship={colDef.r}
-            />;
+            inputToRender = <InputTags {...inputProps} model={this.props.model}/>;
             break;
           case 'image':
             inputToRender = <InputImage {...inputProps} />;
