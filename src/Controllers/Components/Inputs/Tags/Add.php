@@ -8,14 +8,14 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components\Inputs;
+namespace ADIOS\Controllers\Components\Inputs\Tags;
 
 use Illuminate\Database\QueryException;
 
 /**
  * @package Components\Controllers\Tags
  */
-class Tags extends \ADIOS\Core\Controller {
+class NewTag extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {

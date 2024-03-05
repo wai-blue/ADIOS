@@ -22,7 +22,8 @@ interface TagsInputProps extends InputProps {
 }
 
 interface TagsInputState extends InputState {
-  tags: Array<TagBadge>
+  tags: Array<TagBadge>,
+  value: Array<number>
 }
 
 export default class Tags extends Input<TagsInputProps, TagsInputState> {
@@ -37,6 +38,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
     this.state = {
       ...this.state, // Parent state
       tags: [],
+      value: []
     };
   }
 
@@ -46,7 +48,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
 
   loadData() {
     request.get(
-      'components/inputs/tags',
+      'components/inputs/tags/Data',
       {
         model: this.props.model,
         junction: this.props.params.junction,
@@ -68,9 +70,6 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
           //else if (this.props.params['addNewTags'] != undefined) tagInput['className'] += ' ReactTags__not_removable'
         });
 
-        console.log(tags);
-
-
         this.setState({
           isInitialized: true,
           tags: tags
@@ -78,29 +77,6 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
       }
     );
   }
-
-  handleDelete = (index: number, input: {all: object, values: object}) => {
-    //const tag = input['all'][index];
-    //const tagIndex = input['values'].findIndex((t) => t[this.props.dataKey] === tag[this.props.dataKey]);
-    //const model = this.props.model + capitalizeFirstLetter(this.props.parentForm.state.columns[this.props.columnName].relationship).slice(0, -1);
-
-    //request.delete(
-    //  'components/form/ondelete',
-    //  {
-    //    model: model,
-    //    id: tag.id,
-    //    __IS_AJAX__: '1',
-    //  },
-    //  () => {
-    //    if (tagIndex !== -1) input['values'].splice(tagIndex, 1);
-    //    input['all'].splice(index, 1);
-    //    this.onChange(input);
-    //  },
-    //  () => {
-    //    console.log("Tento tag sa nedá zmazať, pretože ešte prislúcha iným modelom.");
-    //  }
-    //);
-  };
 
   handleAddition = (tag: object, input: {all: object, values: object}) => {
     //const model = this.props.parentForm.props.model + capitalizeFirstLetter(this.props.parentForm.state.columns[this.props.columnName].relationship).slice(0, -1);
@@ -123,29 +99,55 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
     //this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
   };
 
-  handleTagClick = (index: string, input: { all: object, values: object }) => {
-    //const tag = input['all'][index];
-    //const tagIndex = input['values'].findIndex((t) => t[this.props.dataKey] === tag[this.props.dataKey]);
-    //const tagInput = {id: tag.id}; tagInput[this.props.dataKey] = tag[this.props.dataKey];
-    //if (tagIndex === -1) input['values'].push(tagInput);
-    //else input['values'].splice(tagIndex, 1);
-
-    //this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
-  };
-
   isTagSelected(idItem: number): boolean {
-    return false;
-    //return this.state.value['selected'].find((selectedItem: any) => selectedItem.id === idItem);
+    return this.state.value.includes(idItem);
+  }
+
+  onTagAdd(tag: any) {
+    let currentTags: Array<TagBadge> = this.state.tags;
+
+    request.get(
+      'components/inputs/tags/Add',
+      {
+        model: this.props.model,
+        junction: this.props.params.junction,
+        __IS_AJAX__: '1',
+      },
+      (data: any) => {
+        //currentTags.push({
+        //  id: "xxxx",
+        //  name: tag[this.props.dataKey ?? 'name'],
+        //  className: ""
+        //});
+      }
+    );
+  }
+
+  onTagDelete(tagIndex: number) {
+    let value: Array<any> = this.state.value;
+    value.splice(tagIndex, 1);
+    this.onChange(value);
+
+    let currentTags: Array<TagBadge> = this.state.tags;
+    currentTags[tagIndex].className = "";
+
+    this.setState({
+      tags: currentTags
+    });
   }
 
   onTagClick(tagIndex: number) {
-    //const tag = input['all'][index];
-    //const tagIndex = input['values'].findIndex((t) => t[this.props.dataKey] === tag[this.props.dataKey]);
-    //const tagInput = {id: tag.id}; tagInput[this.props.dataKey] = tag[this.props.dataKey];
-    //if (tagIndex === -1) input['values'].push(tagInput);
-    //else input['values'].splice(tagIndex, 1);
+    const tmpTag = this.state.tags[tagIndex];
+    let value: Array<number> = this.state.value;
+    value.push(parseInt(tmpTag.id));
+    this.onChange(value);
 
-    //this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
+    let currentTags: Array<TagBadge> = this.state.tags;
+    currentTags[tagIndex].className = " ReactTags__active";
+
+    this.setState({
+      tags: currentTags
+    });
   }
 
   renderInputElement() {
@@ -161,10 +163,9 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
         tags={this.state.tags}
         suggestions={suggestions}
         labelField={this.props.params.dataKey}
-        //handleDelete={(tag) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.handleDelete(tag, params)}
-        //handleAddition={(tag: any) => this.onClick(tag)}
-        handleTagClick={(tag: any) => this.onTagClick(tag)}
-        //handleAddition={(tag) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.handleAddition(tag, params)}
+        handleDelete={(tagIndex: number) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.onTagDelete(tagIndex)}
+        handleTagClick={(tagIndex: number) => this.onTagClick(tagIndex)}
+        handleAddition={(tag: any) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.onTagAdd(tag)}
         allowDragDrop={false}
         //handleTagClick={(i) => this.props.params.readonly ? undefined : this.handleTagClick(i, params)}
         inputFieldPosition="bottom"

@@ -34,7 +34,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
   loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
     request.get(
-      'components/inputs/lookup',
+      'components/inputs/lookup/data',
       {
         model: this.props.params?.model,
         search: inputValue,
