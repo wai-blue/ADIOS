@@ -15,7 +15,7 @@ use Illuminate\Database\QueryException;
 /**
  * @package Components\Controllers\Tags
  */
-class Add extends \ADIOS\Core\Controller {
+class Delete extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
@@ -39,9 +39,7 @@ class Add extends \ADIOS\Core\Controller {
       $junctionOptionKeyColumn = $junctionModel->columns()[$junctionData['optionKeyColumn']];
       $junctionOptionKeyModel = $this->adios->getModel($junctionOptionKeyColumn['model']);
 
-      $junctionOptionKeyModel->insert([
-        $this->params['dataKey'] => $this->params[$this->params['dataKey']]
-      ]);
+      $junctionOptionKeyModel->find($this->params['id'])->delete();
 
       return [];
     } catch (QueryException $e) {

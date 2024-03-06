@@ -268,7 +268,7 @@ export default class Form extends Component<FormProps> {
     Swal.fire({
       title: 'Ste si istý?',
       html: 'Ste si istý, že chcete vymazať tento záznam?',
-      icon: 'danger',
+      icon: 'question',
       showCancelButton: true,
       cancelButtonText: 'Nie',
       confirmButtonText: 'Áno',
