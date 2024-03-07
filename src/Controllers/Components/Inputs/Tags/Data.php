@@ -36,13 +36,20 @@ class Data extends \ADIOS\Core\Controller {
       }
 
       $junctionModel = $this->adios->getModel($junctionData['junctionModel']);
+
+      if ($this->params['id'] != null) {
+        $selected = $junctionModel->where($junctionData['masterKeyColumn'], (int) $this->params['id'])
+          ->pluck($junctionData['optionKeyColumn']);
+      }
+
       $junctionOptionKeyColumn = $junctionModel->columns()[$junctionData['optionKeyColumn']];
 
       $junctionOptionKeyModel = $this->adios->getModel($junctionOptionKeyColumn['model']);
       $data = $junctionOptionKeyModel->all();
 
       return [
-        'data' => $data
+        'data' => $data,
+        'selected' => $selected ?? []
       ];
     } catch (QueryException $e) {
       http_response_code(500);

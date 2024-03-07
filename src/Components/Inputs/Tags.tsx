@@ -19,7 +19,8 @@ interface TagBadge {
 
 interface TagsInputProps extends InputProps {
   dataKey?: string,
-  model?: string
+  model?: string,
+  formId?: number
 }
 
 interface TagsInputState extends InputState {
@@ -47,6 +48,12 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
     this.loadData();
   }
 
+  componentDidUpdate(prevProps: TagsInputProps) {
+    if (prevProps.formId != this.props.formId) {
+      this.loadData();
+    }
+  }
+
   loadData() {
     request.get(
       'components/inputs/tags/data',
@@ -54,22 +61,27 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
         model: this.props.model,
         junction: this.props.params.junction,
         __IS_AJAX__: '1',
+        id: this.props.formId
       },
       (data: any) => {
         const tmpTags: Array<any> = data.data;
+        const selected: Array<number> = data.selected;
+
         let tags: Array<TagBadge> = [];
 
         tmpTags.map((item: any) => {
           const tagBadge: TagBadge = {
             id: item.id + '',
             name: item.name,
-            className: (this.isTagSelected(item.id) ? " ReactTags__active" : "")
-              + (this.props.readonly ? " ReactTags__disabled" : "")
+            className: (this.isTagSelected(item.id) || selected.includes(item.id) ? " ReactTags__active" : "")
+              + (this.state.readonly ? " ReactTags__disabled" : "")
           };
 
           tags.push(tagBadge);
           //else if (this.props.params['addNewTags'] != undefined) tagInput['className'] += ' ReactTags__not_removable'
         });
+
+        this.onChange(selected);
 
         this.setState({
           isInitialized: true,
@@ -79,32 +91,14 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
     );
   }
 
-  handleAddition = (tag: object, input: {all: object, values: object}) => {
-    //const model = this.props.parentForm.props.model + capitalizeFirstLetter(this.props.parentForm.state.columns[this.props.columnName].relationship).slice(0, -1);
-    //let tagInput = {}; tagInput[this.props.dataKey] = tag[this.props.dataKey];
-    ////@ts-ignore
-    //request.post(
-    //  'components/form/onsave',
-    //  {
-    //    inputs: tagInput
-    //  },
-    //  {
-    //    model: model,
-    //    __IS_AJAX__: '1',
-    //  },
-    //  () => {
-    //    this.props.parentForm.fetchColumnData(this.props.columnName);
-    //  }
-    //);
-
-    //this.props.parentForm.inputOnChangeRaw(this.props.columnName, input);
-  };
-
   isTagSelected(idItem: number): boolean {
+    if (!this.state.value) return false;
     return this.state.value.includes(idItem);
   }
 
   onTagAdd(tag: any) {
+    if (this.state.readonly) return;
+
     let postData: any = {};
 
     if (this.props.params.dataKey) {
@@ -159,15 +153,15 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
   }
 
   onTagClick(tagIndex: number) {
-    const tmpTag = this.state.tags[tagIndex];
+    const tmpTagId: number = parseInt(this.state.tags[tagIndex].id);
     let value: Array<number> = this.state.value;
     let className: string = "";
 
     // Insert or delete
-    if (value.includes(parseInt(tmpTag.id))) {
-      value.splice(tagIndex, 1);
+    if (value.includes(tmpTagId)) {
+      value.splice(value.indexOf(tmpTagId), 1);
     } else {
-      value.push(parseInt(tmpTag.id));
+      value.push(tmpTagId);
       className = " ReactTags__active";
     }
 
@@ -185,22 +179,19 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
       return <ProgressBar mode="indeterminate" style={{ height: '3px' }}></ProgressBar>;
     }
 
-    let suggestions = [];
-
-    console.log(this.state.tags);
     return (
       <ReactTags
         tags={this.state.tags}
-        suggestions={suggestions}
+        //suggestions={suggestions}
         labelField={this.props.params.dataKey}
-        handleDelete={(tagIndex: number) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.onTagDelete(tagIndex)}
+        handleDelete={(tagIndex: number) => this.onTagDelete(tagIndex)}
         handleTagClick={(tagIndex: number) => this.onTagClick(tagIndex)}
-        handleAddition={(tag: any) => this.props.params.readonly || this.props.params['addNewTags'] != undefined ? undefined : this.onTagAdd(tag)}
+        handleAddition={(tag: any) => this.onTagAdd(tag)}
         allowDragDrop={false}
         inputFieldPosition="bottom"
         allowDeleteFromEmptyInput={false}
         autocomplete
-        //readOnly={this.props.params['addNewTags'] != undefined || this.props.params.readonly}
+        readOnly={this.state.readonly}
       />
     );
   } 
