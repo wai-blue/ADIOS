@@ -1377,6 +1377,24 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])['params'];
   }
 
+  public function normalizeRecordData(array $data): array {
+    $columns = $this->columns();
+
+    foreach ($data as $colName => $colValue) {
+      if (!isset($columns[$colName])) {
+        unset($data[$colName]);
+      } else {
+        switch ($columns[$colName]["type"]) {
+          case "int": $data[$colName] = (int) $colValue; break;
+          case "lookup": $data[$colName] = ((int) $colValue) <= 0 ? NULL : (int) $colValue; break;
+          case "float": $data[$colName] = (float) $colValue; break;
+        }
+      }
+    }
+
+    return $data;
+  }
+
   /**
    * Check if the lookup table needs the id of the inserted record from this model
    */
@@ -1451,13 +1469,17 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     $dataForThisModel = $this->onBeforeSave($dataForThisModel);
+    $dataForThisModel = $this->normalizeRecordData($dataForThisModel);
 
     if ($id <= 0) {
       unset($dataForThisModel['id']);
-      $returnValue = $this->insertRow($dataForThisModel);
+      $returnValue = $this->create($dataForThisModel)->id;
       $data['id'] = (int) $returnValue;
+      $id = (int) $returnValue;
     } else {
-      $returnValue = $this->updateRow($dataForThisModel, $id);
+      // $returnValue = $this->updateRow($dataForThisModel, $id);
+      $this->find($id)->update($dataForThisModel);
+      $returnValue = $id;
     }
 
     // save data for lookup models first (and create records, if necessary)
@@ -1497,23 +1519,22 @@ class Model extends \Illuminate\Database\Eloquent\Model
       if (is_array($junctions)) {
         $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
 
-        foreach ($junctions as $junction) {
-          $this->adios->db->query("
-            insert into `{$junctionModel->getFullTableSqlName()}` (
-              `{$jParams['masterKeyColumn']}`,
-              `{$jParams['optionKeyColumn']}`
-            ) values (
-              {$id},
-              '" . $this->adios->db->escape($junction) . "'
-            )
-            on duplicate key update `{$jParams['masterKeyColumn']}` = {$id}
-          ");
-        }
+        $this->adios->pdo->execute("
+          delete from `{$junctionModel->getFullTableSqlName()}`
+          where `{$jParams['masterKeyColumn']}` = ?
+        ", [$id]);
 
-        $junctionModel
-          ->where($jParams['masterKeyColumn'], $id)
-          ->whereNotIn($jParams['optionKeyColumn'], $junctions)
-          ->delete();
+        foreach ($junctions as $junction) {
+          $idOption = (int) $junction;
+          if ($idOption > 0) {
+            $this->adios->pdo->execute("
+              insert into `{$junctionModel->getFullTableSqlName()}` (
+                `{$jParams['masterKeyColumn']}`,
+                `{$jParams['optionKeyColumn']}`
+              ) values (?, ?)
+            ", [$id, $idOption]);
+          }
+        }
       }
     }
 

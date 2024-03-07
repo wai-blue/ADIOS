@@ -19,10 +19,11 @@ class DataTypeInt extends DataType
 {
   public function sqlCreateString($table_name, $col_name, $params = [])
   {
-    $params['sql_definitions'] = '' != trim((string)$params['sql_definitions']) || $params['required'] ? $params['sql_definitions'] : ' default null ';
-    $params['sql_definitions'] ??= '';
+    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 
+      ? $params['sql_definitions'] 
+      : "default " . (int) $this->getDefaultValue($params);
 
-    return "`$col_name` int({$params['byte_size']}) {$params['sql_definitions']}";
+    return "`$col_name` int({$params['byte_size']}) {$params['sql_definitions']} NOT NULL";
   }
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])

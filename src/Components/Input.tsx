@@ -117,11 +117,11 @@ export class Input<P extends InputProps, S extends InputState> extends Component
       <div className={this.getClassName()}>
         <input
           id={this.props.id}
+          name={this.props.id}
           type="hidden"
           value={this.serialize()}
           style={{width: "100%", fontSize: "0.4em"}}
           className="value bg-light"
-          disabled
         ></input>
         {this.renderInputElement()}
       </div>

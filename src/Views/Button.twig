@@ -1,0 +1,8 @@
+<a 
+  id="adios-button-{{ uid }}"
+  {% if href == "" %} href="#" {% else %} href="{{ href }}" {% endif %}
+  class="btn btn-icon-split {{ cssClass }}"
+>
+  <span class="icon"><i class="{{ icon }}"></i></span>
+  <span class="text">{{ text }}</span>
+</a>

@@ -37,18 +37,19 @@ class Desktop extends \ADIOS\Core\Controller {
 
   public function addSidebarItem($widget, $item) {
     $item['___widgetClassName'] = get_class($widget);
-    $this->adios->config['desktop']['sidebarItems'][] = $item;
+    $this->viewParams['sidebar']['items'][] = $item;
   }
 
   public function getViewParams(): array {
+    $this->viewParams = $this->adios->params;
 
     foreach ($this->adios->widgets as $widget) {
       $widget->onBeforeDesktopParams($this);
     }
 
-    $settingsMenuItems = [];
+    $topRightMenu = ["items" => []];
 
-    $settingsMenuItems[] = [
+    $topRightMenu["items"][] = [
       "faIcon" => "fas fa-user",
       "text" => $this->translate("My profile"),
       "onclick" => "
@@ -64,72 +65,13 @@ class Desktop extends \ADIOS\Core\Controller {
       ",
     ];
 
-    $settingsMenuItems[] = [
+    $topRightMenu["items"][] = [
       "faIcon" => "fas fa-window-restore",
       "text" => $this->translate("Open new tab"),
       "onclick" => "window.open('{$this->adios->config['url']}');",
     ];
 
-    // $settingsMenuItems[] = [
-    //   "faIcon" => "fas fa-bolt",
-    //   "text" => $this->translate("Restart"),
-    //   "onclick" => "
-    //     if (window.location.href.indexOf('restart=1') == '-1') {
-    //       if (window.location.href.indexOf('?') == -1) {
-    //         window.location.href = window.location.href + '?restart=1';
-    //       } else {
-    //         window.location.href = window.location.href + '&restart=1';
-    //       }
-    //     } else {
-    //       window.location.reload();
-    //     }
-    //   ",
-    // ];
-
-    $settingsSignoutItems = [
-      "confirm" => $this->translate("Sign out"),
-      "text" => $this->translate("Are you sure to sign out?"),
-      "decline" => $this->translate("Stay here"),
-    ];
-
-    // develMenuItems
-    // $develMenuItems = [];
-
-    // if ($this->adios->config['develMode']) {
-    //   // $develMenuItems[] = [
-    //   //   "text" => $this->translate("Show console"),
-    //   //   "faIcon" => "fas fa-terminal",
-    //   //   "onclick" => "desktop_show_console();",
-    //   // ];
-    //   /*$develMenuItems[] = [
-    //     "text" => $this->translate("Examples of UI"),
-    //     "faIcon" => "fas fa-hammer",
-    //     "onclick" => "desktop_render('SkinSamples');",
-    //   ];*/
-    // }
-
-    // if (
-    //   !empty($this->contentController)
-    //   && $this->contentController != 'Desktop'
-    // ) {
-    //   $contentHtml = $this->adios->render($this->contentController, $this->params);
-    // } else {
-    //   $contentHtml = '';
-    // }
-
-    $this->viewParams = array_merge($this->params ?? [],
-      [
-        "config" => $this->adios->config,
-        "user" => $this->adios->userProfile,
-        "console" => $this->adios->console->getLogs(),
-        "settingsMenuItems" => $settingsMenuItems,
-        "settingsSignoutItems" => $settingsSignoutItems,
-      ]
-    );
-
-    // $desktopContentActionClassName = $this->adios->getActionClassName($this->adios->desktopContentAction);
-    // $desktopContentActionObject = new $desktopContentActionClassName($this->adios);
-    // $params = $desktopContentActionObject->onAfterDesktopPreRender($params);
+    $this->viewParams["topRightMenu"] = $topRightMenu;
 
     return $this->viewParams;
   }

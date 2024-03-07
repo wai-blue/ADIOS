@@ -91,4 +91,9 @@ class Router {
     }
   }
 
+  public function redirectTo(string $url) {
+    header("Location: {$this->adios->config['url']}/".trim($url, "/"));
+    exit;
+  }
+
 }

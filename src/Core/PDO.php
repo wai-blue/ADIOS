@@ -54,6 +54,11 @@ class PDO {
     return ob_get_clean();
   }
 
+  public function execute($query, $data) {
+    $stmt = $this->connection->prepare($query);
+    $stmt->execute($data);
+  }
+
   public function fetchAll($query, $data) {
     $stmt = $this->connection->prepare($query);
     $stmt->execute($data);

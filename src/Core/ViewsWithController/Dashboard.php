@@ -39,7 +39,7 @@ class Dashboard extends \ADIOS\Core\ViewWithController
 
   public function getUserDashboard(int $preset = 0): string
   {
-    if ($preset < 0) return $this->adios->renderReturn(400);
+    if ($preset < 0) return $this->adios->renderSuccess(400);
 
     $userDashboard = $this->adios->config['dashboard-' . $this->adios->userProfile['id'] . '-' . $preset . '0'];
 
@@ -95,7 +95,7 @@ class Dashboard extends \ADIOS\Core\ViewWithController
       'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset
     );
 
-    return $this->adios->renderReturn(200);
+    return $this->adios->renderSuccess(200);
   }
 
   public function getAvailableCards(int $preset = -1): array {

@@ -23,7 +23,7 @@ class Controller {
   /**
    * Array of parameters (arguments) passed to the controller
    */
-  protected array $params;
+  public array $params;
 
   /**
    * TRUE/FALSE array with permissions for the user role
@@ -92,6 +92,10 @@ class Controller {
 
   public function init() {
     //
+  }
+
+  public function validateInputs() {
+    return TRUE;
   }
 
   public function getDesktop(array $desktopParams = []): \ADIOS\Core\Controller {

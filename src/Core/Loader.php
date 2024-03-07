@@ -611,6 +611,15 @@ class Loader
         ));
 
         $this->twig->addFunction(new \Twig\TwigFunction(
+          '_dump',
+          function ($var) {
+            ob_start();
+            _var_dump($var);
+            return ob_get_clean();
+          }
+        ));
+
+        $this->twig->addFunction(new \Twig\TwigFunction(
           'adiosHtmlAttributes',
           function (?array $attributes) {
             if (!is_array($attributes)) {
@@ -1227,48 +1236,29 @@ class Loader
 
         $this->onBeforeRender();
 
-        // Either the there is no view specified => return JSON string ...
-        if (empty($this->view)) {
+        // Either return JSON string ...
+        // if (empty($this->view)) {
           $json = $this->controllerObject->renderJson();
-          $return = json_encode($json);
 
+        if (is_array($json)) {
+          $return = json_encode($json);
         // ... Or a view must be applied.
         } else {
 
           $view = $this->view;
           $viewParams = $this->controllerObject->getViewParams();
 
-          // if (substr($view, 0, 3) == 'App') {
-          //   $canUseTwig = is_file($this->config['dir'] . '/' . str_replace('App', 'src', $view) . '.twig');
-          // } else if (substr($view, 0, 5) == 'ADIOS') {
-          //   $canUseTwig = is_file(__DIR__ . '/..' . str_replace('ADIOS', '', $view) . '.twig');
-          // } else {
-          //   $canUseTwig = FALSE;
-          // }
-
-          // $canUseTwig = true;
-
-          // // Either the view will be rendered using Twig ...
-          // if ($canUseTwig) {
-            $contentHtml = $this->twig->render(
-              $view,
-              [
-                'uid' => $this->uid,
-                'user' => $this->userProfile,
-                'config' => $this->config,
-                'session' => $_SESSION[_ADIOS_ID],
-                'viewParams' => $viewParams,
-                'windowParams' => $viewParams['windowParams'] ?? NULL,
-              ]
-            );
-
-          // // ... Or it will be rendered using \ADIOS\Core\View class.
-          // } else {
-          //   $contentHtml = $this->view->create(
-          //     $view,
-          //     $viewParams
-          //   )->render();
-          // };
+          $contentHtml = $this->twig->render(
+            $view,
+            [
+              'uid' => $this->uid,
+              'user' => $this->userProfile,
+              'config' => $this->config,
+              'session' => $_SESSION[_ADIOS_ID],
+              'viewParams' => $viewParams,
+              'windowParams' => $viewParams['windowParams'] ?? NULL,
+            ]
+          );
 
           // In some cases the result of the view will be used as-is ...
           if ($this->params['__IS_AJAX__'] || $this->controllerObject->hideDefaultDesktop) {
@@ -1277,12 +1267,13 @@ class Loader
           // ... But mostly be "encapsulated" in the desktop.
           } else {
             $desktop = $this->controllerObject->getDesktop($this->params);
-            $desktopParams = $desktop->getViewParams();
 
             $desktopParams['user'] = $this->userProfile;
             $desktopParams['config'] = $this->config;
             $desktopParams['session'] = $_SESSION[_ADIOS_ID];
+            $desktopParams['viewParams'] = $desktop->getViewParams();
             $desktopParams['contentHtml'] = $contentHtml;
+
             $html = $this->twig->render('App/Views/Desktop', $desktopParams);
           }
 
@@ -1382,7 +1373,7 @@ class Loader
     return class_exists($this->getControllerClassName($controller));
   }
 
-  public function renderReturn($return) {
+  public function renderSuccess($return) {
     return json_encode([
       "result" => "success",
       "message" => $return,
@@ -1947,4 +1938,5 @@ class Loader
 
     return $js;
   }
+
 }
