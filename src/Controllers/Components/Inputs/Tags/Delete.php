@@ -25,21 +25,34 @@ class Delete extends \ADIOS\Core\Controller {
 
   public function renderJson() { 
     try {
-      if ($this->params['model'] == null) throw new \Exception("Unknown model");
-      if ($this->params['junction'] == null) throw new \Exception("Unknown junction model");
+      $id = (int) $this->params['id'];
+      $model = (string) $this->params['model'];
+      $junction = (string) $this->params['junction'];
 
-      $tmpModel = $this->adios->getModel($this->params['model']);
-      $junctionData = $tmpModel->junctions[$this->params['junction']] ?? null;
+      // Validate required params
+      if ($model == '') throw new \Exception("Unknown model");
+      if ($junction == '') throw new \Exception("Unknown junction model");
+      if ($id == 0) throw new \Exception("Unknown id");
+
+      $tmpModel = $this->adios->getModel($model);
+      $junctionData = $tmpModel->junctions[$junction] ?? null;
 
       if ($junctionData == null) {
-        throw new \Exception("Junction {$this->params['junction']} in {$this->params['model']} not found");
+        throw new \Exception("Junction {$junction} in {$model} not found");
       }
 
       $junctionModel = $this->adios->getModel($junctionData['junctionModel']);
       $junctionOptionKeyColumn = $junctionModel->columns()[$junctionData['optionKeyColumn']];
       $junctionOptionKeyModel = $this->adios->getModel($junctionOptionKeyColumn['model']);
 
-      $junctionOptionKeyModel->find($this->params['id'])->delete();
+      $junctionItemsToDelete = $junctionModel->where($junctionData['optionKeyColumn'], $id)
+        ->get();
+
+      foreach ($junctionItemsToDelete as $junctionItem) {
+        $junctionModel->find($junctionItem->id)->delete();
+      }
+
+      $junctionOptionKeyModel->find($id)->delete();
 
       return [];
     } catch (QueryException $e) {

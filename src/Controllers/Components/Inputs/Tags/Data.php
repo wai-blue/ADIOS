@@ -25,20 +25,25 @@ class Data extends \ADIOS\Core\Controller {
 
   public function renderJson() { 
     try {
-      if ($this->params['model'] == null) throw new \Exception("Unknown model");
-      if ($this->params['junction'] == null) throw new \Exception("Unknown junction model");
+      $id = (int) $this->params['id'];
+      $model = (string) $this->params['model'];
+      $junction = (string) $this->params['junction'];
 
-      $tmpModel = $this->adios->getModel($this->params['model']);
+      // Validate required params
+      if ($model == '') throw new \Exception("Unknown model");
+      if ($junction == '') throw new \Exception("Unknown junction model");
 
-      $junctionData = $tmpModel->junctions[$this->params['junction']] ?? null;
+      $tmpModel = $this->adios->getModel($model);
+
+      $junctionData = $tmpModel->junctions[$junction] ?? null;
       if ($junctionData == null) {
-        throw new \Exception("Junction {$this->params['junction']} in {$this->params['model']} not found");
+        throw new \Exception("Junction {$junction} in {$model} not found");
       }
 
       $junctionModel = $this->adios->getModel($junctionData['junctionModel']);
 
-      if ($this->params['id'] != null) {
-        $selected = $junctionModel->where($junctionData['masterKeyColumn'], (int) $this->params['id'])
+      if ($id > 0) {
+        $selected = $junctionModel->where($junctionData['masterKeyColumn'], $id)
           ->pluck($junctionData['optionKeyColumn']);
       }
 
