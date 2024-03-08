@@ -13,7 +13,7 @@
 
 /* Styles for the input */
 .ReactTags__tagInput {
-  border-radius: 2px;
+  border-radius: 1px;
   display: inline-block;
   width: 100%;
   margin-top: 10px;
@@ -53,7 +53,7 @@
 
 /* Styles for selected tags */
 .ReactTags__selected span.ReactTags__tag {
-  border: 1px solid #858796;
+  border: 2px solid var(--gray-400);
   background: #858796;
   color: white;
   font-size: 0.8rem;
@@ -65,9 +65,7 @@
 }
 
 .ReactTags__remove:hover {
-  color: red !important;
-  border-color: red !important;
-  /*margin-left: 2px;*/
+  color: var(--cl-red) !important;
   cursor: pointer;
 }
 
@@ -84,7 +82,7 @@
 }
 
 .ReactTags__suggestions li {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 2px solid #ddd;
   padding: 5px 10px;
   margin: 0;
 }
@@ -111,7 +109,7 @@
 .ReactTags__active {
   background-color: var(--cl-main) !important;
   color: white !important;
-  border: 1px solid var(--cl-main) !important;
+  border: 2px solid var(--cl-main) !important;
 }
 
 .ReactTags__active .ReactTags__remove {
@@ -119,13 +117,12 @@
 }
 
 .ReactTags__tag:hover {
-  border: 1px solid #717384 !important;
-  background-color: #717384 !important;
+  border: 2px solid var(--cl-hove) !important;
   cursor: pointer !important;
 }
 
 .ReactTags__active:hover {
-  background-color: var(--cl-hove) !important;
+  border: 2px solid var(--cl-hove) !important;
 }
 
 .ReactTags__disabled, .ReactTags__disabled:hover {

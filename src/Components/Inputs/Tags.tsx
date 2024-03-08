@@ -73,7 +73,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
           const tagBadge: TagBadge = {
             id: item.id + '',
             name: item.name,
-            className: (this.isTagSelected(item.id) || selected.includes(item.id) ? " ReactTags__active" : "")
+            className: (selected.includes(item.id) ? " ReactTags__active" : "")
               + (this.state.readonly ? " ReactTags__disabled" : "")
           };
 
@@ -91,11 +91,6 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
     );
   }
 
-  isTagSelected(idItem: number): boolean {
-    if (!this.state.value) return false;
-    return this.state.value.includes(idItem);
-  }
-
   onTagAdd(tag: any) {
     if (this.state.readonly) return;
 
@@ -111,6 +106,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
       postData,
       {
         model: this.props.model,
+        id: this.props.formId,
         junction: this.props.params.junction,
         __IS_AJAX__: '1',
       },
@@ -192,6 +188,8 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
         allowDeleteFromEmptyInput={false}
         autocomplete
         readOnly={this.state.readonly}
+        allowUnique={false}
+        editable={false}
       />
     );
   } 
