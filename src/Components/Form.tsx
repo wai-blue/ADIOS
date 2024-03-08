@@ -329,7 +329,6 @@ export default class Form extends Component<FormProps> {
    * Dynamically initialize inputs (React state) from model columns
    */
   getDataState(columns: FormColumns, inputsValues: Object = {}) {
-
     let data: any = {};
 
     // If is new form and defaultValues props is set
@@ -350,9 +349,6 @@ export default class Form extends Component<FormProps> {
         case 'bool':
         case 'boolean':
           data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
-        break;
-        case 'tags':
-          data[columnName] = inputsValues[columnName]
         break;
         default:
           data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
@@ -599,7 +595,8 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputColor {...inputProps} />;
             break;
           case 'tags':
-            inputToRender = <InputTags {...inputProps} model={this.props.model}/>;
+            console.log(this.state);
+            inputToRender = <InputTags {...inputProps} model={this.props.model} formId={this.state.id}/>;
             break;
           case 'image':
             inputToRender = <InputImage {...inputProps} />;
