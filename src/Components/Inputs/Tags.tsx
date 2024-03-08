@@ -20,7 +20,9 @@ interface TagBadge {
 interface TagsInputProps extends InputProps {
   dataKey?: string,
   model?: string,
-  formId?: number
+  formId?: number,
+  disableDelete?: boolean,
+  disableAdd?: boolean,
 }
 
 interface TagsInputState extends InputState {
@@ -46,6 +48,13 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
 
   componentDidMount() {
     this.loadData();
+
+    if (this.props.disableAdd === true) {
+      setTimeout(() => {
+        const tagInput = document.querySelector('.ReactTags__tagInput') as HTMLElement | null;
+        if (tagInput) tagInput.remove();
+      }, 500);
+    }
   }
 
   componentDidUpdate(prevProps: TagsInputProps) {
@@ -86,14 +95,19 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
         this.setState({
           isInitialized: true,
           tags: tags
+        }, () => {
+          if (this.props.disableDelete === true) {
+            const removeButtons = document.querySelectorAll('.ReactTags__remove');
+            removeButtons.forEach((button: Element) => {
+              (button as HTMLElement).remove();
+            });
+          }
         });
       }
     );
   }
 
   onTagAdd(tag: any) {
-    if (this.state.readonly) return;
-
     let postData: any = {};
 
     if (this.props.params.dataKey) {
@@ -129,26 +143,28 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
       confirmButtonColor: '#dc4c64',
       reverseButtons: false,
     } as SweetAlertOptions).then((result) => {
-      if (result.isConfirmed) {
-        let id: number = parseInt(this.state.tags[tagIndex].id);
-        request.delete(
-          'components/inputs/tags/delete',
-          {
-            model: this.props.model,
-            junction: this.props.params.junction,
-            __IS_AJAX__: '1',
-            id: id
-          },
-          () => {
-            Notification.success("Tag zmazaný");
-            this.loadData();
-          }
-        );
-      }
-    })
+        if (result.isConfirmed) {
+          let id: number = parseInt(this.state.tags[tagIndex].id);
+          request.delete(
+            'components/inputs/tags/delete',
+            {
+              model: this.props.model,
+              junction: this.props.params.junction,
+              __IS_AJAX__: '1',
+              id: id
+            },
+            () => {
+              Notification.success("Tag zmazaný");
+              this.loadData();
+            }
+          );
+        }
+      })
   }
 
   onTagClick(tagIndex: number) {
+    if (this.state.readonly) return;
+
     const tmpTagId: number = parseInt(this.state.tags[tagIndex].id);
     let value: Array<number> = this.state.value;
     let className: string = "";
@@ -178,7 +194,6 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
     return (
       <ReactTags
         tags={this.state.tags}
-        //suggestions={suggestions}
         labelField={this.props.params.dataKey}
         handleDelete={(tagIndex: number) => this.onTagDelete(tagIndex)}
         handleTagClick={(tagIndex: number) => this.onTagClick(tagIndex)}

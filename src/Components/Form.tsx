@@ -595,7 +595,7 @@ export default class Form extends Component<FormProps> {
             inputToRender = <InputColor {...inputProps} />;
             break;
           case 'tags':
-            inputToRender = <InputTags {...inputProps} model={this.props.model} formId={this.state.id}/>;
+            inputToRender = <InputTags {...inputProps} model={this.props.model} formId={this.state.id} />;
             break;
           case 'image':
             inputToRender = <InputImage {...inputProps} />;
