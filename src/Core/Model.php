@@ -604,7 +604,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
-            "uid" => HelperFunctions::str2uid($this->fullName) . '_edit',
+            "uid" => Helper::str2uid($this->fullName) . '_edit',
           ],
           "model" => $this->fullName,
           "id" => '$' . ($varsInUrl + 1),
@@ -618,7 +618,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         "params" => array_merge($urlParams, [
           "displayMode" => "window",
           "windowParams" => [
-            "uid" => HelperFunctions::str2uid($this->fullName) . '_add',
+            "uid" => Helper::str2uid($this->fullName) . '_add',
             "modal" => TRUE,
           ],
           "model" => $this->fullName,
@@ -1472,12 +1472,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
     $dataForThisModel = $this->normalizeRecordData($dataForThisModel);
 
     if ($id <= 0) {
+      $this->adios->router->checkPermission($this->fullName . ':Create');
       unset($dataForThisModel['id']);
       $returnValue = $this->create($dataForThisModel)->id;
       $data['id'] = (int) $returnValue;
       $id = (int) $returnValue;
     } else {
-      // $returnValue = $this->updateRow($dataForThisModel, $id);
+      $this->adios->router->checkPermission($this->fullName . ':Update');
       $this->find($id)->update($dataForThisModel);
       $returnValue = $id;
     }
@@ -1501,8 +1502,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $lookupData = $this->onBeforeSave($lookupData);
 
       if ($data[$lookupColumnName] <= 0) {
-        $data[$lookupColumnName] = (int)$lookupModel->insertRow($lookupData);
+        $this->adios->router->checkPermission($lookupModel->fullName . ':Create');
+        $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
       } else {
+        $this->adios->router->checkPermission($lookupModel->fullName . ':Update');
         $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
       }
     }

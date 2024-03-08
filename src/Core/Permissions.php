@@ -22,6 +22,7 @@ class Permissions {
     $this->adios = $adios;
 
     $this->permissions = $this->loadPermissions();
+    $this->expandPermissionGroups();
 
   }
 
@@ -43,19 +44,30 @@ class Permissions {
     return $permissions;
   }
 
+  public function expandPermissionGroups() {
+    foreach ($this->permissions as $idUserRole => $permissionsByRole) {
+      foreach ($permissionsByRole as $permission) {
+        if (strpos($permission, ':') !== FALSE) {
+          list($pGroup, $pGroupItems) = explode(':', $permission);
+          if (strpos($pGroupItems, ',') !== FALSE) {
+            $pGroupItemsArr = explode(',', $pGroupItems);
+            if (count($pGroupItemsArr) > 1) {
+              foreach ($pGroupItemsArr as $item) {
+                $this->permissions[$idUserRole][] = $pGroup . ':' . $item;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   public function set(string $permission, int $idUserRole, bool $isEnabled)
   {
     $this->adios->saveConfigByPath(
       "permissions/{$idUserRole}/".str_replace("/", ":", $permission),
       $isEnabled ? "1" : "0"
     );
-  }
-
-  public function isEnabled(string $permission, int $idUserRole = 0) : bool
-  {
-    if ($idUserRole <= 0) $idUserRole = (int) reset($this->adios->userProfile['roles']);
-
-    return (bool) in_array($permission, $this->permissions[$idUserRole]);
   }
 
   public function hasRole(int|string $role) {
@@ -70,31 +82,46 @@ class Permissions {
     return in_array($idRole, $this->adios->userProfile['roles'] ?? []);
   }
 
-  public function has(string $permission, array $idUserRoles = []) : bool
+  public function grantedForRole(string $permission, int $idUserRole) : bool
   {
+    if (empty($permission)) return TRUE;
+
+    $granted = (bool) in_array($permission, (array) $this->permissions[$idUserRole]);
+
+    if (!$granted) {
+    }
+
+    return $granted;
+  }
+
+  public function granted(string $permission, array $idUserRoles = []) : bool
+  {
+    if (empty($permission)) return TRUE;
     if (count($idUserRoles) == 0) $idUserRoles = $this->adios->userProfile['roles'];
 
     // TODO: Docasne. Ked bude fungovat, vymazat.
-    if (strpos($permission, "Desktop") === 0) return TRUE;
-    if (strpos($permission, "Administrator/Permission") === 0) return TRUE;
-    if (strpos($permission, "Core/Models") === 0) return TRUE;
+    // if (strpos($permission, "Desktop") === 0) return TRUE;
+    // if (strpos($permission, "Administrator/Permission") === 0) return TRUE;
+    // if (strpos($permission, "Core/Models") === 0) return TRUE;
 
-    $permissionGranted = FALSE;
-    foreach ($idUserRoles as $idUserRole) {
-      if ($idUserRole == \ADIOS\Core\Models\UserRole::ADMINISTRATOR) {
-        $permissionGranted = TRUE;
-      } else {
-        $permissionGranted = (bool) in_array($permission, (array) $this->permissions[$idUserRole]);
+    $granted = FALSE;
+
+    if (in_array(\ADIOS\Core\Models\UserRole::ADMINISTRATOR, $idUserRoles)) $granted = TRUE;
+
+    // check if the premission is granted for one of the roles of the user
+    if (!$granted) {
+      foreach ($idUserRoles as $idUserRole) {
+        $granted = $this->grantedForRole($permission, $idUserRole);
+        if ($granted) break;
       }
-
-      if ($permissionGranted) break;
     }
 
-    if (!$permissionGranted) {
-      $permissionGranted = (bool) in_array($permission, (array) $this->permissions[0]);
+    // check if the premission is granted "globally" (for each role)
+    if (!$granted) {
+      $granted = $this->grantedForRole($permission, 0);
     }
 
-    return $permissionGranted;
+    return $granted;
   }
   
 }

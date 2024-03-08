@@ -39,9 +39,9 @@ class Upload extends \ADIOS\Core\Controller {
         $uploadedFilename = str_replace("{%TS%}", strtotime("now"), $uploadedFilename);
         $uploadedFilename = str_replace("{%RAND%}", rand(1000, 9999), $uploadedFilename);
         $uploadedFilename = str_replace("{%BASENAME%}", $tmpParts['basename'], $uploadedFilename);
-        $uploadedFilename = str_replace("{%BASENAME_ASCII%}", \ADIOS\Core\HelperFunctions::str2url($tmpParts['basename']), $uploadedFilename);
+        $uploadedFilename = str_replace("{%BASENAME_ASCII%}", \ADIOS\Core\Helper::str2url($tmpParts['basename']), $uploadedFilename);
         $uploadedFilename = str_replace("{%FILENAME%}", $tmpParts['filename'], $uploadedFilename);
-        $uploadedFilename = str_replace("{%FILENAME_ASCII%}", \ADIOS\Core\HelperFunctions::str2url($tmpParts['filename']), $uploadedFilename);
+        $uploadedFilename = str_replace("{%FILENAME_ASCII%}", \ADIOS\Core\Helper::str2url($tmpParts['filename']), $uploadedFilename);
         $uploadedFilename = str_replace("{%EXT%}", $tmpParts['extension'], $uploadedFilename);
       }
 

@@ -582,7 +582,7 @@ class Loader
         }
 
         // pridam routing pre ADIOS default controllers
-        $adiosControllers = \ADIOS\Core\HelperFunctions::scanDirRecursively(__DIR__ . '/../Controllers');
+        $adiosControllers = \ADIOS\Core\Helper::scanDirRecursively(__DIR__ . '/../Controllers');
         $tmpRouting = [];
         foreach ($adiosControllers as $tmpController) {
           $tmpController = str_replace(".php", "", $tmpController);
@@ -632,9 +632,9 @@ class Loader
                     if (is_bool($attributes[$key])){
                       return $attributes[$key] ? $key : '';
                     } else if (is_array($attributes[$key])) {
-                      return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='".json_encode($attributes[$key])."'";
+                      return \ADIOS\Core\Helper::camelToKebab($key)."='".json_encode($attributes[$key])."'";
                     } else {
-                      return \ADIOS\Core\HelperFunctions::camelToKebab($key)."='{$attributes[$key]}'";
+                      return \ADIOS\Core\Helper::camelToKebab($key)."='{$attributes[$key]}'";
                     }
                   },
                   array_keys($attributes)
@@ -649,13 +649,13 @@ class Loader
         $this->twig->addFunction(new \Twig\TwigFunction(
           'str2url',
           function ($string) {
-            return \ADIOS\Core\HelperFunctions::str2url($string);
+            return \ADIOS\Core\Helper::str2url($string);
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction(
           'hasPermission',
           function (string $permission, array $idUserRoles = []) {
-            return $this->permissions->has($permission, $idUserRoles);
+            return $this->permissions->granted($permission, $idUserRoles);
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction(
@@ -892,12 +892,12 @@ class Loader
     if (empty($this->dictionary[$toLanguage])) {
       $this->dictionary[$toLanguage] = [];
 
-      $dictionaryFiles = \ADIOS\Core\HelperFunctions::scanDirRecursively("{$this->config['srcDir']}/Lang");
+      $dictionaryFiles = \ADIOS\Core\Helper::scanDirRecursively("{$this->config['srcDir']}/Lang");
 
       foreach ($dictionaryFiles as $file) {
         include("{$this->config['srcDir']}/Lang/{$file}");
 
-        $this->dictionary[$toLanguage] =  \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+        $this->dictionary[$toLanguage] =  \ADIOS\Core\Helper::arrayMergeRecursively(
           $this->dictionary[$toLanguage],
           $dictionary
         );
@@ -1151,7 +1151,7 @@ class Loader
           $this->route = $_SERVER['argv'][1] ?? "";
         } else {
           $this->route = $_REQUEST['controller'] ?? '';
-          $this->params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively(
+          $this->params = \ADIOS\Core\Helper::arrayMergeRecursively(
             array_merge($_GET, $_POST),
             json_decode(file_get_contents("php://input"), true) ?? []
           );
@@ -1176,7 +1176,8 @@ class Loader
 
       // Check if controller exists or if it can be used
       if (!$this->controllerExists($this->controller)) {
-        $controllerClassName = \ADIOS\Core\Controller::class;
+        // $controllerClassName = \ADIOS\Core\Controller::class;
+        throw new \ADIOS\Core\Exceptions\ControllerNotFound();
       } else {
         $controllerClassName = $this->getControllerClassName($this->controller);
       }
@@ -1199,8 +1200,8 @@ class Loader
         }
       }
 
-      // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
-      $this->config = $controllerClassName::overrideConfig($this->config, $this->params);
+      // // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
+      // $this->config = $controllerClassName::overrideConfig($this->config, $this->params);
 
       if (
         !$this->userLogged
@@ -1266,7 +1267,7 @@ class Loader
           
           // ... But mostly be "encapsulated" in the desktop.
           } else {
-            $desktop = $this->controllerObject->getDesktop($this->params);
+            $desktop = $this->controllerObject->getDesktopController($this->params);
 
             $desktopParams['user'] = $this->userProfile;
             $desktopParams['config'] = $this->config;
@@ -1312,8 +1313,7 @@ class Loader
       return $return;
 
     } catch (\ADIOS\Core\Exceptions\ControllerNotFound $e) {
-      header("Location: {$this->config['url']}");
-      exit;
+      $this->router->redirectTo("");
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
       header('HTTP/1.1 401 Unauthorized', true, 401);
       return $this->renderFatal($e->getMessage(), FALSE);
@@ -1330,7 +1330,6 @@ class Loader
       return join(" ", $lines);
     } catch (\ArgumentCountError $e) {
       echo $e->getMessage();
-      // var_dump(debug_backtrace());
       header('HTTP/1.1 400 Bad Request', true, 400);
     }
   }

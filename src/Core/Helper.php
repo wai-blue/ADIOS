@@ -13,7 +13,7 @@ namespace ADIOS\Core;
 /**
  * Various handy helper functions
  */
-class HelperFunctions {
+class Helper {
   static $loadUrlError = '';
   
   /**

@@ -83,9 +83,7 @@ class Router {
   }
 
   public function checkPermission(string $permission) {
-    if (
-      !empty($permission)
-      && !$this->adios->permissions->has($permission)
+    if (!$this->adios->permissions->granted($permission)
     ) {
       throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permission}).");
     }

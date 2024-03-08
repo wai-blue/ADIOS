@@ -11,7 +11,7 @@
 namespace ADIOS\Controllers\Administrator;
 
 class Permissions extends \ADIOS\Core\Controller {
-  public function preRender() {
+  public function getViewParams() {
     $idUserRole = (int) $this->params['idUserRole'];
 
     $userRoleModel = (new ($this->adios->getCoreClass('Core\\Models\\UserRole'))($this->adios));
@@ -28,7 +28,7 @@ class Permissions extends \ADIOS\Core\Controller {
       if (!empty($routeParams['permission'])) {
         $tmpPath = $routeParams['permission'];
         foreach ($userRoles as $role) {
-          $permissions[$tmpPath][$role['id']] = $this->adios->permissions->isEnabled($tmpPath, $role['id']);
+          $permissions[$tmpPath][$role['id']] = $this->adios->permissions->granted($tmpPath, $role['id']);
         }
       }
     }
@@ -44,7 +44,7 @@ class Permissions extends \ADIOS\Core\Controller {
           if (substr($action, -4) == ".php") {
             $tmpPath = "Widgets/{$widget->fullName}/Actions/".substr($action, 0, -4);
             foreach ($userRoles as $role) {
-              $permissions[$tmpPath][$role['id']] = $this->adios->permissions->isEnabled($tmpPath, $role['id']);
+              $permissions[$tmpPath][$role['id']] = $this->adios->permissions->granted($tmpPath, $role['id']);
             }
           }
         }

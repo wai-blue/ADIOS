@@ -34,7 +34,7 @@ class DownloadTemplate extends \ADIOS\Core\Controller {
     header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     header("Content-Description: File Transfer");
     header("Content-Type: application/csv");
-    header("Content-disposition: attachment; filename=".\ADIOS\Core\HelperFunctions::str2url($modelObject->urlBase)."-template.csv");
+    header("Content-disposition: attachment; filename=".\ADIOS\Core\Helper::str2url($modelObject->urlBase)."-template.csv");
 
     echo $csv;
 

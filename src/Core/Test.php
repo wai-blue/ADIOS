@@ -29,7 +29,7 @@ class Test
 
   public function findAllTests(string $dir) : array
   {
-    $allTests = \ADIOS\Core\HelperFunctions::scanDirRecursively($dir);
+    $allTests = \ADIOS\Core\Helper::scanDirRecursively($dir);
 
     // only .php files starting with "Test" are treated to be tests
     foreach ($allTests as $key => $value) {

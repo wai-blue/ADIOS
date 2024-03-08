@@ -11,7 +11,7 @@
 namespace ADIOS\Core\ViewsWithController;
 
 use ADIOS\Core\DB\Query as Q;
-use ADIOS\Core\HelperFunctions;
+use ADIOS\Core\Helper;
 
 class Table extends \ADIOS\Core\ViewWithController
 {
@@ -1153,7 +1153,7 @@ class Table extends \ADIOS\Core\ViewWithController
       ';
     }
 
-    return HelperFunctions::minifyHtml($html);
+    return Helper::minifyHtml($html);
   }
 
   /**

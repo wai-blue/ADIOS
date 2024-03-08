@@ -238,12 +238,11 @@ class Builder {
       break;
       case 'yml':
         $ymlContent = file_get_contents($file);
-        if (is_array($this->prototype['_replacements'])) {
-        var_dump($this->prototype['_replacements']);
-          foreach ($this->prototype['_replacements'] as $from => $to) {
-            $ymlContent = str_replace($from, $to, $ymlContent);
-          }
-        }
+        // if (is_array($this->prototype['_replacements'])) {
+        //   foreach ($this->prototype['_replacements'] as $from => $to) {
+        //     $ymlContent = str_replace($from, $to, $ymlContent);
+        //   }
+        // }
         $prototype = \Symfony\Component\Yaml\Yaml::parse($ymlContent);
       break;
       default:
@@ -462,8 +461,6 @@ class Builder {
       // render controllers
       if (is_array($widgetConfig['controllers'] ?? NULL)) {
         $this->createFolder($widgetRootDir . '/Controllers');
-        // $this->createFolder($widgetRootDir . '/Traits');
-        // $this->createFolder($widgetRootDir . '/Traits/Controllers');
         $this->createFolder($widgetRootDir . '/Views');
 
         foreach ($widgetConfig['controllers'] as $controllerName => $controllerConfig) {
@@ -482,8 +479,6 @@ class Builder {
                 } else {
                   $viewTwigTemplate = 'src/Widgets/Views/DefaultEmpty.twig';
                 }
-
-                // $traitPhpFileTemplate = 'src/Widgets/Traits/ViewRender.php.twig';
               break;
             }
           } else {
@@ -502,7 +497,6 @@ class Builder {
 
           if (strpos($controllerName, '/') !== FALSE) {
             $controllerRootDir = $widgetRootDir . '/Controllers';
-            // $traitRootDir = $widgetRootDir . '/Traits/Controllers';
             $viewRootDir = $widgetRootDir . '/Views';
 
             $tmpDirs = explode('/', $controllerName);
@@ -511,7 +505,6 @@ class Builder {
 
             foreach ($tmpDirs as $level => $tmpDir) {
               $controllerRootDir .= '/' . $tmpDir;
-              // $traitRootDir .= '/' . $tmpDir;
               $viewRootDir .= '/' . $tmpDir;
 
               if ($level != count($tmpDirs) - 1) {
@@ -519,7 +512,6 @@ class Builder {
                 $traitNamespace .= '\\' . $tmpDir;
 
                 $this->createFolder($controllerRootDir);
-                // $this->createFolder($traitRootDir);
                 $this->createFolder($viewRootDir);
               }
 
@@ -553,24 +545,6 @@ class Builder {
             $tmpControllerParams
           );
 
-          // if (!empty($traitPhpFileTemplate)) {
-          //   $this->renderPhpFile(
-          //     $widgetRootDir . '/Traits/Controllers/' . $controllerName . '.php',
-          //     $traitPhpFileTemplate,
-          //     $tmpControllerParams
-          //   );
-          // }
-
-          // At some situations, the controller may be configured to use
-          // only the Twig template, instead of the View
-          // if (!empty($controllerHtmlFileTemplate)) {
-          //   $this->createFolder($widgetRootDir . '/Templates');
-          //   $this->copyFile(
-          //     $controllerHtmlFileTemplate,
-          //     $widgetRootDir . '/Templates/' . $controllerName . '.twig'
-          //   );
-          // }
-
           // Render View for Controller - only if the controller does not use the ADIOS Core view.
           // If the view already exists, it is not overwritten.
           if (
@@ -594,32 +568,12 @@ class Builder {
     }
 
     $this->renderPhpFile('src/App.php', 'src/App.php.twig');
-
-    $this->renderPhpFile('src/Core/Permissions.php', 'src/Core/Permissions.php.twig', [
-      'permissions' => $permissions,
-    ]);
-    $this->renderPhpFile('src/Core/Router.php', 'src/Core/Router.php.twig', [
-      'routing' => $routing,
-    ]);
+    $this->renderPhpFile('src/Core/Controller.php', 'src/Core/Controller.php.twig');
+    $this->renderPhpFile('src/Core/Permissions.php', 'src/Core/Permissions.php.twig', ['permissions' => $permissions]);
+    $this->renderPhpFile('src/Core/Router.php', 'src/Core/Router.php.twig', ['routing' => $routing]);
     $this->renderPhpFile('src/Core/Models/User.php', 'src/Core/Models/User.php.twig', []);
     $this->renderPhpFile('src/Core/Models/UserRole.php', 'src/Core/Models/UserRole.php.twig', []);
     $this->renderPhpFile('src/Core/Models/UserHasRole.php', 'src/Core/Models/UserHasRole.php.twig', []);
   }
 
-  // public function createEmptyDatabase() {
-  //   $this->log("Creating empty database.");
-
-  //   $dbCfg = $this->prototype['ConfigEnv']['db'];
-
-  //   $db = new \mysqli(
-  //     $dbCfg['host'],
-  //     $dbCfg['user'],
-  //     $dbCfg['password'],
-  //     "",
-  //     (int) ($dbCfg['port'] ?? 0)
-  //   );
-
-  //   $multiQuery = $this->twig->render("emptyDatabase.sql.twig", $this->prototype);
-  //   $db->multi_query($multiQuery);
-  // }
 }

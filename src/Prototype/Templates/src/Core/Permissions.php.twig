@@ -20,6 +20,6 @@ class Permissions extends \ADIOS\Core\Permissions {
       $prototypePermissions[$idUserRoleByRoleName[$roleName] ?? 0] = $rolePermissions;
     }
 
-    return \ADIOS\Core\HelperFunctions::arrayMergeRecursively($permissions, $prototypePermissions);
+    return \ADIOS\Core\Helper::arrayMergeRecursively($permissions, $prototypePermissions);
   }
 }

@@ -11,14 +11,12 @@ class Controller {
     $this->params = $params;
   }
 
-  public function preRender() { }
+  public function getViewParams(): array { return []; }
 
-  public function render() {
+  public function render(array $params) {
     // if string is returned, ADIOS Web will not continue in rendering and outputs the returned string
     return NULL;
   }
-
-  public function postRender() { }
 
 }
 

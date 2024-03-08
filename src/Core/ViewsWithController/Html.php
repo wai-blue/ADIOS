@@ -25,6 +25,6 @@ class Html extends \ADIOS\Core\ViewWithController
       $html = $this->params['html'];
     }
 
-    return \ADIOS\Core\HelperFunctions::minifyHtml($html);
+    return \ADIOS\Core\Helper::minifyHtml($html);
   }
 }

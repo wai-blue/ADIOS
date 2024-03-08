@@ -494,7 +494,7 @@ class Form extends \ADIOS\Core\ViewWithController
 
     if ($window !== NULL) {
       $window->setUid(
-        \ADIOS\Core\HelperFunctions::str2uid($this->model->fullName)
+        \ADIOS\Core\Helper::str2uid($this->model->fullName)
         . ($this->params['id'] <= 0 ? '_add' : '_edit')
       );
     }

@@ -254,7 +254,7 @@ class Configure extends \ADIOS\Core\Controller {
     }
   }
 
-  function preRender() {
+  function getViewParams() {
     $dashboard = new \ADIOS\Core\ViewsWithController\Dashboard($this->adios, $this->params);
 
     $availablePresets = $dashboard->getAvailablePresets();

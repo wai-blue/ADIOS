@@ -67,18 +67,18 @@ class Form extends \ADIOS\Core\Controller {
       unset($params['__IS_AJAX__']);
 
       $model = $this->adios->getModel($this->params['model']);
-      $params = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params, $model->formParams ?? []);
+      $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $model->formParams ?? []);
 
-      $params['columns'] = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
-      $params['columns'] = \ADIOS\Core\HelperFunctions::arrayMergeRecursively($params['columns'] ?? [], $model->inputs());
+      $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
+      $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $model->inputs());
       $params['columns'] = array_filter($params['columns'], function($column) {
         return ($column['show'] ?? FALSE);
       });
 
-      $params['canRead'] = $this->adios->permissions->has($this->params['model'] . ':Read');
-      $params['canCreate'] = $this->adios->permissions->has($this->params['model'] . ':Create');
-      $params['canUpdate'] = $this->adios->permissions->has($this->params['model'] . ':Update');
-      $params['canDelete'] = $this->adios->permissions->has($this->params['model'] . ':Delete');
+      $params['canRead'] = $this->adios->permissions->granted($this->params['model'] . ':Read');
+      $params['canCreate'] = $this->adios->permissions->granted($this->params['model'] . ':Create');
+      $params['canUpdate'] = $this->adios->permissions->granted($this->params['model'] . ':Update');
+      $params['canDelete'] = $this->adios->permissions->granted($this->params['model'] . ':Delete');
       $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
 
       $params['folderUrl'] = $model->getFolderUrl();

@@ -151,7 +151,7 @@ Or use method ```preRender()``` to return the JSON output or to apply the TWIG t
 
 ```php
 class MonthlyTurnover extends \ADIOS\Core\Widget\Action {
-  public function preRender() {
+  public function getViewParams() {
     $invoiceModel = new \ADIOS\Widgets\Finances\Models\Invoice($this->adios);
     $invoiceItemModel = new \ADIOS\Widgets\Finances\Models\InvoiceItem($this->adios);
 
