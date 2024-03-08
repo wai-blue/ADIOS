@@ -20,7 +20,6 @@ class Data extends \ADIOS\Core\Controller {
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
-    //$this->permission = $this->params['model'] . ':Read';
   }
 
   public function renderJson() { 
