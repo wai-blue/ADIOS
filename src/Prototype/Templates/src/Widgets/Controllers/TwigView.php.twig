@@ -5,7 +5,7 @@
 namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \App\Core\Controller {
-  public function prepareViewParams(): array {
+  public function prepareViewParams() {
     parent::prepareViewParams();
 
     // build-up view params
