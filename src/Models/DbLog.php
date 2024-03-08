@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\Models;
+namespace ADIOS\Models;
 
 /**
  * Model for storing database operations log entries. Stored in 'db_log' SQL table.
@@ -27,7 +27,7 @@ class DbLog extends \ADIOS\Core\Model {
     return parent::columns([
       'ip' => ['type' => 'varchar', 'byte_size' => 35, 'title' => 'IP', 'show_column' => true],
       'action' => ['type' => 'varchar', 'byte_size' => 150, 'title' => 'Akcia', 'show_column' => true],
-      'id_user' => ['type' => 'lookup', 'title' => 'Používateľ', 'model' => "ADIOS/Core/Models/User", 'show_column' => true],
+      'id_user' => ['type' => 'lookup', 'title' => 'Používateľ', 'model' => "ADIOS/Models/User", 'show_column' => true],
       'date' => ['type' => 'datetime', 'title' => 'Dátum', 'show_column' => true],
       'operation' => ['type' => 'varchar', 'byte_size' => 30, 'title' => 'Operácia', 'show_column' => true],
       'table_name' => ['type' => 'varchar', 'byte_size' => 150, 'title' => 'Tabuľka', 'show_column' => true],

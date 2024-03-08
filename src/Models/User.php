@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\Models;
+namespace ADIOS\Models;
 
 /**
  * Model for storing user profiles. Stored in 'users' SQL table.
@@ -31,7 +31,7 @@ class User extends \ADIOS\Core\Model {
 
   public ?array $junctions = [
     'roles' => [
-      'junctionModel' => \ADIOS\Core\Models\UserHasRole::class,
+      'junctionModel' => \ADIOS\Models\UserHasRole::class,
       'masterKeyColumn' => 'id_user',
       'optionKeyColumn' => 'id_role',
     ],
@@ -44,7 +44,7 @@ class User extends \ADIOS\Core\Model {
 
 
     if (is_object($adiosOrAttributes)) {
-      $tokenModel = $adiosOrAttributes->getModel("ADIOS/Core/Models/Token");
+      $tokenModel = $adiosOrAttributes->getModel("ADIOS/Models/Token");
 
       if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
         $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
@@ -90,7 +90,7 @@ class User extends \ADIOS\Core\Model {
       ],
       //'id_token_reset_password' => [
       //  'type' => 'lookup',
-      //  'model' => "ADIOS/Core/Models/Token",
+      //  'model' => "ADIOS/Models/Token",
       //  'title' => $this->translate('Reset password token'),
       //  'readonly' => TRUE,
       //  'show' => false,
@@ -103,7 +103,7 @@ class User extends \ADIOS\Core\Model {
       'roles' => [
         'type' => 'tags',
         'junction' => 'roles',
-        //'model' => 'ADIOS/Core/Models/UserRole',
+        //'model' => 'ADIOS/Models/UserRole',
         'title' => 'Pridelené role',
         'dataKey' => 'name',
         'show' => TRUE,
@@ -161,7 +161,7 @@ class User extends \ADIOS\Core\Model {
       '/^MyProfile$/' => [
         "controller" => "Components/Form",
         "params" => [
-          "model" => "ADIOS/Core/Models/User",
+          "model" => "ADIOS/Models/User",
           "myProfileView" => TRUE,
           "id" => $this->adios->userProfile['id'],
         ]
@@ -290,7 +290,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function generateToken($idUser, $tokenSalt, $tokenType) {
-    $tokenModel = $this->adios->getModel("ADIOS/Core/Models/Token");
+    $tokenModel = $this->adios->getModel("ADIOS/Models/Token");
     $token = $tokenModel->generateToken($tokenSalt, $tokenType);
 
     $this->updateRow([
@@ -309,7 +309,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function validateToken($token, $deleteAfterValidation = TRUE) {
-    $tokenModel = $this->adios->getModel("ADIOS/Core/Models/Token");
+    $tokenModel = $this->adios->getModel("ADIOS/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
     $userData = $this->where(
@@ -390,7 +390,7 @@ class User extends \ADIOS\Core\Model {
 
   public function roles() {
     return $this->belongsToMany(
-      \ADIOS\Core\Models\UserRole::class,
+      \ADIOS\Models\UserRole::class,
       '_user_has_roles',
       'id_user',
       'id_role'
@@ -398,7 +398,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function id_token_reset_password(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
-    return $this->BelongsTo(\ADIOS\Core\Models\Token::class, 'id_token_reset_password');
+    return $this->BelongsTo(\ADIOS\Models\Token::class, 'id_token_reset_password');
   }
 
 }

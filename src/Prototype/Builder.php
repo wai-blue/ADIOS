@@ -268,7 +268,8 @@ class Builder {
     $this->createFolder('src/Assets');
     $this->createFolder('src/Assets/images');
     $this->createFolder('src/Core');
-    $this->createFolder('src/Core/Models');
+    $this->createFolder('src/Models');
+    $this->createFolder('src/Controllers');
     $this->createFolder('src/Views');
     $this->createFolder('src/Widgets');
     $this->createFolder('log');
@@ -571,9 +572,10 @@ class Builder {
     $this->renderPhpFile('src/Core/Controller.php', 'src/Core/Controller.php.twig');
     $this->renderPhpFile('src/Core/Permissions.php', 'src/Core/Permissions.php.twig', ['permissions' => $permissions]);
     $this->renderPhpFile('src/Core/Router.php', 'src/Core/Router.php.twig', ['routing' => $routing]);
-    $this->renderPhpFile('src/Core/Models/User.php', 'src/Core/Models/User.php.twig', []);
-    $this->renderPhpFile('src/Core/Models/UserRole.php', 'src/Core/Models/UserRole.php.twig', []);
-    $this->renderPhpFile('src/Core/Models/UserHasRole.php', 'src/Core/Models/UserHasRole.php.twig', []);
+    $this->renderPhpFile('src/Models/User.php', 'src/Models/User.php.twig', []);
+    $this->renderPhpFile('src/Models/UserRole.php', 'src/Models/UserRole.php.twig', []);
+    $this->renderPhpFile('src/Models/UserHasRole.php', 'src/Models/UserHasRole.php.twig', []);
+    $this->renderPhpFile('src/Controllers/Desktop.php', 'src/Controllers/Desktop.php.twig');
   }
 
 }

@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\Models;
+namespace ADIOS\Models;
 
 /**
  * Model for storing list of user roles. Stored in 'roles' SQL table.

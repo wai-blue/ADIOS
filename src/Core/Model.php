@@ -1898,7 +1898,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       'id_created_by' => [
         'type' => 'lookup',
         'title' => 'Created By',
-        'model' => 'ADIOS/Core/Models/User',
+        'model' => 'ADIOS/Models/User',
         'foreignKeyOnUpdate' => 'CASCADE',
         'foreignKeyOnDelete' => 'CASCADE',
         'value' => null,
@@ -1913,7 +1913,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       'id_updated_by' => [
         'type' => 'lookup',
         'title' => 'Updated By',
-        'model' => 'ADIOS/Core/Models/User',
+        'model' => 'ADIOS/Models/User',
         'foreignKeyOnUpdate' => 'CASCADE',
         'foreignKeyOnDelete' => 'CASCADE',
         'value' => null,

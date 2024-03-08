@@ -25,23 +25,13 @@ namespace ADIOS\Controllers;
  */
 class Desktop extends \ADIOS\Core\Controller {
 
-  // public string $twigTemplate = "App/Core/Views/Desktop";
-  // public string $contentController = '';
-
-  // function __construct(\ADIOS\Core\Loader $adios, array $params = [])
-  // {
-  //   parent::__construct($adios, $params);
-
-  //   $this->contentController = $params['contentController'] ?? '';
-  // }
-
   public function addSidebarItem($widget, $item) {
     $item['___widgetClassName'] = get_class($widget);
     $this->viewParams['sidebar']['items'][] = $item;
   }
 
-  public function getViewParams(): array {
-    $this->viewParams = $this->adios->params;
+  public function prepareViewParams() {
+    parent::prepareViewParams();
 
     foreach ($this->adios->widgets as $widget) {
       $widget->onBeforeDesktopParams($this);
@@ -72,7 +62,5 @@ class Desktop extends \ADIOS\Core\Controller {
     ];
 
     $this->viewParams["topRightMenu"] = $topRightMenu;
-
-    return $this->viewParams;
   }
 }

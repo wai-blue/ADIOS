@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\Models;
+namespace ADIOS\Models;
 
 /**
  * Model for storing various validation tokens. Stored in 'tokens' SQL table.

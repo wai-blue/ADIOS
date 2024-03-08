@@ -17,9 +17,9 @@ try {
   $app->install();
 
   // user roles and users
-  $userModel = new ($app->getCoreClass('Core\\Models\\User'))($app);
-  $userRoleModel = new ($app->getCoreClass('Core\\Models\\UserRole'))($app);
-  $userHasRoleModel = new ($app->getCoreClass('Core\\Models\\UserHasRole'))($app);
+  $userModel = new ($app->getCoreClass('Models\\User'))($app);
+  $userRoleModel = new ($app->getCoreClass('Models\\UserRole'))($app);
+  $userHasRoleModel = new ($app->getCoreClass('Models\\UserHasRole'))($app);
 
   $idRoleAdministrator = $userRoleModel->insertRow(["name" => "Administrator"]);
 

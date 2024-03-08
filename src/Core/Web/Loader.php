@@ -345,14 +345,14 @@ class Loader {
       $this->router->getCurrentPageTemplateVariables()
     );
 
-    // assume that the getViewParams does not block further rendering
+    // assume that the prepareViewParams does not block further rendering
     $this->canContinueWithRendering = TRUE;
 
     // pre render
     foreach ($this->controllers as $controller) {
-      $params = $controller->getViewParams();
-
-      $render = $controller->render($params);
+      $controller->prepareViewParams();
+      $render = $controller->render($controller->viewParams);
+      
       if (is_string($render)) {
         $this->outputHtml = $render;
         $this->canContinueWithRendering = FALSE;

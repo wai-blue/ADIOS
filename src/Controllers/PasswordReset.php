@@ -19,14 +19,14 @@ class PasswordReset extends \ADIOS\Core\Controller {
   public static bool $requiresUserAuthentication = FALSE;
   public bool $hideDefaultDesktop = TRUE;
 
-  public function getViewParams() {
+  public function prepareViewParams() {
     $token = $this->params["token"];
     $tokenStatus = "";
     $tokenError = "";
 
     if ($token != NULL) {
       try {
-        $userModel = $this->adios->getModel("ADIOS/Core/Models/User");
+        $userModel = $this->adios->getModel("ADIOS/Models/User");
         $userModel->validateToken($token, false);
         $tokenStatus = "success";
       } catch (\ADIOS\Core\Exceptions\InvalidToken $e) {

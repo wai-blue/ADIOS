@@ -5,15 +5,13 @@
 namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \App\Core\Controller {
-  public function getViewParams(): array {
+  public function prepareViewParams(): array {
+    parent::prepareViewParams();
+
     // build-up view params
     {% if thisController.config.params %}$this->viewParams = array_merge(
-      $this->params,
+      $this->viewParams,
 {{ varExport(thisController.config.params, "      ")|raw }} ?? []
-    );{% else %}$this->viewParams = $this->adios->params;{% endif %}
-
-
-    // return viewParams for ADIOS Twig renderer
-    return $this->viewParams;
+    );{% endif %}
   }
 }

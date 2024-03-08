@@ -44,7 +44,7 @@ class Printer extends \ADIOS\Core\Controller {
   //   return $config;
   // }
 
-  public function getViewParams() {
+  public function prepareViewParams() {
     if (
       !empty($this->contentController)
       && $this->contentController != 'Printer'

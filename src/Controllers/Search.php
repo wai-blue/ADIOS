@@ -14,7 +14,7 @@ namespace ADIOS\Controllers;
  * @package Components\Controllers
  */
 class Search extends \ADIOS\Core\Controller {
-  public function getViewParams() {
+  public function prepareViewParams() {
     $items = [];
 
     if (strlen($this->params['q']) >= 3) {

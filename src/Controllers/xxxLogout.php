@@ -9,7 +9,7 @@ class Logout extends \ADIOS\Core\Controller {
   public bool $requiresUserAuthentication = FALSE;
   public bool $hideDefaultDesktop = TRUE;
 
-  public function getViewParams() {
+  public function prepareViewParams() {
     unset($_SESSION[_ADIOS_ID]);
 
     setcookie(_ADIOS_ID.'-user', '', 0);

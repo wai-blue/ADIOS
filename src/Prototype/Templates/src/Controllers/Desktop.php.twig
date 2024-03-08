@@ -2,9 +2,9 @@
 
 {{ builderInfo.php|raw }}
 
-namespace App\Core;
+namespace App\Core\Controllers;
 
-class Controller extends \ADIOS\Core\Controller {
+class Desktop extends \App\Core\Controller {
 
   /**
     * Executed after the init() phase.
@@ -29,6 +29,7 @@ class Controller extends \ADIOS\Core\Controller {
     //   throw new \ADIOS\Core\GeneralException("Inputs are invalid");
     // }
   }
+
 
   /**
    * Prepares parameters used to render TWIG template.

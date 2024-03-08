@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Core\Models;
+namespace ADIOS\Models;
 
 /**
  * Model for storing list of user roles. Stored in 'roles' SQL table.
@@ -37,14 +37,14 @@ class UserHasRole extends \ADIOS\Core\Model {
       'id_user' => [
         'type' => 'lookup',
         'title' => $this->translate('User'),
-        'model' => "ADIOS/Core/Models/User",
+        'model' => "ADIOS/Models/User",
         'foreignKeyOnUpdate' => 'CASCADE',
         'foreignKeyOnDelete' => 'CASCADE',
       ],
       'id_role' => [
         'type' => 'lookup',
         'title' => $this->translate('Role'),
-        'model' => "ADIOS/Core/Models/UserRole",
+        'model' => "ADIOS/Models/UserRole",
         'foreignKeyOnUpdate' => 'CASCADE',
         'foreignKeyOnDelete' => 'CASCADE',
       ],

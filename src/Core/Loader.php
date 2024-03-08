@@ -317,12 +317,12 @@ class Loader
       }
 
       // inicializacia core modelov
-      $this->registerModel($this->getCoreClass('Core\\Models\\Config'));
-      $this->registerModel($this->getCoreClass('Core\\Models\\Translate'));
-      $this->registerModel($this->getCoreClass('Core\\Models\\User'));
-      $this->registerModel($this->getCoreClass('Core\\Models\\UserRole'));
-      $this->registerModel($this->getCoreClass('Core\\Models\\UserHasRole'));
-      $this->registerModel($this->getCoreClass('Core\\Models\\Token'));
+      $this->registerModel($this->getCoreClass('Models\\Config'));
+      $this->registerModel($this->getCoreClass('Models\\Translate'));
+      $this->registerModel($this->getCoreClass('Models\\User'));
+      $this->registerModel($this->getCoreClass('Models\\UserRole'));
+      $this->registerModel($this->getCoreClass('Models\\UserHasRole'));
+      $this->registerModel($this->getCoreClass('Models\\Token'));
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
 
@@ -417,7 +417,7 @@ class Loader
       date_default_timezone_set($this->config['timezone']);
 
       if ($mode == self::ADIOS_MODE_FULL) {
-        $userModel = new ($this->getCoreClass('Core\\Models\\User'))($this);
+        $userModel = new ($this->getCoreClass('Models\\User'))($this);
 
         if (isset($_POST['passwordReset'])) {
           $email = isset($_POST["email"]) ? $_POST["email"] : "";
@@ -776,7 +776,7 @@ class Loader
    * Returns the object of the model referenced by $modelName.
    * The returned object is cached into modelObjects property.
    *
-   * @param  string $modelName Reference of the model. E.g. 'ADIOS/Core/Models/User'.
+   * @param  string $modelName Reference of the model. E.g. 'ADIOS/Models/User'.
    * @throws \ADIOS\Core\Exception If $modelName is not available.
    * @return object Instantiated object of the model.
    */
@@ -1247,7 +1247,7 @@ class Loader
         } else {
 
           $view = $this->view;
-          $viewParams = $this->controllerObject->getViewParams();
+          $this->controllerObject->prepareViewParams();
 
           $contentHtml = $this->twig->render(
             $view,
@@ -1256,8 +1256,8 @@ class Loader
               'user' => $this->userProfile,
               'config' => $this->config,
               'session' => $_SESSION[_ADIOS_ID],
-              'viewParams' => $viewParams,
-              'windowParams' => $viewParams['windowParams'] ?? NULL,
+              'viewParams' => $this->controllerObject->viewParams,
+              'windowParams' => $this->controllerObject->viewParams['windowParams'] ?? NULL,
             ]
           );
 
@@ -1267,12 +1267,13 @@ class Loader
           
           // ... But mostly be "encapsulated" in the desktop.
           } else {
-            $desktop = $this->controllerObject->getDesktopController($this->params);
+            $desktopControllerObject = new ($this->getCoreClass('Controllers\\Desktop'))($this);
+            $desktopControllerObject->prepareViewParams();
 
+            $desktopParams['viewParams'] = $desktopControllerObject->viewParams;
             $desktopParams['user'] = $this->userProfile;
             $desktopParams['config'] = $this->config;
             $desktopParams['session'] = $_SESSION[_ADIOS_ID];
-            $desktopParams['viewParams'] = $desktop->getViewParams();
             $desktopParams['contentHtml'] = $contentHtml;
 
             $html = $this->twig->render('App/Views/Desktop', $desktopParams);

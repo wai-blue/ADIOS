@@ -72,7 +72,7 @@ class Permissions {
 
   public function hasRole(int|string $role) {
     if (is_string($role)) {
-      $userRoleModel = $this->adios->getCoreClass('Core\\Models\\UserRole');
+      $userRoleModel = $this->adios->getCoreClass('Models\\UserRole');
       $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
       $idRole = (int) $idUserRoleByRoleName[$role];
     } else {
@@ -99,14 +99,9 @@ class Permissions {
     if (empty($permission)) return TRUE;
     if (count($idUserRoles) == 0) $idUserRoles = $this->adios->userProfile['roles'];
 
-    // TODO: Docasne. Ked bude fungovat, vymazat.
-    // if (strpos($permission, "Desktop") === 0) return TRUE;
-    // if (strpos($permission, "Administrator/Permission") === 0) return TRUE;
-    // if (strpos($permission, "Core/Models") === 0) return TRUE;
-
     $granted = FALSE;
 
-    if (in_array(\ADIOS\Core\Models\UserRole::ADMINISTRATOR, $idUserRoles)) $granted = TRUE;
+    if (in_array(\ADIOS\Models\UserRole::ADMINISTRATOR, $idUserRoles)) $granted = TRUE;
 
     // check if the premission is granted for one of the roles of the user
     if (!$granted) {

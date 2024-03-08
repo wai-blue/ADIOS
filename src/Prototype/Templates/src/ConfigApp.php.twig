@@ -38,16 +38,18 @@ $config['skin'] = '{{ ConfigApp.skin ?? blue }}';
 $config['coreClasses'] = [
   'Core\\Permissions' => \App\Core\Permissions::class,
   'Core\\Router' => \App\Core\Router::class,
-  'Core\\Models\\User' => \App\Core\Models\User::class,
-  'Core\\Models\\UserRole' => \App\Core\Models\UserRole::class,
-  'Core\\Models\\UserHasRole' => \App\Core\Models\UserHasRole::class,
+  'Core\\Controller' => \App\Core\Controller::class,
+  'Models\\User' => \App\Models\User::class,
+  'Models\\UserRole' => \App\Models\UserRole::class,
+  'Models\\UserHasRole' => \App\Models\UserHasRole::class,
+  'Controllers\\Desktop' => \App\Controllers\Desktop::class,
 // Uncomment these lines if you want to override another core classes
 //   'Core\\Console' => \App\Core\Console::class,
 //   'Core\\Locale' => \App\Core\Locale::class,
 //   'Core\\TwigLoader' => \App\Core\TwigLoader::class,
 //   'Core\\UserNotifications' => \App\Core\UserNotifications::class,
 //   'Core\\Email' => \App\Core\Email::class,
-//   'Core\\Models\\User' => \App\Core\Models\User::class,
+//   'Models\\User' => \App\Models\User::class,
 //   'Core\\ViewWithController' => \App\Core\ViewWithController::class,
 ];
 

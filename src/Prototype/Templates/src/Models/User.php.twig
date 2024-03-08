@@ -2,9 +2,9 @@
 
 {{ builderInfo.php|raw }}
 
-namespace App\Core\Models;
+namespace App\Models;
 
-class User extends \ADIOS\Core\Models\User {
+class User extends \ADIOS\Models\User {
   public function columns(array $columns = []): array
   {
     return parent::columns(array_merge($columns, [

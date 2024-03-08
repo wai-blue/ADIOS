@@ -11,10 +11,10 @@
 namespace ADIOS\Controllers\Administrator;
 
 class Permissions extends \ADIOS\Core\Controller {
-  public function getViewParams() {
+  public function prepareViewParams() {
     $idUserRole = (int) $this->params['idUserRole'];
 
-    $userRoleModel = (new ($this->adios->getCoreClass('Core\\Models\\UserRole'))($this->adios));
+    $userRoleModel = (new ($this->adios->getCoreClass('Models\\UserRole'))($this->adios));
 
     if ($idUserRole > 0) {
       $userRoles = [ $userRoleModel->getById($idUserRole) ];

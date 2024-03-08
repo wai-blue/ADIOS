@@ -111,15 +111,6 @@ class Controller {
   }
 
   /**
-   * Returns the object of the controller for rendering the desktop.
-   *
-   * @return Object of the controller for rendering the desktop.
-   */
-  public function getDesktopController(array $desktopParams = []): \ADIOS\Core\Controller {
-    return new ($this->adios->getCoreClass('Controllers\\Desktop'))($this->adios, $desktopParams);
-  }
-
-  /**
    * If the controller shall only return JSON, this method must be overriden.
    *
    * @return array Array to be returned as a JSON.
@@ -133,9 +124,9 @@ class Controller {
    *
    * @return array View to be used to render the HTML.
    */
-  public function getViewParams(): array
+  public function prepareViewParams()
   {
-    return $this->params ?? [];
+    $this->viewParams = $this->adios->params ?? [];
   }
   
   /**
