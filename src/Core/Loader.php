@@ -1175,8 +1175,9 @@ class Loader
       }
 
       // Check if controller exists or if it can be used
-      if (!$this->controllerExists($this->controller)) {
-        // $controllerClassName = \ADIOS\Core\Controller::class;
+      if (empty($this->controller)) {
+        $controllerClassName = \App\Core\Controller::class;
+      } else if (!$this->controllerExists($this->controller)) {
         throw new \ADIOS\Core\Exceptions\ControllerNotFound();
       } else {
         $controllerClassName = $this->getControllerClassName($this->controller);
@@ -1199,9 +1200,6 @@ class Loader
           throw new \ADIOS\Core\Exceptions\GeneralException("Controller is not enabled in WEB interface.");
         }
       }
-
-      // // mam moznost upravit config (napr. na skrytie desktopu alebo upravu permissions)
-      // $this->config = $controllerClassName::overrideConfig($this->config, $this->params);
 
       if (
         !$this->userLogged
@@ -1238,11 +1236,11 @@ class Loader
         $this->onBeforeRender();
 
         // Either return JSON string ...
-        // if (empty($this->view)) {
-          $json = $this->controllerObject->renderJson();
+        $json = $this->controllerObject->renderJson();
 
         if (is_array($json)) {
           $return = json_encode($json);
+
         // ... Or a view must be applied.
         } else {
 

@@ -67,18 +67,6 @@ class Router {
       }
     }
 
-    // if (empty($view)) {
-    //   $view = "";
-    // }
-    
-    // if (empty($controller)) {
-    //   $controller = "";
-    // }
-
-    // if (empty($permission)) {
-    //   $permission = $controller;
-    // }
-
     return [$controller, $view, $permission, $params];
   }
 
