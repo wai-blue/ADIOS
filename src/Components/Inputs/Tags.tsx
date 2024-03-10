@@ -21,8 +21,8 @@ interface TagsInputProps extends InputProps {
   dataKey?: string,
   model?: string,
   formId?: number,
-  disableDelete?: boolean,
-  disableAdd?: boolean,
+  enableDelete?: boolean,
+  enableAdd?: boolean,
 }
 
 interface TagsInputState extends InputState {
@@ -49,7 +49,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
   componentDidMount() {
     this.loadData();
 
-    if (this.props.disableAdd === true) {
+    if (this.props.enableAdd ?? true) {
       setTimeout(() => {
         const tagInput = document.querySelector('.ReactTags__tagInput') as HTMLElement | null;
         if (tagInput) tagInput.remove();
@@ -96,7 +96,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
           isInitialized: true,
           tags: tags
         }, () => {
-          if (this.props.disableDelete === true) {
+          if (this.props.enableDelete ?? true) {
             const removeButtons = document.querySelectorAll('.ReactTags__remove');
             removeButtons.forEach((button: Element) => {
               (button as HTMLElement).remove();
