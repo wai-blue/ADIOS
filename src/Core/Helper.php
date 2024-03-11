@@ -225,9 +225,16 @@ class Helper {
 
   public static function keyBy(string $key, array $data): array {
     $result = [];
+    $keys = explode('.', $key);
 
     foreach ($data as $item) {
-      $result[$item[$key]] = $item;
+
+      $tmp = &$result;
+      foreach ($keys as $key) {
+        if (!isset($tmp[$item[$key]])) $tmp[$item[$key]] = [];
+        $tmp = &$tmp[$item[$key]];
+      }
+      $tmp = $item;
     }
 
     return $result;

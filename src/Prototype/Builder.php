@@ -172,6 +172,7 @@ class Builder {
   }
 
   public function renderPhpFile($fileName, $template, $twigParams = NULL) {
+    if (empty($fileName)) return;
 
     $outputFile = $this->outputFolder."/".$fileName;
     $canRender = FALSE;
@@ -468,23 +469,10 @@ class Builder {
           $controllerName = substr($controllerName, strlen($widgetName) + 1);
           $viewTwigTemplate = '';
 
-          $relatedView = $controllerConfig['view'] ?? '';
-
           if (isset($controllerConfig['phpTemplate'])) {
             $controllerPhpFileTemplate = "src/Widgets/Controllers/{$controllerConfig['phpTemplate']}.php.twig";
-
-            switch ($controllerConfig['phpTemplate']) {
-              case 'ViewRender':
-                if (substr($controllerConfig['view'], 0, 5) == 'ADIOS') {
-                  $viewTwigTemplate = ''; // nevygenerujem ziadne view, pretoze pouzivam ADIOSove
-                } else {
-                  $viewTwigTemplate = 'src/Widgets/Views/DefaultEmpty.twig';
-                }
-              break;
-            }
           } else {
-            $controllerPhpFileTemplate = 'src/Widgets/ControllerWithTemplate.php.twig';
-            $viewTwigTemplate = 'src/Widgets/Views/' . $controllerConfig['template'] . '.twig';
+            $controllerPhpFileTemplate = '';
           }
 
           $tmpControllerConfig = $controllerConfig;
@@ -498,7 +486,6 @@ class Builder {
 
           if (strpos($controllerName, '/') !== FALSE) {
             $controllerRootDir = $widgetRootDir . '/Controllers';
-            $viewRootDir = $widgetRootDir . '/Views';
 
             $tmpDirs = explode('/', $controllerName);
             
@@ -546,26 +533,40 @@ class Builder {
             $tmpControllerParams
           );
 
-          // Render View for Controller - only if the controller does not use the ADIOS Core view.
-          // If the view already exists, it is not overwritten.
-          if (
-            strpos(strtolower($relatedView), "adios/core") === FALSE
-            && isset($viewTwigTemplate)
-            && !empty($viewTwigTemplate)
-            && !is_file($widgetRootDir . '/Views/' . $controllerName . '.twig')
-          ) {
-            $this->renderTwigFile(
-              $widgetRootDir . '/Views/' . $controllerName . '.twig',
-              $viewTwigTemplate
-            );
-          }
-
         }
       }
 
       if (!empty($widgetConfig['javascript'])) {
         file_put_contents($this->outputFolder . '/' . $widgetRootDir . '/main.js', $widgetConfig['javascript']);
       }
+    }
+
+    // Create default views
+    foreach ($routing as $route) {
+      if (substr($route['view'], 0, 6) == 'ADIOS/') {
+        $viewTwigTemplate = ''; // nevygenerujem ziadne view, pretoze pouzivam ADIOSove
+      } else {
+        $viewTwigTemplate = 'src/Widgets/Views/DefaultEmpty.twig';
+      }
+
+      if (
+        isset($viewTwigTemplate)
+        && !empty($viewTwigTemplate)
+        && !is_file($widgetRootDir . '/Views/' . $route['view'] . '.twig')
+      ) {
+        $view = substr($route['view'], strlen('App/'));
+        $viewRootDir = $this->outputFolder . '/src';
+        foreach (explode('/', $view) as $level => $tmpDir) {
+          $viewRootDir .= '/' . $tmpDir;
+          if ($level != count($tmpDirs) - 1) $this->createFolder($viewRootDir);
+        }
+
+        $this->renderTwigFile(
+          'src/' . $view . '.twig',
+          $viewTwigTemplate
+        );
+      }
+
     }
 
     $this->renderPhpFile('src/App.php', 'src/App.php.twig');
