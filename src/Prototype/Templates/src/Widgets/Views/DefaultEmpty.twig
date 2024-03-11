@@ -42,7 +42,7 @@
   {% set tableParams = null %} <!-- set this tableParams, if you wish specific tableParams for this view -->
   {% set formParams = null %} <!-- set this formParams, if you wish specific formParams for this view -->
 
-  <adios-table-mui-data-grid
+  <adios-table-prime
     model="{{ viewParams.model }}"
     tag="{{ viewParams.tag }}"
     endpoint="{{ viewParams.tableEndpoint | default(model.tableEndpoint) }}"
@@ -50,7 +50,7 @@
     form-id="{{ viewParams.id }}"
     form-endpoint="{{ viewParams.formEndpoint | default(model.formEndpoint) }}"
     form-params='{{ (formParams | default(viewParams.formParams) | default(model.formParams))|json_encode|raw }}'
-  ></adios-table-mui-data-grid>
+  ></adios-table-prime>
 #}
 
 {# Sample code to render form

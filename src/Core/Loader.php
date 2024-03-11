@@ -365,9 +365,6 @@ class Loader
       // inicializacia objektu notifikacii
       $this->userNotifications = new ($this->getCoreClass('Core\\UserNotifications'))($this);
 
-      // inicializacia mailera
-      $this->email = new ($this->getCoreClass('Core\\Email'))($this);
-
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
       $dbProvider = $this->getConfig('db/provider', '');

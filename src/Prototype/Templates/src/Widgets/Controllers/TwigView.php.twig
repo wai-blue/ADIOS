@@ -7,11 +7,11 @@ namespace {{ thisController.namespace }};
 class {{ thisController.class }} extends \App\Core\Controller {
   public function prepareViewParams() {
     parent::prepareViewParams();
-
-    // build-up view params
-    {% if thisController.config.params %}$this->viewParams = array_merge(
+{% if thisController.config.params %}
+    $this->viewParams = array_merge(
       $this->viewParams,
 {{ varExport(thisController.config.params, "      ")|raw }} ?? []
-    );{% endif %}
+    );
+{% endif %}
   }
 }

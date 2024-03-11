@@ -6,30 +6,6 @@ import { isValidJson, kebabToPascal, camelToKebab } from './Helper';
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 
-/**
- * Components
- */
-import Form from "./Form";
-import Table from "./Table";
-import CardButton from "./CardButton";
-import Title from "./Title";
-import Breadcrumbs from "./Breadcrumbs";
-import Card from "./Card";
-import Button from "./Button";
-import Modal from "./Modal";
-import FormButton from "./FormButton";
-import FormCardButton from "./FormCardButton";
-import View from "./View";
-import ExportButton from "./ExportButton";
-import MuiTable from "./Table/MuiTable";
-import PrimeTable from "./Table/PrimeTable";
-
-import InputVarchar from "./Inputs/Varchar";
-import InputInt from "./Inputs/Int";
-import InputLookup from "./Inputs/Lookup";
-import InputImage from "./Inputs/Image";
-import InputBoolean from "./Inputs/Boolean";
-
 export class ADIOS {
   APP_URL: string = '';
 
@@ -44,25 +20,6 @@ export class ADIOS {
   ];
 
   constructor() {
-    this.registerReactComponent('Form', Form);
-    this.registerReactComponent('Table', Table);
-    this.registerReactComponent('CardButton', CardButton);
-    this.registerReactComponent('Title', Title);
-    this.registerReactComponent('Breadcrumbs', Breadcrumbs);
-    this.registerReactComponent('Card', Card);
-    this.registerReactComponent('Button', Button);
-    this.registerReactComponent('Modal', Modal);
-    this.registerReactComponent('FormButton', FormButton);
-    this.registerReactComponent('FormCardButton', FormCardButton);
-    this.registerReactComponent('View', View);
-    this.registerReactComponent('ExportButton', ExportButton);
-    this.registerReactComponent('TableMui', MuiTable);
-    this.registerReactComponent('TablePrime', PrimeTable);
-    this.registerReactComponent('InputVarchar', InputVarchar);
-    this.registerReactComponent('InputInt', InputInt);
-    this.registerReactComponent('InputLookup', InputLookup);
-    this.registerReactComponent('InputBoolean', InputBoolean);
-    this.registerReactComponent('InputImage', InputImage);
   }
   
   registerReactComponent(elementName: string, elementObject: any) {

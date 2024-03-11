@@ -222,4 +222,15 @@ class Helper {
   public static function camelToKebab(string $s) {
     return strtolower(preg_replace("/[A-Z]/", "-$0", $s));
   }
+
+  public static function keyBy(string $key, array $data): array {
+    $result = [];
+
+    foreach ($data as $item) {
+      $result[$item[$key]] = $item;
+    }
+
+    return $result;
+  }
+
 }
