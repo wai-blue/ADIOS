@@ -10662,7 +10662,6 @@ a:focus {
 }
 
 .bg-login-image {
-  background: url("../assets/images/golden-gate-bridge-731207_640.jpg");
   background-position: center;
   background-size: contain;
   background-repeat: no-repeat;
@@ -10670,13 +10669,11 @@ a:focus {
 }
 
 .bg-register-image {
-  background: url("../assets/images/golden-gate-bridge-731207_640.jpg");
   background-position: center;
   background-size: cover;
 }
 
 .bg-password-image {
-  background: url("../assets/images/golden-gate-bridge-731207_640.jpg");
   background-position: center;
   background-size: cover;
 }

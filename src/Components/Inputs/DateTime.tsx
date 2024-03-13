@@ -3,6 +3,7 @@ import { Input, InputProps, InputState } from '../Input'
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
 import { FormColumnParams } from '../Form'
+import moment, { Moment } from "moment";
 import * as uuid from 'uuid';
 
 export const dateToEUFormat = (dateString: string): string => {
@@ -86,6 +87,22 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
     }
   }
 
+  onChange(value: any) {
+    switch (this.props.type) {
+      case 'datetime':
+        value = moment(value, 'DD.MM.YYYY H:i:s').format('YYYY-MM-DD H:i:s');
+      break;
+      case 'date':
+        value = moment(value, 'DD.MM.YYYY').format('YYYY-MM-DD');
+      break;
+      case 'time':
+        value = moment(value).format('HH:mm');
+      break;
+    }
+
+    super.onChange(value);
+  }
+
   renderInputElement() {
     let value = this.state.value;
 
@@ -116,7 +133,6 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
           <Flatpickr
             value={value}
             onChange={(data: Date[]) => this.onChange(data[0] ?? null)}
-            onBlur={(e: React.FocusEvent<HTMLInputElement>) => this.onChange(e.target.value)}
             className={
               "form-control"
                 + " " + (this.state.invalid ? 'is-invalid' : '')

@@ -555,6 +555,7 @@ export default class Form extends Component<FormProps> {
     const data = this.state.data ?? {};
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
+      id: this.props.uid + '_' + columnName,
       columnName: columnName,
       params: inputParams,
       value: data[columnName] ?? '',
