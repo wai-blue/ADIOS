@@ -717,6 +717,7 @@ export default class Form extends Component<FormProps> {
     }
 
     let formContent = this._renderTab();
+    let title = this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting;
 
     return (
       <>
@@ -751,9 +752,11 @@ export default class Form extends Component<FormProps> {
             </div>
           ) : (
             <>
-              <div className="py-4">
-                <h1>{this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}</h1>
-              </div>
+              {title ? (
+                <div className="py-4">
+                  <h1>{title}</h1>
+                </div>
+              ) : null}
               <div className="card w-100">
                 <div className="card-header">
                   <div className="row">

@@ -27,11 +27,6 @@
   }
 } */
 
-@media screen and (max-width: 700px) {
-  .adios-react-ui.modal .modal-dialog {
-    width: 100%;
-  }
-}
 
 .adios-react-ui.modal .modal-content {
   height: 100%;
@@ -107,4 +102,11 @@
 
 .max-w-350 {
   max-width: 350px;
+}
+
+
+@media screen and (max-width: 1200px) {
+  .adios-react-ui.modal .modal-dialog {
+    width: 100% !important;
+  }
 }

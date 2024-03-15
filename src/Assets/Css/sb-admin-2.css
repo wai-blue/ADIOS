@@ -9390,11 +9390,11 @@ button.bg-dark:focus {
 }
 
 a.text-primary:hover, a.text-primary:focus {
-  color: var( --cl-hove) !important;
+  color:var(--cl-hover) !important;
 }
 
 .text-secondary {
-  color: #858796 !important;
+  color: var(--cl-secondary) !important;
 }
 
 a.text-secondary:hover, a.text-secondary:focus {
@@ -10098,16 +10098,16 @@ a:focus {
 }
 
 .topbar.navbar-light .navbar-nav .nav-item .nav-link {
-  color: #d1d3e2;
+  color: var(--cl-main);
 }
 
-.topbar.navbar-light .navbar-nav .nav-item .nav-link:hover {
+/* .topbar.navbar-light .navbar-nav .nav-item .nav-link:hover {
   color: #b7b9cc;
 }
 
 .topbar.navbar-light .navbar-nav .nav-item .nav-link:active {
   color: #858796;
-}
+} */
 
 .sidebar {
   width: 6.5rem;
