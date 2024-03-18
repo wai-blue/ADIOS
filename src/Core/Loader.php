@@ -99,7 +99,7 @@ spl_autoload_register(function ($class) {
     } else if (preg_match('/ADIOS\/([\w\/]+)/', $class, $m)) {
       include_once(__DIR__ . "/../{$m[1]}.php");
 
-    } else if (preg_match('/App\/([\w\/]+)/', $class, $m)) {
+    } else if (preg_match('/' . ($___ADIOSObject->config['appNamespace'] ?? 'App') . '\/([\w\/]+)/', $class, $m)) {
       $fname1 = $___ADIOSObject->config['srcDir'] . "/{$m[1]}/Main.php";
       $fname2 = $___ADIOSObject->config['srcDir'] . "/{$m[1]}.php";
       
@@ -187,11 +187,11 @@ class Loader
       $mode = self::ADIOS_MODE_FULL;
     }
 
-    $this->test = new ($this->getCoreClass('Core\\Test'))($this);
-
     if (is_array($config)) {
       $this->config = $config;
     }
+
+    // $this->test = new ($this->getCoreClass('Core\\Test'))($this);
 
     $this->widgetsDir = $config['widgetsDir'] ?? "";
 
@@ -584,7 +584,7 @@ class Loader
         foreach ($adiosControllers as $tmpController) {
           $tmpController = str_replace(".php", "", $tmpController);
           $tmpRouting["/^".str_replace("/", "\\/", $tmpController)."$/"] = [
-            "controller" => $tmpController,
+            "controller" => 'ADIOS\\Controllers\\' . $tmpController,
           ];
         }
         $this->router->addRouting($tmpRouting);
@@ -722,7 +722,7 @@ class Loader
   public function addWidget($widgetName) {
     if (!isset($this->widgets[$widgetName])) {
       try {
-        $widgetClassName = "\\App\\Widgets\\".str_replace("/", "\\", $widgetName);
+        $widgetClassName = "\\" . $this->config['appNamespace'] . "\\Widgets\\".str_replace("/", "\\", $widgetName);
         if (!class_exists($widgetClassName)) {
           throw new \Exception("Widget {$widgetName} not found.");
         }
@@ -1123,17 +1123,6 @@ class Loader
    * @return string Rendered content.
    */
   public function render(string $route = '', array $params = []) {
-    if (preg_match('/(\w+)\/Cron\/(\w+)/', $this->requestedUri, $m)) {
-      $cronClassName = str_replace("/", "\\", "/App/Widgets/{$m[0]}");
-
-      if (class_exists($cronClassName)) {
-        (new $cronClassName($this))->run();
-      } else {
-        echo "Unknown cron '{$this->requestedUri}'.";
-      }
-
-      exit();
-    }
 
     try {
 
@@ -1175,7 +1164,7 @@ class Loader
       if (empty($this->controller)) {
         $controllerClassName = \App\Core\Controller::class;
       } else if (!$this->controllerExists($this->controller)) {
-        throw new \ADIOS\Core\Exceptions\ControllerNotFound();
+        throw new \ADIOS\Core\Exceptions\ControllerNotFound($this->controller);
       } else {
         $controllerClassName = $this->getControllerClassName($this->controller);
       }
@@ -1203,7 +1192,7 @@ class Loader
         && $this->controllerObject->requiresUserAuthentication
       ) {
         $this->controllerObject = new \ADIOS\Controllers\Login($this);
-        $this->view = 'App/Views/Login';
+        $this->view = ($this->config['appNamespace'] ?? 'App') . '/Views/Login';
         $this->permission = "";
       }
 
@@ -1226,93 +1215,74 @@ class Loader
 
       $this->dispatchEventToPlugins("onADIOSBeforeRender", ["adios" => $this]);
 
-      try {
-          
-        unset($this->params['__IS_AJAX__']);
+      unset($this->params['__IS_AJAX__']);
 
-        $this->onBeforeRender();
+      $this->onBeforeRender();
 
-        // Either return JSON string ...
-        $json = $this->controllerObject->renderJson();
+      // Either return JSON string ...
+      $json = $this->controllerObject->renderJson();
 
-        if (is_array($json)) {
-          $return = json_encode($json);
+      if (is_array($json)) {
+        $return = json_encode($json);
 
-        // ... Or a view must be applied.
+      // ... Or a view must be applied.
+      } else {
+
+        $view = $this->view;
+        $this->controllerObject->prepareViewParams();
+
+        $contentHtml = $this->twig->render(
+          $view,
+          [
+            'uid' => $this->uid,
+            'user' => $this->userProfile,
+            'config' => $this->config,
+            'session' => $_SESSION[_ADIOS_ID],
+            'viewParams' => $this->controllerObject->viewParams,
+            'windowParams' => $this->controllerObject->viewParams['windowParams'] ?? NULL,
+          ]
+        );
+
+        // In some cases the result of the view will be used as-is ...
+        if ($this->params['__IS_AJAX__'] || $this->controllerObject->hideDefaultDesktop) {
+          $html = $contentHtml;
+        
+        // ... But mostly be "encapsulated" in the desktop.
         } else {
+          $desktopControllerObject = new ($this->getCoreClass('Controllers\\Desktop'))($this);
+          $desktopControllerObject->prepareViewParams();
 
-          $view = $this->view;
-          $this->controllerObject->prepareViewParams();
+          $desktopParams['viewParams'] = $desktopControllerObject->viewParams;
+          $desktopParams['user'] = $this->userProfile;
+          $desktopParams['config'] = $this->config;
+          $desktopParams['session'] = $_SESSION[_ADIOS_ID];
+          $desktopParams['contentHtml'] = $contentHtml;
 
-          $contentHtml = $this->twig->render(
-            $view,
-            [
-              'uid' => $this->uid,
-              'user' => $this->userProfile,
-              'config' => $this->config,
-              'session' => $_SESSION[_ADIOS_ID],
-              'viewParams' => $this->controllerObject->viewParams,
-              'windowParams' => $this->controllerObject->viewParams['windowParams'] ?? NULL,
-            ]
-          );
-
-          // In some cases the result of the view will be used as-is ...
-          if ($this->params['__IS_AJAX__'] || $this->controllerObject->hideDefaultDesktop) {
-            $html = $contentHtml;
-          
-          // ... But mostly be "encapsulated" in the desktop.
-          } else {
-            $desktopControllerObject = new ($this->getCoreClass('Controllers\\Desktop'))($this);
-            $desktopControllerObject->prepareViewParams();
-
-            $desktopParams['viewParams'] = $desktopControllerObject->viewParams;
-            $desktopParams['user'] = $this->userProfile;
-            $desktopParams['config'] = $this->config;
-            $desktopParams['session'] = $_SESSION[_ADIOS_ID];
-            $desktopParams['contentHtml'] = $contentHtml;
-
-            $html = $this->twig->render('App/Views/Desktop', $desktopParams);
-          }
-
-          return $html;
+          $html = $this->twig->render(($this->config['appNamespace'] ?? 'App') . '/Views/Desktop', $desktopParams);
         }
 
-        $this->onAfterRender();
-
-      } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-        $message = "Not enough permissions: ".$e->getMessage();
-        if ($this->userLogged) {
-          $message .= " Hint: Sign out and sign in again.";
-        }
-        $return = $this->renderFatal($message, FALSE);
-        header('HTTP/1.1 401 Unauthorized', true, 401);
-      } catch (\Exception $e) {
-        $error = error_get_last();
-
-        if ($error['type'] == E_ERROR) {
-          $return = $this->renderFatal(
-            '<div style="margin-bottom:1em;">'
-              . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
-            . '</div>'
-            . '<pre style="font-size:0.75em;font-family:Courier New">'
-              . $e->getTraceAsString()
-            . '</pre>',
-            TRUE
-          );
-        } else {
-          $return = $this->renderFatal($this->renderExceptionHtml($e));
-        }
-
-        header('HTTP/1.1 400 Bad Request', true, 400);
+        return $html;
       }
+
+      $this->onAfterRender();
+
 
       return $return;
 
     } catch (\ADIOS\Core\Exceptions\ControllerNotFound $e) {
-      $this->router->redirectTo("");
+      header('HTTP/1.1 400 Bad Request', true, 400);
+      return $this->renderFatal('Controller not found: ' . $e->getMessage(), FALSE);
+      // $this->router->redirectTo("");
+    // } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
+    //   header('HTTP/1.1 401 Unauthorized', true, 401);
+    //   return $this->renderFatal($e->getMessage(), FALSE);
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
-      header('HTTP/1.1 401 Unauthorized', true, 401);
-      return $this->renderFatal($e->getMessage(), FALSE);
+      $message = $e->getMessage();
+      if ($this->userLogged) {
+        $message .= " Hint: Sign out and sign in again.";
+      }
+      return $this->renderFatal($message, FALSE);
+      // header('HTTP/1.1 401 Unauthorized', true, 401);
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {
       $lines = [];
       $lines[] = "ADIOS RUN failed: [".get_class($e)."] ".$e->getMessage();
@@ -1327,41 +1297,62 @@ class Loader
     } catch (\ArgumentCountError $e) {
       echo $e->getMessage();
       header('HTTP/1.1 400 Bad Request', true, 400);
+    } catch (\Exception $e) {
+      $error = error_get_last();
+
+      if ($error['type'] == E_ERROR) {
+        $return = $this->renderFatal(
+          '<div style="margin-bottom:1em;">'
+            . $error['message'] . ' in ' . $error['file'] . ':' . $error['line']
+          . '</div>'
+          . '<pre style="font-size:0.75em;font-family:Courier New">'
+            . $e->getTraceAsString()
+          . '</pre>',
+          TRUE
+        );
+      } else {
+        $return = $this->renderFatal($this->renderExceptionHtml($e));
+      }
+
+      return $return;
+
+      header('HTTP/1.1 400 Bad Request', true, 400);
     }
   }
 
   public function getControllerClassName(string $controller) : string {
+    return '\\' . str_replace('/', '\\', $controller);
 
-    $controllerPathParts = [];
-    foreach (explode("/", $controller) as $controllerPathPart) {
-      // convert-dash-string-toCamelCase
-      $controllerPathParts[] = str_replace(' ', '', ucwords(str_replace('-', ' ', $controllerPathPart)));
-    }
-    $controller = join("/", $controllerPathParts);
+    // $controllerPathParts = [];
+    // foreach (explode("/", $controller) as $controllerPathPart) {
+    //   // convert-dash-string-toCamelCase
+    //   $controllerPathParts[] = str_replace(' ', '', ucwords(str_replace('-', ' ', $controllerPathPart)));
+    // }
+    // $controller = join("/", $controllerPathParts);
 
-    $controllerClassName = '';
+    // $controllerClassName = '';
 
-    // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
-    foreach (array_keys($this->widgets) as $widgetName) {
-      if (strpos(strtolower($controller), strtolower($widgetName)) === 0) {
-        $controllerClassName =
-          '\\App\\Widgets\\'
-          . $widgetName
-          . '\\Controllers\\'
-          . substr($controller, strlen($widgetName) + 1)
-        ;
-      }
-    }
-    $controllerClassName = str_replace('/', '\\', $controllerClassName);
+    // // Dusan 31.5.2023: Tento sposob zapisu akcii je zjednoteny so sposobom zapisu modelov.
+    // foreach (array_keys($this->widgets) as $widgetName) {
+    //   if (strpos(strtolower($controller), strtolower($widgetName)) === 0) {
+    //     $controllerClassName =
+    //       '\\' . $this->config['appNamespace'] . '\\Widgets\\'
+    //       . $widgetName
+    //       . '\\Controllers\\'
+    //       . substr($controller, strlen($widgetName) + 1)
+    //     ;
+    //   }
+    // }
+    // $controllerClassName = str_replace('/', '\\', $controllerClassName);
 
-    if (!class_exists($controllerClassName)) {
-      // Dusan 31.5.2023: Tento sposob zapisu akcii je deprecated.
-      $controllerClassName = 'ADIOS\\Controllers\\' . str_replace('/', '\\', $controller);
+    // if (!class_exists($controllerClassName)) {
+    //   // Dusan 31.5.2023: Tento sposob zapisu akcii je deprecated.
+    //   $controllerClassName = 'ADIOS\\Controllers\\' . str_replace('/', '\\', $controller);
 
-      // $this->console->warning('[ADIOS] Deprecated class name for controller ' . $controller . '.');
-    }
+    //   // $this->console->warning('[ADIOS] Deprecated class name for controller ' . $controller . '.');
+    // }
 
-    return $controllerClassName;
+    // return $controllerClassName;
   }
 
   public function controllerExists(string $controller) : bool {
@@ -1421,7 +1412,6 @@ class Loader
     $errorHash = md5(date("YmdHis").$errorMessage);
 
     $errorDebugInfoHtml = "
-      <div class='adios exception debug'>
         Error hash: {$errorHash} (see error log file for more information)<br/>
         ".get_class($exception)."<br/>
         Stack trace:<br/>
@@ -1429,13 +1419,7 @@ class Loader
       </div>
     ";
 
-    $showMoreInformationButton = "
-      <a href='javascript:void(0);' onclick='$(this).next(\"div\").show(); $(this).hide();'>
-        ".$this->translate("Show more information", [], $this)."
-      </a>
-    ";
-
-    // $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
+    $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
 
     switch (get_class($exception)) {
       case 'ADIOS\Core\Exceptions\DBException':
@@ -1448,10 +1432,7 @@ class Loader
           <div class='adios exception message'>
             {$errorMessage}
           </div>
-          {$showMoreInformationButton}
-          <div style='display:none' class='adios exception more-information'>
-            {$errorDebugInfoHtml}
-          </div>
+          {$errorDebugInfoHtml}
         ";
       break;
       case 'Illuminate\Database\QueryException':
@@ -1502,11 +1483,8 @@ class Loader
             <br/>
             <b>".join(", ", $invalidColumns)."</b>
           </div>
-          {$showMoreInformationButton}
-          <div style='display:none' class='adios exception more-information'>
-            {$dbError}
-            {$errorDebugInfoHtml}
-          </div>
+          {$dbError}
+          {$errorDebugInfoHtml}
         ";
       break;
       default:
@@ -1519,10 +1497,7 @@ class Loader
           <div class='adios exception message'>
             ".$exception->getMessage()."
           </div>
-          {$showMoreInformationButton}
-          <div style='display:none' class='adios exception more-information'>
-            {$errorDebugInfoHtml}
-          </div>
+          {$errorDebugInfoHtml}
         ";
       break;
     }
@@ -1760,6 +1735,7 @@ class Loader
       $tmp = $uid;
     }
 
+    $tmp = str_replace('\\', '/', $tmp);
     $tmp = str_replace('/', '-', $tmp);
 
     $uid = "";
@@ -1813,7 +1789,8 @@ class Loader
     }
 
     foreach (scandir($this->widgetsDir) as $widget) {
-      if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/Main.css")) {
+      if (in_array($widget, [".", ".."])) continue;
+      if (is_file($this->widgetsDir."/{$widget}/Main.css")) {
         $cssFiles[] = $this->widgetsDir."/{$widget}/Main.css";
       }
 

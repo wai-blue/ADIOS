@@ -172,12 +172,17 @@ class Builder {
   }
 
   public function renderPhpFile($fileName, $template, $twigParams = NULL) {
-    if (empty($fileName)) return;
+    if (empty($fileName)) {
+      $this->log("Not rendering PHP file from {$template} - filename not provided.");
+      return;
+    }
+
+    $twigParams['appNamespace'] = $this->prototype['ConfigApp']['appNamespace'] ?? 'App';
 
     $outputFile = $this->outputFolder."/".$fileName;
     $canRender = FALSE;
 
-    $this->log("Rendering file {$outputFile} from {$template}.");
+    $this->log("Rendering PHP file {$outputFile} from {$template}.");
 
     if ($this->fileCanBeRerendered($outputFile)) {
       $params = $twigParams ?? $this->prototype;
@@ -258,7 +263,9 @@ class Builder {
 
   public function buildPrototype() {
 
-    // delete folders if they exist
+    $appNamespace = $this->prototype['ConfigApp']['appNamespace'] ?? 'App';
+
+  // delete folders if they exist
     $this->removeFolder('src/Widgets');
     $this->removeFolder('log');
     $this->removeFolder('tmp');
@@ -337,7 +344,7 @@ class Builder {
     foreach ($this->prototype['Widgets'] as $widgetName => $widgetConfig) {
       $this->log('Building widget ' . $widgetName);
 
-      $widgetNamespace = 'App\Widgets';
+      $widgetNamespace = $appNamespace . '\Widgets';
       $widgetClassName = '';
 
       if (strpos($widgetName, '/') !== FALSE) {
@@ -482,10 +489,11 @@ class Builder {
           $controllerNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Controllers';
           $controllerClassName = str_replace('/', '\\', $controllerName);
 
-          $traitNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Traits\Controllers';
+          // $traitNamespace = $widgetNamespace . '\\' . $widgetClassName . '\Traits\Controllers';
 
           if (strpos($controllerName, '/') !== FALSE) {
             $controllerRootDir = $widgetRootDir . '/Controllers';
+            // $viewRootDir = $widgetRootDir . '/Views';
 
             $tmpDirs = explode('/', $controllerName);
             
@@ -493,14 +501,15 @@ class Builder {
 
             foreach ($tmpDirs as $level => $tmpDir) {
               $controllerRootDir .= '/' . $tmpDir;
-              $viewRootDir .= '/' . $tmpDir;
+              // $viewRootDir .= '/' . $tmpDir;
 
               if ($level != count($tmpDirs) - 1) {
                 $controllerNamespace .= '\\' . $tmpDir;
-                $traitNamespace .= '\\' . $tmpDir;
+
+                // $traitNamespace .= '\\' . $tmpDir;
 
                 $this->createFolder($controllerRootDir);
-                $this->createFolder($viewRootDir);
+                // $this->createFolder($viewRootDir);
               }
 
             }
@@ -520,7 +529,6 @@ class Builder {
               'thisController' => [
                 'name' => $controllerName,
                 'namespace' => $controllerNamespace,
-                'traitNamespace' => $traitNamespace,
                 'class' => $controllerClassName,
                 'config' => $tmpControllerConfig
               ]
@@ -543,6 +551,8 @@ class Builder {
 
     // Create default views
     foreach ($routing as $route) {
+      if (!isset($route['view'])) continue;
+      
       if (substr($route['view'], 0, 6) == 'ADIOS/') {
         $viewTwigTemplate = ''; // nevygenerujem ziadne view, pretoze pouzivam ADIOSove
       } else {
@@ -554,8 +564,9 @@ class Builder {
         && !empty($viewTwigTemplate)
         && !is_file($widgetRootDir . '/Views/' . $route['view'] . '.twig')
       ) {
-        $view = substr($route['view'], strlen('App/'));
+        $view = substr($route['view'], strlen($appNamespace . '/'));
         $viewRootDir = $this->outputFolder . '/src';
+
         foreach (explode('/', $view) as $level => $tmpDir) {
           $viewRootDir .= '/' . $tmpDir;
           if ($level != count($tmpDirs) - 1) $this->createFolder($viewRootDir);

@@ -54,6 +54,7 @@ export interface FormProps {
   defaultValues?: Object,
   endpoint?: string,
   tag?: string,
+  context?: any,
 }
 
 export interface FormState {
@@ -98,6 +99,7 @@ export interface FormColumnParams {
   cssClass?: string,
   dataKey?: string,
   placeholder?: string,
+  endpoint?: string,
 }
 
 export interface FormColumns {
@@ -556,6 +558,8 @@ export default class Form extends Component<FormProps> {
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
       id: this.props.uid + '_' + columnName,
+      parentForm: this,
+      context: this.props.context ? this.props.context : this.props.uid,
       columnName: columnName,
       params: inputParams,
       value: data[columnName] ?? '',

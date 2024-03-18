@@ -18,6 +18,7 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
     * @throws \Twig\Error\LoaderError When $name is not found
     */
   public function getSourceContext($name): \Twig\Source {
+    $appNamespace = $this->adios->config['appNamespace'] ?? 'App';
     $templateName = str_replace("\\", "/", $name);
 
     if (strpos($templateName, "ADIOS/Templates/Widgets/") === 0) {
@@ -26,9 +27,8 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $action = substr($templateName, strpos($templateName, "/") + 1);
 
       $templateFile = $this->adios->widgetsDir."/{$widget}/Templates/{$action}.twig";
-    } else if (strpos($templateName, "App/") === 0) {
-      $templateName = str_replace('App/', '', $templateName);
-
+    } else if (strpos($templateName, "{$appNamespace}/") === 0) {
+      $templateName = substr($templateName, strlen($appNamespace . '/'));
       $templateFile = 
         $this->adios->config['dir']
         . '/src/' . $templateName . '.twig'

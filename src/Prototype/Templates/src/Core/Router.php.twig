@@ -2,7 +2,7 @@
 
 {{ builderInfo.php|raw }}
 
-namespace App\Core;
+namespace {{ appNamespace }}\Core;
 
 class Router extends \ADIOS\Core\Router {
   public function __construct(\ADIOS\Core\Loader $adios) {

@@ -2,6 +2,8 @@
 
 {{ builderInfo.php|raw }}
 
+$config['appNamespace']                  = '{{ ConfigApp.appNamespace }}';
+
 // session
 $config['sessionSalt']                   = '{{ ConfigApp.sessionSalt }}';
 
@@ -36,21 +38,21 @@ $config['userRoles'] = {% if ConfigApp.userRoles %}{{ varExport(ConfigApp.userRo
 $config['skin'] = '{{ ConfigApp.skin ?? blue }}';
 
 $config['coreClasses'] = [
-  'Core\\Permissions' => \App\Core\Permissions::class,
-  'Core\\Router' => \App\Core\Router::class,
-  'Core\\Controller' => \App\Core\Controller::class,
-  'Models\\User' => \App\Models\User::class,
-  'Models\\UserRole' => \App\Models\UserRole::class,
-  'Models\\UserHasRole' => \App\Models\UserHasRole::class,
-  'Controllers\\Desktop' => \App\Controllers\Desktop::class,
+  'Core\\Permissions' => \{{ ConfigApp.appNamespace }}\Core\Permissions::class,
+  'Core\\Router' => \{{ ConfigApp.appNamespace }}\Core\Router::class,
+  'Core\\Controller' => \{{ ConfigApp.appNamespace }}\Core\Controller::class,
+  'Models\\User' => \{{ ConfigApp.appNamespace }}\Models\User::class,
+  'Models\\UserRole' => \{{ ConfigApp.appNamespace }}\Models\UserRole::class,
+  'Models\\UserHasRole' => \{{ ConfigApp.appNamespace }}\Models\UserHasRole::class,
+  'Controllers\\Desktop' => \{{ ConfigApp.appNamespace }}\Controllers\Desktop::class,
 // Uncomment these lines if you want to override another core classes
-//   'Core\\Console' => \App\Core\Console::class,
-//   'Core\\Locale' => \App\Core\Locale::class,
-//   'Core\\TwigLoader' => \App\Core\TwigLoader::class,
-//   'Core\\UserNotifications' => \App\Core\UserNotifications::class,
-//   'Core\\Email' => \App\Core\Email::class,
-//   'Models\\User' => \App\Models\User::class,
-//   'Core\\ViewWithController' => \App\Core\ViewWithController::class,
+//   'Core\\Console' => \{{ ConfigApp.appNamespace }}\Core\Console::class,
+//   'Core\\Locale' => \{{ ConfigApp.appNamespace }}\Core\Locale::class,
+//   'Core\\TwigLoader' => \{{ ConfigApp.appNamespace }}\Core\TwigLoader::class,
+//   'Core\\UserNotifications' => \{{ ConfigApp.appNamespace }}\Core\UserNotifications::class,
+//   'Core\\Email' => \{{ ConfigApp.appNamespace }}\Core\Email::class,
+//   'Models\\User' => \{{ ConfigApp.appNamespace }}\Models\User::class,
+//   'Core\\ViewWithController' => \{{ ConfigApp.appNamespace }}\Core\ViewWithController::class,
 ];
 
 {% if ConfigApp.smtp %}

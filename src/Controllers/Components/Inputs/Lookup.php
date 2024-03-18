@@ -8,12 +8,12 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Controllers\Components\Inputs\Lookup;
+namespace ADIOS\Controllers\Components\Inputs;
 
 /**
  * @package Components\Controllers\Lookup
  */
-class Data extends \ADIOS\Core\Controller {
+class Lookup extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
@@ -21,31 +21,28 @@ class Data extends \ADIOS\Core\Controller {
     $this->permission = $this->params['model'] . ':Read';
   }
 
+  public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
+    $tmpModel = $this->adios->getModel($this->params['model']);
+
+    $lookupSqlValue = "(" .
+      str_replace("{%TABLE%}.", '', $tmpModel->lookupSqlValue())
+      . ") as text";
+
+    $query = $tmpModel->selectRaw('id, ' . $lookupSqlValue);
+
+    if ($this->params['search']) {
+      foreach ($tmpModel->columns() as $columnName => $column) {
+        $query->orWhere($columnName, 'LIKE', '%' . $this->params['search'] . '%');
+      }
+    }
+
+    return $query;
+  }
+
   public function renderJson() { 
     try {
-      $tmpModel = $this->adios->getModel($this->params['model']);
-
-      $lookupSqlValue = "(" .
-        str_replace("{%TABLE%}.", '', $tmpModel->lookupSqlValue())
-        . ") as text";
-
-      $tmpData = $tmpModel->selectRaw('id, ' . $lookupSqlValue);
-
-      if ($this->params['search']) {
-        foreach ($tmpModel->columns() as $columnName => $column) {
-          $tmpData->orWhere($columnName, 'LIKE', '%' . $this->params['search'] . '%');
-        }
-      }
-
-      $tmpData = $tmpData->get();
-
-      $data = [];
-      foreach ($tmpData as $item) {
-        $data[$item['id']] = $item;
-      }
-
       return [
-        'data' => $data
+        'data' => \ADIOS\Core\Helper::keyBy('id', $this->prepareDataQuery()->get()->toArray())
       ];
     } catch (QueryException $e) {
       http_response_code(500);

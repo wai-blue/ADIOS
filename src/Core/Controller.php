@@ -72,7 +72,6 @@ class Controller {
     $this->controller = $this->adios->controller;
 
     $this->shortName = $this->name;
-    $this->shortName = str_replace('App/Widgets/', '', $this->shortName);
     $this->shortName = str_replace('Controllers/', '', $this->shortName);
 
     $this->permission = $this->shortName;

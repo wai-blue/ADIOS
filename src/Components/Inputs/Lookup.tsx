@@ -7,10 +7,12 @@ import { ProgressBar } from 'primereact/progressbar';
 
 interface LookupInputProps extends InputProps {
   model?: string
+  endpoint?: string,
 }
 
 interface LookupInputState extends InputState {
   data: Array<any>,
+  endpoint: string,
 }
 
 export default class Lookup extends Input<LookupInputProps, LookupInputState> {
@@ -24,6 +26,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
     this.state = {
       ...this.state, // Parent state
+      endpoint: props.endpoint ? props.endpoint : (props.params.endpoint ? props.params.endpoint : 'components/inputs/lookup'),
       data: [],
     };
   }
@@ -34,9 +37,11 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
   loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
     request.get(
-      'components/inputs/lookup/data',
+      this.state.endpoint,
       {
         model: this.props.params?.model,
+        context: this.props.context,
+        formData: this.props.parentForm?.state?.data,
         search: inputValue,
         __IS_AJAX__: '1',
       },

@@ -2,7 +2,7 @@
 
 {{ builderInfo.php|raw }}
 
-namespace App\Core;
+namespace {{ appNamespace }}\Core;
 
 class Permissions extends \ADIOS\Core\Permissions {
   public function loadPermissions(): array {

@@ -108,7 +108,7 @@ export default class Table<T extends TableState = TableState> extends Component<
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
       formId: props.formId,
-      formEndpoint: props.formEndpoint ? props.formEndpoint : 'components/form',
+      formEndpoint: props.formEndpoint ? props.formEndpoint : 'adios/controllers/components/form',
       formParams: {
         model: props.model,
         uid: props.uid,

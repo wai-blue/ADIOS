@@ -2,7 +2,7 @@
 
 {{ builderInfo.php|raw }}
 
-namespace App\Models;
+namespace {{ appNamespace }}\Models;
 
 class User extends \ADIOS\Models\User {
   public function columns(array $columns = []): array
