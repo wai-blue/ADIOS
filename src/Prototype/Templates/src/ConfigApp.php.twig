@@ -14,7 +14,7 @@ $config['logDir']                        = realpath(__DIR__ . '/../log');
 $config['tmpDir']                        = realpath(__DIR__ . '/../tmp');
 $config['widgetsDir']                    = realpath(__DIR__ . '/../src/Widgets');
 $config['uploadDir']                     = realpath(__DIR__ . '/../{{ ConfigApp.uploadDir ?? 'upload' }}');
-$config['uploadUrl']                     = '//' . $_SERVER['HTTP_HOST'] . $config['rewriteBase'] . '{{ ConfigApp.uploadDir ?? 'upload' }}';
+$config['uploadUrl']                     = '//' . ($_SERVER['HTTP_HOST'] ?? '') . $config['rewriteBase'] . '{{ ConfigApp.uploadDir ?? 'upload' }}';
 
 // brand
 $config['brand']['title']                = '{{ ConfigApp.brand.title }}';

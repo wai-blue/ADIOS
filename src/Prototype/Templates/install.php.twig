@@ -5,11 +5,16 @@
 set_time_limit(60*10);
 session_start();
 
+// load configs
+require_once(__DIR__ . "/ConfigEnv.php");
+require_once(__DIR__ . "/src/ConfigApp.php");
+
+// load application class
 require(__DIR__."/src/App.php");
 
 try {
 
-  $app = new App($config, TRUE);
+  $app = new {{ appNamespace }}($config, TRUE);
 
   // Uncomment this line if you wish to see logs in the console
   // $app->console->cliEchoEnabled = TRUE;

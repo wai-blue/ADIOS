@@ -1427,7 +1427,6 @@ class Loader
           <div class='adios exception emoji'>🥴</div>
           <div class='adios exception message'>
             Oops! Something went wrong with the database.
-            See logs for more information or contact the support.<br/>
           </div>
           <div class='adios exception message'>
             {$errorMessage}
@@ -1492,7 +1491,6 @@ class Loader
           <div class='adios exception emoji'>🥴</div>
           <div class='adios exception message'>
             Oops! Something went wrong.
-            See logs for more information or contact the support.<br/>
           </div>
           <div class='adios exception message'>
             ".$exception->getMessage()."
