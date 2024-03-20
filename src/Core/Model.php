@@ -898,6 +898,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $columnType = $columnDefinition['type'];
       if (isset($this->adios->db->columnTypes[$columnType])) {
         $data[$lookupKeyPrefix . $column] = $this->adios->db->columnTypes[$columnType]->fromString($data[$lookupKeyPrefix . $column]);
+      } else {
+        $data[$lookupKeyPrefix . $column] = NULL;
       }
 
       if ($columnType == 'lookup' && empty($lookupKeyPrefix)) {
@@ -1392,6 +1394,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
       }
     }
 
+    foreach ($columns as $colName => $colDef) {
+      if (!isset($data[$colName])) $data[$colName] = NULL;
+    }
+
     return $data;
   }
 
@@ -1520,6 +1526,9 @@ class Model extends \Illuminate\Database\Eloquent\Model
       }
 
       if (is_array($junctions)) {
+      _var_dump($jName);
+      _var_dump($jParams);
+      _var_dump($junctions);
         $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
 
         $this->adios->pdo->execute("
