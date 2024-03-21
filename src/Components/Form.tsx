@@ -78,32 +78,11 @@ export interface FormState {
   titleForInserting?: string,
   layout?: string,
   endpoint: string,
-}
-
-export interface FormColumnParams {
-  title: string,
-  type: string,
-  length?: number,
-  required?: boolean,
-  description?: string,
-  disabled?: boolean,
-  model?: string,
-  junction?: string,
-  enumValues?: Array<string | number>,
-  unit?: string,
-  step?: number,
-  defaultValue?: any,
-  min?: number,
-  readonly?: boolean,
-  inputJSX?: string,
-  cssClass?: string,
-  dataKey?: string,
-  placeholder?: string,
-  endpoint?: string,
+  params: any,
 }
 
 export interface FormColumns {
-  [key: string]: FormColumnParams;
+  [key: string]: any;
 }
 
 interface FormInputs {
@@ -136,7 +115,8 @@ export default class Form extends Component<FormProps> {
       layout: this.convertLayoutToString(props.layout),
       isEdit: props.id ? props.id > 0 : false,
       invalidInputs: {},
-      data: {}
+      data: {},
+      params: null,
     };
   }
 
@@ -193,6 +173,8 @@ export default class Form extends Component<FormProps> {
       },
       (data: any) => {
         let newState: any = deepObjectMerge(data.params, this.props);
+
+        newState.params = { ...data.params };
         if (newState.layout) {
           newState.layout = this.convertLayoutToString(newState.layout);
         }
@@ -430,19 +412,19 @@ export default class Form extends Component<FormProps> {
   /**
    * Render tab
    */
-  _renderTab(): JSX.Element {
+  renderFormContent(): JSX.Element {
     if (this.state.columns == null) {
       return adiosError(`No columns specified for ${this.props.model}. Did the controller return definition of columns?`);
     }
 
     if (this.state.content?.tabs) {
       let tabs: any = Object.keys(this.state.content.tabs).map((tabName: string) => {
-        return this._renderTabContent(tabName, this.state.content?.tabs[tabName]);
+        return this.renderTabs(tabName, this.state.content?.tabs[tabName]);
       })
 
       return tabs;
     } else {
-      return this._renderTabContent("default", this.state.content);
+      return this.renderTabs("default", this.state.content);
     }
   }
 
@@ -450,7 +432,7 @@ export default class Form extends Component<FormProps> {
     * Render tab content
     * If tab is not set, use default tabName else use activated one
     */
-  _renderTabContent(tabName: string, content: any) {
+  renderTabs(tabName: string, content: any) {
     if (
       tabName == "default"
       || (this.state.tabs && this.state.tabs[tabName]['active'])
@@ -473,13 +455,13 @@ export default class Form extends Component<FormProps> {
               return this._renderContentItem(key++, contentArea, content[contentArea]);
             })
             : this.state.data != null ? (
-              Object.keys(this.state.data).map((inputName: string) => {
+              Object.keys(this.state.data).map((columnName: string) => {
                 if (
                   this.state.columns == null
-                  || this.state.columns[inputName] == null
-                ) return <strong style={{color: 'red'}}>Not defined params for {inputName}</strong>;
+                  || this.state.columns[columnName] == null
+                ) return <strong style={{color: 'red'}}>Not defined params for column `{columnName}`</strong>;
 
-                return <span key={key++}>{this._renderInput(inputName)}</span>;
+                return <span key={key++}>{this.inputWrapper(columnName)}</span>;
               })
             ) : ''}
         </div>
@@ -505,12 +487,12 @@ export default class Form extends Component<FormProps> {
 
     switch (contentItemName) {
       case 'input':
-        contentItem = this._renderInput(contentItemParams['input'] as string);
+        contentItem = this.inputWrapper(contentItemParams['input'] as string);
         break;
       case 'inputs':
         //@ts-ignore
-        contentItem = (contentItemParams['inputs'] as Array<string>).map((input: string) => {
-          return this._renderInput(input)
+        contentItem = (contentItemParams['inputs'] as Array<string>).map((columnName: string) => {
+          return this.inputWrapper(columnName)
         });
         break;
       case 'html':
@@ -542,18 +524,25 @@ export default class Form extends Component<FormProps> {
     );
   }
 
+  buildInputParams(columnName: string, customInputParams?: any) {
+    if (!customInputParams) customInputParams = {};
+    let stateColDef = (this.state.columns ? this.state.columns[columnName] ?? {} : {});
+    customInputParams = {...stateColDef, ...customInputParams};
+
+    return {...customInputParams, ...{readonly: this.state.readonly}};
+  }
+
   /**
    * Render different input types
    */
-  _renderInput(columnName: string): JSX.Element {
-    let inputToRender: JSX.Element | null = <></>;
-    const colDef = this.state.columns ? this.state.columns[columnName] : null;
+  input(columnName: string, customInputParams?: any): JSX.Element {
+    let inputToRender: JSX.Element = <></>;
 
-    if (!colDef) {
-      return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);
-    }
+    // if (!colDef) {
+    //   return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);
+    // }
 
-    const inputParams = {...colDef, ...{readonly: this.state.readonly}};
+    const inputParams = this.buildInputParams(columnName, customInputParams);
     const data = this.state.data ?? {};
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
@@ -565,24 +554,19 @@ export default class Form extends Component<FormProps> {
       value: data[columnName] ?? '',
       invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
-      cssClass: colDef.cssClass ?? '',
+      cssClass: inputParams.cssClass ?? '',
       onChange: (value: any) => this.inputOnChangeRaw(columnName, value),
       isInitialized: false,
     };
 
-    if (colDef.enumValues) {
-      inputToRender = <InputEnumValues {...inputProps} enumValues={colDef.enumValues}/>
+    if (inputParams.enumValues) {
+      inputToRender = <InputEnumValues {...inputProps} enumValues={inputParams.enumValues}/>
     } else {
-      if (colDef.inputJSX) {
-        let inputJSX = colDef.inputJSX;
-
-        inputToRender = adios.getComponent(
-          inputJSX,
-          inputProps
-        );
+      if (inputParams.inputJSX) {
+        inputToRender = adios.getComponent(inputParams.inputJSX, inputProps) ?? <></>;
       } else {
 
-        switch (colDef.type) {
+        switch (inputParams.type) {
           case 'text':
             inputToRender = <InputTextarea {...inputProps} />;
             break;
@@ -608,7 +592,7 @@ export default class Form extends Component<FormProps> {
           case 'datetime':
           case 'date':
           case 'time':
-            inputToRender = <InputDateTime {...inputProps} type={colDef.type} />;
+            inputToRender = <InputDateTime {...inputProps} type={inputParams.type} />;
             break;
           //case 'MapPoint':
           //  inputToRender = <InputMapPoint {...inputProps} />;
@@ -633,23 +617,27 @@ export default class Form extends Component<FormProps> {
       }
     }
 
-    return columnName != 'id' ? (
-      <div
-        className="input-form mb-3"
-        key={columnName}
-      >
+    return inputToRender ?? <></>;
+  }
+
+  inputWrapper(columnName: string, customInputParams?: any) {
+
+    const inputParams = this.buildInputParams(columnName, customInputParams);
+
+    return columnName == 'id' ? <></>: (
+      <div className="input-form mb-3" key={columnName}>
         <label className="text-dark">
-          {colDef.title}
-          {colDef.required == true ? <b className="text-danger"> *</b> : ""}
+          {inputParams.title}
+          {inputParams.required == true ? <b className="text-danger"> *</b> : ""}
         </label>
 
         <div key={columnName}>
-          {inputToRender}
+          {this.input(columnName, inputParams)}
         </div>
 
-        <small className="form-text text-muted">{colDef.description}</small>
+        <small className="form-text text-muted">{inputParams.description}</small>
       </div>
-    ) : <></>;
+    );
   }
 
   _renderButtonsLeft(): JSX.Element {
@@ -720,7 +708,7 @@ export default class Form extends Component<FormProps> {
       );
     }
 
-    let formContent = this._renderTab();
+    let formContent = this.renderFormContent();
     let title = this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting;
 
     return (

@@ -64,15 +64,6 @@ interface TableData {
   total: number
 }
 
-//export interface TableParams {
-//  model: string,
-//  parentFormId: number,
-//  parentFormModel: string,
-//  tag: string,
-//  columns: FormColumnParams,
-//  folderUrl: string
-//}
-
 export interface TableState {
   endpoint: string,
   addButtonText?: string,

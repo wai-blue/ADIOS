@@ -4,19 +4,19 @@ import { ProgressBar } from 'primereact/progressbar';
 
 import Table, { SortBy } from '../Table';
 import Modal from "./../Modal";
-import Form, { FormColumnParams } from "./../Form";
+import Form from "./../Form";
 import ExportButton from "../ExportButton";
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
 interface MuiTableColumn extends Omit<GridColDef, 'field' | 'headerName'> {
-  adiosColumnDef: FormColumnParams,
+  adiosColumnDef: any,
   field: string;
   headerName: string;
 }
 
 export default class MuiTable extends Table {
 
-  _commonCellRenderer(column: FormColumnParams, content: JSX.Element): JSX.Element {
+  _commonCellRenderer(column: any, content: JSX.Element): JSX.Element {
     return <div className={column.cssClass}>{content}</div>
   }
 
@@ -75,7 +75,7 @@ export default class MuiTable extends Table {
       let newColumns: Array<GridColDef> = [];
 
       for (let columnName in params.columns) {
-        const column: FormColumnParams = {...params.columns[columnName], ...this.props.columns};
+        const column: any = {...params.columns[columnName], ...this.props.columns};
 
         let newColumn = {
           adiosColumnDef: column,

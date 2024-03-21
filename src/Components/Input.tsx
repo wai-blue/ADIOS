@@ -1,9 +1,9 @@
 import React, { Component } from 'react'
 import * as uuid from 'uuid';
-import Form, { FormColumnParams } from './Form';
+import Form from './Form';
 
 export interface InputProps {
-  params: FormColumnParams,
+  params: any,
   inputClassName?: string,
   columnName: string,
   id?: string,

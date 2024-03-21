@@ -18,7 +18,7 @@ import { ProgressBar } from 'primereact/progressbar';
 
 import Table, { SortBy, TableState, TableProps } from './../Table';
 import Modal from '../Modal';
-import Form, { FormColumnParams } from '../Form';
+import Form from '../Form';
 import ExportButton from '../ExportButton';
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
@@ -378,7 +378,7 @@ export default class PrimeTable extends Table<PrimeTableState> {
   /*
    * Render body for Column (PrimeReact column)
    */
-  _renderColumnBody(columnName: string, column: FormColumnParams, data: any, options: any) {
+  _renderColumnBody(columnName: string, column: any, data: any, options: any) {
     const columnValue: any = data[columnName];
     const enumValues = column.enumValues;
 
@@ -425,7 +425,7 @@ export default class PrimeTable extends Table<PrimeTableState> {
 
   _renderRows(): JSX.Element[] {
     return Object.keys(this.state.columns).map((columnName: string) => {
-      const column: FormColumnParams = this.state.columns[columnName];
+      const column: any = this.state.columns[columnName];
       return <Column
         key={columnName}
         field={columnName}

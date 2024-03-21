@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import { Input, InputProps, InputState } from '../Input'
 import "flatpickr/dist/themes/material_blue.css";
 import Flatpickr from "react-flatpickr";
-import { FormColumnParams } from '../Form'
 import moment, { Moment } from "moment";
 import * as uuid from 'uuid';
 
