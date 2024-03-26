@@ -144,6 +144,7 @@ export default class Form extends Component<FormProps> {
 
     if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
       newState.data = this.getDataState(this.state.columns ?? {}, this.props.defaultValues);
+      newState.data = this.onAfterDataLoaded(newState.data);
       setNewState = true;
     }
 
@@ -199,11 +200,13 @@ export default class Form extends Component<FormProps> {
         },
         (data: any) => {
           let newData = this.getDataState(this.state.columns ?? {}, data.data);
+          newData = this.onAfterDataLoaded(newData);
           this.setState({isInitialized: true, data: newData});
         }
       );
     } else {
       let newData = this.getDataState(this.state.columns ?? {}, {});
+      newData = this.onAfterDataLoaded(newData);
       this.setState({isInitialized: true, data: newData});
     }
   }
@@ -301,12 +304,14 @@ export default class Form extends Component<FormProps> {
     let changedInput: any = {};
     changedInput[columnName] = inputValue;
 
-    this.setState((prevState: FormState) => ({
-      data: {
-        ...prevState.data,
-        [columnName]: inputValue
+    this.setState((prevState: FormState) => {
+      return {
+        data: {
+          ...prevState.data,
+          [columnName]: inputValue
+        }
       }
-    }));
+    });
   }
 
   /**
@@ -341,6 +346,11 @@ export default class Form extends Component<FormProps> {
 
     return data;
   }
+
+  onAfterDataLoaded(data: any) {
+    return data;
+  }
+
 
   fetchColumnData (columnName: string) {
     let id = this.state.id ? this.state.id : 0;

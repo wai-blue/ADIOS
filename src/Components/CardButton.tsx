@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import './Css/CardButton.css';
+import '../Assets/Css/Components/CardButton.css';
 
 interface CardButtonProps {
   uid: string,

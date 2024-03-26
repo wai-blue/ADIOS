@@ -15,6 +15,7 @@ namespace ADIOS\Core;
  */
 class Helper {
   static $loadUrlError = '';
+  static array $speedLogTags = [];
   
   /**
    * Minifies HTML
@@ -238,6 +239,27 @@ class Helper {
     }
 
     return $result;
+  }
+
+  public static function clearSpeedLogTags() {
+    self::$speedLogTags = [];
+  }
+
+  public static function addSpeedLogTag($tag) {
+    list($usec, $sec) = explode(' ', microtime());
+    self::$speedLogTags[] = [(float) $usec + (float) $sec, $tag];
+  }
+
+  public static function printSpeedLogTags() {
+    $lastMicrotime = NULL;
+    $microtimeDiff = 0;
+    $i = 0;
+    foreach (self::$speedLogTags as $data) {
+      list($microtime, $tag) = $data;
+      if ($lastMicrotime !== NULL) $microtimeDiff = ($microtime - $lastMicrotime) * 1000;
+      _print_r("{$tag} {$microtime} {$microtimeDiff}");
+      $lastMicrotime = $microtime;
+    }
   }
 
 }

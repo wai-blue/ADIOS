@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import * as uuid from 'uuid';
 
-// import './Css/Modal.css';
+// import '../Assets/Components/Modal.css';
 
 export interface ModalProps {
   onClose?: () => void;

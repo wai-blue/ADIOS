@@ -124,6 +124,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
           value={this.serialize()}
           style={{width: "100%", fontSize: "0.4em"}}
           className="value bg-light"
+          readOnly={true}
         ></input>
         {this.renderInputElement()}
       </div>

@@ -1427,6 +1427,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function recordSave(array $data)
   {
     $id = (int) $data['id'];
+    $isInsert = ($id <= 0);
 
     $this->recordSaveOriginalData = $data;
 
@@ -1468,7 +1469,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
     $this->recordValidate($dataForThisModel);
 
-    if ($id <= 0) {
+    if ($isInsert) {
       $dataForThisModel = $this->onBeforeInsert($dataForThisModel);
     } else {
       $dataForThisModel = $this->onBeforeUpdate($dataForThisModel);
@@ -1526,9 +1527,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
       }
 
       if (is_array($junctions)) {
-      _var_dump($jName);
-      _var_dump($jParams);
-      _var_dump($junctions);
         $junctionModel = $this->adios->getModel($jParams["junctionModel"]);
 
         $this->adios->pdo->execute("
@@ -1550,7 +1548,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       }
     }
 
-    if ($id <= 0) {
+    if ($isInsert) {
       $returnValue = $this->onAfterInsert($data, $returnValue);
     } else {
       $returnValue = $this->onAfterUpdate($data, $returnValue);

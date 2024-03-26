@@ -7,7 +7,7 @@ import request from "../Request";
 import { ProgressBar } from 'primereact/progressbar';
 import Swal, { SweetAlertOptions } from 'sweetalert2';
 
-import './../Css/Inputs/Tags.css';
+import './../../Assets/Css/Components/Inputs/Tags.css';
 import {capitalizeFirstLetter} from "../Helper";
 import Notification from "../Notification";
 

@@ -191,6 +191,8 @@ class Loader
       $this->config = $config;
     }
 
+    \ADIOS\Core\Helper::addSpeedLogTag("#1");
+
     // $this->test = new ($this->getCoreClass('Core\\Test'))($this);
 
     $this->widgetsDir = $config['widgetsDir'] ?? "";
@@ -277,6 +279,8 @@ class Loader
       // nacitanie zakladnych ADIOS lib suborov
       require_once dirname(__FILE__)."/Lib/basic_functions.php";
 
+      \ADIOS\Core\Helper::addSpeedLogTag("#2");
+
       if ($mode == self::ADIOS_MODE_FULL) {
 
         // inicializacia Twigu
@@ -315,6 +319,8 @@ class Loader
           die();
         }
       }
+
+      \ADIOS\Core\Helper::addSpeedLogTag("#2.1");
 
       // inicializacia core modelov
       $this->registerModel($this->getCoreClass('Models\\Config'));
@@ -356,6 +362,8 @@ class Loader
         define('_SESSION_ID', session_id());
       }
 
+      \ADIOS\Core\Helper::addSpeedLogTag("#2.2");
+
       // inicializacia routera
       $this->router = new ($this->getCoreClass('Core\\Router'))($this);
 
@@ -378,6 +386,8 @@ class Loader
 
       $this->loadConfigFromDB();
 
+      \ADIOS\Core\Helper::addSpeedLogTag("#3");
+
       if ($mode == self::ADIOS_MODE_FULL) {
 
         // set language
@@ -399,8 +409,10 @@ class Loader
 
       // finalizacia konfiguracie - aj pre FULL aj pre LITE mode
       $this->finalizeConfig();
+      \ADIOS\Core\Helper::addSpeedLogTag("#3.1");
 
       $this->onAfterConfigLoaded();
+      \ADIOS\Core\Helper::addSpeedLogTag("#3.2");
 
       // object pre kontrolu permissions
       $this->permissions = new ($this->getCoreClass('Core\\Permissions'))($this);
@@ -561,7 +573,7 @@ class Loader
         $this->onUserAuthorised();
 
 
-
+        \ADIOS\Core\Helper::addSpeedLogTag("#4");
 
 
         // inicializacia widgetov
@@ -571,6 +583,8 @@ class Loader
         $this->addAllWidgets($this->config['widgets']);
 
         $this->onAfterWidgetsLoaded();
+
+        \ADIOS\Core\Helper::addSpeedLogTag("#5");
 
         // vytvorim definiciu tables podla nacitanych modelov
 
@@ -700,6 +714,9 @@ class Loader
     } catch (\Exception $e) {
       exit("ADIOS INIT failed: [".get_class($e)."] ".$e->getMessage());
     }
+
+    \ADIOS\Core\Helper::addSpeedLogTag("#6");
+    // \ADIOS\Core\Helper::printSpeedLogTags();
 
     return $this;
   }
@@ -1126,6 +1143,9 @@ class Loader
 
     try {
 
+      \ADIOS\Core\Helper::clearSpeedLogTags();
+      \ADIOS\Core\Helper::addSpeedLogTag("render1");
+
       // Find-out which route is used for rendering
 
       if (empty($route)) {
@@ -1169,6 +1189,8 @@ class Loader
         $controllerClassName = $this->getControllerClassName($this->controller);
       }
 
+      \ADIOS\Core\Helper::addSpeedLogTag("render2");
+
       // Create the object for the controller
       $this->controllerObject = new $controllerClassName($this, $this->params);
 
@@ -1187,6 +1209,8 @@ class Loader
         }
       }
 
+      \ADIOS\Core\Helper::addSpeedLogTag("render3");
+
       if (
         !$this->userLogged
         && $this->controllerObject->requiresUserAuthentication
@@ -1201,6 +1225,8 @@ class Loader
       $this->router->checkPermission($this->permission);
 
       // All OK, rendering content...
+
+      \ADIOS\Core\Helper::addSpeedLogTag("render4");
 
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
@@ -1221,6 +1247,8 @@ class Loader
 
       // Either return JSON string ...
       $json = $this->controllerObject->renderJson();
+
+      \ADIOS\Core\Helper::addSpeedLogTag("render5");
 
       if (is_array($json)) {
         $return = json_encode($json);
@@ -1243,6 +1271,8 @@ class Loader
           ]
         );
 
+        \ADIOS\Core\Helper::addSpeedLogTag("render6");
+
         // In some cases the result of the view will be used as-is ...
         if ($this->params['__IS_AJAX__'] || $this->controllerObject->hideDefaultDesktop) {
           $html = $contentHtml;
@@ -1259,13 +1289,21 @@ class Loader
           $desktopParams['contentHtml'] = $contentHtml;
 
           $html = $this->twig->render(($this->config['appNamespace'] ?? 'App') . '/Views/Desktop', $desktopParams);
+
+          \ADIOS\Core\Helper::addSpeedLogTag("render7");
+
         }
+
+        \ADIOS\Core\Helper::addSpeedLogTag("render8");
 
         return $html;
       }
 
       $this->onAfterRender();
 
+      \ADIOS\Core\Helper::addSpeedLogTag("render9");
+
+      // \ADIOS\Core\Helper::printSpeedLogTags();
 
       return $return;
 
