@@ -1,8 +1,9 @@
-import  { Component } from "react";
+import React, { Component } from "react";
 import { GridColDef, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 
-import  { ModalProps } from "./Modal";
-import  { FormProps, FormColumns } from "./Form";
+import Modal, { ModalProps } from "./Modal";
+import Form, { FormProps, FormColumns } from "./Form";
+import Notification from "./Notification";
 
 import { adiosError, deepObjectMerge } from "./Helper";
 import request from "./Request";
@@ -99,7 +100,7 @@ export default class Table<T extends TableState = TableState> extends Component<
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
       formId: props.formId,
-      formEndpoint: props.formEndpoint ? props.formEndpoint : 'adios/controllers/components/form',
+      formEndpoint: props.formEndpoint ? props.formEndpoint : 'components/form',
       formParams: {
         model: props.model,
         uid: props.uid,
@@ -126,7 +127,10 @@ export default class Table<T extends TableState = TableState> extends Component<
     }
   }
 
-  // TODO: TOTO VYLEPSIT
+  onAfterLoadParams(params: any): any {
+    return params;
+  }
+
   loadParams(successCallback?: (params: any) => void) {
     let propsColumns = this.props.columns ?? {};
 
@@ -141,21 +145,30 @@ export default class Table<T extends TableState = TableState> extends Component<
         __IS_AJAX__: '1',
       },
       (data: any) => {
-        let params: any = deepObjectMerge(data.params, this.props);
-        if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
-        if (successCallback) successCallback(params);
+        try {
+          if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
+          if (!data.params) throw new Error('Failed to load table params.');
+        
+          let params: any = deepObjectMerge(data.params, this.props);
+          if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
+          if (successCallback) successCallback(params);
 
-        this.setState({
-          addButtonText: this.props.addButtonText ?? params.addButtonText,
-          canCreate: params.canCreate ?? true,
-          canDelete: params.canDelete ?? true,
-          canRead: params.canRead ?? true,
-          canUpdate: params.canUpdate ?? true,
-          columns: params.columns,
-          showHeader: params.showHeader ?? true,
-          title: this.props.title ?? params.title,
-          folderUrl: params.folderUrl,
-        });
+          params = this.onAfterLoadParams(params);
+
+          this.setState({
+            addButtonText: this.props.addButtonText ?? params.addButtonText,
+            canCreate: params.canCreate ?? true,
+            canDelete: params.canDelete ?? true,
+            canRead: params.canRead ?? true,
+            canUpdate: params.canUpdate ?? true,
+            columns: params.columns,
+            showHeader: params.showHeader ?? true,
+            title: this.props.title ?? params.title,
+            folderUrl: params.folderUrl,
+          });
+        } catch (err) {
+          Notification.error(err.message);
+        }
       }
     );
   }
@@ -185,6 +198,44 @@ export default class Table<T extends TableState = TableState> extends Component<
         });
       }
     );
+  }
+
+  getFormParams(): any {
+    return {
+      uid: this.props.uid,
+      model: this.props.model,
+      tag: this.props.tag, 
+      id: this.state.formId ?? 0, 
+      endpoint: this.state.formEndpoint ?? '',
+      showInModal: true,
+      onSaveCallback: () => {
+        this.loadData();
+        globalThis.ADIOS.modalToggle(this.props.uid);
+      },
+      onDeleteCallback: () => {
+        this.loadData();
+        globalThis.ADIOS.modalToggle(this.props.uid);
+      },
+      isInitialized: false,
+    }
+  }
+
+  getFormModalParams(): any {
+    return {
+      uid: this.props.uid,
+      model: this.props.model,
+      hideHeader: true,
+      isOpen: this.props.formParams?.id ? true : false,
+      ...this.props.modal
+    }
+  }
+
+  renderFormModal() {
+    return <Modal {...this.getFormModalParams()}>{this.renderForm()}</Modal>;
+  }
+
+  renderForm(): JSX.Element {
+    return <Form {...this.getFormParams()} />;
   }
 
   openForm(id: number) {

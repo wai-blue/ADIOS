@@ -17,8 +17,6 @@ import { Tag } from 'primereact/tag';
 import { ProgressBar } from 'primereact/progressbar';
 
 import Table, { SortBy, TableState, TableProps } from './../Table';
-import Modal from '../Modal';
-import Form from '../Form';
 import ExportButton from '../ExportButton';
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
@@ -448,30 +446,7 @@ export default class PrimeTable extends Table<PrimeTableState> {
 
     return (
       <>
-        <Modal
-          uid={this.props.uid}
-          model={this.props.model}
-          {...this.props.modal}
-          hideHeader={true}
-          isOpen={this.props.formParams?.id ? true : false}
-        >
-          <Form
-            uid={this.props.uid}
-            model={this.props.model}
-            tag={this.props.tag}
-            id={this.state.formId ?? 0}
-            endpoint={this.state.formEndpoint ?? ''}
-            showInModal={true}
-            onSaveCallback={() => {
-              this.loadData();
-              globalThis.ADIOS.modalToggle(this.props.uid);
-            }}
-            onDeleteCallback={() => {
-              this.loadData();
-              globalThis.ADIOS.modalToggle(this.props.uid);
-            }}
-          />
-        </Modal>
+        {this.renderFormModal()}
 
         <div
           id={"adios-table-prime-" + this.props.uid}

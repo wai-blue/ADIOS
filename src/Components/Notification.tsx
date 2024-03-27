@@ -1,4 +1,4 @@
-import { Notyf, NotyfNotification } from "notyf";
+import { INotyfNotificationOptions, Notyf, NotyfNotification } from "notyf";
 import 'notyf/notyf.min.css';
 
 export interface NotificationOptions {
@@ -25,6 +25,11 @@ class Notification extends Notyf {
         }
       ]
     });
+  }
+
+  error(payload: string | Partial<INotyfNotificationOptions>): NotyfNotification {
+    console.error(payload);
+    return super.error(payload);
   }
 
   custom(options: NotificationOptions): NotyfNotification {

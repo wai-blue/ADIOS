@@ -3,8 +3,6 @@ import { DataGrid, GridColDef, GridValueGetterParams, skSK, GridSortModel, GridF
 import { ProgressBar } from 'primereact/progressbar';
 
 import Table, { SortBy } from '../Table';
-import Modal from "./../Modal";
-import Form from "./../Form";
 import ExportButton from "../ExportButton";
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
@@ -138,32 +136,7 @@ export default class MuiTable extends Table {
 
     return (
       <>
-        <Modal 
-          uid={this.props.uid}
-          model={this.props.model}
-          {...this.props.modal}
-          hideHeader={true}
-          isOpen={this.state.formId ? true : false}
-        >
-          <Form
-            uid={this.props.uid}
-            model={this.props.model}
-            tag={this.props.tag}
-            id={this.state.formId ?? 0}
-            endpoint={this.state.formEndpoint ?? ''}
-            showInModal={true}
-            onSaveCallback={() => {
-              this.loadData();
-              globalThis.ADIOS.modalToggle(this.props.uid);
-            }}
-            onDeleteCallback={() => {
-              this.loadData();
-              globalThis.ADIOS.modalToggle(this.props.uid);
-            }}
-            isInitialized={false}
-            {...params}
-          />
-        </Modal>
+        {this.renderFormModal()}
 
         <div
           id={"adios-table-mui-" + this.props.uid}
