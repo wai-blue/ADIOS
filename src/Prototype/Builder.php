@@ -262,7 +262,6 @@ class Builder {
   }
 
   public function buildPrototype() {
-
     $appNamespace = $this->prototype['ConfigApp']['appNamespace'] ?? 'App';
 
   // delete folders if they exist
@@ -315,6 +314,7 @@ class Builder {
       if (strpos($widgetName, '/') !== FALSE) {
         $tmpCfg = &$configWidgetsEnabled;
         $tmpDirs = explode('/', $widgetName);
+
         foreach ($tmpDirs as $tmpLevel => $tmpDir) {
           if ($tmpLevel == count($tmpDirs) - 1) {
             $tmpCfg[$tmpDir]['enabled'] = TRUE;
@@ -566,6 +566,7 @@ class Builder {
       ) {
         $view = substr($route['view'], strlen($appNamespace . '/'));
         $viewRootDir = $this->outputFolder . '/src';
+        $tmpDirs = explode('/', $route['view']);
 
         foreach (explode('/', $view) as $level => $tmpDir) {
           $viewRootDir .= '/' . $tmpDir;
