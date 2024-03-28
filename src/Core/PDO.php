@@ -36,7 +36,7 @@ class PDO {
 
   }
 
-  public function debugQuery($query, $data) {
+  public function debugQuery($query, $data = []) {
     $stmt = $this->connection->prepare($query);
     $stmt->execute($data);
     ob_start();
@@ -44,12 +44,12 @@ class PDO {
     return ob_get_clean();
   }
 
-  public function execute($query, $data) {
+  public function execute($query, $data = []) {
     $stmt = $this->connection->prepare($query);
     $stmt->execute($data);
   }
 
-  public function fetchAll($query, $data) {
+  public function fetchAll($query, $data = []) {
     $stmt = $this->connection->prepare($query);
     $stmt->execute($data);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);

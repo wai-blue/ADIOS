@@ -234,7 +234,7 @@ class User extends \ADIOS\Core\Model {
     return md5($login.".".$password).",".$login;
   }
 
-  public function authUser(string $login, string $password, $rememberLogin = FALSE): void {
+  public function authUser(string $login, string $password, $rememberLogin = FALSE, $authColumns = ['login']): void {
     $authResult = FALSE;
 
     $login = trim($login);
@@ -245,7 +245,11 @@ class User extends \ADIOS\Core\Model {
 
     if (!empty($login)) {
       $users = $this
-        ->where('login', '=', $login)
+        ->where(function($q) use ($authColumns, $login) {
+          foreach ($authColumns as $column) {
+            $q->orWhere($column, '=', $login);
+          }
+        })
         ->where('is_active', '<>', 0)
         ->get()
         ->makeVisible(['password'])
@@ -258,9 +262,15 @@ class User extends \ADIOS\Core\Model {
         if (!empty($password) && password_verify($password, $user['password'] ?? "")) {
           // plain text
           $passwordMatch = TRUE;
-        } else if (
-          $_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($user['login'], $user['password'])) {
-          $passwordMatch = TRUE;
+        } else {
+          foreach ($authColumns as $column) {
+            if (
+              $_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($user[$column], $user['password'])
+            ) {
+              $passwordMatch = TRUE;
+              break;
+            }
+          }
         }
 
         if ($passwordMatch) {

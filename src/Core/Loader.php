@@ -1222,7 +1222,9 @@ class Loader
 
       // Kontrola permissions
 
-      $this->router->checkPermission($this->permission);
+      if ($this->controllerObject->requiresUserAuthentication) {
+        $this->router->checkPermission($this->permission);
+      }
 
       // All OK, rendering content...
 
