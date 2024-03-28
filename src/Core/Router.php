@@ -39,7 +39,7 @@ class Router {
           $routeParams[$paramName] = $this->replaceRouteVariables($paramValue, $variables);
         } else {
           foreach ($variables as $k2 => $v2) {
-            $routeParams[$paramName] = str_replace('$'.$k2, $v2, $routeParams[$paramName]);
+            $routeParams[$paramName] = str_replace('$'.$k2, $v2, (string)$routeParams[$paramName]);
           }
         }
       }
