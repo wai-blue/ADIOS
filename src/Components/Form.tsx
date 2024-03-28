@@ -167,14 +167,13 @@ export default class Form extends Component<FormProps> {
       {
         returnParams: '1',
         model: this.props.model,
-        columns: this.props.columns,
+        //columns: this.props.columns,
         id: this.props.id,
         tag: this.props.tag,
         __IS_AJAX__: '1',
       },
       (data: any) => {
         let newState: any = deepObjectMerge(data.params, this.props);
-
         newState.params = { ...data.params };
         if (newState.layout) {
           newState.layout = this.convertLayoutToString(newState.layout);
@@ -572,7 +571,7 @@ export default class Form extends Component<FormProps> {
     if (inputParams.enumValues) {
       inputToRender = <InputEnumValues {...inputProps} enumValues={inputParams.enumValues}/>
     } else {
-      if (inputParams.inputJSX) {
+      if (typeof inputParams.inputJSX === 'string' && inputParams.inputJSX !== '') {
         inputToRender = adios.getComponent(inputParams.inputJSX, inputProps) ?? <></>;
       } else {
 

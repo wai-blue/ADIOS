@@ -208,6 +208,7 @@ export default class Table<T extends TableState = TableState> extends Component<
       id: this.state.formId ?? 0, 
       endpoint: this.state.formEndpoint ?? '',
       showInModal: true,
+      columns: this.props.formParams?.columns ?? {},
       onSaveCallback: () => {
         this.loadData();
         globalThis.ADIOS.modalToggle(this.props.uid);
