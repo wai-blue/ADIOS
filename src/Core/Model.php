@@ -1382,6 +1382,10 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function normalizeRecordData(array $data): array {
     $columns = $this->columns();
 
+    foreach ($columns as $colName => $colDef) {
+      if (!isset($data[$colName])) $data[$colName] = NULL;
+    }
+
     foreach ($data as $colName => $colValue) {
       if (!isset($columns[$colName])) {
         unset($data[$colName]);
@@ -1392,10 +1396,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
           case "float": $data[$colName] = (float) $colValue; break;
         }
       }
-    }
-
-    foreach ($columns as $colName => $colDef) {
-      if (!isset($data[$colName])) $data[$colName] = NULL;
     }
 
     return $data;
