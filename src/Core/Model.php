@@ -1394,6 +1394,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
           case "int": $data[$colName] = (int) $colValue; break;
           case "lookup": $data[$colName] = ((int) $colValue) <= 0 ? NULL : (int) $colValue; break;
           case "float": $data[$colName] = (float) $colValue; break;
+          case "boolean": 
+            if (empty($colValue) || !((bool) $colValue)) {
+              $data[$colName] = 0;
+            } else {
+              $data[$colName] = 1;
+            }
+          break;
         }
       }
     }

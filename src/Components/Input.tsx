@@ -15,7 +15,7 @@ export interface InputProps {
   placeholder?: string,
   isInitialized?: boolean,
   context?: any,
-  parentForm?: Form,
+  parentForm?: Form<any, any>,
 }
 
 export interface InputState {

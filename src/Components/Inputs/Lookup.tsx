@@ -59,7 +59,13 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
   renderInputElement() {
     if (!this.state.isInitialized) {
-      return <ProgressBar mode="indeterminate" style={{ height: '3px' }}></ProgressBar>;
+      // return <ProgressBar mode="indeterminate" style={{ height: '3px' }}></ProgressBar>;
+      return (
+        <AsyncSelect
+          isDisabled={true}
+          placeholder="..."
+        />
+      )
     }
 
     return (

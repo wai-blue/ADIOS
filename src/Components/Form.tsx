@@ -89,8 +89,9 @@ interface FormInputs {
   [key: string]: string | number;
 }
 
-export default class Form extends Component<FormProps> {
-  state: FormState;
+export default class Form<P extends FormProps, S extends FormState> extends Component<P, S> {
+  state: S;
+
   newState: any;
 
   model: String;
@@ -99,7 +100,7 @@ export default class Form extends Component<FormProps> {
   jsxContentRendered: boolean = false;
   jsxContent: JSX.Element;
 
-  constructor(props: FormProps) {
+  constructor(props: P) {
     super(props);
 
     this.state = {
@@ -117,7 +118,7 @@ export default class Form extends Component<FormProps> {
       invalidInputs: {},
       data: {},
       params: null,
-    };
+    } as S;
   }
 
 
@@ -283,7 +284,7 @@ export default class Form extends Component<FormProps> {
    */
   checkIfIsEdit() {
     this.setState({
-      isEdit: this.state.id && this.state.id > 0
+      isEdit: this.state.id && this.state.id > 0 ? true : false,
     });
   }
 
