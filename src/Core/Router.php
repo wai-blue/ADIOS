@@ -56,13 +56,22 @@ class Router {
     foreach ($this->routing as $routePattern => $tmpRoute) {
       if (preg_match($routePattern.'i', $route, $m)) {
 
-        $controller = $tmpRoute['controller'] ?? '';
-        $view = $tmpRoute['view'] ?? '';
-        $permission = $tmpRoute['permission'] ?? '';
-        $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'], $m);
+        if (!empty($tmpRoute['redirect'])) {
+          $url = $tmpRoute['redirect']['url'];
+          foreach ($m as $k => $v) {
+            $url = str_replace('$'.$k, $v, $url);
+          }
+          $this->redirectTo($url, $tmpRoute['redirect']['code'] ?? 302);
+          exit;
+        } else {
+          $controller = $tmpRoute['controller'] ?? '';
+          $view = $tmpRoute['view'] ?? '';
+          $permission = $tmpRoute['permission'] ?? '';
+          $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'] ?? [], $m);
 
-        foreach ($tmpRoute['params'] as $k => $v) {
-          $params[$k] = $v;
+          foreach ($tmpRoute['params'] as $k => $v) {
+            $params[$k] = $v;
+          }
         }
       }
     }
@@ -77,8 +86,8 @@ class Router {
     }
   }
 
-  public function redirectTo(string $url) {
-    header("Location: {$this->adios->config['url']}/".trim($url, "/"));
+  public function redirectTo(string $url, int $code = 302) {
+    header("Location: {$this->adios->config['url']}/".trim($url, "/"), true, $code);
     exit;
   }
 

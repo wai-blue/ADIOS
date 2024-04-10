@@ -257,9 +257,24 @@ class Helper {
     foreach (self::$speedLogTags as $data) {
       list($microtime, $tag) = $data;
       if ($lastMicrotime !== NULL) $microtimeDiff = ($microtime - $lastMicrotime) * 1000;
-      _print_r("{$tag} {$microtime} {$microtimeDiff}");
+      _var_dump("{$tag} {$microtime} {$microtimeDiff}");
       $lastMicrotime = $microtime;
     }
   }
+
+  // public function _put_default_params_values($params, $default_values) {
+  //   foreach ($default_values as $key => $value) {
+  //     if (!isset($params[$key])) {
+  //       $params[$key] = $value;
+  //     } else {
+  //       if (is_array($value)) {
+  //         $params[$key] = _put_default_params_values($params[$key], $value);
+  //       }
+  //     }
+  //   }
+
+  //   return $params;
+  // }
+
 
 }

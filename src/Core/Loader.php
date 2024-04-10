@@ -284,14 +284,14 @@ class Loader
       if ($mode == self::ADIOS_MODE_FULL) {
 
         // inicializacia Twigu
-        include(dirname(__FILE__)."/Lib/Twig.php");
+        // include(dirname(__FILE__)."/Lib/Twig.php");
 
         $eloquentCapsule = new \Illuminate\Database\Capsule\Manager;
 
         $eloquentCapsule->addConnection([
           "driver"    => "mysql",
           "host"      => $this->config['db_host'],
-          "port"      => $this->config['db_port'],
+          "port"      => $this->config['db_port'] ?? 3306,
           "database"  => $this->config['db_name'],
           "username"  => $this->config['db_user'],
           "password"  => $this->config['db_password'],
@@ -344,16 +344,7 @@ class Loader
 
 
       if ($mode == self::ADIOS_MODE_FULL) {
-
         // start session
-
-        if ($this->config['setSessionTime'] ?? TRUE) {
-          ini_set('session.gc_maxlifetime', $this->config['session_maxlifetime'] ?? 60 * 60);
-          ini_set('session.gc_probability', $this->config['session_probability'] ?? 1);
-          ini_set('session.gc_divisor', $this->config['session_divisor'] ?? 1000);
-        }
-
-        ini_set('session.use_cookies', $this->config['sessionUseCookies'] ?? TRUE);
 
         session_id();
         session_name(_ADIOS_ID);
@@ -542,10 +533,10 @@ class Loader
 
         // user authentication
 
-        if ((int) $_SESSION[_ADIOS_ID]['userProfile']['id'] > 0) {
+        if ((int) ($_SESSION[_ADIOS_ID]['userProfile']['id'] ?? 0) > 0) {
           $user = $userModel->find((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
 
-          if ($user['is_active'] != 1) {
+          if (!$userModel->isUserActive($user)) {
             $userModel->signOut();
           } else {
             $user = $userModel->loadUserFromSession();
@@ -566,7 +557,7 @@ class Loader
             ((int) $_POST['keep_logged_in']) == 1
           );
 
-          $userModel->updateLoginAndAccessInformation((int) $this->userProfile['id']);
+          $userModel->updateLoginAndAccessInformation((int) ($this->userProfile['id'] ?? 0));
         }
 
         // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
@@ -604,7 +595,6 @@ class Loader
         $this->router->addRouting($tmpRouting);
 
         // inicializacia twigu
-
         $twigLoader = new ($this->getCoreClass('Core\\TwigLoader'))($this);
         $this->twig = new \Twig\Environment($twigLoader, array(
           'cache' => FALSE,
@@ -1129,6 +1119,28 @@ class Loader
     $this->console->info("Core installation done in ".round((microtime(true) - $installationStart), 2)." seconds.");
   }
 
+  public function extractRouteParamsFromRequest() {
+    $route = '';
+    $params = [];
+
+    if (php_sapi_name() === 'cli') {
+      $params = @json_decode($_SERVER['argv'][2] ?? "", TRUE);
+      if (!is_array($params)) { // toto nastane v pripade, ked $_SERVER['argv'] nie je JSON string
+        $params = $_SERVER['argv'];
+      }
+      $route = $_SERVER['argv'][1] ?? "";
+    } else {
+      $route = $_REQUEST['route'] ?? ($_REQUEST['controller'] ?? '');
+      $params = \ADIOS\Core\Helper::arrayMergeRecursively(
+        array_merge($_GET, $_POST),
+        json_decode(file_get_contents("php://input"), true) ?? []
+      );
+      unset($params['controller']);
+    }
+
+    return [$route, $params];
+  }
+
   /**
    * Renders the requested content. It can be the (1) whole desktop with complete <html>
    * content; (2) the HTML of a controller requested dynamically using AJAX; or (3) a JSON
@@ -1149,23 +1161,11 @@ class Loader
       // Find-out which route is used for rendering
 
       if (empty($route)) {
-        if (php_sapi_name() === 'cli') {
-          $params = @json_decode($_SERVER['argv'][2] ?? "", TRUE);
-          if (!is_array($params)) { // toto nastane v pripade, ked $_SERVER['argv'] nie je JSON string
-            $params = $_SERVER['argv'];
-          }
-          $this->route = $_SERVER['argv'][1] ?? "";
-        } else {
-          $this->route = $_REQUEST['controller'] ?? '';
-          $this->params = \ADIOS\Core\Helper::arrayMergeRecursively(
-            array_merge($_GET, $_POST),
-            json_decode(file_get_contents("php://input"), true) ?? []
-          );
-          unset($this->params['controller']);
-        }
-      } else {
-        $this->route = $route;
+        list($route, $params) = $this->extractRouteParamsFromRequest();
       }
+
+      $this->route = $route;
+      $this->params = $params;
 
       // Apply routing and find-out which controller, permision and rendering params will be used
       list($this->controller, $this->view, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
@@ -1232,7 +1232,7 @@ class Loader
 
       // vygenerovanie UID tohto behu
       if (empty($this->uid)) {
-        $uid = $this->getUid($this->params['id']);
+        $uid = $this->getUid($this->params['id'] ?? '');
       } else {
         $uid = $this->uid.'__'.$this->getUid($this->params['id']);
       }
@@ -1267,7 +1267,7 @@ class Loader
             'uid' => $this->uid,
             'user' => $this->userProfile,
             'config' => $this->config,
-            'session' => $_SESSION[_ADIOS_ID],
+            'session' => $_SESSION[_ADIOS_ID] ?? [],
             'viewParams' => $this->controllerObject->viewParams,
             'windowParams' => $this->controllerObject->viewParams['windowParams'] ?? NULL,
           ]
@@ -1276,7 +1276,7 @@ class Loader
         \ADIOS\Core\Helper::addSpeedLogTag("render6");
 
         // In some cases the result of the view will be used as-is ...
-        if ($this->params['__IS_AJAX__'] || $this->controllerObject->hideDefaultDesktop) {
+        if (($this->params['__IS_AJAX__'] ?? FALSE)|| $this->controllerObject->hideDefaultDesktop) {
           $html = $contentHtml;
         
         // ... But mostly be "encapsulated" in the desktop.
@@ -1459,7 +1459,7 @@ class Loader
       </div>
     ";
 
-    $this->console->error("{$errorHash}\t{$errorMessage}\t{$this->db->last_query}\t{$this->db->db_error}");
+    $this->console->error("{$errorHash}\t{$errorMessage}");
 
     switch (get_class($exception)) {
       case 'ADIOS\Core\Exceptions\DBException':

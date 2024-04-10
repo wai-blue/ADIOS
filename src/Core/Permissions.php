@@ -86,7 +86,7 @@ class Permissions {
   {
     if (empty($permission)) return TRUE;
 
-    $granted = (bool) in_array($permission, (array) $this->permissions[$idUserRole]);
+    $granted = (bool) in_array($permission, (array) ($this->permissions[$idUserRole] ?? []));
 
     if (!$granted) {
     }

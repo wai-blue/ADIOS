@@ -26,7 +26,7 @@ class DataTypeTime extends DataType
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])
   {
-    $params = _put_default_params_values($params, [
+    $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, [
       'null_value' => false,
       'dumping_data' => false,
     ]);

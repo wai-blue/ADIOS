@@ -10,8 +10,6 @@
 
 namespace ADIOS\Core\DB\DataTypes;
 
-define('DELETE_FILE', 'delete_file');
-
 /**
  * @package DataTypes
  */
@@ -26,7 +24,7 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])
   {
-    if ($value == DELETE_FILE) {
+    if ($value == 'delete_file') {
       $sql = "`{$col_name}` = ''";
     } else {
       if (is_string($value)) {

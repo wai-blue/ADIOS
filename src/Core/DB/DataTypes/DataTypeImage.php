@@ -10,8 +10,6 @@
 
 namespace ADIOS\Core\DB\DataTypes;
 
-define('DELETE_IMAGE', 'delete_image');
-
 /**
  * @package DataTypes
  */
@@ -26,7 +24,7 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType
 
     public function sqlValueString($table_name, $col_name, $value, $params = [])
     {
-        $params = _put_default_params_values($params, [
+        $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, [
             'null_value' => false,
             'dumping_data' => false,
             'supported_extensions' => $this->adios->getConfig('m_datapub/columns/image/supported_extensions', ['jpg', 'gif', 'png', 'jpeg', 'webp']),
@@ -36,7 +34,7 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType
         if ($params['dumping_data']) {
             $sql = "$col_name='$value'";
         } else {
-            if (DELETE_IMAGE == $value) {
+            if ($value == 'delete_image') {
                 $sql = "$col_name=''";
             } else {
                 $sql = "$col_name='".($params['escape_string'] ? $this->adios->db->escape($value) : $value)."'";

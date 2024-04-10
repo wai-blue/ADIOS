@@ -33,7 +33,7 @@
   } else {
     echo "
       <br/>
-      ".l("Žiadne systémové záznamy neboli nájdené.")."
+      No system records found.
     ";
   };
   

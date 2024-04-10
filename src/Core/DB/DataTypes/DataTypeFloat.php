@@ -32,7 +32,7 @@ class DataTypeFloat extends \ADIOS\Core\DB\DataType
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])
   {
-    $params = _put_default_params_values($params, [
+    $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, [
       'null_value' => false,
       'dumping_data' => false,
       'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),

@@ -93,11 +93,12 @@ class ViewWithController {
       $this->saveParamsToSession($params['uid'], $tmpParams);
     }
 
-    $componentName = end(explode("\\", get_class($this)));
+    $tmp = explode("\\", get_class($this));
+    $componentName = end($tmp);
 
     $this->params = $params;
     $this->uid = $params['uid'];
-    $this->displayMode = $this->params['displayMode'];
+    $this->displayMode = $this->params['displayMode'] ?? 'desktop';
     $this->childViews = [];
     $this->classes = ['adios', 'ui', $componentName];
     $this->twigTemplate = $this->twigTemplate ?? "Components/{$this->fullName}";

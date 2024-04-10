@@ -163,7 +163,7 @@ class User extends \ADIOS\Core\Model {
         "params" => [
           "model" => "ADIOS/Models/User",
           "myProfileView" => TRUE,
-          "id" => $this->adios->userProfile['id'],
+          "id" => $this->adios->userProfile['id'] ?? 0,
         ]
       ],
     ]);
@@ -225,6 +225,10 @@ class User extends \ADIOS\Core\Model {
     ]);
   }
 
+  public function isUserActive($user): bool {
+    return $user['is_active'] == 1;
+  }
+
   public function authCookieGetLogin() {
     list($tmpHash, $tmpLogin) = explode(",", $_COOKIE[_ADIOS_ID.'-user']);
     return $tmpLogin;
@@ -265,7 +269,8 @@ class User extends \ADIOS\Core\Model {
         } else {
           foreach ($authColumns as $column) {
             if (
-              $_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($user[$column], $user['password'])
+              isset($_COOKIE[_ADIOS_ID.'-user'])
+              && $_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($user[$column], $user['password'])
             ) {
               $passwordMatch = TRUE;
               break;
@@ -343,7 +348,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function signOut() {
-    unset($_SESSION[_ADIOS_ID]['userProfile']);
+    unset($_SESSION[_ADIOS_ID]);
     $this->adios->userProfile = [];
     $this->adios->userLogged = FALSE;
   }
@@ -360,7 +365,7 @@ class User extends \ADIOS\Core\Model {
     $user = $this->getQueryForUser($idUser)->first()->toArray();
 
     $tmpRoles = [];
-    foreach ($user['roles'] as $role) {
+    foreach ($user['roles'] ?? [] as $role) {
       $tmpRoles[] = (int) $role['pivot']['id_role'];
     }
     $user['roles'] = $tmpRoles;
@@ -369,7 +374,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function loadUserFromSession() {
-    return $this->loadUser((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
+    return $this->loadUser((int) ($_SESSION[_ADIOS_ID]['userProfile']['id'] ?? 0));
   }
 
   public function getByEmail(string $email) {

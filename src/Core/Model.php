@@ -138,16 +138,27 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL)
   {
-    $this->gtp = $adiosOrAttributes->gtp;
-    $this->fullTableSqlName = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;
-    $this->table = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName; // toto je kvoli Eloquentu
+    if (is_array($adiosOrAttributes) && isset($adiosOrAttributes['gtp'])) {
+      $this->gtp = $adiosOrAttributes['gtp'];
+    }
+
+    if (empty($this->fullTableSqlName)) {
+      $this->fullTableSqlName = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;
+    }
+
+    if (empty($this->table)) {
+      $this->table = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName; // toto je kvoli Eloquentu
+    }
 
     if (!is_object($adiosOrAttributes)) {
       // v tomto pripade ide o volanie constructora z Eloquentu
       return parent::__construct($adiosOrAttributes ?? []);
     } else {
       $this->fullName = str_replace("\\", "/", get_class($this));
-      $this->shortName = end(explode("/", $this->fullName));
+
+      $tmp = explode("/", $this->fullName);
+      $this->shortName = end($tmp);
+
       $this->adios = $adiosOrAttributes;
 
       $this->myRootFolder = str_replace("\\", "/", dirname((new ReflectionClass(get_class($this)))->getFileName()));

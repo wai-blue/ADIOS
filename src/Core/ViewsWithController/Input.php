@@ -1114,7 +1114,7 @@ class Input extends \ADIOS\Core\ViewWithController {
                       <i class='icon fas fa-id-card'></i>
                     </span>
                   " : "")."
-                  ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->adios->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='".l('Pridať')."' />" : '').'
+                  ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->adios->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='Add' />" : '').'
                   '.(!$this->params['readonly'] ? "
                     <span
                       class='btn btn-light btn-sm'
