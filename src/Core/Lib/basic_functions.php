@@ -28,7 +28,7 @@ function _var_dump($var, $only_return = false) {
   ob_start();
   $dump = var_dump($var);
   $dump = ob_get_clean();
-  $str = "<pre style='font-size:11px;color:orange'>{$dump}</pre>";
+  $str = "<pre style='font-size:11px;color:orange;position:relative;background:white;z-index:10000'>{$dump}</pre>";
 
   if ($only_return) {
     return $str;

@@ -41,7 +41,7 @@ class PDO {
     $stmt->execute($data);
     ob_start();
     $stmt->debugDumpParams();
-    return ob_get_clean();
+    _var_dump(ob_get_clean());
   }
 
   public function execute($query, $data = []) {
@@ -53,6 +53,9 @@ class PDO {
     $stmt = $this->connection->prepare($query);
     $stmt->execute($data);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+  }
+  public function fetchFirst($query, $data = []) {
+    return reset($this->fetchAll($query, $data));
   }
 
 }

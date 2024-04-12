@@ -12,12 +12,12 @@ var ADIOS = {
     window_render(url, params, options.onclose, options);
   },
 
-  registerReactElement(elementName, elementObject) {
-    if (typeof window['App']['reactElements'] == 'undefined') {
-      window['App']['reactElements'] = {};
-    }
-    window['App']['reactElements'][elementName] = elementObject;
-  },
+  // registerReactElement(elementName, elementObject) {
+  //   if (typeof window['App']['reactElements'] == 'undefined') {
+  //     window['App']['reactElements'] = {};
+  //   }
+  //   window['App']['reactElements'][elementName] = elementObject;
+  // },
 
   modal(controllerUrl, params = {}, modalParams = null) {
     $('#adios-modal-title-global').text("");

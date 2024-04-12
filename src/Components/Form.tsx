@@ -47,6 +47,7 @@ export interface FormProps {
   hideOverlay?: boolean,
   showInModal?: boolean,
   columns?: FormColumns,
+  title?: string,
   titleForInserting?: string,
   titleForEditing?: string,
   saveButtonText?: string,
@@ -74,6 +75,7 @@ export interface FormState {
   folderUrl?: string,
   addButtonText?: string,
   saveButtonText?: string,
+  title?: string,
   titleForEditing?: string,
   titleForInserting?: string,
   layout?: string,
@@ -89,9 +91,7 @@ interface FormInputs {
   [key: string]: string | number;
 }
 
-export default class Form<P extends FormProps, S extends FormState> extends Component<P, S> {
-  state: S;
-
+export default class Form<P, S> extends Component<FormProps, FormState> {
   newState: any;
 
   model: String;
@@ -100,7 +100,7 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
   jsxContentRendered: boolean = false;
   jsxContent: JSX.Element;
 
-  constructor(props: P) {
+  constructor(props: FormProps) {
     super(props);
 
     this.state = {
@@ -118,7 +118,7 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
       invalidInputs: {},
       data: {},
       params: null,
-    } as S;
+    };
   }
 
 
@@ -201,13 +201,17 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
         (data: any) => {
           let newData = this.getDataState(this.state.columns ?? {}, data.data);
           newData = this.onAfterDataLoaded(newData);
-          this.setState({isInitialized: true, data: newData});
+          this.setState({isInitialized: true, data: newData}, () => {
+            this.onAfterFormInitialized();
+          });
         }
       );
     } else {
       let newData = this.getDataState(this.state.columns ?? {}, {});
       newData = this.onAfterDataLoaded(newData);
-      this.setState({isInitialized: true, data: newData});
+      this.setState({isInitialized: true, data: newData}, () => {
+        this.onAfterFormInitialized();
+      });
     }
   }
 
@@ -349,6 +353,9 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
 
   onAfterDataLoaded(data: any) {
     return data;
+  }
+
+  onAfterFormInitialized() {
   }
 
 
@@ -645,6 +652,8 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
           {this.input(columnName, inputParams)}
         </div>
 
+        {inputParams.unit ? <div>{inputParams.unit}</div> : null}
+
         <small className="form-text text-muted">{inputParams.description}</small>
       </div>
     );
@@ -656,7 +665,7 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
       <div className="d-flex">
         {this.props.showInModal ?
           <button
-            className="btn btn-sm btn-light mr-2"
+            className="btn btn-light mr-2"
             type="button"
             data-dismiss="modal"
             aria-label="Close"
@@ -667,7 +676,7 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
         <button
           onClick={() => this.saveRecord()}
           className={
-            "btn btn-sm btn-success btn-icon-split mr-2"
+            "btn btn-success btn-icon-split mr-2"
             + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
           }
         >
@@ -696,7 +705,7 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
         {this.state.isEdit ?
           <button
             onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
-            className={"btn btn-sm btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
+            className={"btn btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
           >
             <span className="icon"><i className="fas fa-trash"></i></span>
             <span className="text">Delete</span>
@@ -719,7 +728,10 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
     }
 
     let formContent = this.renderFormContent();
-    let title = this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting;
+    let title = 
+      this.state.title ? this.state.title :
+      this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting
+    ;
 
     return (
       <>
@@ -733,9 +745,7 @@ export default class Form<P extends FormProps, S extends FormState> extends Comp
                 <h3
                   id={'adios-modal-title-' + this.props.uid}
                   className="m-0 p-0"
-                >
-                  {this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting}
-                </h3>
+                >{title}</h3>
               </div>
               <div className="col-lg-4 p-0 d-flex flex-row-reverse">
                 {this._renderButtonsRight()}

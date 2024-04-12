@@ -1915,14 +1915,16 @@ class Loader
       }
     }
 
-    foreach (scandir($this->widgetsDir) as $widget) {
-      if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/main.js")) {
-        $jsFiles[] = $this->widgetsDir."/{$widget}/main.js";
-      }
+    if (is_dir($this->widgetsDir)) {
+      foreach (scandir($this->widgetsDir) as $widget) {
+        if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/main.js")) {
+          $jsFiles[] = $this->widgetsDir."/{$widget}/main.js";
+        }
 
-      if (is_dir($this->widgetsDir."/{$widget}/Assets/Js")) {
-        foreach (scandir($this->widgetsDir."/{$widget}/Assets/Js") as $widgetJsFile) {
-          $jsFiles[] = $this->widgetsDir."/{$widget}/Assets/Js/{$widgetJsFile}";
+        if (is_dir($this->widgetsDir."/{$widget}/Assets/Js")) {
+          foreach (scandir($this->widgetsDir."/{$widget}/Assets/Js") as $widgetJsFile) {
+            $jsFiles[] = $this->widgetsDir."/{$widget}/Assets/Js/{$widgetJsFile}";
+          }
         }
       }
     }

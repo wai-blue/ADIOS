@@ -20,12 +20,15 @@ import Table, { SortBy, TableState, TableProps } from './../Table';
 import ExportButton from '../ExportButton';
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
-interface PrimeTableState extends TableState {
+export interface PrimeTableProps extends TableProps {
+}
+
+export interface PrimeTableState extends TableState {
   sortOrder: SortOrder,
   sortField?: string
 }
 
-export default class PrimeTable extends Table<PrimeTableState> {
+export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableState> {
   dt = createRef<DataTable<any[]>>();
 
   constructor(props: TableProps) {

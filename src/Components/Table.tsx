@@ -87,8 +87,8 @@ export interface TableState {
   folderUrl?: string,
 }
 
-export default class Table<T extends TableState = TableState> extends Component<TableProps> {
-  state: T;
+export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
+  state: S;
 
   constructor(props: TableProps) {
     super(props);
@@ -108,7 +108,7 @@ export default class Table<T extends TableState = TableState> extends Component<
       page: 1,
       itemsPerPage: 15,
       showHeader: props.showHeader ?? true,
-    } as T;
+    } as S;
   }
 
   componentDidMount() {
@@ -215,11 +215,13 @@ export default class Table<T extends TableState = TableState> extends Component<
       addButtonText: this.props.formParams?.addButtonText,
       onSaveCallback: () => {
         this.loadData();
-        globalThis.ADIOS.modalToggle(this.props.uid);
+        //@ts-ignore
+        ADIOS.modalToggle(this.props.uid);
       },
       onDeleteCallback: () => {
         this.loadData();
-        globalThis.ADIOS.modalToggle(this.props.uid);
+        //@ts-ignore
+        ADIOS.modalToggle(this.props.uid);
       },
       isInitialized: false,
     }
