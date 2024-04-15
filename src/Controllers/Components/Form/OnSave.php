@@ -18,7 +18,7 @@ class OnSave extends \ADIOS\Core\Controller {
 
   function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
     parent::__construct($adios, $params);
-    $this->permission = $this->params['model'] . ':'. ($this->params['id'] <= 0 ? 'Create' : 'Update');
+    $this->permission = $this->params['model'] . ':'. ($this->params['data']['id'] <= 0 ? 'Create' : 'Update');
   }
 
   public function renderJson() {

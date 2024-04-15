@@ -386,10 +386,20 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
 
     switch (column.type) {
+      case 'int':
+        return <div className="text-right">
+          {columnValue}
+          {column.unit ? ' ' + column.unit : ''}
+        </div>;
+      case 'float':
+        return <div className="text-right">
+          {columnValue}
+          {column.unit ? ' ' + column.unit : ''}
+        </div>;
       case 'color':
         return <div
           style={{ width: '20px', height: '20px', background: columnValue }} 
-          className="rounded" 
+          className="rounded"
         />;
       case 'image':
         if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
@@ -431,7 +441,13 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
         key={columnName}
         field={columnName}
         header={column.title}
-        body={(data: any, options: any) => this._renderColumnBody(columnName, column, data, options)}
+        body={(data: any, options: any) => {
+          return (
+            <div className={column.cssClass} style={column.cssStyle}>
+              {this._renderColumnBody(columnName, column, data, options)}
+            </div>
+          );
+        }}
         style={{ width: 'auto' }}
         sortable
       ></Column>;
@@ -439,7 +455,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
   }
 
   _rowClassName(rowData: any) {
-    return rowData.id % 2 === 0 ? '' : 'bg-light';
+    return ''; // rowData.id % 2 === 0 ? '' : 'bg-light';
   }
 
   render() {
@@ -540,13 +556,14 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
                 totalRecords={this.state.data.total}
                 rowsPerPageOptions={[15, 30, 50, 100]}
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                currentPageReportTemplate="{first}-{last} of {totalRecords} records"
+                currentPageReportTemplate="{first}-{last} / {totalRecords}"
                 onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
                 onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
                 onSort={(event: DataTableSortEvent) => this.onSortByChangeCustom(event)}
                 sortOrder={this.state.sortOrder}
                 sortField={this.state.sortField}
                 rowClassName={this._rowClassName}
+                stripedRows={true}
                 //globalFilter={globalFilter}
                 //header={header}
                 //selection={selectedProducts}
