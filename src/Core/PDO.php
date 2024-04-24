@@ -54,8 +54,10 @@ class PDO {
     $stmt->execute($data);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
   }
+
   public function fetchFirst($query, $data = []) {
-    return reset($this->fetchAll($query, $data));
+    $tmp = $this->fetchAll($query, $data);
+    return reset($tmp);
   }
 
 }

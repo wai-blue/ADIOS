@@ -241,6 +241,15 @@ class Helper {
     return $result;
   }
 
+  public static function groupBy(string $key, array $data): array {
+    $result = [];
+
+    foreach ($data as $item) {
+      $result[$item[$key]][] = $item;
+    }
+
+    return $result;
+  }
   public static function clearSpeedLogTags() {
     self::$speedLogTags = [];
   }
