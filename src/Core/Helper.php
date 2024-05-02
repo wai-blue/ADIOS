@@ -114,6 +114,7 @@ class Helper {
       $string = str_replace('/', '-', $string);
     }
 
+    $string = str_replace('_', '-', $string);
     $string = preg_replace('/ |^(a-z0-9)/', '-', strtolower(self::rmspecialchars(self::rmdiacritic($string))));
 
     $string = preg_replace('/[^(\x20-\x7F)]*/', '', $string);

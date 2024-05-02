@@ -72,7 +72,10 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
       <AsyncSelect
         loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
         defaultOptions={Object.values(this.state.data ?? {})}
-        value={{id: this.state.value, text: this.state.data[this.state.value]?.text}}
+        value={{
+          id: this.state.value,
+          text: this.state.data ? (this.state.data[this.state.value] ? this.state.data[this.state.value].text : '') : '',
+        }}
         getOptionLabel={(option: any) => { return option.text }}
         getOptionValue={(option: any) => { return option.id }}
         onChange={(item: any) => { this.onChange(item.id); }}
