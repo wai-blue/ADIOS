@@ -8,9 +8,9 @@ import Notification from "./Notification";
 import { adiosError, deepObjectMerge } from "./Helper";
 import request from "./Request";
 
-export interface SortBy {
+export interface OrderBy {
   field: string,
-  sort?: string | null
+  direction?: string | null
 }
 
 export interface TableProps {
@@ -78,13 +78,14 @@ export interface TableState {
   formId?: number,
   formEndpoint?: string,
   formParams?: FormProps,
-  sortBy?: SortBy,
+  orderBy?: OrderBy,
   page: number,
   itemsPerPage: number,
   search?: string,
   showHeader?: boolean,
   title?: string,
   folderUrl?: string,
+  loadingInProgress: boolean,
 }
 
 export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
@@ -108,6 +109,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       page: 1,
       itemsPerPage: 15,
       showHeader: props.showHeader ?? true,
+      loadingInProgress: false,
     } as S;
   }
 
@@ -174,13 +176,14 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   loadData(page: number = 1, itemsPerPage = 15) {
+    this.setState({loadingInProgress: true});
     request.get(
       this.state.endpoint,
       {
         returnData: '1',
         filterBy: this.state.filterBy,
         model: this.props.model,
-        sortBy: this.state.sortBy,
+        orderBy: this.state.orderBy,
         page: page,
         itemsPerPage: itemsPerPage,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
@@ -192,6 +195,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       },
       (data: any) => {
         this.setState({
+          loadingInProgress: false,
           data: data.data,
           page: page,
           itemsPerPage: itemsPerPage
@@ -276,10 +280,10 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     }, () => this.loadData());
   }
 
-  onSortByChange(sortBy?: SortBy, stateParams?: any) {
+  onOrderByChange(orderBy?: OrderBy, stateParams?: any) {
     this.setState({
       ...stateParams,
-      sortBy: sortBy,
+      orderBy: orderBy,
     }, () => this.loadData());
   }
 
