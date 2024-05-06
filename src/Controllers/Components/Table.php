@@ -191,7 +191,7 @@ class Table extends \ADIOS\Core\Controller {
         $params['sortBy']['field'],
         $params['sortBy']['sort']);
     } else {
-      $query->orderBy('id', 'DESC');
+      $query->orderBy($this->model->getFullTableSqlName() . '.id', 'DESC');
     }
 
     return $query;

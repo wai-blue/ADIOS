@@ -114,6 +114,7 @@ class Helper {
       $string = str_replace('/', '-', $string);
     }
 
+    $string = str_replace('_', '-', $string);
     $string = preg_replace('/ |^(a-z0-9)/', '-', strtolower(self::rmspecialchars(self::rmdiacritic($string))));
 
     $string = preg_replace('/[^(\x20-\x7F)]*/', '', $string);
@@ -241,6 +242,15 @@ class Helper {
     return $result;
   }
 
+  public static function groupBy(string $key, array $data): array {
+    $result = [];
+
+    foreach ($data as $item) {
+      $result[$item[$key]][] = $item;
+    }
+
+    return $result;
+  }
   public static function clearSpeedLogTags() {
     self::$speedLogTags = [];
   }

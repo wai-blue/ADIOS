@@ -95,6 +95,11 @@ export class ADIOS {
           } else {
             attributeValue = attributeValues;
           }
+        } else if (attributeValue === 'true') {
+          attributeValue = true;
+        } else if (attributeValue === 'false') {
+
+          attributeValue = false;
         }
 
         componentProps[attributeName] = this.getValidatedAttributeValue(attributeName, attributeValue); 
