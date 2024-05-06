@@ -86,6 +86,12 @@ class Upload extends \ADIOS\Core\Controller {
     //   // } elseif (file_exists($destinationFile)) {
     //   //   $error = "File with this name is already uploaded.";
     // }
+    //
+    //
+
+    if (is_file($destinationFile)) {
+      throw new \Exception("The file already exists");
+    }
 
     if (!move_uploaded_file($sourceFile, $destinationFile)) {
       throw new \Exception("An error occurred during the file upload");

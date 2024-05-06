@@ -18,17 +18,17 @@ class Delete extends \ADIOS\Core\Controller {
 
   public function renderJson() {
     try {
-      $filesToUpload = $_FILES['upload'];
+      $fileFullPath = $this->adios->config['uploadDir'] . '/' . (string) $this->params['fileFullPath'];
 
-      $uploadedFiles = [];
-      for ($i = 0; $i < count($filesToUpload['tmp_name']);$i++) {
-        $uploadedFiles[] = $this->uploadFile($filesToUpload['name'][$i], $filesToUpload['tmp_name'][$i]);
+      if (is_file($fileFullPath)) {
+        if (!unlink($fileFullPath)) throw new \Exception("The deletion of the file encountered an error");
+      } else {
+        throw new \Exception("File not found");
       }
 
       return [
         'status' => 'success',
-        'message' => 'The file has been successfully uploaded',
-        'uploadedFiles' => $uploadedFiles
+        'message' => 'The file has been successfully deleted'
       ];
     } catch (\Exception $e) {
       http_response_code(400);

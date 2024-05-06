@@ -5,11 +5,13 @@ import * as uuid from 'uuid';
 import { Input, InputProps, InputState } from '../Input'
 import Swal from "sweetalert2";
 import request from "../Request";
+import { adiosError, isValidJson } from "../Helper";
 
 interface FileUploadInputProps extends InputProps {
   uid: string,
   folderPath?: string,
   renamePattern?: string,
+  multiselect?: boolean,
   allowedExtenstions?: Array<string>
 }
 
@@ -39,9 +41,17 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
   constructor(props: FileUploadInputProps) {
     super(props);
 
+    let files: Array<string> = [];
+    if (props.value && props.multiselect !== false) {
+      if (Array.isArray(props.value)) files = props.value;
+      else adiosError("Multiselect value must be type of Array");
+    } else {
+      if (props.value != '') files.push(props.value);
+    }
+
     this.state = {
       ...this.state,
-      files: [],
+      files: files,
       endpoint: globalThis._APP_URL + '/components/inputs/fileupload/upload?__IS_AJAX__=1'
         + (props.folderPath ? '&folderPath=' + props.folderPath : '')
         + (props.renamePattern ? '&renamePattern=' + props.renamePattern : '')
@@ -55,7 +65,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     let response: UploadResponse = JSON.parse(event.xhr.response);
     Notification.success(response.message);
 
-    let uploadedFilesPaths: Array<string> = [];
+    let uploadedFilesPaths: Array<string> = this.state.files;
     response.uploadedFiles.map((file: UploadedFile) => uploadedFilesPaths.push(file.fullPath));
 
     this.setState({
@@ -63,19 +73,13 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     });
 
     this.onChange(uploadedFilesPaths);
-
-    setTimeout(() => {
-      this.fileUploadPrimeRef.current?.clear();
-    }, 300);
+    this.clearUploadFiles();
   }
 
   onError(event: FileUploadErrorEvent) {
     let response: UploadResponse = JSON.parse(event.xhr.response);
     Notification.error(response.message);
-  }
-
-  onRemove(event: FileUploadRemoveEvent) {
-    console.log(event);
+    this.clearUploadFiles();
   }
 
   onDelete(fileFullPath: string) {
@@ -88,15 +92,29 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
       cancelButtonColor: '#d33',
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
-        if (result.isConfirmed) {
-          request.delete('');
-          Swal.fire(
-            'Deleted!',
-            'Your file has been deleted.',
-            'success'
-          );
-        }
-      });
+      if (result.isConfirmed) {
+        request.delete(
+          'components/inputs/fileupload/delete',
+          {
+            fileFullPath: fileFullPath
+          },
+          () => {
+            Notification.success("File deleted");
+            this.deleteFileFromFiles(fileFullPath);
+          },
+          () => {
+            alert();
+          }
+        );
+      }
+    });
+  }
+
+  deleteFileFromFiles(fileFullPathToDelete: string) {
+    const updatedFiles = this.state.files.filter((filePath: string) => filePath != fileFullPathToDelete);
+    this.setState({
+      files: updatedFiles
+    });
   }
 
   onUploadedFileClick(fileFullPath: string) {
@@ -107,6 +125,17 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     });
   };
 
+  clearUploadFiles() {
+    setTimeout(() => {
+      this.fileUploadPrimeRef.current?.clear();
+    }, 100);
+  }
+
+  serialize(): string {
+    if (this.props.multiselect === false) return this.state.value ? this.state.value.toString() : '';
+    return JSON.stringify(this.state.files);
+  }
+
   renderInputElement() {
     return (
       <div 
@@ -115,7 +144,6 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
       >
         {this.state.files.length > 0 && (
           <div>
-            <h6>Uploaded Images:</h6>
             <div className="d-flex flex-wrap">
               {this.state.files.map((fileFullPath: string, index: number) => (
                 <div
@@ -148,11 +176,10 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
             ref={this.fileUploadPrimeRef}
             name="upload[]"
             auto={true}
-            multiple={true}
+            multiple={this.props.multiselect ?? true}
             url={this.state.endpoint}
             onUpload={(event: FileUploadUploadEvent) => this.onSuccess(event)}
             onError={(event: FileUploadErrorEvent) => this.onError(event)}
-            onRemove={(event: FileUploadRemoveEvent) => this.onRemove(event)}
             accept="image/*"
             maxFileSize={1000000}
             emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} />
