@@ -4,6 +4,7 @@ import Notification from "./../Notification";
 import * as uuid from 'uuid';
 import { Input, InputProps, InputState } from '../Input'
 import Swal from "sweetalert2";
+import request from "../Request";
 
 interface FileUploadInputProps extends InputProps {
   uid: string,
@@ -77,6 +78,27 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     console.log(event);
   }
 
+  onDelete(fileFullPath: string) {
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+          request.delete('');
+          Swal.fire(
+            'Deleted!',
+            'Your file has been deleted.',
+            'success'
+          );
+        }
+      });
+  }
+
   onUploadedFileClick(fileFullPath: string) {
     Swal.fire({
       imageUrl: globalThis._APP_URL + '/upload/' + fileFullPath,
@@ -96,7 +118,11 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
             <h6>Uploaded Images:</h6>
             <div className="d-flex flex-wrap">
               {this.state.files.map((fileFullPath: string, index: number) => (
-                <div key={index} className="img-container mr-2 mb-2" style={{ maxHeight: '100px', maxWidth: '100px', overflow: 'hidden' }}>
+                <div
+                  key={index}
+                  className="img-container position-relative mr-2 mb-2"
+                  style={{ maxHeight: '100px', maxWidth: '100px', overflow: 'hidden' }}
+                >
                   <img
                     className="img-fluid border border-gray"
                     src={globalThis._APP_URL + '/upload/' + fileFullPath}
@@ -104,6 +130,14 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
                     onClick={() => this.onUploadedFileClick(fileFullPath)}
                     style={{ height: 'auto', maxWidth: '100%', cursor: 'pointer' }}
                   />
+
+                  <button
+                    className="btn btn-sm btn-danger m-2"
+                    onClick={() => this.onDelete(fileFullPath)}
+                    style={{ zIndex: 9999 }}
+                  >
+                    <i className="fas fa-trash"></i>
+                  </button>
                 </div>
               ))}
             </div>

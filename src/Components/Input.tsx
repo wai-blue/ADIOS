@@ -120,7 +120,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
         <input
           id={this.props.id}
           name={this.props.id}
-          type="text"
+          type="hidden"
           value={this.serialize()}
           style={{width: "100%", fontSize: "0.4em"}}
           className="value bg-light"
