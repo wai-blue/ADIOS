@@ -1817,7 +1817,7 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
       dirname(__FILE__)."/../Assets/Css/adios-react-ui.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",
-      dirname(__FILE__)."/../Components/Css/Modal.css",
+      dirname(__FILE__)."/../Assets/Css/modal.css",
     ];
 
     foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {

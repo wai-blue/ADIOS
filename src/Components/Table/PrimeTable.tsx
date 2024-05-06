@@ -3,7 +3,7 @@ import { DataTable, DataTableRowClickEvent, DataTablePageEvent, DataTableSortEve
 import { Column } from 'primereact/column';
 import { ProgressBar } from 'primereact/progressbar';
 
-import Table, { SortBy, TableState, TableProps } from './../Table';
+import Table, { OrderBy, TableState, TableProps } from './../Table';
 import ExportButton from '../ExportButton';
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
@@ -33,7 +33,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     this.onPaginationChange(page, itemsPerPage);
   }
 
-  onSortByChangeCustom(event: DataTableSortEvent) {
+  onOrderByChangeCustom(event: DataTableSortEvent) {
     let sortOrder: number | null = 1;
 
     // Icons in PrimeTable changing
@@ -44,13 +44,13 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       sortOrder = (this.state.sortOrder === null ? 1 : (this.state.sortOrder === 1 ? -1 : null));
     }
 
-    const sortBy: SortBy = {
+    const orderBy: OrderBy = {
       field: event.sortField,
-      sort: event.sortOrder === 1 ? 'asc' : 'desc'
+      direction: event.sortOrder === 1 ? 'asc' : 'desc'
     };
 
-    this.onSortByChange(
-      (sortOrder == null ? undefined : sortBy),
+    this.onOrderByChange(
+      (sortOrder == null ? undefined : orderBy),
       {
         sortOrder: sortOrder,
         sortField: sortOrder === null ? undefined : event.sortField
@@ -151,7 +151,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
 
         <div
           id={"adios-table-prime-" + this.props.uid}
-          className="adios-react-ui table"
+          className={"adios-react-ui table " + (this.state.loadingInProgress ? "loading" : "")}
         >
           <div className="card border-0">
             {this.state.showHeader ?
@@ -239,7 +239,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
                 currentPageReportTemplate="{first}-{last} / {totalRecords}"
                 onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
                 onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
-                onSort={(event: DataTableSortEvent) => this.onSortByChangeCustom(event)}
+                onSort={(event: DataTableSortEvent) => this.onOrderByChangeCustom(event)}
                 sortOrder={this.state.sortOrder}
                 sortField={this.state.sortField}
                 rowClassName={this._rowClassName}

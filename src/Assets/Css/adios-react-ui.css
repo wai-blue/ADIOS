@@ -1,6 +1,15 @@
-/* .adios-react-ui.table {
+.adios-react-ui.input.lookup {
+  min-width: 250px;
+}
+
+/* .table {
   margin-top: 1em;
+  background: blue;
 } */
+
+.adios-react-ui.table.loading {
+  opacity: 0.6;
+}
 
 /* Prime DataTable */
 .p-datatable tbody tr td {
@@ -29,6 +38,10 @@
 .p-datatable-tbody tr:hover {
   background-color: #f0f0f0;
   cursor: pointer;
+}
+
+.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  border-color: var(--cl-main);
 }
 
 /* End Prime DataTable */
