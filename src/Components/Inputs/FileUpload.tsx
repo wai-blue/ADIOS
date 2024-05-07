@@ -1,4 +1,4 @@
-import React, { Component, RefObject, createRef } from "react";
+import React, { RefObject, createRef } from "react";
 import { FileUpload as FileUploadPrime, FileUploadErrorEvent, FileUploadUploadEvent, FileUploadRemoveEvent } from 'primereact/fileupload';
 import Notification from "./../Notification";
 import * as uuid from 'uuid';
@@ -112,9 +112,6 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
           () => {
             Notification.success("File deleted");
             this.deleteFileFromFiles(fileFullPath);
-          },
-          () => {
-            alert();
           }
         );
       }
