@@ -5,14 +5,14 @@ import * as uuid from 'uuid';
 import { Input, InputProps, InputState } from '../Input'
 import Swal from "sweetalert2";
 import request from "../Request";
-import { adiosError, isValidJson } from "../Helper";
+import { adiosError } from "../Helper";
 
 interface FileUploadInputProps extends InputProps {
   uid: string,
   folderPath?: string,
   renamePattern?: string,
   multiselect?: boolean,
-  allowedExtenstions?: Array<string>
+  allowedExtensions?: string
 }
 
 interface UploadedFile {
@@ -55,7 +55,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
       endpoint: globalThis._APP_URL + '/components/inputs/fileupload/upload?__IS_AJAX__=1'
         + (props.folderPath ? '&folderPath=' + props.folderPath : '')
         + (props.renamePattern ? '&renamePattern=' + props.renamePattern : '')
-        + (props.allowedExtenstions ? '&allowedExtenstions=' + props.allowedExtenstions : '')
+        + (props.allowedExtensions ? '&allowedExtensions=' + props.allowedExtensions : '')
     };
 
     this.fileUploadPrimeRef = createRef<FileUploadPrime>();
@@ -66,6 +66,17 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     Notification.success(response.message);
 
     let uploadedFilesPaths: Array<string> = this.state.files;
+    if (this.props.multiselect === false && this.state.files.length > 0) {
+      uploadedFilesPaths = [];
+      const currentFileToDelete = this.state.files.pop();
+      if (currentFileToDelete) {
+        request.delete(
+          'components/inputs/fileupload/delete',
+          { fileFullPath: currentFileToDelete }
+        );
+      }
+    }
+
     response.uploadedFiles.map((file: UploadedFile) => uploadedFilesPaths.push(file.fullPath));
 
     this.setState({
@@ -117,7 +128,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     });
   }
 
-  onUploadedFileClick(fileFullPath: string) {
+  onUploadedImageClick(fileFullPath: string) {
     Swal.fire({
       imageUrl: globalThis._APP_URL + '/upload/' + fileFullPath,
       imageAlt: 'Image',
@@ -125,10 +136,71 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     });
   };
 
+ onUploadedFileClick(fileFullPath: string) {
+    Swal.fire({
+      html: `<iframe src="${globalThis._APP_URL}/upload/${fileFullPath}" width="100%" height="750px" frameborder="0"></iframe>`,
+      width: '80%',
+      heightAuto: false,
+      showCloseButton: true,
+      showConfirmButton: false,
+      scrollbarPadding: false
+    });
+}
+
   clearUploadFiles() {
     setTimeout(() => {
       this.fileUploadPrimeRef.current?.clear();
     }, 100);
+  }
+
+  getFileExtension(fileName: string): string|null {
+    const extenstion = fileName.split('.').pop();
+    if (extenstion == undefined) return null;
+    return extenstion.toLowerCase();
+  };
+
+  getFileName(fileFullPath: string): string {
+    if (!this.props.folderPath) return fileFullPath;
+
+    const lastIndex = fileFullPath.lastIndexOf(this.props.folderPath);
+    return fileFullPath.slice(lastIndex + this.props.folderPath.length + 1);
+  }
+
+  renderFontAwesomeIcon(icon: string, fileFullPath: string) {
+    return <div style={{ textAlign: 'center' }}>
+      <i
+        className={icon}
+        onClick={() => this.onUploadedFileClick(fileFullPath)}
+        style={{ fontSize: '45px', cursor: 'pointer' }}
+      />
+      <label className="m-0 p-0 mt-1" style={{ fontSize: '10px', display: 'block' }}>
+        {this.getFileName(fileFullPath)}
+      </label>
+    </div>;
+  }
+
+  renderFileIcon(fileFullPath: string): JSX.Element {
+    const extension = this.getFileExtension(fileFullPath);
+
+    switch (extension) {
+      case 'pdf':
+        return this.renderFontAwesomeIcon("fas fa-file-pdf", fileFullPath);
+      case 'doc':
+      case 'docx':
+        return this.renderFontAwesomeIcon("fas fa-file-word", fileFullPath);
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+        return <img
+          className="img-fluid border border-gray"
+          src={globalThis._APP_URL + '/upload/' + fileFullPath}
+          alt={`Image ${fileFullPath}`}
+          onClick={() => this.onUploadedImageClick(fileFullPath)}
+          style={{ height: '65px', width: '65px', cursor: 'pointer' }}
+        />
+      default:
+        return this.renderFontAwesomeIcon("fas fa-file", fileFullPath);
+    }
   }
 
   serialize(): string {
@@ -143,32 +215,18 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
         className="adios-react-ui Title p-4"
       >
         {this.state.files.length > 0 && (
-          <div>
-            <div className="d-flex flex-wrap">
-              {this.state.files.map((fileFullPath: string, index: number) => (
-                <div
-                  key={index}
-                  className="img-container position-relative mr-2 mb-2"
-                  style={{ maxHeight: '100px', maxWidth: '100px', overflow: 'hidden' }}
+          <div className="d-flex flex-wrap">
+            {this.state.files.map((fileFullPath: string, index: number) => (
+              <div key={index} className="d-flex flex-column align-items-center m-2">
+                {this.renderFileIcon(fileFullPath)}
+                <button
+                  className="btn btn-sm btn-danger m-2"
+                  onClick={() => this.onDelete(fileFullPath)}
                 >
-                  <img
-                    className="img-fluid border border-gray"
-                    src={globalThis._APP_URL + '/upload/' + fileFullPath}
-                    alt={`Image ${index}`}
-                    onClick={() => this.onUploadedFileClick(fileFullPath)}
-                    style={{ height: 'auto', maxWidth: '100%', cursor: 'pointer' }}
-                  />
-
-                  <button
-                    className="btn btn-sm btn-danger m-2"
-                    onClick={() => this.onDelete(fileFullPath)}
-                    style={{ zIndex: 9999 }}
-                  >
-                    <i className="fas fa-trash"></i>
-                  </button>
-                </div>
-              ))}
-            </div>
+                  <i className="fas fa-trash"></i>
+                </button>
+              </div>
+            ))}
           </div>
         )}
         <div className="card">
@@ -180,7 +238,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
             url={this.state.endpoint}
             onUpload={(event: FileUploadUploadEvent) => this.onSuccess(event)}
             onError={(event: FileUploadErrorEvent) => this.onError(event)}
-            accept="image/*"
+            accept={this.props.allowedExtensions}
             maxFileSize={1000000}
             emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} />
         </div>
