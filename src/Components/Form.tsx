@@ -329,22 +329,26 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       inputsValues = this.props.defaultValues;
     }
 
-    Object.keys(columns).map((columnName: string) => {
-      switch (columns[columnName]['type']) {
-        case 'image':
-          data[columnName] = {
-            fileName: inputsValues[columnName] ?? inputsValues[columnName],
-            fileData: inputsValues[columnName] != undefined && inputsValues[columnName] != ""
-              ? this.state.folderUrl + '/' + inputsValues[columnName]
-              : null
-          };
-        break;
-        case 'bool':
-        case 'boolean':
-          data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
-        break;
-        default:
-          data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
+    Object.keys(inputsValues).map((columnName: string) => {
+      if (!columns[columnName]) {
+        data[columnName] = inputsValues[columnName];
+      } else {
+        switch (columns[columnName]['type']) {
+          case 'image':
+            data[columnName] = {
+              fileName: inputsValues[columnName] ?? inputsValues[columnName],
+              fileData: inputsValues[columnName] != undefined && inputsValues[columnName] != ""
+                ? this.state.folderUrl + '/' + inputsValues[columnName]
+                : null
+            };
+          break;
+          case 'bool':
+          case 'boolean':
+            data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
+          break;
+          default:
+            data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
+        }
       }
     });
 
@@ -570,7 +574,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       params: inputParams,
       value: data[columnName] ?? '',
       invalid: this.state.invalidInputs[columnName] ?? false,
-      readonly: this.props.readonly || columns[columnName].readonly || columns[columnName].disabled,
+      readonly: this.props.readonly || columns[columnName]?.readonly || columns[columnName]?.disabled,
       cssClass: inputParams.cssClass ?? '',
       onChange: (value: any) => this.inputOnChangeRaw(columnName, value),
       isInitialized: false,
@@ -649,10 +653,10 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         </label>
 
         <div key={columnName}>
-          {this.input(columnName, inputParams)}
+          <div className="d-inline-block">{this.input(columnName, inputParams)}</div>
+          {inputParams.unit ? <div className="d-inline-block pl-2">{inputParams.unit}</div> : null}
         </div>
 
-        {inputParams.unit ? <div>{inputParams.unit}</div> : null}
 
         <small className="form-text text-muted">{inputParams.description}</small>
       </div>
