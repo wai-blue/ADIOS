@@ -1182,7 +1182,7 @@ class Loader
 
       // Check if controller exists or if it can be used
       if (empty($this->controller)) {
-        $controllerClassName = \App\Core\Controller::class;
+        $controllerClassName = \ADIOS\Core\Controller::class;
       } else if (!$this->controllerExists($this->controller)) {
         throw new \ADIOS\Core\Exceptions\ControllerNotFound($this->controller);
       } else {

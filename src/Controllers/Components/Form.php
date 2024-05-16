@@ -71,9 +71,9 @@ class Form extends \ADIOS\Core\Controller {
 
       $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
       $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $model->inputs());
-      $params['columns'] = array_filter($params['columns'], function($column) {
-        return ($column['show'] ?? FALSE);
-      });
+      // $params['columns'] = array_filter($params['columns'], function($column) {
+      //   return ($column['show'] ?? FALSE);
+      // });
 
       $params['canRead'] = $this->adios->permissions->granted($this->params['model'] . ':Read');
       $params['canCreate'] = $this->adios->permissions->granted($this->params['model'] . ':Create');

@@ -1,5 +1,5 @@
   var ui_table_params = {};
-  let ui_table_order_by = '';
+  // let ui_table_order_by = '';
 
   function ui_table_settings_click(uid){
 

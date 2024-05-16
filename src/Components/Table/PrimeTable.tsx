@@ -1,5 +1,13 @@
 import React, { ChangeEvent, createRef } from 'react';
-import { DataTable, DataTableRowClickEvent, DataTablePageEvent, DataTableSortEvent, SortOrder, } from 'primereact/datatable';
+import {
+  DataTable,
+  DataTableRowClickEvent,
+  DataTableSelectEvent,
+  DataTableUnselectEvent,
+  DataTablePageEvent,
+  DataTableSortEvent,
+  SortOrder,
+} from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ProgressBar } from 'primereact/progressbar';
 
@@ -8,14 +16,19 @@ import ExportButton from '../ExportButton';
 import { dateToEUFormat, datetimeToEUFormat } from "../Inputs/DateTime";
 
 export interface PrimeTableProps extends TableProps {
+  selectionMode?: 'single' | 'multiple' | undefined,
 }
 
 export interface PrimeTableState extends TableState {
   sortOrder: SortOrder,
-  sortField?: string
+  sortField?: string,
+  selection: any,
 }
 
 export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableState> {
+  state: PrimeTableState;
+  props: PrimeTableProps;
+
   dt = createRef<DataTable<any[]>>();
 
   constructor(props: TableProps) {
@@ -23,8 +36,50 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
 
     this.state = {
       ...this.state,
+      selection: [],
       sortOrder: null,
     };
+  }
+
+  getTableProps(): Object {
+    return {
+      ref: this.dt,
+      value: this.state.data?.data,
+      // editMode: 'row',
+      compareSelectionBy: 'equals',
+      dataKey: "id",
+      first: (this.state.page - 1) * this.state.itemsPerPage,
+      paginator: true,
+      rows: this.state.itemsPerPage,
+      totalRecords: this.state.data?.total,
+      rowsPerPageOptions: [15, 30, 50, 100],
+      paginatorTemplate: "FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown",
+      currentPageReportTemplate: "{first}-{last} / {totalRecords}",
+      onRowClick: (data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number),
+      onRowSelect: (event: DataTableSelectEvent) => this.onRowSelect(event),
+      onRowUnselect: (event: DataTableUnselectEvent) => this.onRowUnselect(event),
+      onPage: (event: DataTablePageEvent) => this.onPaginationChangeCustom(event),
+      onSort: (event: DataTableSortEvent) => this.onOrderByChangeCustom(event),
+      sortOrder: this.state.sortOrder,
+      sortField: this.state.sortField,
+      rowClassName: this.rowClassName,
+      stripedRows: true,
+      //globalFilter={globalFilter}
+      //header={header}
+      dragSelection: true,
+      selectAll: true,
+      metaKeySelection: true,
+      selection: this.state.selection,
+      selectionMode: (this.props.selectionMode == 'single' ? 'radiobutton': (this.props.selectionMode == 'multiple' ? 'checkbox' : null)),
+      onSelectionChange: (event: any) => {
+        this.setState({selection: event.value} as PrimeTableState);
+        this.onSelectionChange(event);
+      }
+    };
+  }
+
+  onSelectionChange(event :any) {
+    // to be overriden
   }
 
   onPaginationChangeCustom(event: DataTablePageEvent) {
@@ -58,10 +113,18 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     );
   }
 
+  onRowSelect(event: DataTableSelectEvent) {
+    // to be overriden
+  }
+
+  onRowUnselect(event: DataTableUnselectEvent) {
+    // to be overriden
+  }
+
   /*
    * Render body for Column (PrimeReact column)
    */
-  _renderColumnBody(columnName: string, column: any, data: any, options: any) {
+  renderCell(columnName: string, column: any, data: any, options: any) {
     const columnValue: any = data[columnName];
     const enumValues = column.enumValues;
 
@@ -116,27 +179,39 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     }
   }
 
-  _renderRows(): JSX.Element[] {
-    return Object.keys(this.state.columns).map((columnName: string) => {
+  renderRows(): JSX.Element[] {
+    let columns: JSX.Element[] = [];
+
+    if (this.props.selectionMode) {
+      columns.push(<Column selectionMode={this.props.selectionMode}></Column>);
+    }
+    
+    Object.keys(this.state.columns).map((columnName: string) => {
       const column: any = this.state.columns[columnName];
-      return <Column
+      columns.push(<Column
         key={columnName}
         field={columnName}
         header={column.title}
         body={(data: any, options: any) => {
           return (
-            <div className={column.cssClass} style={column.cssStyle}>
-              {this._renderColumnBody(columnName, column, data, options)}
+            <div className={(column.cssClass ?? '') + ' ' + this.cellClassName(columnName, data)} style={column.cssStyle}>
+              {this.renderCell(columnName, column, data, options)}
             </div>
           );
         }}
         style={{ width: 'auto' }}
         sortable
-      ></Column>;
+      ></Column>);
     });
+
+    return columns;
   }
 
-  _rowClassName(rowData: any) {
+  cellClassName(columnName: string, rowData: any) {
+    return ''; // rowData.id % 2 === 0 ? '' : 'bg-light';
+  }
+
+  rowClassName(rowData: any) {
     return ''; // rowData.id % 2 === 0 ? '' : 'bg-light';
   }
 
@@ -180,7 +255,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
 
                   <div className="col-lg-6 m-0 p-0">
                     <div className="d-flex flex-row-reverse">
-                      <div className="dropdown no-arrow">
+                      {/* <div className="dropdown no-arrow">
                         <button 
                           className="btn btn-light dropdown-toggle" 
                           type="button"
@@ -207,7 +282,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
                             <i className="fas fa-print mr-2"/> Tlačiť
                           </button>
                         </div>
-                      </div>
+                      </div> */}
 
                       <input 
                         className="mr-2 form-control border-end-0 border"
@@ -224,32 +299,8 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
             : ''}
 
             <div id={"adios-table-prime-body-" + this.props.uid}>
-              <DataTable
-                className="border rounded"
-                ref={this.dt}
-                value={this.state.data.data}
-                lazy={true}
-                dataKey="id"
-                first={(this.state.page - 1) * this.state.itemsPerPage}
-                paginator
-                rows={this.state.itemsPerPage}
-                totalRecords={this.state.data.total}
-                rowsPerPageOptions={[15, 30, 50, 100]}
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                currentPageReportTemplate="{first}-{last} / {totalRecords}"
-                onRowClick={(data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number)}
-                onPage={(event: DataTablePageEvent) => this.onPaginationChangeCustom(event)}
-                onSort={(event: DataTableSortEvent) => this.onOrderByChangeCustom(event)}
-                sortOrder={this.state.sortOrder}
-                sortField={this.state.sortField}
-                rowClassName={this._rowClassName}
-                stripedRows={true}
-                //globalFilter={globalFilter}
-                //header={header}
-                //selection={selectedProducts}
-                //onSelectionChange={(e) => setSelectedProducts(e.value)}
-              >
-                {this._renderRows()}
+              <DataTable {...this.getTableProps()}>
+                {this.renderRows()}
               </DataTable>
             </div>
           </div>

@@ -133,12 +133,22 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     return params;
   }
 
+  getEndpointUrl(): string {
+    return this.state.endpoint;
+  }
+
+  getCustomEndpointParams(): any {
+    /* to be overriden */
+    return {};
+  }
+
   loadParams(successCallback?: (params: any) => void) {
     let propsColumns = this.props.columns ?? {};
 
     request.get(
-      this.state.endpoint,
+      this.getEndpointUrl(),
       {
+        ...this.getCustomEndpointParams(),
         returnParams: '1',
         model: this.props.model,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
@@ -178,8 +188,9 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   loadData(page: number = 1, itemsPerPage = 15) {
     this.setState({loadingInProgress: true});
     request.get(
-      this.state.endpoint,
+      this.getEndpointUrl(),
       {
+        ...this.getCustomEndpointParams(),
         returnData: '1',
         filterBy: this.state.filterBy,
         model: this.props.model,
