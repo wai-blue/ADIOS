@@ -12,7 +12,7 @@ interface FileUploadInputProps extends InputProps {
   folderPath?: string,
   renamePattern?: string,
   multiselect?: boolean,
-  allowedExtensions?: string
+  accept?: string
 }
 
 interface UploadedFile {
@@ -42,12 +42,11 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
     super(props);
 
     let files: Array<string> = [];
+
     if (props.value && props.multiselect !== false) {
       if (Array.isArray(props.value)) files = props.value;
       else adiosError("Multiselect value must be type of Array");
-    } else {
-      if (props.value != '') files.push(props.value);
-    }
+    } else if (props.value) files.push(props.value);
 
     this.state = {
       ...this.state,
@@ -55,7 +54,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
       endpoint: globalThis._APP_URL + '/components/inputs/fileupload/upload?__IS_AJAX__=1'
         + (props.folderPath ? '&folderPath=' + props.folderPath : '')
         + (props.renamePattern ? '&renamePattern=' + props.renamePattern : '')
-        + (props.allowedExtensions ? '&allowedExtensions=' + props.allowedExtensions : '')
+        + (props.accept ? '&accept=' + props.accept : '')
     };
 
     this.fileUploadPrimeRef = createRef<FileUploadPrime>();
@@ -135,7 +134,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
 
  onUploadedFileClick(fileFullPath: string) {
     Swal.fire({
-      html: `<iframe src="${globalThis._APP_URL}/upload/${fileFullPath}" width="100%" height="750px" frameborder="0"></iframe>`,
+      html: `<iframe src="${globalThis._APP_UPLOAD_URL}/${fileFullPath}" width="100%" height="750px" frameborder="0"></iframe>`,
       width: '80%',
       heightAuto: false,
       showCloseButton: true,
@@ -190,7 +189,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
       case 'png':
         return <img
           className="img-fluid border border-gray"
-          src={globalThis._APP_URL + '/upload/' + fileFullPath}
+          src={globalThis._APP_UPLOAD_URL + '/' + fileFullPath}
           alt={`Image ${fileFullPath}`}
           onClick={() => this.onUploadedImageClick(fileFullPath)}
           style={{ height: '65px', width: '65px', cursor: 'pointer' }}
@@ -235,7 +234,7 @@ export default class FileUpload extends Input<FileUploadInputProps, FileUploadIn
             url={this.state.endpoint}
             onUpload={(event: FileUploadUploadEvent) => this.onSuccess(event)}
             onError={(event: FileUploadErrorEvent) => this.onError(event)}
-            accept={this.props.allowedExtensions}
+            accept={this.props.accept}
             maxFileSize={1000000}
             emptyTemplate={<p className="m-0">Drag and drop files to here to upload.</p>} />
         </div>
