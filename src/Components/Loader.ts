@@ -11,6 +11,7 @@ export class ADIOS {
 
   reactComponents: any = {};
   reactComponentsWaitingForRender: number = 0;
+  reactElements: Object = {};
 
   /**
   * Define attributes which will not removed

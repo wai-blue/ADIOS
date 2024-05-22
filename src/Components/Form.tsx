@@ -103,6 +103,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   constructor(props: FormProps) {
     super(props);
 
+    globalThis.adios.reactElements[this.props.uid] = this;
+
     this.state = {
       isInitialized: false,
       endpoint: props.endpoint ? props.endpoint : 'components/form',
@@ -567,6 +569,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const data = this.state.data ?? {};
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
+      uid: this.props.uid + '_' + columnName,
       id: this.props.uid + '_' + columnName,
       parentForm: this,
       context: this.props.context ? this.props.context : this.props.uid,

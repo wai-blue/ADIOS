@@ -1697,7 +1697,7 @@ class Loader
         while ($row = $this->db->fetchArray()) {
           $tmp = &$this->config;
           foreach (explode("/", $row['path']) as $tmp_path) {
-            if (!is_array($tmp[$tmp_path])) {
+            if (!isset($tmp[$tmp_path])) {
               $tmp[$tmp_path] = [];
             }
             $tmp = &$tmp[$tmp_path];

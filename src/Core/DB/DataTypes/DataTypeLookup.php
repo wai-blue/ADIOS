@@ -26,7 +26,7 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     //   $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : ' default 0 ';
     // }
 
-    return "`{$col_name}` ".('' == $params['sql_type'] ? 'int(8)' : $params['sql_type'])." {$params['sql_definitions']} NULL default 0";
+    return "`{$col_name}` ".($params['sql_type'] ?? 'int(8)')." ".($params['sql_definitions'] ?? '')." NULL default 0";
   }
 
   public function sqlValueString($table, $colName, $value, $params = []) {

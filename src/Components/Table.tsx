@@ -94,6 +94,8 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   constructor(props: TableProps) {
     super(props);
 
+    globalThis.adios.reactElements[this.props.uid] = this;
+
     this.state = {
       endpoint: props.endpoint ? props.endpoint : 'components/table',
       canCreate: props.canCreate ?? true,
@@ -119,6 +121,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   componentDidUpdate(prevProps: TableProps, prevState: TableState) {
+
     if (
       (prevProps.formParams?.id != this.props.formParams?.id)
       || (prevProps.parentFormId != this.props.parentFormId)

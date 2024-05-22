@@ -985,7 +985,7 @@ class MySQLi extends \ADIOS\Core\DB
       }
 
       $table_columns = $this->tables[$table_name];
-      $table_params = $table_columns['%%table_params%%'];
+      $table_params = $table_columns['%%table_params%%'] ?? [];
 
       $sql = "drop table if exists `{$table_name}`;;\n";
       $sql .= "create table `{$table_name}` (\n";
@@ -993,7 +993,7 @@ class MySQLi extends \ADIOS\Core\DB
       foreach ($table_columns as $col_name => $col_definition) {
         $col_type = trim($col_definition['type']);
 
-        if (isset($this->columnTypes[$col_type]) && !$col_definition['virtual']) {
+        if (isset($this->columnTypes[$col_type]) && !($col_definition['virtual'] ?? false)) {
           $tmp = $this->columnTypes[$col_type]
             ->sqlCreateString($table_name, $col_name, $col_definition);
 
@@ -1015,7 +1015,7 @@ class MySQLi extends \ADIOS\Core\DB
       foreach ($table_columns as $col_name => $col_definition) {
         if (
           $col_name != 'id'
-          && !$col_definition['virtual']
+          && !($col_definition['virtual'] ?? false)
           && in_array($col_definition['type'], ['lookup', 'int', 'bool', 'boolean', 'date', 'datetime'])
         ) {
           $sql .= " index `{$col_name}` (`{$col_name}`),\n";

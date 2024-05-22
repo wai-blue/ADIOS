@@ -3,6 +3,7 @@ import * as uuid from 'uuid';
 import Form from './Form';
 
 export interface InputProps {
+  uid: string,
   params: any,
   inputClassName?: string,
   columnName: string,
@@ -37,6 +38,8 @@ export class Input<P extends InputProps, S extends InputState> extends Component
 
   constructor(props: P) {
     super(props);
+
+    globalThis.adios.reactElements[this.props.uid] = this;
 
     const isInitialized: boolean = props.isInitialized ?? false;
     const readonly: boolean = props.readonly ?? false;
