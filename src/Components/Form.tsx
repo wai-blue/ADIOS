@@ -484,7 +484,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
                   || this.state.columns[columnName] == null
                 ) return <strong style={{color: 'red'}}>Not defined params for column `{columnName}`</strong>;
 
-                return <span key={key++}>{this.inputWrapper(columnName)}</span>;
+                return this.inputWrapper(columnName);
               })
             ) : ''}
         </div>
@@ -649,19 +649,21 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const inputParams = this.buildInputParams(columnName, customInputParams);
 
     return columnName == 'id' ? <></>: (
-      <div className="input-form mb-3" key={columnName}>
-        <label className="text-dark">
+      <div className="input-wrapper" key={columnName}>
+        <div className="input-label">
           {inputParams.title}
           {inputParams.required == true ? <b className="text-danger"> *</b> : ""}
-        </label>
+        </div>
 
-        <div key={columnName}>
-          <div className="d-inline-block">{this.input(columnName, inputParams)}</div>
+        <div className="input-body" key={columnName}>
+          {this.input(columnName, inputParams)}
           {inputParams.unit ? <div className="d-inline-block pl-2">{inputParams.unit}</div> : null}
         </div>
 
-
-        <small className="form-text text-muted">{inputParams.description}</small>
+        {inputParams.description ?
+          <div className="input-description">{inputParams.description}</div>
+          : null
+        }
       </div>
     );
   }
