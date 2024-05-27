@@ -1046,13 +1046,13 @@ class MySQLi extends \ADIOS\Core\DB
     $sql = '';
     foreach ($this->tables[$table] as $column => $columnDefinition) {
       if (
-        !$columnDefinition['disableForeignKey']
+        !($columnDefinition['disableForeignKey'] ?? false)
         && 'lookup' == $columnDefinition['type']
       ) {
         $lookupModel = $this->adios->getModel($columnDefinition['model']);
-        $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?: "id";
-        $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?: "RESTRICT";
-        $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?: "RESTRICT";
+        $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?? "id";
+        $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?? "RESTRICT";
+        $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?? "RESTRICT";
 
         $sql .= "
           ALTER TABLE `{$table}`

@@ -19,10 +19,8 @@ class DataTypeInt extends DataType
 {
   public function sqlCreateString($table_name, $col_name, $params = [])
   {
-    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 
-      ? $params['sql_definitions'] 
-      : "default " . (int) $this->getDefaultValue($params);
-
+    $sqlDef = $params['sql_definitions'] ?? '';
+    $params['sql_definitions'] = '' != trim($sqlDef) ? $sqlDef : "default " . (int) $this->getDefaultValue($params);
     return "`$col_name` int({$params['byte_size']}) {$params['sql_definitions']} NOT NULL";
   }
 

@@ -17,10 +17,8 @@ class DataTypeVarchar extends \ADIOS\Core\DB\DataType
 {
 
   public function sqlCreateString($table_name, $col_name, $params = []) {
-    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 
-      ? $params['sql_definitions'] 
-      : "default '" . (string) $this->getDefaultValue($params) . "' ";
-
+    $sqlDef = $params['sql_definitions'] ?? '';
+    $params['sql_definitions'] = '' != trim($sqlDef) ? $sqlDef : "default '" . (string) $this->getDefaultValue($params) . "' ";
     return "`$col_name` varchar({$params['byte_size']}) {$params['sql_definitions']}";
   }
 
