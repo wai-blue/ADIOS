@@ -39,7 +39,7 @@ class Lookup extends \ADIOS\Core\Controller {
     return $query;
   }
 
-  public function renderJson() { 
+  public function renderJson(): ?array { 
     try {
       return [
         'data' => \ADIOS\Core\Helper::keyBy('id', $this->prepareDataQuery()->get()->toArray())

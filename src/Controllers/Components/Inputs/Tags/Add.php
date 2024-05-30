@@ -23,7 +23,7 @@ class Add extends \ADIOS\Core\Controller {
     //$this->permission = $this->params['model'] . ':Read';
   }
 
-  public function renderJson() { 
+  public function renderJson(): ?array { 
     try {
       $id = (int) $this->params['id'];
       $model = (string) $this->params['model'];

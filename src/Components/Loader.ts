@@ -13,6 +13,8 @@ export class ADIOS {
   reactComponentsWaitingForRender: number = 0;
   reactElements: Object = {};
 
+  dictionary: Object = {};
+
   /**
   * Define attributes which will not removed
   */

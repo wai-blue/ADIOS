@@ -22,7 +22,7 @@ class Data extends \ADIOS\Core\Controller {
     parent::__construct($adios, $params);
   }
 
-  public function renderJson() { 
+  public function renderJson(): ?array { 
     try {
       $id = (int) $this->params['id'];
       $model = (string) $this->params['model'];

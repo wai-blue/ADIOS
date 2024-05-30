@@ -114,8 +114,8 @@ class Controller {
    *
    * @return array Array to be returned as a JSON.
    */
-  public function renderJson() {
-    return NULL;
+  public function renderJson(): ?array {
+    return null;
   }
 
   /**

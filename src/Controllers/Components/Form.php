@@ -96,7 +96,7 @@ class Form extends \ADIOS\Core\Controller {
 
 
 
-  public function renderJson() {
+  public function renderJson(): ?array {
     if (empty($this->params['view'])) {
       try {
         return [

@@ -220,7 +220,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
   getFormParams(): any {
     return {
-      uid: this.props.uid,
+      uid: this.props.uid + '_form',
       model: this.props.model,
       tag: this.props.tag, 
       id: this.state.formId ?? 0, 
@@ -247,7 +247,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
   getFormModalParams(): any {
     return {
-      uid: this.props.uid,
+      uid: this.props.uid + '_form',
       model: this.props.model,
       hideHeader: true,
       isOpen: this.props.formParams?.id ? true : false,
@@ -270,7 +270,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
         let _this = this;
         setTimeout(function() {
           //@ts-ignore
-          ADIOS.modalToggle(_this.props.uid);
+          ADIOS.modalToggle(_this.props.uid + '_form');
         }, 280);
       }
     )

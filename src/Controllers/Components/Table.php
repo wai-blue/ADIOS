@@ -218,7 +218,7 @@ class Table extends \ADIOS\Core\Controller {
 
 
 
-  public function renderJson() {
+  public function renderJson(): ?array {
     try {
       return [
         'params' => ($this->params['returnParams'] ? $this->getParams() : []),

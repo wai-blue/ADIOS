@@ -657,7 +657,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
         <div className="input-body" key={columnName}>
           {this.input(columnName, inputParams)}
-          {inputParams.unit ? <div className="d-inline-block pl-2">{inputParams.unit}</div> : null}
         </div>
 
         {inputParams.description ?

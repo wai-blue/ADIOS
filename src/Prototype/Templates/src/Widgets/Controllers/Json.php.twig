@@ -8,7 +8,7 @@ class {{ thisController.class }} extends \{{ appNamespace }}\Core\Controller {
 
   public bool $hideDefaultDesktop = true;
 
-  public function renderJson() { 
+  public function renderJson(): ?array { 
     try {
       return 
 {{ varExport(thisController.config.params, "      ")|raw }} ?? []

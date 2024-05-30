@@ -24,7 +24,7 @@ class OnDelete extends \ADIOS\Core\Controller {
     $this->permission = $this->params['model'] . ':Delete';
   }
 
-  public function renderJson() {
+  public function renderJson(): ?array {
     try {
       $params = $this->params;
 

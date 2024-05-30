@@ -66,14 +66,19 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       stripedRows: true,
       //globalFilter={globalFilter}
       //header={header}
+      emptyMessage: globalThis.adios.dictionary['PrimeTable/emptyMessage'] ?? 'No data.',
       dragSelection: true,
       selectAll: true,
       metaKeySelection: true,
       selection: this.state.selection,
       selectionMode: (this.props.selectionMode == 'single' ? 'radiobutton': (this.props.selectionMode == 'multiple' ? 'checkbox' : null)),
       onSelectionChange: (event: any) => {
-        this.setState({selection: event.value} as PrimeTableState);
-        this.onSelectionChange(event);
+        this.setState(
+          {selection: event.value} as PrimeTableState,
+          function() {
+            this.onSelectionChange(event);
+          }
+        )
       }
     };
   }
@@ -130,52 +135,56 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
 
     if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
 
-    switch (column.type) {
-      case 'int':
-        return <div className="text-right">
-          {columnValue}
-          {column.unit ? ' ' + column.unit : ''}
-        </div>;
-      case 'float':
-        return <div className="text-right">
-          {columnValue}
-          {column.unit ? ' ' + column.unit : ''}
-        </div>;
-      case 'color':
-        return <div
-          style={{ width: '20px', height: '20px', background: columnValue }} 
-          className="rounded"
-        />;
-      case 'image':
-        if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
-        return <img 
-          style={{ width: '30px', height: '30px' }}
-          src={this.state.folderUrl + "/" + columnValue}
-          className="rounded"
-        />;
-      case 'lookup':
-        return <span style={{
-          color: '#2d4a8a'
-        }}>{columnValue?.lookupSqlValue}</span>;
-      case 'enum':
-        const enumValues = column.enumValues;
-        if (!enumValues) return;
-        return enumValues[columnValue];
-      case 'bool':
-      case 'boolean':
-        if (columnValue) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
-        return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
-      case 'date': return dateToEUFormat(columnValue);
-      case 'datetime': return datetimeToEUFormat(columnValue);
-      case 'tags': {
-        return <>
-          {columnValue.map((item: any) => {
-            if (!column.dataKey) return <></>;
-            return <span className="badge badge-info mx-1" key={item.id}>{item[column.dataKey]}</span>;
-          })}
-        </>
+    if (columnValue === null) {
+      return <div className="text-right"><small style={{color: 'var(--gray-700)'}}>N/A</small></div>;
+    } else {
+      switch (column.type) {
+        case 'int':
+          return <div className="text-right">
+            {columnValue}
+            {column.unit ? ' ' + column.unit : ''}
+          </div>;
+        case 'float':
+          return <div className="text-right">
+            {columnValue}
+            {column.unit ? ' ' + column.unit : ''}
+          </div>;
+        case 'color':
+          return <div
+            style={{ width: '20px', height: '20px', background: columnValue }} 
+            className="rounded"
+          />;
+        case 'image':
+          if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+          return <img 
+            style={{ width: '30px', height: '30px' }}
+            src={this.state.folderUrl + "/" + columnValue}
+            className="rounded"
+          />;
+        case 'lookup':
+          return <span style={{
+            color: '#2d4a8a'
+          }}>{columnValue?.lookupSqlValue}</span>;
+        case 'enum':
+          const enumValues = column.enumValues;
+          if (!enumValues) return;
+          return enumValues[columnValue];
+        case 'bool':
+        case 'boolean':
+          if (columnValue) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
+          return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
+        case 'date': return dateToEUFormat(columnValue);
+        case 'datetime': return datetimeToEUFormat(columnValue);
+        case 'tags': {
+          return <>
+            {columnValue.map((item: any) => {
+              if (!column.dataKey) return <></>;
+              return <span className="badge badge-info mx-1" key={item.id}>{item[column.dataKey]}</span>;
+            })}
+          </>
+        }
+        default: return columnValue;
       }
-      default: return columnValue;
     }
   }
 

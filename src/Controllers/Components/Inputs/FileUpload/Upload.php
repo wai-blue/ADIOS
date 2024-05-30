@@ -16,7 +16,7 @@ namespace ADIOS\Controllers\Components\Inputs\FileUpload;
 class Upload extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = TRUE;
 
-  public function renderJson() {
+  public function renderJson(): ?array {
     try {
       $filesToUpload = $_FILES['upload'];
 

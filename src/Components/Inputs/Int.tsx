@@ -14,7 +14,7 @@ export default class Int extends Input<IntInputProps, InputState> {
 
   renderInputElement() {
     return (
-      <div className={"max-w-250 " + (this.props.unit ? "input-group" : "")}>
+      <div className={"max-w-250 " + (this.props.params.unit ? "input-group" : "")}>
         <input
           type="number"
           value={this.state.value}
@@ -28,11 +28,11 @@ export default class Int extends Input<IntInputProps, InputState> {
           }
           disabled={this.state.readonly}
         />
-          {this.props.unit ? (
-            <div className="input-group-append">
-              <span className="input-group-text">{this.props.unit}</span>
-            </div>
-          ) : ''}
+        {this.props.params.unit ? (
+          <div className="input-group-append">
+            <span className="input-group-text">{this.props.params.unit}</span>
+          </div>
+        ) : ''}
       </div>
     );
   }

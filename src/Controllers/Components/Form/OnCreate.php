@@ -21,7 +21,7 @@ class OnCreate extends \ADIOS\Core\Controller {
     $this->permission = $this->params['model'] . ':Create';
   }
 
-  public function renderJson() {
+  public function renderJson(): ?array {
     try {
       $params = $this->params;
 

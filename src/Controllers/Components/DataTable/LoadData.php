@@ -167,7 +167,7 @@ class LoadData extends \ADIOS\Core\Controller {
         $this->selectedRecordCount = count($this->data);
     }
 
-    public function renderJson() {
+    public function renderJson(): ?array {
         $this->setSessionParams();
 
         $this->loadData();
