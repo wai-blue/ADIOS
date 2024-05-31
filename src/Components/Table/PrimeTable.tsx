@@ -42,6 +42,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
   }
 
   getTableProps(): Object {
+    console.log(this.state.data?.total);
     return {
       ref: this.dt,
       value: this.state.data?.data,
@@ -50,6 +51,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       dataKey: "id",
       first: (this.state.page - 1) * this.state.itemsPerPage,
       paginator: true,
+      lazy: true,
       rows: this.state.itemsPerPage,
       totalRecords: this.state.data?.total,
       rowsPerPageOptions: [15, 30, 50, 100],
