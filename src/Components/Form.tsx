@@ -189,17 +189,21 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
+  getParamsForLoadData(): object {
+    return {
+      returnData: '1',
+      model: this.props.model,
+      id: this.state.id,
+      tag: this.props.tag,
+      __IS_AJAX__: '1',
+    };
+  }
+
   loadData() {
     if (this.state.id) {
       request.get(
         this.state.endpoint,
-        {
-          returnData: '1',
-          model: this.props.model,
-          id: this.state.id,
-          tag: this.props.tag,
-          __IS_AJAX__: '1',
-        },
+        this.getParamsForLoadData(),
         (data: any) => {
           let newData = this.getDataState(this.state.columns ?? {}, data.data);
           newData = this.onAfterDataLoaded(newData);

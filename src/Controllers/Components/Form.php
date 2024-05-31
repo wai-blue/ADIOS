@@ -35,6 +35,7 @@ class Form extends \ADIOS\Core\Controller {
 
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
     $query = $this->model->selectRaw($columnsToShowAsString);
+    $query = $query->where('id', $this->params['id']);
 
     //foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
     //  if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
@@ -53,7 +54,7 @@ class Form extends \ADIOS\Core\Controller {
 
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
       $this->query = $this->prepareDataQuery();
-      $data = $this->query->find($this->params['id'])?->toArray();
+      $data = $this->query->first()->toArray();
     }
 
     return $data;
