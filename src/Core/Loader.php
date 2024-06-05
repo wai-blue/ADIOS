@@ -1159,6 +1159,7 @@ class Loader
 
       // Apply routing and find-out which controller, permision and rendering params will be used
       list($this->controller, $this->view, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
+      $this->onAfterRouting();
 
       if (isset($this->params['sign-out'])) {
         unset($_SESSION[_ADIOS_ID]);
@@ -1737,6 +1738,10 @@ class Loader
   }
 
   public function onAfterPluginsLoaded() {
+    // to be overriden
+  }
+
+  public function onAfterRouting() {
     // to be overriden
   }
 

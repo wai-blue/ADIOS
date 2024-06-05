@@ -73,6 +73,9 @@ class Table extends \ADIOS\Core\Controller {
     }
   }
 
+  public function getColumnsForDataQuery(): array {
+    return $this->model->columns();
+  }
 
   public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
     $params = $this->params;
@@ -85,7 +88,7 @@ class Table extends \ADIOS\Core\Controller {
 
     $this->model = $this->adios->getModel($this->params['model']);
 
-    $tmpColumns = $this->model->columns();
+    $tmpColumns = $this->getColumnsForDataQuery();
 
     $selectRaw = [];
     $withs = [];
@@ -101,6 +104,8 @@ class Table extends \ADIOS\Core\Controller {
     foreach ($tmpColumns as $columnName => $column) {
       if ($column['type'] == 'lookup') {
         $lookupModel = $this->adios->getModel($column['model']);
+        $lookupConnection = $lookupModel->getConnectionName();
+        $lookupDatabase = $lookupModel->getConnection()->getDatabaseName();
         $lookupTableName = $lookupModel->getFullTableSqlName();
         $joinAlias = 'join_' . $columnName;
         $lookupSqlValue = "(" .
@@ -113,7 +118,7 @@ class Table extends \ADIOS\Core\Controller {
         ;
 
         $joins[] = [
-          $lookupTableName . ' as ' . $joinAlias,
+          $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,
           $joinAlias.'.id',
           '=',
           $this->model->getFullTableSqlName().'.'.$columnName
