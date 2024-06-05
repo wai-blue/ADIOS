@@ -164,6 +164,7 @@ class Loader
   public ?\ADIOS\Core\Permissions $permissions = NULL;
   public ?\ADIOS\Core\Test $test = NULL;
   public ?\ADIOS\Core\Web\Loader $web = NULL;
+  public ?\Illuminate\Database\Capsule\Manager $eloquent = NULL;
 
   public ?\Twig\Environment $twig = NULL;
 
@@ -286,38 +287,27 @@ class Loader
         // inicializacia Twigu
         // include(dirname(__FILE__)."/Lib/Twig.php");
 
-        $eloquentCapsule = new \Illuminate\Database\Capsule\Manager;
-
-        $eloquentCapsule->addConnection([
-          "driver"    => "mysql",
-          "host"      => $this->config['db_host'],
-          "port"      => $this->config['db_port'] ?? 3306,
-          "database"  => $this->config['db_name'],
-          "username"  => $this->config['db_user'],
-          "password"  => $this->config['db_password'],
-          "charset"   => 'utf8mb4',
-          "collation" => 'utf8mb4_unicode_ci',
-        ]);
+        $this->eloquent = new \Illuminate\Database\Capsule\Manager;
 
         // Make this Capsule instance available globally.
-        $eloquentCapsule->setAsGlobal();
+        $this->eloquent->setAsGlobal();
 
         // Setup the Eloquent ORM.
-        $eloquentCapsule->bootEloquent();
+        $this->eloquent->bootEloquent();
 
-        // Image a file su specialne akcie v tom zmysle, ze nie je
-        // potrebne mat nainicializovany cely ADIOS, aby zbehli
-        // (ide najma o nepotrebne nacitavanie DB configu)
-        // Spustaju sa tu, aby sa setrili zdroje.
-
-        if (
-          !empty($this->requestedController)
-          && in_array($this->requestedController, ['Image', 'File'])
-        ) {
-          $this->finalizeConfig();
-          include "{$this->requestedController}.php";
-          die();
-        }
+        $this->eloquent->addConnection(
+          [
+            "driver"    => "mysql",
+            "host"      => $this->config['db_host'],
+            "port"      => $this->config['db_port'] ?? 3306,
+            "database"  => $this->config['db_name'],
+            "username"  => $this->config['db_user'],
+            "password"  => $this->config['db_password'],
+            "charset"   => 'utf8mb4',
+            "collation" => 'utf8mb4_unicode_ci',
+          ],
+          'default'
+        );
       }
 
       \ADIOS\Core\Helper::addSpeedLogTag("#2.1");
