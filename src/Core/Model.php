@@ -170,10 +170,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $this->eloquentQuery->pdoCrossTables = [];
       }
 
-      $this->pdo = $this->getConnection()->getPdo();
+      try {
+        $this->pdo = $this->getConnection()->getPdo();
+      } catch (Exception $e) {
+        $this->pdo = null;
+      } 
 
       // During the installation no SQL tables exist. If child's init()
       // method uses data from DB, $this->init() call would fail.
+      // Therefore the 'try ... catch'.
       try {
         $this->init();
       } catch (Exception $e) {

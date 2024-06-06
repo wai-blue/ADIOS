@@ -284,30 +284,8 @@ class Loader
 
       if ($mode == self::ADIOS_MODE_FULL) {
 
-        // inicializacia Twigu
-        // include(dirname(__FILE__)."/Lib/Twig.php");
+        $this->initDatabaseConnections();
 
-        $this->eloquent = new \Illuminate\Database\Capsule\Manager;
-
-        // Make this Capsule instance available globally.
-        $this->eloquent->setAsGlobal();
-
-        // Setup the Eloquent ORM.
-        $this->eloquent->bootEloquent();
-
-        $this->eloquent->addConnection(
-          [
-            "driver"    => "mysql",
-            "host"      => $this->config['db_host'],
-            "port"      => $this->config['db_port'] ?? 3306,
-            "database"  => $this->config['db_name'],
-            "username"  => $this->config['db_user'],
-            "password"  => $this->config['db_password'],
-            "charset"   => 'utf8mb4',
-            "collation" => 'utf8mb4_unicode_ci',
-          ],
-          'default'
-        );
       }
 
       \ADIOS\Core\Helper::addSpeedLogTag("#2.1");
@@ -355,13 +333,6 @@ class Loader
       $this->userNotifications = new ($this->getCoreClass('Core\\UserNotifications'))($this);
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
-
-      $dbProvider = $this->getConfig('db/provider', '');
-      $dbProviderClass = $this->getCoreClass('Core\\DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
-      $this->db = new $dbProviderClass($this);
-
-      $this->pdo = new \ADIOS\Core\PDO($this);
-      $this->pdo->connect();
 
       $this->onBeforeConfigLoaded();
 
@@ -524,7 +495,7 @@ class Loader
         // user authentication
 
         if ((int) ($_SESSION[_ADIOS_ID]['userProfile']['id'] ?? 0) > 0) {
-          $user = $userModel->find((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
+          $user = $userModel->loadUser((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
 
           if (!$userModel->isUserActive($user)) {
             $userModel->signOut();
@@ -711,6 +682,42 @@ class Loader
 
   public function getCoreClass($class): string {
     return $this->config['coreClasses'][$class] ?? ('\\ADIOS\\' . $class);
+  }
+
+  public function getDefaultConnectionConfig(): ?array {
+    if (is_array($this->config['db']['defaultConnection'])) {
+      return $this->config['db']['defaultConnection'];
+    } else {
+      return [
+        "driver"    => "mysql",
+        "host"      => $this->config['db_host'],
+        "port"      => $this->config['db_port'] ?? 3306,
+        "database"  => $this->config['db_name'],
+        "username"  => $this->config['db_user'],
+        "password"  => $this->config['db_password'],
+        "charset"   => 'utf8mb4',
+        "collation" => 'utf8mb4_unicode_ci',
+      ];
+    }
+  }
+
+  public function initDatabaseConnections() {
+    $this->eloquent = new \Illuminate\Database\Capsule\Manager;
+
+    $dbConnectionConfig = $this->getDefaultConnectionConfig();
+
+    if ($dbConnectionConfig !== null) {
+      $this->eloquent->setAsGlobal();
+      $this->eloquent->bootEloquent();
+      $this->eloquent->addConnection($dbConnectionConfig, 'default');
+    }
+
+    $dbProvider = $this->getConfig('db/provider', '');
+    $dbProviderClass = $this->getCoreClass('Core\\DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
+    $this->db = new $dbProviderClass($this);
+
+    $this->pdo = new \ADIOS\Core\PDO($this);
+    $this->pdo->connect();
   }
 
   //////////////////////////////////////////////////////////////////////////////

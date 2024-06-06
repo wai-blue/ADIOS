@@ -204,7 +204,7 @@ class Table extends \ADIOS\Core\Controller {
     return $data;
   }
 
-  public function loadData() {
+  public function loadData(): array {
     $this->query = $this->prepareDataQuery();
 
     // Laravel pagination
@@ -214,8 +214,10 @@ class Table extends \ADIOS\Core\Controller {
       'page',
       $this->params['page'])->toArray()
     ;
-// _var_dump($data);
+
     $data = $this->postprocessData($data);
+
+    if (!is_array($data)) $data = [];
 
     return $data;
   }
