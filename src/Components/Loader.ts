@@ -87,25 +87,25 @@ export class ADIOS {
         let attributeValue: any = element.attributes[i].value;
 
         if (isValidJson(attributeValue)) {
-          let attributeValues: Object|Array<any> = JSON.parse(attributeValue);
-          if (!Array.isArray(attributeValues)) {
-            attributeValue = {};
+          attributeValue = JSON.parse(attributeValue);
+          // let attributeValues: Object|Array<any> = JSON.parse(attributeValue);
+          // if (!Array.isArray(attributeValues)) {
+          //   attributeValue = {};
 
-            attributeValue  = Object.keys(attributeValues).reduce(function(result, key) {
-              result[key] = _this.getValidatedAttributeValue(key, attributeValues[key]);
-              return result;
-            }, {});
-          } else {
-            attributeValue = attributeValues;
-          }
+          //   attributeValue  = Object.keys(attributeValues).reduce(function(result, key) {
+          //     result[key] = _this.getValidatedAttributeValue(key, attributeValues[key]);
+          //     return result;
+          //   }, {});
+          // } else {
+          //   attributeValue = attributeValues;
+          // }
         } else if (attributeValue === 'true') {
           attributeValue = true;
         } else if (attributeValue === 'false') {
-
           attributeValue = false;
         }
 
-        componentProps[attributeName] = this.getValidatedAttributeValue(attributeName, attributeValue); 
+        componentProps[attributeName] = attributeValue; // this.getValidatedAttributeValue(attributeName, attributeValue); 
 
         if (this.attributesToSkip.includes(attributeName)) {
           i++;

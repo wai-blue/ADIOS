@@ -42,7 +42,6 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
   }
 
   getTableProps(): Object {
-    console.log(this.state.data?.total);
     return {
       ref: this.dt,
       value: this.state.data?.data,
@@ -85,7 +84,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     };
   }
 
-  onSelectionChange(event :any) {
+  onSelectionChange(event: any) {
     // to be overriden
   }
 

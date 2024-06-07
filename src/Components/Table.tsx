@@ -13,6 +13,12 @@ export interface OrderBy {
   direction?: string | null
 }
 
+export interface ExternalCallbacks {
+  openForm?: string,
+  onAddClick?: string,
+  onRowClick?: string,
+}
+
 export interface TableProps {
   addButtonText?: string,
   canCreate?: boolean,
@@ -36,6 +42,7 @@ export interface TableProps {
   uid: string,
   where?: Array<any>,
   params?: any,
+  externalCallbacks?: ExternalCallbacks,
 
   //TODO
   //showPaging?: boolean,
@@ -264,24 +271,36 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   openForm(id: number) {
-    this.setState(
-      { formId: id },
-      () => {
-        let _this = this;
-        setTimeout(function() {
-          //@ts-ignore
-          ADIOS.modalToggle(_this.props.uid + '_form');
-        }, 280);
-      }
-    )
+    if (this.props.externalCallbacks && this.props.externalCallbacks.openForm) {
+      window[this.props.externalCallbacks.openForm](this, id);
+    } else {
+      this.setState(
+        { formId: id },
+        () => {
+          let _this = this;
+          setTimeout(function() {
+            //@ts-ignore
+            ADIOS.modalToggle(_this.props.uid + '_form');
+          }, 280);
+        }
+      )
+    }
   }
 
   onAddClick() {
-    this.openForm(0);
+    if (this.props.externalCallbacks && this.props.externalCallbacks.onAddClick) {
+      window[this.props.externalCallbacks.onAddClick](this);
+    } else {
+      this.openForm(0);
+    }
   }
 
   onRowClick(id: number) {
-    this.openForm(id);
+    if (this.props.externalCallbacks && this.props.externalCallbacks.onRowClick) {
+      window[this.props.externalCallbacks.onRowClick](this, id);
+    } else {
+      this.openForm(id);
+    }
   }
 
   onPaginationChange(page: number, itemsPerPage: number) {
