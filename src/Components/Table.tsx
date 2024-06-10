@@ -43,6 +43,8 @@ export interface TableProps {
   where?: Array<any>,
   params?: any,
   externalCallbacks?: ExternalCallbacks,
+  itemsPerPage: number,
+  orderBy?: OrderBy,
 
   //TODO
   //showPaging?: boolean,
@@ -116,9 +118,10 @@ export default class Table<P, S extends TableState = TableState> extends Compone
         uid: props.uid,
       },
       page: 1,
-      itemsPerPage: 15,
+      itemsPerPage: this.props.itemsPerPage,
       showHeader: props.showHeader ?? true,
       loadingInProgress: false,
+      orderBy: this.props.orderBy,
     } as S;
   }
 
@@ -313,7 +316,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     }, () => this.loadData());
   }
 
-  onOrderByChange(orderBy?: OrderBy, stateParams?: any) {
+  onOrderByChange(orderBy?: OrderBy | null, stateParams?: any) {
     this.setState({
       ...stateParams,
       orderBy: orderBy,
