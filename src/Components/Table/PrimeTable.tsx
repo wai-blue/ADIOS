@@ -19,9 +19,10 @@ export interface PrimeTableProps extends TableProps {
   selectionMode?: 'single' | 'multiple' | undefined,
 }
 
+/**
+ * [Description PrimeTableState]
+ */
 export interface PrimeTableState extends TableState {
-  sortOrder: SortOrder,
-  sortField?: string,
   selection: any,
 }
 
@@ -37,11 +38,12 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     this.state = {
       ...this.state,
       selection: [],
-      sortOrder: null,
     };
   }
 
   getTableProps(): Object {
+    const sortOrders = {'asc': 1, 'desc': -1};
+
     return {
       ref: this.dt,
       value: this.state.data?.data,
@@ -61,8 +63,8 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       onRowUnselect: (event: DataTableUnselectEvent) => this.onRowUnselect(event),
       onPage: (event: DataTablePageEvent) => this.onPaginationChangeCustom(event),
       onSort: (event: DataTableSortEvent) => this.onOrderByChangeCustom(event),
-      sortOrder: this.state.sortOrder,
-      sortField: this.state.sortField,
+      sortOrder: sortOrders[this.state.orderBy?.direction ?? 'asc'],
+      sortField: this.state.orderBy?.field,
       rowClassName: this.rowClassName,
       stripedRows: true,
       //globalFilter={globalFilter}
@@ -95,28 +97,27 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
   }
 
   onOrderByChangeCustom(event: DataTableSortEvent) {
-    let sortOrder: number | null = 1;
+    let orderBy: OrderBy | null = null;
 
     // Icons in PrimeTable changing
     // 1 == ASC
     // -1 == DESC
     // null == neutral icons
-    if (event.sortField == this.state.sortField) {
-      sortOrder = (this.state.sortOrder === null ? 1 : (this.state.sortOrder === 1 ? -1 : null));
+    if (event.sortField == this.state.orderBy?.field) {
+      orderBy = {
+        field: event.sortField,
+        direction: event.sortOrder === 1 ? 'asc' : 'desc',
+      };
+    } else {
+      orderBy = {
+        field: event.sortField,
+        direction: 'asc',
+      };
     }
 
-    const orderBy: OrderBy = {
-      field: event.sortField,
-      direction: event.sortOrder === 1 ? 'asc' : 'desc'
-    };
+    console.log(event, orderBy);
 
-    this.onOrderByChange(
-      (sortOrder == null ? undefined : orderBy),
-      {
-        sortOrder: sortOrder,
-        sortField: sortOrder === null ? undefined : event.sortField
-      }
-    );
+    this.onOrderByChange(orderBy);
   }
 
   onRowSelect(event: DataTableSelectEvent) {
