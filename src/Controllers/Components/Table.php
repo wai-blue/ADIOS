@@ -125,7 +125,7 @@ class Table extends \ADIOS\Core\Controller {
         ];
 
         $withs[$columnName] = function ($query) use ($lookupSqlValue) {
-          $query->selectRaw('id, ' . $lookupSqlValue);
+          $query->selectRaw('*, ' . $lookupSqlValue);
         };
       } else if (isset($column['relationship'])) {
         $withs[$columnName] = function ($query) {
@@ -156,21 +156,22 @@ class Table extends \ADIOS\Core\Controller {
 
     // Search
     if ($search !== null) {
-        foreach ($tmpColumns as $columnName => $column) {
-          if (isset($column['enumValues'])) {
-            foreach ($column['enumValues'] as $enumValueKey => $enumValue) {
-              if (str_contains(strtolower(Str::ascii($enumValue)), $search)) {
-                $query->orHaving($columnName, $enumValueKey);
-              }
+      foreach ($tmpColumns as $columnName => $column) {
+        if (isset($column['enumValues'])) {
+          foreach ($column['enumValues'] as $enumValueKey => $enumValue) {
+            if (str_contains(strtolower(Str::ascii($enumValue)), $search)) {
+              $query->orHaving($columnName, $enumValueKey);
             }
           }
-
-          if ($column['type'] == 'lookup') {
-            $query->orHaving($columnName.':LOOKUP', 'like', "%{$search}%");
-          } else {
-            $query->orHaving($columnName, 'like', "%{$search}%");
-          }
         }
+
+        if ($column['type'] == 'lookup') {
+          $query->orHaving($columnName.':LOOKUP', 'like', "%{$search}%");
+        } else {
+          $query->orHaving($columnName, 'like', "%{$search}%");
+        }
+      }
+
       // $query->where(function ($query) use ($params, $tmpColumns) {
       //   foreach ($tmpColumns as $columnName => $column) {
       //     if ($column['type'] == 'lookup') {

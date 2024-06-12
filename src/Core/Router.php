@@ -38,6 +38,7 @@ class Router {
         if (is_array($paramValue)) {
           $routeParams[$paramName] = $this->replaceRouteVariables($paramValue, $variables);
         } else {
+          krsort($variables);
           foreach ($variables as $k2 => $v2) {
             $routeParams[$paramName] = str_replace('$'.$k2, $v2, (string)$routeParams[$paramName]);
           }
