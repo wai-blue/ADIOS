@@ -167,45 +167,37 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     //@ts-ignore
     request.get(
       this.state.endpoint,
-      {
-        returnParams: '1',
-        model: this.props.model,
-        //columns: this.props.columns,
-        id: this.props.id,
-        tag: this.props.tag,
-        __IS_AJAX__: '1',
-      },
+      { action: 'returnParams', ...this.getEndpointParams() },
       (data: any) => {
-        let newState: any = deepObjectMerge(data.params, this.props);
-        newState.params = { ...data.params };
+        let newState: any = deepObjectMerge(data, this.props);
+        newState.params = { ...data };
         if (newState.layout) {
           newState.layout = this.convertLayoutToString(newState.layout);
         }
 
         this.setState(newState, () => {
-          this.loadData();
+          this.loadRecord();
         });
       }
     );
   }
 
-  getParamsForLoadData(): object {
+  getEndpointParams(): object {
     return {
-      returnData: '1',
       model: this.props.model,
-      id: this.state.id,
+      id: this.state.id ? this.state.id : 0,
       tag: this.props.tag,
       __IS_AJAX__: '1',
     };
   }
 
-  loadData() {
+  loadRecord() {
     if (this.state.id) {
       request.get(
         this.state.endpoint,
-        this.getParamsForLoadData(),
+        { action: 'loadRecord', ...this.getEndpointParams() },
         (data: any) => {
-          let newData = this.getDataState(this.state.columns ?? {}, data.data);
+          let newData = this.getDataState(this.state.columns ?? {}, data);
           newData = this.onAfterDataLoaded(newData);
           this.setState({isInitialized: true, data: newData}, () => {
             this.onAfterFormInitialized();
@@ -239,9 +231,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
     //@ts-ignore
     request.post(
-      'components/form/onsave',
+      this.state.endpoint,
       {
-        data: {...formattedInputs, id: this.state.id}
+        action: 'saveRecord',
+        ...this.getEndpointParams(),
+        data: { ...formattedInputs, id: this.state.id }
       },
       {
         model: this.props.model,
@@ -369,17 +363,10 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
 
-  fetchColumnData (columnName: string) {
-    let id = this.state.id ? this.state.id : 0;
-
+  fetchColumnData(columnName: string) {
     request.get(
       this.state.endpoint,
-      {
-        returnData: '1',
-        model: this.props.model,
-        id: id,
-        __IS_AJAX__: '1',
-      },
+      { action: 'loadRecord', ...this.getEndpointParams() },
       (data: any) => {
         const input = data.data[columnName];
         this.inputOnChangeRaw(columnName, input);

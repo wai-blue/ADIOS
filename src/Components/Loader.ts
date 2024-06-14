@@ -13,6 +13,13 @@ export class ADIOS {
   reactComponentsWaitingForRender: number = 0;
   reactElements: Object = {};
 
+  primeReactTailwindTheme: any = {
+    dataTable: {
+      // root: { className: 'bg-primary' },
+      headerRow: { className: 'bg-primary' },
+    },
+  };
+
   dictionary: Object = {};
 
   /**

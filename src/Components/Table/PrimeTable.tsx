@@ -310,6 +310,9 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
             : ''}
 
             <div id={"adios-table-prime-body-" + this.props.uid}>
+              {/* <DataTable {...this.getTableProps()} {...globalThis.adios.primeReactTailwindTheme.getPropsFor('DataTable')}>
+                {this.renderRows()}
+              </DataTable> */}
               <DataTable {...this.getTableProps()}>
                 {this.renderRows()}
               </DataTable>

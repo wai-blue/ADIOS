@@ -1448,6 +1448,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return preg_match($pattern, $base64String);
   }
 
+  public function recordCreate(array $data): int {
+    return $this->create($dataForThisModel)->id;
+  }
+
+  public function recordUpdate(int $id, array $data): int {
+    $this->find($id)->update($data);
+    return $id;
+  }
+
   public function recordSave(array $data)
   {
     $id = (int) $data['id'];
@@ -1505,13 +1514,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
     if ($id <= 0) {
       $this->adios->router->checkPermission($this->fullName . ':Create');
       unset($dataForThisModel['id']);
-      $returnValue = $this->create($dataForThisModel)->id;
+      $returnValue = $this->recordCreate($dataForThisModel);
       $data['id'] = (int) $returnValue;
       $id = (int) $returnValue;
     } else {
       $this->adios->router->checkPermission($this->fullName . ':Update');
-      $this->find($id)->update($dataForThisModel);
-      $returnValue = $id;
+      $returnValue = $this->recordUpdate($id, $dataForThisModel);
     }
 
     // save data for lookup models first (and create records, if necessary)

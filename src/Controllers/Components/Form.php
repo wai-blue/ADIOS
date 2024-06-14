@@ -47,7 +47,7 @@ class Form extends \ADIOS\Core\Controller {
     return $query;
   }
 
-  public function loadData() {
+  public function loadRecord() {
     $this->model = $this->adios->getModel($this->params['model']);
 
     $data = [];
@@ -96,47 +96,83 @@ class Form extends \ADIOS\Core\Controller {
   }
 
 
+  public function saveRecord(): ?array {
+    try {
+      $params = $this->params;
 
-  public function renderJson(): ?array {
-    if (empty($this->params['view'])) {
-      try {
-        return [
-          'params' => ($this->params['returnParams'] ? $this->getParams() : []),
-          'data' => ($this->params['returnData'] ? $this->loadData() : []),
-        ];
-      } catch (QueryException $e) {
-        http_response_code(500);
+      $tmpModel = $this->adios->getModel($params['model']);
 
-        return [
-          'status' => 'error',
-          'message' => $e->getMessage() 
-        ];
-      } catch (\Exception $e) {
-        http_response_code(400);
+      $tmpModel->recordSave($params['data']);
 
-        return [
-          'status' => 'error',
-          'message' => $e->getMessage() 
-        ];
-      }
-    } else {
-      return null;
+      return [
+        'status' => 'success',
+        'message' => isset($params['data']['id']) ? 'Záznam uložený' : 'Pridaný nový záznam'
+      ];
+    } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
+      http_response_code(422);
+
+      $invalidInputs = json_decode($e->getMessage());
+
+      return [
+        'status' => 'error',
+        'message' => 'Neboli vyplnené všetky povinné polia',
+        'invalidInputs' => $invalidInputs
+      ];
+    } catch (QueryException $e) {
+      http_response_code(500);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
+    } catch (\Exception $e) {
+      http_response_code(400);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
     }
   }
 
-  public function prepareViewParams() {
-    parent::prepareViewParams();
+  public function renderJson(): ?array {
+    try {
+      $return = [];
+      switch ($this->params['action']) {
+        case 'getParams': return $this->getParams(); break;
+        case 'loadRecord': return $this->loadRecord(); break;
+        case 'saveRecord': return $this->saveRecord(); break;
+      }
+    } catch (QueryException $e) {
+      http_response_code(500);
 
-    // build-up view params
-    unset($this->params['view']);
-    $this->viewParams = array_merge(
-      $this->adios->params,
-      [
-        'params' => $this->getParams(),
-        'data' => $this->loadData(),
-      ]
-    );
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
+    } catch (\Exception $e) {
+      http_response_code(400);
+
+      return [
+        'status' => 'error',
+        'message' => $e->getMessage() 
+      ];
+    }
   }
+
+  // public function prepareViewParams() {
+  //   parent::prepareViewParams();
+
+  //   // build-up view params
+  //   unset($this->params['view']);
+  //   $this->viewParams = array_merge(
+  //     $this->adios->params,
+  //     [
+  //       'params' => $this->getParams(),
+  //       'data' => $this->loadRecord(),
+  //     ]
+  //   );
+  // }
 
 
 }

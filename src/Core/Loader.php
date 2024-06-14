@@ -685,7 +685,7 @@ class Loader
   }
 
   public function getDefaultConnectionConfig(): ?array {
-    if (is_array($this->config['db']['defaultConnection'])) {
+    if (isset($this->config['db']['defaultConnection']) && is_array($this->config['db']['defaultConnection'])) {
       return $this->config['db']['defaultConnection'];
     } else {
       return [
