@@ -60,7 +60,6 @@ export default class EnumValues extends Input<EnumValuesInputProps, InputState> 
         }
         disabled={this.state.readonly}
       >
-        <option value=""></option>
         {Object.keys(this.props.enumValues).map((key: string|number) => this._renderOption(key))}
       </select>
     );
