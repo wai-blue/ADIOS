@@ -383,11 +383,15 @@ class User extends \ADIOS\Core\Model {
     return !empty($user) ? $user->toArray() : [];
   }
 
+  public function hashPassword(string $password): string {
+    return password_hash($password, PASSWORD_DEFAULT);
+  }
+
   public function updatePassword(int $idUser, string $password) {
     return
       self::where('id', $idUser)
       ->update(
-        ["password" => password_hash($password, PASSWORD_DEFAULT)]
+        ["password" => $this->hasPassword($password)]
       )
     ;
   }

@@ -228,10 +228,18 @@ class Table extends \ADIOS\Core\Controller {
 
   public function renderJson(): ?array {
     try {
-      return [
-        'params' => ($this->params['returnParams'] ? $this->getParams() : []),
-        'data' => ($this->params['returnData'] ? $this->loadData() : []),
-      ];
+      $return = [];
+
+      switch ($this->params['action']) {
+        case 'getParams': $return = $this->getParams(); break;
+        case 'loadData': $return = $this->loadData(); break;
+      }
+
+      if (!is_array($return)) {
+        return [];
+      } else {
+        return $return;
+      }
     } catch (QueryException $e) {
       http_response_code(500);
 

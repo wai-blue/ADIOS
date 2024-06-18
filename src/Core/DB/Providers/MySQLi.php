@@ -662,8 +662,8 @@ class MySQLi extends \ADIOS\Core\DB
     }
 
     foreach ($this->tables[$table] as $colName => $colDefinition) {
-      if (!$colDefinition['virtual'] && $colName != '%%table_params%%') {
-        $sql .= $this->columnSqlValue($table, $colName, $data, $colDefinition['default_value']);
+      if (!($colDefinition['virtual'] ?? false) && $colName != '%%table_params%%') {
+        $sql .= $this->columnSqlValue($table, $colName, $data, $colDefinition['defaultValue'] ?? '');
       }
     }
 

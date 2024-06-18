@@ -64,7 +64,6 @@ class Form extends \ADIOS\Core\Controller {
   public function getParams() {
     try {
       $params = $this->params;
-      unset($params['returnParams']);
       unset($params['__IS_AJAX__']);
 
       $model = $this->app->getModel($this->params['model']);
@@ -135,13 +134,19 @@ class Form extends \ADIOS\Core\Controller {
     }
   }
 
-  public function renderJson(): ?array {
+  public function renderJson(): array {
     try {
       $return = [];
       switch ($this->params['action']) {
-        case 'getParams': return $this->getParams(); break;
-        case 'loadRecord': return $this->loadRecord(); break;
-        case 'saveRecord': return $this->saveRecord(); break;
+        case 'getParams': $return = $this->getParams(); break;
+        case 'loadRecord': $return = $this->loadRecord(); break;
+        case 'saveRecord': $return = $this->saveRecord(); break;
+      }
+
+      if (!is_array($return)) {
+        return [];
+      } else {
+        return $return;
       }
     } catch (QueryException $e) {
       http_response_code(500);

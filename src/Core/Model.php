@@ -381,6 +381,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
         }
       }
 
+      $this->createSqlForeignKeys();
+
       $this->saveConfig('installed-version', max(array_keys($this->upgrades())));
 
       return TRUE;

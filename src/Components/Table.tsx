@@ -162,7 +162,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       this.getEndpointUrl(),
       {
         ...this.getCustomEndpointParams(),
-        returnParams: '1',
+        action: 'getParams',
         model: this.props.model,
         parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
         parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
@@ -172,9 +172,8 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       (data: any) => {
         try {
           if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
-          if (!data.params) throw new Error('Failed to load table params.');
         
-          let params: any = deepObjectMerge(data.params, this.props);
+          let params: any = deepObjectMerge(data, this.props);
           if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
           if (successCallback) successCallback(params);
 
@@ -204,7 +203,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       this.getEndpointUrl(),
       {
         ...this.getCustomEndpointParams(),
-        returnData: '1',
+        action: 'loadData',
         filterBy: this.state.filterBy,
         model: this.props.model,
         orderBy: this.state.orderBy,
@@ -220,7 +219,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       (data: any) => {
         this.setState({
           loadingInProgress: false,
-          data: data.data,
+          data: data,
           page: page,
           itemsPerPage: itemsPerPage
         });

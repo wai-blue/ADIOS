@@ -49,13 +49,11 @@ class Router {
     return $routeParams;
   }
 
-  public function applyRouting(string $route, array $params): array {
-    $controller = "";
-    $view = "";
-    $permission = "";
+  public function applyRouting(string $routeUrl, array $params): array {
+    $route = [];
 
     foreach ($this->routing as $routePattern => $tmpRoute) {
-      if (preg_match($routePattern.'i', $route, $m)) {
+      if (preg_match($routePattern.'i', $routeUrl, $m)) {
 
         if (!empty($tmpRoute['redirect'])) {
           $url = $tmpRoute['redirect']['url'];
@@ -65,19 +63,21 @@ class Router {
           $this->redirectTo($url, $tmpRoute['redirect']['code'] ?? 302);
           exit;
         } else {
-          $controller = $tmpRoute['controller'] ?? '';
-          $view = $tmpRoute['view'] ?? '';
-          $permission = $tmpRoute['permission'] ?? '';
+          $route = $tmpRoute;
+          // $controller = $tmpRoute['controller'] ?? '';
+          // $view = $tmpRoute['view'] ?? '';
+          // $permission = $tmpRoute['permission'] ?? '';
           $tmpRoute['params'] = $this->replaceRouteVariables($tmpRoute['params'] ?? [], $m);
 
-          foreach ($tmpRoute['params'] as $k => $v) {
+          foreach ($this->replaceRouteVariables($tmpRoute['params'] ?? [], $m) as $k => $v) {
             $params[$k] = $v;
           }
         }
       }
     }
 
-    return [$controller, $view, $permission, $params];
+    // return [$controller, $view, $permission, $params];
+    return [$route, $params];
   }
 
   public function checkPermission(string $permission) {

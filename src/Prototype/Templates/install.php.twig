@@ -5,19 +5,21 @@
 set_time_limit(60*10);
 session_start();
 
+if (php_sapi_name() != 'cli') {
+  exit('Installer can be launched only from CLI');
+}
+
 // load configs
-require_once(__DIR__ . "/ConfigEnv.php");
-require_once(__DIR__ . "/src/ConfigApp.php");
+require_once(__DIR__ . '/ConfigEnv.php');
+require_once(__DIR__ . '/src/ConfigApp.php');
 
 // load application class
-require(__DIR__."/src/App.php");
+require(__DIR__ . '/src/App.php');
 
 try {
 
   $app = new {{ appNamespace }}($config, TRUE);
-
-  // Uncomment this line if you wish to see logs in the console
-  // $app->console->cliEchoEnabled = TRUE;
+  $app->console->cliEchoEnabled = TRUE;
 
   $app->install();
 
@@ -26,83 +28,38 @@ try {
   $userRoleModel = new ($app->getCoreClass('Models\\UserRole'))($app);
   $userHasRoleModel = new ($app->getCoreClass('Models\\UserHasRole'))($app);
 
-  $idRoleAdministrator = $userRoleModel->insertRow(["name" => "Administrator"]);
+  $idRoleAdministrator = $userRoleModel->insertRow(['name' => 'Administrator']);
 
-  $adminPassword = "{{ adminPassword }}";
+  $adminPassword = 'administrator';
 
   $idUserAdministrator = $userModel->insertRow([
-    "login" => "administrator",
-    "password" => $adminPassword,
-    "password_1" => $adminPassword,
-    "password_2" => $adminPassword,
-    "is_active" => 1,
+    'login' => 'administrator',
+    'password' => $adminPassword,
+    'password_1' => $adminPassword,
+    'password_2' => $adminPassword,
+    'is_active' => 1,
   ]);
 
   $userHasRoleModel->insertRow([
-    "id_user" => $idUserAdministrator,
-    "id_role" => $idRoleAdministrator,
+    'id_user' => $idUserAdministrator,
+    'id_role' => $idRoleAdministrator,
   ]);
+
+  $errors = $app->console->getErrors();
+  if (count($errors) > 0) {
+    echo "ADIOS app installation failed. Following errors occured during the installation.\n";
+    echo "\n";
+    foreach ($errors as $error) {
+      echo $error[0] . "\n";
+      echo $error[1]['exception'] . "\n";
+      echo "\n";
+    }
+
+    exit(1);
+  }
+
+  echo "ADIOS app installation was successful.\n";
 
 } catch (\Exception $e) {
   echo $e->getMessage();
-}
-
-$errors = $app->console->getErrors();
-if (count($errors) > 0) {
-  echo "ADIOS app installation failed. Following errors occured during the installation.\n";
-  echo "\n";
-  foreach ($errors as $error) {
-    echo $error[0] . "\n";
-    echo $error[1]['exception'] . "\n";
-    echo "\n";
-  }
-
-  exit(1);
-}
-
-if (php_sapi_name() == "cli") {
-  echo "ADIOS app installation was successful.\n";
-} else {
-  echo "
-    <html>
-    <head>
-      <style>
-        * { font-family: Verdana; }
-        .main-div {
-          width: 50%;
-          margin: 3em auto;
-          padding: 2em;
-          text-align: center;
-        }
-        .main-div .success {
-          font-size: 4em;
-          color: green;
-          margin: 1em;
-        }
-        .main-div a {
-          border: 1px solid #EEEEEE;
-          padding: 1em;
-          display: block;
-        }
-        .main-div a:hover {
-          background: #EEEEEE;
-        }
-      </style>
-    </head>
-    <body>
-      <div class='main-div'>
-        <div class='success'>✓</div>
-        <div>
-          Your prototype app has been successfully created.<br/>
-          <br/>
-          Administrator credentials: <b>administrator</b> / <b>{$adminPassword}</b><br/>
-          <br/>
-          <span style='color:red'>We recommend to delete the install.php file in your project's root folder.</span><br/>
-          <br/>
-          <a href='.' target=_blank>Login as administrator</a>
-        </div>
-      </div>
-    </body>
-    </html>
-  ";
 }

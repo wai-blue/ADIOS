@@ -40,11 +40,13 @@ export class ADIOS {
   * Get specific ADIOS component with destructed params 
   */
   getComponent(componentName: string, props: Object) {
+    if (!componentName) return null;
+
     // Check if uid exists or create custom
     if (props['uid'] == undefined) {
       props['uid'] = uuid.v4();
     }
-    
+
     let componentNamePascalCase = kebabToPascal(componentName);
 
     if (!this.reactComponents[componentNamePascalCase]) {

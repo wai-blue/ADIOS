@@ -126,7 +126,6 @@ class Loader
   const ADIOS_MODE_FULL = 1;
   const ADIOS_MODE_LITE = 2;
 
-  public string $version = "";
   public string $gtp = "";
   public string $requestedUri = "";
   public string $requestedController = "";
@@ -134,6 +133,7 @@ class Loader
   public string $permission = "";
   public string $uid = "";
   public string $srcDir = "";
+  public array $route = [];
 
   public ?\ADIOS\Core\Controller $controllerObject;
 
@@ -197,8 +197,6 @@ class Loader
     // $this->test = new ($this->getCoreClass('Core\\Test'))($this);
 
     $this->widgetsDir = $config['widgetsDir'] ?? "";
-
-    $this->version = file_get_contents(__DIR__."/../version.txt");
 
     $this->gtp = $this->config['global_table_prefix'] ?? "";
     $this->requestedController = $_REQUEST['controller'] ?? "";
@@ -1073,22 +1071,22 @@ class Loader
       }
     }
 
-    foreach ($this->models as $modelName) {
-      try {
-        $model = $this->getModel($modelName);
+    // foreach ($this->models as $modelName) {
+    //   try {
+    //     $model = $this->getModel($modelName);
 
-        $start = microtime(TRUE);
+    //     $start = microtime(TRUE);
 
-        $model->createSqlForeignKeys();
-        $this->console->info("Indexes for model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
-      } catch (\Exception $e) {
-        $this->console->error("Indexes installation for model {$modelName} failed.", ["exception" => $e->getMessage()]);
-      } catch (\Illuminate\Database\QueryException $e) {
-        //
-      } catch (\ADIOS\Core\Exceptions\DBException $e) {
-        //
-      }
-    }
+    //     $model->createSqlForeignKeys();
+    //     $this->console->info("Indexes for model {$modelName} installed.", ["duration" => round((microtime(true) - $start) * 1000, 2)." msec"]);
+    //   } catch (\Exception $e) {
+    //     $this->console->error("Indexes installation for model {$modelName} failed.", ["exception" => $e->getMessage()]);
+    //   } catch (\Illuminate\Database\QueryException $e) {
+    //     //
+    //   } catch (\ADIOS\Core\Exceptions\DBException $e) {
+    //     //
+    //   }
+    // }
 
     foreach ($this->widgets as $widget) {
       try {
@@ -1148,7 +1146,7 @@ class Loader
    * @throws \ADIOS\Core\Exception When running in SAPI and requested controller is blocked for the SAPI.
    * @return string Rendered content.
    */
-  public function render(string $route = '', array $params = []) {
+  public function render(string $routeUrl = '', array $params = []) {
 
     try {
 
@@ -1157,15 +1155,21 @@ class Loader
 
       // Find-out which route is used for rendering
 
-      if (empty($route)) {
-        list($route, $params) = $this->extractRouteParamsFromRequest();
+      if (empty($routeUrl)) {
+        list($routeUrl, $params) = $this->extractRouteParamsFromRequest();
       }
 
-      $this->route = $route;
+      $this->routeUrl = $routeUrl;
       $this->params = $params;
 
       // Apply routing and find-out which controller, permision and rendering params will be used
-      list($this->controller, $this->view, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
+      // list($this->controller, $this->view, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
+      list($this->route, $this->params) = $this->router->applyRouting($this->routeUrl, $this->params);
+
+      $this->controller = $this->route['controller'] ?? '';
+      $this->view = $this->route['view'] ?? '';
+      $this->permission = $this->route['permission'] ?? '';
+
       $this->onAfterRouting();
 
       if (isset($this->params['sign-out'])) {
@@ -1259,16 +1263,20 @@ class Loader
         $view = $this->view;
         $this->controllerObject->prepareViewParams();
 
+        $twigParams = [
+          'uid' => $this->uid,
+          'user' => $this->userProfile,
+          'config' => $this->config,
+          'routeUrl' => $this->routeUrl,
+          'route' => $this->route,
+          'session' => $_SESSION[_ADIOS_ID] ?? [],
+          'viewParams' => $this->controllerObject->viewParams,
+          'windowParams' => $this->controllerObject->viewParams['windowParams'] ?? NULL,
+        ];
+
         $contentHtml = $this->twig->render(
           $view,
-          [
-            'uid' => $this->uid,
-            'user' => $this->userProfile,
-            'config' => $this->config,
-            'session' => $_SESSION[_ADIOS_ID] ?? [],
-            'viewParams' => $this->controllerObject->viewParams,
-            'windowParams' => $this->controllerObject->viewParams['windowParams'] ?? NULL,
-          ]
+          $twigParams
         );
 
         \ADIOS\Core\Helper::addSpeedLogTag("render6");
@@ -1277,15 +1285,12 @@ class Loader
         if (($this->params['__IS_AJAX__'] ?? FALSE)|| $this->controllerObject->hideDefaultDesktop) {
           $html = $contentHtml;
         
-        // ... But mostly be "encapsulated" in the desktop.
+        // ... But in most cases it will be "encapsulated" in the desktop.
         } else {
           $desktopControllerObject = new ($this->getCoreClass('Controllers\\Desktop'))($this);
           $desktopControllerObject->prepareViewParams();
 
-          $desktopParams['viewParams'] = $desktopControllerObject->viewParams;
-          $desktopParams['user'] = $this->userProfile;
-          $desktopParams['config'] = $this->config;
-          $desktopParams['session'] = $_SESSION[_ADIOS_ID];
+          $desktopParams = $twigParams;
           $desktopParams['contentHtml'] = $contentHtml;
 
           $html = $this->twig->render(($this->config['appNamespace'] ?? 'App') . '/Views/Desktop', $desktopParams);
