@@ -13,8 +13,8 @@ class Chart extends View
   public string $twigTemplate = "ADIOS/Core/Components/Chart";
   private ?Model $model = null;
 
-  public function __construct(?Loader $adios, array $params = []) {
-    $this->adios = $adios;
+  public function __construct(?Loader $app, array $params = []) {
+    $this->app = $app;
 
     $this->params = parent::params_merge([
       'type' => null, # pie, bar, line, radar, bubble, doughnut, polarArea, radar, scatter
@@ -46,7 +46,7 @@ class Chart extends View
           default => -1,
         };
 
-        $labelQuery = $this->adios
+        $labelQuery = $this->app
           ->getModel($dataset['model'])
         ;
 
@@ -76,7 +76,7 @@ class Chart extends View
         foreach ($dataset['dataColumns'] as $col_def) {
           $col = key($col_def);
 
-          $dataQuery = $this->adios->getModel($dataset['model']);
+          $dataQuery = $this->app->getModel($dataset['model']);
 
           if ($dataset['where'] != '') {
             $dataQuery = $dataQuery->where(...array_merge_recursive($dataset['where']));
@@ -130,7 +130,7 @@ class Chart extends View
         # Lastly, replace the label if it is a foreign ID
         if ($dataset['labelColumn']['lookup']) {
           foreach ($this->params['labelModel'] as &$label) {
-            $labelModel = $this->adios->getModel($dataset['labelColumn']['model']);
+            $labelModel = $this->app->getModel($dataset['labelColumn']['model']);
 
             $labelData = $labelModel
               ->select($dataset['labelColumn']['lookup'])
@@ -148,7 +148,7 @@ class Chart extends View
       }
     }
 
-    $this->params['uid'] = $this->adios->uid;
+    $this->params['uid'] = $this->app->uid;
   }
 
   public function getTwigParams(): array

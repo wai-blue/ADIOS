@@ -14,7 +14,7 @@ class ManyToMany extends \ADIOS\Core\ViewsWithController\Input {
 
   public function render(string $panel = ''): string
   {
-    $model = $this->adios->getModel($this->params['model']);
+    $model = $this->app->getModel($this->params['model']);
     
     switch ($this->params['columns'] ?? 3) {
       case 1: default: $bootstrapColumnSize = 12; break;
@@ -33,10 +33,10 @@ class ManyToMany extends \ADIOS\Core\ViewsWithController\Input {
     $srcColumn = $this->params['relation'][0];
     $dstColumn = $this->params['relation'][1];
 
-    $srcModel = $this->adios->getModel($columns[$srcColumn]['model']);
-    $dstModel = $this->adios->getModel($columns[$dstColumn]['model']);
+    $srcModel = $this->app->getModel($columns[$srcColumn]['model']);
+    $dstModel = $this->app->getModel($columns[$dstColumn]['model']);
 
-    $dstItems = $this->adios->db->fetchRaw("
+    $dstItems = $this->app->db->fetchRaw("
       select
         `dst`.`id`,
         ".$dstModel->lookupSqlValue('dst')." as `lookup_sql_value`
@@ -44,7 +44,7 @@ class ManyToMany extends \ADIOS\Core\ViewsWithController\Input {
       order by ".($this->params['order'] ?? "id asc")."
     ");
 
-    $valuesRaw = $this->adios->db->fetchRaw("
+    $valuesRaw = $this->app->db->fetchRaw("
       select
         *
       from `".$model->getFullTableSqlName()."`

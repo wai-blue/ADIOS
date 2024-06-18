@@ -16,6 +16,6 @@ namespace ADIOS\Controllers\Components;
 class SettingsPanel extends \ADIOS\Core\Controller {
   public function render() {
     $this->params['uid'] = $this->uid;
-    return $this->adios->view->SettingsPanel($this->params)->render();
+    return $this->app->view->SettingsPanel($this->params)->render();
   }
 }

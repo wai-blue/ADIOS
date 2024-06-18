@@ -24,7 +24,7 @@ namespace ADIOS\Controllers\Components;
  *
  * Example call inside **PHP** code (works but is *not optimal*):
  * ```
- * echo $adios->renderAction(
+ * echo $app->renderAction(
  *   "Components/Cards",
  *   ["model" => "MyWidget/Models/MyModel"]
  * );
@@ -36,6 +36,6 @@ namespace ADIOS\Controllers\Components;
 class Cards extends \ADIOS\Core\Controller {
   # TODO: Nepouziva sa
   function render() {
-    return (new \ADIOS\Core\ViewsWithController\Cards($this->adios, $this->params))->render();
+    return (new \ADIOS\Core\ViewsWithController\Cards($this->app, $this->params))->render();
   }
 }

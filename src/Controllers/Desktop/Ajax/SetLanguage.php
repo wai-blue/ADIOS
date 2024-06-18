@@ -15,7 +15,7 @@ namespace ADIOS\Controllers\Desktop\Ajax;
  */
 class SetLanguage extends \ADIOS\Core\Controller {
   public function render() {
-    if (!in_array($this->params['language'], $this->adios->config['availableLanguages'])) {
+    if (!in_array($this->params['language'], $this->app->config['availableLanguages'])) {
       throw new \ADIOS\Core\Exceptions\GeneralException("Invalid language");
     }
 

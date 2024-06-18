@@ -18,10 +18,10 @@ class CSV extends \ADIOS\Core\Controller {
 
   public function render() {
     $model = $this->params['model'];
-    $modelObject = $this->adios->getModel($model);
+    $modelObject = $this->app->getModel($model);
 
     $fileUploadInput = new \ADIOS\Core\ViewsWithController\Input(
-      $this->adios,
+      $this->app,
       [
         "uid" => "{$this->uid}_csv_file",
         "type" => "file",
@@ -119,23 +119,23 @@ class CSV extends \ADIOS\Core\Controller {
       </div>
     ";
 
-    $window = $this->adios->view->Window([
+    $window = $this->app->view->Window([
       'uid' => "{$this->uid}_window",
       'title' => $this->translate("Import from CSV"),
       'content' => $content,
     ]);
 
     $window->params['header'] = [
-      $this->adios->view->button([
+      $this->app->view->button([
         'type' => 'close',
         'onclick' => "{$this->uid}_close();",
       ]),
-      $this->adios->view->button([
+      $this->app->view->button([
         'faIcon' => 'fas fa-file-alt',
         'text' => $this->translate("Download CSV file template"),
         'onclick' => "{$this->uid}_downloadTemplate();",
       ]),
-      $this->adios->view->button([
+      $this->app->view->button([
         'type' => 'save',
         'text' => $this->translate("Start import !"),
         'onclick' => "{$this->uid}_import();",

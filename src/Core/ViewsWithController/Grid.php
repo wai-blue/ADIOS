@@ -10,7 +10,7 @@ namespace ADIOS\Core\ViewsWithController;
  * Example code to render layout:
  *
  * ```php
- *   $adios->view->create('\\ADIOS\\Core\\ViewsWithController\\Grid', [
+ *   $app->view->create('\\ADIOS\\Core\\ViewsWithController\\Grid', [
  *     ...
  *   ]);
  * ```
@@ -24,8 +24,8 @@ class Grid extends \ADIOS\Core\ViewWithController {
   /**
    * @internal
    */
-  public function __construct($adios, ?array $params = null) {
-    $this->adios = $adios;
+  public function __construct(\ADIOS\Core\Loader $app, ?array $params = null) {
+    $this->app = $app;
 
     $this->params = array_replace_recursive([
       "layoutSm" => [],
@@ -36,7 +36,7 @@ class Grid extends \ADIOS\Core\ViewWithController {
       "areas" => []
     ], $params);
 
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
   }
 
   public function getTwigParams(): array {

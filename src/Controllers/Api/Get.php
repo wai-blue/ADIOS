@@ -19,7 +19,7 @@ class Get extends \ADIOS\Core\Controller {
     $model = $this->params['model'] ?? '';
     if (!empty($model)) {
       
-      $query = $this->adios->db->select($this->adios->getModel($model))->columns(['*']);
+      $query = $this->app->db->select($this->app->getModel($model))->columns(['*']);
 
       if (isset($this->params['id'])) {
         $query = $query->where([['id', '=', (int) $this->params['id']]]);

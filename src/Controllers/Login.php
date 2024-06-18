@@ -19,8 +19,8 @@ class Login extends \ADIOS\Core\Controller {
   public bool $requiresUserAuthentication = FALSE;
   public bool $hideDefaultDesktop = TRUE;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
 
     $this->permission = "";
   }
@@ -29,6 +29,6 @@ class Login extends \ADIOS\Core\Controller {
     parent::prepareViewParams();
 
     $this->viewParams["login"] = $_POST['login'] ?? '';
-    $this->viewParams["userLogged"] = $this->adios->userLogged;
+    $this->viewParams["userLogged"] = $this->app->userLogged;
   }
 }

@@ -18,7 +18,7 @@ class SettingsPanel extends \ADIOS\Core\ViewWithController {
   {
 
     $inputHtml = (new \ADIOS\Core\ViewsWithController\Inputs\SettingsPanel(
-      $this->adios,
+      $this->app,
       $this->params['uid'],
       $this->params
     ))->render();
@@ -50,16 +50,16 @@ class SettingsPanel extends \ADIOS\Core\ViewWithController {
     ";
     
 
-    $html = $this->adios->view->Window(
+    $html = $this->app->view->Window(
       [
         'uid' => "{$this->uid}_window",
         'content' => $inputHtml,
         'header' => [
-          $this->adios->view->Button([
+          $this->app->view->Button([
             "type" => "close",
             "onclick" => (empty($this->params['onclose']) ? "{$this->uid}_close();" : $this->params['onsave']),
           ]),
-          $this->adios->view->Button([
+          $this->app->view->Button([
             "type" => "save",
             "onclick" => (empty($this->params['onsave']) ? "{$this->uid}_save();" : $this->params['onsave']),
           ]),

@@ -22,8 +22,8 @@ class InstallUpgrades extends \ADIOS\Core\Controller
     $contentHtml = "";
     $foreignKeysToInstall = [];
 
-    foreach ($this->adios->models as $modelName) {
-      $model = $this->adios->getModel($modelName);
+    foreach ($this->app->models as $modelName) {
+      $model = $this->app->getModel($modelName);
 
       if ($model->hasAvailableUpgrades()) {
         $contentHtml .= "{$model->fullName}: ";
@@ -45,7 +45,7 @@ class InstallUpgrades extends \ADIOS\Core\Controller
     }
 
     foreach ($foreignKeysToInstall as $modelName) {
-      $model = $this->adios->getModel($modelName);
+      $model = $this->app->getModel($modelName);
       $model->createSqlForeignKeys();
     }
 

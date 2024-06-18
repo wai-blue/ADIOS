@@ -25,7 +25,7 @@ class DataTypeColor extends \ADIOS\Core\DB\DataType
 
     public function sqlValueString($table_name, $col_name, $value, $params = [])
     {
-      return "`{$col_name}`= '" . $this->adios->db->escape($value) . "'";
+      return "`{$col_name}`= '" . $this->app->db->escape($value) . "'";
     }
 
     public function get_control_params($table_name, $col_name, $value, $col_definition, $params = [])

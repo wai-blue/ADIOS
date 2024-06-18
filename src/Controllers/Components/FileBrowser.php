@@ -15,6 +15,6 @@ namespace ADIOS\Controllers\Components;
  */
 class FileBrowser extends \ADIOS\Core\Controller {
   public function render() {
-    return $this->adios->view->FileBrowser($this->params)->render();
+    return $this->app->view->FileBrowser($this->params)->render();
   }
 }

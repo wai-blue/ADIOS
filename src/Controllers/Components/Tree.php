@@ -15,6 +15,6 @@ namespace ADIOS\Controllers\Components;
  */
 class Tree extends \ADIOS\Core\Controller {
   function render($params = []) {
-    return $this->adios->view->Tree($params)->render();
+    return $this->app->view->Tree($params)->render();
   }
 }

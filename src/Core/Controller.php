@@ -13,7 +13,7 @@ class Controller {
   /**
    * Reference to ADIOS object
    */
-  protected ?\ADIOS\Core\Loader $adios = null;
+  protected ?\ADIOS\Core\Loader $app = null;
     
   /**
    * Shorthand for "global table prefix"
@@ -62,14 +62,14 @@ class Controller {
   public string $twigTemplate = "";
   public string $view = "";
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = [])
+  function __construct(\ADIOS\Core\Loader $app, array $params = [])
   {
     $this->name = str_replace("\\", "/", str_replace("ADIOS\\", "", get_class($this)));
-    $this->adios = $adios;
+    $this->app = $app;
     $this->params = $params;
-    $this->uid = $this->adios->uid;
-    $this->gtp = $this->adios->gtp;
-    $this->controller = $this->adios->controller;
+    $this->uid = $this->app->uid;
+    $this->gtp = $this->app->gtp;
+    $this->controller = $this->app->controller;
 
     $this->shortName = $this->name;
     $this->shortName = str_replace('Controllers/', '', $this->shortName);
@@ -82,8 +82,8 @@ class Controller {
       $this->params = [];
     }
 
-    if (!empty($this->adios->config['templates'][static::class])) {
-      $this->twigTemplate = $this->adios->config['templates'][static::class];
+    if (!empty($this->app->config['templates'][static::class])) {
+      $this->twigTemplate = $this->app->config['templates'][static::class];
     }
 
     $this->init();
@@ -125,7 +125,7 @@ class Controller {
    */
   public function prepareViewParams()
   {
-    $this->viewParams = $this->adios->params ?? [];
+    $this->viewParams = $this->app->params ?? [];
   }
   
   /**
@@ -138,7 +138,7 @@ class Controller {
    */
   public function translate(string $string, array $vars = []): string
   {
-    return $this->adios->translate($string, $vars, $this);
+    return $this->app->translate($string, $vars, $this);
   }
   
   /**
@@ -155,14 +155,14 @@ class Controller {
   {
     $twigParams = $this->params;
 
-    $twigParams["uid"] = $this->adios->uid;
-    $twigParams["gtp"] = $this->adios->gtp;
-    $twigParams["config"] = $this->adios->config;
-    $twigParams["requestedUri"] = $this->adios->requestedUri;
-    $twigParams["user"] = $this->adios->userProfile;
-    $twigParams["locale"] = $this->adios->locale->getAll();
+    $twigParams["uid"] = $this->app->uid;
+    $twigParams["gtp"] = $this->app->gtp;
+    $twigParams["config"] = $this->app->config;
+    $twigParams["requestedUri"] = $this->app->requestedUri;
+    $twigParams["user"] = $this->app->userProfile;
+    $twigParams["locale"] = $this->app->locale->getAll();
     $twigParams["dictionary"] = $this->dictionary;
-    $twigParams['userNotifications'] = $this->adios->userNotifications->getAsHtml();
+    $twigParams['userNotifications'] = $this->app->userNotifications->getAsHtml();
 
     try {
       $tmpTemplate = empty($this->twigTemplate)
@@ -170,7 +170,7 @@ class Controller {
         : $this->twigTemplate
       ;
 
-      return $this->adios->twig->render(
+      return $this->app->twig->render(
         $tmpTemplate,
         $twigParams
       );

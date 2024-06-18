@@ -77,8 +77,8 @@ class FileBrowser extends \ADIOS\Core\ViewsWithController\Input {
 
     $mode = $this->params["mode"] ?? self::MODE_BROWSE;
 
-    $rootDir = $this->adios->config['uploadDir'].(empty($this->params['subdir']) ? "" : "/{$this->params['subdir']}");
-    $rootUrl = $this->adios->config['uploadUrl'].(empty($this->params['subdir']) ? "" : "/{$this->params['subdir']}");
+    $rootDir = $this->app->config['uploadDir'].(empty($this->params['subdir']) ? "" : "/{$this->params['subdir']}");
+    $rootUrl = $this->app->config['uploadUrl'].(empty($this->params['subdir']) ? "" : "/{$this->params['subdir']}");
 
     $this->renderFolderTree($rootDir);
 

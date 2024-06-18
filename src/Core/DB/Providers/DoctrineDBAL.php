@@ -26,7 +26,7 @@ class DoctrineDBAL extends \ADIOS\Core\DB
   public function connect(): void
   {
     $dsnParser = new \Doctrine\DBAL\Tools\DsnParser();
-    $connectionParams = $dsnParser->parse($this->adios->getConfig('db/dsn', ''));
+    $connectionParams = $dsnParser->parse($this->app->getConfig('db/dsn', ''));
     $this->connection = \Doctrine\DBAL\DriverManager::getConnection($connectionParams);
   }
 
@@ -976,7 +976,7 @@ class DoctrineDBAL extends \ADIOS\Core\DB
         !$columnDefinition['disableForeignKey']
         && 'lookup' == $columnDefinition['type']
       ) {
-        $lookupModel = $this->adios->getModel($columnDefinition['model']);
+        $lookupModel = $this->app->getModel($columnDefinition['model']);
         $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?: "id";
         $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?: "RESTRICT";
         $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?: "RESTRICT";
@@ -1025,7 +1025,7 @@ class DoctrineDBAL extends \ADIOS\Core\DB
   //         list($dummy, $srcColumnName, $lookupColumnName) = explode("___", $columnName);
 
   //         $srcColumn = $model->columns()[$srcColumnName];
-  //         $lookupModel = $this->adios->getModel($srcColumn['model']);
+  //         $lookupModel = $this->app->getModel($srcColumn['model']);
 
   //         $having .= " and (" . $this->columnSqlFilter(
   //           $lookupModel,

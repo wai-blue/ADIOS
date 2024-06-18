@@ -18,8 +18,8 @@ class Form extends \ADIOS\Core\Controller {
 
   public \ADIOS\Core\Model $model;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Read';
   }
 
@@ -48,7 +48,7 @@ class Form extends \ADIOS\Core\Controller {
   }
 
   public function loadRecord() {
-    $this->model = $this->adios->getModel($this->params['model']);
+    $this->model = $this->app->getModel($this->params['model']);
 
     $data = [];
 
@@ -67,7 +67,7 @@ class Form extends \ADIOS\Core\Controller {
       unset($params['returnParams']);
       unset($params['__IS_AJAX__']);
 
-      $model = $this->adios->getModel($this->params['model']);
+      $model = $this->app->getModel($this->params['model']);
       $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $model->formParams ?? []);
 
       $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
@@ -76,10 +76,10 @@ class Form extends \ADIOS\Core\Controller {
       //   return ($column['show'] ?? FALSE);
       // });
 
-      $params['canRead'] = $this->adios->permissions->granted($this->params['model'] . ':Read');
-      $params['canCreate'] = $this->adios->permissions->granted($this->params['model'] . ':Create');
-      $params['canUpdate'] = $this->adios->permissions->granted($this->params['model'] . ':Update');
-      $params['canDelete'] = $this->adios->permissions->granted($this->params['model'] . ':Delete');
+      $params['canRead'] = $this->app->permissions->granted($this->params['model'] . ':Read');
+      $params['canCreate'] = $this->app->permissions->granted($this->params['model'] . ':Create');
+      $params['canUpdate'] = $this->app->permissions->granted($this->params['model'] . ':Update');
+      $params['canDelete'] = $this->app->permissions->granted($this->params['model'] . ':Delete');
       $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
 
       $params['folderUrl'] = $model->getFolderUrl();
@@ -100,7 +100,7 @@ class Form extends \ADIOS\Core\Controller {
     try {
       $params = $this->params;
 
-      $tmpModel = $this->adios->getModel($params['model']);
+      $tmpModel = $this->app->getModel($params['model']);
 
       $tmpModel->recordSave($params['data']);
 
@@ -166,7 +166,7 @@ class Form extends \ADIOS\Core\Controller {
   //   // build-up view params
   //   unset($this->params['view']);
   //   $this->viewParams = array_merge(
-  //     $this->adios->params,
+  //     $this->app->params,
   //     [
   //       'params' => $this->getParams(),
   //       'data' => $this->loadRecord(),

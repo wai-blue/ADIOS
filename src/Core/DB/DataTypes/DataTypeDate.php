@@ -44,7 +44,7 @@ class DataTypeDate extends \ADIOS\Core\DB\DataType
     if (!empty($params['col_definition']['format'])) {
       $format = $params['col_definition']['format'];
     } else {
-      $format = $this->adios->locale->dateFormat();
+      $format = $this->app->locale->dateFormat();
     }
 
     $ts = strtotime((string) $value);

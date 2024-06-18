@@ -15,6 +15,6 @@ namespace ADIOS\Controllers\Components\Table;
  */
 class PrintPdf extends \ADIOS\Core\Controller {
   public function render($params = []) {
-    return $this->adios->view->PrintPdf($this->params)->render();
+    return $this->app->view->PrintPdf($this->params)->render();
   }
 }

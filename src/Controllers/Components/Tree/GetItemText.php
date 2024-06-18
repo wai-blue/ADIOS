@@ -15,7 +15,7 @@ namespace ADIOS\Controllers\Components\Tree;
  */
 class GetItemText extends \ADIOS\Core\Controller {
   public function render() {
-    $model = $this->adios->getModel($this->params['model']);
+    $model = $this->app->getModel($this->params['model']);
 
     $tmp = reset($model
       ->selectRaw($model->getFullTableSqlName().".id")

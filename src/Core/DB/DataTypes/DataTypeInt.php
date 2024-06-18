@@ -29,7 +29,7 @@ class DataTypeInt extends DataType
     $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, [
       'null_value' => false,
       'dumping_data' => false,
-      'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
+      'escape_string' => $this->app->getConfig('m_datapub/escape_string', true),
     ]);
 
     if ($params['dumping_data'] && '' == $value) {
@@ -40,7 +40,7 @@ class DataTypeInt extends DataType
       $sql = "$col_name=NULL";
     } else {
       if (is_numeric($value) && '' != $value) {
-        $sql = "$col_name='" . ($params['escape_string'] ? $this->adios->db->escape($value + 0) : $value + 0) . "'";
+        $sql = "$col_name='" . ($params['escape_string'] ? $this->app->db->escape($value + 0) : $value + 0) . "'";
       } else {
         $sql = "$col_name=null";
       }

@@ -53,7 +53,7 @@ class DataTypeTime extends DataType
     if (isset($params['col_definition']['format'])) {
       $format = $params['col_definition']['format'];
     } else {
-      $format = $this->adios->getConfig('m_datapub/columns/time/format', 'H:i:s');
+      $format = $this->app->getConfig('m_datapub/columns/time/format', 'H:i:s');
     }
 
     $ts = strtotime($value);

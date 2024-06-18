@@ -19,6 +19,6 @@ class Refresh extends \ADIOS\Core\Controller {
 
     $tmpParams['refresh'] = true;
 
-    return $this->adios->view->DataTable($tmpParams)->render();
+    return $this->app->view->DataTable($tmpParams)->render();
   }
 }

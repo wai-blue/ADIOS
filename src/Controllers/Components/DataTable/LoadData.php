@@ -129,7 +129,7 @@ class LoadData extends \ADIOS\Core\Controller {
     }
 
     private function loadData(): void {
-        $this->model = $this->adios->getModel($this->sessionParams['model']);
+        $this->model = $this->app->getModel($this->sessionParams['model']);
         $this->table = $this->model->getFullTableSqlName();
         $this->columns = $this->params['columns'];
 

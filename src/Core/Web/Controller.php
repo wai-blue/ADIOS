@@ -3,12 +3,12 @@
 namespace ADIOS\Core\Web;
 
 class Controller {
-  public $adios;
+  public $app;
   public array $params = [];
   public array $viewParams = [];
 
-  function __construct($adios, $params = []) {
-    $this->adios = $adios;
+  function __construct($app, $params = []) {
+    $this->app = $app;
     $this->params = $params;
   }
 

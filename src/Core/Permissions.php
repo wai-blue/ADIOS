@@ -13,13 +13,13 @@ class Permissions {
   /**
    * Reference to ADIOS object
    */
-  protected $adios;
+  protected \ADIOS\Core\Loader $app;
 
   protected array $permissions = [];
     
-  function __construct($adios)
+  function __construct(\ADIOS\Core\Loader $app)
   {
-    $this->adios = $adios;
+    $this->app = $app;
 
     $this->permissions = $this->loadPermissions();
     $this->expandPermissionGroups();
@@ -28,8 +28,8 @@ class Permissions {
 
   function loadPermissions(): array {
     $permissions = [];
-    if (is_array($this->adios->config['permissions'] ?? [])) {
-      foreach ($this->adios->config['permissions'] ?? [] as $idUserRole => $permissionsByRole) {
+    if (is_array($this->app->config['permissions'] ?? [])) {
+      foreach ($this->app->config['permissions'] ?? [] as $idUserRole => $permissionsByRole) {
         $permissions[$idUserRole] = [];
         foreach ($permissionsByRole as $permissionPath => $isEnabled) {
           if ((bool) $isEnabled) {
@@ -64,7 +64,7 @@ class Permissions {
 
   public function set(string $permission, int $idUserRole, bool $isEnabled)
   {
-    $this->adios->saveConfigByPath(
+    $this->app->saveConfigByPath(
       "permissions/{$idUserRole}/".str_replace("/", ":", $permission),
       $isEnabled ? "1" : "0"
     );
@@ -72,14 +72,14 @@ class Permissions {
 
   public function hasRole(int|string $role) {
     if (is_string($role)) {
-      $userRoleModel = $this->adios->getCoreClass('Models\\UserRole');
+      $userRoleModel = $this->app->getCoreClass('Models\\UserRole');
       $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
       $idRole = (int) $idUserRoleByRoleName[$role];
     } else {
       $idRole = (int) $role;
     }
 
-    return in_array($idRole, $this->adios->userProfile['roles'] ?? []);
+    return in_array($idRole, $this->app->userProfile['roles'] ?? []);
   }
 
   public function grantedForRole(string $permission, int $idUserRole) : bool
@@ -97,7 +97,7 @@ class Permissions {
   public function granted(string $permission, array $idUserRoles = []) : bool
   {
     if (empty($permission)) return TRUE;
-    if (count($idUserRoles) == 0) $idUserRoles = $this->adios->userProfile['roles'];
+    if (count($idUserRoles) == 0) $idUserRoles = $this->app->userProfile['roles'];
 
     $granted = FALSE;
 

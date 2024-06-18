@@ -14,9 +14,9 @@ class Tabs extends \ADIOS\Core\ViewWithController {
   
   private array $tabs = [];
 
-  public function __construct($adios, $params = NULL)
+  public function __construct($app, $params = NULL)
   {
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
 
     $this->tabs = $this->params['tabs'] ?? [];
   }

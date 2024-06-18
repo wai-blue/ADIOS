@@ -24,8 +24,8 @@ class Table extends \ADIOS\Core\Controller {
   public array $data = [];
   private int $itemsPerPage = 15;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Read';
   }
 
@@ -45,7 +45,7 @@ class Table extends \ADIOS\Core\Controller {
   public function getParams() {
     try {
       $params = $this->params;
-      $model = $this->adios->getModel($this->params['model']);
+      $model = $this->app->getModel($this->params['model']);
 
       $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $model->tableParams ?? []);
 
@@ -54,10 +54,10 @@ class Table extends \ADIOS\Core\Controller {
         return ($column['show'] ?? FALSE);
       });
 
-      $params['canRead'] = $this->adios->permissions->granted($this->params['model'] . ':Read');
-      $params['canCreate'] = $this->adios->permissions->granted($this->params['model'] . ':Create');
-      $params['canUpdate'] = $this->adios->permissions->granted($this->params['model'] . ':Update');
-      $params['canDelete'] = $this->adios->permissions->granted($this->params['model'] . ':Delete');
+      $params['canRead'] = $this->app->permissions->granted($this->params['model'] . ':Read');
+      $params['canCreate'] = $this->app->permissions->granted($this->params['model'] . ':Create');
+      $params['canUpdate'] = $this->app->permissions->granted($this->params['model'] . ':Update');
+      $params['canDelete'] = $this->app->permissions->granted($this->params['model'] . ':Delete');
       $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
 
       $params['folderUrl'] = $model->getFolderUrl();
@@ -86,7 +86,7 @@ class Table extends \ADIOS\Core\Controller {
       $search = strtolower(Str::ascii($params['search']));
     }
 
-    $this->model = $this->adios->getModel($this->params['model']);
+    $this->model = $this->app->getModel($this->params['model']);
 
     $tmpColumns = $this->getColumnsForDataQuery();
 
@@ -103,7 +103,7 @@ class Table extends \ADIOS\Core\Controller {
     // LOOKUPS and RELATIONSHIPS
     foreach ($tmpColumns as $columnName => $column) {
       if ($column['type'] == 'lookup') {
-        $lookupModel = $this->adios->getModel($column['model']);
+        $lookupModel = $this->app->getModel($column['model']);
         $lookupConnection = $lookupModel->getConnectionName();
         $lookupDatabase = $lookupModel->getConnection()->getDatabaseName();
         $lookupTableName = $lookupModel->getFullTableSqlName();

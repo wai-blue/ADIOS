@@ -17,8 +17,8 @@ class Refresh extends \ADIOS\Core\Controller {
   public function render($params = []) {
     $tmp['refresh'] = 1;
     $tmp['uid'] = $_REQUEST['uid'];
-    $this->adios->setUid($tmp['uid']);
-    $table = $this->adios->view->Table($tmp);
+    $this->app->setUid($tmp['uid']);
+    $table = $this->app->view->Table($tmp);
     return $table->render();
   }
 }

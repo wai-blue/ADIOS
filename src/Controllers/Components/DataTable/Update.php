@@ -25,7 +25,7 @@ class Update extends \ADIOS\Core\Controller {
         $colNameToUpdate = $this->params['colName'];
         $newValue = $this->params['newValue'];
 
-        $tmpModel = $this->adios->getModel($sessionParams['model']);
+        $tmpModel = $this->app->getModel($sessionParams['model']);
 
         // Replace newValue if col is type of enum
         if (!empty($sessionParams['columnSettings'][$colNameToUpdate]['enumValues'])) {

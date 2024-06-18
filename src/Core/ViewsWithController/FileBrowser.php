@@ -17,7 +17,7 @@ class FileBrowser extends \ADIOS\Core\ViewWithController {
   public function render(string $panel = ''): string
   {
     $inputHtml = (new \ADIOS\Core\ViewsWithController\Inputs\FileBrowser(
-      $this->adios,
+      $this->app,
       $this->params['uid'],
       $this->params
     ))->render();
@@ -27,7 +27,7 @@ class FileBrowser extends \ADIOS\Core\ViewWithController {
         $this->params['onchange'] = "{$this->uid}_close($(this).val());";
       }
 
-      $html = $this->adios->view->Window(
+      $html = $this->app->view->Window(
         [
           'uid' => "{$this->uid}_window",
           'content' => "
@@ -41,7 +41,7 @@ class FileBrowser extends \ADIOS\Core\ViewWithController {
             </script>
           ",
           'header' => [
-            $this->adios->view->Button([
+            $this->app->view->Button([
               "text" => $this->translate("Close"),
               "type" => "close",
               "onclick" => "{$this->uid}_close();",
@@ -54,7 +54,7 @@ class FileBrowser extends \ADIOS\Core\ViewWithController {
       $html = "";
 
       if (!empty($this->params['title'])) {
-        $html .= $this->adios->view->Title([
+        $html .= $this->app->view->Title([
           'center' => $this->translate($this->params['title']),
         ])->render();
       }

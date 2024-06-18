@@ -19,7 +19,7 @@ class Save extends \ADIOS\Core\Controller
   {
     $params = $this->params;
 
-    $model = $this->adios->getModel($params['model']);
+    $model = $this->app->getModel($params['model']);
 
     // najdem stlpec pre rodica
 
@@ -37,7 +37,7 @@ class Save extends \ADIOS\Core\Controller
     foreach ($values as $value) {
       if ($value['toDelete']) {
         foreach ($model->findForeignKeyModels() as $fkModelName => $fkColumn) {
-          $this->adios->getModel($fkModelName)->where($fkColumn, $value['id'])->update([
+          $this->app->getModel($fkModelName)->where($fkColumn, $value['id'])->update([
             $fkColumn => NULL
           ]);
         }

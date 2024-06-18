@@ -28,7 +28,7 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
       $sql = "`{$col_name}` = ''";
     } else {
       if (is_string($value)) {
-        $sql = "`{$col_name}` = '" . $this->adios->db->escape($value) . "'";
+        $sql = "`{$col_name}` = '" . $this->app->db->escape($value) . "'";
       } else {
         $sql = "`{$col_name}` = ''";
       }
@@ -43,13 +43,13 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
 
     $value = htmlspecialchars($value);
 
-    if ('' != $value && file_exists($this->adios->config['uploadDir']."/{$value}")) {
+    if ('' != $value && file_exists($this->app->config['uploadDir']."/{$value}")) {
       $value = str_replace('\\', '/', $value);
       $value = explode('/', $value);
       $value[count($value) - 1] = rawurlencode($value[count($value) - 1]);
       $value = implode('/', $value);
 
-      $html = "<a href='{$this->adios->config['url']}/File?f={$value}' onclick='event.cancelBubble = true;' target='_blank'>".basename($value).'</a>';
+      $html = "<a href='{$this->app->config['url']}/File?f={$value}' onclick='event.cancelBubble = true;' target='_blank'>".basename($value).'</a>';
     }
 
     return $html;
@@ -57,6 +57,6 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
 
   public function toCsv($value, $params = [])
   {
-    return "{$this->adios->config['url']}/File?f=/{$value}";
+    return "{$this->app->config['url']}/File?f=/{$value}";
   }
 }

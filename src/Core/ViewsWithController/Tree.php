@@ -22,7 +22,7 @@ class Tree extends \ADIOS\Core\ViewWithController
   public ?\ADIOS\Core\Model $model = NULL;
 
   public function __construct(
-   object $adios,
+   object $app,
    array $params = [],
    ?\ADIOS\Core\ViewWithController $parentView = NULL
   ) {
@@ -49,10 +49,10 @@ class Tree extends \ADIOS\Core\ViewWithController
     }
 
     // parent constructor
-    parent::__construct($adios, $params, $parentView);
+    parent::__construct($app, $params, $parentView);
 
     // finalizacia
-    $this->model = $this->adios->getModel($this->params['model']);
+    $this->model = $this->app->getModel($this->params['model']);
 
   }
 
@@ -274,9 +274,9 @@ class Tree extends \ADIOS\Core\ViewWithController
   public function render(string $panel = ''): string
   {
 
-    $inputUid = $this->adios->getUid($this->model->fullName);
+    $inputUid = $this->app->getUid($this->model->fullName);
 
-    // $contentHtml = (new \ADIOS\Core\ViewsWithController\Inputs\Tree($this->adios, $inputUid, $this->params))->render();
+    // $contentHtml = (new \ADIOS\Core\ViewsWithController\Inputs\Tree($this->app, $inputUid, $this->params))->render();
 
     // najdem stlpec pre rodica
     $parentColumn = $this->params['parentColumn'] ?? '';
@@ -404,7 +404,7 @@ class Tree extends \ADIOS\Core\ViewWithController
 
 
     // if ($this->params['__IS_WINDOW__']) {
-    //   $contentHtml = $this->adios->view->Window(
+    //   $contentHtml = $this->app->view->Window(
     //     [
     //       'uid' => "{$this->uid}_window",
     //       'content' => $contentHtml,

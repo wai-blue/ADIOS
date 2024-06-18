@@ -21,9 +21,9 @@ class Token extends \ADIOS\Core\Model {
 
   public $tokenTypes = [];
 
-  public function __construct(&$adios) {
+  public function __construct(\ADIOS\Core\Loader $app) {
     $this->sqlName = "_tokens";
-    parent::__construct($adios);
+    parent::__construct($app);
   }
 
   public function columns(array $columns = []): array

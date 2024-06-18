@@ -34,14 +34,14 @@ class Table extends \ADIOS\Core\ViewWithController
   /**
    * __construct
    *
-   * @param mixed $adios
+   * @param mixed $app
    * @param mixed $params
    * @return void
    */
-  public function __construct($adios, $params = null)
+  public function __construct($app, $params = null)
   {
 
-    $this->adios = $adios;
+    $this->app = $app;
 
     if ($params['refresh'] && !empty($params['uid'])) {
       $params = parent::params_merge(
@@ -131,11 +131,11 @@ class Table extends \ADIOS\Core\ViewWithController
       throw new \Exception("Components/Table: Don't know what model to work with.");
     }
   
-    $this->model = $this->adios->getModel($params['model']);
+    $this->model = $this->app->getModel($params['model']);
     $params['table'] = $this->model->getFullTableSqlName();
 
     if (empty($params['uid'])) {
-      $params['uid'] = $this->adios->getUid($params['model']);
+      $params['uid'] = $this->app->getUid($params['model']);
     }
 
     if (empty($params['title'])) {
@@ -171,7 +171,7 @@ class Table extends \ADIOS\Core\ViewWithController
 
     $_SESSION[_ADIOS_ID]['table'][$params['uid']] = $paramsToSession;
 
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
 
     $this->model->onTableBeforeInit($this);
 
@@ -238,7 +238,7 @@ class Table extends \ADIOS\Core\ViewWithController
           $fkColumnName = $this->params['foreignKey'];
           $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
           if ($fkColumnDefinition !== NULL) {
-            $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
+            $tmpModel = $this->app->getModel($fkColumnDefinition['model']);
             $tmpUrl = $tmpModel->urlBase . "/" . $tmpParentFormId . "/" . $tmpUrl;
           }
 
@@ -297,7 +297,7 @@ class Table extends \ADIOS\Core\ViewWithController
 
     $this->loadData();
 
-    $this->adios->test->assert("loadedRowsCount", count($this->data), ["model" => $params['model']]);
+    $this->app->test->assert("loadedRowsCount", count($this->data), ["model" => $params['model']]);
 
     // strankovanie
 
@@ -336,7 +336,7 @@ class Table extends \ADIOS\Core\ViewWithController
    */
   public function loadData()
   {
-    $db = $this->adios->db;
+    $db = $this->app->db;
     if (empty($this->params['table'])) return;
 
     // where and whereRaw
@@ -353,7 +353,7 @@ class Table extends \ADIOS\Core\ViewWithController
         $fkColumnName = $this->params['foreignKey'];
         $fkColumnDefinition = $this->columns[$fkColumnName] ?? NULL;
         if ($fkColumnDefinition !== NULL) {
-          $tmpModel = $this->adios->getModel($fkColumnDefinition['model']);
+          $tmpModel = $this->app->getModel($fkColumnDefinition['model']);
           $whereRaw .= "
             and
               `lookup_{$tmpModel->getFullTableSqlName()}_{$fkColumnName}`.`id`
@@ -445,13 +445,13 @@ class Table extends \ADIOS\Core\ViewWithController
   {
     if (!empty($col_def['input']) && is_string($col_def['input'])) {
       $inputClassName = "\\ADIOS\\" . str_replace("/", "\\", $col_def['input']);
-      $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
+      $tmpInput = new $inputClassName($this->app, "", ["value" => $rowValues[$columnName]]);
       $cellCsv = $tmpInput->formatValueToCsv();
-    } else if ($this->adios->db->isRegisteredColumnType($columnDefinition['type'])) {
+    } else if ($this->app->db->isRegisteredColumnType($columnDefinition['type'])) {
       if (!empty($columnDefinition['enumValues'])) {
         $cellCsv = $columnDefinition['enumValues'][$rowValues[$columnName]];
       } else {
-        $cellCsv = $this->adios->db->columnTypes[$columnDefinition['type']]->toCsv(
+        $cellCsv = $this->app->db->columnTypes[$columnDefinition['type']]->toCsv(
           $rowValues[$columnName],
           [
             'col_name' => $columnName,
@@ -660,7 +660,7 @@ class Table extends \ADIOS\Core\ViewWithController
 
         // fulltext search
         if ($this->params['showFulltextSearch']) {
-          $titleRightContent[] = new Html($this->adios, [
+          $titleRightContent[] = new Html($this->app, [
             'html' => "
               <input
                 type='input'
@@ -714,11 +714,11 @@ class Table extends \ADIOS\Core\ViewWithController
             if (strpos($searchColName, "LOOKUP___") === 0) {
               list($tmp, $tmpSrcColName, $tmpLookupColName) = explode("___", $searchColName);
               $tmpSrcColumn = $tmpColumns[$tmpSrcColName];
-              $tmpLookupModel = $this->adios->getModel($tmpSrcColumn["model"]);
+              $tmpLookupModel = $this->app->getModel($tmpSrcColumn["model"]);
               $tmpColumn = $tmpLookupModel->columns()[$tmpLookupColName];
               $tmpTitle = $tmpLookupModel->tableParams['title'] . " / " . $tmpColumn["title"];
             } else if ($tmpColumn["type"] == "lookup" && is_numeric($searchValue)) {
-              $tmpLookupModel = $this->adios->getModel($tmpColumn["model"]);
+              $tmpLookupModel = $this->app->getModel($tmpColumn["model"]);
 
               $tmp = reset($tmpLookupModel->lookupQuery(
                 NULL,
@@ -757,7 +757,7 @@ class Table extends \ADIOS\Core\ViewWithController
                 " . $this->addView('\\ADIOS\\Core\\ViewsWithController\\Button', [
             "type" => "close",
             "text" => $this->translate("Clear filter"),
-            "onclick" => "ADIOS.renderDesktop('{$this->adios->requestedAction}');",
+            "onclick" => "ADIOS.renderDesktop('{$this->app->requestedAction}');",
           ])->render() . "
               </div>
             </div>
@@ -782,11 +782,11 @@ class Table extends \ADIOS\Core\ViewWithController
           ? json_encode($this->params['_REQUEST'])
           : json_encode(['uid' => $this->params['uid']])
         ) . "'
-          data-action='" . ads($this->adios->action) . "'
+          data-action='" . ads($this->app->action) . "'
           data-page='" . (int)$this->params['page'] . "'
           data-items-per-page='" . (int)$this->params['items-per-page'] . "'
-          data-is-ajax='" . ($this->adios->isAjax() ? "1" : "0") . "'
-          data-is-in-form='" . (in_array("Components/Form", (array) $this->adios->actionStack) ? "1" : "0") . "'
+          data-is-ajax='" . ($this->app->isAjax() ? "1" : "0") . "'
+          data-is-in-form='" . (in_array("Components/Form", (array) $this->app->actionStack) ? "1" : "0") . "'
         >
       ";
     }
@@ -1168,10 +1168,10 @@ class Table extends \ADIOS\Core\ViewWithController
   {
     if (!empty($columnDefinition['input']) && is_string($columnDefinition['input'])) {
       $inputClassName = "\\ADIOS\\" . str_replace("/", "\\", $columnDefinition['input']);
-      $tmpInput = new $inputClassName($this->adios, "", ["value" => $rowValues[$columnName]]);
+      $tmpInput = new $inputClassName($this->app, "", ["value" => $rowValues[$columnName]]);
       $cellHtml = $tmpInput->formatValueToHtml();
-    } else if ($this->adios->db->isRegisteredColumnType($columnDefinition['type'])) {
-      $cellHtml = $this->adios->db->columnTypes[$columnDefinition['type']]->toHtml(
+    } else if ($this->app->db->isRegisteredColumnType($columnDefinition['type'])) {
+      $cellHtml = $this->app->db->columnTypes[$columnDefinition['type']]->toHtml(
         $rowValues[$columnName],
         [
           'col_name' => $columnName,

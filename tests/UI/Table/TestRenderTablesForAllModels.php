@@ -4,8 +4,8 @@ namespace ADIOS\Tests\UI\Table;
 
 class TestRenderTablesForAllModels extends \ADIOS\Core\Test {
   public function init() : void {
-    foreach ($this->adios->models as $model) {
-      $table = new \ADIOS\Core\ViewsWithController\Table($this->adios, [
+    foreach ($this->app->models as $model) {
+      $table = new \ADIOS\Core\ViewsWithController\Table($this->app, [
         "model" => $model,
       ]);
 

@@ -19,8 +19,8 @@ use Illuminate\Database\QueryException;
 class OnDelete extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Delete';
   }
 
@@ -28,7 +28,7 @@ class OnDelete extends \ADIOS\Core\Controller {
     try {
       $params = $this->params;
 
-      $tmpModel = $this->adios->getModel($params['model']);
+      $tmpModel = $this->app->getModel($params['model']);
       
       $tmpModel->find($params['id'])->delete();
 

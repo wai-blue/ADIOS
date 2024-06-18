@@ -17,9 +17,9 @@ class Window extends \ADIOS\Core\ViewWithController {
 
   public ?\ADIOS\Core\ViewsWithController\Button $closeButton = NULL;
 
-  public function __construct($adios, $params = null)
+  public function __construct($app, $params = null)
   {
-    $this->adios = $adios;
+    $this->app = $app;
 
     $this->params = [
       'title' => 'Window',
@@ -31,10 +31,10 @@ class Window extends \ADIOS\Core\ViewWithController {
       'cssClass' => '',
     ];
 
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
 
-    $this->headerLeft = new \ADIOS\Core\ViewWithController($this->adios, $params, $this);
-    $this->headerRight = new \ADIOS\Core\ViewWithController($this->adios, $params, $this);
+    $this->headerLeft = new \ADIOS\Core\ViewWithController($this->app, $params, $this);
+    $this->headerRight = new \ADIOS\Core\ViewWithController($this->app, $params, $this);
 
   }
 
@@ -142,8 +142,8 @@ class Window extends \ADIOS\Core\ViewWithController {
       <script>
         window_post_render(
           $('#{$this->uid}'),
-          '".ads($this->adios->action)."',
-          '".ads($this->adios->requestedUri)."',
+          '".ads($this->app->action)."',
+          '".ads($this->app->requestedUri)."',
           {},
           {}
         );

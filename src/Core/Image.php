@@ -17,7 +17,7 @@ $f = $_GET['f'] ?? "";
 
 
 
-if (!isset($this->adios->config['image']['configurations']['main_datapub_image'])) {
+if (!isset($this->app->config['image']['configurations']['main_datapub_image'])) {
     $this->config['image']['configurations']['main_datapub_image'] = ['width' => 48, 'height' => 48, 'background' => 'transparent', 'use_cache' => false];
 }
 

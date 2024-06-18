@@ -17,7 +17,7 @@ class Search extends \ADIOS\Core\Controller
 {
   public function render()
   {
-    $tableSearch = new \ADIOS\Core\ViewsWithController\TableSearch($this->adios, $this->params);
+    $tableSearch = new \ADIOS\Core\ViewsWithController\TableSearch($this->app, $this->params);
     return $tableSearch->render();
   }
 }

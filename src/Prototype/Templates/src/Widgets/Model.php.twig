@@ -41,8 +41,8 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
 
   public bool $storeRecordInfo = {%if thisModel.config.storeRecordInfo %}TRUE{% else %}FALSE{% endif %};
 
-  public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
-    parent::__construct($adiosOrAttributes, $eloquentQuery);
+  public function __construct($appOrAttributes = NULL, $eloquentQuery = NULL) {
+    parent::__construct($appOrAttributes, $eloquentQuery);
 
     $this->tableParams = 
       {{ varExport(thisModel.config.tableParams | default(null), "    ")|raw }}
@@ -115,7 +115,7 @@ class {{ thisModel.class }} extends \ADIOS\Core\Model {
 {{ varExport(thisModel.config.formParams.defaultValues, "      ")|raw }}
     ;
 
-    return $this->adios->dispatchEventToPlugins("onModelAfterFormParams", [
+    return $this->app->dispatchEventToPlugins("onModelAfterFormParams", [
       "model" => $this,
       "data" => $data,
       "params" => $params,

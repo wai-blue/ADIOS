@@ -16,7 +16,7 @@ namespace ADIOS\Controllers\Components\Table;
 class Copy extends \ADIOS\Core\Controller {
   public function render($params = []) {
 
-    $model = $this->adios->getModel($params['model']);
+    $model = $this->app->getModel($params['model']);
 
     if (is_numeric($params['id'])) {
       $ids = [(int) $params['id']];
@@ -24,13 +24,13 @@ class Copy extends \ADIOS\Core\Controller {
       $ids = explode(',', $params['ids']);
     }
 
-    $this->adios->db->startTransaction();
+    $this->app->db->startTransaction();
 
     foreach ($ids as $id) {
       $tmpResult = $model->copyRow((int) $id);
     }
 
-    $this->adios->db->commit();
+    $this->app->db->commit();
 
     return _count($ids) == 1 ? $tmpResult : 1;
   }

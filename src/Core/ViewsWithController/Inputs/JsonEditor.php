@@ -12,7 +12,7 @@ namespace ADIOS\Core\ViewsWithController\Inputs;
 
 class JsonEditor extends \ADIOS\Core\ViewsWithController\Input {
 
-  public function __construct($adios, array $params = [])
+  public function __construct($app, array $params = [])
   {
     $params = array_replace_recursive([
       'uid' => '',
@@ -24,7 +24,7 @@ class JsonEditor extends \ADIOS\Core\ViewsWithController\Input {
 
     if (!is_array($params['schema'])) $params['schema'] = [];
 
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
   }
 
   public function render(string $panel = ''): string

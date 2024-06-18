@@ -38,13 +38,13 @@ class User extends \ADIOS\Core\Model {
   ];
 
 
-  public function __construct($adiosOrAttributes = NULL, $eloquentQuery = NULL) {
+  public function __construct($appOrAttributes = NULL, $eloquentQuery = NULL) {
     $this->sqlName = "_users";
-    parent::__construct($adiosOrAttributes, $eloquentQuery);
+    parent::__construct($appOrAttributes, $eloquentQuery);
 
 
-    if (is_object($adiosOrAttributes)) {
-      $tokenModel = $adiosOrAttributes->getModel("ADIOS/Models/Token");
+    if (is_object($appOrAttributes)) {
+      $tokenModel = $appOrAttributes->getModel("ADIOS/Models/Token");
 
       if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
         $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
@@ -163,7 +163,7 @@ class User extends \ADIOS\Core\Model {
         "params" => [
           "model" => "ADIOS/Models/User",
           "myProfileView" => TRUE,
-          "id" => $this->adios->userProfile['id'] ?? 0,
+          "id" => $this->app->userProfile['id'] ?? 0,
         ]
       ],
     ]);
@@ -296,8 +296,8 @@ class User extends \ADIOS\Core\Model {
     }
 
     if (is_array($authResult)) {
-      $this->adios->userProfile = $authResult;
-      $this->adios->userLogged = TRUE;
+      $this->app->userProfile = $authResult;
+      $this->app->userLogged = TRUE;
       $_SESSION[_ADIOS_ID]['userProfile'] = $authResult;
     } else {
       $this->signOut();
@@ -305,7 +305,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function generateToken($idUser, $tokenSalt, $tokenType) {
-    $tokenModel = $this->adios->getModel("ADIOS/Models/Token");
+    $tokenModel = $this->app->getModel("ADIOS/Models/Token");
     $token = $tokenModel->generateToken($tokenSalt, $tokenType);
 
     $this->updateRow([
@@ -324,7 +324,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function validateToken($token, $deleteAfterValidation = TRUE) {
-    $tokenModel = $this->adios->getModel("ADIOS/Models/Token");
+    $tokenModel = $this->app->getModel("ADIOS/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
     $userData = $this->where(
@@ -349,8 +349,8 @@ class User extends \ADIOS\Core\Model {
 
   public function signOut() {
     unset($_SESSION[_ADIOS_ID]);
-    $this->adios->userProfile = [];
-    $this->adios->userLogged = FALSE;
+    $this->app->userProfile = [];
+    $this->app->userLogged = FALSE;
   }
 
   public function getQueryForUser(int $idUser) {

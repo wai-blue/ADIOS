@@ -8,8 +8,8 @@ class DataTable extends \ADIOS\Core\ViewWithController {
   public string $twigTemplate = "ADIOS/Core/Components/DataTable";
   private ?\ADIOS\Core\Model $model = null;
 
-  public function __construct(?\ADIOS\Core\Loader $adios, array $params = []) {
-    $this->adios = $adios;
+  public function __construct(?\ADIOS\Core\Loader $app, array $params = []) {
+    $this->app = $app;
 
     $this->params = parent::params_merge([
       'datatableName' => null,
@@ -37,20 +37,20 @@ class DataTable extends \ADIOS\Core\ViewWithController {
 
     if ($this->params['refresh'] == false) {
       $this->params['datatableName'] = 
-        ($this->params['datatableName'] ?? $this->adios->uid) 
+        ($this->params['datatableName'] ?? $this->app->uid) 
         . '_datatable'
       ;
 
-      $this->params['loadDataActionFullUrl'] = $this->adios->config['url'] . '/' .
+      $this->params['loadDataActionFullUrl'] = $this->app->config['url'] . '/' .
         $this->params['loadDataAction'] . '?uid=' . $this->params['datatableName']
       ;
     }
 
     if (empty($this->params['columnSettings']) && $this->params['model'] != null) {
-      $tmpModel = $this->adios->getModel($this->params['model']);
+      $tmpModel = $this->app->getModel($this->params['model']);
 
-      $this->params['columnSettings'] = $this->adios->db->tables[
-        "{$this->adios->gtp}_{$tmpModel->sqlName}"
+      $this->params['columnSettings'] = $this->app->db->tables[
+        "{$this->app->gtp}_{$tmpModel->sqlName}"
       ];
 
       foreach ($this->params['columnSettings'] as $columnName => $column) {
@@ -72,7 +72,7 @@ class DataTable extends \ADIOS\Core\ViewWithController {
           } elseif ($column['type'] == 'lookup') {
             $edtitorType = 'select';
 
-            $model = $this->adios->getModel($column['model']);
+            $model = $this->app->getModel($column['model']);
 
             if ($model == NULL) exit('Model not found');
 
@@ -84,7 +84,7 @@ class DataTable extends \ADIOS\Core\ViewWithController {
           }
 
           $this->params['columns'][] = [
-            'adiosColumn' => $column,
+            'appColumn' => $column,
             'title' => $column['title'],
             'data' => $columnName,
             'editorType' => $edtitorType
@@ -110,7 +110,7 @@ class DataTable extends \ADIOS\Core\ViewWithController {
     $this->saveParamsToSession($this->params['datatableName'], $this->params);
 
     if (empty($this->params['data'])) {
-      $this->model = $this->adios->getModel($this->params['model']);
+      $this->model = $this->app->getModel($this->params['model']);
 
       $this->params['data'] = array_values($this->model->getAll());
     }
@@ -120,7 +120,7 @@ class DataTable extends \ADIOS\Core\ViewWithController {
     return array_merge(
       $this->params,
       [
-        'ui' => $this->adios->ui
+        'ui' => $this->app->ui
       ]
     );
   }

@@ -20,7 +20,7 @@ class Tags extends \ADIOS\Core\ViewsWithController\Input {
       'initialTags' => '[""]' 
     ], $this->params);
 
-    $model = $this->adios->getModel($params['model']);
+    $model = $this->app->getModel($params['model']);
     $data = $model->getAll();
 
     if (!array_key_exists($params['tagColumn'], $model->columns())) {

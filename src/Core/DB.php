@@ -27,7 +27,7 @@ class DB
   protected string $db_name = "";
   protected string $db_codepage = "";
 
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
 
   public array $tables = [];
 
@@ -46,9 +46,9 @@ class DB
    * @param string Name of this element
    * @param array Array of parameters for this module
    */
-  public function __construct($adios)
+  public function __construct(\ADIOS\Core\Loader $app)
   {
-    $this->adios = $adios;
+    $this->app = $app;
     $this->tables = [];
 
     $this->connect();
@@ -88,7 +88,7 @@ class DB
       // Type to lower if is not custom
       // REVIEW: Treba vymysliet univerzalne - neviazat na konkretne nazvy datovych typov.
       if (!in_array($tmp, ['MapPoint'])) $tmp = strtolower($tmp);
-      $this->columnTypes[$tmp] = new $class($this->adios);
+      $this->columnTypes[$tmp] = new $class($this->app);
     }
   }
 
@@ -422,7 +422,7 @@ class DB
                   throw new \Exception("Model for lookup: {$col_name} is empty");
                 }
 
-                $lookupModel = $this->adios->getModel($col_definition['model']);
+                $lookupModel = $this->app->getModel($col_definition['model']);
                 if ($lookupModel == NULL) throw new \Exception("Model: {$col_definition['model']} not found");
 
                 $modelAllData = $lookupModel->select('id')

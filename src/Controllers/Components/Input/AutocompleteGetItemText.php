@@ -16,7 +16,7 @@ namespace ADIOS\Controllers\Components\Input;
 class AutocompleteGetItemText extends \ADIOS\Core\Controller {
   public function render() {
     $value = (int) $this->params['value'];
-    $lookupModel = $this->adios->getModel($this->params['model']);
+    $lookupModel = $this->app->getModel($this->params['model']);
 
     $lookupRow = reset($lookupModel->lookupQuery(
       $this->params['initiating_model'],

@@ -19,7 +19,7 @@ class Import extends \ADIOS\Core\Controller {
     $columnNamesInFirstLine = (bool) $this->params['column_names_in_first_line'];
     $separator = $this->params['separator'];
     $model = $this->params['model'];
-    $modelObject = $this->adios->getModel($model);
+    $modelObject = $this->app->getModel($model);
     $trimCellValues = (bool) $this->params['trim_cell_values'];
 
     if ($separator == "TAB") $separator = "\t";
@@ -28,7 +28,7 @@ class Import extends \ADIOS\Core\Controller {
     $row = 0;
     $importedRows = 0;
 
-    if (($handle = fopen("{$this->adios->config['uploadDir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
+    if (($handle = fopen("{$this->app->config['uploadDir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
       while (($csvRow = fgetcsv($handle, 1000, $separator)) !== FALSE) {
         $row++;
 
@@ -73,14 +73,14 @@ class Import extends \ADIOS\Core\Controller {
       <pre>{$log}</pre>
     ";
 
-    $window = $this->adios->view->Window([
+    $window = $this->app->view->Window([
       'uid' => "{$this->uid}_window",
       'title' => " ",
       'content' => $content,
     ]);
 
     $window->params['header'] = [
-      $this->adios->view->Button([
+      $this->app->view->Button([
         'type' => 'close',
         'onclick' => "{$this->uid}_close();",
       ]),

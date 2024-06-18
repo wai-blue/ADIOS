@@ -18,8 +18,8 @@ use Illuminate\Database\QueryException;
 class Data extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
   }
 
   public function renderJson(): ?array { 
@@ -32,14 +32,14 @@ class Data extends \ADIOS\Core\Controller {
       if ($model == '') throw new \Exception("Unknown model");
       if ($junction == '') throw new \Exception("Unknown junction model");
 
-      $tmpModel = $this->adios->getModel($model);
+      $tmpModel = $this->app->getModel($model);
 
       $junctionData = $tmpModel->junctions[$junction] ?? null;
       if ($junctionData == null) {
         throw new \Exception("Junction {$junction} in {$model} not found");
       }
 
-      $junctionModel = $this->adios->getModel($junctionData['junctionModel']);
+      $junctionModel = $this->app->getModel($junctionData['junctionModel']);
 
       if ($id > 0) {
         $selected = $junctionModel->where($junctionData['masterKeyColumn'], $id)
@@ -48,7 +48,7 @@ class Data extends \ADIOS\Core\Controller {
 
       $junctionOptionKeyColumn = $junctionModel->columns()[$junctionData['optionKeyColumn']];
 
-      $junctionOptionKeyModel = $this->adios->getModel($junctionOptionKeyColumn['model']);
+      $junctionOptionKeyModel = $this->app->getModel($junctionOptionKeyColumn['model']);
       $data = $junctionOptionKeyModel->all();
 
       return [

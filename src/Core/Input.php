@@ -12,7 +12,7 @@ namespace ADIOS\Core;
 
 class Input {
   public $name;
-  public $adios;
+  public $app;
   public $params;
   public $gtp;
   public $uid;
@@ -27,15 +27,15 @@ class Input {
    */
   // public $languageDictionary = [];
 
-  function __construct(&$adios, $uid, $params) {
-    $this->adios = &$adios;
-    $this->gtp = $this->adios->gtp;
-    $this->uid = (empty($uid) ? $this->adios->getUid() : $uid);
+  function __construct($app, $uid, $params) {
+    $this->app = $app;
+    $this->gtp = $this->app->gtp;
+    $this->uid = (empty($uid) ? $this->app->getUid() : $uid);
     $this->cssUid = (empty($params['css_uid']) ? $this->uid : $params['css_uid']);
     $this->params = $params;
     $this->value = $this->params['value'];
 
-    // $this->languageDictionary = $this->adios->loadLanguageDictionary($this);
+    // $this->languageDictionary = $this->app->loadLanguageDictionary($this);
   }
 
   /**
@@ -49,7 +49,7 @@ class Input {
    */
   public function translate(string $string, array $vars = []): string
   {
-    return $this->adios->translate($string, $vars, $this);
+    return $this->app->translate($string, $vars, $this);
   }
 
   public function render() {

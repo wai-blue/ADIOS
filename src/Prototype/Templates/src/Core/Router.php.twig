@@ -5,8 +5,8 @@
 namespace {{ appNamespace }}\Core;
 
 class Router extends \ADIOS\Core\Router {
-  public function __construct(\ADIOS\Core\Loader $adios) {
-    parent::__construct($adios);
+  public function __construct(\ADIOS\Core\Loader $app) {
+    parent::__construct($app);
 
     $this->addRouting(
 {{ varExport(routing, "      ")|raw }}

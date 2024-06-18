@@ -16,7 +16,7 @@ class ViewWithController {
   const DISPLAY_MODE_DESKTOP = 'desktop';
   const DISPLAY_MODE_INLINE = 'inline';
   
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
 
   public string $uid = "";
 
@@ -49,21 +49,21 @@ class ViewWithController {
    * __construct
    *
    * @internal
-   * @param  mixed $adios
+   * @param  mixed $app
    * @param  mixed $params
    * @return void
    */
   public function __construct(
-    ?\ADIOS\Core\Loader $adios = NULL,
+    ?\ADIOS\Core\Loader $app = NULL,
     array $params = [],
     ?\ADIOS\Core\ViewWithController $parentView = NULL
   ) {
-    if (!isset($adios->viewsCounter)) {
-      $adios->viewsCounter = 0;
+    if (!isset($app->viewsCounter)) {
+      $app->viewsCounter = 0;
     }
-    ++$adios->viewsCounter;
+    ++$app->viewsCounter;
 
-    $this->adios = $adios;
+    $this->app = $app;
     $this->parentView = $parentView;
 
     if ($params['lpfs'] ?? FALSE) {
@@ -118,7 +118,7 @@ class ViewWithController {
       if (empty($this->params['windowParams']['uid'])) {
         $this->params['windowParams']['uid'] = $this->uid . '_window';
       }
-      $this->window = $this->adios->view->create(
+      $this->window = $this->app->view->create(
         '\\ADIOS\\Core\\ViewsWithController\\Window' . ($this->params['windowParams']['uid'] == '' ? '' : '#' . $this->params['windowParams']['uid'])
       );
       $this->window->addViewAsObject($this);
@@ -139,7 +139,7 @@ class ViewWithController {
       $firstLetterIsCapital
       && class_exists($className)
     ) {
-      return new $className($this->adios, $arguments[0], $arguments[1]);
+      return new $className($this->app, $arguments[0], $arguments[1]);
     } else {
       throw new \ADIOS\Core\Exceptions\UnknownView();
     }
@@ -195,7 +195,7 @@ class ViewWithController {
     }
 
     return new $viewClassName(
-      $this->adios,
+      $this->app,
       $params,
       $parentView
     );
@@ -236,7 +236,7 @@ class ViewWithController {
    */
   public function translate(string $string, array $vars = []): string
   {
-    return $this->adios->translate($string, $vars, $this);
+    return $this->app->translate($string, $vars, $this);
   }
   
   /**
@@ -271,7 +271,7 @@ class ViewWithController {
    * @return void
    */
   // public function cadd($component_name, $params = null) {
-  //   $this->add($this->adios->view->create($component_name, $params));
+  //   $this->add($this->app->view->create($component_name, $params));
 
   //   return $this;
   // }
@@ -427,16 +427,16 @@ class ViewWithController {
 
       $twigParams = [
         "uid" => $this->uid,
-        "gtp" => $this->adios->gtp,
-        "config" => $this->adios->config,
-        "user" => $this->adios->userProfile,
-        "locale" => $this->adios->locale->getAll(),
-        "dictionary" => $this->adios->dictionary,
+        "gtp" => $this->app->gtp,
+        "config" => $this->app->config,
+        "user" => $this->app->userProfile,
+        "locale" => $this->app->locale->getAll(),
+        "dictionary" => $this->app->dictionary,
         "view" => $this->params,
         "params" => $this->getTwigParams(),
       ];
 
-      $html = $this->adios->twig->render(
+      $html = $this->app->twig->render(
         'ADIOS\\Templates\\' . $this->twigTemplate,
         $twigParams
       );
@@ -466,7 +466,7 @@ class ViewWithController {
     switch ($displayMode) {
       case self::DISPLAY_MODE_WINDOW:
         if (!$this->window instanceof \ADIOS\Core\ViewsWithController\Window) {
-          $this->window = new \ADIOS\Core\ViewsWithController\Window($this->adios, []);
+          $this->window = new \ADIOS\Core\ViewsWithController\Window($this->app, []);
           $this->window->setTitle('Window Title');
           $this->window->setCloseButton(
             $this->create('\\ADIOS\\Core\\ViewsWithController\\Button', [

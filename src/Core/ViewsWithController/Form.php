@@ -26,12 +26,12 @@ class Form extends \ADIOS\Core\ViewWithController
   public bool $print = FALSE;
 
   public function __construct(
-   object $adios,
+   \ADIOS\Core\Loader $app,
    array $params = [],
    ?\ADIOS\Core\ViewWithController $parentView = NULL
   ) {
 
-    $this->adios = $adios;
+    $this->app = $app;
 
     // defaultne parametre
 
@@ -72,14 +72,14 @@ class Form extends \ADIOS\Core\ViewWithController
       return;
     }
 
-    $this->model = $this->adios->getModel($params['model']);
+    $this->model = $this->app->getModel($params['model']);
     $this->data = (array) $this->model->getById((int) $params['id']);
 
     foreach ($this->model->columns() as $colName => $colDefinition) {
       if (!isset($this->data[$colName])) continue;
 
       if ($colDefinition['type'] == 'lookup') {
-        $lookupModel = $this->adios->getModel($colDefinition['model']);
+        $lookupModel = $this->app->getModel($colDefinition['model']);
         $this->lookupData[$colName] = $lookupModel->getById($this->data[$colName]);
       }
     }
@@ -87,7 +87,7 @@ class Form extends \ADIOS\Core\ViewWithController
     $params['table'] = $this->model->getFullTableSqlName();
 
     if (empty($params['uid'])) {
-      $params['uid'] = $this->adios->getUid("{$params['model']}_{$params['id']}")."_".rand(1000, 9999);
+      $params['uid'] = $this->app->getUid("{$params['model']}_{$params['id']}")."_".rand(1000, 9999);
     }
 
     if (empty($params['title'])) {
@@ -118,11 +118,11 @@ class Form extends \ADIOS\Core\ViewWithController
 
     // call the parent constructor
     // after this, the $this->params must be used instead of $params.
-    parent::__construct($adios, $params, $parentView);
+    parent::__construct($app, $params, $parentView);
 
     $this->params['id'] = (int) $this->params['id'];
     $this->params['columns'] = parent::params_merge(
-      $this->adios->db->tables[$this->params['table']],
+      $this->app->db->tables[$this->params['table']],
       $this->params['columns'] ?? []
     );
 
@@ -295,7 +295,7 @@ class Form extends \ADIOS\Core\ViewWithController
         [$columnName, $lookupColumnName] = explode(":LOOKUP:", $item);
         $lookupModelName = $this->params['columns'][$columnName]['model'] ?? '';
         if (!empty($lookupModelName)) {
-          $lookupModel = $this->adios->getModel($lookupModelName);
+          $lookupModel = $this->app->getModel($lookupModelName);
           $lookupColumn = $lookupModel->columns()[$lookupColumnName] ?? [];
 
           $title = 
@@ -347,7 +347,7 @@ class Form extends \ADIOS\Core\ViewWithController
     } else if (is_string($item['controller'])) {
       $html .= "
         <div class='adios ui Form item'>
-          ".$this->adios->render($item['controller'], $item['params'])."
+          ".$this->app->render($item['controller'], $item['params'])."
         </div>
       ";
 
@@ -361,7 +361,7 @@ class Form extends \ADIOS\Core\ViewWithController
 
       $html .= "
         <div class='adios ui Form item'>
-          ".$this->adios->view->create($tmpView, $tmpViewParams)->render()."
+          ".$this->app->view->create($tmpView, $tmpViewParams)->render()."
         </div>
       ";
 
@@ -379,7 +379,7 @@ class Form extends \ADIOS\Core\ViewWithController
         $inputParams['initiating_model'] = $this->params['model'];
 
         $inputHtml = (new $inputClass(
-          $this->adios,
+          $this->app,
           "{$this->params['uid']}_{$item['input']['uid']}",
           $inputParams
         ))->render();
@@ -423,7 +423,7 @@ class Form extends \ADIOS\Core\ViewWithController
       $tmpControllerParams['form_data'] = $this->data;
       $tmpControllerParams['initiating_model'] = $this->params['model'];
 
-      $html = $this->adios->render($tmpController, $tmpControllerParams);
+      $html = $this->app->render($tmpController, $tmpControllerParams);
     } else if (is_callable($items['template'])) {
       // template je definovany ako anonymna funkcia
       $html = $items['template']($this->params['columns'], $this);
@@ -447,7 +447,7 @@ class Form extends \ADIOS\Core\ViewWithController
           $tmpViewParams['form_data'] = $this->data;
           $tmpViewParams['initiating_model'] = $this->params['model'];
 
-          $html .= $this->adios->view->create($tmpView, $tmpViewParams)->render();
+          $html .= $this->app->view->create($tmpView, $tmpViewParams)->render();
         } else if (isset($item['group']['title'])) {
           $html .= "
             <div class='adios ui Form item'>
@@ -500,7 +500,7 @@ class Form extends \ADIOS\Core\ViewWithController
     }
     
     if (!_count($this->params['columns'])) {
-      $this->adios->console->error("No columns provided: {$this->params['model']}");
+      $this->app->console->error("No columns provided: {$this->params['model']}");
     }
 
     $html = "";
@@ -534,7 +534,7 @@ class Form extends \ADIOS\Core\ViewWithController
       $tmpView = $this->params['content']['view'];
       $tmpViewParams = $this->_renderItemsRecursively($this->params['content']['params']);
 
-      $contentHtml = $this->adios->view->create($tmpView, $tmpViewParams)->render();
+      $contentHtml = $this->app->view->create($tmpView, $tmpViewParams)->render();
     } else {
 
       // params['template']
@@ -594,7 +594,7 @@ class Form extends \ADIOS\Core\ViewWithController
               ])->render();
 
             } else if (is_string($col['controller'])) {
-              $col_html .= $this->adios->render($col['controller'], $col['params']);
+              $col_html .= $this->app->render($col['controller'], $col['params']);
             } else if (is_string($col['html'])) {
               $col_html .= $col['html'];
             } else if (is_array($col['content'])) {
@@ -640,7 +640,7 @@ class Form extends \ADIOS\Core\ViewWithController
         data-do-not-close='{$this->params['do_not_close']}'
         data-window-uid='".($window === NULL ? "" : $window->uid)."'
         data-form-type='{$this->params['formType']}'
-        data-is-ajax='".($this->params['__IS_AJAX__'] || $this->adios->isAjax() ? "1" : "0")."'
+        data-is-ajax='".($this->params['__IS_AJAX__'] || $this->app->isAjax() ? "1" : "0")."'
         data-is-in-window='".($window === NULL ? "0" : "1")."'
       >
         {$contentHtml}

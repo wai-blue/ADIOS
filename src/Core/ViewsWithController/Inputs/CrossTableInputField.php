@@ -14,7 +14,7 @@ class CrossTableInputField extends \ADIOS\Core\ViewsWithController\Input {
 
   public function render(string $panel = ''): string
   {
-    $crossModel = $this->adios->getModel($this->params['cross_model']);
+    $crossModel = $this->app->getModel($this->params['cross_model']);
 
     switch ($this->params['columns'] ?? 3) {
       case 1: default: $bootstrapColumnSize = 12; break;
@@ -29,15 +29,15 @@ class CrossTableInputField extends \ADIOS\Core\ViewsWithController\Input {
     }
 
     // Get saved values in DB
-    $itemValues = $this->adios->db->fetchRaw(
+    $itemValues = $this->app->db->fetchRaw(
       "
         select
           *
         from `".$crossModel->getFullTableSqlName()."`
         where
-          `".$this->adios->db->escape($this->params['cross_key_column'])."` = '".$this->adios->db->escape($this->params['cross_key_value'])."'
+          `".$this->app->db->escape($this->params['cross_key_column'])."` = '".$this->app->db->escape($this->params['cross_key_value'])."'
       ",
-      $this->adios->db->escape($this->params['key_by'])
+      $this->app->db->escape($this->params['key_by'])
     );
     
     $html = "

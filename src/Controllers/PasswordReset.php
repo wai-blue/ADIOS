@@ -26,7 +26,7 @@ class PasswordReset extends \ADIOS\Core\Controller {
 
     if ($token != NULL) {
       try {
-        $userModel = $this->adios->getModel("ADIOS/Models/User");
+        $userModel = $this->app->getModel("ADIOS/Models/User");
         $userModel->validateToken($token, false);
         $tokenStatus = "success";
       } catch (\ADIOS\Core\Exceptions\InvalidToken $e) {
@@ -36,7 +36,7 @@ class PasswordReset extends \ADIOS\Core\Controller {
     }
 
     return [
-      "userPasswordReset" => $this->adios->userPasswordReset,
+      "userPasswordReset" => $this->app->userPasswordReset,
       "token" => [
         "status" => $tokenStatus,
         "error" => $tokenError

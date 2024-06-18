@@ -15,6 +15,6 @@ namespace ADIOS\Controllers\Desktop\Ajax;
  */
 class ClearConsole extends \ADIOS\Core\Controller {
   public function render() {
-    $this->adios->console->clear();
+    $this->app->console->clear();
   }
 }

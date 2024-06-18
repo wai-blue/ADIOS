@@ -11,20 +11,20 @@
 namespace ADIOS\Core;
 
 class PDO {
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
   public ?\PDO $connection = null;
   
-  public function __construct(&$adios) {
-    $this->adios = $adios;
+  public function __construct($app) {
+    $this->app = $app;
   }
 
   public function connect() {
-    $dbHost = $this->adios->config['db_host'] ?? '';
-    $dbPort = $this->adios->config['db_port'] ?? '';
-    $dbUser = $this->adios->config['db_user'] ?? '';
-    $dbPassword = $this->adios->config['db_password'] ?? '';
-    $dbName = $this->adios->config['db_name'] ?? '';
-    $dbCodepage = $this->adios->config['db_codepage'] ?? 'utf8mb4';
+    $dbHost = $this->app->config['db_host'] ?? '';
+    $dbPort = $this->app->config['db_port'] ?? '';
+    $dbUser = $this->app->config['db_user'] ?? '';
+    $dbPassword = $this->app->config['db_password'] ?? '';
+    $dbName = $this->app->config['db_name'] ?? '';
+    $dbCodepage = $this->app->config['db_codepage'] ?? 'utf8mb4';
 
     if (!empty($dbHost) && !empty($dbName) && !empty($dbCodepage)) {
       $this->connection = new \PDO(

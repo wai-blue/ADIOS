@@ -33,7 +33,7 @@ class Desktop extends \ADIOS\Core\Controller {
   public function prepareViewParams() {
     parent::prepareViewParams();
 
-    foreach ($this->adios->widgets as $widget) {
+    foreach ($this->app->widgets as $widget) {
       $widget->onBeforeDesktopParams($this);
     }
 
@@ -58,7 +58,7 @@ class Desktop extends \ADIOS\Core\Controller {
     $topRightMenu["items"][] = [
       "faIcon" => "fas fa-window-restore",
       "text" => $this->translate("Open new tab"),
-      "onclick" => "window.open('{$this->adios->config['url']}');",
+      "onclick" => "window.open('{$this->app->config['url']}');",
     ];
 
     $this->viewParams["topRightMenu"] = $topRightMenu;

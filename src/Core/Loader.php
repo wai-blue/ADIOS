@@ -240,23 +240,23 @@ class Loader
     $this->assetsUrlMap["adios/assets/js/"] = __DIR__."/../Assets/Js/";
     $this->assetsUrlMap["adios/assets/images/"] = __DIR__."/../Assets/Images/";
     $this->assetsUrlMap["adios/assets/webfonts/"] = __DIR__."/../Assets/Webfonts/";
-    $this->assetsUrlMap["adios/assets/widgets/"] = function ($adios, $url) {
+    $this->assetsUrlMap["adios/assets/widgets/"] = function ($app, $url) {
       $url = str_replace("adios/assets/widgets/", "", $url);
       preg_match('/(.*?)\/(.+)/', $url, $m);
 
       $widget = $m[1];
       $asset = $m[2];
 
-      return $adios->widgetsDir."/{$widget}/Assets/{$asset}";
+      return $app->widgetsDir."/{$widget}/Assets/{$asset}";
     };
-    $this->assetsUrlMap["adios/assets/plugins/"] = function ($adios, $url) {
+    $this->assetsUrlMap["adios/assets/plugins/"] = function ($app, $url) {
       $url = str_replace("adios/assets/plugins/", "", $url);
       preg_match('/(.+?)\/~\/(.+)/', $url, $m);
 
       $plugin = $m[1];
       $asset = $m[2];
 
-      foreach ($adios->pluginFolders as $pluginFolder) {
+      foreach ($app->pluginFolders as $pluginFolder) {
         $file = "{$pluginFolder}/{$plugin}/Assets/{$asset}";
         if (is_file($file)) {
           return $file;
@@ -545,9 +545,9 @@ class Loader
         }
 
         // pridam routing pre ADIOS default controllers
-        $adiosControllers = \ADIOS\Core\Helper::scanDirRecursively(__DIR__ . '/../Controllers');
+        $appControllers = \ADIOS\Core\Helper::scanDirRecursively(__DIR__ . '/../Controllers');
         $tmpRouting = [];
-        foreach ($adiosControllers as $tmpController) {
+        foreach ($appControllers as $tmpController) {
           $tmpController = str_replace(".php", "", $tmpController);
           $tmpRouting["/^".str_replace("/", "\\/", $tmpController)."$/"] = [
             "controller" => 'ADIOS\\Controllers\\' . $tmpController,
@@ -661,7 +661,7 @@ class Loader
         $this->view = new ($this->getCoreClass('Core\\ViewWithController'))($this);
       }
 
-      $this->dispatchEventToPlugins("onADIOSAfterInit", ["adios" => $this]);
+      $this->dispatchEventToPlugins("onADIOSAfterInit", ["app" => $this]);
     } catch (\Exception $e) {
       exit("ADIOS INIT failed: [".get_class($e)."] ".$e->getMessage());
     }
@@ -1174,7 +1174,7 @@ class Loader
         setcookie(_ADIOS_ID.'-user', '', 0);
         setcookie(_ADIOS_ID.'-language', '', 0);
 
-        header("Location: {$this->adios->config['url']}?");
+        header("Location: {$this->config['url']}?");
         exit();
       }
 
@@ -1239,7 +1239,7 @@ class Loader
 
       $return = '';
 
-      $this->dispatchEventToPlugins("onADIOSBeforeRender", ["adios" => $this]);
+      $this->dispatchEventToPlugins("onADIOSBeforeRender", ["app" => $this]);
 
       unset($this->params['__IS_AJAX__']);
 

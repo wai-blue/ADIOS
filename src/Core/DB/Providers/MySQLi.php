@@ -25,12 +25,12 @@ class MySQLi extends \ADIOS\Core\DB
    */
   public function connect(): void
   {
-    $dbHost = $this->adios->getConfig('db_host', '');
-    $dbPort = $this->adios->getConfig('db_port', '');
-    $dbUser = $this->adios->getConfig('db_user', '');
-    $dbPassword = $this->adios->getConfig('db_password', '');
-    $dbName = $this->adios->getConfig('db_name', '');
-    $dbCodepage = $this->adios->getConfig('db_codepage', '');
+    $dbHost = $this->app->getConfig('db_host', '');
+    $dbPort = $this->app->getConfig('db_port', '');
+    $dbUser = $this->app->getConfig('db_user', '');
+    $dbPassword = $this->app->getConfig('db_password', '');
+    $dbName = $this->app->getConfig('db_name', '');
+    $dbCodepage = $this->app->getConfig('db_codepage', '');
 
     if (empty($dbHost)) {
       throw new \ADIOS\Core\Exceptions\DBException("Database connection string is not configured.");
@@ -66,7 +66,7 @@ class MySQLi extends \ADIOS\Core\DB
         default collate = utf8mb4_unicode_ci
       ");
 
-      $this->adios->console->info("Created database `{$dbName}`");
+      $this->app->console->info("Created database `{$dbName}`");
 
       $this->connection->select_db($dbName);
     } else if ($this->connection->errno > 0) {
@@ -924,7 +924,7 @@ class MySQLi extends \ADIOS\Core\DB
         );
       }
     } else if ($this->logQueries) {
-      $this->adios->logger->info("Query OK [" . ($this->lastQueryDurationSec * 1000) . "]:\n{$query}", [], "db");
+      $this->app->logger->info("Query OK [" . ($this->lastQueryDurationSec * 1000) . "]:\n{$query}", [], "db");
     }
 
     return TRUE;
@@ -1049,7 +1049,7 @@ class MySQLi extends \ADIOS\Core\DB
         !($columnDefinition['disableForeignKey'] ?? false)
         && 'lookup' == $columnDefinition['type']
       ) {
-        $lookupModel = $this->adios->getModel($columnDefinition['model']);
+        $lookupModel = $this->app->getModel($columnDefinition['model']);
         $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?? "id";
         $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?? "RESTRICT";
         $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?? "RESTRICT";
@@ -1098,7 +1098,7 @@ class MySQLi extends \ADIOS\Core\DB
   //         list($dummy, $srcColumnName, $lookupColumnName) = explode("___", $columnName);
 
   //         $srcColumn = $model->columns()[$srcColumnName];
-  //         $lookupModel = $this->adios->getModel($srcColumn['model']);
+  //         $lookupModel = $this->app->getModel($srcColumn['model']);
 
   //         $having .= " and (" . $this->columnSqlFilter(
   //           $lookupModel,

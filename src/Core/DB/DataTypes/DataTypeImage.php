@@ -27,8 +27,8 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType
         $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, [
             'null_value' => false,
             'dumping_data' => false,
-            'supported_extensions' => $this->adios->getConfig('m_datapub/columns/image/supported_extensions', ['jpg', 'gif', 'png', 'jpeg', 'webp']),
-            'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
+            'supported_extensions' => $this->app->getConfig('m_datapub/columns/image/supported_extensions', ['jpg', 'gif', 'png', 'jpeg', 'webp']),
+            'escape_string' => $this->app->getConfig('m_datapub/escape_string', true),
         ]);
 
         if ($params['dumping_data']) {
@@ -37,7 +37,7 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType
             if ($value == 'delete_image') {
                 $sql = "$col_name=''";
             } else {
-                $sql = "$col_name='".($params['escape_string'] ? $this->adios->db->escape($value) : $value)."'";
+                $sql = "$col_name='".($params['escape_string'] ? $this->app->db->escape($value) : $value)."'";
             }
         }
 
@@ -50,15 +50,15 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType
 
         $value = htmlspecialchars($value);
 
-        if ('' != $value && file_exists($this->adios->config['uploadDir']."/{$value}")) {
-            $img_url = "{$this->adios->config['images_url']}/{$value}";
+        if ('' != $value && file_exists($this->app->config['uploadDir']."/{$value}")) {
+            $img_url = "{$this->app->config['images_url']}/{$value}";
             $img_style = "style='height:30px;border:none'";
 
-            $img_url = "{$this->adios->config['url']}/Image?f=".urlencode($value).'&cfg=wa_list&rand='.rand(1, 999999);
+            $img_url = "{$this->app->config['url']}/Image?f=".urlencode($value).'&cfg=wa_list&rand='.rand(1, 999999);
             $img_style = "style='border:none'";
 
             $pathinfo = pathinfo($value);
-            $html = "<a href='{$this->adios->config['url']}/Image?f=".urlencode($value)."' target='_blank' onclick='event.cancelBubble=true;'><img src='{$img_url}' {$img_style} class='list_image'></a>";
+            $html = "<a href='{$this->app->config['url']}/Image?f=".urlencode($value)."' target='_blank' onclick='event.cancelBubble=true;'><img src='{$img_url}' {$img_style} class='list_image'></a>";
             if ($params['display_basename']) {
                 $html .= "<br/>{$pathinfo['basename']}";
             }
@@ -71,6 +71,6 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType
 
     public function toCsv($value, $params = [])
     {
-        return "{$this->adios->config['images_url']}/{$value}";
+        return "{$this->app->config['images_url']}/{$value}";
     }
 }

@@ -25,7 +25,7 @@ namespace ADIOS\Core\ViewsWithController;
  * Example code to render the input for *char* data type:
  *
  * ```php
- *   $adios->view->create('\\ADIOS\\Core\\ViewsWithController\\Input', [
+ *   $app->view->create('\\ADIOS\\Core\\ViewsWithController\\Input', [
  *     "type" => "char",
  *     "value" => "Hello World",
  *   ]);
@@ -42,8 +42,8 @@ class Input extends \ADIOS\Core\ViewWithController {
     /*             */
     /* __construct */
     /*             */
-    public function __construct($adios, array $params = []) {
-      $this->adios = $adios;
+    public function __construct($app, array $params = []) {
+      $this->app = $app;
 
       $this->default_params = [
         'model' => '',
@@ -91,11 +91,11 @@ class Input extends \ADIOS\Core\ViewWithController {
       }
 
       if (!empty($params['model'])) {
-        $this->model = $adios->getModel($params['model']);
+        $this->model = $app->getModel($params['model']);
       }
 
       if (empty($params['table']) && !empty($params['model'])) {
-        $params['table'] = $adios->getModel($params['model'])->getFullTableSqlName();
+        $params['table'] = $app->getModel($params['model'])->getFullTableSqlName();
       }
 
       // nacita parametre z tables a zmerguje s obdrzanymi
@@ -106,7 +106,7 @@ class Input extends \ADIOS\Core\ViewWithController {
         // $params['column'] = $this->model->columns();
       }
 
-      parent::__construct($adios, $params);
+      parent::__construct($app, $params);
       $this->addCssClass($this->params['type']);
     }
 
@@ -122,7 +122,7 @@ class Input extends \ADIOS\Core\ViewWithController {
           $tmpParams = $this->params;
           unset($tmpParams['uid']);
           $inputClassName = "\\ADIOS\\".str_replace("/", "\\", $this->params['input']);
-          $input = new $inputClassName($this->adios, $this->params['uid'], $tmpParams);
+          $input = new $inputClassName($this->app, $this->params['uid'], $tmpParams);
           return $input->render();
         } else if (is_array($this->params['input'])) {
           $this->params = array_merge($this->params, $this->params['input']);
@@ -248,14 +248,14 @@ class Input extends \ADIOS\Core\ViewWithController {
                 <div
                   class='input-content'
                 >
-                   " . (new Input($this->adios, $input))->render() . "  
+                   " . (new Input($this->app, $input))->render() . "  
                 </div>
               </div>"
             ;
           }
         } else {
           $jsonEditor = new \ADIOS\Core\ViewsWithController\Inputs\JsonEditor(
-            $this->adios,
+            $this->app,
             [
               'uid' => $this->params['uid'],
               'value' => $this->params['value'],
@@ -433,7 +433,7 @@ class Input extends \ADIOS\Core\ViewWithController {
               if ('' == $this->params['value']) {
                   $this->params['value'] = ('' != $this->params['default_date_value'] ? $this->params['default_date_value'] : '');
               }
-              $this->params['value'] = (false !== strtotime($this->params['value']) ? date($this->adios->locale->dateFormat(), strtotime($this->params['value'])) : '');
+              $this->params['value'] = (false !== strtotime($this->params['value']) ? date($this->app->locale->dateFormat(), strtotime($this->params['value'])) : '');
           }
 
           /* datetime, timestamp */
@@ -620,12 +620,12 @@ class Input extends \ADIOS\Core\ViewWithController {
 
       /* image */
       if ('image' == $this->params['type']) {
-        $img_src_base = "{$this->adios->config['url']}/Image?cfg=input&f=";
+        $img_src_base = "{$this->app->config['url']}/Image?cfg=input&f=";
 
         if ('' != $this->params['value']) {
-          $img_src = "{$this->adios->config['url']}/Image?cfg=input&f=".urlencode($this->params['value']);
+          $img_src = "{$this->app->config['url']}/Image?cfg=input&f=".urlencode($this->params['value']);
         } else {
-          $img_src = "{$this->adios->config['url']}/adios/assets/images/empty.png";
+          $img_src = "{$this->app->config['url']}/adios/assets/images/empty.png";
         }
 
         $html = "
@@ -678,7 +678,7 @@ class Input extends \ADIOS\Core\ViewWithController {
               </div>
               <div style='margin:1em'>
                 ".(new \ADIOS\Core\ViewsWithController\Inputs\FileBrowser(
-                  $this->adios,
+                  $this->app,
                   [
                     "uid" => $this->params['uid'],
                     "mode" => "select",
@@ -703,7 +703,7 @@ class Input extends \ADIOS\Core\ViewWithController {
       /* file */
       if ('file' == $this->params['type']) {
         if ('' != $this->params['value']) {
-          $file_href = "{$this->adios->config['uploadUrl']}/".ads($this->params['value']);
+          $file_href = "{$this->app->config['uploadUrl']}/".ads($this->params['value']);
         } else {
           $file_href = "";
         }
@@ -780,7 +780,7 @@ class Input extends \ADIOS\Core\ViewWithController {
               </div>
               <div style='margin:1em'>
                 ".(new \ADIOS\Core\ViewsWithController\Inputs\FileBrowser(
-                  $this->adios,
+                  $this->app,
                   [
                     "uid" => $this->params['uid'],
                     "mode" => "select",
@@ -790,7 +790,7 @@ class Input extends \ADIOS\Core\ViewWithController {
                       $('#{$this->params['uid']}_href')
                         .attr(
                           'href',
-                          '{$this->adios->config['uploadUrl']}/' + file
+                          '{$this->app->config['uploadUrl']}/' + file
                         )
                         .text(file)
                       ;
@@ -809,9 +809,9 @@ class Input extends \ADIOS\Core\ViewWithController {
       /* file */
       // if ('x-file' == $this->params['type']) {
       //     $default_src = $this->translate("No file uploaded");
-      //     $file_src_base = "{$this->adios->config['url']}/File?f=";
+      //     $file_src_base = "{$this->app->config['url']}/File?f=";
       //     // $upload_params = "type=file&column={$this->params['column']}&rename_file={$this->params['rename_file']}&subdir={$this->params['subdir']}";
-      //     // $file_upload_url = "{$this->adios->config['url']}/Components/FileBrowser/Upload?output=json&".$upload_params;
+      //     // $file_upload_url = "{$this->app->config['url']}/Components/FileBrowser/Upload?output=json&".$upload_params;
 
       //     if ('' != $this->params['value']) {
       //       $file_short_name = end(explode('/', $this->params['value']));
@@ -836,7 +836,7 @@ class Input extends \ADIOS\Core\ViewWithController {
       //           '.$this->generate_input_events().'
       //           value="'.ads($this->params['value'])."\"
       //           {$this->params['html_attributes']}
-      //           data-src-real-base=\"".ads($this->adios->config['uploadUrl']).'"
+      //           data-src-real-base=\"".ads($this->app->config['uploadUrl']).'"
       //           data-src-base="'.ads($file_src_base).'"
       //           data-default-txt="'.ads($default_src).'"
       //           data-subdir="'.ads($this->params['subdir']).'"
@@ -940,7 +940,7 @@ class Input extends \ADIOS\Core\ViewWithController {
 
       /* lookup */
       if ('lookup' == $this->params['type']) {
-        $lookupModel = $this->adios->getModel($this->params['model']);
+        $lookupModel = $this->app->getModel($this->params['model']);
         $value = (int) $this->params['value'];
         $inputStyle = $this->params['input_style'] ?? "";
 
@@ -952,7 +952,7 @@ class Input extends \ADIOS\Core\ViewWithController {
         );
 
         if (!in_array($inputStyle, ['autocomplete', 'select'])) {
-          $rowsCnt = reset($this->adios->db->fetchRaw("
+          $rowsCnt = reset($this->app->db->fetchRaw("
             select
               ifnull(count(*), 0) as cnt
             from (" . $lookupQuery->buildSql() . ") dummy
@@ -1036,7 +1036,7 @@ class Input extends \ADIOS\Core\ViewWithController {
             $this->params['onkeydown'] = " ui_input_lookup_onkeydown(event, '{$this->params['uid']}'); ".$this->params['onkeydown'];
             $this->params['onchange'] = " ui_input_lookup_set_value('{$this->params['uid']}', $('#{$this->params['uid']}').val(), '', function(){ ".$this->params['onchange'].' }); ';
 
-            // if (!$this->adios->db_perms($this->params['table'].'/select')) {
+            // if (!$this->app->db_perms($this->params['table'].'/select')) {
             //   if ('' == $this->params['lookup_detail_onclick']) {
             //     $this->params['lookup_detail_enabled'] = false;
             //   }
@@ -1114,7 +1114,7 @@ class Input extends \ADIOS\Core\ViewWithController {
                       <i class='icon fas fa-id-card'></i>
                     </span>
                   " : "")."
-                  ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->adios->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='Add' />" : '').'
+                  ".($this->params['lookup_add_enabled'] && !$this->params['readonly'] ? "<img id='{$this->params['uid']}_add_button' style='".($this->params['value'] > 0 ? 'display:none;' : '')."' src='{$this->app->config['adios_images_url']}/black/app/plus.png' onclick=\" {$add_onclick}('{$this->params['uid']}'); \" title='Add' />" : '').'
                   '.(!$this->params['readonly'] ? "
                     <span
                       class='btn btn-light btn-sm'

@@ -21,7 +21,7 @@ class Save extends \ADIOS\Core\Controller {
       "search" => $this->params['search'],
     ]);
 
-    $this->adios->saveConfig(
+    $this->app->saveConfig(
       [
         "model" => $this->params['model'],
         "search" => $this->params['search'],

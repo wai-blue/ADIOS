@@ -16,10 +16,10 @@ namespace ADIOS\Controllers\Components\Table\Search;
 class SavedSearchesOverview extends \ADIOS\Core\Controller {
   public function render() {
     $searchGroup = $this->params["searchGroup"];
-    $savedSearches = $this->adios->config["UI"]["Table"]["savedSearches"][$searchGroup];
+    $savedSearches = $this->app->config["UI"]["Table"]["savedSearches"][$searchGroup];
     $parentUid = $this->params["parentUid"];
 
-    $this->adios->checkUid($parentUid);
+    $this->app->checkUid($parentUid);
     
     $savedSearchesHtml = "";
     if (_count($savedSearches)) {

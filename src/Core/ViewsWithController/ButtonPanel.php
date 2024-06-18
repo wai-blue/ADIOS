@@ -8,7 +8,7 @@ namespace ADIOS\Core\ViewsWithController;
  * Example code to render:
  *
  * ```php
- *   $adios->view->create('\\ADIOS\\Core\\ViewsWithController\\ButtonPanel', [
+ *   $app->view->create('\\ADIOS\\Core\\ViewsWithController\\ButtonPanel', [
  *     "columns" => [
  *       [
  *         "cssClass" => "col-6",
@@ -53,12 +53,12 @@ namespace ADIOS\Core\ViewsWithController;
 class ButtonPanel extends \ADIOS\Core\ViewWithController {
 
   public function __construct(
-    ?\ADIOS\Core\Loader $adios = NULL,
+    ?\ADIOS\Core\Loader $app = NULL,
     array $params = [],
     ?\ADIOS\Core\ViewWithController $parentView = NULL
   ) {
 
-    parent::__construct($adios, $params, $parentView);
+    parent::__construct($app, $params, $parentView);
 
     if (!is_array($this->params['columns'])) $this->params['columns'] = [];
 
@@ -87,7 +87,7 @@ class ButtonPanel extends \ADIOS\Core\ViewWithController {
         foreach ($column['buttons'] as $button) {
           $columnHtml .= "
             <div class='row py-2'>
-              <div class='col-md-3 align-self-center'>".$this->adios->view->create('\\ADIOS\\Core\\ViewsWithController\\Button', $button)->render()."</div>
+              <div class='col-md-3 align-self-center'>".$this->app->view->create('\\ADIOS\\Core\\ViewsWithController\\Button', $button)->render()."</div>
               <div class='col-md-9 align-self-center'>".hsc($button['hint'])."</div>
             </div>
           ";

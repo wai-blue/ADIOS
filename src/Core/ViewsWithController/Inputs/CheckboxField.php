@@ -18,16 +18,16 @@ class CheckboxField extends \ADIOS\Core\ViewsWithController\Input {
     if (isset($this->params['crossTableAssignment'])) {
       $this->uid = $this->params['crossTableAssignment'];
 
-      $initiatingModel = $this->adios->getModel($this->params['initiating_model']);
+      $initiatingModel = $this->app->getModel($this->params['initiating_model']);
       $cta = $initiatingModel->junctions[$this->params['junctions']];
 
-      $junctionModel = $this->adios->getModel($cta['junctionModel']);
+      $junctionModel = $this->app->getModel($cta['junctionModel']);
       $masterKeyColumn = $cta['masterKeyColumn'];
       $optionKeyColumn = $cta['optionKeyColumn'];
-      $options = $this->adios->getModel($cta['optionsModel'])->getEnumValues();
+      $options = $this->app->getModel($cta['optionsModel'])->getEnumValues();
 
     } else { // 2023-01-20 DEPRECATED
-      $junctionModel = $this->adios->getModel($this->params['model']);
+      $junctionModel = $this->app->getModel($this->params['model']);
       $masterKeyColumn = $this->params['key_column'] ?? "";
       $optionKeyColumn = $this->params['assignment_column'] ?? $this->params['value_column'] ?? "";
       $options = $this->params['values'];
@@ -53,7 +53,7 @@ class CheckboxField extends \ADIOS\Core\ViewsWithController\Input {
       throw new \ADIOS\Core\Exceptions\GeneralException("CheckboxField Input: Error #1");
     }
 
-    $assignmentsRaw = $this->adios->db->select($junctionModel)
+    $assignmentsRaw = $this->app->db->select($junctionModel)
       ->columns(\ADIOS\Core\DB\Query::allColumnsWithLookups)
       ->where([
         [$masterKeyColumn, '=', $keyValue]

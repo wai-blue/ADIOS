@@ -32,7 +32,7 @@ class Save extends \ADIOS\Core\Controller {
       }
     }
 
-    $this->adios->saveConfig([
+    $this->app->saveConfig([
       'settings' => [
         $this->params['__settings_group'] => $settings
       ]

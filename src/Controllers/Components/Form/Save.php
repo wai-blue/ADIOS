@@ -19,12 +19,12 @@ class Save extends \ADIOS\Core\Controller {
     $saveParams['id'] = $params['id'];
 
     try {
-      return $this->adios
+      return $this->app
         ->getModel($params['model'])
         ->recordSave($saveParams)
       ;
     } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
-      return $this->adios->renderHtmlFatal($e->getMessage());
+      return $this->app->renderHtmlFatal($e->getMessage());
     }
   }
 }

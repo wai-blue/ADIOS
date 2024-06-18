@@ -19,7 +19,7 @@ class Search extends \ADIOS\Core\Controller {
 
     if (strlen($this->params['q']) >= 3) {
 
-      foreach ($this->adios->db->tables as $table_name => $table_columns) {
+      foreach ($this->app->db->tables as $table_name => $table_columns) {
         if ($table_columns['%%table_params%%']['model'] instanceof \ADIOS\Core\Model) {
           $tmp_items = $table_columns['%%table_params%%']['model']->search($this->params['q']);
           $items = array_merge(
@@ -44,13 +44,13 @@ class Search extends \ADIOS\Core\Controller {
      // TODO: Po zmene z \ADIOS\Core\UI na \ADIOS\Core\ViewWithController toto sposobuje nekonecnu rekurziu
     $content = parent::render();
 
-    $window = $this->adios->view->Window([
+    $window = $this->app->app->view->Window([
       'title' => "Hľadanie: {$this->params['q']}",
       'content' => $content,
     ]);
 
     $window->params['header'] = [
-      $this->adios->view->Button([
+      $this->app->view->Button([
         'type' => 'close',
         'onclick' => "window_close('{$window->params['uid']}');",
       ]),

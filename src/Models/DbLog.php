@@ -17,9 +17,9 @@ namespace ADIOS\Models;
  */
 class DbLog extends \ADIOS\Core\Model {
 
-  public function __construct(&$adios) {
+  public function __construct(\ADIOS\Core\Loader $app) {
     $this->sqlName = "_db_log";
-    parent::__construct($adios);
+    parent::__construct($app);
   }
 
   public function columns(array $columns = []): array

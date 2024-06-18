@@ -16,8 +16,8 @@ namespace ADIOS\Controllers\Components\Form;
 class OnCreate extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Create';
   }
 
@@ -25,7 +25,7 @@ class OnCreate extends \ADIOS\Core\Controller {
     try {
       $params = $this->params;
 
-      $tmpModel = $this->adios->getModel($params['model']);
+      $tmpModel = $this->app->getModel($params['model']);
 
       $emptyRequiredInputs = $tmpModel->getEmptyRequiredInputs(
         $params['inputs'], 

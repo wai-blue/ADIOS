@@ -23,14 +23,14 @@ class Plugin {
    *
    * @var mixed
    */
-  public $adios;
+  public \ADIOS\Core\Loader $app;
 
-  public function __construct($adios) {
+  public function __construct($app) {
     $this->name = str_replace("\\", "/", str_replace("ADIOS\\Plugins\\", "", get_class($this)));
     $this->shortName = end(explode("/", $this->name));
-    $this->adios = &$adios;
+    $this->app = $app;
     $this->params = [];
-    $this->gtp = $this->adios->gtp;
+    $this->gtp = $this->app->gtp;
 
     $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
     $this->dictionaryFolder = $this->myRootFolder."/Lang";
@@ -38,19 +38,19 @@ class Plugin {
     // inicializacia pluginu
     $this->init();
 
-    $this->adios->dispatchEventToPlugins("onPluginAfterInit", [
+    $this->app->dispatchEventToPlugins("onPluginAfterInit", [
       "plugin" => $this,
     ]);
 
     // nacitanie modelov
     $this->loadModels();
 
-    $this->adios->dispatchEventToPlugins("onPluginModelsLoaded", [
+    $this->app->dispatchEventToPlugins("onPluginModelsLoaded", [
       "plugin" => $this,
     ]);
 
     // add routing
-    $this->adios->addRouting($this->routing());
+    $this->app->addRouting($this->routing());
   }
 
   public function init() {
@@ -76,14 +76,14 @@ class Plugin {
   }
 
   public function loadModels() {
-    foreach ($this->adios->pluginFolders as $pluginFolder) {
+    foreach ($this->app->pluginFolders as $pluginFolder) {
       $folder = $pluginFolder."/{$this->name}/Models";
 
       if (is_dir($folder)) {
         foreach (scandir($folder) as $file) {
           if (is_file("{$folder}/{$file}")) {
             $tmpModelName = str_replace(".php", "", $file);
-            $this->adios->registerModel("Plugins/{$this->name}/Models/{$tmpModelName}");
+            $this->app->registerModel("Plugins/{$this->name}/Models/{$tmpModelName}");
           }
         }
       }
@@ -91,7 +91,7 @@ class Plugin {
   }
 
   public function routing(array $routing = []) {
-    return $this->adios->dispatchEventToPlugins("onPluginAfterRouting", [
+    return $this->app->dispatchEventToPlugins("onPluginAfterRouting", [
       "model" => $this,
       "routing" => $routing,
     ])["routing"];

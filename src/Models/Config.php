@@ -26,9 +26,9 @@ class Config extends \ADIOS\Core\Model {
    "titleForEditing" => "Configuration parameter",
   ];
 
-  public function __construct($adios) {
+  public function __construct(\ADIOS\Core\Loader $app) {
     $this->sqlName = "_config";
-    parent::__construct($adios);
+    parent::__construct($app);
   }
 
   public function columns(array $columns = []): array

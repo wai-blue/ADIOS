@@ -17,7 +17,7 @@ class Delete extends \ADIOS\Core\Controller {
 
   public function render() {
     try {
-      $tmpModel = $this->adios->getModel($this->params['model']);
+      $tmpModel = $this->app->getModel($this->params['model']);
 
       if (is_numeric($this->params['id'])) {
         $tmpModel->recordDelete($this->params['id']);

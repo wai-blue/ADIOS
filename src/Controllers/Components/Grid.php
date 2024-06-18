@@ -15,6 +15,6 @@ namespace ADIOS\Controllers\Components;
  */
 class Grid extends \ADIOS\Core\Controller {
   public function render(): string {
-    return $this->adios->view->Grid($this->params)->render();
+    return $this->app->view->Grid($this->params)->render();
   }
 }

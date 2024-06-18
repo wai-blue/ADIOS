@@ -4,11 +4,11 @@
 
 require("src/App.php");
 
-$adios = new App($config);
+$app = new App($config);
 
 include(__DIR__ . '/src/Web/SiteMap.php');
 
-echo $adios->web
+echo $app->web
   ->setRouter(new \ADIOS\Core\Web\Router($siteMap))
   ->render()
 ;

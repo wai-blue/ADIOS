@@ -15,13 +15,13 @@ namespace ADIOS\Controllers\Components\Input;
 class LookupSearch extends \ADIOS\Core\Controller {
   public function render() {
 
-    // $this->adios->getUid("{$this->params['uid']}_lookup_select_window_action");
+    // $this->app->getUid("{$this->params['uid']}_lookup_select_window_action");
 
-    $tableUid = $this->params['uid'] ?? $this->adios->getUid("{$this->params['model']}_LookupSearch");
+    $tableUid = $this->params['uid'] ?? $this->app->getUid("{$this->params['model']}_LookupSearch");
     $windowUid = "{$tableUid}_lookup_select_window";
 
-    $lookupModel = $this->adios->getModel($this->params['model']);
-    $content = $this->adios->view->Table([
+    $lookupModel = $this->app->getModel($this->params['model']);
+    $content = $this->app->view->Table([
       "uid" => $tableUid,
       "model" => $this->params['model'],
       "where" => $lookupModel->lookupWhere(
@@ -43,9 +43,9 @@ class LookupSearch extends \ADIOS\Core\Controller {
       'title' => $this->translate("Select"),
     ];
 
-    $window = $this->adios->view->Window($windowParams);
+    $window = $this->app->view->Window($windowParams);
     $window->setHeaderLeft([
-      $this->adios->view->Button([
+      $this->app->view->Button([
         'type' => 'close',
         'onclick' => "window_close('{$windowUid}');"
       ]),

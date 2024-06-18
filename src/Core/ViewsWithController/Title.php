@@ -17,14 +17,14 @@ class Title extends \ADIOS\Core\ViewWithController
   private \ADIOS\Core\ViewWithController $center;
   private \ADIOS\Core\ViewWithController $right;
 
-  public function __construct($adios, $params = NULL)
+  public function __construct($app, $params = NULL)
   {
 
     $params = array_replace_recursive([
       'title' => '',
     ], $params);
 
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
 
     if ($this->params['fixed']) {
       $this->addCssClass('fixed');

@@ -46,7 +46,7 @@ class Query
 
 
   // private properties
-  private ?\ADIOS\Core\Loader $adios = NULL;
+  private ?\ADIOS\Core\Loader $app = NULL;
   private ?\ADIOS\Core\DB $db = NULL;
   private ?\ADIOS\Core\Model $model = NULL;
   private int $type = 0;
@@ -63,7 +63,7 @@ class Query
     $this->model = $model;
     $this->type = $type;
 
-    $this->adios = $db->adios;
+    $this->app = $db->app;
   }
 
   /**
@@ -144,7 +144,7 @@ class Query
         && isset($modelColumnParams['model'])
       ) {
         $lookupModelClass = str_replace('/', '\\', $modelColumnParams['model']);
-        $lookupModel = new $lookupModelClass($this->adios);
+        $lookupModel = new $lookupModelClass($this->app);
         $lookupTableAlias = $modelColumn . ':LOOKUP';
 
         $this->add([

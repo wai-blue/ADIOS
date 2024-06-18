@@ -15,6 +15,6 @@ namespace ADIOS\Controllers\Components;
  */
 class DataTable extends \ADIOS\Core\Controller {
   public function render() {
-    return $this->adios->view->DataTable($this->params)->render();
+    return $this->app->view->DataTable($this->params)->render();
   }
 }

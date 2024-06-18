@@ -17,10 +17,10 @@ class Preview extends \ADIOS\Core\Controller {
   public function getModelColumnSelectHtml($colIndex, $colName) {
     $parentUid = $this->params['parentUid'];
     $model = $this->params['model'];
-    $modelObject = $this->adios->getModel($model);
+    $modelObject = $this->app->getModel($model);
     $columns = $modelObject->columns();
 
-    $this->adios->checkUid($parentUid);
+    $this->app->checkUid($parentUid);
 
     $modelColumnsSelectHtml = "
       <select
@@ -59,7 +59,7 @@ class Preview extends \ADIOS\Core\Controller {
       $acceptedValuesHtml = "";
       switch ($columns[$tmpColName]['type']) {
         case "lookup":
-          $lookupModelObject = $this->adios->getModel($columns[$tmpColName]["model"]);
+          $lookupModelObject = $this->app->getModel($columns[$tmpColName]["model"]);
           $tmp = $lookupModelObject->lookupQuery()->fetch();
 
           $acceptedValuesHtml = "<select style='font-size:inherit;color:inherit'>";
@@ -135,7 +135,7 @@ class Preview extends \ADIOS\Core\Controller {
     $csvRows = [];
     $row = 1;
 
-    if (($handle = fopen("{$this->adios->config['uploadDir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
+    if (($handle = fopen("{$this->app->config['uploadDir']}/csv-import/{$csvFile}", "r")) !== FALSE) {
       while (($data = fgetcsv($handle, 1000, $separator)) !== FALSE) {
         $csvRows[] = array_map(
           function($str) {
@@ -187,7 +187,7 @@ class Preview extends \ADIOS\Core\Controller {
     ";
 
 
-    // $csv = file_get_contents("{$this->adios->config['uploadDir']}/csv-import/{$csvFile}");
+    // $csv = file_get_contents("{$this->app->config['uploadDir']}/csv-import/{$csvFile}");
     return $conversionTableHtml;
 
   }

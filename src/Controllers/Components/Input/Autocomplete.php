@@ -16,9 +16,9 @@ namespace ADIOS\Controllers\Components\Input;
 class Autocomplete extends \ADIOS\Core\Controller {
   public function render() {
     $tmpValue = str_replace(' ', '', str_replace('.', '', str_replace(',', '', str_replace('-', '', str_replace('_', '', $this->params['value'])))));
-    $having = "replace(replace(replace(replace(replace(input_lookup_value, ' ', ''), '.', ''), ',', ''), '-', ''), '_', '') like '%".$this->adios->db->escape($tmpValue)."%'";
+    $having = "replace(replace(replace(replace(replace(input_lookup_value, ' ', ''), '.', ''), ',', ''), '-', ''), '_', '') like '%".$this->app->db->escape($tmpValue)."%'";
 
-    $lookupModel = $this->adios->getModel($this->params['model']);
+    $lookupModel = $this->app->getModel($this->params['model']);
 
     $lookupRows = $lookupModel->lookupQuery(
       $this->params['initiating_model'],

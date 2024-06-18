@@ -18,7 +18,7 @@ class DownloadTemplate extends \ADIOS\Core\Controller {
 
   public function render() {
     $model = $this->params['model'];
-    $modelObject = $this->adios->getModel($model);
+    $modelObject = $this->app->getModel($model);
     $columns = $modelObject->columns();
 
     $csv = "";

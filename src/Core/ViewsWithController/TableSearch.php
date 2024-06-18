@@ -6,7 +6,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
   
   public function render(string $panel = ''): string
   {
-    $model = $this->adios->getModel($this->params['model']);
+    $model = $this->app->getModel($this->params['model']);
     $searchGroup = $this->params['searchGroup'];
 
     $unsearchableColumnTypes = [
@@ -24,7 +24,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
 
       if ($colDef['type'] == "lookup") {
         $lookupModelName = $colDef['model'];
-        $lookupModel = $this->adios->getModel($lookupModelName);
+        $lookupModel = $this->app->getModel($lookupModelName);
         $tabs[$lookupModel->fullName] = [];
         $tabs[$lookupModel->fullName]["title"] = $lookupModel->tableParams['title'];
 
@@ -34,7 +34,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
           if (!in_array($lookupColDef["type"], $unsearchableColumnTypes)) {
             $tabs[$lookupModel->fullName]["items"][] = [
               "title" => $lookupColDef['title'],
-              "input" => $this->adios->view->Input([
+              "input" => $this->app->view->Input([
                 "model" => $this->params['model'],
                 "type" => $lookupColDef["type"],
                 "value" => NULL,
@@ -48,7 +48,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
       if (!in_array($colDef["type"], $unsearchableColumnTypes)) {
         $tabs[$model->fullName]["items"][] = [
           "title" => $colDef['title'],
-          "input" => $this->adios->view->Input([
+          "input" => $this->app->view->Input([
             "model" => $colDef['model'] ?? $this->params['model'],
             "type" => $colDef["type"],
             "input_style" => "select",
@@ -63,7 +63,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
       <div class='row'>
         <div class='col-12 col-lg-8'>
           " . (new \ADIOS\Core\ViewsWithController\Inputs\SettingsPanel(
-            $this->adios,
+            $this->app,
             [
               "uid" => $this->uid . "_settings_panel",
               "settings_group" => "tableSearch",
@@ -76,7 +76,7 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
         <div class='col-12 col-lg-4'>
           <div class='row'>
             <div class='col-12 pb-2'>
-              ".(new \ADIOS\Core\ViewsWithController\Button($this->adios, [
+              ".(new \ADIOS\Core\ViewsWithController\Button($this->app, [
                 'text' => $this->translate('Save this search'),
                 'onclick' => "{$this->uid}_save_search();",
                 'class' => 'btn-light',
@@ -196,13 +196,13 @@ class TableSearch extends \ADIOS\Core\ViewWithController {
     if ($this->window !== NULL) {
       $this->window->setTitle($this->translate("Advanced search") . ": " . hsc($searchGroup));
       $this->window->setCloseButton(
-        new \ADIOS\Core\ViewsWithController\Button($this->adios, [
+        new \ADIOS\Core\ViewsWithController\Button($this->app, [
           'type' => 'close',
           'onclick' => "{$this->uid}_close();",
         ]),
       );
       $this->window->setHeaderLeft([
-        new \ADIOS\Core\ViewsWithController\Button($this->adios, [
+        new \ADIOS\Core\ViewsWithController\Button($this->app, [
           'type' => 'apply',
           'onclick' => "{$this->uid}_search();",
         ]),

@@ -11,12 +11,12 @@
 namespace ADIOS\Core;
 
 class Router {
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
 
   public $routing = [];
   
-  public function __construct(\ADIOS\Core\Loader $adios) {
-    $this->adios = $adios;
+  public function __construct(\ADIOS\Core\Loader $app) {
+    $this->app = $app;
   }
 
   public function setRouting($routing) {
@@ -81,14 +81,14 @@ class Router {
   }
 
   public function checkPermission(string $permission) {
-    if (!$this->adios->permissions->granted($permission)
+    if (!$this->app->permissions->granted($permission)
     ) {
       throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permission}).");
     }
   }
 
   public function redirectTo(string $url, int $code = 302) {
-    header("Location: {$this->adios->config['url']}/".trim($url, "/"), true, $code);
+    header("Location: {$this->app->config['url']}/".trim($url, "/"), true, $code);
     exit;
   }
 

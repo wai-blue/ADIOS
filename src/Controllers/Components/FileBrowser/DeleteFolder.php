@@ -21,7 +21,7 @@ class DeleteFolder extends \ADIOS\Core\Controller {
       if ($tmp == "..") return "Invalid folder path.";
     }
 
-    $dir = $this->adios->config['uploadDir'];
+    $dir = $this->app->config['uploadDir'];
 
     if (!empty($dir) && rmdir("{$dir}/{$folder}")) {
       return "1";

@@ -17,6 +17,6 @@ class Html extends \ADIOS\Core\Controller
 {
   function render()
   {
-    return $this->adios->view->Html($this->params)->render();
+    return $this->app->view->Html($this->params)->render();
   }
 }

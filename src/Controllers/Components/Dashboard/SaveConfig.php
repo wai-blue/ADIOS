@@ -20,7 +20,7 @@ class SaveConfig extends \ADIOS\Core\Controller {
 
   function render(): bool|string
   {
-    return $this->adios->view->Dashboard($this->params)
+    return $this->app->view->Dashboard($this->params)
       ->saveConfiguration(json_encode($_POST['configuration']), $_POST['preset'])
     ;
   }

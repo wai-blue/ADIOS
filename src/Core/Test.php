@@ -12,16 +12,16 @@ namespace ADIOS\Core;
 
 class Test
 {
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
   public array $assertions = [];
   public int $assertionCounter = 0;
 
   public string $sourceFile = "";
 
-  public function __construct($adios)
+  public function __construct($app)
   {
-    $this->adios = $adios;
-    $this->adios->test = $this;
+    $this->app = $app;
+    $this->app->test = $this;
 
     $this->sourceFile = (new \ReflectionClass(get_class($this)))->getFileName();
 

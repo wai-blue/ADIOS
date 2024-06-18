@@ -69,11 +69,11 @@ class Upload extends \ADIOS\Core\Controller {
 
     if (empty($folderPath)) $folderPath = ".";
 
-    if (!is_dir("{$this->adios->config['uploadDir']}/{$folderPath}")) {
-      mkdir("{$this->adios->config['uploadDir']}/{$folderPath}", 0775, TRUE);
+    if (!is_dir("{$this->app->config['uploadDir']}/{$folderPath}")) {
+      mkdir("{$this->app->config['uploadDir']}/{$folderPath}", 0775, TRUE);
     }
 
-    $destinationFile = "{$this->adios->config['uploadDir']}/{$folderPath}/{$fileName}";
+    $destinationFile = "{$this->app->config['uploadDir']}/{$folderPath}/{$fileName}";
 
     if (in_array($uploadedFileExtension, ['php', 'sh', 'exe', 'bat', 'htm', 'html', 'htaccess'])) {
       throw new \Exception('This file type cannot be uploaded');
@@ -102,7 +102,7 @@ class Upload extends \ADIOS\Core\Controller {
       //'folderPath' => $folderPath,
       //'fileName' => $fileName,
       //'fileSize' => filesize($destinationFile),
-      //'url' => "{$this->adios->config['uploadUrl']}/{$folderPath}/{$fileName}",
+      //'url' => "{$this->app->config['uploadUrl']}/{$folderPath}/{$fileName}",
     ];
   }
 }

@@ -2,32 +2,9 @@
 
 namespace ADIOS\Core\Web;
 
-// // ADIOS Web autoload function
-// spl_autoload_register(function($className) {
-//   global $___ADIOSObject;
-
-//   $className = str_replace("\\", "/", $className);
-
-//   $rootNamespace = substr($className, 0, strpos($className, "/"));
-//   $restNamespace = substr($className, strpos($className, "/") + 1);
-
-//   switch ($rootNamespace) {
-//     case "Cascada":
-//       include(dirname(__FILE__)."/src/{$restNamespace}.php");
-//     break;
-//     case "WEB":
-//       if (!is_object($___ADIOSObject)) return;
-//       if (empty($___ADIOSObject->rootDir) || !@include("{$___ADIOSObject->rootDir}/{$restNamespace}.php")) {
-//         include("{$___ADIOSObject->themeDir}/{$restNamespace}.php");
-//       }
-//     break;
-//   }
-
-// });
-
 // Loader class
 class Loader {
-  public $adios = NULL;
+  public \ADIOS\Core\Loader $app = NULL;
 
   public array $controllers = [];
   public $router = NULL;
@@ -53,9 +30,9 @@ class Loader {
 
   private $canContinueWithRendering = TRUE;
 
-  function __construct($adios, $config) {
+  function __construct(\ADIOS\Core\Loader $app, $config) {
 
-    $this->adios = $adios;
+    $this->app = $app;
     $this->config = $config;
     $this->rootDir = $config['rootDir'] ?? '';
     $this->rewriteBase = $config['rewriteBase'] ?? '';
@@ -131,20 +108,20 @@ class Loader {
     $this->twig->addFunction(new \Twig\TwigFunction(
       'translate',
       function ($string) {
-        return $this->adios->translate($string, []);
+        return $this->app->translate($string, []);
       }
     ));
     $this->twig->addFunction(new \Twig\TwigFunction('adiosView', function ($uid, $view, $params) {
       if (!is_array($params)) {
         $params = [];
       }
-      return $this->adios->view->create(
+      return $this->app->view->create(
         $view . (empty($uid) ? '' : '#' . $uid),
         $params
       )->render();
     }));
     $this->twig->addFunction(new \Twig\TwigFunction('adiosRender', function ($action, $params = []) {
-      return $this->adios->render($action, $params);
+      return $this->app->render($action, $params);
     }));
 
     // set default twig params
@@ -171,7 +148,7 @@ class Loader {
 
   function setRouter($router) {
     $this->router = $router;
-    $this->router->adios = $this->adios;
+    $this->router->app = $this->app;
 
     // perform redirects, if any
     $this->router->performRedirects();

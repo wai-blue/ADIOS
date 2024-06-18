@@ -124,10 +124,10 @@ class Button extends \ADIOS\Core\ViewWithController {
   /**
    * @internal
    */
-  public function __construct(&$adios, $params = null) {
-    $this->adios = $adios;
+  public function __construct(\ADIOS\Core\Loader $app, $params = null) {
+    $this->app = $app;
 
-    // $this->languageDictionary = $this->adios->loadLanguageDictionary($this);
+    // $this->languageDictionary = $this->app->loadLanguageDictionary($this);
 
     $defParams = [];
     switch ($params['type'] ?? "") {
@@ -135,65 +135,65 @@ class Button extends \ADIOS\Core\ViewWithController {
         $defParams['faIcon'] = 'fas fa-check';
         $defParams['text'] = $this->translate("Save");
         $defParams['class'] = "btn-success btn-icon-split {$params['class']}";
-        $defParams['onclick'] = "{$this->adios->uid}_save()";
+        $defParams['onclick'] = "{$this->app->uid}_save()";
         unset($params['class']);
       break;
       case 'search':
         $defParams['faIcon'] = 'fas fa-search';
         $defParams['text'] = $this->translate("Search");
         $defParams['class'] = "btn-light btn-icon-split {$params['class']}";
-        $defParams['onclick'] = "{$this->adios->uid}_search()";
+        $defParams['onclick'] = "{$this->app->uid}_search()";
         unset($params['class']);
       break;
       case 'apply':
         $defParams['faIcon'] = 'fas fa-check';
         $defParams['text'] = $this->translate("Apply");
         $defParams['class'] = "btn-success btn-icon-split {$params['class']}";
-        $defParams['onclick'] = "{$this->adios->uid}_apply()";
+        $defParams['onclick'] = "{$this->app->uid}_apply()";
         unset($params['class']);
       break;
       case 'close':
         $defParams['faIcon'] = 'fas fa-times';
         $defParams['class'] = "btn-light {$params['class']}";
         $defParams['title'] = $this->translate("Close");
-        $defParams['onclick'] = "{$this->adios->uid}_close()";
+        $defParams['onclick'] = "{$this->app->uid}_close()";
         unset($params['class']);
       break;
       case 'copy':
         $defParams['faIcon'] = 'fas fa-copy';
         $defParams['class'] = "btn-secondary btn-icon-split {$params['class']}";
         $defParams['text'] = $this->translate("Copy");
-        $defParams['onclick'] = "{$this->adios->uid}_copy()";
+        $defParams['onclick'] = "{$this->app->uid}_copy()";
         unset($params['class']);
       break;
       case 'add':
         $defParams['faIcon'] = 'fas fa-plus';
         $defParams['text'] = $this->translate("Add");
-        $defParams['onclick'] = "{$this->adios->uid}_add()";
+        $defParams['onclick'] = "{$this->app->uid}_add()";
         unset($params['class']);
       break;
       case 'delete':
         $defParams['faIcon'] = 'fas fa-trash-alt';
         $defParams['class'] = "btn-danger btn-icon-split {$params['class']}";
         $defParams['text'] = $this->translate("Delete");
-        $defParams['onclick'] = "{$this->adios->uid}_delete()";
+        $defParams['onclick'] = "{$this->app->uid}_delete()";
         unset($params['class']);
       break;
       case 'cancel':
         $defParams['faIcon'] = 'app/x-mark-3.png';
         $defParams['text'] = $this->translate("Cancel");
-        $defParams['onclick'] = "{$this->adios->uid}_cancel()";
+        $defParams['onclick'] = "{$this->app->uid}_cancel()";
         unset($params['class']);
       break;
       case 'confirm':
         $defParams['faIcon'] = 'app/ok.png';
         $defParams['text'] = $this->translate("Confirm");
-        $defParams['onclick'] = "{$this->adios->uid}_confirm()";
+        $defParams['onclick'] = "{$this->app->uid}_confirm()";
         unset($params['class']);
       case 'print':
         $defParams['faIcon'] = 'fas fa-print';
         $defParams['text'] = $this->translate("Print");
-        $defParams['onclick'] = "{$this->adios->uid}_print()";
+        $defParams['onclick'] = "{$this->app->uid}_print()";
         $defParams['class'] = "btn-light btn-icon-split {$params['class']}";
         unset($params['class']);
       break;
@@ -201,7 +201,7 @@ class Button extends \ADIOS\Core\ViewWithController {
 
     $this->params = array_merge($defParams, $params);
 
-    parent::__construct($adios, $this->params);
+    parent::__construct($app, $this->params);
 
     $this->faIcon = $this->params['faIcon'];
     $this->text = $this->params['text'];
@@ -213,7 +213,7 @@ class Button extends \ADIOS\Core\ViewWithController {
     $this->disabled = $this->params['disabled'];
 
     if (!empty($this->params['url'])) {
-      $this->href = $this->adios->config['url'] . '/' . $this->params['url'];
+      $this->href = $this->app->config['url'] . '/' . $this->params['url'];
     } else {
       $this->href = $this->params['href'] ?? 'javascript:void(0);';
     }

@@ -17,15 +17,15 @@ class PrintPdf extends \ADIOS\Core\ViewWithController
   public string $pdfOutput = '';
   public array $hiddenColumns = [];
 
-  public function __construct($adios, $params = null)
+  public function __construct($app, $params = null)
   {
     $modelParams = json_decode(base64_decode($params['modelParams']));
     $tableParams = json_decode(base64_decode($params['tableParams']), TRUE);
     $orderBy = $params['orderBy'];
 
-    $model = $adios->getModel($modelParams->model);
+    $model = $app->getModel($modelParams->model);
     $columns = $model->columns();
-    $uiTable = new \ADIOS\Core\ViewsWithController\Table($adios, $tableParams);
+    $uiTable = new \ADIOS\Core\ViewsWithController\Table($app, $tableParams);
     $data = $uiTable->data;
 
     $this->pdf = new PDF('L', 'mm', 'A4', true, $modelParams->title);
@@ -101,7 +101,7 @@ class PrintPdf extends \ADIOS\Core\ViewWithController
               ? $columns[$colName]['enumValues'][$colValue] 
               : $colValue
             ),
-            'date', 'datetime' => $adios->db->columnTypes[$columns[$colName]["type"]]->toHtml(
+            'date', 'datetime' => $app->db->columnTypes[$columns[$colName]["type"]]->toHtml(
               $row[$colName],
               [
                 'col_name' => $colName,

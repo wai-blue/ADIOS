@@ -17,7 +17,7 @@ class OnChange extends \ADIOS\Core\Controller {
 
   public function render() {
     try {
-      $tmpModel = $this->adios->getModel($this->params['model']);
+      $tmpModel = $this->app->getModel($this->params['model']);
 
       return $tmpModel->onFormChange(
         $this->params['column'],

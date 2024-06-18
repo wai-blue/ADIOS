@@ -18,7 +18,7 @@ class Delete extends \ADIOS\Core\Controller {
 
   public function renderJson(): ?array {
     try {
-      $fileFullPath = $this->adios->config['uploadDir'] . '/' . (string) $this->params['fileFullPath'];
+      $fileFullPath = $this->app->config['uploadDir'] . '/' . (string) $this->params['fileFullPath'];
 
       if (is_file($fileFullPath)) {
         if (!unlink($fileFullPath)) throw new \Exception("The deletion of the file encountered an error");

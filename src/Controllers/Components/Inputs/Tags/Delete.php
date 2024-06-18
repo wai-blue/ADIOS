@@ -18,8 +18,8 @@ use Illuminate\Database\QueryException;
 class Delete extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
     //$this->permission = $this->params['model'] . ':Read';
   }
 
@@ -34,16 +34,16 @@ class Delete extends \ADIOS\Core\Controller {
       if ($junction == '') throw new \Exception("Unknown junction model");
       if ($id == 0) throw new \Exception("Unknown id");
 
-      $tmpModel = $this->adios->getModel($model);
+      $tmpModel = $this->app->getModel($model);
       $junctionData = $tmpModel->junctions[$junction] ?? null;
 
       if ($junctionData == null) {
         throw new \Exception("Junction {$junction} in {$model} not found");
       }
 
-      $junctionModel = $this->adios->getModel($junctionData['junctionModel']);
+      $junctionModel = $this->app->getModel($junctionData['junctionModel']);
       $junctionOptionKeyColumn = $junctionModel->columns()[$junctionData['optionKeyColumn']];
-      $junctionOptionKeyModel = $this->adios->getModel($junctionOptionKeyColumn['model']);
+      $junctionOptionKeyModel = $this->app->getModel($junctionOptionKeyColumn['model']);
 
       $junctionItemsToDelete = $junctionModel->where($junctionData['optionKeyColumn'], $id)
         ->get();

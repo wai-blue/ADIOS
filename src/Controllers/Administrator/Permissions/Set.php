@@ -16,6 +16,6 @@ class Set extends \ADIOS\Core\Controller {
     $idUserRole = (int) $this->params['idUserRole'];
     $permission = $this->params['permission'];
 
-    $this->adios->permissions->set($permission, $idUserRole, $isEnabled ? "1" : "0");
+    $this->app->permissions->set($permission, $idUserRole, $isEnabled ? "1" : "0");
   }
 }

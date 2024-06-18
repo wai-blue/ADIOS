@@ -16,7 +16,7 @@ namespace ADIOS\Core;
   */
 
 class Widget {
-  public $adios;
+  public \ADIOS\Core\Loader $app;
   public string $gtp = "";
   // public $languageDictionary = [];
 
@@ -28,15 +28,15 @@ class Widget {
   public array $params = [];
   public array $models = [];
 
-  function __construct($adios, $params = []) {
-    $appNamespace = ($adios->config['appNamespace'] ?? 'App');
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    $appNamespace = ($app->config['appNamespace'] ?? 'App');
     $this->name = str_replace("{$appNamespace}\\Widgets\\", "", get_class($this));
     $this->fullName = str_replace("{$appNamespace}\\Widgets\\", "", get_class($this));
     $this->shortName = end(explode("/", $this->name));
 
-    $this->adios = $adios;
+    $this->app = $app;
     $this->params = $params;
-    $this->gtp = $this->adios->gtp;
+    $this->gtp = $this->app->gtp;
 
     $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 
@@ -45,19 +45,19 @@ class Widget {
     }
 
     // preklady
-    // $this->languageDictionary = $this->adios->loadLanguageDictionary($this);
+    // $this->languageDictionary = $this->app->loadLanguageDictionary($this);
 
     // inicializacia widgetu
     $this->init();
 
-    $this->adios->dispatchEventToPlugins("onWidgetAfterInit", [
+    $this->app->dispatchEventToPlugins("onWidgetAfterInit", [
       "widget" => $this,
     ]);
 
     // nacitanie modelov
     $this->loadModels();
 
-    $this->adios->dispatchEventToPlugins("onWidgetModelsLoaded", [
+    $this->app->dispatchEventToPlugins("onWidgetModelsLoaded", [
       "widget" => $this,
     ]);
 
@@ -78,7 +78,7 @@ class Widget {
 
   public function routing(array $routing = [])
   {
-    return $this->adios->dispatchEventToPlugins("onWidgetAfterRouting", [
+    return $this->app->dispatchEventToPlugins("onWidgetAfterRouting", [
       "model" => $this,
       "routing" => $routing,
     ])["routing"];
@@ -90,7 +90,7 @@ class Widget {
 
   public function translate(string $string, array $vars = []): string
   {
-    return $this->adios->translate($string, $vars, $this);
+    return $this->app->translate($string, $vars, $this);
   }
 
   public function install() {
@@ -99,18 +99,18 @@ class Widget {
 
   public function loadModels() {
     $this->name = $dir = str_replace("\\", "/", $this->name);
-    $dir = $this->adios->widgetsDir . "/{$this->name}/Models";
+    $dir = $this->app->widgetsDir . "/{$this->name}/Models";
 
     if (is_dir($dir)) {
       foreach (scandir($dir) as $file) {
         if (is_file("{$dir}/{$file}")) {
           $tmpModelName = str_replace(".php", "", $file);
-          $this->adios->registerModel(($this->adios->config['appNamespace'] ?? 'App') . "/Widgets/{$this->name}/Models/{$tmpModelName}");
+          $this->app->registerModel(($this->app->config['appNamespace'] ?? 'App') . "/Widgets/{$this->name}/Models/{$tmpModelName}");
         }
       }
     }
 
-    $this->adios->dispatchEventToPlugins("onWidgetAfterModelsLoaded", [
+    $this->app->dispatchEventToPlugins("onWidgetAfterModelsLoaded", [
       "widget" => $this,
     ]);
   }

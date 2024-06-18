@@ -12,9 +12,9 @@ namespace ADIOS\Core\ViewsWithController;
 
 class Html extends \ADIOS\Core\ViewWithController
 {
-  public function __construct(&$adios, $params = null)
+  public function __construct(&$app, $params = null)
   {
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
   }
 
   public function render(string $panel = ''): string

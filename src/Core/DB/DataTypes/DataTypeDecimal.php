@@ -40,7 +40,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
     $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, [
       'null_value' => false,
       'dumping_data' => false,
-      'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
+      'escape_string' => $this->app->getConfig('m_datapub/escape_string', true),
     ]);
 
     if ($params['dumping_data'] && '' == $value) {
@@ -53,7 +53,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
       return "$col_name=NULL";
     } else {
       if (is_numeric($value) && '' != $value) {
-        return "$col_name='" . ($params['escape_string'] ? $this->adios->db->escape($value) : $value) . "'";
+        return "$col_name='" . ($params['escape_string'] ? $this->app->db->escape($value) : $value) . "'";
       } else {
         return "$col_name=null";
       }

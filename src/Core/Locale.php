@@ -11,26 +11,26 @@
 namespace ADIOS\Core;
 
 class Locale {
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
   
-  public function __construct(&$adios) {
-    $this->adios = $adios;
+  public function __construct($app) {
+    $this->app = $app;
   }
 
   public function dateFormat() {
-    return $this->adios->config["locale"]["date"]["format"] ?? "d.m.Y";
+    return $this->app->config["locale"]["date"]["format"] ?? "d.m.Y";
   }
 
   public function datetimeFormat() {
-    return $this->adios->config["locale"]["datetime"]["format"] ?? "d.m.Y H:i:s";
+    return $this->app->config["locale"]["datetime"]["format"] ?? "d.m.Y H:i:s";
   }
 
   public function timeFormat() {
-    return $this->adios->config["locale"]["time"]["format"] ?? "H:i:s";
+    return $this->app->config["locale"]["time"]["format"] ?? "H:i:s";
   }
 
   public function currencySymbol() {
-    return $this->adios->config["locale"]["currency"]["symbol"] ?? "€";
+    return $this->app->config["locale"]["currency"]["symbol"] ?? "€";
   }
 
   public function getAll(string $keyBy = "") {

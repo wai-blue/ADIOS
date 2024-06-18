@@ -25,7 +25,7 @@ class DataTypePassword extends \ADIOS\Core\DB\DataType
     $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, [
       'null_value' => false,
       'dumping_data' => false,
-      'escape_string' => $this->adios->getConfig('m_datapub/escape_string', true),
+      'escape_string' => $this->app->getConfig('m_datapub/escape_string', true),
     ]);
 
     if ($params['null_value']) {

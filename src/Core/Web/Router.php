@@ -4,7 +4,7 @@ namespace ADIOS\Core\Web;
 
 class Router {
   public array $routingTable = [];
-  public $adios;
+  public \ADIOS\Core\Loader $app;
 
   function __construct($routingTable = NULL) {
     if ($routingTable !== NULL) {
@@ -23,8 +23,8 @@ class Router {
     foreach ($this->routingTable as $route => $params) {
       if (
         ($route == "*"
-          || $route == $this->adios->web->pageUrl
-          || preg_match("/^".str_replace("/", "\\/", trim($route, "/"))."$/", $this->adios->web->pageUrl)
+          || $route == $this->app->web->pageUrl
+          || preg_match("/^".str_replace("/", "\\/", trim($route, "/"))."$/", $this->app->web->pageUrl)
         )
       ) {
         $routes[$route] = $params;
@@ -55,7 +55,7 @@ class Router {
 
     foreach ($routes as $route => $params) {
       if (isset($params['urlVariables']) && is_array($params['urlVariables'])) {
-        if (preg_match("/^".str_replace("/", "\\/", trim($route, "/"))."$/", $this->adios->web->pageUrl, $m)) {
+        if (preg_match("/^".str_replace("/", "\\/", trim($route, "/"))."$/", $this->app->web->pageUrl, $m)) {
           $tmpUrlVariables = $params['urlVariables'];
           foreach ($tmpUrlVariables as $varIndex => $varName) {
             if (isset($m[$varIndex])) {
@@ -101,7 +101,7 @@ class Router {
       }
     }
 
-    if ($template == "") $template = $this->adios->web->pageUrl;
+    if ($template == "") $template = $this->app->web->pageUrl;
 
     return $template;
   }
@@ -118,12 +118,12 @@ class Router {
         switch ($route['redirect'][1]) {
           case 301:
             header('HTTP/1.1 301 Moved Permanently');
-            header('Location: ' . $this->adios->web->config['rewriteBase'] . $route['redirect'][0]);
+            header('Location: ' . $this->app->web->config['rewriteBase'] . $route['redirect'][0]);
             exit();
           break;
           case 302:
             header('HTTP/1.1 302 Moved Temporarily');
-            header('Location: ' . $this->adios->web->config['rewriteBase'] . $route['redirect'][0]);
+            header('Location: ' . $this->app->web->config['rewriteBase'] . $route['redirect'][0]);
             exit();
           break;
         }

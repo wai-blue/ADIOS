@@ -16,11 +16,11 @@ namespace ADIOS\Core;
   */
 
 class Cron {
-  protected $adios;
+  protected \ADIOS\Core\Loader $app;
   protected array $params = [];
 
-  function __construct(&$adios, $params = []) {
-    $this->adios = &$adios;
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    $this->app = $app;
     $this->params = $params;
   }
 

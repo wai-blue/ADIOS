@@ -31,9 +31,9 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
 
     public function sqlValueString($table_name, $col_name, $value, $params = [])
     {
-      $e_vals = explode(',', $this->adios->db->tables[$table_name][$col_name]['enumValues']);
+      $e_vals = explode(',', $this->app->db->tables[$table_name][$col_name]['enumValues']);
       if (in_array($value, $e_vals)) {
-        $sql = "{$col_name}='".$this->adios->db->escape($value)."'";
+        $sql = "{$col_name}='".$this->app->db->escape($value)."'";
       } else {
         $sql = "$col_name=NULL";
       }

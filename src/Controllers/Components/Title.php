@@ -15,6 +15,6 @@ namespace ADIOS\Controllers\Components;
  */
 class Title extends \ADIOS\Core\Controller {
   public function render() {
-    return $this->adios->view->Title($this->params)->render();
+    return $this->app->view->Title($this->params)->render();
   }
 }

@@ -14,8 +14,8 @@ class Dashboard extends \ADIOS\Core\ViewWithController
 {
   public string $twigTemplate = "ADIOS/Core/Components/Dashboard";
 
-  public function __construct($adios, array $params = []) {
-    $this->adios = $adios;
+  public function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    $this->app = $app;
 
     $this->params = parent::params_merge([
       'title' => 'Dashboard',
@@ -39,9 +39,9 @@ class Dashboard extends \ADIOS\Core\ViewWithController
 
   public function getUserDashboard(int $preset = 0): string
   {
-    if ($preset < 0) return $this->adios->renderSuccess(400);
+    if ($preset < 0) return $this->app->renderSuccess(400);
 
-    $userDashboard = $this->adios->config['dashboard-' . $this->adios->userProfile['id'] . '-' . $preset . '0'];
+    $userDashboard = $this->app->config['dashboard-' . $this->app->userProfile['id'] . '-' . $preset . '0'];
 
     if ($userDashboard == null) {
       $userDashboard = $this->initDefaultDashboard($preset);
@@ -62,9 +62,9 @@ class Dashboard extends \ADIOS\Core\ViewWithController
       $area['cards'] = [];
     }
 
-    $this->adios->saveConfig(
+    $this->app->saveConfig(
       [json_encode($configuration)],
-      'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset
+      'dashboard-' . $this->app->userProfile['id'] . '-' . $preset
     );
 
     return json_encode($configuration);
@@ -90,12 +90,12 @@ class Dashboard extends \ADIOS\Core\ViewWithController
   public function saveConfiguration(string $configuration, int $preset = 0): string
   {
     # TODO: May be vulnerable against SQL Injection etc.? $_POST['configuration'] goes straight into database...
-    $this->adios->saveConfig(
+    $this->app->saveConfig(
       [$configuration],
-      'dashboard-' . $this->adios->userProfile['id'] . '-' . $preset
+      'dashboard-' . $this->app->userProfile['id'] . '-' . $preset
     );
 
-    return $this->adios->renderSuccess(200);
+    return $this->app->renderSuccess(200);
   }
 
   public function getAvailableCards(int $preset = -1): array {
@@ -112,8 +112,8 @@ class Dashboard extends \ADIOS\Core\ViewWithController
       }
     }
 
-    foreach ($this->adios->models as $model) {
-      foreach ($this->adios->getModel($model)->cards() as $card) {
+    foreach ($this->app->models as $model) {
+      foreach ($this->app->getModel($model)->cards() as $card) {
         if (!in_array($card['action'], $usedCards)) {
           $availableCards[] = $card;
         }
@@ -127,7 +127,7 @@ class Dashboard extends \ADIOS\Core\ViewWithController
     $presets = [0];
 
     $i = 1;
-    while (!empty($this->adios->config['dashboard-'.$this->adios->userProfile['id'] . '-' . $i . '0'])) {
+    while (!empty($this->app->config['dashboard-'.$this->app->userProfile['id'] . '-' . $i . '0'])) {
       $presets[] = $i;
       $i++;
     }

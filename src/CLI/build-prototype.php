@@ -3,7 +3,7 @@
 if (php_sapi_name() !== 'cli') exit();
 
 require(__DIR__."/../Core/Loader.php");
-$adios = new \ADIOS\Core\Loader(NULL, \ADIOS\Core\Loader::ADIOS_MODE_LITE);
+$app = new \ADIOS\Core\Loader(NULL, \ADIOS\Core\Loader::ADIOS_MODE_LITE);
 
 $isWindows = strpos(strtolower(php_uname('s')), "windows") !== FALSE;
 
@@ -67,7 +67,7 @@ if (
 ) {
   exit(<<<USAGE
 
-ADIOS v{$adios->version} PROTOTYPE BUILDER.
+ADIOS v{$app->version} PROTOTYPE BUILDER.
 
 Creates an ADIOS application based on prototype definition file.
 
@@ -88,7 +88,7 @@ USAGE
   );
 }
 
-echo "ADIOS v{$adios->version} PROTOTYPE BUILDER\n";
+echo "ADIOS v{$app->version} PROTOTYPE BUILDER\n";
 
 if (
   empty($rewriteBase)

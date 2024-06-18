@@ -18,7 +18,7 @@ use Monolog\Handler\RotatingFileHandler;
  * Debugger console for ADIOS application.
  */
 class Console {
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
 
   public array $loggers = [];
   public array $infos = [];
@@ -31,9 +31,9 @@ class Console {
 
   public string $logDir = "";
  
-  public function __construct($adios) {
-    $this->adios = $adios;
-    $this->logDir = $this->adios->config['logDir'] ?? "";
+  public function __construct($app) {
+    $this->app = $app;
+    $this->logDir = $this->app->config['logDir'] ?? "";
 
     $this->initLogger('core');
   }
@@ -96,7 +96,7 @@ class Console {
   }
 
   public function logTimestamp($message, $logger = "core") {
-    if (!$this->adios->config['devel_mode']) return;
+    if (!$this->app->config['devel_mode']) return;
 
     $now = $this->timestampMicrosec();
     if ($this->lastTimestamp == 0) $this->lastTimestamp = $now;

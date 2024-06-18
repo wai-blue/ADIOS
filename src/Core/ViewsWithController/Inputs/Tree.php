@@ -171,7 +171,7 @@ class Tree extends \ADIOS\Core\Input
   public function render(string $panel = ''): string
   {
     $params = $this->params;
-    $this->model = $this->adios->getModel($params['model']);
+    $this->model = $this->app->getModel($params['model']);
 
     $params = $this->model->treeParams($params);
 

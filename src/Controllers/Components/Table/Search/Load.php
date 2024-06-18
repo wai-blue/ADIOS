@@ -15,7 +15,7 @@ namespace ADIOS\Controllers\Components\Table\Search;
  */
 class Load extends \ADIOS\Core\Controller {
   public function render() {
-    return json_decode(base64_decode($this->adios->config
+    return json_decode(base64_decode($this->app->config
       ["UI"]
       ["Table"]
       ["savedSearches"]

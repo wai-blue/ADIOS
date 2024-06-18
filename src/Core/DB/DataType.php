@@ -17,13 +17,13 @@ namespace ADIOS\Core\DB;
  */
 class DataType {
 
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
 
   protected $defaultValue = null;
 
-  public function __construct($adios)
+  public function __construct($app)
   {
-    $this->adios = $adios;
+    $this->app = $app;
   }
   
   /**
@@ -91,7 +91,7 @@ class DataType {
 
   public function translate(string $string, array $vars = []): string
   {
-    return $this->adios->translate($string, $vars, $this);
+    return $this->app->translate($string, $vars, $this);
   }
 
   public function fromString(?string $value)

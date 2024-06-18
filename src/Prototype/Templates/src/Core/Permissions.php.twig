@@ -12,7 +12,7 @@ class Permissions extends \ADIOS\Core\Permissions {
 {{ varExport(permissions, "      ")|raw }}
     ;
 
-    $userRoleModel = $this->adios->getCoreClass('Models\\UserRole');
+    $userRoleModel = $this->app->getCoreClass('Models\\UserRole');
     $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
 
     $prototypePermissions = [];

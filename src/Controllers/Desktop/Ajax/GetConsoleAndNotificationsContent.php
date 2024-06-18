@@ -24,7 +24,7 @@ class GetConsoleAndNotificationsContent extends \ADIOS\Core\Controller {
     }
 
     return [
-      'console' => $this->adios->console->getLogs(),
+      'console' => $this->app->console->getLogs(),
       'notifications' => $notif,
     ];
   }

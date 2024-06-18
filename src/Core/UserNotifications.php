@@ -14,12 +14,12 @@ class UserNotifications {
   const FORMAT_HTML = 1;
   const FORMAT_STRING = 2;
 
-  public ?\ADIOS\Core\Loader $adios = null;
+  public ?\ADIOS\Core\Loader $app = null;
 
   public $notifications = [];
 
-  public function __construct(&$adios) {
-    $this->adios = $adios;
+  public function __construct($app) {
+    $this->app = $app;
   }
 
   public function add($type, $notification) {

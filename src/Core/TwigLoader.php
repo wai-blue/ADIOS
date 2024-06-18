@@ -4,10 +4,10 @@ namespace ADIOS\Core;
 
 class TwigLoader implements \Twig\Loader\LoaderInterface {
 
-  public $adios;
+  public \ADIOS\Core\Loader $app;
 
-  public function __construct($adios) {
-    $this->adios = $adios;
+  public function __construct($app) {
+    $this->app = $app;
   }
 
   /**
@@ -18,7 +18,7 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
     * @throws \Twig\Error\LoaderError When $name is not found
     */
   public function getSourceContext($name): \Twig\Source {
-    $appNamespace = $this->adios->config['appNamespace'] ?? 'App';
+    $appNamespace = $this->app->config['appNamespace'] ?? 'App';
     $templateName = str_replace("\\", "/", $name);
 
     if (strpos($templateName, "ADIOS/Templates/Widgets/") === 0) {
@@ -26,11 +26,11 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
       $widget = substr($templateName, 0, strpos($templateName, "/"));
       $action = substr($templateName, strpos($templateName, "/") + 1);
 
-      $templateFile = $this->adios->widgetsDir."/{$widget}/Templates/{$action}.twig";
+      $templateFile = $this->app->widgetsDir."/{$widget}/Templates/{$action}.twig";
     } else if (strpos($templateName, "{$appNamespace}/") === 0) {
       $templateName = substr($templateName, strlen($appNamespace . '/'));
       $templateFile = 
-        $this->adios->config['dir']
+        $this->app->config['dir']
         . '/src/' . $templateName . '.twig'
       ;
     } else if (strpos($templateName, "ADIOS/Views/") === 0) {
@@ -49,13 +49,13 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
         $tName = array_pop($tPath);
         $tPath = join("/", $tPath);
 
-        $templateFile = $this->adios->widgetsDir."/{$tPath}/Templates/{$tName}.twig";
+        $templateFile = $this->app->widgetsDir."/{$tPath}/Templates/{$tName}.twig";
       }
 
       // ...a nakoniec Plugin akciu
       if (!is_file($templateFile)) {
         preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
-        foreach ($this->adios->pluginFolders as $pluginFolder) {
+        foreach ($this->app->pluginFolders as $pluginFolder) {
           $folder = $pluginFolder."/{$name}/Models";
 
           $templateFile = "{$folder}/{$m[1]}/Templates/{$m[2]}.twig";

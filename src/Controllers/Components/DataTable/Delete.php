@@ -19,7 +19,7 @@ class Delete extends \ADIOS\Core\Controller {
     try {
       $sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
 
-      $tmpModel = $this->adios->getModel($sessionParams['model']);
+      $tmpModel = $this->app->getModel($sessionParams['model']);
 
       if (is_numeric($this->params['id'])) {
         return $tmpModel->recordDelete($this->params['id']);

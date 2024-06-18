@@ -34,8 +34,8 @@ class DataTypeDatetime extends \ADIOS\Core\DB\DataType
   }
 
   private function _toHtmlOrCsv($value, $params = []) {
-    $dateFormat = $this->adios->locale->dateFormat();
-    $timeFormat = $this->adios->locale->timeFormat();
+    $dateFormat = $this->app->locale->dateFormat();
+    $timeFormat = $this->app->locale->timeFormat();
 
     $ts = strtotime($value);
     $dateStr = date($dateFormat, $ts);

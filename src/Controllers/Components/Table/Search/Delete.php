@@ -15,7 +15,7 @@ namespace ADIOS\Controllers\Components\Table\Search;
  */
 class Delete extends \ADIOS\Core\Controller {
   public function render() {
-    $this->adios->deleteConfig(
+    $this->app->deleteConfig(
       "Components/Table/savedSearches/{$this->params['searchGroup']}/{$this->params['searchName']}"
     );
 

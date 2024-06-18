@@ -27,9 +27,9 @@ class Printer extends \ADIOS\Core\Controller {
 
  public string $contentController = '';
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = [])
+  function __construct(\ADIOS\Core\Loader $app, array $params = [])
   {
-    parent::__construct($adios, $params);
+    parent::__construct($app, $params);
 
     $this->contentController = $params['contentController'] ?? '';
 
@@ -49,7 +49,7 @@ class Printer extends \ADIOS\Core\Controller {
       !empty($this->contentController)
       && $this->contentController != 'Printer'
     ) {
-      $contentHtml = $this->adios->render($this->contentController, $this->params);
+      $contentHtml = $this->app->render($this->contentController, $this->params);
     } else {
       $contentHtml = '';
     }

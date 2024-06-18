@@ -18,7 +18,7 @@ class AddRow extends \ADIOS\Core\Controller {
     try {
       $sessionParams = (array) $_SESSION[_ADIOS_ID]['views'][$this->params['uid']];
 
-      $tmpModel = $this->adios->getModel($sessionParams['model']);
+      $tmpModel = $this->app->getModel($sessionParams['model']);
 
       return $tmpModel->insertGetId($sessionParams['defaultValues']);
     } catch (\ADIOS\Core\Exceptions\GeneralException $e) {

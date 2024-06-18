@@ -16,13 +16,13 @@ namespace ADIOS\Controllers\Components\Inputs;
 class Lookup extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
-  function __construct(\ADIOS\Core\Loader $adios, array $params = []) {
-    parent::__construct($adios, $params);
+  function __construct(\ADIOS\Core\Loader $app, array $params = []) {
+    parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Read';
   }
 
   public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
-    $tmpModel = $this->adios->getModel($this->params['model']);
+    $tmpModel = $this->app->getModel($this->params['model']);
 
     $lookupSqlValue = "(" .
       str_replace("{%TABLE%}.", '', $tmpModel->lookupSqlValue())
