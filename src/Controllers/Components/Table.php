@@ -124,8 +124,11 @@ class Table extends \ADIOS\Core\Controller {
           $this->model->getFullTableSqlName().'.'.$columnName
         ];
 
-        $withs[$columnName] = function ($query) use ($lookupSqlValue) {
-          $query->selectRaw('*, ' . $lookupSqlValue);
+        $withs[$columnName] = function ($query) use ($lookupDatabase, $lookupTableName, $lookupSqlValue) {
+          $query
+            ->from($lookupDatabase . '.' . $lookupTableName)
+            ->selectRaw('*, ' . $lookupSqlValue)
+          ;
         };
       } else if (isset($column['relationship'])) {
         $withs[$columnName] = function ($query) {

@@ -20,7 +20,12 @@ spl_autoload_register(function ($class) {
 
   // if (strpos($class, "ADIOS/") === FALSE) return;
 
-  $loaded = @include_once(dirname(__FILE__) . "/" . str_replace("ADIOS/", "", $class) . ".php");
+  $includeFile = dirname(__FILE__) . "/" . str_replace("ADIOS/", "", $class) . ".php";
+  if (is_file($includeFile)) {
+    $loaded = include_once($includeFile);
+  } else {
+    $loaded = false;
+  }
 
   if (!$loaded) {
 
