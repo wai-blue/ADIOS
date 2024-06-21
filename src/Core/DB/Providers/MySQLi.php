@@ -1041,10 +1041,12 @@ class MySQLi extends \ADIOS\Core\DB
   }
 
 
-  public function createSqlForeignKeys($table)
+  public function createSqlForeignKeys($table, $onlyColumn = '')
   {
     $sql = '';
     foreach ($this->tables[$table] as $column => $columnDefinition) {
+      if (!empty($onlyColumn) && $onlyColumn != $column) continue;
+
       if (
         !($columnDefinition['disableForeignKey'] ?? false)
         && 'lookup' == $columnDefinition['type']

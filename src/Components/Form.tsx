@@ -167,7 +167,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     //@ts-ignore
     request.get(
       this.state.endpoint,
-      { action: 'returnParams', ...this.getEndpointParams() },
+      { action: 'getParams', ...this.getEndpointParams() },
       (data: any) => {
         let newState: any = deepObjectMerge(data, this.props);
         newState.params = { ...data };
