@@ -693,11 +693,11 @@ class Loader
     } else {
       return [
         "driver"    => "mysql",
-        "host"      => $this->config['db_host'],
+        "host"      => $this->config['db_host'] ?? '',
         "port"      => $this->config['db_port'] ?? 3306,
-        "database"  => $this->config['db_name'],
-        "username"  => $this->config['db_user'],
-        "password"  => $this->config['db_password'],
+        "database"  => $this->config['db_name'] ?? '',
+        "username"  => $this->config['db_user'] ?? '',
+        "password"  => $this->config['db_password'] ?? '',
         "charset"   => 'utf8mb4',
         "collation" => 'utf8mb4_unicode_ci',
       ];
