@@ -1170,6 +1170,7 @@ class Loader
       // Apply routing and find-out which controller, permision and rendering params will be used
       // list($this->controller, $this->view, $this->permission, $this->params) = $this->router->applyRouting($this->route, $this->params);
       list($this->route, $this->params) = $this->router->applyRouting($this->routeUrl, $this->params);
+      $this->console->info("applyRouting for {$this->routeUrl}: " . print_r($this->route, true));
 
       $this->controller = $this->route['controller'] ?? '';
       $this->view = $this->route['view'] ?? '';
@@ -1259,7 +1260,7 @@ class Loader
 
       \ADIOS\Core\Helper::addSpeedLogTag("render5");
 
-      if (is_array($json)) {
+      if (is_array($json) && count($json) > 0) {
         $return = json_encode($json);
 
       // ... Or a view must be applied.
