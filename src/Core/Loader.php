@@ -614,7 +614,7 @@ class Loader
         $this->twig->addFunction(new \Twig\TwigFunction(
           'str2url',
           function ($string) {
-            return \ADIOS\Core\Helper::str2url($string);
+            return \ADIOS\Core\Helper::str2url($string ?? '');
           }
         ));
         $this->twig->addFunction(new \Twig\TwigFunction(
