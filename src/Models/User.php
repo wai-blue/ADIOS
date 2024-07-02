@@ -362,7 +362,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function loadUser(int $idUser) {
-    $user = $this->getQueryForUser($idUser)->first()->toArray();
+    $user = $this->getQueryForUser($idUser)->first()?->toArray();
 
     $tmpRoles = [];
     foreach ($user['roles'] ?? [] as $role) {

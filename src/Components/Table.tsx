@@ -26,6 +26,7 @@ export interface TableProps {
   canRead?: boolean,
   canUpdate?: boolean,
   columns?: FormColumns,
+  renderForm?: boolean,
   formId?: number,
   formEndpoint?: string,
   formModal?: ModalProps,
@@ -95,6 +96,7 @@ export interface TableState {
   title?: string,
   folderUrl?: string,
   loadingInProgress: boolean,
+  renderForm?: boolean,
 }
 
 export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
@@ -117,6 +119,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
         model: props.model,
         uid: props.uid,
       },
+      renderForm: props.renderForm ?? true,
       page: 1,
       itemsPerPage: this.props.itemsPerPage,
       showHeader: props.showHeader ?? true,
@@ -265,11 +268,19 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   renderFormModal() {
-    return <Modal {...this.getFormModalParams()}>{this.renderForm()}</Modal>;
+    if (this.state.renderForm) {
+      return <Modal {...this.getFormModalParams()}>{this.renderForm()}</Modal>;
+    } else {
+      return null;
+    }
   }
 
   renderForm(): JSX.Element {
-    return <Form {...this.getFormParams()} />;
+    if (this.state.renderForm) {
+      return <Form {...this.getFormParams()} />;
+    } else {
+      return null;
+    }
   }
 
   openForm(id: number) {
