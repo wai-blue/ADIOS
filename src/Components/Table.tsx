@@ -267,11 +267,11 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     }
   }
 
-  renderFormModal() {
+  renderFormModal(): JSX.Element {
     if (this.state.renderForm) {
       return <Modal {...this.getFormModalParams()}>{this.renderForm()}</Modal>;
     } else {
-      return null;
+      return <></>;
     }
   }
 
@@ -279,7 +279,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     if (this.state.renderForm) {
       return <Form {...this.getFormParams()} />;
     } else {
-      return null;
+      return <></>;
     }
   }
 
