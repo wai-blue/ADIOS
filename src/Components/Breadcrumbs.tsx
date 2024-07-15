@@ -39,7 +39,7 @@ export default class Breadcrumbs extends Component<BreadcrumbsProps> {
             <span style={{color: '#e78b00'}}>{item.text}</span>
           ) : (
             <a
-              href={globalThis._APP_URL + '/' + item.url}
+              href={globalThis.app.config.url + '/' + item.url}
               className="text-primary"
             >{item.text}</a>
           )}

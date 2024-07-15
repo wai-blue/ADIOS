@@ -7,7 +7,7 @@ import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
 
 export class ADIOS {
-  APP_URL: string = '';
+  config: object = {};
 
   reactComponents: any = {};
   reactComponentsWaitingForRender: number = 0;
@@ -29,9 +29,10 @@ export class ADIOS {
     'onclick'
   ];
 
-  constructor() {
+  constructor(config: object) {
+    this.config = config;
   }
-  
+
   registerReactComponent(elementName: string, elementObject: any) {
     this.reactComponents[elementName] = elementObject;
   }
@@ -144,4 +145,4 @@ export class ADIOS {
   }
 }
 
-export const adios = new ADIOS();
+// export const adios = new ADIOS();

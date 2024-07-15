@@ -11,7 +11,7 @@ export function SwalModalPageLarge(
 ): void {
   const iframeContent = `
     <iframe 
-      src="` + globalThis.adios._APP_URL + params.url + `" 
+      src="` + globalThis.app.config.url + params.url + `" 
       width="100%" 
       height="800px" 
       frameborder="0"

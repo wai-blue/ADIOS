@@ -13,7 +13,9 @@ interface ApiError {
 
 class Request {
 
-  appUrl: string = globalThis._APP_URL + '/';
+  getAppUrl(): string {
+    return globalThis.app.config.url + '/';
+  }
 
   public get<T>(
     url: string,
@@ -21,7 +23,7 @@ class Request {
     successCallback?: (data: ApiResponse<T>) => void,
     errorCallback?: (data: any) => void,
   ): void {
-    axios.get<T, AxiosResponse<ApiResponse<T>>>(this.appUrl + url, {
+    axios.get<T, AxiosResponse<ApiResponse<T>>>(this.getAppUrl() + url, {
       params: queryParams
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
@@ -36,7 +38,7 @@ class Request {
     successCallback?: (data: ApiResponse<T>) => void,
     errorCallback?: (data: any) => void,
   ): void {
-    axios.post<T, AxiosResponse<ApiResponse<T>>>(this.appUrl + url, postData, {
+    axios.post<T, AxiosResponse<ApiResponse<T>>>(this.getAppUrl() + url, postData, {
       params: queryParams
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
@@ -51,7 +53,7 @@ class Request {
     successCallback?: (data: ApiResponse<T>) => void,
     errorCallback?: (data: any) => void,
   ): void {
-    axios.put<T, AxiosResponse<ApiResponse<T>>>(this.appUrl + url, putData, {
+    axios.put<T, AxiosResponse<ApiResponse<T>>>(this.getAppUrl() + url, putData, {
       params: queryParams
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
@@ -66,7 +68,7 @@ class Request {
     successCallback?: (data: ApiResponse<T>) => void,
     errorCallback?: (data: any) => void,
   ): void {
-    axios.patch<T, AxiosResponse<ApiResponse<T>>>(this.appUrl + url, patchData, {
+    axios.patch<T, AxiosResponse<ApiResponse<T>>>(this.getAppUrl() + url, patchData, {
       params: queryParams
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
@@ -80,7 +82,7 @@ class Request {
     successCallback?: (data: ApiResponse<T>) => void,
     errorCallback?: (data: any) => void,
   ): void {
-    axios.delete<T, AxiosResponse<ApiResponse<T>>>(this.appUrl + url, {
+    axios.delete<T, AxiosResponse<ApiResponse<T>>>(this.getAppUrl() + url, {
       params: queryParams
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;

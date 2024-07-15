@@ -69,7 +69,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       stripedRows: true,
       //globalFilter={globalFilter}
       //header={header}
-      emptyMessage: globalThis.adios.dictionary['PrimeTable/emptyMessage'] ?? 'No data.',
+      emptyMessage: globalThis.app.dictionary['PrimeTable/emptyMessage'] ?? 'No data.',
       dragSelection: true,
       selectAll: true,
       metaKeySelection: true,
@@ -310,7 +310,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
             : ''}
 
             <div id={"adios-table-prime-body-" + this.props.uid}>
-              {/* <DataTable {...this.getTableProps()} {...globalThis.adios.primeReactTailwindTheme.getPropsFor('DataTable')}>
+              {/* <DataTable {...this.getTableProps()} {...globalThis.app.primeReactTailwindTheme.getPropsFor('DataTable')}>
                 {this.renderRows()}
               </DataTable> */}
               <DataTable {...this.getTableProps()}>

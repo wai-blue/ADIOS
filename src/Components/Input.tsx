@@ -39,7 +39,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
   constructor(props: P) {
     super(props);
 
-    globalThis.adios.reactElements[this.props.uid] = this;
+    globalThis.app.reactElements[this.props.uid] = this;
 
     const isInitialized: boolean = props.isInitialized ?? false;
     const readonly: boolean = props.readonly ?? false;

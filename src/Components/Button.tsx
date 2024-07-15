@@ -65,7 +65,7 @@ export default class Button extends Component<ButtonProps> {
           href={
             this.props.href ? (
               this.props.href.startsWith('/')
-                ? globalThis._APP_URL + this.props.href
+                ? globalThis.app.config.url + this.props.href
                 : this.props.href.startsWith('?')
                   ? window.location.href + this.props.href
                   : window.location.href + '/' + this.props.href

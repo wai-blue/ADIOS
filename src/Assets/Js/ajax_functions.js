@@ -182,13 +182,14 @@ function _ajax_check_result(res, use_alert = true){
 }
 
 function _ajax_read(controller, params, onsuccess, onreadystatechange) {
+console.log(globalThis.app.config.url + '/' + controller);
   $.ajax({
     // 'type': 'GET',
-    // 'url': _APP_URL + '/' + _ajax_controller_url(controller, params),
+    // 'url': globalThis.app.config.url + '/' + _ajax_controller_url(controller, params),
     // 'data': data,
 
     'type': 'POST',
-    'url': _APP_URL + '/' + controller,
+    'url': globalThis.app.config.url + '/' + controller,
     'data': _ajax_post_data(params),
 
     'success': function(res) {
@@ -246,13 +247,17 @@ function _ajax_read(controller, params, onsuccess, onreadystatechange) {
   });
 };
 
+function _alert(msg) {
+  alert(msg);
+}
+
 function _ajax_read_json(controller, params, onsuccess, onwarning, onfatal) {
   $.ajax({
     // 'type': 'GET',
-    // 'url': _APP_URL + '/' + _ajax_controller_url(controller, params),
+    // 'url': globalThis.app.config.url + '/' + _ajax_controller_url(controller, params),
 
     'type': 'POST',
-    'url': _APP_URL + '/' + controller,
+    'url': globalThis.app.config.url + '/' + controller,
     'data': _ajax_post_data(params),
 
     'dataType': 'json',
@@ -293,21 +298,19 @@ function _ajax_sread(controller, params, options) {
   }
 
   try {
-    var ret_val = trim(
-      $.ajax({
-        async: false,
+    var ret_val = $.ajax({
+      async: false,
 
-        // type: 'GET',
-        // url: _APP_URL + '/' + _ajax_controller_url(controller, params),
+      // type: 'GET',
+      // url: globalThis.app.config.url + '/' + _ajax_controller_url(controller, params),
 
-        'type': 'POST',
-        'url': _APP_URL + '/' + controller,
-        'data': _ajax_post_data(params),
+      'type': 'POST',
+      'url': globalThis.app.config.url + '/' + controller,
+      'data': _ajax_post_data(params),
 
-        success: options.success,
-        // complete: function() { desktop_console_update(); }
-      }).responseText
-    );
+      success: options.success,
+      // complete: function() { desktop_console_update(); }
+    }).responseText
   } catch (ex) {
     window.console.log(ex);
     ret_val = '';
@@ -463,7 +466,7 @@ function _ajax_multiupload(options){
             formData.append('upload', files[item]);
 
             $.ajax({
-              url: _APP_URL + '/UI/FileBrowser/Upload?__IS_AJAX__=1&output=json&type=' + options.type + '&rename_file=' + options.rename_file + '&subdir=' + options.subdir,
+              url: globalThis.app.config.url + '/UI/FileBrowser/Upload?__IS_AJAX__=1&output=json&type=' + options.type + '&rename_file=' + options.rename_file + '&subdir=' + options.subdir,
               type: 'post',
               data: formData,
               enctype: 'multipart/form-data',

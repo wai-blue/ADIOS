@@ -8,7 +8,6 @@ import ReactQuill, {Value} from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import Swal, {SweetAlertOptions} from "sweetalert2";
 
-import { adios } from "./Loader";
 import { adiosError, deepObjectMerge } from "./Helper";
 
 /** Components */
@@ -103,7 +102,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   constructor(props: FormProps) {
     super(props);
 
-    globalThis.adios.reactElements[this.props.uid] = this;
+    globalThis.app.reactElements[this.props.uid] = this;
 
     this.state = {
       isInitialized: false,
@@ -513,7 +512,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
-        contentItem = adios.getComponent(
+        contentItem = globalThis.app.getComponent(
           contentItemName,
           {
             ...contentItemParams[contentItemName],
@@ -578,7 +577,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       inputToRender = <InputEnumValues {...inputProps} enumValues={inputParams.enumValues}/>
     } else {
       if (typeof inputParams.inputJSX === 'string' && inputParams.inputJSX !== '') {
-        inputToRender = adios.getComponent(inputParams.inputJSX, inputProps) ?? <></>;
+        inputToRender = globalThis.app.getComponent(inputParams.inputJSX, inputProps) ?? <></>;
       } else {
 
         switch (inputParams.type) {

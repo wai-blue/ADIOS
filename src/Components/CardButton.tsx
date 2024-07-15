@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import '../Assets/Css/Components/CardButton.css';
 
 interface CardButtonProps {
   uid: string,
@@ -25,7 +24,7 @@ export default class CardButton extends Component<CardButtonProps> {
           this.props.href ? (
             this.props.href.startsWith('/')
                 //@ts-ignore
-              ? globalThis._APP_URL + this.props.href
+              ? globalThis.app.config.url + this.props.href
               : window.location.href + '/' + this.props.href
           ) : '#'
         }

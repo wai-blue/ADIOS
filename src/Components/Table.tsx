@@ -105,7 +105,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   constructor(props: TableProps) {
     super(props);
 
-    globalThis.adios.reactElements[this.props.uid] = this;
+    globalThis.app.reactElements[this.props.uid] = this;
 
     this.state = {
       endpoint: props.endpoint ? props.endpoint : 'components/table',

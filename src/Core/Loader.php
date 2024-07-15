@@ -967,19 +967,19 @@ class Loader
       echo $jsCache;
 
       exit();
-    } else if ($this->requestedUri == "adios/react.js") {
-      $jsCache = $this->renderReactJsBundle();
-      $cachingTime = 3600;
+    // } else if ($this->requestedUri == "adios/react.js") {
+    //   $jsCache = $this->renderReactJsBundle();
+    //   $cachingTime = 3600;
 
-      header("Content-type: text/js");
-      header("ETag: ".md5($jsCache));
-      header($headerExpires);
-      header("Pragma: cache");
-      header($headerCacheControl);
+    //   header("Content-type: text/js");
+    //   header("ETag: ".md5($jsCache));
+    //   header($headerExpires);
+    //   header("Pragma: cache");
+    //   header($headerCacheControl);
 
-      echo $jsCache;
+    //   echo $jsCache;
 
-      exit();
+    //   exit();
     } else {
       foreach ($this->assetsUrlMap as $urlPart => $mapping) {
         if (preg_match('/^'.str_replace("/", "\\/", $urlPart).'/', $this->requestedUri, $m)) {
@@ -1830,27 +1830,26 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
       dirname(__FILE__)."/../Assets/Css/adios-react-ui.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",
-      dirname(__FILE__)."/../Assets/Css/modal.css",
     ];
 
-    foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {
-      if ('.css' == substr($file, -4)) {
-        $cssFiles[] = dirname(__FILE__)."/../Assets/Css/Ui/{$file}";
-      }
-    }
+    // foreach (scandir(dirname(__FILE__).'/../Assets/Css/Ui') as $file) {
+    //   if ('.css' == substr($file, -4)) {
+    //     $cssFiles[] = dirname(__FILE__)."/../Assets/Css/Ui/{$file}";
+    //   }
+    // }
 
-    foreach (scandir($this->widgetsDir) as $widget) {
-      if (in_array($widget, [".", ".."])) continue;
-      if (is_file($this->widgetsDir."/{$widget}/Main.css")) {
-        $cssFiles[] = $this->widgetsDir."/{$widget}/Main.css";
-      }
+    // foreach (scandir($this->widgetsDir) as $widget) {
+    //   if (in_array($widget, [".", ".."])) continue;
+    //   if (is_file($this->widgetsDir."/{$widget}/Main.css")) {
+    //     $cssFiles[] = $this->widgetsDir."/{$widget}/Main.css";
+    //   }
 
-      if (is_dir($this->widgetsDir."/{$widget}/Assets/Css")) {
-        foreach (scandir($this->widgetsDir."/{$widget}/Assets/Css") as $widgetCssFile) {
-          $cssFiles[] = $this->widgetsDir."/{$widget}/Assets/Css/{$widgetCssFile}";
-        }
-      }
-    }
+    //   if (is_dir($this->widgetsDir."/{$widget}/Assets/Css")) {
+    //     foreach (scandir($this->widgetsDir."/{$widget}/Assets/Css") as $widgetCssFile) {
+    //       $cssFiles[] = $this->widgetsDir."/{$widget}/Assets/Css/{$widgetCssFile}";
+    //     }
+    //   }
+    // }
 
     foreach ($cssFiles as $file) {
       $css .= @file_get_contents($file)."\n";
@@ -1872,20 +1871,20 @@ class Loader
     return $reactJs;
   }
 
-  public function renderReactJsBundle(): string {
-    $reactFolders = [
-      dirname(__FILE__) . '/..',
-      $this->config['srcDir']
-    ];
+  // public function renderReactJsBundle(): string {
+  //   $reactFolders = [
+  //     dirname(__FILE__) . '/..',
+  //     $this->config['srcDir']
+  //   ];
 
-    $jsFilesContent = "";
+  //   $jsFilesContent = "";
 
-    foreach ($reactFolders as $reactFolder) {
-      $jsFilesContent .= $this->scanReactFolder($reactFolder);
-    }
+  //   foreach ($reactFolders as $reactFolder) {
+  //     $jsFilesContent .= $this->scanReactFolder($reactFolder);
+  //   }
 
-    return $jsFilesContent;
-  }
+  //   return $jsFilesContent;
+  // }
 
   public function renderJSCache() {
     $js = "";
@@ -1922,25 +1921,25 @@ class Loader
       dirname(__FILE__)."/../Assets/Js/draggable.js"
     ];
 
-    foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
-      if ('.js' == substr($file, -3)) {
-        $jsFiles[] = dirname(__FILE__)."/../Assets/Js/Ui/{$file}";
-      }
-    }
+    // foreach (scandir(dirname(__FILE__).'/../Assets/Js/Ui') as $file) {
+    //   if ('.js' == substr($file, -3)) {
+    //     $jsFiles[] = dirname(__FILE__)."/../Assets/Js/Ui/{$file}";
+    //   }
+    // }
 
-    if (is_dir($this->widgetsDir)) {
-      foreach (scandir($this->widgetsDir) as $widget) {
-        if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/main.js")) {
-          $jsFiles[] = $this->widgetsDir."/{$widget}/main.js";
-        }
+    // if (is_dir($this->widgetsDir)) {
+    //   foreach (scandir($this->widgetsDir) as $widget) {
+    //     if (!in_array($widget, [".", ".."]) && is_file($this->widgetsDir."/{$widget}/main.js")) {
+    //       $jsFiles[] = $this->widgetsDir."/{$widget}/main.js";
+    //     }
 
-        if (is_dir($this->widgetsDir."/{$widget}/Assets/Js")) {
-          foreach (scandir($this->widgetsDir."/{$widget}/Assets/Js") as $widgetJsFile) {
-            $jsFiles[] = $this->widgetsDir."/{$widget}/Assets/Js/{$widgetJsFile}";
-          }
-        }
-      }
-    }
+    //     if (is_dir($this->widgetsDir."/{$widget}/Assets/Js")) {
+    //       foreach (scandir($this->widgetsDir."/{$widget}/Assets/Js") as $widgetJsFile) {
+    //         $jsFiles[] = $this->widgetsDir."/{$widget}/Assets/Js/{$widgetJsFile}";
+    //       }
+    //     }
+    //   }
+    // }
 
     foreach ($jsFiles as $file) {
       $js .= @file_get_contents($file).";\n";
