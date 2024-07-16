@@ -66,11 +66,11 @@ export default class Modal extends Component<ModalProps> {
     }
   }
 
-  render() {
+  render(): JSX.Element {
     return ReactDOM.createPortal(
       <div
         id={'adios-modal-' + this.props.uid} 
-        className={"adios-react-ui modal " + this.state.type + " fade"}
+        className={"adios component modal " + this.state.type + " fade"}
         role="dialog"
       >
         <div className="modal-dialog" role="document">

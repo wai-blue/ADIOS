@@ -140,7 +140,7 @@ export default class MuiTable extends Table {
 
         <div
           id={"adios-table-mui-" + this.props.uid}
-          className="adios-react-ui table"
+          className="adios component table"
         >
           <div className="card border-0">
             {this.state.showHeader ?

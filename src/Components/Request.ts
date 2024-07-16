@@ -23,10 +23,12 @@ class Request {
     successCallback?: (data: ApiResponse<T>) => void,
     errorCallback?: (data: any) => void,
   ): void {
+    document.body.classList.add("ajax-loading");
     axios.get<T, AxiosResponse<ApiResponse<T>>>(this.getAppUrl() + url, {
       params: queryParams
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
+      document.body.classList.remove("ajax-loading");
       if (successCallback) successCallback(responseData);
     }).catch((err: AxiosError<ApiError>) => this.catchHandler(url, err, errorCallback));
   }
@@ -38,10 +40,12 @@ class Request {
     successCallback?: (data: ApiResponse<T>) => void,
     errorCallback?: (data: any) => void,
   ): void {
+    document.body.classList.add("ajax-loading");
     axios.post<T, AxiosResponse<ApiResponse<T>>>(this.getAppUrl() + url, postData, {
       params: queryParams
     }).then(res => {
       const responseData: ApiResponse<T> = res.data;
+      document.body.classList.remove("ajax-loading");
       if (successCallback) successCallback(responseData);
     }).catch((err: AxiosError<ApiError>) => this.catchHandler(url, err, errorCallback));
   }

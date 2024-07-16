@@ -16,7 +16,7 @@ export default class Card extends Component<CardProps> {
     return (
       <div 
         id={"adios-card-" + this.props.uid}
-        className="adios-react-ui card"
+        className="adios component card"
       >
         {this.props.title ? (
           <div className="card-header py-3">

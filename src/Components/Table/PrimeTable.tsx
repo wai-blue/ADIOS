@@ -65,7 +65,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       onSort: (event: DataTableSortEvent) => this.onOrderByChangeCustom(event),
       sortOrder: sortOrders[this.state.orderBy?.direction ?? 'asc'],
       sortField: this.state.orderBy?.field,
-      rowClassName: this.rowClassName,
+      rowClassName: (rowData: any) => this.rowClassName(rowData),
       stripedRows: true,
       //globalFilter={globalFilter}
       //header={header}
@@ -222,8 +222,73 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     return ''; // rowData.id % 2 === 0 ? '' : 'bg-light';
   }
 
-  rowClassName(rowData: any) {
-    return ''; // rowData.id % 2 === 0 ? '' : 'bg-light';
+  rowClassName(rowData: any): string {
+    return rowData.id === this.state.formId ? 'highlighted' : '';
+  }
+
+  renderAddButton(): JSX.Element {
+    return (
+      <button
+        className="btn btn-primary btn-icon-split"
+        onClick={() => this.onAddClick()}
+      >
+        <span className="icon"><i className="fas fa-plus"/></span>
+        <span className="text">{this.state.addButtonText}</span>
+      </button>
+    );
+  }
+
+  renderHeaderButtons(): JSX.Element {
+    return this.state.canCreate ? this.renderAddButton() : <></>;
+  }
+
+  renderHeader(): JSX.Element {
+    return <div className="table-header">
+      <div className="table-header-left">
+        {this.renderHeaderButtons()}
+      </div>
+
+      {this.state.title ? <div className="table-header-title">{this.state.title}</div> : null}
+
+      <div className="table-header-right">
+        <input 
+          className="table-header-search"
+          type="search"
+          placeholder="Start typing to search..."
+          value={this.state.search}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
+        />
+      </div>
+
+      {/* <div className="dropdown no-arrow">
+        <button 
+          className="btn btn-light dropdown-toggle" 
+          type="button"
+          data-toggle="dropdown"
+          aria-haspopup="true"
+          aria-expanded="false"
+        >
+          <i className="fas fa-ellipsis-v"/>
+        </button>
+        <div className="dropdown-menu">
+          <ExportButton
+            uid={this.props.uid}
+            exportType="image"
+            exportElementId={'adios-table-prime-body-' + this.props.uid}
+            exportFileName={this.state.title}
+            text="Save as image"
+            icon="fas fa-file-export mr-2"
+            customCssClass="dropdown-item"
+          />
+          <button className="dropdown-item" type="button">
+            <i className="fas fa-file-export mr-2"/> Exportovať do CSV
+          </button>
+          <button className="dropdown-item" type="button">
+            <i className="fas fa-print mr-2"/> Tlačiť
+          </button>
+        </div>
+      </div> */}
+    </div>
   }
 
   render() {
@@ -237,86 +302,14 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
 
         <div
           id={"adios-table-prime-" + this.props.uid}
-          className={"adios-react-ui table " + (this.state.loadingInProgress ? "loading" : "")}
+          className={"adios component table " + (this.state.loadingInProgress ? "loading" : "")}
         >
-          <div className="card border-0">
-            {this.state.showHeader ?
-              <div className="card-header mb-2">
-                <div className="row m-0">
+          {this.state.showHeader ? this.renderHeader() : ''}
 
-                  <div className="col-lg-12 p-0 m-0">
-                    <h3 className="card-title m-0 text-primary mb-2">{this.state.title}</h3>
-                  </div>
-
-                  <div className="col-lg-6 m-0 p-0">
-                    {this.state.canCreate ?
-                      <button
-                        className="btn btn-primary btn-icon-split"
-                        onClick={() => this.onAddClick()}
-                      >
-                        <span className="icon">
-                          <i className="fas fa-plus"/>
-                        </span>
-                        <span className="text">
-                          {this.state.addButtonText}
-                        </span>
-                      </button>
-                    : ""}
-                  </div>
-
-                  <div className="col-lg-6 m-0 p-0">
-                    <div className="d-flex flex-row-reverse">
-                      {/* <div className="dropdown no-arrow">
-                        <button 
-                          className="btn btn-light dropdown-toggle" 
-                          type="button"
-                          data-toggle="dropdown"
-                          aria-haspopup="true"
-                          aria-expanded="false"
-                        >
-                          <i className="fas fa-ellipsis-v"/>
-                        </button>
-                        <div className="dropdown-menu">
-                          <ExportButton
-                            uid={this.props.uid}
-                            exportType="image"
-                            exportElementId={'adios-table-prime-body-' + this.props.uid}
-                            exportFileName={this.state.title}
-                            text="Save as image"
-                            icon="fas fa-file-export mr-2"
-                            customCssClass="dropdown-item"
-                          />
-                          <button className="dropdown-item" type="button">
-                            <i className="fas fa-file-export mr-2"/> Exportovať do CSV
-                          </button>
-                          <button className="dropdown-item" type="button">
-                            <i className="fas fa-print mr-2"/> Tlačiť
-                          </button>
-                        </div>
-                      </div> */}
-
-                      <input 
-                        className="mr-2 form-control border-end-0 border"
-                        style={{maxWidth: '250px'}}
-                        type="search"
-                        placeholder="Start typing to search..."
-                        value={this.state.search}
-                        onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            : ''}
-
-            <div id={"adios-table-prime-body-" + this.props.uid}>
-              {/* <DataTable {...this.getTableProps()} {...globalThis.app.primeReactTailwindTheme.getPropsFor('DataTable')}>
-                {this.renderRows()}
-              </DataTable> */}
-              <DataTable {...this.getTableProps()}>
-                {this.renderRows()}
-              </DataTable>
-            </div>
+          <div className="table-body" id={"adios-table-prime-body-" + this.props.uid}>
+            <DataTable {...this.getTableProps()}>
+              {this.renderRows()}
+            </DataTable>
           </div>
         </div>
       </>

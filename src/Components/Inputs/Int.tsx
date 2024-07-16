@@ -13,27 +13,25 @@ export default class Int extends Input<IntInputProps, InputState> {
   }
 
   renderInputElement() {
-    return (
-      <div className={"max-w-250 " + (this.props.params.unit ? "input-group" : "")}>
-        <input
-          type="number"
-          value={this.state.value}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onChange(e.currentTarget.value)}
-          placeholder={this.props.params?.placeholder}
-          className={
-            "form-control"
-            + " " + (this.state.invalid ? 'is-invalid' : '')
-            + " " + (this.props.cssClass ?? "")
-            + " " + (this.state.readonly ? "bg-muted" : "")
-          }
-          disabled={this.state.readonly}
-        />
-        {this.props.params.unit ? (
-          <div className="input-group-append">
-            <span className="input-group-text">{this.props.params.unit}</span>
-          </div>
-        ) : ''}
-      </div>
-    );
+    return <>
+      <input
+        type="number"
+        value={this.state.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onChange(e.currentTarget.value)}
+        placeholder={this.props.params?.placeholder}
+        className={
+          "form-control"
+          + " " + (this.state.invalid ? 'is-invalid' : '')
+          + " " + (this.props.cssClass ?? "")
+          + " " + (this.state.readonly ? "bg-muted" : "")
+        }
+        disabled={this.state.readonly}
+      />
+      {this.props.params.unit ? (
+        <div className="input-unit">
+          {this.props.params.unit}
+        </div>
+      ) : ''}
+    </>;
   }
 }

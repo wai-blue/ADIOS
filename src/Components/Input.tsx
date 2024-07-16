@@ -94,7 +94,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
 
   getClassName() {
     return (
-      "adios-react-ui input"
+      "adios component input"
       + " " + this.props.inputClassName
       + " " + (this.state.invalid ? 'invalid' : '')
       + " " + (this.state.cssClass ?? "")

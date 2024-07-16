@@ -1828,7 +1828,7 @@ class Loader
       dirname(__FILE__)."/../Assets/Css/fontawesome-5.13.0.css",
       dirname(__FILE__)."/../Assets/Css/bootstrap.min.css",
       dirname(__FILE__)."/../Assets/Css/sb-admin-2.css",
-      dirname(__FILE__)."/../Assets/Css/adios-react-ui.css",
+      dirname(__FILE__)."/../Assets/Css/components.css",
       dirname(__FILE__)."/../Assets/Css/colors.css",
     ];
 

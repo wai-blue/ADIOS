@@ -57,7 +57,7 @@ export default class Button extends Component<ButtonProps> {
     return (
       <div
         id={"adios-button-" + this.props.uid}
-        className="adios-react-ui button"
+        className="adios component button"
       >
         <a 
           className={"adios ui Button btn " + this.state.cssClass + (this.props.icon && this.props.text ? " btn-icon-split" : "")}

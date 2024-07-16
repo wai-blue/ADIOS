@@ -45,6 +45,7 @@ export interface FormProps {
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
   showInModal?: boolean,
+  showInModalSimple?: boolean,
   columns?: FormColumns,
   title?: string,
   titleForInserting?: string,
@@ -714,6 +715,15 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
+  renderFormTitle(): JSX.Element {
+    let title = 
+      this.state.title ? this.state.title :
+      this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting
+    ;
+
+    return <div>{title}</div>;
+  }
+
 
   render() {
 
@@ -725,86 +735,100 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       );
     }
 
+    let formTitle = this.renderFormTitle();
     let formContent = this.renderFormContent();
-    let title = 
-      this.state.title ? this.state.title :
-      this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting
-    ;
 
-    return (
-      <>
-        {this.props.showInModal ? (
-          <div className="modal-header">
-            <div className="row w-100 p-0 m-0 d-flex align-items-center justify-content-center">
-              <div className="col-lg-4 p-0">
-                {this._renderButtonsLeft()}
-              </div>
-              <div className="col-lg-4 text-center">
-                <h3
-                  id={'adios-modal-title-' + this.props.uid}
-                  className="m-0 p-0"
-                >{title}</h3>
-              </div>
-              <div className="col-lg-4 p-0 d-flex flex-row-reverse">
-                {this._renderButtonsRight()}
-              </div>
+    if (this.props.showInModalSimple) {
+      return <>
+        <div className="modal-header">
+          <div className="modal-header-inner">
+            <div className="modal-header-left">
+              {this._renderButtonsLeft()}
+            </div>
+            <div className="modal-header-title">
+              {formTitle}
+            </div>
+            <div className="modal-header-right">
+              {this._renderButtonsRight()}
             </div>
           </div>
-        ) : ''}
-
-        <div
-          id={"adios-form-" + this.props.uid}
-          className="adios-react-ui form"
-        >
+        </div>
+        <div className="modal-body">
+          {formContent}
+        </div>
+      </>;
+    } else {
+      return (
+        <>
           {this.props.showInModal ? (
-            <div className="modal-body">
-              {formContent}
-            </div>
-          ) : (
-            <>
-              {title ? (
-                <div className="py-4">
-                  <h1>{title}</h1>
+            <div className="modal-header">
+              <div className="row w-100 p-0 m-0 d-flex align-items-center justify-content-center">
+                <div className="col-lg-4 p-0">
+                  {this._renderButtonsLeft()}
                 </div>
-              ) : null}
-              <div className="card w-100">
-                <div className="card-header">
-                  <div className="row">
-                    <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
-                      {this._renderButtonsLeft()}
-                    </div>
-
-                    {this.state.tabs != undefined ? (
-                      <div className={"col-lg-6 m-0 p-0"}>
-                        <ul className="nav nav-tabs card-header-tabs mt-3">
-                          {Object.keys(this.state.tabs).map((tabName: string) => {
-                            return (
-                              <li className="nav-item" key={tabName}>
-                                <button
-                                  className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
-                                  onClick={() => this.changeTab(tabName)}
-                                >{tabName}</button>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    ) : ''}
-
-                    <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
-                      {this._renderButtonsRight()}
-                    </div>
-                  </div>
+                <div className="col-lg-4 text-center">
+                  <h3
+                    id={'adios-modal-title-' + this.props.uid}
+                    className="m-0 p-0"
+                  >{formTitle}</h3>
                 </div>
-
-                <div className="card-body">
-                  {formContent}
+                <div className="col-lg-4 p-0 d-flex flex-row-reverse">
+                  {this._renderButtonsRight()}
                 </div>
               </div>
-            </>
-          )}
-        </div>
-      </>
-    );
+            </div>
+          ) : ''}
+
+          <div
+            id={"adios-form-" + this.props.uid}
+            className="adios component form"
+          >
+            {this.props.showInModal ? (
+              <div className="modal-body">
+                {formContent}
+              </div>
+            ) : (
+              <>
+                {formTitle}
+                <div className="card w-100">
+                  <div className="card-header">
+                    <div className="row">
+                      <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
+                        {this._renderButtonsLeft()}
+                      </div>
+
+                      {this.state.tabs != undefined ? (
+                        <div className={"col-lg-6 m-0 p-0"}>
+                          <ul className="nav nav-tabs card-header-tabs mt-3">
+                            {Object.keys(this.state.tabs).map((tabName: string) => {
+                              return (
+                                <li className="nav-item" key={tabName}>
+                                  <button
+                                    className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
+                                    onClick={() => this.changeTab(tabName)}
+                                  >{tabName}</button>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      ) : ''}
+
+                      <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
+                        {this._renderButtonsRight()}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="card-body">
+                    {formContent}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      );
+    }
   }
 }

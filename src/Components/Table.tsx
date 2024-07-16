@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { GridColDef, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 
 import Modal, { ModalProps } from "./Modal";
+import ModalSimple from "./ModalSimple";
 import Form, { FormProps, FormColumns } from "./Form";
 import Notification from "./Notification";
 
@@ -30,6 +31,7 @@ export interface TableProps {
   formId?: number,
   formEndpoint?: string,
   formModal?: ModalProps,
+  formUseModalSimple?: boolean,
   formParams?: FormProps,
   endpoint?: string
   modal?: ModalProps,
@@ -100,6 +102,10 @@ export interface TableState {
 }
 
 export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
+  static defaultProps = {
+    formUseModalSimple: true,
+  }
+
   state: S;
 
   constructor(props: TableProps) {
@@ -238,20 +244,26 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       id: this.state.formId ?? 0, 
       endpoint: this.state.formEndpoint ?? '',
       showInModal: true,
+      showInModalSimple: this.props.formUseModalSimple,
       columns: this.props.formParams?.columns ?? {},
       titleForInserting: this.props.formParams?.titleForInserting,
       titleForEditing: this.props.formParams?.titleForEditing,
       saveButtonText: this.props.formParams?.saveButtonText,
       addButtonText: this.props.formParams?.addButtonText,
+      onClose: () => {
+        this.setState({ formId: 0 });
+      },
       onSaveCallback: () => {
         this.loadData();
-        //@ts-ignore
-        ADIOS.modalToggle(this.props.uid);
+        this.setState({ formId: 0 });
+        // //@ts-ignore
+        // ADIOS.modalToggle(this.props.uid);
       },
       onDeleteCallback: () => {
         this.loadData();
-        //@ts-ignore
-        ADIOS.modalToggle(this.props.uid);
+        this.setState({ formId: 0 });
+        // //@ts-ignore
+        // ADIOS.modalToggle(this.props.uid);
       },
       isInitialized: false,
     }
@@ -262,14 +274,18 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       uid: this.props.uid + '_form',
       model: this.props.model,
       hideHeader: true,
-      isOpen: this.props.formParams?.id ? true : false,
+      isOpen: this.state.formId ? true : false,
       ...this.props.modal
     }
   }
 
   renderFormModal(): JSX.Element {
     if (this.state.renderForm) {
-      return <Modal {...this.getFormModalParams()}>{this.renderForm()}</Modal>;
+      if (this.props.formUseModalSimple) {
+        return <ModalSimple {...this.getFormModalParams()}>{this.renderForm()}</ModalSimple>;
+      } else {
+        return <Modal {...this.getFormModalParams()}>{this.renderForm()}</Modal>;
+      }
     } else {
       return <></>;
     }
@@ -289,13 +305,13 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     } else {
       this.setState(
         { formId: id },
-        () => {
-          let _this = this;
-          setTimeout(function() {
-            //@ts-ignore
-            ADIOS.modalToggle(_this.props.uid + '_form');
-          }, 280);
-        }
+        // () => {
+        //   let _this = this;
+        //   setTimeout(function() {
+        //     //@ts-ignore
+        //     ADIOS.modalToggle(_this.props.uid + '_form');
+        //   }, 280);
+        // }
       )
     }
   }

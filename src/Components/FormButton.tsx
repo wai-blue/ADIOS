@@ -43,7 +43,7 @@ export default class FormButton extends Component<FormButtonProps> {
         </Modal>
         <div
           id={"adios-button-" + this.props.uid}
-          className="adios-react-ui button"
+          className="adios component button"
         >
           <button
             onClick={() => ADIOS.modalToggle(this.props.uid)}

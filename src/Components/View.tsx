@@ -76,7 +76,7 @@ export default class View extends Component<ViewProps> {
       <div
         ref={this.divRef}
         id={"adios-view-" + this.props.uid}
-        className="adios-react-ui View"
+        className="adios component view"
         dangerouslySetInnerHTML={{__html: this.state.html}}
       >
       </div>

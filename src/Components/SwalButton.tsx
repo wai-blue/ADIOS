@@ -86,7 +86,7 @@ export default class SwalButton extends Component<SwalButtonProps> {
     return (
       <div
         id={"adios-button-" + this.props.uid}
-        className="adios-react-ui button"
+        className="adios component button"
       >
         <button
           className={"adios ui Button btn " + this.state.css + " btn-icon-split"}

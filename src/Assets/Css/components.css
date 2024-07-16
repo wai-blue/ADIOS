@@ -2,7 +2,7 @@
 /* ----- COMPONENT: input ----- */
 /* ----- */
 
-.adios-react-ui.input.lookup {
+.adios.component.input.lookup {
   min-width: 250px;
 }
 
@@ -10,7 +10,7 @@
 /* ----- COMPONENT: table ----- */
 /* ----- */
 
-.adios-react-ui.table.loading {
+.adios.component.table.loading {
   opacity: 0.6;
 }
 
@@ -55,8 +55,11 @@
 /* ----- COMPONENT: modal ----- */
 /* ----- */
 
-.adios-react-ui.modal .modal-dialog {
+.adios.component.modal .modal-dialog {
   position: fixed;
+  top: 0px;
+  z-index: 9999;
+  background: white;
   margin: auto;
   -webkit-transform: translate3d(0%, 0, 0);
   -ms-transform: translate3d(0%, 0, 0);
@@ -65,46 +68,46 @@
   max-width: none;
 }
 
-.adios-react-ui.modal.left .modal-dialog,
-.adios-react-ui.modal.right .modal-dialog {
+.adios.component.modal.left .modal-dialog,
+.adios.component.modal.right .modal-dialog {
   width: 65%;
   height: 100%;
 }
 
-.adios-react-ui.modal.center .modal-dialog {
+.adios.component.modal.center .modal-dialog {
   width: auto;
   height: auto;
 }
 
-.adios-react-ui.modal .modal-content {
+.adios.component.modal .modal-content {
   height: 100%;
   overflow-y: auto;
   border-radius: var(--mdb-modal-border-radius);
   border: none;
 }
 
-.adios-react-ui.modal .modal-header .close {
+.adios.component.modal .modal-header .close {
   margin: 0;
 }
 
-.adios-react-ui.modal .modal-body {
+.adios.component.modal .modal-body {
   padding: 15px 15px 80px;
 }
 
 /*Left*/
-.adios-react-ui.modal.left.fade .modal-dialog {
+.adios.component.modal.left.fade .modal-dialog {
   -webkit-transition: opacity 0.3s linear, left 0.3s ease-out;
   -moz-transition: opacity 0.3s linear, left 0.3s ease-out;
   -o-transition: opacity 0.3s linear, left 0.3s ease-out;
   transition: opacity 0.3s linear, left 0.3s ease-out;
 }
 
-.adios-react-ui.modal.left.fade.in .modal-dialog {
+.adios.component.modal.left.fade.in .modal-dialog {
   left: 0;
 }
 
 /*Right*/
-.adios-react-ui.modal.right.fade .modal-dialog {
+.adios.component.modal.right.fade .modal-dialog {
   right: 0px;
   -webkit-transition: opacity 0.3s linear, right 0.3s ease-out;
   -moz-transition: opacity 0.3s linear, right 0.3s ease-out;
@@ -112,31 +115,31 @@
   transition: opacity 0.3s linear, right 0.3s ease-out;
 }
 
-.adios-react-ui.modal.right.fade.in .modal-dialog {
+.adios.component.modal.right.fade.in .modal-dialog {
   right: 0;
 }
 
 /*Center*/
-.adios-react-ui.modal.center.fade .modal-dialog {
+.adios.component.modal.center.fade .modal-dialog {
   -webkit-transition: opacity 0.3s linear, left 0.3s ease-out;
   -moz-transition: opacity 0.3s linear, left 0.3s ease-out;
   -o-transition: opacity 0.3s linear, left 0.3s ease-out;
   transition: opacity 0.3s linear, left 0.3s ease-out;
 }
 
-.adios-react-ui.modal.center.fade .modal-dialog {
+.adios.component.modal.center.fade .modal-dialog {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
 }
 
-.adios-react-ui.modal-content {
+.adios.component.modal-content {
   border-radius: 0;
   border: none;
   z-index: 99999;
 }
 
-.adios-react-ui.modal-header {
+.adios.component.modal-header {
   border-bottom-color: #EEEEEE;
   background-color: #FAFAFA;
 }
@@ -151,7 +154,7 @@
 
 
 @media screen and (max-width: 1200px) {
-  .adios-react-ui.modal .modal-dialog {
+  .adios.component.modal .modal-dialog {
     width: 100% !important;
   }
 }

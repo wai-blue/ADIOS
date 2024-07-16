@@ -182,7 +182,7 @@ function _ajax_check_result(res, use_alert = true){
 }
 
 function _ajax_read(controller, params, onsuccess, onreadystatechange) {
-console.log(globalThis.app.config.url + '/' + controller);
+  document.body.classList.add("ajax-loading");
   $.ajax({
     // 'type': 'GET',
     // 'url': globalThis.app.config.url + '/' + _ajax_controller_url(controller, params),
@@ -193,6 +193,7 @@ console.log(globalThis.app.config.url + '/' + controller);
     'data': _ajax_post_data(params),
 
     'success': function(res) {
+      document.body.classList.remove("ajax-loading");
       try {
         var resJson = JSON.parse(res);
       } catch (ex) {
@@ -252,6 +253,7 @@ function _alert(msg) {
 }
 
 function _ajax_read_json(controller, params, onsuccess, onwarning, onfatal) {
+  document.body.classList.add("ajax-loading");
   $.ajax({
     // 'type': 'GET',
     // 'url': globalThis.app.config.url + '/' + _ajax_controller_url(controller, params),
@@ -262,6 +264,7 @@ function _ajax_read_json(controller, params, onsuccess, onwarning, onfatal) {
 
     'dataType': 'json',
     'success': function(res) {
+      document.body.classList.remove("ajax-loading");
       if (res.status == 'success') {
         if (typeof onsuccess == 'function') {
           onsuccess(res.content);
