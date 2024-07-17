@@ -169,7 +169,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       this.state.endpoint,
       { action: 'getParams', ...this.getEndpointParams() },
       (data: any) => {
-        let newState: any = deepObjectMerge(data, this.props);
+        let newState: any = deepObjectMerge({ ...data }, this.props);
         newState.params = { ...data };
         if (newState.layout) {
           newState.layout = this.convertLayoutToString(newState.layout);
@@ -192,12 +192,13 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
   loadRecord() {
-    if (this.state.id) {
+    if (this.state.id && this.state.id > 0) {
       request.get(
         this.state.endpoint,
         { action: 'loadRecord', ...this.getEndpointParams() },
         (data: any) => {
           let newData = this.getDataState(this.state.columns ?? {}, data);
+          console.log(newData);
           newData = this.onAfterDataLoaded(newData);
           this.setState({isInitialized: true, data: newData}, () => {
             this.onAfterFormInitialized();
@@ -426,7 +427,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   /**
    * Render tab
    */
-  renderFormContent(): JSX.Element {
+  renderContent(): JSX.Element {
     if (this.state.columns == null) {
       return adiosError(`No columns specified for ${this.props.model}. Did the controller return definition of columns?`);
     }
@@ -712,28 +713,34 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
-  renderFormTitle(): JSX.Element {
+  renderTitle(): JSX.Element {
     let title = 
       this.state.title ? this.state.title :
-      this.state.isEdit ? this.state.titleForEditing : this.state.titleForInserting
+      this.state.isEdit ? this.state.params?.titleForEditing : this.state.params?.titleForInserting
     ;
 
-    return <div>{title}</div>;
+    return <>
+      <h2>{title}</h2>
+      <small>{
+        this.state.isEdit
+          ? globalThis.app.translate('Editing record') + ' #' + this.state.id
+          : globalThis.app.translate('Adding new record')
+      }</small>
+    </>
   }
-
 
   render() {
 
     if (!this.state.isInitialized) {
       return (
-        <div className="p-4">
-          <ProgressBar mode="indeterminate" style={{ height: '30px' }}></ProgressBar>
+        <div className="p-4 h-full flex items-center">
+          <ProgressBar mode="indeterminate" style={{ flex: 1, height: '30px' }}></ProgressBar>
         </div>
       );
     }
 
-    let formTitle = this.renderFormTitle();
-    let formContent = this.renderFormContent();
+    let formTitle = this.renderTitle();
+    let formContent = this.renderContent();
 
     if (this.props.showInModalSimple) {
       return <>

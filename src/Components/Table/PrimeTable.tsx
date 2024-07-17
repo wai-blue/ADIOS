@@ -138,7 +138,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
 
     if (columnValue === null) {
-      return <div></div>;
+      return null;
     } else {
       switch (column.type) {
         case 'int':

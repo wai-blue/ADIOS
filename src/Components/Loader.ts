@@ -33,6 +33,11 @@ export class ADIOS {
     this.config = config;
   }
 
+  translate(orig: string): string {
+    let translated: string = this.dictionary[orig] ?? orig;
+    return translated;
+  }
+
   registerReactComponent(elementName: string, elementObject: any) {
     this.reactComponents[elementName] = elementObject;
   }

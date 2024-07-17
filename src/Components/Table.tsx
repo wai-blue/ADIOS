@@ -28,7 +28,7 @@ export interface TableProps {
   canUpdate?: boolean,
   columns?: FormColumns,
   renderForm?: boolean,
-  formId?: number,
+  formId?: number|null,
   formEndpoint?: string,
   formModal?: ModalProps,
   formUseModalSimple?: boolean,
@@ -87,7 +87,7 @@ export interface TableState {
   columns?: any, //Array<GridColDef>,
   data?: TableData,
   filterBy?: GridFilterModel,
-  formId?: number,
+  formId?: number|null,
   formEndpoint?: string,
   formParams?: FormProps,
   orderBy?: OrderBy,
@@ -251,17 +251,17 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       saveButtonText: this.props.formParams?.saveButtonText,
       addButtonText: this.props.formParams?.addButtonText,
       onClose: () => {
-        this.setState({ formId: 0 });
+        this.setState({ formId: null });
       },
       onSaveCallback: () => {
         this.loadData();
-        this.setState({ formId: 0 });
+        this.setState({ formId: null });
         // //@ts-ignore
         // ADIOS.modalToggle(this.props.uid);
       },
       onDeleteCallback: () => {
         this.loadData();
-        this.setState({ formId: 0 });
+        this.setState({ formId: null });
         // //@ts-ignore
         // ADIOS.modalToggle(this.props.uid);
       },
@@ -274,13 +274,13 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       uid: this.props.uid + '_form',
       model: this.props.model,
       hideHeader: true,
-      isOpen: this.state.formId ? true : false,
+      isOpen: Number.isInteger(this.state.formId),
       ...this.props.modal
     }
   }
 
   renderFormModal(): JSX.Element {
-    if (this.state.renderForm) {
+    if (this.state.renderForm && Number.isInteger(this.state.formId)) {
       if (this.props.formUseModalSimple) {
         return <ModalSimple {...this.getFormModalParams()}>{this.renderForm()}</ModalSimple>;
       } else {
@@ -303,16 +303,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     if (this.props.externalCallbacks && this.props.externalCallbacks.openForm) {
       window[this.props.externalCallbacks.openForm](this, id);
     } else {
-      this.setState(
-        { formId: id },
-        // () => {
-        //   let _this = this;
-        //   setTimeout(function() {
-        //     //@ts-ignore
-        //     ADIOS.modalToggle(_this.props.uid + '_form');
-        //   }, 280);
-        // }
-      )
+      this.setState({ formId: id })
     }
   }
 
@@ -320,7 +311,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     if (this.props.externalCallbacks && this.props.externalCallbacks.onAddClick) {
       window[this.props.externalCallbacks.onAddClick](this);
     } else {
-      this.openForm(0);
+      this.openForm(-1);
     }
   }
 

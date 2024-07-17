@@ -1451,7 +1451,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   public function recordCreate(array $data): int {
-    return $this->create($dataForThisModel)->id;
+    return $this->create($data)->id;
   }
 
   public function recordUpdate(int $id, array $data): int {
