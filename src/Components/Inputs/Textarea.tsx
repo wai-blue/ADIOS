@@ -17,10 +17,9 @@ export default class Textarea extends Input<InputProps, InputState> {
         rows={5}
         placeholder={this.props.params?.placeholder}
         className={
-          "form-control"
-          + " " + (this.state.invalid ? 'is-invalid' : '')
-          + " " + (this.props.cssClass ?? "")
-          + " " + (this.state.readonly ? "bg-muted" : "")
+          (this.props.cssClass ?? "")
+          + " " + (this.state.invalid ? 'invalid' : '')
+          + " " + (this.state.readonly ? "readonly" : "")
         }
         disabled={this.state.readonly}
       />

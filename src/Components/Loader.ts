@@ -90,32 +90,30 @@ export class ADIOS {
         component = '';
       }
 
+      let attributesDoNotConvert: Array<string> = [];
+      for (let i in element.attributes) {
+        if (element.attributes[i].name == '--adios-do-not-convert') {
+          attributesDoNotConvert = element.attributes[i].value.split(',');
+        }
+      }
+
       // Find attribute and also delete it using [0] index
       let i: number = 0
       while (element.attributes.length > i) {
         let attributeName: string = element.attributes[i].name.replace(/-([a-z])/g, (_: any, letter: string) => letter.toUpperCase());
         let attributeValue: any = element.attributes[i].value;
 
-        if (isValidJson(attributeValue)) {
-          attributeValue = JSON.parse(attributeValue);
-          // let attributeValues: Object|Array<any> = JSON.parse(attributeValue);
-          // if (!Array.isArray(attributeValues)) {
-          //   attributeValue = {};
-
-          //   attributeValue  = Object.keys(attributeValues).reduce(function(result, key) {
-          //     result[key] = _this.getValidatedAttributeValue(key, attributeValues[key]);
-          //     return result;
-          //   }, {});
-          // } else {
-          //   attributeValue = attributeValues;
-          // }
-        } else if (attributeValue === 'true') {
-          attributeValue = true;
-        } else if (attributeValue === 'false') {
-          attributeValue = false;
+        if (!attributesDoNotConvert.includes(attributeName)) {
+          if (isValidJson(attributeValue)) {
+            attributeValue = JSON.parse(attributeValue);
+          } else if (attributeValue === 'true') {
+            attributeValue = true;
+          } else if (attributeValue === 'false') {
+            attributeValue = false;
+          }
         }
 
-        componentProps[attributeName] = attributeValue; // this.getValidatedAttributeValue(attributeName, attributeValue); 
+        componentProps[attributeName] = attributeValue;
 
         if (this.attributesToSkip.includes(attributeName)) {
           i++;

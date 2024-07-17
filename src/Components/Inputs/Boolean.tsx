@@ -17,24 +17,22 @@ export default class Boolean extends Input<InputProps, InputState & BooleanInput
 
     this.state = {
       ...this.state, // Parent state
-      isChecked: this.props.value == '1' || this.props.value > 0 || this.props.value == 'true' ? true : false,
+      isChecked: this.props.value == '1' || this.props.value == 'Y' || this.props.value > 0 || this.props.value == 'true',
     };
   }
 
   renderInputElement() {
     return (
-      <div className="form-check mb-4">
-        <input 
-          type="checkbox"
-          value={this.state.value ? 'false' : 'true'}
-          onChange={(e) => {
-            this.setState({isChecked: !this.state.isChecked});
-            this.onChange(!this.state.isChecked);
-          }}
-          disabled={this.state.readonly}
-          checked={this.state.isChecked}
-        />
-      </div>
+      <input 
+        type="checkbox"
+        value={this.state.value ? 'false' : 'true'}
+        onChange={(e) => {
+          this.setState({isChecked: !this.state.isChecked});
+          this.onChange(!this.state.isChecked);
+        }}
+        disabled={this.state.readonly}
+        checked={this.state.isChecked}
+      />
     );
   } 
 }

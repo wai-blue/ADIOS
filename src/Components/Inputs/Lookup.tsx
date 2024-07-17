@@ -12,6 +12,7 @@ interface LookupInputProps extends InputProps {
 
 interface LookupInputState extends InputState {
   data: Array<any>,
+  model: string
   endpoint: string,
 }
 
@@ -26,7 +27,8 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
     this.state = {
       ...this.state, // Parent state
-      endpoint: props.endpoint ? props.endpoint : (props.params.endpoint ? props.params.endpoint : 'components/inputs/lookup'),
+      endpoint: props.endpoint ? props.endpoint : (props.params && props.params.endpoint ? props.params.endpoint : 'components/inputs/lookup'),
+      model: props.model ? props.model : (props.params && props.params.model ? props.params.model : ''),
       data: [],
     };
   }
@@ -39,7 +41,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
     request.get(
       this.state.endpoint,
       {
-        model: this.props.params?.model,
+        model: this.state.model,
         context: this.props.context,
         formData: this.props.parentForm?.state?.data,
         search: inputValue,

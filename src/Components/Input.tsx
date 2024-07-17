@@ -6,8 +6,6 @@ export interface InputProps {
   uid: string,
   params: any,
   inputClassName?: string,
-  columnName: string,
-  id?: string,
   value?: any,
   onChange?: (value: any) => void | string,
   readonly?: boolean,
@@ -121,8 +119,8 @@ export class Input<P extends InputProps, S extends InputState> extends Component
     return (
       <div className={this.getClassName()}>
         <input
-          id={this.props.id}
-          name={this.props.id}
+          id={this.props.uid}
+          name={this.props.uid}
           type="hidden"
           value={this.serialize()}
           style={{width: "100%", fontSize: "0.4em"}}

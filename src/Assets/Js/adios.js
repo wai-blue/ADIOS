@@ -9,7 +9,7 @@ const ADIOS = {
   },
 
   update(url, params, selector, onDone) {
-    _ajax_supdate(url, params, selector, { async: false, append: false, success: onDone });
+    _ajax_supdate(url, params, selector, { async: true, append: false, success: onDone });
   },
 
   renderDesktop: function(url, params) {
@@ -53,7 +53,6 @@ const ADIOS = {
       {
         success: () => {
           $('#adios-modal-global').modal();
-          globalThis.app.renderReactComponents('#adios-modal-body-global');
         }
       }
     );

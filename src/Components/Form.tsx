@@ -561,10 +561,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
       uid: this.props.uid + '_' + columnName,
-      id: this.props.uid + '_' + columnName,
       parentForm: this,
       context: this.props.context ? this.props.context : this.props.uid,
-      columnName: columnName,
       params: inputParams,
       value: data[columnName] ?? '',
       invalid: this.state.invalidInputs[columnName] ?? false,
@@ -640,11 +638,10 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const inputParams = this.buildInputParams(columnName, customInputParams);
 
     return columnName == 'id' ? <></>: (
-      <div className="input-wrapper" key={columnName}>
-        <div className="input-label">
+      <div className={"input-wrapper" + (inputParams.required == true ? " required" : "")} key={columnName}>
+        <label className="input-label" htmlFor={this.props.uid + '_' + columnName}>
           {inputParams.title}
-          {inputParams.required == true ? <b className="text-danger"> *</b> : ""}
-        </div>
+        </label>
 
         <div className="input-body" key={columnName}>
           {this.input(columnName, inputParams)}
@@ -669,7 +666,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
             data-dismiss="modal"
             aria-label="Close"
             onClick={this.props.onClose}
-          ><span>&times;</span></button>
+          ><span className="text">&times;</span></button>
         : ''}
 
         <button

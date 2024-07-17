@@ -293,33 +293,35 @@ var _ajax_sread_ret_val = {};
 var _ajax_sread_use_async = false;
 
 function _ajax_sread(controller, params, options) {
-  if (typeof options == 'undefined') options = new Object;
+  console.log('Sync AJAX is not supported anymore.');
+  return;
+  // if (typeof options == 'undefined') options = new Object;
 
-  if (_ajax_sread_use_async) {
-    alert('ADIOS _ajax_sread_use_async call error');
-    return 'ADIOS _ajax_sread_use_async call error';
-  }
+  // if (_ajax_sread_use_async) {
+  //   alert('ADIOS _ajax_sread_use_async call error');
+  //   return 'ADIOS _ajax_sread_use_async call error';
+  // }
 
-  try {
-    var ret_val = $.ajax({
-      async: false,
+  // try {
+  //   var ret_val = $.ajax({
+  //     async: false,
 
-      // type: 'GET',
-      // url: globalThis.app.config.url + '/' + _ajax_controller_url(controller, params),
+  //     // type: 'GET',
+  //     // url: globalThis.app.config.url + '/' + _ajax_controller_url(controller, params),
 
-      'type': 'POST',
-      'url': globalThis.app.config.url + '/' + controller,
-      'data': _ajax_post_data(params),
+  //     'type': 'POST',
+  //     'url': globalThis.app.config.url + '/' + controller,
+  //     'data': _ajax_post_data(params),
 
-      success: options.success,
-      // complete: function() { desktop_console_update(); }
-    }).responseText
-  } catch (ex) {
-    window.console.log(ex);
-    ret_val = '';
-  };
+  //     success: options.success,
+  //     // complete: function() { desktop_console_update(); }
+  //   }).responseText
+  // } catch (ex) {
+  //   window.console.log(ex);
+  //   ret_val = '';
+  // };
 
-  return ret_val;
+  // return ret_val;
 };
 
 
@@ -386,6 +388,9 @@ function _ajax_supdate(controller, params, selector, options) {
           };
 
           _ajax_update_dynamic_scripts(data);
+
+          globalThis.app.renderReactComponents(selector);
+
           $(selector).stop().css('opacity', 1);
           if (typeof options.success == 'function') setTimeout(options.success, 100);
         });
