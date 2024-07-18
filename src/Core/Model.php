@@ -1778,6 +1778,25 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
 
+  public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
+    $columnsToShowAsString = '';
+    $tmpColumns = $this->columns();
+
+    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+      if (!isset($tmpColumnDefinition['relationship'])) {
+        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
+      }
+    }
+
+    // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
+    $query = $this->selectRaw($columnsToShowAsString);
+
+    return $query;
+  }
+
+  public function onAfterLoadRecord(array $data): array {
+    return $data;
+  }
 
 
   //////////////////////////////////////////////////////////////////

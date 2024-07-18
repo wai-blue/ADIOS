@@ -190,7 +190,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
     }
   }
 
-  renderRows(): JSX.Element[] {
+  renderColumns(): JSX.Element[] {
     let columns: JSX.Element[] = [];
 
     if (this.props.selectionMode) {
@@ -308,7 +308,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
 
           <div className="table-body" id={"adios-table-prime-body-" + this.props.uid}>
             <DataTable {...this.getTableProps()}>
-              {this.renderRows()}
+              {this.renderColumns()}
             </DataTable>
           </div>
         </div>

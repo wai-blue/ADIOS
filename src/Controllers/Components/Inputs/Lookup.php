@@ -21,7 +21,7 @@ class Lookup extends \ADIOS\Core\Controller {
     $this->permission = $this->params['model'] . ':Read';
   }
 
-  public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
+  public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
     $tmpModel = $this->app->getModel($this->params['model']);
 
     $lookupSqlValue = "(" .
@@ -42,7 +42,7 @@ class Lookup extends \ADIOS\Core\Controller {
   public function renderJson(): ?array { 
     try {
       return [
-        'data' => \ADIOS\Core\Helper::keyBy('id', $this->prepareDataQuery()->get()->toArray())
+        'data' => \ADIOS\Core\Helper::keyBy('id', $this->prepareLoadRecordQuery()->get()->toArray())
       ];
     } catch (QueryException $e) {
       http_response_code(500);

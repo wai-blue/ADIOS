@@ -6,8 +6,8 @@ namespace {{ thisController.namespace }};
 
 class {{ thisController.class }} extends \ADIOS\Controllers\Components\Inputs\Lookup {
 
-  public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
-    $query = parent::prepareDataQuery();
+  public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
+    $query = parent::prepareLoadRecordQuery();
 
     // Modify the $query here
     // You can use $this->model property to get the model for which the query is built.

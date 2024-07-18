@@ -23,28 +23,8 @@ class Form extends \ADIOS\Core\Controller {
     $this->permission = $this->params['model'] . ':Read';
   }
 
-  public function prepareDataQuery(): \Illuminate\Database\Eloquent\Builder {
-    $columnsToShowAsString = '';
-    $tmpColumns = $this->model->columns();//getColumnsToShowInView('Form');
-
-    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-      if (!isset($tmpColumnDefinition['relationship'])) {
-        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
-      }
-    }
-
-    // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-    $query = $this->model->selectRaw($columnsToShowAsString);
-    $query = $query->where('id', $this->params['id']);
-
-    //foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-    //  if (isset($tmpColumnDefinition['relationship']) && $tmpColumnDefinition['type'] == 'tags') {
-    //    $query->with($tmpColumnDefinition['relationship']);
-    //    $this->tagsLists[$tmpColumnDefinition['relationship']] = $query->first()->roles()->getRelated()->get();
-    //  }
-    //}
-
-    return $query;
+  public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
+    return $this->model->prepareLoadRecordQuery();
   }
 
   public function loadRecord() {
@@ -53,9 +33,12 @@ class Form extends \ADIOS\Core\Controller {
     $data = [];
 
     if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
-      $this->query = $this->prepareDataQuery();
-      $data = $this->query->first()->toArray();
+      $query = $this->prepareLoadRecordQuery();
+      $query = $query->where('id', $this->params['id']);
+      $data = $query->first()->toArray();
     }
+
+    $data = $this->model->onAfterLoadRecord($data);
 
     return $data;
   }

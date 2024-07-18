@@ -88,7 +88,7 @@ export interface FormColumns {
 }
 
 interface FormInputs {
-  [key: string]: string | number;
+  [key: string]: any;
 }
 
 export default class Form<P, S> extends Component<FormProps, FormState> {
