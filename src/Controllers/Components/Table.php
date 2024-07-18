@@ -90,15 +90,8 @@ class Table extends \ADIOS\Core\Controller {
 
     $tmpColumns = $this->getColumnsForDataQuery();
 
-    $selectRaw = [];
     $withs = [];
     $joins = [];
-
-    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-      if (!isset($tmpColumnDefinition['relationship'])) {
-        $selectRaw[] = $this->model->getFullTableSqlName().'.'.$tmpColumnName;
-      }
-    }
 
     // LOOKUPS and RELATIONSHIPS
     foreach ($tmpColumns as $columnName => $column) {
@@ -130,16 +123,10 @@ class Table extends \ADIOS\Core\Controller {
             ->selectRaw('*, ' . $lookupSqlValue)
           ;
         };
-      } else if (isset($column['relationship'])) {
-        $withs[$columnName] = function ($query) {
-          $query->pluck('name');
-        };
       }
     }
 
-    $query = $this->model;
-    // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-    $query = $query->selectRaw(implode(",", $selectRaw))->with($withs);
+    $query = $this->model->prepareLoadRecordQuery($this->app)->with($withs);
 
     foreach ($joins as $join) {
       $query->leftJoin($join[0], $join[1], $join[2], $join[3]);
@@ -174,26 +161,7 @@ class Table extends \ADIOS\Core\Controller {
           $query->orHaving($columnName, 'like', "%{$search}%");
         }
       }
-
-      // $query->where(function ($query) use ($params, $tmpColumns) {
-      //   foreach ($tmpColumns as $columnName => $column) {
-      //     if ($column['type'] == 'lookup') {
-      //       $query->orWhere($this->model->getFullTableSqlName().'.'.$columnName, 'like', "%{$params['search']}%");
-      //     } else {
-      //       $query->orWhere($this->model->getFullTableSqlName().'.'.$columnName, 'like', "%{$params['search']}%");
-      //     }
-      //   }
-      // });
-
-      // $query->having(function ($query) use ($params, $tmpColumns) {
-      //   foreach ($tmpColumns as $columnName => $column) {
-      //     if ($column['type'] == 'lookup') {
-      //       $query->orHaving($columnName.':LOOKUP', 'like', "%{$params['search']}%");
-      //     }
-      //   }
-      // });
     }
-    // _var_dump($query->toSql());
 
     if (isset($params['orderBy'])) {
       $query->orderBy(

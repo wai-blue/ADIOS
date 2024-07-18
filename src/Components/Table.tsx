@@ -159,9 +159,15 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     return this.state.endpoint;
   }
 
-  getCustomEndpointParams(): any {
-    /* to be overriden */
-    return {};
+  getEndpointParams(): any {
+    return {
+      action: 'getParams',
+      model: this.props.model,
+      parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+      parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
+      tag: this.props.tag,
+      __IS_AJAX__: '1',
+    }
   }
 
   loadParams(successCallback?: (params: any) => void) {
@@ -169,15 +175,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
     request.get(
       this.getEndpointUrl(),
-      {
-        ...this.getCustomEndpointParams(),
-        action: 'getParams',
-        model: this.props.model,
-        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
-        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
-        tag: this.props.tag,
-        __IS_AJAX__: '1',
-      },
+      this.getEndpointParams(),
       (data: any) => {
         try {
           if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
@@ -211,7 +209,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     request.get(
       this.getEndpointUrl(),
       {
-        ...this.getCustomEndpointParams(),
+        ...this.getEndpointParams(),
         action: 'loadData',
         filterBy: this.state.filterBy,
         model: this.props.model,

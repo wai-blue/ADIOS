@@ -334,10 +334,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   public function install()
   {
-    if (!empty($this->getFullTableSqlName())) {
-      $this->app->db->createSqlTable(
-        $this->getFullTableSqlName()
-      );
+    if (!empty($this->fullTableSqlName)) {
+      $this->app->db->createSqlTable($this->fullTableSqlName);
 
       foreach ($this->indexes() as $indexOrConstraintName => $indexDef) {
         if (empty($indexOrConstraintName) || is_numeric($indexOrConstraintName)) {
@@ -368,13 +366,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
         switch ($indexDef["type"]) {
           case "index":
             $this->app->db->query("
-              alter table `" . $this->getFullTableSqlName() . "`
+              alter table `" . $this->fullTableSqlName . "`
               add index `{$indexOrConstraintName}` ({$tmpColumns})
             ");
             break;
           case "unique":
             $this->app->db->query("
-              alter table `" . $this->getFullTableSqlName() . "`
+              alter table `" . $this->fullTableSqlName . "`
               add constraint `{$indexOrConstraintName}` unique ({$tmpColumns})
             ");
             break;
@@ -436,7 +434,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function dropTableIfExists()
   {
     $this->app->db->query("set foreign_key_checks = 0");
-    $this->app->db->query("drop table if exists `" . $this->getFullTableSqlName() . "`");
+    $this->app->db->query("drop table if exists `" . $this->fullTableSqlName . "`");
     $this->app->db->query("set foreign_key_checks = 1");
   }
 
@@ -448,8 +446,8 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function createSqlForeignKeys()
   {
 
-    if (!empty($this->getFullTableSqlName())) {
-      $this->app->db->createSqlForeignKeys($this->getFullTableSqlName());
+    if (!empty($this->fullTableSqlName)) {
+      $this->app->db->createSqlForeignKeys($this->fullTableSqlName);
     }
   }
 
@@ -1091,13 +1089,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function pdoPrepareAndExecute(string $query, array $variables)
   {
-    $q = $this->pdo->prepare(str_replace(":table", $this->getFullTableSqlName(), $query));
+    $q = $this->pdo->prepare(str_replace(":table", $this->fullTableSqlName, $query));
     return $q->execute($variables);
   }
 
   public function pdoPrepareExecuteAndFetch(string $query, array $variables, string $keyBy = "")
   {
-    $q = $this->pdo->prepare(str_replace(":table", $this->getFullTableSqlName(), $query));
+    $q = $this->pdo->prepare(str_replace(":table", $this->fullTableSqlName, $query));
     $q->execute($variables);
 
     $rows = [];
@@ -1778,13 +1776,13 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
 
-  public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
+  public function prepareLoadRecordQuery(\ADIOS\Core\Loader $app): \Illuminate\Database\Eloquent\Builder {
     $columnsToShowAsString = '';
     $tmpColumns = $this->columns();
 
     foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
       if (!isset($tmpColumnDefinition['relationship'])) {
-        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $tmpColumnName;
+        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $this->fullTableSqlName . '.' . $tmpColumnName;
       }
     }
 
@@ -1830,7 +1828,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       unset($lookupsToAdd[$colName]);
     }
 
-    $selects = [$this->getFullTableSqlName() . ".*"];
+    $selects = [$this->fullTableSqlName . ".*"];
     $joins = [];
 
     foreach ($lookupsToAdd as $colName => $lookupName) {
@@ -1850,7 +1848,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
         $lookupedModel->getFullTableSqlName(),
         $lookupedModel->getFullTableSqlName() . ".id",
         '=',
-        $this->getFullTableSqlName() . ".{$colName}"
+        $this->fullTableSqlName . ".{$colName}"
       ];
 
       $query->addedLookups[$colName] = $lookupName;

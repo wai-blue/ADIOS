@@ -24,7 +24,7 @@ class Form extends \ADIOS\Core\Controller {
   }
 
   public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
-    return $this->model->prepareLoadRecordQuery();
+    return $this->model->prepareLoadRecordQuery($this->app);
   }
 
   public function loadRecord() {
@@ -42,7 +42,6 @@ class Form extends \ADIOS\Core\Controller {
 
     return $data;
   }
-
 
   public function getParams() {
     try {
