@@ -20,7 +20,8 @@ export class ADIOS {
     },
   };
 
-  dictionary: Object = {};
+  language: string = '';
+  dictionary: any = {};
 
   /**
   * Define attributes which will not removed
@@ -34,7 +35,10 @@ export class ADIOS {
   }
 
   translate(orig: string): string {
-    let translated: string = this.dictionary[orig] ?? orig;
+    let translated: string = orig;
+    if (this.dictionary[this.language] && this.dictionary[this.language][orig]) {
+      translated = this.dictionary[this.language][orig];
+    }
     return translated;
   }
 

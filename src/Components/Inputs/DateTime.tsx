@@ -128,25 +128,20 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
 
     return (
       <>
-        <div className={"max-w-250 input-group"}>
-          <Flatpickr
-            value={value}
-            onChange={(data: Date[]) => this.onChange(data[0] ?? null)}
-            className={
-              "form-control"
-                + " " + (this.state.invalid ? 'is-invalid' : '')
-                + " " + (this.props.cssClass ?? "")
-                + " " + (this.state.readonly ? "bg-muted" : "")
-            }
-            placeholder={this.props.params?.placeholder}
-            disabled={this.state.readonly}
-            options={this.options}
-          />
-          <div className="input-group-append">
-            <span className="input-group-text">
-              {this._renderIcon()}
-            </span>
-          </div>
+        <Flatpickr
+          value={value}
+          onChange={(data: Date[]) => this.onChange(data[0] ?? null)}
+          className={
+            (this.state.invalid ? 'is-invalid' : '')
+            + " " + (this.props.cssClass ?? "")
+            + " " + (this.state.readonly ? "bg-muted" : "")
+          }
+          placeholder={this.props.params?.placeholder}
+          disabled={this.state.readonly}
+          options={this.options}
+        />
+        <div className="input-after">
+          {this._renderIcon()}
         </div>
       </>
     );

@@ -681,13 +681,13 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
             ? (
               <>
                 <span className="icon"><i className="fas fa-save"></i></span>
-                <span className="text"> {this.state.saveButtonText ?? "Save"}</span>
+                <span className="text"> {this.state.saveButtonText ?? globalThis.app.translate("Save")}</span>
               </>
             )
             : (
               <>
                 <span className="icon"><i className="fas fa-plus"></i></span>
-                <span className="text"> {this.state.addButtonText ?? "Add"}</span>
+                <span className="text"> {this.state.addButtonText ?? globalThis.app.translate("Add")}</span>
               </>
             )
           }
@@ -705,7 +705,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
             className={"btn btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
           >
             <span className="icon"><i className="fas fa-trash"></i></span>
-            <span className="text">Delete</span>
+            <span className="text">{globalThis.app.translate('Delete')}</span>
           </button>
           : ''
         }

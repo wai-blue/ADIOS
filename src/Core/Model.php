@@ -1775,19 +1775,59 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])['id'];
   }
 
-
-  public function prepareLoadRecordQuery(\ADIOS\Core\Loader $app): \Illuminate\Database\Eloquent\Builder {
-    $columnsToShowAsString = '';
+  public function prepareLoadRecordQuery(bool $addLookups = false): \Illuminate\Database\Eloquent\Builder {
     $tmpColumns = $this->columns();
 
+    $selectRaw = [];
+    $withs = [];
+    $joins = [];
+
     foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-      if (!isset($tmpColumnDefinition['relationship'])) {
-        $columnsToShowAsString .= ($columnsToShowAsString == '' ? '' : ', ') . $this->fullTableSqlName . '.' . $tmpColumnName;
+      $selectRaw[] = $this->fullTableSqlName . '.' . $tmpColumnName;
+    }
+
+    if ($addLookups) {
+
+      // LOOKUPS and RELATIONSHIPS
+      foreach ($tmpColumns as $columnName => $column) {
+        if ($column['type'] == 'lookup') {
+          $lookupModel = $this->app->getModel($column['model']);
+          $lookupConnection = $lookupModel->getConnectionName();
+          $lookupDatabase = $lookupModel->getConnection()->getDatabaseName();
+          $lookupTableName = $lookupModel->getFullTableSqlName();
+          $joinAlias = 'join_' . $columnName;
+          $lookupSqlValue = "(" .
+            str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
+            . ") as lookupSqlValue";
+
+          $selectRaw[] = "(" .
+            str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
+            . ") as `{$columnName}:LOOKUP`"
+          ;
+
+          $joins[] = [
+            $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,
+            $joinAlias.'.id',
+            '=',
+            $this->fullTableSqlName.'.'.$columnName
+          ];
+
+          $withs[$columnName] = function ($query) use ($lookupDatabase, $lookupTableName, $lookupSqlValue) {
+            $query
+              ->from($lookupDatabase . '.' . $lookupTableName)
+              ->selectRaw('*, ' . $lookupSqlValue)
+            ;
+          };
+        }
       }
+
     }
 
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-    $query = $this->selectRaw($columnsToShowAsString);
+    $query = $this->selectRaw(join(',', $selectRaw))->with($withs);
+    foreach ($joins as $join) {
+      $query->leftJoin($join[0], $join[1], $join[2], $join[3]);
+    }
 
     return $query;
   }

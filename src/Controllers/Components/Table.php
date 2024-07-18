@@ -86,51 +86,10 @@ class Table extends \ADIOS\Core\Controller {
       $search = strtolower(Str::ascii($params['search']));
     }
 
-    $this->model = $this->app->getModel($this->params['model']);
+    $model = $this->app->getModel($this->params['model']);
+    $columns = $model->columns();
 
-    $tmpColumns = $this->getColumnsForDataQuery();
-
-    $withs = [];
-    $joins = [];
-
-    // LOOKUPS and RELATIONSHIPS
-    foreach ($tmpColumns as $columnName => $column) {
-      if ($column['type'] == 'lookup') {
-        $lookupModel = $this->app->getModel($column['model']);
-        $lookupConnection = $lookupModel->getConnectionName();
-        $lookupDatabase = $lookupModel->getConnection()->getDatabaseName();
-        $lookupTableName = $lookupModel->getFullTableSqlName();
-        $joinAlias = 'join_' . $columnName;
-        $lookupSqlValue = "(" .
-          str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
-          . ") as lookupSqlValue";
-
-        $selectRaw[] = "(" .
-          str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
-          . ") as `{$columnName}:LOOKUP`"
-        ;
-
-        $joins[] = [
-          $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,
-          $joinAlias.'.id',
-          '=',
-          $this->model->getFullTableSqlName().'.'.$columnName
-        ];
-
-        $withs[$columnName] = function ($query) use ($lookupDatabase, $lookupTableName, $lookupSqlValue) {
-          $query
-            ->from($lookupDatabase . '.' . $lookupTableName)
-            ->selectRaw('*, ' . $lookupSqlValue)
-          ;
-        };
-      }
-    }
-
-    $query = $this->model->prepareLoadRecordQuery($this->app)->with($withs);
-
-    foreach ($joins as $join) {
-      $query->leftJoin($join[0], $join[1], $join[2], $join[3]);
-    };
+    $query = $model->prepareLoadRecordQuery(true);
 
     // FILTER BY
     if (isset($params['filterBy'])) {
@@ -146,7 +105,7 @@ class Table extends \ADIOS\Core\Controller {
 
     // Search
     if ($search !== null) {
-      foreach ($tmpColumns as $columnName => $column) {
+      foreach ($columns as $columnName => $column) {
         if (isset($column['enumValues'])) {
           foreach ($column['enumValues'] as $enumValueKey => $enumValue) {
             if (str_contains(strtolower(Str::ascii($enumValue)), $search)) {
