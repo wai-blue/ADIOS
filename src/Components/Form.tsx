@@ -550,12 +550,14 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   /**
    * Render different input types
    */
-  input(columnName: string, customInputParams?: any): JSX.Element {
+  input(columnName: string, customInputParams?: any, onChange?: any): JSX.Element {
     let inputToRender: JSX.Element = <></>;
 
     // if (!colDef) {
     //   return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);
     // }
+
+    if (!onChange) onChange = (value: any) => this.inputOnChangeRaw(columnName, value);
 
     const inputParams = this.buildInputParams(columnName, customInputParams);
     const data = this.state.data ?? {};
@@ -569,7 +571,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName]?.readonly || columns[columnName]?.disabled,
       cssClass: inputParams.cssClass ?? '',
-      onChange: (value: any) => this.inputOnChangeRaw(columnName, value),
+      onChange: onChange,
       isInitialized: false,
     };
 

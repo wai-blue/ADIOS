@@ -98,18 +98,18 @@ class User extends \ADIOS\Core\Model {
     ]));
   }
 
-  public function inputs(): array {
-    return [
-      'roles' => [
-        'type' => 'tags',
-        'junction' => 'roles',
-        //'model' => 'ADIOS/Models/UserRole',
-        'title' => 'Pridelené role',
-        'dataKey' => 'name',
-        'show' => TRUE,
-      ],
-    ];
-  }
+  // public function inputs(): array {
+  //   return [
+  //     'roles' => [
+  //       'type' => 'tags',
+  //       'junction' => 'roles',
+  //       //'model' => 'ADIOS/Models/UserRole',
+  //       'title' => 'Pridelené role',
+  //       'dataKey' => 'name',
+  //       'show' => TRUE,
+  //     ],
+  //   ];
+  // }
 
   public function upgrades() : array {
     // Upgrade nebude fungovať pretože sa mení logika prihlásenia a upgrade sa vykoná až po prihlásení.

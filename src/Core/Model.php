@@ -888,15 +888,15 @@ class Model extends \Illuminate\Database\Eloquent\Model
     return array_keys($this->indexNames());
   }
 
-  /**
-   * Returns the configuration of various inputs used in the form.
-   *
-   * @return array
-   */
-  public function inputs(): array
-  {
-    return [];
-  }
+  // /**
+  //  * Returns the configuration of various inputs used in the form.
+  //  *
+  //  * @return array
+  //  */
+  // public function inputs(): array
+  // {
+  //   return [];
+  // }
 
   /**
    * Parses the $data containing strings as a result of DB fetch operation
