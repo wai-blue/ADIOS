@@ -229,13 +229,15 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
 
     return <>
       {cellValueElement}
-      <i
-        className="inline-edit-icon fas fa-pencil-alt text-xs"
-        onClick={(e) => { e.stopPropagation(); op.current?.toggle(e); }}
-      ></i>
-      <OverlayPanel ref={op} onClick={(e) => { e.stopPropagation(); }}>
-        {cellEditorElement}
-      </OverlayPanel>
+      {this.state.inlineEditingEnabled ? <>
+        <i
+          className="inline-edit-icon fas fa-pencil-alt text-xs"
+          onClick={(e) => { e.stopPropagation(); op.current?.toggle(e); }}
+        ></i>
+        <OverlayPanel ref={op} onClick={(e) => { e.stopPropagation(); }}>
+          {cellEditorElement}
+        </OverlayPanel>
+      </> : null}
     </>;
   }
 

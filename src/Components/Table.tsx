@@ -49,6 +49,7 @@ export interface TableProps {
   externalCallbacks?: ExternalCallbacks,
   itemsPerPage: number,
   orderBy?: OrderBy,
+  inlineEditingEnabled?: boolean,
 
   //TODO
   //showPaging?: boolean,
@@ -102,6 +103,7 @@ export interface TableState {
   folderUrl?: string,
   loadingInProgress: boolean,
   renderForm?: boolean,
+  inlineEditingEnabled: boolean,
 }
 
 export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
@@ -135,6 +137,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       showHeader: props.showHeader ?? true,
       loadingInProgress: false,
       orderBy: this.props.orderBy,
+      inlineEditingEnabled: props.inlineEditingEnabled ? props.inlineEditingEnabled : false,
     } as S;
   }
 
