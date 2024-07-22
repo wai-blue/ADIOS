@@ -264,6 +264,20 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       ></Column>);
     });
 
+    columns.push(<Column
+      key='__actions'
+      field='__actions'
+      header=''
+      body={(data: any, options: any) => {
+        return (
+          <button className="btn btn-small btn-transparent">
+            <span className="icon"><i className="fas fa-ellipsis-h"></i></span>
+          </button>
+        );
+      }}
+      style={{ width: 'auto' }}
+    ></Column>);
+
     return columns;
   }
 

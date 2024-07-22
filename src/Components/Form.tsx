@@ -9,8 +9,10 @@ import Swal, {SweetAlertOptions} from "sweetalert2";
 
 import { adiosError, deepObjectMerge } from "./Helper";
 
+import Table from "./Table";
 import { InputProps } from "./Input";
 import { InputFactory } from "./InputFactory";
+import { TableProps } from "@mui/material";
 
 interface Content {
   [key: string]: ContentCard | any;
@@ -21,10 +23,13 @@ interface ContentCard {
 }
 
 export interface FormProps {
+  parentTable: any,
   isInitialized?: boolean,
   uid: string,
   model: string,
   id?: number,
+  prevId?: number,
+  nextId?: number,
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
@@ -50,6 +55,8 @@ export interface FormProps {
 export interface FormState {
   isInitialized: boolean,
   id?: number,
+  prevId?: number,
+  nextId?: number,
   readonly?: boolean,
   canCreate?: boolean,
   canRead?: boolean,
@@ -99,6 +106,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       isInitialized: false,
       endpoint: props.endpoint ? props.endpoint : 'components/form',
       id: props.id,
+      prevId: props.prevId,
+      nextId: props.nextId,
       readonly: props.readonly,
       canCreate: props.readonly,
       canRead: props.readonly,
@@ -607,70 +616,88 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   _renderButtonsLeft(): JSX.Element {
     let id = this.state.id ? this.state.id : 0;
-    return (
-      <div className="d-flex">
-        {this.props.showInModal ?
-          <button
-            className="btn btn-light mr-2"
-            type="button"
-            data-dismiss="modal"
-            aria-label="Close"
-            onClick={this.props.onClose}
-          ><span className="text">&times;</span></button>
-        : ''}
+    return <>
+      {this.props.showInModal ?
+        <button
+          className="btn btn-light"
+          type="button"
+          data-dismiss="modal"
+          aria-label="Close"
+          onClick={this.props.onClose}
+        ><span className="text">&times;</span></button>
+      : ''}
 
-        {this.state.isInlineEditing
-          ?
-            <button
-              onClick={() => this.saveRecord()}
-              className={
-                "btn btn-success btn-icon-split mr-2"
-                + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
-              }
-            >
-              {this.state.isEdit
-                ? (
-                  <>
-                    <span className="icon"><i className="fas fa-save"></i></span>
-                    <span className="text"> {this.state.saveButtonText ?? globalThis.app.translate("Save")}</span>
-                  </>
-                )
-                : (
-                  <>
-                    <span className="icon"><i className="fas fa-plus"></i></span>
-                    <span className="text"> {this.state.addButtonText ?? globalThis.app.translate("Add")}</span>
-                  </>
-                )
-              }
-            </button>
-          :
-            <button
-              onClick={() => this.setState({ isInlineEditing: true })}
-              className="btn btn-transparent"
-            >
-              <span className="icon"><i className="fas fa-pencil-alt"></i></span>
-              <span className="text">{globalThis.app.translate('Edit')}</span>
-            </button>
-        }
-      </div>
-    );
+      {this.state.isInlineEditing
+        ?
+          <button
+            onClick={() => this.saveRecord()}
+            className={
+              "btn btn-success"
+              + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
+            }
+          >
+            {this.state.isEdit
+              ? (
+                <>
+                  <span className="icon"><i className="fas fa-save"></i></span>
+                  <span className="text"> {this.state.saveButtonText ?? globalThis.app.translate("Save")}</span>
+                </>
+              )
+              : (
+                <>
+                  <span className="icon"><i className="fas fa-plus"></i></span>
+                  <span className="text"> {this.state.addButtonText ?? globalThis.app.translate("Add")}</span>
+                </>
+              )
+            }
+          </button>
+        :
+          <button
+            onClick={() => this.setState({ isInlineEditing: true })}
+            className="btn btn-transparent"
+          >
+            <span className="icon"><i className="fas fa-pencil-alt"></i></span>
+            <span className="text">{globalThis.app.translate('Edit')}</span>
+          </button>
+      }
+    </>;
   }
 
   _renderButtonsRight(): JSX.Element {
-    return (
-      <div className="d-flex">
-        {/* {this.state.isEdit ?
-          <button
-            onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
-            className={"btn btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
-          >
-            <span className="icon"><i className="fas fa-trash"></i></span>
-            <span className="text">{globalThis.app.translate('Delete')}</span>
-          </button>
-          : ''
-        } */}
-      </div>
-    );
+    const prevId = this.state?.prevId ?? 0;
+    const nextId = this.state?.nextId ?? 0;
+    return <>
+      <button
+        onClick={() => {
+          if (prevId > 0 && this.props.parentTable) {
+            this.props.parentTable.openForm(prevId);
+          }
+        }}
+        className={"btn btn-transparent" + (prevId > 0 ? "" : " btn-disabled")}
+      >
+        <span className="icon"><i className="fas fa-angle-left"></i></span>
+      </button>
+      <button
+        onClick={() => {
+          if (nextId > 0 && this.props.parentTable) {
+            this.props.parentTable.openForm(nextId);
+          }
+        }}
+        className={"btn btn-transparent" + (nextId > 0 ? "" : " btn-disabled")}
+      >
+        <span className="icon"><i className="fas fa-angle-right"></i></span>
+      </button>
+      {/* {this.state.isEdit ?
+        <button
+          onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
+          className={"btn btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
+        >
+          <span className="icon"><i className="fas fa-trash"></i></span>
+          <span className="text">{globalThis.app.translate('Delete')}</span>
+        </button>
+        : ''
+      } */}
+    </>;
   }
 
   renderTitle(): JSX.Element {

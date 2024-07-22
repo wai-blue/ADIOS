@@ -8,6 +8,7 @@ import Notification from "./Notification";
 
 import { adiosError, deepObjectMerge } from "./Helper";
 import request from "./Request";
+import { setDefaultHighWaterMark } from "stream";
 
 export interface OrderBy {
   field: string,
@@ -88,6 +89,8 @@ export interface TableState {
   data?: TableData,
   filterBy?: GridFilterModel,
   formId?: number|null,
+  formPrevId?: number|null,
+  formNextId?: number|null,
   formEndpoint?: string,
   formParams?: FormProps,
   orderBy?: OrderBy,
@@ -237,11 +240,15 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
   getFormParams(): any {
     return {
+      parentTable: this,
       uid: this.props.uid + '_form',
       model: this.props.model,
-      tag: this.props.tag, 
-      id: this.state.formId ?? 0, 
+      tag: this.props.tag,
+      id: this.state.formId ?? 0,
+      prevId: this.state?.formPrevId ?? 0,
+      nextId: this.state?.formNextId ?? 0,
       endpoint: this.state.formEndpoint ?? '',
+      isInlineEditing: (this.state.formId ?? 0) == -1,
       showInModal: true,
       showInModalSimple: this.props.formUseModalSimple,
       columns: this.props.formParams?.columns ?? {},
@@ -299,10 +306,34 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   openForm(id: number) {
+    let prevId: number = 0;
+    let nextId: number = 0;
+    let prevRow: any = {};
+    let saveNextId: boolean = false;
+
+    for (let i in this.state.data?.data) {
+      const row = this.state.data?.data[i];
+      console.log(row);
+      if (row && row.id) {
+        if (saveNextId) {
+          nextId = row.id;
+          saveNextId = false;
+        } else if (row.id == id) {
+          prevId = prevRow.id ?? 0;
+          saveNextId = true;
+        }
+      }
+      prevRow = row;
+    }
+
     if (this.props.externalCallbacks && this.props.externalCallbacks.openForm) {
       window[this.props.externalCallbacks.openForm](this, id);
     } else {
-      this.setState({ formId: id })
+      this.setState({
+        formId: id,
+        formPrevId: prevId,
+        formNextId: nextId,
+      })
     }
   }
 
@@ -314,7 +345,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     }
   }
 
-  onRowClick(id: number) {
+  onRowClick(id: number, prevId?: number, nextId?: number) {
     if (this.props.externalCallbacks && this.props.externalCallbacks.onRowClick) {
       window[this.props.externalCallbacks.onRowClick](this, id);
     } else {
