@@ -4,6 +4,7 @@ import Form from './Form';
 
 export interface InputProps {
   uid: string,
+  columnName?: string,
   params: any,
   inputClassName?: string,
   value?: any,
@@ -13,6 +14,10 @@ export interface InputProps {
   cssClass?: string,
   placeholder?: string,
   isInitialized?: boolean,
+  isInlineEditing?: boolean,
+  showInlineEditingButtons?: boolean,
+  onInlineEditCancel?: () => void,
+  onInlineEditSave?: () => void,
   context?: any,
   parentForm?: Form<any, any>,
 }
@@ -24,6 +29,8 @@ export interface InputState {
   onChange?: any,
   cssClass: string,
   isInitialized: boolean,
+  isInlineEditing: boolean,
+  showInlineEditingButtons: boolean,
 }
 
 export class Input<P extends InputProps, S extends InputState> extends Component<P, S> {
@@ -40,6 +47,8 @@ export class Input<P extends InputProps, S extends InputState> extends Component
     globalThis.app.reactElements[this.props.uid] = this;
 
     const isInitialized: boolean = props.isInitialized ?? false;
+    const isInlineEditing: boolean = props.isInlineEditing ?? false;
+    const showInlineEditingButtons: boolean = props.showInlineEditingButtons ?? true;
     const readonly: boolean = props.readonly ?? false;
     const invalid: boolean = props.invalid ?? false;
     const value: any = props.value;
@@ -48,6 +57,8 @@ export class Input<P extends InputProps, S extends InputState> extends Component
 
     this.state = {
       isInitialized: isInitialized,
+      isInlineEditing: isInlineEditing,
+      showInlineEditingButtons: showInlineEditingButtons,
       readonly: readonly,
       invalid: invalid,
       value: value,
@@ -62,6 +73,16 @@ export class Input<P extends InputProps, S extends InputState> extends Component
 
     if (this.props.isInitialized != prevProps.isInitialized) {
       newState.isInitialized = this.props.isInitialized;
+      setNewState = true;
+    }
+
+    if (this.props.isInlineEditing != prevProps.isInlineEditing) {
+      newState.isInlineEditing = this.props.isInlineEditing;
+      setNewState = true;
+    }
+
+    if (this.props.showInlineEditingButtons != prevProps.showInlineEditingButtons) {
+      newState.showInlineEditingButtons = this.props.showInlineEditingButtons;
       setNewState = true;
     }
 
@@ -115,20 +136,91 @@ export class Input<P extends InputProps, S extends InputState> extends Component
     return <input type="text" value={this.state.value}></input>;
   }
 
+  renderValueElement() {
+    return this.state.value;
+  }
+
   render() {
     return (
-      <div className={this.getClassName()}>
-        <input
-          id={this.props.uid}
-          name={this.props.uid}
-          type="hidden"
-          value={this.serialize()}
-          style={{width: "100%", fontSize: "0.4em"}}
-          className="value bg-light"
-          readOnly={true}
-        ></input>
-        {this.renderInputElement()}
-      </div>
+      <div className={this.getClassName() + (this.state.isInlineEditing ? ' editing' : '')}><div className="inner">
+        {this.state.isInlineEditing
+          ? <>
+              <input
+                id={this.props.uid}
+                name={this.props.uid}
+                type="hidden"
+                value={this.serialize()}
+                style={{width: "100%", fontSize: "0.4em"}}
+                className="value bg-light"
+                readOnly={true}
+              ></input>
+              <div className="input-element">
+                {this.renderInputElement()}
+              </div>
+              {this.state.showInlineEditingButtons ? 
+                <div className="inline-editing-buttons always-visible">
+                  <button
+                    className={"btn btn-success-outline"}
+                    onClick={() => {
+                      this.setState(
+                        {isInlineEditing: false},
+                        () => {
+                          if (this.props.onInlineEditSave) {
+                            this.props.onInlineEditSave()
+                          }
+                        }
+                      );
+                    }}
+                  >
+                    <span className="icon"><i className="fas fa-check"></i></span>
+                  </button>
+                  <button
+                    className={"btn btn-cancel-outline"}
+                    onClick={() => {
+                      this.setState(
+                        {isInlineEditing: false},
+                        () => {
+                          if (this.props.onInlineEditCancel) {
+                            this.props.onInlineEditCancel()
+                          }
+                        }
+                      );
+                    }}
+                  >
+                    <span className="icon"><i className="fas fa-times"></i></span>
+                  </button>
+                </div>
+                : null
+              }
+          </>
+          : <>
+            <div
+              className="value-element"
+              onDoubleClick={() => {
+                if (!this.state.readonly) {
+                  this.setState({isInlineEditing: true});
+                }
+              }}>
+              {this.renderValueElement()}
+              {this.props.params.unit ? (
+                <div className="input-unit">
+                  {this.props.params.unit}
+                </div>
+              ) : ''}
+            </div>
+            {this.state.readonly ? null :
+              <div className="inline-editing-buttons">
+                <button
+                  className="btn btn-transparent"
+                  onClick={() => { this.setState({isInlineEditing: true}); }}
+                >
+                  <span className="icon"><i className="fas fa-pencil-alt"></i></span>
+                </button>
+              </div>
+            }
+          </>
+        }
+      </div></div>
     );
   }
 }

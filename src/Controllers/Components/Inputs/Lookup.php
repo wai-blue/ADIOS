@@ -28,7 +28,7 @@ class Lookup extends \ADIOS\Core\Controller {
       str_replace("{%TABLE%}.", '', $tmpModel->lookupSqlValue())
       . ") as text";
 
-    $query = $tmpModel->selectRaw('id, ' . $lookupSqlValue);
+    $query = $tmpModel->prepareLoadRecordQuery()->selectRaw('id, ' . $lookupSqlValue);
 
     if ($this->params['search']) {
       foreach ($tmpModel->columns() as $columnName => $column) {

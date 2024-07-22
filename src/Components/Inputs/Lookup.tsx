@@ -37,16 +37,19 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
     this.loadData();
   }
 
+  getEndpointParams(): object {
+    return {
+      model: this.state.model,
+      context: this.props.context,
+      formData: this.props.parentForm?.state?.data,
+      __IS_AJAX__: '1',
+    };
+  }
+
   loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
     request.get(
       this.state.endpoint,
-      {
-        model: this.state.model,
-        context: this.props.context,
-        formData: this.props.parentForm?.state?.data,
-        search: inputValue,
-        __IS_AJAX__: '1',
-      },
+      {...this.getEndpointParams(), search: inputValue},
       (data: any) => {
         this.setState({
           isInitialized: true,
@@ -83,6 +86,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
         onChange={(item: any) => { this.onChange(item.id); }}
         isDisabled={this.state.readonly}
         placeholder={this.props.params?.placeholder}
+        classNamePrefix="adios-lookup"
       />
     )
   }

@@ -17,6 +17,15 @@ export default class EnumValues extends Input<EnumValuesInputProps, InputState> 
     return <option key={key} value={key}>{this.props.enumValues[key] ?? ''}</option>
   }
 
+  renderValueElement() {
+    let value = this.props.enumValues ? this.props.enumValues[this.state.value] : null;
+    if (!value) {
+      if (this.props.enumValues) value = this.props.enumValues[Object.keys(this.props.enumValues)[0]];
+      else value = '-';
+    }
+    return value;
+  }
+
   renderInputElement() {
     if (!this.props.enumValues) return <></>;
 
@@ -25,8 +34,7 @@ export default class EnumValues extends Input<EnumValuesInputProps, InputState> 
         value={this.state.value ?? 0}
         onChange={(e: React.ChangeEvent<HTMLSelectElement>) => this.onChange(e.target.value)}
         className={
-          "form-control"
-          + " " + (this.state.invalid ? 'is-invalid' : '')
+          (this.state.invalid ? 'is-invalid' : '')
           + " " + (this.props.cssClass ?? "")
           + " " + (this.state.readonly ? "bg-muted" : "")
         }

@@ -10,6 +10,9 @@ import {
 } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { ProgressBar } from 'primereact/progressbar';
+import { OverlayPanel } from 'primereact/overlaypanel';
+import { InputProps } from "../Input";
+import { InputFactory } from "../InputFactory";
 
 import Table, { OrderBy, TableState, TableProps } from './../Table';
 import ExportButton from '../ExportButton';
@@ -134,60 +137,106 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
   renderCell(columnName: string, column: any, data: any, options: any) {
     const columnValue: any = data[columnName];
     const enumValues = column.enumValues;
+    const inputProps = {
+      uid: this.props.uid + '_' + columnName,
+      columnName: columnName,
+      params: column,
+      value: columnValue,
+      showInlineEditingButtons: true,
+    };
 
     if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
 
+    let cellValueElement: JSX.Element|null = null;
+
     if (columnValue === null) {
-      return null;
+      cellValueElement = null;
     } else {
       switch (column.type) {
         case 'int':
-          return <div className="text-right">
+          cellValueElement = <div className="text-right">
             {columnValue}
             {column.unit ? ' ' + column.unit : ''}
           </div>;
+        break;
         case 'float':
-          return <div className="text-right">
+          cellValueElement = <div className="text-right">
             {columnValue}
             {column.unit ? ' ' + column.unit : ''}
           </div>;
+        break;
         case 'color':
-          return <div
+          cellValueElement = <div
             style={{ width: '20px', height: '20px', background: columnValue }} 
             className="rounded"
           />;
+        break;
         case 'image':
-          if (!columnValue) return <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
-          return <img 
-            style={{ width: '30px', height: '30px' }}
-            src={this.state.folderUrl + "/" + columnValue}
-            className="rounded"
-          />;
+          if (!columnValue) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+          else {
+            cellValueElement = <img 
+              style={{ width: '30px', height: '30px' }}
+              src={this.state.folderUrl + "/" + columnValue}
+              className="rounded"
+            />;
+          }
+        break;
         case 'lookup':
-          return <span style={{
+          cellValueElement = <span style={{
             color: '#2d4a8a'
           }}>{columnValue?.lookupSqlValue}</span>;
+        break;
         case 'enum':
           const enumValues = column.enumValues;
-          if (!enumValues) return;
-          return enumValues[columnValue];
+          if (enumValues) cellValueElement = enumValues[columnValue];
+        break;
         case 'bool':
         case 'boolean':
-          if (columnValue) return <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
-          return <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
-        case 'date': return dateToEUFormat(columnValue);
-        case 'datetime': return datetimeToEUFormat(columnValue);
-        case 'tags': {
-          return <>
+          if (columnValue) cellValueElement = <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
+          else cellValueElement = <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
+        break;
+        case 'date':
+          cellValueElement = <span>{dateToEUFormat(columnValue)}</span>;
+        break;
+        case 'datetime':
+          cellValueElement = <span>{datetimeToEUFormat(columnValue)}</span>;
+        break;
+        case 'tags':
+          cellValueElement = <>
             {columnValue.map((item: any) => {
               if (!column.dataKey) return <></>;
               return <span className="badge badge-info mx-1" key={item.id}>{item[column.dataKey]}</span>;
             })}
           </>
-        }
-        default: return columnValue;
+        break;
+        default:
+          cellValueElement = columnValue;
+        break;
+      }
+
+      if (cellValueElement === <></>) {
+        cellValueElement = columnValue;
       }
     }
+
+    let op = createRef<OverlayPanel>();
+
+    let cellEditorElement: JSX.Element = InputFactory({
+      ...inputProps,
+      isInlineEditing: true,
+      onInlineEditCancel: () => { op.current?.hide(); }
+    });
+
+    return <>
+      {cellValueElement}
+      <i
+        className="inline-edit-icon fas fa-pencil-alt text-xs"
+        onClick={(e) => { e.stopPropagation(); op.current?.toggle(e); }}
+      ></i>
+      <OverlayPanel ref={op} onClick={(e) => { e.stopPropagation(); }}>
+        {cellEditorElement}
+      </OverlayPanel>
+    </>;
   }
 
   renderColumns(): JSX.Element[] {

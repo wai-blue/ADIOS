@@ -54,7 +54,7 @@ export class ADIOS {
 
     // Check if uid exists or create custom
     if (props['uid'] == undefined) {
-      props['uid'] = uuid.v4();
+      props['uid'] = '_' + uuid.v4().replace('-', '_');
     }
 
     let componentNamePascalCase = kebabToPascal(componentName);

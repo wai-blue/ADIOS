@@ -2,27 +2,15 @@ import React, {Component} from "react";
 
 import Notification from "./Notification";
 import { ProgressBar } from 'primereact/progressbar';
+import { Tooltip } from 'primereact/tooltip';
 import request from "./Request";
 
-import ReactQuill, {Value} from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import Swal, {SweetAlertOptions} from "sweetalert2";
 
 import { adiosError, deepObjectMerge } from "./Helper";
 
-/** Components */
-import InputLookup from "./Inputs/Lookup";
-import InputVarchar from "./Inputs/Varchar";
-import InputTextarea from "./Inputs/Textarea";
-import InputInt from "./Inputs/Int";
-import InputBoolean from "./Inputs/Boolean";
-import InputMapPoint from "./Inputs/MapPoint";
-import InputColor from "./Inputs/Color";
-import InputImage from "./Inputs/Image";
-import InputTags from "./Inputs/Tags";
-import InputDateTime from "./Inputs/DateTime";
-import InputEnumValues from "./Inputs/EnumValues";
 import { InputProps } from "./Input";
+import { InputFactory } from "./InputFactory";
 
 interface Content {
   [key: string]: ContentCard | any;
@@ -46,6 +34,7 @@ export interface FormProps {
   hideOverlay?: boolean,
   showInModal?: boolean,
   showInModalSimple?: boolean,
+  isInlineEditing?: boolean,
   columns?: FormColumns,
   title?: string,
   titleForInserting?: string,
@@ -70,6 +59,7 @@ export interface FormState {
   columns?: FormColumns,
   data?: FormInputs,
   isEdit: boolean,
+  isInlineEditing: boolean,
   invalidInputs: Object,
   tabs?: any,
   folderUrl?: string,
@@ -117,6 +107,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
       isEdit: props.id ? props.id > 0 : false,
+      isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
       invalidInputs: {},
       data: {},
       params: null,
@@ -198,7 +189,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         { action: 'loadRecord', ...this.getEndpointParams() },
         (data: any) => {
           let newData = this.getDataState(this.state.columns ?? {}, data);
-          console.log(newData);
           newData = this.onAfterDataLoaded(newData);
           this.setState({isInitialized: true, data: newData}, () => {
             this.onAfterFormInitialized();
@@ -564,6 +554,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
       uid: this.props.uid + '_' + columnName,
+      columnName: columnName,
       parentForm: this,
       context: this.props.context ? this.props.context : this.props.uid,
       params: inputParams,
@@ -573,67 +564,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       cssClass: inputParams.cssClass ?? '',
       onChange: onChange,
       isInitialized: false,
+      isInlineEditing: this.state.isInlineEditing,
+      showInlineEditingButtons: !this.state.isInlineEditing,
     };
 
-    if (inputParams.enumValues) {
-      inputToRender = <InputEnumValues {...inputProps} enumValues={inputParams.enumValues}/>
-    } else {
-      if (typeof inputParams.inputJSX === 'string' && inputParams.inputJSX !== '') {
-        inputToRender = globalThis.app.getComponent(inputParams.inputJSX, inputProps) ?? <></>;
-      } else {
-
-        switch (inputParams.type) {
-          case 'text':
-            inputToRender = <InputTextarea {...inputProps} />;
-            break;
-          case 'float':
-          case 'int':
-            inputToRender = <InputInt {...inputProps} />;
-            break;
-          case 'boolean':
-            inputToRender = <InputBoolean {...inputProps} />;
-            break;
-          case 'lookup':
-            inputToRender = <InputLookup {...inputProps} />;
-            break;
-          case 'color':
-            inputToRender = <InputColor {...inputProps} />;
-            break;
-          case 'tags':
-            inputToRender = <InputTags {...inputProps} model={this.props.model} formId={this.state.id} />;
-            break;
-          case 'image':
-            inputToRender = <InputImage {...inputProps} />;
-            break;
-          case 'datetime':
-          case 'date':
-          case 'time':
-            inputToRender = <InputDateTime {...inputProps} type={inputParams.type} />;
-            break;
-          //case 'MapPoint':
-          //  inputToRender = <InputMapPoint {...inputProps} />;
-          //  break;
-          case 'editor':
-            if (this.state.data) {
-              inputToRender = (
-                <div
-                  className={'h-100 form-control ' + `${this.state.invalidInputs[columnName] ? 'is-invalid' : 'border-0'}`}>
-                  <ReactQuill
-                    theme="snow"
-                    value={this.state.data[columnName] as Value}
-                    onChange={(value) => this.inputOnChangeRaw(columnName, value)}
-                    className="w-100"
-                  />
-                </div>
-              );
-            }
-            break;
-          default: inputToRender = <InputVarchar {...inputProps} />;
-        }
-      }
-    }
-
-    return inputToRender ?? <></>;
+    return InputFactory(inputProps);
   }
 
   inputWrapper(columnName: string, customInputParams?: any) {
@@ -641,19 +576,31 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const inputParams = this.buildInputParams(columnName, customInputParams);
 
     return columnName == 'id' ? <></>: (
-      <div className={"input-wrapper" + (inputParams.required == true ? " required" : "")} key={columnName}>
+      <div
+        id={this.props.uid + '_' + columnName}
+        className={"input-wrapper" + (inputParams.required == true ? " required" : "")}
+        key={columnName}
+      >
         <label className="input-label" htmlFor={this.props.uid + '_' + columnName}>
           {inputParams.title}
         </label>
 
         <div className="input-body" key={columnName}>
           {this.input(columnName, inputParams)}
+
+          {inputParams.description
+            ? <>
+              <Tooltip target={'#' + this.props.uid + '_' + columnName + ' .input-description'} />
+              <i
+                className="input-description fas fa-info"
+                data-pr-tooltip={inputParams.description}
+                data-pr-position="top"
+              ></i>
+            </>
+            : null
+          }
         </div>
 
-        {inputParams.description ?
-          <div className="input-description">{inputParams.description}</div>
-          : null
-        }
       </div>
     );
   }
@@ -672,28 +619,39 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           ><span className="text">&times;</span></button>
         : ''}
 
-        <button
-          onClick={() => this.saveRecord()}
-          className={
-            "btn btn-success btn-icon-split mr-2"
-            + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
-          }
-        >
-          {this.state.isEdit
-            ? (
-              <>
-                <span className="icon"><i className="fas fa-save"></i></span>
-                <span className="text"> {this.state.saveButtonText ?? globalThis.app.translate("Save")}</span>
-              </>
-            )
-            : (
-              <>
-                <span className="icon"><i className="fas fa-plus"></i></span>
-                <span className="text"> {this.state.addButtonText ?? globalThis.app.translate("Add")}</span>
-              </>
-            )
-          }
-        </button>
+        {this.state.isInlineEditing
+          ?
+            <button
+              onClick={() => this.saveRecord()}
+              className={
+                "btn btn-success btn-icon-split mr-2"
+                + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
+              }
+            >
+              {this.state.isEdit
+                ? (
+                  <>
+                    <span className="icon"><i className="fas fa-save"></i></span>
+                    <span className="text"> {this.state.saveButtonText ?? globalThis.app.translate("Save")}</span>
+                  </>
+                )
+                : (
+                  <>
+                    <span className="icon"><i className="fas fa-plus"></i></span>
+                    <span className="text"> {this.state.addButtonText ?? globalThis.app.translate("Add")}</span>
+                  </>
+                )
+              }
+            </button>
+          :
+            <button
+              onClick={() => this.setState({ isInlineEditing: true })}
+              className="btn btn-transparent"
+            >
+              <span className="icon"><i className="fas fa-pencil-alt"></i></span>
+              <span className="text">{globalThis.app.translate('Edit')}</span>
+            </button>
+        }
       </div>
     );
   }
@@ -701,7 +659,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   _renderButtonsRight(): JSX.Element {
     return (
       <div className="d-flex">
-        {this.state.isEdit ?
+        {/* {this.state.isEdit ?
           <button
             onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
             className={"btn btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
@@ -710,7 +668,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
             <span className="text">{globalThis.app.translate('Delete')}</span>
           </button>
           : ''
-        }
+        } */}
       </div>
     );
   }
