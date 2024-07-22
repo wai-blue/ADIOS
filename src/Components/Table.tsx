@@ -103,6 +103,7 @@ export interface TableState {
 
 export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
   static defaultProps = {
+    itemsPerPage: 100,
     formUseModalSimple: true,
   }
 
@@ -204,7 +205,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     );
   }
 
-  loadData(page: number = 1, itemsPerPage = 15) {
+  loadData(page: number = 1, itemsPerPage = 100) {
     this.setState({loadingInProgress: true});
     request.get(
       this.getEndpointUrl(),

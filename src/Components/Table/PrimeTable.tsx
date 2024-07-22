@@ -55,7 +55,7 @@ export default class PrimeTable<P, S> extends Table<PrimeTableProps, PrimeTableS
       lazy: true,
       rows: this.state.itemsPerPage,
       totalRecords: this.state.data?.total,
-      rowsPerPageOptions: [15, 30, 50, 100],
+      rowsPerPageOptions: [5, 15, 30, 50, 100, 200, 500, 1000],
       paginatorTemplate: "FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown",
       currentPageReportTemplate: "{first}-{last} / {totalRecords}",
       onRowClick: (data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number),
