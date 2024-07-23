@@ -34,7 +34,7 @@ export interface FormProps {
   content?: Content,
   layout?: Array<Array<string>>,
   onClose?: () => void;
-  onSaveCallback?: () => void,
+  onSaveCallback?: (inlineEditing: boolean) => void,
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
   showInModal?: boolean,
@@ -213,21 +213,12 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     }
   }
 
-  saveRecord() {
+  saveRecord(inlineEditing: boolean) {
     this.setState({
       invalidInputs: {}
     });
 
     let formattedInputs = JSON.parse(JSON.stringify(this.state.data));
-
-    //Object.entries(this.state.columns ?? {}).forEach(([key, value]) => {
-    //  if (value['relationship'] != undefined) {
-    //    Object.entries(formattedInputs[key]['values']).forEach(([i, role]) => {
-    //      formattedInputs[key]['values'][i] = role.id;
-    //    })
-    //    formattedInputs[key] = formattedInputs[key]['values'];
-    //  }
-    //});
 
     //@ts-ignore
     request.post(
@@ -242,7 +233,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         __IS_AJAX__: '1',
       },
       () => {
-        if (this.props.onSaveCallback) this.props.onSaveCallback();
+        if (this.props.onSaveCallback) this.props.onSaveCallback(inlineEditing);
       },
       (err: any) => {
         if (err.status == 422) {
@@ -575,6 +566,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       isInitialized: false,
       isInlineEditing: this.state.isInlineEditing,
       showInlineEditingButtons: !this.state.isInlineEditing,
+      onInlineEditCancel: () => {
+      },
+      onInlineEditSave: () => {
+        this.saveRecord(true);
+      }
     };
 
     return InputFactory(inputProps);
@@ -630,7 +626,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       {this.state.isInlineEditing
         ?
           <button
-            onClick={() => this.saveRecord()}
+            onClick={() => this.saveRecord(false)}
             className={
               "btn btn-success"
               + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")

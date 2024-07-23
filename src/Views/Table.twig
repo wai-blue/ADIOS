@@ -2,7 +2,7 @@
 {% set tableParams = viewParams %} <!-- set this tableParams, if you wish specific tableParams for this view -->
 {% set formParams = viewParams.formParams %} <!-- set this formParams, if you wish specific formParams for this view -->
 
-<adios-table-prime
+<adios-table
   model="{{ viewParams.model }}"
   tag="{{ viewParams.tag }}"
   endpoint="{{ viewParams.tableEndpoint | default(model.tableEndpoint) }}"
@@ -10,4 +10,4 @@
   form-id="{{ viewParams.id }}"
   form-endpoint="{{ viewParams.formEndpoint | default(model.formEndpoint) }}"
   form-params='{{ (formParams | default(viewParams.formParams) | default(model.formParams))|json_encode|raw }}'
-></adios-table-prime>
+></adios-table>
