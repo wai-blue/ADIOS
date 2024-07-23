@@ -26,6 +26,7 @@ export interface InputState {
   readonly: boolean,
   invalid: boolean,
   value: any,
+  origValue: any,
   onChange?: any,
   cssClass: string,
   isInitialized: boolean,
@@ -62,6 +63,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
       readonly: readonly,
       invalid: invalid,
       value: value,
+      origValue: value,
       onChange: onChange,
       cssClass: cssClass,
     } as S;
@@ -137,7 +139,9 @@ export class Input<P extends InputProps, S extends InputState> extends Component
   }
 
   renderValueElement() {
-    return this.state.value;
+    let value = this.state.value + '';
+    if (value == '') return <span className="no-value">N/A</span>;
+    else return this.state.value;
   }
 
   render() {
@@ -163,7 +167,10 @@ export class Input<P extends InputProps, S extends InputState> extends Component
                     className={"btn btn-success-outline"}
                     onClick={() => {
                       this.setState(
-                        {isInlineEditing: false},
+                        {
+                          origValue: this.state.value,
+                          isInlineEditing: false
+                        },
                         () => {
                           if (this.props.onInlineEditSave) {
                             this.props.onInlineEditSave()
@@ -178,7 +185,10 @@ export class Input<P extends InputProps, S extends InputState> extends Component
                     className={"btn btn-cancel-outline"}
                     onClick={() => {
                       this.setState(
-                        {isInlineEditing: false},
+                        {
+                          value: this.state.origValue,
+                          isInlineEditing: false,
+                        },
                         () => {
                           if (this.props.onInlineEditCancel) {
                             this.props.onInlineEditCancel()
@@ -198,7 +208,10 @@ export class Input<P extends InputProps, S extends InputState> extends Component
               className="value-element"
               onDoubleClick={() => {
                 if (!this.state.readonly) {
-                  this.setState({isInlineEditing: true});
+                  this.setState({
+                    origValue: this.state.value,
+                    isInlineEditing: true,
+                  });
                 }
               }}>
               {this.renderValueElement()}
@@ -212,7 +225,11 @@ export class Input<P extends InputProps, S extends InputState> extends Component
               <div className="inline-editing-buttons">
                 <button
                   className="btn btn-transparent"
-                  onClick={() => { this.setState({isInlineEditing: true}); }}
+                  onClick={() => {
+                    this.setState({
+                      origValue: this.state.value,
+                      isInlineEditing: true,
+                    }); }}
                 >
                   <span className="icon"><i className="fas fa-pencil-alt"></i></span>
                 </button>

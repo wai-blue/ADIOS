@@ -1786,6 +1786,12 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $selectRaw[] = $this->fullTableSqlName . '.' . $tmpColumnName;
     }
 
+    $selectRaw[] = '(' .
+      str_replace('{%TABLE%}', $this->fullTableSqlName, $this->lookupSqlValue())
+      . ') as _lookupText_'
+    ;
+
+
     if ($addLookups) {
 
       // LOOKUPS and RELATIONSHIPS

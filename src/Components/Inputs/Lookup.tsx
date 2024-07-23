@@ -62,6 +62,11 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
     );
   }
 
+  renderValueElement() {
+    return this.state.data[this.state.value]?._lookupText_ ?? '...';
+    // return this.state.value;
+  }
+
   renderInputElement() {
     if (!this.state.isInitialized) {
       // return <ProgressBar mode="indeterminate" style={{ height: '3px' }}></ProgressBar>;
