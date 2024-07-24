@@ -190,7 +190,6 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
   getEndpointParams(): any {
     return {
-      action: 'getParams',
       model: this.props.model,
       parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
       parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
@@ -250,7 +249,10 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
     request.get(
       this.getEndpointUrl(),
-      this.getEndpointParams(),
+      {
+        ...this.getEndpointParams(),
+        action: 'getParams',
+      },
       (data: any) => {
         try {
           if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
