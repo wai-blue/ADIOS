@@ -1260,7 +1260,7 @@ class Loader
 
       \ADIOS\Core\Helper::addSpeedLogTag("render5");
 
-      if (is_array($json) && count($json) > 0) {
+      if (is_array($json)) {
         $return = json_encode($json);
 
       // ... Or a view must be applied.

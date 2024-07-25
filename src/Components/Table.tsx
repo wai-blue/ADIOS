@@ -141,13 +141,13 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     globalThis.app.reactElements[this.props.uid] = this;
 
     this.state = {
-      endpoint: props.endpoint ? props.endpoint : 'components/table',
+      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultTableEndpoint ?? 'components/table'),
       canCreate: props.canCreate ?? true,
       canDelete: props.canDelete ?? true,
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
       formId: props.formId,
-      formEndpoint: props.formEndpoint ? props.formEndpoint : 'components/form',
+      formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? 'components/form'),
       formParams: {
         model: props.model,
         uid: props.uid,

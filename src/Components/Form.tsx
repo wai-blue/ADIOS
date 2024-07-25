@@ -111,7 +111,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
     this.state = {
       isInitialized: false,
-      endpoint: props.endpoint ? props.endpoint : 'components/form',
+      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? 'components/form'),
       id: props.id,
       prevId: props.prevId,
       nextId: props.nextId,
@@ -252,34 +252,34 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
-  deleteRecord(id: number) {
-    //@ts-ignore
-    Swal.fire({
-      title: 'Ste si istý?',
-      html: 'Ste si istý, že chcete vymazať tento záznam?',
-      icon: 'question',
-      showCancelButton: true,
-      cancelButtonText: 'Nie',
-      confirmButtonText: 'Áno',
-      confirmButtonColor: '#dc4c64',
-      reverseButtons: false,
-    } as SweetAlertOptions).then((result) => {
-      if (result.isConfirmed) {
-        request.delete(
-          'components/form/ondelete',
-          {
-            model: this.props.model,
-            id: id,
-            __IS_AJAX__: '1',
-          },
-          () => {
-            Notification.success("Záznam zmazaný");
-            if (this.props.onDeleteCallback) this.props.onDeleteCallback();
-          }
-        );
-      }
-    })
-  }
+  // deleteRecord(id: number) {
+  //   //@ts-ignore
+  //   Swal.fire({
+  //     title: 'Ste si istý?',
+  //     html: 'Ste si istý, že chcete vymazať tento záznam?',
+  //     icon: 'question',
+  //     showCancelButton: true,
+  //     cancelButtonText: 'Nie',
+  //     confirmButtonText: 'Áno',
+  //     confirmButtonColor: '#dc4c64',
+  //     reverseButtons: false,
+  //   } as SweetAlertOptions).then((result) => {
+  //     if (result.isConfirmed) {
+  //       request.delete(
+  //         'components/form/ondelete',
+  //         {
+  //           model: this.props.model,
+  //           id: id,
+  //           __IS_AJAX__: '1',
+  //         },
+  //         () => {
+  //           Notification.success("Záznam zmazaný");
+  //           if (this.props.onDeleteCallback) this.props.onDeleteCallback();
+  //         }
+  //       );
+  //     }
+  //   })
+  // }
 
   /**
    * Check if is id = undefined or id is > 0
