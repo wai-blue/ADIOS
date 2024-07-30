@@ -215,11 +215,9 @@ export class Input<P extends InputProps, S extends InputState> extends Component
                 }
               }}>
               {this.renderValueElement()}
-              {this.props.params.unit ? (
-                <div className="input-unit">
-                  {this.props.params.unit}
-                </div>
-              ) : ''}
+              <div className="input-unit">
+                {this.props.params.unit}
+              </div>
             </div>
             {this.state.readonly ? null :
               <div className="inline-editing-buttons">

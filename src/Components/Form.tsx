@@ -34,6 +34,7 @@ export interface FormProps {
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
+  onChange?: () => void;
   onClose?: () => void;
   onSaveCallback?: (inlineEditing: boolean) => void,
   onDeleteCallback?: () => void,
@@ -313,6 +314,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           [columnName]: inputValue
         }
       }
+    }, () => {
+      if (this.props.onChange) this.props.onChange();
     });
   }
 

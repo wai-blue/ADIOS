@@ -29,18 +29,19 @@ class Form extends \ADIOS\Core\Controller {
 
   public function loadRecord() {
     $this->model = $this->app->getModel($this->params['model']);
+    return $this->model->loadRecord(function($q) { $q->where('id', $this->params['id']); });
 
-    $data = [];
+    // $data = [];
 
-    if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
-      $query = $this->prepareLoadRecordQuery();
-      $query = $query->where('id', $this->params['id']);
-      $data = $query->first()->toArray();
-    }
+    // if (isset($this->params['id']) && (int) $this->params['id'] > 0) {
+    //   $query = $this->prepareLoadRecordQuery();
+    //   $query = $query->where('id', $this->params['id']);
+    //   $data = $query->first()->toArray();
+    // }
 
-    $data = $this->model->onAfterLoadRecord($data);
+    // $data = $this->model->onAfterLoadRecord($data);
 
-    return $data;
+    // return $data;
   }
 
   public function getParams() {

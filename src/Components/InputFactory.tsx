@@ -9,6 +9,7 @@ import InputLookup from "./Inputs/Lookup";
 import InputVarchar from "./Inputs/Varchar";
 import InputTextarea from "./Inputs/Textarea";
 import InputInt from "./Inputs/Int";
+import InputBool from "./Inputs/Bool";
 import InputBoolean from "./Inputs/Boolean";
 import InputMapPoint from "./Inputs/MapPoint";
 import InputColor from "./Inputs/Color";
@@ -26,33 +27,15 @@ export function InputFactory(inputProps: any): JSX.Element {
       inputToRender = globalThis.app.getComponent(inputProps.params.inputJSX, inputProps) ?? <></>;
     } else {
       switch (inputProps.params.type) {
-        case 'text':
-          inputToRender = <InputTextarea {...inputProps} />;
-          break;
-        case 'float':
-        case 'int':
-          inputToRender = <InputInt {...inputProps} />;
-          break;
-        case 'boolean':
-          inputToRender = <InputBoolean {...inputProps} />;
-          break;
-        case 'lookup':
-          inputToRender = <InputLookup {...inputProps} />;
-          break;
-        case 'color':
-          inputToRender = <InputColor {...inputProps} />;
-          break;
-        case 'tags':
-          inputToRender = <InputTags {...inputProps} model={this.props.model} formId={this.state.id} />;
-          break;
-        case 'image':
-          inputToRender = <InputImage {...inputProps} />;
-          break;
-        case 'datetime':
-        case 'date':
-        case 'time':
-          inputToRender = <InputDateTime {...inputProps} type={inputProps.params.type} />;
-          break;
+        case 'text': inputToRender = <InputTextarea {...inputProps} />; break;
+        case 'float': case 'int': inputToRender = <InputInt {...inputProps} />; break;
+        case 'bool': inputToRender = <InputBool {...inputProps} />; break;
+        case 'boolean': inputToRender = <InputBoolean {...inputProps} />; break;
+        case 'lookup': inputToRender = <InputLookup {...inputProps} />; break;
+        case 'color': inputToRender = <InputColor {...inputProps} />; break;
+        case 'tags': inputToRender = <InputTags {...inputProps} model={this.props.model} formId={this.state.id} />; break;
+        case 'image': inputToRender = <InputImage {...inputProps} />; break;
+        case 'datetime': case 'date': case 'time': inputToRender = <InputDateTime {...inputProps} type={inputProps.params.type} />; break;
         //case 'MapPoint':
         //  inputToRender = <InputMapPoint {...inputProps} />;
         //  break;

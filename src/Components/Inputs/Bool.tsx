@@ -18,7 +18,7 @@ export default class Boolean extends Input<InputProps, InputState & BooleanInput
 
     this.state = {
       ...this.state, // Parent state
-      isChecked: this.props.value == '1' || this.props.value > 0 || this.props.value == 'true',
+      isChecked: this.props.value == 'Y',
     };
   }
 
@@ -28,8 +28,9 @@ export default class Boolean extends Input<InputProps, InputState & BooleanInput
         disabled={this.state.readonly}
         checked={this.state.isChecked}
         onChange={(e) => {
-          this.setState({isChecked: !this.state.isChecked});
-          this.onChange(!this.state.isChecked);
+          const newIsChecked = !this.state.isChecked;
+          this.setState({isChecked: newIsChecked});
+          this.onChange(newIsChecked ? 'Y' : 'N');
         }}
       />
     </>;

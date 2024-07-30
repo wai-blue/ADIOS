@@ -1775,6 +1775,28 @@ class Model extends \Illuminate\Database\Eloquent\Model
     ])['id'];
   }
 
+  public function loadRecords(callable|null $queryModifierCallback = null): array {
+    $query = $this->prepareLoadRecordQuery();
+    if ($queryModifierCallback !== null) $queryModifierCallback($query);
+
+    $data = $query->get()?->toArray();
+
+    if (!is_array($data)) $data = [];
+
+    foreach ($data as $key => $value) {
+      $data[$key] = $this->onAfterLoadRecord($data[$key]);
+    }
+
+    return $data;
+  }
+
+  public function loadRecord(callable|null $queryModifierCallback = null): array {
+    $data = reset($this->loadRecords($queryModifierCallback));
+    if (!is_array($data)) $data = [];
+    return $data;
+  }
+
+
   public function prepareLoadRecordQuery(bool $addLookups = false): \Illuminate\Database\Eloquent\Builder {
     $tmpColumns = $this->columns();
 
@@ -1841,7 +1863,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
   public function onAfterLoadRecord(array $data): array {
     return $data;
   }
-
 
   //////////////////////////////////////////////////////////////////
   // own implementation of lookups and pivots
