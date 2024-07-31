@@ -1,5 +1,5 @@
 import { createRoot } from "react-dom/client";
-import React from "react";
+import React, { useRef } from "react";
 import * as uuid from 'uuid';
 import { isValidJson, kebabToPascal, camelToKebab } from './Helper';
 
@@ -10,7 +10,7 @@ export class ADIOS {
   config: object = {};
 
   reactComponents: any = {};
-  reactComponentsWaitingForRender: number = 0;
+  reactElementsWaitingForRender: number = 0;
   reactElements: Object = {};
 
   primeReactTailwindTheme: any = {
@@ -49,13 +49,8 @@ export class ADIOS {
   /**
   * Get specific ADIOS component with destructed params 
   */
-  getComponent(componentName: string, props: Object) {
+  getComponent(componentName: string, props: Object, children: any) {
     if (!componentName) return null;
-
-    // Check if uid exists or create custom
-    if (props['uid'] == undefined) {
-      props['uid'] = '_' + uuid.v4().replace('-', '_');
-    }
 
     let componentNamePascalCase = kebabToPascal(componentName);
 
@@ -65,7 +60,8 @@ export class ADIOS {
     } else {
       return React.createElement(
         this.reactComponents[componentNamePascalCase],
-        props
+        props,
+        children
       );
     }
   };
@@ -74,16 +70,19 @@ export class ADIOS {
   * Validate attribute value
   * E.g. if string contains Callback create frunction from string
   */
-  getValidatedAttributeValue(attributeName: string, attributeValue: any): Function|any {
-    return attributeName.toLowerCase().includes('callback') ? new Function(attributeValue) : attributeValue;
-  }
+  // getValidatedAttributeValue(attributeName: string, attributeValue: any): Function|any {
+  //   return attributeName.toLowerCase().includes('callback') ? new Function(attributeValue) : attributeValue;
+  // }
 
   /**
   * Render React component (create HTML tag root and render) 
   */
   renderReactComponents(renderIntoElement: string = 'body') {
 
+    $(renderIntoElement).addClass('react-elements-rendering')
+
     document.querySelectorAll(renderIntoElement + ' *').forEach((element, _index) => {
+     
       let component: string = '';
       let componentProps: Object = {};
       let _this = this;
@@ -105,7 +104,6 @@ export class ADIOS {
           attributesDoNotConvert = element.attributes[i].value.split(',');
         }
       }
-
       // Find attribute and also delete it using [0] index
       let i: number = 0
       while (element.attributes.length > i) {
@@ -115,6 +113,9 @@ export class ADIOS {
         if (!attributesDoNotConvert.includes(attributeName)) {
           if (isValidJson(attributeValue)) {
             attributeValue = JSON.parse(attributeValue);
+          } else if (attributeName.startsWith('function:')) {
+            attributeName = attributeName.replace('function:', '');
+            attributeValue = new Function(attributeValue);
           } else if (attributeValue === 'true') {
             attributeValue = true;
           } else if (attributeValue === 'false') {
@@ -132,19 +133,32 @@ export class ADIOS {
         element.removeAttribute(element.attributes[i].name);
       }
 
-      let componentBuildElement = createRoot(element);
-      this.reactComponentsWaitingForRender++;
-      componentBuildElement.render(this.getComponent(component, componentProps));
+      let elementRoot = createRoot(element);
+      this.reactElementsWaitingForRender++;
+
+      if (componentProps['uid'] == undefined) {
+        componentProps['uid'] = '_' + uuid.v4().replace('-', '_');
+      }
+
+      componentProps['ref'] = (element) => { this.reactElements[componentProps['uid']] = element; }
+
+      const reactElement = this.getComponent(
+        component,
+        componentProps,
+        element.innerHTML == '' ? null : React.createElement('inner-html', {dangerouslySetInnerHTML: {__html: element.innerHTML}})
+      );
+
+      elementRoot.render(reactElement);
 
       // https://stackoverflow.com/questions/75388021/migrate-reactdom-render-with-async-callback-to-createroot
       // https://blog.saeloun.com/2021/07/15/react-18-adds-new-root-api/
       requestIdleCallback(() => {
-        this.reactComponentsWaitingForRender--;
+        this.reactElementsWaitingForRender--;
 
-        if (this.reactComponentsWaitingForRender <= 0) {
+        if (this.reactElementsWaitingForRender <= 0) {
           $(renderIntoElement)
-            .removeClass('react-components-rendering')
-            .addClass('react-components-rendered')
+            .removeClass('react-elements-rendering')
+            .addClass('react-elements-rendered')
           ;
         }
       });

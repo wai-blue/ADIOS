@@ -143,23 +143,23 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
       confirmButtonColor: '#dc4c64',
       reverseButtons: false,
     } as SweetAlertOptions).then((result) => {
-        if (result.isConfirmed) {
-          let id: number = parseInt(this.state.tags[tagIndex].id);
-          request.delete(
-            'components/inputs/tags/delete',
-            {
-              model: this.props.model,
-              junction: this.props.params.junction,
-              __IS_AJAX__: '1',
-              id: id
-            },
-            () => {
-              Notification.success("Tag zmazaný");
-              this.loadData();
-            }
-          );
-        }
-      })
+      if (result.isConfirmed) {
+        let id: number = parseInt(this.state.tags[tagIndex].id);
+        request.delete(
+          'components/inputs/tags/delete',
+          {
+            model: this.props.model,
+            junction: this.props.params.junction,
+            __IS_AJAX__: '1',
+            id: id
+          },
+          () => {
+            Notification.success("Tag zmazaný");
+            this.loadData();
+          }
+        );
+      }
+    })
   }
 
   onTagClick(tagIndex: number) {
