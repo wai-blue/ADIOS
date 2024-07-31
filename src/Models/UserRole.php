@@ -35,9 +35,10 @@ class UserRole extends \ADIOS\Core\Model {
    "titleForEditing" => "User role",
   ];
 
-  public function __construct($appOrAttributes = NULL, $eloquentQuery = NULL) {
+  public function __construct(\ADIOS\Core\Loader $app)
+  {
     $this->sqlName = "_user_roles";
-    parent::__construct($appOrAttributes);
+    parent::__construct($app);
   }
 
   public function columns(array $columns = []): array

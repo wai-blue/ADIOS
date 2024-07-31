@@ -40,17 +40,15 @@ class User extends \ADIOS\Core\Model {
   ];
 
 
-  public function __construct($appOrAttributes = NULL, $eloquentQuery = NULL) {
+  public function __construct(\ADIOS\Core\Loader $app)
+  {
     $this->sqlName = "_users";
-    parent::__construct($appOrAttributes, $eloquentQuery);
+    parent::__construct($app);
 
+    $tokenModel = $app->getModel("ADIOS/Models/Token");
 
-    if (is_object($appOrAttributes)) {
-      $tokenModel = $appOrAttributes->getModel("ADIOS/Models/Token");
-
-      if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
-        $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
-      }
+    if (!$tokenModel->isTokenTypeRegistered(self::TOKEN_TYPE_USER_FORGOT_PASSWORD)) {
+      $tokenModel->registerTokenType(self::TOKEN_TYPE_USER_FORGOT_PASSWORD);
     }
   }
 

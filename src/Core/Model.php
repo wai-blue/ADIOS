@@ -28,30 +28,6 @@ use ReflectionClass;
  */
 class Model
 {
-  /**
-   * ADIOS model's primary key is always 'id'
-   *
-   * @var string
-   */
-  protected $primaryKey = 'id';
-
-  protected $guarded = [];
-
-  // protected ?Builder $eloquentQuery = null;
-
-  /**
-   * ADIOS model does not use time stamps
-   *
-   * @var bool
-   */
-  public $timestamps = false;
-
-  /**
-   * Language dictionary for the context of the model
-   *
-   * @var array
-   */
-  // public $languageDictionary = [];
 
   /**
    * Full name of the model. Useful for getModel() function
@@ -933,16 +909,17 @@ class Model
 
   public function getById(int $id)
   {
-    $item = reset($this->eloquent->getRelationships()->where('id', $id)->get()->toArray());
+    // $item = reset($this->prepareLoadRecordQuery(function($q) use ($id) { $q->where('id', $id); })->get()->toArray());
+    $item = $this->loadRecord(function($q) use ($id) { $q->where('id', $id); });
 
-    if ($this->getExtendedData([]) !== NULL) {
-      $item = $this->getExtendedData($item);
-    }
+    // if ($this->getExtendedData([]) !== NULL) {
+    //   $item = $this->getExtendedData($item);
+    // }
 
-    $item = $this->app->dispatchEventToPlugins("onModelAfterGetExtendedData", [
-      "model" => $this,
-      "item" => $item,
-    ])["item"];
+    // $item = $this->app->dispatchEventToPlugins("onModelAfterGetExtendedData", [
+    //   "model" => $this,
+    //   "item" => $item,
+    // ])["item"];
 
     return $item;
   }
