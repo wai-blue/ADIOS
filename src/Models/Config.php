@@ -17,6 +17,8 @@ namespace ADIOS\Models;
  */
 class Config extends \ADIOS\Core\Model {
 
+  public string $eloquentClass = \ADIOS\Models\Eloquent\Config::class;
+
   public string $urlBase = "core/config";
   public ?array $tableParams = [
     "title" => "Configuration",

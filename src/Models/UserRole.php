@@ -22,6 +22,8 @@ class UserRole extends \ADIOS\Core\Model {
     self::ADMINISTRATOR => 'ADMINISTRATOR',
   ];
 
+  public string $eloquentClass = \ADIOS\Models\Eloquent\UserRole::class;
+
   public string $urlBase = "user-roles";
   public ?string $lookupSqlValue = "{%TABLE%}.name";
 

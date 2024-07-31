@@ -21,6 +21,7 @@ class Form extends \ADIOS\Core\Controller {
   function __construct(\ADIOS\Core\Loader $app, array $params = []) {
     parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Read';
+    $this->model = $this->app->getModel($this->params['model']);
   }
 
   public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
@@ -28,7 +29,6 @@ class Form extends \ADIOS\Core\Controller {
   }
 
   public function loadRecord() {
-    $this->model = $this->app->getModel($this->params['model']);
     return $this->model->loadRecord(function($q) { $q->where('id', $this->params['id']); });
 
     // $data = [];

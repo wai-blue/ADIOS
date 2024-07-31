@@ -17,6 +17,8 @@ namespace ADIOS\Models;
  */
 class Translate extends \ADIOS\Core\Model {
 
+  public string $eloquentClass = \ADIOS\Models\Eloquent\Translate::class;
+
   public function __construct(\ADIOS\Core\Loader $app) {
     $this->sqlName = "_translate";
     parent::__construct($app);

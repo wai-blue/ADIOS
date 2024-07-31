@@ -30,7 +30,7 @@ class OnDelete extends \ADIOS\Core\Controller {
 
       $tmpModel = $this->app->getModel($params['model']);
       
-      $tmpModel->find($params['id'])->delete();
+      $tmpModel->eloquent->find($params['id'])->delete();
 
       return [
         'status' => 'success'

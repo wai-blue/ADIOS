@@ -16,6 +16,8 @@ namespace ADIOS\Models;
  * @package DefaultModels
  */
 class UserHasRole extends \ADIOS\Core\Model {
+  public string $eloquentClass = \ADIOS\Models\Eloquent\UserHasRole::class;
+
   public bool $isJunctionTable = FALSE;
 
   public ?array $tableParams = [

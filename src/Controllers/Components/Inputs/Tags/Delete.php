@@ -45,14 +45,14 @@ class Delete extends \ADIOS\Core\Controller {
       $junctionOptionKeyColumn = $junctionModel->columns()[$junctionData['optionKeyColumn']];
       $junctionOptionKeyModel = $this->app->getModel($junctionOptionKeyColumn['model']);
 
-      $junctionItemsToDelete = $junctionModel->where($junctionData['optionKeyColumn'], $id)
+      $junctionItemsToDelete = $junctionModel->eloquent->where($junctionData['optionKeyColumn'], $id)
         ->get();
 
       foreach ($junctionItemsToDelete as $junctionItem) {
-        $junctionModel->find($junctionItem->id)->delete();
+        $junctionModel->eloquent->find($junctionItem->id)->delete();
       }
 
-      $junctionOptionKeyModel->find($id)->delete();
+      $junctionOptionKeyModel->eloquent->find($id)->delete();
 
       return [];
     } catch (QueryException $e) {

@@ -35,7 +35,7 @@ class Update extends \ADIOS\Core\Controller {
           );
         } 
 
-        return $tmpModel->find($idToUpdate)->update([
+        return $tmpModel->eloquent->find($idToUpdate)->update([
           $colNameToUpdate => $newValue
         ]);
       } else {

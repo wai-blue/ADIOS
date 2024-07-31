@@ -1297,7 +1297,7 @@ class Loader
           $desktopControllerObject->prepareViewParams();
 
           $desktopParams = $contentParams;
-          $desktopParams['viewParams'] = $desktopControllerObject->viewParams;
+          $desktopParams['viewParams'] = array_merge($desktopControllerObject->viewParams, $contentParams['viewParams']);
           $desktopParams['contentHtml'] = $contentHtml;
 
           $html = $this->twig->render(($this->config['appNamespace'] ?? 'App') . '/Views/Desktop', $desktopParams);

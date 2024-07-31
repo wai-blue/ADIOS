@@ -425,7 +425,7 @@ class DB
                 $lookupModel = $this->app->getModel($col_definition['model']);
                 if ($lookupModel == NULL) throw new \Exception("Model: {$col_definition['model']} not found");
 
-                $modelAllData = $lookupModel->select('id')
+                $modelAllData = $lookupModel->eloquent->select('id')
                   ->get()
                   ->toArray()
                 ;

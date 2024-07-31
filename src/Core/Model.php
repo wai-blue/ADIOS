@@ -26,7 +26,7 @@ use ReflectionClass;
  * Core implementation of database model. Extends from Eloquent's model and adds own
  * functionalities.
  */
-class Model extends \Illuminate\Database\Eloquent\Model
+class Model
 {
   /**
    * ADIOS model's primary key is always 'id'
@@ -37,7 +37,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   protected $guarded = [];
 
-  protected ?Builder $eloquentQuery = null;
+  // protected ?Builder $eloquentQuery = null;
 
   /**
    * ADIOS model does not use time stamps
@@ -123,24 +123,25 @@ class Model extends \Illuminate\Database\Eloquent\Model
    */
   var $recordSaveOriginalData = NULL;
   protected string $fullTableSqlName = "";
+  public string $table = '';
+  public string $myRootFolder = '';
+  public string $eloquentClass = ''; //\ADIOS\Core\Model\Eloquent::class;
 
   private static ?array $allItemsCache = NULL;
 
   public ?array $junctions = [];
+  public ?\Illuminate\Database\Eloquent\Model $eloquent = null;
 
 
   /**
    * Creates instance of model's object.
    *
-   * @param mixed $appOrAttributes
-   * @param mixed $eloquentQuery
+   * @param mixed $app
    * @return void
    */
-  public function __construct($appOrAttributes = NULL, $eloquentQuery = NULL)
+  public function __construct(\ADIOS\Core\Loader $app)
   {
-    if (is_array($appOrAttributes) && isset($appOrAttributes['gtp'])) {
-      $this->gtp = $appOrAttributes['gtp'];
-    }
+    $this->gtp = $app->config['gtp'];
 
     if (empty($this->fullTableSqlName)) {
       $this->fullTableSqlName = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;
@@ -150,48 +151,48 @@ class Model extends \Illuminate\Database\Eloquent\Model
       $this->table = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName; // toto je kvoli Eloquentu
     }
 
-    if (!is_object($appOrAttributes)) {
-      // v tomto pripade ide o volanie constructora z Eloquentu
-      return parent::__construct($appOrAttributes ?? []);
-    } else {
-      $this->fullName = str_replace("\\", "/", get_class($this));
+    $eloquentClass = $this->eloquentClass;
+    if (empty($eloquentClass)) throw new Exception(get_class($this). ' - empty eloquentClass');
+    $this->eloquent = new $eloquentClass;
+    $this->eloquent->setTable($this->table);
 
-      $tmp = explode("/", $this->fullName);
-      $this->shortName = end($tmp);
+    $this->fullName = str_replace("\\", "/", get_class($this));
 
-      $this->app = $appOrAttributes;
+    $tmp = explode("/", $this->fullName);
+    $this->shortName = end($tmp);
 
-      $this->myRootFolder = str_replace("\\", "/", dirname((new ReflectionClass(get_class($this)))->getFileName()));
+    $this->app = $app;
 
-      if ($eloquentQuery === NULL) {
-        $this->eloquentQuery = $this->select('id');
-      } else {
-        $this->eloquentQuery = $eloquentQuery;
-        $this->eloquentQuery->pdoCrossTables = [];
-      }
+    $this->myRootFolder = str_replace("\\", "/", dirname((new ReflectionClass(get_class($this)))->getFileName()));
 
-      try {
-        $this->pdo = $this->getConnection()->getPdo();
-      } catch (Exception $e) {
-        $this->pdo = null;
-      } 
+    // if ($eloquentQuery === NULL) {
+    //   $this->eloquentQuery = $this->select('id');
+    // } else {
+    //   $this->eloquentQuery = $eloquentQuery;
+    //   $this->eloquentQuery->pdoCrossTables = [];
+    // }
 
-      // During the installation no SQL tables exist. If child's init()
-      // method uses data from DB, $this->init() call would fail.
-      // Therefore the 'try ... catch'.
-      try {
-        $this->init();
-      } catch (Exception $e) {
-        //
-      }
+    try {
+      $this->pdo = $this->eloquent->getConnection()->getPdo();
+    } catch (Exception $e) {
+      $this->pdo = null;
+    } 
 
-      $this->app->db->addTable(
-        $this->fullTableSqlName,
-        $this->columns(),
-        $this->isJunctionTable
-      );
+    // During the installation no SQL tables exist. If child's init()
+    // method uses data from DB, $this->init() call would fail.
+    // Therefore the 'try ... catch'.
+    try {
+      $this->init();
+    } catch (Exception $e) {
+      //
     }
 
+    $this->app->db->addTable(
+      $this->fullTableSqlName,
+      $this->columns(),
+      $this->isJunctionTable
+    );
+    
     $currentVersion = (int)$this->getCurrentInstalledVersion();
     $lastVersion = $this->getLastAvailableVersion();
 
@@ -501,7 +502,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function getEnumValues()
   {
-    $tmp = $this
+    $tmp = $this->eloquent
       ->selectRaw("{$this->fullTableSqlName}.id")
       ->selectRaw("(" . str_replace("{%TABLE%}", $this->fullTableSqlName, $this->lookupSqlValue()) . ") as ___lookupSqlValue")
       ->orderBy("___lookupSqlValue", "asc")
@@ -514,19 +515,6 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     return $enumValues;
-  }
-
-  public function associateKey($input, $key)
-  {
-    if (is_array($input)) {
-      $output = [];
-      foreach ($input as $row) {
-        $output[$row[$key]] = $row;
-      }
-      return $output;
-    } else {
-      return parent::keyBy($input);
-    }
   }
 
   public function sqlQuery($query)
@@ -831,7 +819,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
       "columns" => $newColumns,
     ])["columns"];
 
-    $this->fillable = array_keys($newColumns);
+    $this->eloquent->fillable = array_keys($newColumns);
 
     return $newColumns;
   }
@@ -945,7 +933,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function getById(int $id)
   {
-    $item = reset($this->getRelationships()->where('id', $id)->get()->toArray());
+    $item = reset($this->eloquent->getRelationships()->where('id', $id)->get()->toArray());
 
     if ($this->getExtendedData([]) !== NULL) {
       $item = $this->getExtendedData($item);
@@ -1453,7 +1441,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   public function recordUpdate(int $id, array $data): int {
-    $this->find($id)->update($data);
+    $this->eloquent->find($id)->update($data);
     return $id;
   }
 
@@ -1813,15 +1801,14 @@ class Model extends \Illuminate\Database\Eloquent\Model
       . ') as _lookupText_'
     ;
 
-
     if ($addLookups) {
 
       // LOOKUPS and RELATIONSHIPS
       foreach ($tmpColumns as $columnName => $column) {
         if ($column['type'] == 'lookup') {
           $lookupModel = $this->app->getModel($column['model']);
-          $lookupConnection = $lookupModel->getConnectionName();
-          $lookupDatabase = $lookupModel->getConnection()->getDatabaseName();
+          $lookupConnection = $lookupModel->eloquent->getConnectionName();
+          $lookupDatabase = $lookupModel->eloquent->getConnection()->getDatabaseName();
           $lookupTableName = $lookupModel->getFullTableSqlName();
           $joinAlias = 'join_' . $columnName;
           $lookupSqlValue = "(" .
@@ -1852,7 +1839,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-    $query = $this->selectRaw(join(',', $selectRaw))->with($withs);
+    $query = $this->eloquent->selectRaw(join(',', $selectRaw))->with($withs);
     foreach ($joins as $join) {
       $query->leftJoin($join[0], $join[1], $join[2], $join[3]);
     }
@@ -1972,50 +1959,50 @@ class Model extends \Illuminate\Database\Eloquent\Model
   }
 
   // fetchRows
-  public function fetchRows($eloquentQuery, $keyBy = 'id', $processLookups = TRUE)
-  {
-    $query = $this->pdo->prepare($eloquentQuery->toSql());
-    $query->execute($eloquentQuery->getBindings());
+  // public function fetchRows($eloquentQuery, $keyBy = 'id', $processLookups = TRUE)
+  // {
+  //   $query = $this->pdo->prepare($eloquentQuery->toSql());
+  //   $query->execute($eloquentQuery->getBindings());
 
-    $rows = $this->associateKey($query->fetchAll(\PDO::FETCH_ASSOC), 'id');
+  //   $rows = Helper::keyBy('id', $query->fetchAll(\PDO::FETCH_ASSOC));
 
-    if ($processLookups) {
-      $rows = $this->processLookupsInQueryResult($rows);
-    }
+  //   if ($processLookups) {
+  //     $rows = $this->processLookupsInQueryResult($rows);
+  //   }
 
-    if (!empty($eloquentQuery->pdoCrossTables)) {
-      foreach ($eloquentQuery->pdoCrossTables as $crossTable) {
-        list($tmpCrossTableModel, $tmpForeignKey, $tmpCrossTableResultKey) = $crossTable;
+  //   if (!empty($eloquentQuery->pdoCrossTables)) {
+  //     foreach ($eloquentQuery->pdoCrossTables as $crossTable) {
+  //       list($tmpCrossTableModel, $tmpForeignKey, $tmpCrossTableResultKey) = $crossTable;
 
-        $tmpCrossQuery = $tmpCrossTableModel->getQuery();
-        $tmpCrossTableModel->addLookupsToQuery($tmpCrossQuery);
-        $tmpCrossQuery->whereIn($tmpForeignKey, array_keys($rows));
+  //       $tmpCrossQuery = $tmpCrossTableModel->getQuery();
+  //       $tmpCrossTableModel->addLookupsToQuery($tmpCrossQuery);
+  //       $tmpCrossQuery->whereIn($tmpForeignKey, array_keys($rows));
 
-        $tmpCrossTableValues = $this->fetchRows($tmpCrossQuery, 'id', FALSE);
+  //       $tmpCrossTableValues = $this->fetchRows($tmpCrossQuery, 'id', FALSE);
 
-        foreach ($tmpCrossTableValues as $tmpCrossTableValue) {
-          $rows[$tmpCrossTableValue[$tmpForeignKey]][$tmpCrossTableResultKey][] = $tmpCrossTableValue;
-        }
-      }
-    }
+  //       foreach ($tmpCrossTableValues as $tmpCrossTableValue) {
+  //         $rows[$tmpCrossTableValue[$tmpForeignKey]][$tmpCrossTableResultKey][] = $tmpCrossTableValue;
+  //       }
+  //     }
+  //   }
 
-    if (empty($keyBy) || $keyBy === NULL || $keyBy === FALSE || $keyBy == 'id') {
-      return $rows;
-    } else {
-      return $this->associateKey($rows, $keyBy);
-    }
-  }
+  //   if (empty($keyBy) || $keyBy === NULL || $keyBy === FALSE || $keyBy == 'id') {
+  //     return $rows;
+  //   } else {
+  //     return Helper::keyBy($keyBy, $rows);
+  //   }
+  // }
 
   // countRowsInQuery
-  public function countRowsInQuery($eloquentQuery)
-  {
-    $query = $this->pdo->prepare($eloquentQuery->toSql());
-    $query->execute($eloquentQuery->getBindings());
+  // public function countRowsInQuery($eloquentQuery)
+  // {
+  //   $query = $this->pdo->prepare($eloquentQuery->toSql());
+  //   $query->execute($eloquentQuery->getBindings());
 
-    $rows = $query->fetchAll(\PDO::FETCH_COLUMN, 0);
+  //   $rows = $query->fetchAll(\PDO::FETCH_COLUMN, 0);
 
-    return count($rows);
-  }
+  //   return count($rows);
+  // }
 
   public function getNewRecordInfo(): array
   {
@@ -2063,7 +2050,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
 
   public function setRecordInfoUpdated(array $data): array
   {
-    $tmpData = $this->find($data['id']);
+    $tmpData = $this->eloquent->find($data['id']);
     $recordInfo = json_decode($tmpData->record_info, true);
 
     $recordInfo['id_updated_by']['value'] = $this->app->userProfile['id'];

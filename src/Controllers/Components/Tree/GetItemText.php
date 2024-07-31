@@ -17,7 +17,7 @@ class GetItemText extends \ADIOS\Core\Controller {
   public function render() {
     $model = $this->app->getModel($this->params['model']);
 
-    $tmp = reset($model
+    $tmp = reset($model->eloquent
       ->selectRaw($model->getFullTableSqlName().".id")
       ->selectRaw("(".str_replace("{%TABLE%}", $model->getFullTableSqlName(), $model->lookupSqlValue).") as ___lookupSqlValue")
       ->where('id', (int) $this->params['id'])

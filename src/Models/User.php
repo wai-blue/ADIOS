@@ -28,6 +28,8 @@ class User extends \ADIOS\Core\Model {
 
   public string $urlBase = "users";
   public ?string $lookupSqlValue = "{%TABLE%}.login";
+  public string $eloquentClass = \ADIOS\Models\Eloquent\User::class;
+  
 
   public ?array $junctions = [
     'roles' => [
@@ -209,7 +211,7 @@ class User extends \ADIOS\Core\Model {
 
   public function updateAccessInformation(int $idUser) {
     $clientIp = $this->getClientIpAddress();
-    $this->where('id', $idUser)->update([
+    $this->eloquent->where('id', $idUser)->update([
       'last_access_time' => date('Y-m-d H:i:s'),
       'last_access_ip' => $clientIp,
     ]);
@@ -217,7 +219,7 @@ class User extends \ADIOS\Core\Model {
 
   public function updateLoginAndAccessInformation(int $idUser) {
     $clientIp = $this->getClientIpAddress();
-    $this->where('id', $idUser)->update([
+    $this->eloquent->where('id', $idUser)->update([
       'last_login_time' => date('Y-m-d H:i:s'),
       'last_login_ip' => $clientIp,
       'last_access_time' => date('Y-m-d H:i:s'),
@@ -248,7 +250,7 @@ class User extends \ADIOS\Core\Model {
     }
 
     if (!empty($login)) {
-      $users = $this
+      $users = $this->eloquent
         ->where(function($q) use ($authColumns, $login) {
           foreach ($authColumns as $column) {
             $q->orWhere($column, '=', $login);
@@ -308,7 +310,7 @@ class User extends \ADIOS\Core\Model {
     $tokenModel = $this->app->getModel("ADIOS/Models/Token");
     $token = $tokenModel->generateToken($tokenSalt, $tokenType);
 
-    $this->updateRow([
+    $this->eloquent->updateRow([
       "id_token_reset_password" => $token['id'],
     ], $idUser);
 
@@ -327,7 +329,7 @@ class User extends \ADIOS\Core\Model {
     $tokenModel = $this->app->getModel("ADIOS/Models/Token");
     $tokenData = $tokenModel->validateToken($token);
 
-    $userData = $this->where(
+    $userData = $this->eloquent->where(
       'id_token_reset_password', $tokenData['id']
       )->first()
     ;
@@ -337,7 +339,7 @@ class User extends \ADIOS\Core\Model {
     }
 
     if ($deleteAfterValidation) {
-      $this->updateRow([
+      $this->eloquent->updateRow([
         "id_token_reset_password" => NULL,
       ], $userData["id"]);
 
@@ -354,7 +356,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function getQueryForUser(int $idUser) {
-    return $this
+    return $this->eloquent
       ->with('roles')
       ->where('id', $idUser)
       ->where('is_active', '<>', 0)
@@ -378,7 +380,7 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function getByEmail(string $email) {
-    $user = self::where("email", $email)->first();
+    $user = $this->eloquent->where("email", $email)->first();
 
     return !empty($user) ? $user->toArray() : [];
   }

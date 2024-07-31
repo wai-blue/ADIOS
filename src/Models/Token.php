@@ -20,6 +20,7 @@ class Token extends \ADIOS\Core\Model {
   public ?string $lookupSqlValue = "{%TABLE%}.token";
 
   public $tokenTypes = [];
+  public string $eloquentClass = \ADIOS\Models\Eloquent\Token::class;
 
   public function __construct(\ADIOS\Core\Loader $app) {
     $this->sqlName = "_tokens";
