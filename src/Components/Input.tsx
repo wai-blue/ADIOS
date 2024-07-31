@@ -140,7 +140,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
 
   renderValueElement() {
     let value = this.state.value + '';
-    if (value == '') return <span className="no-value">N/A</span>;
+    if (value == '') return <span className="no-value"></span>;
     else return this.state.value;
   }
 

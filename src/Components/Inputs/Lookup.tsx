@@ -27,7 +27,14 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
     this.state = {
       ...this.state, // Parent state
-      endpoint: props.endpoint ? props.endpoint : (props.params && props.params.endpoint ? props.params.endpoint : 'components/inputs/lookup'),
+      endpoint:
+        props.endpoint
+          ? props.endpoint
+          : (props.params && props.params.endpoint
+            ? props.params.endpoint
+            : (globalThis.app.config.defaultLookupEndpoint ?? 'components/inputs/lookup')
+          )
+      ,
       model: props.model ? props.model : (props.params && props.params.model ? props.params.model : ''),
       data: [],
     };
@@ -63,7 +70,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   }
 
   renderValueElement() {
-    return this.state.data[this.state.value]?._lookupText_ ?? '...';
+    return this.state.data[this.state.value]?._lookupText_ ?? <span className='no-value'></span>;
     // return this.state.value;
   }
 

@@ -16,33 +16,48 @@ namespace ADIOS\Controllers\Components\Inputs;
 class Lookup extends \ADIOS\Core\Controller {
   public bool $hideDefaultDesktop = true;
 
+  public \ADIOS\Core\Model $model;
+
   function __construct(\ADIOS\Core\Loader $app, array $params = []) {
     parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Read';
+    $this->model = $this->app->getModel($this->params['model']);
   }
 
   public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
-    $tmpModel = $this->app->getModel($this->params['model']);
 
     $lookupSqlValue = "(" .
-      str_replace("{%TABLE%}.", '', $tmpModel->lookupSqlValue())
+      str_replace("{%TABLE%}.", '', $this->model->lookupSqlValue())
       . ") as text";
 
-    $query = $tmpModel->prepareLoadRecordQuery()->selectRaw('id, ' . $lookupSqlValue);
+    $query = $this->model->prepareLoadRecordQuery()->selectRaw('id, ' . $lookupSqlValue);
 
     if ($this->params['search']) {
-      foreach ($tmpModel->columns() as $columnName => $column) {
-        $query->orWhere($columnName, 'LIKE', '%' . $this->params['search'] . '%');
-      }
+      $query->where(function($q) {
+        foreach ($this->model->columns() as $columnName => $column) {
+          $q->orWhere($columnName, 'LIKE', '%' . $this->params['search'] . '%');
+        }
+      });
     }
 
     return $query;
   }
 
+  public function postprocessData(array $data): array {
+    return $data;
+  }
+
+  public function loadData(): array {
+    $data = $this->prepareLoadRecordQuery()->get()->toArray();
+    $data = $this->postprocessData($data);
+    return $data;
+  }
+
   public function renderJson(): ?array { 
     try {
+      $data = $this->loadData();
       return [
-        'data' => \ADIOS\Core\Helper::keyBy('id', $this->prepareLoadRecordQuery()->get()->toArray())
+        'data' => \ADIOS\Core\Helper::keyBy('id', $data)
       ];
     } catch (QueryException $e) {
       http_response_code(500);

@@ -27,6 +27,7 @@ class Table extends \ADIOS\Core\Controller {
   function __construct(\ADIOS\Core\Loader $app, array $params = []) {
     parent::__construct($app, $params);
     $this->permission = $this->params['model'] . ':Read';
+    $this->model = $this->app->getModel($this->params['model']);
   }
 
   /**
@@ -45,11 +46,10 @@ class Table extends \ADIOS\Core\Controller {
   public function getParams() {
     try {
       $params = $this->params;
-      $model = $this->app->getModel($this->params['model']);
 
-      $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $model->tableParams ?? []);
+      $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $this->model->tableParams ?? []);
 
-      $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $model->columns());
+      $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $this->model->columns());
       $params['columns'] = array_filter($params['columns'], function($column) {
         return ($column['show'] ?? FALSE);
       });
@@ -60,7 +60,7 @@ class Table extends \ADIOS\Core\Controller {
       $params['canDelete'] = $this->app->permissions->granted($this->params['model'] . ':Delete');
       $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
 
-      $params['folderUrl'] = $model->getFolderUrl();
+      $params['folderUrl'] = $this->model->getFolderUrl();
 
       return $params;
     } catch (\Exception $e) {
@@ -86,10 +86,9 @@ class Table extends \ADIOS\Core\Controller {
       $search = strtolower(Str::ascii($params['search']));
     }
 
-    $model = $this->app->getModel($this->params['model']);
-    $columns = $model->columns();
+    $columns = $this->model->columns();
 
-    $query = $model->prepareLoadRecordQuery(true);
+    $query = $this->model->prepareLoadRecordQuery(true);
 
     // FILTER BY
     if (isset($params['filterBy'])) {
