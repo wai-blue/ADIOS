@@ -1269,7 +1269,7 @@ class Loader
         $view = $this->view;
         $this->controllerObject->prepareViewParams();
 
-        $twigParams = [
+        $contentParams = [
           'uid' => $this->uid,
           'user' => $this->userProfile,
           'config' => $this->config,
@@ -1282,7 +1282,7 @@ class Loader
 
         $contentHtml = $this->twig->render(
           $view,
-          $twigParams
+          $contentParams
         );
 
         \ADIOS\Core\Helper::addSpeedLogTag("render6");
@@ -1296,7 +1296,8 @@ class Loader
           $desktopControllerObject = new ($this->getCoreClass('Controllers\\Desktop'))($this);
           $desktopControllerObject->prepareViewParams();
 
-          $desktopParams = $twigParams;
+          $desktopParams = $contentParams;
+          $desktopParams['viewParams'] = $desktopControllerObject->viewParams;
           $desktopParams['contentHtml'] = $contentHtml;
 
           $html = $this->twig->render(($this->config['appNamespace'] ?? 'App') . '/Views/Desktop', $desktopParams);

@@ -819,7 +819,7 @@ class Model extends \Illuminate\Database\Eloquent\Model
     }
 
     foreach ($newColumns as $colName => $colDef) {
-      $colObject = $this->app->db->columnTypes[$colDef['type']];
+      $colObject = $this->app->db->columnTypes[$colDef['type']] ?? null;
 
       if ($colObject instanceof DataType) {
         $newColumns[$colName] = $colObject->columnDefinitionPostProcess($colDef);

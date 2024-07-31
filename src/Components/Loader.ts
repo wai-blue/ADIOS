@@ -79,14 +79,10 @@ export class ADIOS {
   */
   renderReactComponents(renderIntoElement: string = 'body') {
 
-    $(renderIntoElement).addClass('react-elements-rendering')
-
     document.querySelectorAll(renderIntoElement + ' *').forEach((element, _index) => {
-     
+
       let component: string = '';
       let componentProps: Object = {};
-      let _this = this;
-      let _element = element;
 
       if (element.tagName.substring(0, 6) != 'ADIOS-' && element.tagName.substring(0, 4) != 'APP-') return;
 
@@ -97,6 +93,8 @@ export class ADIOS {
       } else {
         component = '';
       }
+
+      $(renderIntoElement).addClass('react-elements-rendering');
 
       let attributesDoNotConvert: Array<string> = [];
       for (let i in element.attributes) {

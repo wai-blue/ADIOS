@@ -685,7 +685,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const nextId = this.state?.nextId ?? 0;
 
     return <>
-      {prevId > 0 && nextId > 0 ? <>
+      {prevId > 0 || nextId > 0 ? <>
         <button
           onClick={() => {
             if (prevId > 0 && this.props.parentTable) {
