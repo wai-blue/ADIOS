@@ -117,7 +117,7 @@ class Model
    */
   public function __construct(\ADIOS\Core\Loader $app)
   {
-    $this->gtp = $app->config['gtp'];
+    $this->gtp = $app->config['gtp'] ?? '';
 
     if (empty($this->fullTableSqlName)) {
       $this->fullTableSqlName = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;

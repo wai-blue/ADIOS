@@ -7,17 +7,17 @@ export interface ModalProps {
   uid: string,
   type?: string,
   children?: any;
-  isActive?: boolean;
+  // isActive?: boolean;
   title?: string;
   hideHeader?: boolean;
   isOpen?: boolean;
-  model?: string;
+  // model?: string;
 }
 
 interface ModalState {
   uid: string,
   type: string,
-  isActive: boolean;
+  isOpen: boolean;
   title?: string;
 }
 
@@ -33,7 +33,7 @@ export default class Modal extends Component<ModalProps> {
     this.state = {
       uid: props.uid ?? uuid.v4(),
       type: props.type ?? "right",
-      isActive: true,
+      isOpen: props.isOpen ?? false,
       title: props.title
     };
 
@@ -47,10 +47,10 @@ export default class Modal extends Component<ModalProps> {
 
   componentDidMount() {
     //console.log('modal did mount ' + this.props.uid + ' ' + this.props.model);
-    if (this.props.isOpen === true) {
-      //@ts-ignore
-      ADIOS.modalToggle(this.state.uid);
-    }
+    // if (this.props.isOpen === true) {
+    //   //@ts-ignore
+    //   ADIOS.modalToggle(this.state.uid);
+    // }
   }
 
   /**
@@ -71,6 +71,7 @@ export default class Modal extends Component<ModalProps> {
       <div
         id={'adios-modal-' + this.props.uid} 
         className={"adios component modal " + this.state.type + " fade"}
+        style={{"display": this.state.isOpen ? "block" : "none"}}
         role="dialog"
       >
         <div className="modal-dialog" role="document">

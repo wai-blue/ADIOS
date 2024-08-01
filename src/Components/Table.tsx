@@ -353,7 +353,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   getFormModalParams(): any {
     return {
       uid: this.props.uid + '_form',
-      model: this.props.model,
+      // model: this.props.model,
       hideHeader: true,
       isOpen: Number.isInteger(this.state.formId),
       ...this.props.modal
