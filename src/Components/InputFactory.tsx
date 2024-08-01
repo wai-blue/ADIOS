@@ -27,6 +27,8 @@ export function InputFactory(inputProps: any): JSX.Element {
       inputToRender = globalThis.app.renderReactElement(inputProps.params.inputJSX, inputProps) ?? <></>;
     } else {
       switch (inputProps.params.type) {
+        case 'varchar': inputToRender = <InputVarchar {...inputProps} />; break;
+        case 'password': inputToRender = <InputVarchar {...inputProps} type='password' />; break;
         case 'text': inputToRender = <InputTextarea {...inputProps} />; break;
         case 'float': case 'int': inputToRender = <InputInt {...inputProps} />; break;
         case 'bool': inputToRender = <InputBool {...inputProps} />; break;

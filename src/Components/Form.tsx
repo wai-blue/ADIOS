@@ -1,19 +1,14 @@
 import React, {Component} from "react";
 import * as uuid from 'uuid';
 
-import Notification from "./Notification";
 import { ProgressBar } from 'primereact/progressbar';
 import { Tooltip } from 'primereact/tooltip';
 import request from "./Request";
 
-import Swal, {SweetAlertOptions} from "sweetalert2";
-
 import { adiosError, deepObjectMerge } from "./Helper";
 
-import Table from "./Table";
 import { InputProps } from "./Input";
 import { InputFactory } from "./InputFactory";
-import { TableProps } from "@mui/material";
 
 interface Content {
   [key: string]: ContentCard | any;

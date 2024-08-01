@@ -1,5 +1,4 @@
 import React, { Component, ChangeEvent, createRef } from "react";
-import { GridColDef, GridSortModel, GridFilterModel } from '@mui/x-data-grid';
 
 import Modal, { ModalProps } from "./Modal";
 import ModalSimple from "./ModalSimple";
@@ -106,7 +105,7 @@ export interface TableState {
   canUpdate?: boolean,
   columns?: any, //Array<GridColDef>,
   data?: TableData,
-  filterBy?: GridFilterModel,
+  filterBy?: any,
   formId?: number|null,
   formPrevId?: number|null,
   formNextId?: number|null,
@@ -692,7 +691,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     this.loadData(page, itemsPerPage);
   }
 
-  onFilterChange(data: GridFilterModel) {
+  onFilterChange(data: any) {
     this.setState({
       filterBy: data
     }, () => this.loadData());
