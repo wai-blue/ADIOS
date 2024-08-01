@@ -49,13 +49,13 @@ export class ADIOS {
   /**
   * Get specific ADIOS component with destructed params 
   */
-  getComponent(componentName: string, props: Object, children: any) {
+  renderReactElement(componentName: string, props: Object, children: any) {
     if (!componentName) return null;
 
     let componentNamePascalCase = kebabToPascal(componentName);
 
     if (!this.reactComponents[componentNamePascalCase]) {
-      console.error('ADIOS: getComponent(' + componentNamePascalCase + '). Component does not exist. Use `adios.registerReactComponent()` in your project\'s index.tsx file.');
+      console.error('ADIOS: renderReactElement(' + componentNamePascalCase + '). Component does not exist. Use `adios.registerReactComponent()` in your project\'s index.tsx file.');
       return null;
     } else {
       return React.createElement(
@@ -74,39 +74,32 @@ export class ADIOS {
   //   return attributeName.toLowerCase().includes('callback') ? new Function(attributeValue) : attributeValue;
   // }
 
-  /**
-  * Render React component (create HTML tag root and render) 
-  */
-  renderReactComponents(renderIntoElement: string = 'body') {
+  convertDomToReact(domElement) {
+    let isAdiosComponent = false;
+    let component: string = '';
+    let componentProps: Object = {};
 
-    document.querySelectorAll(renderIntoElement + ' *').forEach((element, _index) => {
-
-      let component: string = '';
-      let componentProps: Object = {};
-
-      if (element.tagName.substring(0, 6) != 'ADIOS-' && element.tagName.substring(0, 4) != 'APP-') return;
-
-      if (element.tagName.substring(0, 6) == 'ADIOS-') {
-        component = element.tagName.substring(6).toLowerCase();
-      } else if (element.tagName.substring(0, 4) == 'APP-') {
-        component = element.tagName.substring(4).toLowerCase();
+    if (domElement.nodeType == 3) { /* Text node: https://developer.mozilla.org/en-US/docs/Web/API/Node/nodeType */
+      return <>{domElement.textContent}</>;
+    } else {
+      if (domElement.tagName.substring(0, 4) != 'APP-') {
+        component = domElement.tagName.toLowerCase();
       } else {
-        component = '';
+        component = domElement.tagName.substring(4).toLowerCase();
+        isAdiosComponent = true;
       }
-
-      $(renderIntoElement).addClass('react-elements-rendering');
 
       let attributesDoNotConvert: Array<string> = [];
-      for (let i in element.attributes) {
-        if (element.attributes[i].name == '--adios-do-not-convert') {
-          attributesDoNotConvert = element.attributes[i].value.split(',');
+      for (let i in domElement.attributes) {
+        if (domElement.attributes[i].name == 'adios-do-not-convert') {
+          attributesDoNotConvert = domElement.attributes[i].value.split(',');
         }
       }
-      // Find attribute and also delete it using [0] index
+
       let i: number = 0
-      while (element.attributes.length > i) {
-        let attributeName: string = element.attributes[i].name.replace(/-([a-z])/g, (_: any, letter: string) => letter.toUpperCase());
-        let attributeValue: any = element.attributes[i].value;
+      while (domElement.attributes.length > i) {
+        let attributeName: string = domElement.attributes[i].name.replace(/-([a-z])/g, (_: any, letter: string) => letter.toUpperCase());
+        let attributeValue: any = domElement.attributes[i].value;
 
         if (!attributesDoNotConvert.includes(attributeName)) {
           if (isValidJson(attributeValue)) {
@@ -128,25 +121,60 @@ export class ADIOS {
           continue;
         }
         // Remove attributes from HTML DOM
-        element.removeAttribute(element.attributes[i].name);
+        domElement.removeAttribute(domElement.attributes[i].name);
       }
+
+      let children: Array<any> = [];
+
+      domElement.childNodes.forEach((subElement, _index) => {
+        children.push(this.convertDomToReact(subElement));
+      });
+
+      let reactElement: any = null;
+
+      if (isAdiosComponent) {
+        if (componentProps['uid'] == undefined) {
+          componentProps['uid'] = '_' + uuid.v4().replace('-', '_');
+        }
+
+        reactElement = this.renderReactElement(
+          component,
+          componentProps,
+          children
+        );
+
+        domElement.setAttribute('adios-react-rendered', 'true');
+      } else {
+        reactElement = React.createElement(
+          component,
+          componentProps,
+          children
+        );
+      }
+
+      return reactElement;
+    }
+
+  }
+
+  /**
+  * Render React component (create HTML tag root and render) 
+  */
+  renderReactElements(rootElement?) {
+    if (!rootElement) rootElement = document;
+
+    rootElement.querySelectorAll('*').forEach((element, _index) => {
+
+      if (element.tagName.substring(0, 4) != 'APP-') return;
+      if (element.attributes['adios-react-rendered']) return;
+
+      $(rootElement).addClass('react-elements-rendering');
 
       let elementRoot = createRoot(element);
       this.reactElementsWaitingForRender++;
-
-      if (componentProps['uid'] == undefined) {
-        componentProps['uid'] = '_' + uuid.v4().replace('-', '_');
-      }
-
-      componentProps['ref'] = (element) => { this.reactElements[componentProps['uid']] = element; }
-
-      const reactElement = this.getComponent(
-        component,
-        componentProps,
-        element.innerHTML == '' ? null : React.createElement('inner-html', {dangerouslySetInnerHTML: {__html: element.innerHTML}})
-      );
-
+      const reactElement = this.convertDomToReact(element)
       elementRoot.render(reactElement);
+
 
       // https://stackoverflow.com/questions/75388021/migrate-reactdom-render-with-async-callback-to-createroot
       // https://blog.saeloun.com/2021/07/15/react-18-adds-new-root-api/
@@ -154,13 +182,14 @@ export class ADIOS {
         this.reactElementsWaitingForRender--;
 
         if (this.reactElementsWaitingForRender <= 0) {
-          $(renderIntoElement)
+          $(rootElement)
             .removeClass('react-elements-rendering')
             .addClass('react-elements-rendered')
           ;
         }
       });
     });
+
   }
 }
 

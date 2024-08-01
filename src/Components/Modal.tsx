@@ -29,6 +29,9 @@ export default class Modal extends Component<ModalProps> {
     super(props);
 
     // console.log('modal construct ' + this.props.uid + ' ' + this.props.model);
+    if (this.props.uid) {
+      globalThis.app.reactElements[this.props.uid] = this;
+    }
 
     this.state = {
       uid: props.uid ?? uuid.v4(),

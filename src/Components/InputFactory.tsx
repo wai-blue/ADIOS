@@ -24,7 +24,7 @@ export function InputFactory(inputProps: any): JSX.Element {
     inputToRender = <InputEnumValues {...inputProps} enumValues={inputProps.params.enumValues}/>
   } else {
     if (typeof inputProps.params.inputJSX === 'string' && inputProps.params.inputJSX !== '') {
-      inputToRender = globalThis.app.getComponent(inputProps.params.inputJSX, inputProps) ?? <></>;
+      inputToRender = globalThis.app.renderReactElement(inputProps.params.inputJSX, inputProps) ?? <></>;
     } else {
       switch (inputProps.params.type) {
         case 'text': inputToRender = <InputTextarea {...inputProps} />; break;

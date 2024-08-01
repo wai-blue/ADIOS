@@ -389,7 +389,7 @@ function _ajax_supdate(controller, params, selector, options) {
 
           _ajax_update_dynamic_scripts(data);
 
-          globalThis.app.renderReactComponents(selector);
+          globalThis.app.renderReactElements(selector);
 
           $(selector).stop().css('opacity', 1);
           if (typeof options.success == 'function') setTimeout(options.success, 100);

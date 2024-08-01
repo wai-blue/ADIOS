@@ -1,4 +1,4 @@
-<adios-form
+<app-form
   model="{{ viewParams.model }}"
   id="{{ viewParams.id }}"
   {% if viewParams.titleForInserting %} title-for-inserting="{{ viewParams.titleForInserting }}" {% endif %}
@@ -8,4 +8,4 @@
   {% if viewParams.columns %} columns='{{ viewParams.columns|json_encode|raw }}' {% endif %}
   {% if viewParams.defaultValues %} default-values='{{ viewParams.defaultValues|json_encode|raw }}' {% endif %}
   {% if viewParams.addButtonText %} add-button-text='{{ viewParams.addButtonText }}' {% endif %}
-></adios-form>
+></app-form>

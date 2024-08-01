@@ -514,7 +514,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         contentItem = (<div dangerouslySetInnerHTML={{__html: contentItemParams['html']}}/>);
         break;
       default:
-        contentItem = globalThis.app.getComponent(
+        contentItem = globalThis.app.renderReactElement(
           contentItemName,
           {
             ...contentItemParams[contentItemName],
