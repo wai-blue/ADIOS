@@ -1414,7 +1414,7 @@ class Model
   }
 
   public function recordCreate(array $data): int {
-    return $this->create($data)->id;
+    return $this->eloquent->create($data)->id;
   }
 
   public function recordUpdate(int $id, array $data): int {

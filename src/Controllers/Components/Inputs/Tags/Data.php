@@ -42,7 +42,7 @@ class Data extends \ADIOS\Core\Controller {
       $junctionModel = $this->app->getModel($junctionData['junctionModel']);
 
       if ($id > 0) {
-        $selected = $junctionModel->where($junctionData['masterKeyColumn'], $id)
+        $selected = $junctionModel->eloquent->where($junctionData['masterKeyColumn'], $id)
           ->pluck($junctionData['optionKeyColumn']);
       }
 

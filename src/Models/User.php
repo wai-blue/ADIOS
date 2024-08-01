@@ -388,8 +388,8 @@ class User extends \ADIOS\Core\Model {
   }
 
   public function updatePassword(int $idUser, string $password) {
-    return
-      self::where('id', $idUser)
+    return $this->eloquent
+      ->where('id', $idUser)
       ->update(
         ["password" => $this->hasPassword($password)]
       )

@@ -37,7 +37,7 @@ class Save extends \ADIOS\Core\Controller
     foreach ($values as $value) {
       if ($value['toDelete']) {
         foreach ($model->findForeignKeyModels() as $fkModelName => $fkColumn) {
-          $this->app->getModel($fkModelName)->where($fkColumn, $value['id'])->update([
+          $this->app->getModel($fkModelName)->eloquent->where($fkColumn, $value['id'])->update([
             $fkColumn => NULL
           ]);
         }
