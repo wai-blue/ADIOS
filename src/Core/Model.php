@@ -172,7 +172,7 @@ class Model
     $currentVersion = (int)$this->getCurrentInstalledVersion();
     $lastVersion = $this->getLastAvailableVersion();
 
-    if ($this->lastVersion == 0) {
+    if ($lastVersion == 0) {
       $this->saveConfig('installed-version', $lastVersion);
     }
 
