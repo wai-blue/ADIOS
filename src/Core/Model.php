@@ -1160,6 +1160,14 @@ class Model
     );
   }
 
+  public function tableParams(array $params = []): array {
+    $columns = $this->columns();
+    unset($columns['id']);
+    return [
+      'columns' => $columns,
+    ];
+  }
+
   /**
    * onTableParams
    *
@@ -1827,6 +1835,10 @@ class Model
 
   public function onAfterLoadRecord(array $data): array {
     return $data;
+  }
+
+  public function deleteRecord(int $id): bool {
+    return $this->eloquent->where('id', $id)->delete();
   }
 
   //////////////////////////////////////////////////////////////////

@@ -414,8 +414,19 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   deleteRecord() {
-    // request... on success:
-    this.setState({idToDelete: 0});
+    request.get(
+      this.getEndpointUrl(),
+      {
+        model: this.props.model,
+        id: this.state.idToDelete,
+        action: 'deleteRecord',
+      },
+      (data: any) => {
+        this.setState({idToDelete: 0}, () => {
+          this.loadData();
+        });
+      }
+    );
   }
 
   renderDeleteConfirmModal(): JSX.Element {
@@ -460,7 +471,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
         </ModalSimple>
       );
     } else {
-      return null;
+      return <></>;
     }
   }
 

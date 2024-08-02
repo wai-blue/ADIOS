@@ -45,14 +45,16 @@ class Table extends \ADIOS\Core\Controller {
 
   public function getParams() {
     try {
-      $params = $this->params;
+      // $params = $this->params;
 
-      $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $this->model->tableParams ?? []);
+      // $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $this->model->tableParams ?? []);
 
-      $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $this->model->columns());
-      $params['columns'] = array_filter($params['columns'], function($column) {
-        return ($column['show'] ?? FALSE);
-      });
+      // $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $this->model->columns());
+      // $params['columns'] = array_filter($params['columns'], function($column) {
+      //   return ($column['show'] ?? FALSE);
+      // });
+
+      $params = $this->model->tableParams($this->params);
 
       $params['canRead'] = $this->app->permissions->granted($this->params['model'] . ':Read');
       $params['canCreate'] = $this->app->permissions->granted($this->params['model'] . ':Create');
@@ -60,7 +62,7 @@ class Table extends \ADIOS\Core\Controller {
       $params['canDelete'] = $this->app->permissions->granted($this->params['model'] . ':Delete');
       $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
 
-      $params['folderUrl'] = $this->model->getFolderUrl();
+      // $params['folderUrl'] = $this->model->getFolderUrl();
 
       return $params;
     } catch (\Exception $e) {
@@ -152,6 +154,10 @@ class Table extends \ADIOS\Core\Controller {
     return $data;
   }
 
+  public function deleteRecord() {
+    return $this->model->deleteRecord((int) $this->params['id']);
+  }
+
 
 
 
@@ -162,6 +168,7 @@ class Table extends \ADIOS\Core\Controller {
       switch ($this->params['action']) {
         case 'getParams': $return = $this->getParams(); break;
         case 'loadData': $return = $this->loadData(); break;
+        case 'deleteRecord': $return = $this->deleteRecord(); break;
       }
 
       if (!is_array($return)) {
