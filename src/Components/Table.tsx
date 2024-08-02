@@ -629,24 +629,14 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       body={(data: any, options: any) => {
         return (
           <button
-            className="btn btn-small btn-transparent btn-dropdown"
-            onClick={(e) => { e.preventDefault(); }}
+            className="btn btn-list-item btn-danger"
+            title={globalThis.app.translate('Delete')}
+            onClick={(e) => {
+              e.preventDefault();
+              this.setState({idToDelete: data.id});
+            }}
           >
-            <span className="icon"><i className="fas fa-ellipsis-h"></i></span>
-            <div className="menu">
-              <div className="list">
-                <a
-                  href='javascript:void(0);'
-                  className="btn btn-list-item btn-danger"
-                  onClick={() => {
-                    this.setState({idToDelete: data.id});
-                  }}
-                >
-                  <span className="icon"><i className="fas fa-trash-alt"></i></span>
-                  <span className="text">{globalThis.app.translate('Delete')}</span>
-                </a>
-              </div>
-            </div>
+            <span className="icon"><i className="fas fa-trash-alt"></i></span>
           </button>
         );
       }}
