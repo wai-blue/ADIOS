@@ -750,16 +750,14 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     if (this.props.showInModalSimple) {
       return <>
         <div className="modal-header">
-          <div className="modal-header-inner">
-            <div className="modal-header-left">
-              {this.renderHeaderLeft()}
-            </div>
-            <div className="modal-header-title">
-              {formTitle}
-            </div>
-            <div className="modal-header-right">
-              {this.renderHeaderRight()}
-            </div>
+          <div className="modal-header-left">
+            {this.renderHeaderLeft()}
+          </div>
+          <div className="modal-header-title">
+            {formTitle}
+          </div>
+          <div className="modal-header-right">
+            {this.renderHeaderRight()}
           </div>
         </div>
         <div className="modal-body">

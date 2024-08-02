@@ -122,6 +122,7 @@ export interface TableState {
   renderForm?: boolean,
   inlineEditingEnabled: boolean,
   selection: any,
+  idToDelete: number,
 }
 
 export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
@@ -159,6 +160,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       orderBy: this.props.orderBy,
       inlineEditingEnabled: props.inlineEditingEnabled ? props.inlineEditingEnabled : false,
       selection: [],
+      idToDelete: 0,
     } as S;
   }
 
@@ -399,6 +401,69 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     </div>
   }
 
+  findDataById(id: number): any {
+    let data: any = {};
+
+    for (let i in this.state.data?.data) {
+      if (this.state.data?.data[i].id == id) {
+        data = this.state.data.data[i];
+      }
+    }
+
+    return data;
+  }
+
+  deleteRecord() {
+    // request... on success:
+    this.setState({idToDelete: 0});
+  }
+
+  renderDeleteConfirmModal(): JSX.Element {
+    if (this.state.idToDelete > 0) {
+      const data: any = this.findDataById(this.state.idToDelete);
+      return (
+        <ModalSimple
+          uid={this.props.uid + '_delete_confirm'}
+          isOpen={true} type='centered tiny'
+        >
+          <div className='modal-header'>
+            <div>
+              <div>{globalThis.app.translate('Delete record') + ' #' + this.state.idToDelete}</div>
+              <small>{data?._lookupText_ ?? ''}</small>
+            </div>
+          </div>
+          <div className='modal-body'>
+            {globalThis.app.translate('You are about to delete the record. Press OK to confirm.')}
+          </div>
+          <div className='modal-footer'>
+            <div className='flex justify-between'>
+              <button
+                className='btn btn-primary'
+                onClick={() => {
+                  this.deleteRecord();
+                }}
+              >
+                <span className='icon'><i className='fas fa-check'></i></span>
+                <span className='text'>{globalThis.app.translate('Yes, delete')}</span>
+              </button>
+              <button
+                className='btn btn-cancel'
+                onClick={() => {
+                  this.setState({idToDelete: 0});
+                }}
+              >
+                <span className='icon'><i className='fas fa-times'></i></span>
+                <span className='text'>{globalThis.app.translate('No, do not delete')}</span>
+              </button>
+            </div>
+          </div>
+        </ModalSimple>
+      );
+    } else {
+      return null;
+    }
+  }
+
   renderFormModal(): JSX.Element {
     if (this.state.renderForm && Number.isInteger(this.state.formId)) {
       if (this.props.formUseModalSimple) {
@@ -544,7 +609,10 @@ export default class Table<P, S extends TableState = TableState> extends Compone
         header={column.title}
         body={(data: any, options: any) => {
           return (
-            <div className={(column.cssClass ?? '') + ' ' + this.cellClassName(columnName, data)} style={column.cssStyle}>
+            <div
+              className={(column.cssClass ?? '') + (data.id == this.state.idToDelete ? ' bg-red-50' : '') + ' ' + this.cellClassName(columnName, data)}
+              style={column.cssStyle}
+            >
               {this.renderCell(columnName, column, data, options)}
             </div>
           );
@@ -554,19 +622,36 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       ></Column>);
     });
 
-    // columns.push(<Column
-    //   key='__actions'
-    //   field='__actions'
-    //   header=''
-    //   body={(data: any, options: any) => {
-    //     return (
-    //       <button className="btn btn-small btn-transparent">
-    //         <span className="icon"><i className="fas fa-ellipsis-h"></i></span>
-    //       </button>
-    //     );
-    //   }}
-    //   style={{ width: 'auto' }}
-    // ></Column>);
+    columns.push(<Column
+      key='__actions'
+      field='__actions'
+      header=''
+      body={(data: any, options: any) => {
+        return (
+          <button
+            className="btn btn-small btn-transparent btn-dropdown"
+            onClick={(e) => { e.preventDefault(); }}
+          >
+            <span className="icon"><i className="fas fa-ellipsis-h"></i></span>
+            <div className="menu">
+              <div className="list">
+                <a
+                  href='javascript:void(0);'
+                  className="btn btn-list-item btn-danger"
+                  onClick={() => {
+                    this.setState({idToDelete: data.id});
+                  }}
+                >
+                  <span className="icon"><i className="fas fa-trash-alt"></i></span>
+                  <span className="text">{globalThis.app.translate('Delete')}</span>
+                </a>
+              </div>
+            </div>
+          </button>
+        );
+      }}
+      style={{ width: 'auto' }}
+    ></Column>);
 
     return columns;
   }
@@ -579,6 +664,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
     return (
       <>
         {this.renderFormModal()}
+        {this.renderDeleteConfirmModal()}
 
         <div
           id={"adios-table-" + this.props.uid}
