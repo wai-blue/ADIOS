@@ -76,7 +76,7 @@ class DataTypeYear extends DataType
   }
 
 
-  public function validate($value): bool
+  public function validate(\ADIOS\Core\Model $model, $value): bool
   {
     return (int)$value >= 0;
   }

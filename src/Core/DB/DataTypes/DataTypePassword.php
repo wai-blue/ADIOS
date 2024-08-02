@@ -42,6 +42,20 @@ class DataTypePassword extends \ADIOS\Core\DB\DataType
     return $sql;
   }
 
+  public function validate(\ADIOS\Core\Model $model, $value): bool
+  {
+    return $value[0] == $value[1];
+  }
+  
+  public function normalize(\ADIOS\Core\Model $model, $value)
+  {
+    if (method_exists($model, 'hashPassword')) {
+      return $model->hashPassword((string) $value[0]);
+    } else {
+      return password_hash($value[0], PASSWORD_DEFAULT);
+    }
+  }
+  
   public function toHtml($value, $params = []) {
     return "...".substr(hsc($value), 8, 8)."...";
   }

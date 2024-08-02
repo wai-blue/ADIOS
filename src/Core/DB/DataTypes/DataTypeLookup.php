@@ -78,6 +78,11 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     }
   }
 
+  public function normalize(\ADIOS\Core\Model $model, $value)
+  {
+    return ((int) $value) <= 0 ? 0 : (int) $value;
+  }
+  
   private function _toHtmlOrCsv($value, $params = [])
   {
     $html = $params['row']["{$params['col_name']}:LOOKUP"] ?? "";
@@ -99,7 +104,7 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     return (int) $value;
   }
 
-  public function validate($value): bool
+  public function validate(\ADIOS\Core\Model $model, $value): bool
   {
     return empty($value) || is_numeric($value);
   }

@@ -65,6 +65,15 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
     return "<div style='text-align:center'>{$html}</div>";
   }
 
+  public function normalize(\ADIOS\Core\Model $model, $value)
+  {
+    if (empty($value) || !((bool) $value)) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+  
   public function toCsv($value, $params = []) {
     return (int) $value;
   }

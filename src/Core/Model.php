@@ -1277,10 +1277,22 @@ class Model
     $colType = $colDefinition['type'];
 
     if ($this->app->db->isRegisteredColumnType($colType)) {
-      $valid = $this->app->db->columnTypes[$colType]->validate($value);
+      $valid = $this->app->db->columnTypes[$colType]->validate($this, $value);
     }
 
     return $valid;
+  }
+
+  public function columnNormalize(string $column, $value)
+  {
+    $colDefinition = $this->columns()[$column] ?? [];
+    $colType = $colDefinition['type'];
+
+    if ($this->app->db->isRegisteredColumnType($colType)) {
+      $value = $this->app->db->columnTypes[$colType]->normalize($this, $value);
+    }
+
+    return $value;
   }
 
   /**
@@ -1372,18 +1384,7 @@ class Model
       if (!isset($columns[$colName])) {
         unset($data[$colName]);
       } else {
-        switch ($columns[$colName]["type"]) {
-          case "int": $data[$colName] = (int) $colValue; break;
-          case "lookup": $data[$colName] = ((int) $colValue) <= 0 ? NULL : (int) $colValue; break;
-          case "float": $data[$colName] = (float) $colValue; break;
-          case "boolean": 
-            if (empty($colValue) || !((bool) $colValue)) {
-              $data[$colName] = 0;
-            } else {
-              $data[$colName] = 1;
-            }
-          break;
-        }
+        $data[$colName] = $this->columnNormalize($colName, $data[$colName]);
       }
     }
 

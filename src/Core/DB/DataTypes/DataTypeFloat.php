@@ -78,6 +78,11 @@ class DataTypeFloat extends \ADIOS\Core\DB\DataType
     return $html;
   }
 
+  public function normalize(\ADIOS\Core\Model $model, $value)
+  {
+    return (float) $value;
+  }
+  
   public function toCsv($value, $params = [])
   {
     return str_replace('.', ',', strip_tags($value + 0));
@@ -88,7 +93,7 @@ class DataTypeFloat extends \ADIOS\Core\DB\DataType
     return (float) $value;
   }
 
-  public function validate($value): bool
+  public function validate(\ADIOS\Core\Model $model, $value): bool
   {
     return empty($value) || is_numeric($value);
   }

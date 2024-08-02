@@ -93,7 +93,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
     return (float) $value;
   }
 
-  public function validate($value): bool
+  public function validate(\ADIOS\Core\Model $model, $value): bool
   {
     return empty($value) || !ctype_alpha($value);
   }

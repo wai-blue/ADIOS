@@ -87,6 +87,11 @@ class DataTypeInt extends DataType
     return $html;
   }
 
+  public function normalize(\ADIOS\Core\Model $model, $value)
+  {
+    return (int) $value;
+  }
+  
   public function toCsv($value, $params = [])
   {
     return $this->_toHtmlOrCsv($value, $params);
@@ -97,7 +102,7 @@ class DataTypeInt extends DataType
     return (int)$value;
   }
 
-  public function validate($value): bool
+  public function validate(\ADIOS\Core\Model $model, $value): bool
   {
     return empty($value) || is_numeric($value);
   }

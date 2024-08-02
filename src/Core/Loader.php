@@ -793,41 +793,41 @@ class Loader
     }
 
     if ($toLanguage == "en") {
-      return $string;
-    }
-
-    if (empty($this->dictionary[$toLanguage])) {
-      $this->dictionary[$toLanguage] = [];
-
-      $dictionaryFiles = \ADIOS\Core\Helper::scanDirRecursively("{$this->config['srcDir']}/Lang");
-
-      foreach ($dictionaryFiles as $file) {
-        include("{$this->config['srcDir']}/Lang/{$file}");
-
-        $this->dictionary[$toLanguage] =  \ADIOS\Core\Helper::arrayMergeRecursively(
-          $this->dictionary[$toLanguage],
-          $dictionary
-        );
-      }
-    }
-
-    $dictionary = $this->dictionary[$toLanguage] ?? [];
-    $objectClassName = get_class($object);
-    foreach (explode("\\", $objectClassName) as $namespaceItem) {
-      if (is_array($dictionary[$namespaceItem])) {
-        $dictionary = $dictionary[$namespaceItem];
-      } else {
-        break;
-      }
-    }
-
-    if (!isset($dictionary[$string])) {
       $translated = $string;
-      if ($this->getConfig('debugTranslations', FALSE)) {
-        $translated .= ' ' . get_class($object);
-      }
     } else {
-      $translated = $dictionary[$string];
+      if (empty($this->dictionary[$toLanguage])) {
+        $this->dictionary[$toLanguage] = [];
+
+        $dictionaryFiles = \ADIOS\Core\Helper::scanDirRecursively("{$this->config['srcDir']}/Lang");
+
+        foreach ($dictionaryFiles as $file) {
+          include("{$this->config['srcDir']}/Lang/{$file}");
+
+          $this->dictionary[$toLanguage] =  \ADIOS\Core\Helper::arrayMergeRecursively(
+            $this->dictionary[$toLanguage],
+            $dictionary
+          );
+        }
+      }
+
+      $dictionary = $this->dictionary[$toLanguage] ?? [];
+      $objectClassName = get_class($object);
+      foreach (explode("\\", $objectClassName) as $namespaceItem) {
+        if (is_array($dictionary[$namespaceItem])) {
+          $dictionary = $dictionary[$namespaceItem];
+        } else {
+          break;
+        }
+      }
+
+      if (!isset($dictionary[$string])) {
+        $translated = $string;
+        if ($this->getConfig('debugTranslations', FALSE)) {
+          $translated .= ' ' . get_class($object);
+        }
+      } else {
+        $translated = $dictionary[$string];
+      }
     }
 
     foreach ($vars as $varName => $varValue) {

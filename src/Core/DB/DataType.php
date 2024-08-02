@@ -112,7 +112,12 @@ class DataType {
     return $colDef;
   }
 
-  public function validate($value): bool
+  public function normalize(\ADIOS\Core\Model $model, $value)
+  {
+    return $value;
+  }
+  
+  public function validate(\ADIOS\Core\Model $model, $value): bool
   {
     return TRUE;
   }

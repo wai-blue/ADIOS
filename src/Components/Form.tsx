@@ -453,12 +453,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       return (
         <div
           key={tabName}
-          style={{
-            display: 'grid',
-            gridTemplateRows: 'auto',
-            gridTemplateAreas: this.state.layout,
-            gridGap: '15px'
-          }}
         >
           {this.state.content != null ?
             Object.keys(content).map((contentArea: string) => {
