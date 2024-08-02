@@ -104,6 +104,9 @@ export class ADIOS {
         if (!attributesDoNotConvert.includes(attributeName)) {
           if (isValidJson(attributeValue)) {
             attributeValue = JSON.parse(attributeValue);
+          } else if (attributeName.startsWith('int:')) {
+            attributeName = attributeName.replace('int:', '');
+            attributeValue = parseInt(attributeValue);
           } else if (attributeName.startsWith('function:')) {
             attributeName = attributeName.replace('function:', '');
             attributeValue = new Function(attributeValue);

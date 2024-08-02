@@ -2,7 +2,7 @@ import React, { Component, ChangeEvent, createRef } from "react";
 
 import Modal, { ModalProps } from "./Modal";
 import ModalSimple from "./ModalSimple";
-import Form, { FormProps, FormColumns } from "./Form";
+import Form, { FormProps, FormState, FormColumns } from "./Form";
 import Notification from "./Notification";
 
 import {
@@ -331,19 +331,15 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       onClose: () => {
         this.setState({ formId: null });
       },
-      onSaveCallback: (inlineEditing: boolean) => {
+      onSaveCallback: (form: Form<FormProps, FormState>, saveResponse: any) => {
         this.loadData();
-        if (!inlineEditing) {
+        if (!form.state.isInlineEditing) {
           this.setState({ formId: null });
         }
-        // //@ts-ignore
-        // ADIOS.modalToggle(this.props.uid);
       },
       onDeleteCallback: () => {
         this.loadData();
         this.setState({ formId: null });
-        // //@ts-ignore
-        // ADIOS.modalToggle(this.props.uid);
       },
       isInitialized: false,
     }

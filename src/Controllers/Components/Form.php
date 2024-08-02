@@ -84,11 +84,19 @@ class Form extends \ADIOS\Core\Controller {
 
       $tmpModel = $this->app->getModel($params['model']);
 
-      $tmpModel->recordSave($params['data']);
+      $id = $tmpModel->recordSave($params['data']);
+
+      if ($id > 0) {
+        $savedData = $tmpModel->loadRecord(function($q) use ($id) {
+          $q->where('id', $id);
+        });
+      }
 
       return [
         'status' => 'success',
-        'message' => isset($params['data']['id']) ? 'Záznam uložený' : 'Pridaný nový záznam'
+        'originalData' => $params['data'] ?? [],
+        'savedData' => $savedData ?? [],
+        // 'message' => isset($params['data']['id']) ? 'Záznam uložený' : 'Pridaný nový záznam'
       ];
     } catch (\ADIOS\Core\Exceptions\RecordSaveException $e) {
       http_response_code(422);
@@ -97,7 +105,7 @@ class Form extends \ADIOS\Core\Controller {
 
       return [
         'status' => 'error',
-        'message' => 'Neboli vyplnené všetky povinné polia',
+        // 'message' => 'Neboli vyplnené všetky povinné polia',
         'invalidInputs' => $invalidInputs
       ];
     } catch (QueryException $e) {

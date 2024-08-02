@@ -1,12 +1,16 @@
 import React, {Component} from "react";
 import * as uuid from 'uuid';
 
+import Notification from "./Notification";
 import { ProgressBar } from 'primereact/progressbar';
 import { Tooltip } from 'primereact/tooltip';
 import request from "./Request";
 
+import Swal, {SweetAlertOptions} from "sweetalert2";
+
 import { adiosError, deepObjectMerge } from "./Helper";
 
+import Table from "./Table";
 import { InputProps } from "./Input";
 import { InputFactory } from "./InputFactory";
 
@@ -31,7 +35,7 @@ export interface FormProps {
   layout?: Array<Array<string>>,
   onChange?: () => void;
   onClose?: () => void;
-  onSaveCallback?: (inlineEditing: boolean) => void,
+  onSaveCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
   showInModal?: boolean,
@@ -195,33 +199,37 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
   loadRecord() {
-    if (this.state.id && this.state.id > 0) {
-      request.get(
-        this.state.endpoint,
-        { action: 'loadRecord', ...this.getEndpointParams() },
-        (data: any) => {
-          let newData = this.getDataState(this.state.columns ?? {}, data);
-          newData = this.onAfterDataLoaded(newData);
-          this.setState({isInitialized: true, data: newData}, () => {
-            this.onAfterFormInitialized();
-          });
-        }
-      );
-    } else {
-      let newData = this.getDataState(this.state.columns ?? {}, {});
-      newData = this.onAfterDataLoaded(newData);
-      this.setState({isInitialized: true, data: newData}, () => {
-        this.onAfterFormInitialized();
-      });
-    }
+    request.get(
+      this.state.endpoint,
+      { action: 'loadRecord', ...this.getEndpointParams() },
+      (data: any) => {
+        let newData = this.getDataState(this.state.columns ?? {}, data);
+        newData = this.onAfterDataLoaded(newData);
+        this.setState({isInitialized: true, data: newData}, () => {
+          this.onAfterFormInitialized();
+        });
+      }
+    );
   }
 
-  saveRecord(inlineEditing: boolean) {
+  onBeforeSaveRecord(data) {
+    // to be overriden
+    return data;
+  }
+
+  onAfterSaveRecord(saveResponse) {
+    if (this.props.onSaveCallback) this.props.onSaveCallback(this, saveResponse);
+  }
+
+  saveRecord() {
     this.setState({
       invalidInputs: {}
     });
 
     let formattedInputs = JSON.parse(JSON.stringify(this.state.data));
+    let data = { ...formattedInputs, id: this.state.id };
+
+    data = this.onBeforeSaveRecord(data);
 
     //@ts-ignore
     request.post(
@@ -229,14 +237,16 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       {
         action: 'saveRecord',
         ...this.getEndpointParams(),
-        data: { ...formattedInputs, id: this.state.id }
+        data: data
       },
       {
         model: this.props.model,
         __IS_AJAX__: '1',
       },
-      () => {
-        if (this.props.onSaveCallback) this.props.onSaveCallback(inlineEditing);
+      (saveResponse: any) => {
+        this.setState({data: saveResponse.savedData ?? {}}, () => {
+          this.onAfterSaveRecord(saveResponse);
+        });
       },
       (err: any) => {
         if (err.status == 422) {
@@ -454,20 +464,16 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         <div
           key={tabName}
         >
-          {this.state.content != null ?
-            Object.keys(content).map((contentArea: string) => {
+          {content != null
+            ? Object.keys(content).map((contentArea: string) => {
               return this._renderContentItem(key++, contentArea, content[contentArea]);
             })
             : this.state.data != null ? (
-              Object.keys(this.state.data).map((columnName: string) => {
-                if (
-                  this.state.columns == null
-                  || this.state.columns[columnName] == null
-                ) return <strong style={{color: 'red'}}>Not defined params for column `{columnName}`</strong>;
-
+              Object.keys(this.state.columns ?? {}).map((columnName: string) => {
                 return this.inputWrapper(columnName);
               })
-            ) : ''}
+            ) : ''
+          }
         </div>
       );
     } else {
@@ -568,7 +574,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       onInlineEditCancel: () => {
       },
       onInlineEditSave: () => {
-        this.saveRecord(true);
+        this.saveRecord();
       }
     };
 
@@ -614,7 +620,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
     return (
       <button
-        onClick={() => this.saveRecord(false)}
+        onClick={() => this.saveRecord()}
         className={
           "btn btn-success"
           + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
@@ -711,8 +717,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   renderTitle(): JSX.Element {
     let title = 
-      this.state.title ? this.state.title :
-      this.state.isEdit ? this.state.params?.titleForEditing : this.state.params?.titleForInserting
+      this.state.title
+        ? this.state.title
+        : this.state.isEdit
+          ? this.state.params?.titleForEditing ?? (this.state.data?._lookupText_ ?? '')
+          : this.state.params?.titleForInserting
     ;
 
     return <>
