@@ -792,7 +792,7 @@ class Loader
     return $dictionary;
   }
 
-  public function translate(string $string, array $vars, $object = NULL, $toLanguage = ""): string {
+  public function translate(string $string, array $vars = [], $object = NULL, $toLanguage = ""): string {
     if ($object === NULL) $object = $this;
     if (empty($toLanguage)) {
       $toLanguage = $this->config['language'] ?? "en";
