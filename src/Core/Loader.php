@@ -1202,7 +1202,7 @@ class Loader
         
         // ... But in most cases it will be "encapsulated" in the desktop.
         } else {
-          $desktopControllerObject = new ($this->getCoreClass('Controllers\\Desktop'))($this);
+          $desktopControllerObject = $this->getDesktopController();
           $desktopControllerObject->prepareViewParams();
 
           $desktopParams = $contentParams;
@@ -1277,6 +1277,10 @@ class Loader
 
       header('HTTP/1.1 400 Bad Request', true, 400);
     }
+  }
+
+  public function getDesktopController(): \ADIOS\Core\Controller {
+    return new ($this->getCoreClass('Controllers\\Desktop'))($this);
   }
 
   public function getControllerClassName(string $controller) : string {
