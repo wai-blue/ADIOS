@@ -19,9 +19,9 @@ $config['uploadUrl']                     = '//' . ($_SERVER['HTTP_HOST'] ?? '') 
 // brand
 $config['brand']['title']                = '{{ ConfigApp.brand.title }}';
 $config['brand']['headline']             = '{{ ConfigApp.brand.headline }}';
-$config['brand']['favicon']              = {% if ConfigApp.brand.favicon %}'{{ ConfigApp.brand.favicon }}'{% else %}$config['url'] . '/src/Assets/images/favicon.png'{% endif %};
-$config['brand']['login']['splash']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.loginScreenImage ?? 'login-screen.jpg' }}';
-$config['brand']['sidebar']['icon']      = $config['url'] . '/src/Assets/images/{{ ConfigApp.brand.sidebar.icon ?? 'logo.png' }}';
+$config['brand']['favicon']              = {% if ConfigApp.brand.favicon %}'{{ ConfigApp.brand.favicon }}'{% else %}$config['accountUrl'] . '/src/Assets/images/favicon.png'{% endif %};
+$config['brand']['login']['splash']      = $config['accountUrl'] . '/src/Assets/images/{{ ConfigApp.brand.loginScreenImage ?? 'login-screen.jpg' }}';
+$config['brand']['sidebar']['icon']      = $config['accountUrl'] . '/src/Assets/images/{{ ConfigApp.brand.sidebar.icon ?? 'logo.png' }}';
 $config['brand']['sidebar']['iconUrl']   = '{{ ConfigApp.brand.sidebar.iconUrl ?? '' }}';
 $config['brand']['sidebar']['title']     = '{{ ConfigApp.brand.sidebar.title ?? '' }}';
 

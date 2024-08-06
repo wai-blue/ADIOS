@@ -58,7 +58,7 @@ class Desktop extends \ADIOS\Core\Controller {
     $topRightMenu["items"][] = [
       "faIcon" => "fas fa-window-restore",
       "text" => $this->translate("Open new tab"),
-      "onclick" => "window.open('{$this->app->config['url']}');",
+      "onclick" => "window.open('{$this->app->config['accountUrl']}');",
     ];
 
     $this->viewParams["topRightMenu"] = $topRightMenu;

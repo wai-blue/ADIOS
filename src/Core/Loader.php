@@ -112,6 +112,8 @@ class Loader
     if (empty($this->config['dir'])) $this->config['dir'] = "";
     if (empty($this->config['url'])) $this->config['url'] = "";
     if (empty($this->config['rewriteBase'])) $this->config['rewriteBase'] = "";
+    if (empty($this->config['accountDir'])) $this->config['accountDir'] = $this->config['dir'];
+    if (empty($this->config['accountUrl'])) $this->config['accountUrl'] = $this->config['url'];
 
     $this->srcDir = realpath(__DIR__."/..");
 
@@ -335,8 +337,8 @@ class Loader
                   <p>"
                     .$this->translate("To recover a forgotten password, click on the link below.", [], $this).
                   "</p>
-                  <a href='{$config['url']}/PasswordReset?token={$passwordResetToken}'>
-                    {$config['url']}/PasswordReset?token={$passwordResetToken}
+                  <a href='{$config['accountUrl']}/PasswordReset?token={$passwordResetToken}'>
+                    {$config['accountUrl']}/PasswordReset?token={$passwordResetToken}
                   </a>
                 ");
                 $this->email->send();
@@ -396,7 +398,7 @@ class Loader
                 $newPassword ?? ''
               );
 
-              header('Location: ' . $this->config['url']);
+              header('Location: ' . $this->config['accountUrl']);
               exit();
             }
           }
@@ -1091,7 +1093,7 @@ class Loader
         setcookie(_ADIOS_ID.'-user', '', 0);
         setcookie(_ADIOS_ID.'-language', '', 0);
 
-        header("Location: {$this->config['url']}?");
+        header("Location: {$this->config['accountUrl']}?");
         exit();
       }
 
@@ -1236,7 +1238,7 @@ class Loader
     } catch (\ADIOS\Core\Exceptions\NotEnoughPermissionsException $e) {
       $message = $e->getMessage();
       if ($this->userLogged) {
-        $message .= " Hint: Sign out and sign in again. {$this->config['url']}?sign-out";
+        $message .= " Hint: Sign out and sign in again. {$this->config['accountUrl']}?sign-out";
       }
       return $this->renderFatal($message, FALSE);
       // header('HTTP/1.1 401 Unauthorized', true, 401);
@@ -1633,8 +1635,8 @@ class Loader
     $this->config['protocol'] = (strtoupper($_SERVER['HTTPS'] ?? "") == "ON" ? "https" : "http");
     $this->config['timezone'] = $this->config['timezone'] ?? 'Europe/Bratislava';
 
-    $this->config['uploadDir'] = $this->config['uploadDir'] ?? "{$this->config['dir']}/upload";
-    $this->config['uploadUrl'] = $this->config['uploadUrl'] ?? "{$this->config['url']}/upload";
+    $this->config['uploadDir'] = $this->config['uploadDir'] ?? "{$this->config['accountDir']}/upload";
+    $this->config['uploadUrl'] = $this->config['uploadUrl'] ?? "{$this->config['accountUrl']}/upload";
 
     $this->config['uploadDir'] = str_replace("\\", "/", $this->config['uploadDir']);
   }

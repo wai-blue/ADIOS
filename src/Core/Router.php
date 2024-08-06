@@ -88,7 +88,7 @@ class Router {
   }
 
   public function redirectTo(string $url, int $code = 302) {
-    header("Location: {$this->app->config['url']}/".trim($url, "/"), true, $code);
+    header("Location: {$this->app->config['accountUrl']}/".trim($url, "/"), true, $code);
     exit;
   }
 

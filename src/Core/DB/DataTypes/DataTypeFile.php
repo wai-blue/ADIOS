@@ -49,7 +49,7 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
       $value[count($value) - 1] = rawurlencode($value[count($value) - 1]);
       $value = implode('/', $value);
 
-      $html = "<a href='{$this->app->config['url']}/File?f={$value}' onclick='event.cancelBubble = true;' target='_blank'>".basename($value).'</a>';
+      $html = "<a href='{$this->app->config['accountUrl']}/File?f={$value}' onclick='event.cancelBubble = true;' target='_blank'>".basename($value).'</a>';
     }
 
     return $html;
@@ -57,6 +57,6 @@ class DataTypeFile extends \ADIOS\Core\DB\DataType
 
   public function toCsv($value, $params = [])
   {
-    return "{$this->app->config['url']}/File?f=/{$value}";
+    return "{$this->app->config['accountUrl']}/File?f=/{$value}";
   }
 }

@@ -50,11 +50,11 @@ class DataTypeImage extends \ADIOS\Core\DB\DataType {
       $img_url = "{$this->app->config['images_url']}/{$value}";
       $img_style = "style='height:30px;border:none'";
 
-      $img_url = "{$this->app->config['url']}/Image?f=".urlencode($value).'&cfg=wa_list&rand='.rand(1, 999999);
+      $img_url = "{$this->app->config['accountUrl']}/Image?f=".urlencode($value).'&cfg=wa_list&rand='.rand(1, 999999);
       $img_style = "style='border:none'";
 
       $pathinfo = pathinfo($value);
-      $html = "<a href='{$this->app->config['url']}/Image?f=".urlencode($value)."' target='_blank' onclick='event.cancelBubble=true;'><img src='{$img_url}' {$img_style} class='list_image'></a>";
+      $html = "<a href='{$this->app->config['accountUrl']}/Image?f=".urlencode($value)."' target='_blank' onclick='event.cancelBubble=true;'><img src='{$img_url}' {$img_style} class='list_image'></a>";
       if ($params['display_basename']) {
         $html .= "<br/>{$pathinfo['basename']}";
       }
