@@ -21,50 +21,11 @@ class TwigLoader implements \Twig\Loader\LoaderInterface {
     $appNamespace = $this->app->config['appNamespace'] ?? 'App';
     $templateName = str_replace("\\", "/", $name);
 
-    if (strpos($templateName, "ADIOS/Templates/Widgets/") === 0) {
-      $templateName = str_replace("ADIOS/Templates/Widgets/", "", $templateName);
-      $widget = substr($templateName, 0, strpos($templateName, "/"));
-      $action = substr($templateName, strpos($templateName, "/") + 1);
-
-      $templateFile = $this->app->widgetsDir."/{$widget}/Templates/{$action}.twig";
-    } else if (strpos($templateName, "{$appNamespace}/") === 0) {
+    if (strpos($templateName, "{$appNamespace}/") === 0) {
       $templateName = substr($templateName, strlen($appNamespace . '/'));
-      $templateFile = 
-        $this->app->config['dir']
-        . '/src/' . $templateName . '.twig'
+      $templateRootDir = $this->app->config['twigRootDir'] ?? $this->app->config['dir'] . '/src';
+      $templateFile = $templateRootDir . '/' . $templateName . '.twig'
       ;
-    } else if (strpos($templateName, "ADIOS/Views/") === 0) {
-      $templateName = str_replace('ADIOS/', '', $templateName);
-
-      $templateFile = __DIR__ . '/../' . $templateName . '.twig';
-    } else if (strpos($templateName, "ADIOS/Templates/") === 0) {
-      $templateName = str_replace("ADIOS/Templates/", "", $templateName);
-
-      // najprv skusim hladat core template...
-      $templateFile = __DIR__."/../Templates/{$templateName}.twig";
-
-      // ...potom Widget akciu
-      if (!is_file($templateFile)) {
-        $tPath = explode("/", $templateName);
-        $tName = array_pop($tPath);
-        $tPath = join("/", $tPath);
-
-        $templateFile = $this->app->widgetsDir."/{$tPath}/Templates/{$tName}.twig";
-      }
-
-      // ...a nakoniec Plugin akciu
-      if (!is_file($templateFile)) {
-        preg_match('/(\w+)\/([\w\/]+)/', $templateName, $m);
-        foreach ($this->app->pluginFolders as $pluginFolder) {
-          $folder = $pluginFolder."/{$name}/Models";
-
-          $templateFile = "{$folder}/{$m[1]}/Templates/{$m[2]}.twig";
-          if (is_file($templateFile)) {
-            break;
-          }
-        }
-      }
-
     } else {
       return new \Twig\Source($name, $name);
     }

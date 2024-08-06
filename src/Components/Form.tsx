@@ -618,8 +618,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   renderSaveButton(): JSX.Element {
     let id = this.state.id ? this.state.id : 0;
 
-    return (
-      <button
+    return <>
+      {this.state.canUpdate ? <button
         onClick={() => this.saveRecord()}
         className={
           "btn btn-success"
@@ -640,20 +640,20 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
             </>
           )
         }
-      </button>
-    );
+      </button> : null}
+    </>;
   }
 
   renderEditButton(): JSX.Element {
-    return (
-      <button
+    return <>
+      {this.state.canUpdate ? <button
         onClick={() => this.setState({ isInlineEditing: true })}
         className="btn btn-transparent"
       >
         <span className="icon"><i className="fas fa-pencil-alt"></i></span>
         <span className="text">{globalThis.app.translate('Edit')}</span>
-      </button>
-    );
+      </button> : null}
+    </>;
   }
 
   renderCloseButton(): JSX.Element {

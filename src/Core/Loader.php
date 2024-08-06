@@ -57,7 +57,7 @@ class Loader
   public array $plugins = [];
 
   public array $modelObjects = [];
-  public array $models = [];
+  public array $registeredModels = [];
 
   public bool $userLogged = FALSE;
   public array $userProfile = [];
@@ -242,7 +242,9 @@ class Loader
 
       $this->onBeforeConfigLoaded();
 
-      $this->loadConfigFromDB();
+      if ($mode == self::ADIOS_MODE_FULL) {
+        $this->loadConfigFromDB();
+      }
 
       \ADIOS\Core\Helper::addSpeedLogTag("#3");
 
@@ -252,6 +254,8 @@ class Loader
         if (!empty($_SESSION[_ADIOS_ID]['language'])) {
           $this->config['language'] = $_SESSION[_ADIOS_ID]['language'];
         }
+
+        if (empty($this->config['language'])) $this->config['language'] = 'en';
 
         if (is_array($this->config['availableLanguages'])) {
           if (!in_array($this->config['language'], $this->config['availableLanguages'])) {
@@ -446,7 +450,7 @@ class Loader
 
         // vytvorim definiciu tables podla nacitanych modelov
 
-        foreach ($this->models as $modelName) {
+        foreach ($this->registeredModels as $modelName) {
           $this->getModel($modelName);
         }
 
@@ -664,14 +668,14 @@ class Loader
 
   public function registerModel($modelName): void
   {
-    if (!in_array($modelName, $this->models)) {
-      $this->models[] = $modelName;
+    if (!in_array($modelName, $this->registeredModels)) {
+      $this->registeredModels[] = $modelName;
     }
   }
 
   public function getModelNames(): array
   {
-    return $this->models;
+    return $this->registeredModels;
   }
 
   public function getModelClassName($modelName): string
@@ -949,7 +953,7 @@ class Loader
 
     $this->console->info("Dropping existing tables.");
 
-    foreach ($this->models as $modelName) {
+    foreach ($this->registeredModels as $modelName) {
       $model = $this->getModel($modelName);
       $model->dropTableIfExists();
     }
@@ -958,7 +962,7 @@ class Loader
 
     $this->db->startTransaction();
 
-    foreach ($this->models as $modelName) {
+    foreach ($this->registeredModels as $modelName) {
       try {
         $model = $this->getModel($modelName);
 
@@ -979,7 +983,7 @@ class Loader
       }
     }
 
-    // foreach ($this->models as $modelName) {
+    // foreach ($this->registeredModels as $modelName) {
     //   try {
     //     $model = $this->getModel($modelName);
 

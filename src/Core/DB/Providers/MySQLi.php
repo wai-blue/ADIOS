@@ -56,7 +56,9 @@ class MySQLi extends \ADIOS\Core\DB
       throw new \ADIOS\Core\Exceptions\DBException($this->connection->connect_error);
     }
 
-    $this->connection->select_db($dbName);
+    if (!empty($dbName)) {
+      $this->connection->select_db($dbName);
+    }
 
     if ($this->connection->errno == 1049) {
       // unknown database

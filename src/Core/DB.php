@@ -53,9 +53,13 @@ class DB
 
     $this->connect();
 
-    $tmp = $this->showTables();
-    foreach ($tmp as $value) {
-      $this->existingSqlTables[] = reset($value);
+    $dbName = $this->app->getConfig('db_name', '');
+
+    if (!empty($dbName)) {
+      $tmp = $this->showTables();
+      foreach ($tmp as $value) {
+        $this->existingSqlTables[] = reset($value);
+      }
     }
 
     $h = opendir(dirname(__FILE__) . '/DB/DataTypes');

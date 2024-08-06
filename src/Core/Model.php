@@ -1396,6 +1396,10 @@ class Model
       }
     }
 
+    foreach ($columns as $colName => $colDef) {
+      if (!isset($data[$colName])) $data[$colName] = null;
+    }
+
     return $data;
   }
 
@@ -2072,4 +2076,22 @@ class Model
 
     return $relationships;
   }
+
+  public function getDependentRecords(int $parentId): array {
+    $dependentRecords = [];
+    foreach ($this->adios->registeredModels as $modelClass) {
+      $tmpModel = $this->adios->getModel($modelClass);
+      foreach ($tmpModel->columns() as $colName => $colDef) {
+        if ($colDef['type'] == 'lookup' && $colDef['model'] == $this->fullName) {
+          $count = $tmpModel->where($colName, $parentId)->count();
+          if ($count > 0) {
+            $dependentRecords[$tmpModel->fullName . '.' . $colName] = $count;
+          }
+        }
+      }
+    }
+
+    return $dependentRecords;
+  }
+
 }

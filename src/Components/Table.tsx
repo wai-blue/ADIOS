@@ -330,12 +330,16 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       titleForEditing: this.props.formParams?.titleForEditing,
       saveButtonText: this.props.formParams?.saveButtonText,
       addButtonText: this.props.formParams?.addButtonText,
+      canCreate: this.state.canCreate,
+      canDelete: this.state.canDelete,
+      canRead: this.state.canRead,
+      canUpdate: this.state.canUpdate,
       onClose: () => {
         this.setState({ formId: null });
       },
       onSaveCallback: (form: Form<FormProps, FormState>, saveResponse: any) => {
         this.loadData();
-        if (!form.state.isInlineEditing) {
+        if (form.state.isInlineEditing) {
           this.setState({ formId: null });
         }
       },
@@ -638,8 +642,8 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       field='__actions'
       header=''
       body={(data: any, options: any) => {
-        return (
-          <button
+        return <>
+          {this.state.canDelete ? <button
             className="btn btn-list-item btn-danger"
             title={globalThis.app.translate('Delete')}
             onClick={(e) => {
@@ -648,8 +652,8 @@ export default class Table<P, S extends TableState = TableState> extends Compone
             }}
           >
             <span className="icon"><i className="fas fa-trash-alt"></i></span>
-          </button>
-        );
+          </button> : null}
+        </>;
       }}
       style={{ width: 'auto' }}
     ></Column>);
