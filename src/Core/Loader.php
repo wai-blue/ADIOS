@@ -244,9 +244,9 @@ class Loader
 
       $this->onBeforeConfigLoaded();
 
-      if ($mode == self::ADIOS_MODE_FULL) {
-        $this->loadConfigFromDB();
-      }
+      // if ($mode == self::ADIOS_MODE_FULL) {
+      //   $this->loadConfigFromDB();
+      // }
 
       \ADIOS\Core\Helper::addSpeedLogTag("#3");
 
@@ -699,7 +699,7 @@ class Loader
         $modelClassName = $this->getModelClassName($modelName);
         $this->modelObjects[$modelName] = new $modelClassName($this);
 
-        $this->router->addRouting($this->modelObjects[$modelName]->routing());
+        // $this->router->addRouting($this->modelObjects[$modelName]->routing());
 
       } catch (\Exception $e) {
         throw new \ADIOS\Core\Exceptions\GeneralException("Can't find model '{$modelName}'. ".$e->getMessage());
@@ -1603,31 +1603,31 @@ class Loader
     }
   }
 
-  public function loadConfigFromDB() {
-    try {
-      $queryOk = $this->db->query("
-        select
-          *
-        from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
-        order by id asc
-      ");
+  // public function loadConfigFromDB() {
+  //   try {
+  //     $queryOk = $this->db->query("
+  //       select
+  //         *
+  //       from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
+  //       order by id asc
+  //     ");
 
-      if ($queryOk) {
-        while ($row = $this->db->fetchArray()) {
-          $tmp = &$this->config;
-          foreach (explode("/", $row['path']) as $tmp_path) {
-            if (!isset($tmp[$tmp_path])) {
-              $tmp[$tmp_path] = [];
-            }
-            $tmp = &$tmp[$tmp_path];
-          }
-          $tmp = $row['value'];
-        }
-      }
-    } catch (\Exception $e) {
-      // do nothing
-    }
-  }
+  //     if ($queryOk) {
+  //       while ($row = $this->db->fetchArray()) {
+  //         $tmp = &$this->config;
+  //         foreach (explode("/", $row['path']) as $tmp_path) {
+  //           if (!isset($tmp[$tmp_path])) {
+  //             $tmp[$tmp_path] = [];
+  //           }
+  //           $tmp = &$tmp[$tmp_path];
+  //         }
+  //         $tmp = $row['value'];
+  //       }
+  //     }
+  //   } catch (\Exception $e) {
+  //     // do nothing
+  //   }
+  // }
 
   public function finalizeConfig() {
     // various default values

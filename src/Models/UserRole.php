@@ -52,14 +52,14 @@ class UserRole extends \ADIOS\Core\Model {
     ]);
   }
 
-  public function routing(array $routing = []) {
-    return parent::routing([
-      '/^Administrator\/Permissions\/(\d+)$/' => [
-        "controller" => "Administrator/Permissions",
-        "params" => [
-          "idUserRole" => '$1',
-        ]
-      ],
-    ]);
-  }
+  // public function routing(array $routing = []) {
+  //   return parent::routing([
+  //     '/^Administrator\/Permissions\/(\d+)$/' => [
+  //       "controller" => "Administrator/Permissions",
+  //       "params" => [
+  //         "idUserRole" => '$1',
+  //       ]
+  //     ],
+  //   ]);
+  // }
 }

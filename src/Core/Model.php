@@ -63,7 +63,7 @@ class Model
    */
   public string $urlBase = "";
 
-  public ?array $crud = [];
+  // public ?array $crud = [];
 
   /**
    * SQL-compatible string used to render displayed value of the record when used
@@ -408,11 +408,12 @@ class Model
     }
   }
 
-  public function dropTableIfExists()
+  public function dropTableIfExists(): \ADIOS\Core\Model
   {
     $this->app->db->query("set foreign_key_checks = 0");
     $this->app->db->query("drop table if exists `" . $this->fullTableSqlName . "`");
     $this->app->db->query("set foreign_key_checks = 1");
+    return $this;
   }
 
   /**
@@ -423,9 +424,37 @@ class Model
   public function createSqlForeignKeys()
   {
 
-    if (!empty($this->fullTableSqlName)) {
-      $this->app->db->createSqlForeignKeys($this->fullTableSqlName);
+    $sql = '';
+    foreach ($this->columns() as $column => $columnDefinition) {
+      if (!empty($onlyColumn) && $onlyColumn != $column) continue;
+
+      if (
+        !($columnDefinition['disableForeignKey'] ?? false)
+        && 'lookup' == $columnDefinition['type']
+      ) {
+        $lookupModel = $this->app->getModel($columnDefinition['model']);
+        $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?? "id";
+        $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?? "RESTRICT";
+        $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?? "RESTRICT";
+
+        $sql .= "
+          ALTER TABLE `{$this->fullTableSqlName}`
+          ADD CONSTRAINT `fk_" . md5($this->fullTableSqlName . '_' . $column) . "`
+          FOREIGN KEY (`{$column}`)
+          REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`)
+          ON DELETE {$foreignKeyOnDelete}
+          ON UPDATE {$foreignKeyOnUpdate};;
+        ";
+      }
     }
+
+    if (!empty($sql)) {
+      $this->app->db->multiQuery($sql);
+    }
+
+    // if (!empty($this->fullTableSqlName)) {
+    //   $this->app->db->createSqlForeignKeys($this->fullTableSqlName);
+    // }
   }
 
   /**
@@ -503,233 +532,233 @@ class Model
   //////////////////////////////////////////////////////////////////
   // routing
 
-  public function routing(array $routing = [])
-  {
-    // return $this->app->dispatchEventToPlugins("onModelAfterRouting", [
-    //   "model" => $this,
-    //   "routing" => $this->addStandardCRUDRouting($routing),
-    // ])["routing"];
-  }
+  // public function routing(array $routing = [])
+  // {
+  //   // return $this->app->dispatchEventToPlugins("onModelAfterRouting", [
+  //   //   "model" => $this,
+  //   //   "routing" => $this->addStandardCRUDRouting($routing),
+  //   // ])["routing"];
+  // }
 
-  public function addStandardCRUDRouting($routing = [], $params = [])
-  {
-    if (empty($params['urlBase'])) {
-      $urlBase = str_replace('/', '\/', $this->urlBase);
-    } else {
-      $urlBase = $params['urlBase'];
-    }
+  // public function addStandardCRUDRouting($routing = [], $params = [])
+  // {
+  //   if (empty($params['urlBase'])) {
+  //     $urlBase = str_replace('/', '\/', $this->urlBase);
+  //   } else {
+  //     $urlBase = $params['urlBase'];
+  //   }
 
-    $urlParams = (empty($params['urlParams']) ? [] : $params['urlParams']);
+  //   $urlParams = (empty($params['urlParams']) ? [] : $params['urlParams']);
 
-    $varsInUrl = preg_match_all('/{{ (\w+) }}/', $urlBase, $m);
-    foreach ($m[0] as $k => $v) {
-      $urlBase = str_replace($v, '([\w\.-]+)', $urlBase);
-      $urlParams[$m[1][$k]] = '$' . ($k + 1);
-    }
+  //   $varsInUrl = preg_match_all('/{{ (\w+) }}/', $urlBase, $m);
+  //   foreach ($m[0] as $k => $v) {
+  //     $urlBase = str_replace($v, '([\w\.-]+)', $urlBase);
+  //     $urlParams[$m[1][$k]] = '$' . ($k + 1);
+  //   }
 
-    if (!is_array($routing)) {
-      $routing = [];
-    }
+  //   if (!is_array($routing)) {
+  //     $routing = [];
+  //   }
 
-    $routing = array_merge(
-      $routing,
-      $this->getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
-    );
+  //   $routing = array_merge(
+  //     $routing,
+  //     $this->getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
+  //   );
 
-    foreach ($this->columns() as $colName => $colDefinition) {
-      if ($colDefinition['type'] == 'lookup') {
-        $tmpModel = $this->app->getModel($colDefinition['model']);
-        $routing = array_merge(
-          $routing,
-          $this->getStandardCRUDRoutes(
-            str_replace("/", "\\/", $tmpModel->urlBase) . '\/(\d+)\/' . $urlBase,
-            $urlParams,
-            $varsInUrl + 1
-          )
-        );
-      }
-    }
+  //   foreach ($this->columns() as $colName => $colDefinition) {
+  //     if ($colDefinition['type'] == 'lookup') {
+  //       $tmpModel = $this->app->getModel($colDefinition['model']);
+  //       $routing = array_merge(
+  //         $routing,
+  //         $this->getStandardCRUDRoutes(
+  //           str_replace("/", "\\/", $tmpModel->urlBase) . '\/(\d+)\/' . $urlBase,
+  //           $urlParams,
+  //           $varsInUrl + 1
+  //         )
+  //       );
+  //     }
+  //   }
 
-    return $routing;
-  }
+  //   return $routing;
+  // }
 
-  public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
-  {
-    if (empty($urlBase)) return [];
+  // public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
+  // {
+  //   if (empty($urlBase)) return [];
 
-    $routing = [
+  //   $routing = [
 
-      // Default
-      '/^' . $urlBase . '$/i' => [
-        "permission" => "{$this->fullName}/Browse",
-        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Default
+  //     '/^' . $urlBase . '$/i' => [
+  //       "permission" => "{$this->fullName}/Browse",
+  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Browse
-      '/^' . $urlBase . '\/browse$/i' => [
-        "permission" => "{$this->fullName}/Browse",
-        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Browse
+  //     '/^' . $urlBase . '\/browse$/i' => [
+  //       "permission" => "{$this->fullName}/Browse",
+  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Edit
-      '/^' . $urlBase . '\/(\d+)\/edit$/i' => [
-        "permission" => "{$this->fullName}/Edit",
-        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-        "params" => array_merge($urlParams, [
-          "displayMode" => "window",
-          "windowParams" => [
-            "uid" => Helper::str2uid($this->fullName) . '_edit',
-          ],
-          "model" => $this->fullName,
-          "id" => '$' . ($varsInUrl + 1),
-        ])
-      ],
+  //     // Edit
+  //     '/^' . $urlBase . '\/(\d+)\/edit$/i' => [
+  //       "permission" => "{$this->fullName}/Edit",
+  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
+  //       "params" => array_merge($urlParams, [
+  //         "displayMode" => "window",
+  //         "windowParams" => [
+  //           "uid" => Helper::str2uid($this->fullName) . '_edit',
+  //         ],
+  //         "model" => $this->fullName,
+  //         "id" => '$' . ($varsInUrl + 1),
+  //       ])
+  //     ],
 
-      // Add
-      '/^' . $urlBase . '\/add$/i' => [
-        "permission" => "{$this->fullName}/Add",
-        "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-        "params" => array_merge($urlParams, [
-          "displayMode" => "window",
-          "windowParams" => [
-            "uid" => Helper::str2uid($this->fullName) . '_add',
-            "modal" => TRUE,
-          ],
-          "model" => $this->fullName,
-          "id" => -1,
-        ])
-      ],
+  //     // Add
+  //     '/^' . $urlBase . '\/add$/i' => [
+  //       "permission" => "{$this->fullName}/Add",
+  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
+  //       "params" => array_merge($urlParams, [
+  //         "displayMode" => "window",
+  //         "windowParams" => [
+  //           "uid" => Helper::str2uid($this->fullName) . '_add',
+  //           "modal" => TRUE,
+  //         ],
+  //         "model" => $this->fullName,
+  //         "id" => -1,
+  //       ])
+  //     ],
 
-      // Save
-      '/^' . $urlBase . '\/save$/i' => [
-        "permission" => "{$this->fullName}/Save",
-        "controller" => $this->crud['save']['controller'] ?? "Components/Form/Save",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Save
+  //     '/^' . $urlBase . '\/save$/i' => [
+  //       "permission" => "{$this->fullName}/Save",
+  //       "controller" => $this->crud['save']['controller'] ?? "Components/Form/Save",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Delete
-      '/^' . $urlBase . '\/delete$/' => [
-        "permission" => "{$this->fullName}/Delete",
-        "controller" => $this->crud['delete']['controller'] ?? "Components/Form/Delete",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Delete
+  //     '/^' . $urlBase . '\/delete$/' => [
+  //       "permission" => "{$this->fullName}/Delete",
+  //       "controller" => $this->crud['delete']['controller'] ?? "Components/Form/Delete",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Copy
-      '/^' . $urlBase . '\/copy$/i' => [
-        "permission" => "{$this->fullName}/Copy",
-        "controller" => $this->crud['copy']['controller'] ?? "Components/Form/Copy",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Copy
+  //     '/^' . $urlBase . '\/copy$/i' => [
+  //       "permission" => "{$this->fullName}/Copy",
+  //       "controller" => $this->crud['copy']['controller'] ?? "Components/Form/Copy",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Print
-      '/^' . $urlBase . '\/(\d+)\/print$/i' => [
-        "permission" => "{$this->fullName}/Edit",
-        "controller" => "Printer",
-        "params" => array_merge($urlParams, [
-          "contentController" => $this->crud['print']['controller'] ?? "Components/Form",
-          "params" => [
-            "model" => $this->fullName,
-            "id" => '$' . ($varsInUrl + 1),
-          ]
-        ])
-      ],
+  //     // Print
+  //     '/^' . $urlBase . '\/(\d+)\/print$/i' => [
+  //       "permission" => "{$this->fullName}/Edit",
+  //       "controller" => "Printer",
+  //       "params" => array_merge($urlParams, [
+  //         "contentController" => $this->crud['print']['controller'] ?? "Components/Form",
+  //         "params" => [
+  //           "model" => $this->fullName,
+  //           "id" => '$' . ($varsInUrl + 1),
+  //         ]
+  //       ])
+  //     ],
 
-      // Search
-      '/^' . $urlBase . '\/search$/i' => [
-        "permission" => "{$this->fullName}/Search",
-        "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-          "searchGroup" => $this->tableParams['title'] ?? $urlBase,
-          "displayMode" => "window",
-          "windowParams" => [
-            "modal" => TRUE,
-          ],
-        ])
-      ],
+  //     // Search
+  //     '/^' . $urlBase . '\/search$/i' => [
+  //       "permission" => "{$this->fullName}/Search",
+  //       "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //         "searchGroup" => $this->tableParams['title'] ?? $urlBase,
+  //         "displayMode" => "window",
+  //         "windowParams" => [
+  //           "modal" => TRUE,
+  //         ],
+  //       ])
+  //     ],
 
-      // Export/CSV
-      '/^' . $urlBase . '\/Export\/CSV$/' => [
-        "permission" => "{$this->fullName}/Export/CSV",
-        "controller" => "Components/Table/Export/CSV",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Export/CSV
+  //     '/^' . $urlBase . '\/Export\/CSV$/' => [
+  //       "permission" => "{$this->fullName}/Export/CSV",
+  //       "controller" => "Components/Table/Export/CSV",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Import/CSV
-      '/^' . $urlBase . '\/Import\/CSV$/i' => [
-        "permission" => "{$this->fullName}/Export/CSV",
-        "controller" => "Components/Table/Import/CSV",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Import/CSV
+  //     '/^' . $urlBase . '\/Import\/CSV$/i' => [
+  //       "permission" => "{$this->fullName}/Export/CSV",
+  //       "controller" => "Components/Table/Import/CSV",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Import/CSV/Import
-      '/^' . $urlBase . '\/Import\/CSV\/Import$/i' => [
-        "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "Components/Table/Import/CSV/Import",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Import/CSV/Import
+  //     '/^' . $urlBase . '\/Import\/CSV\/Import$/i' => [
+  //       "permission" => "{$this->fullName}/Import/CSV",
+  //       "controller" => "Components/Table/Import/CSV/Import",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Import/CSV/DownloadTemplate
-      '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/i' => [
-        "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "Components/Table/Import/CSV/DownloadTemplate",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Import/CSV/DownloadTemplate
+  //     '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/i' => [
+  //       "permission" => "{$this->fullName}/Import/CSV",
+  //       "controller" => "Components/Table/Import/CSV/DownloadTemplate",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Import/CSV/Preview
-      '/^' . $urlBase . '\/Import\/CSV\/Preview$/i' => [
-        "permission" => "{$this->fullName}/Import/CSV",
-        "controller" => "Components/Table/Import/CSV/Preview",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-        ])
-      ],
+  //     // Import/CSV/Preview
+  //     '/^' . $urlBase . '\/Import\/CSV\/Preview$/i' => [
+  //       "permission" => "{$this->fullName}/Import/CSV",
+  //       "controller" => "Components/Table/Import/CSV/Preview",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //       ])
+  //     ],
 
-      // Api/Get/<ID>
-      '/^Api\/' . $urlBase . '\/Get\/(\d+)$/i' => [
-        "permission" => "{$this->fullName}/Api/Get",
-        "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-          "id" => '$' . ($varsInUrl + 1),
-        ])
-      ],
+  //     // Api/Get/<ID>
+  //     '/^Api\/' . $urlBase . '\/Get\/(\d+)$/i' => [
+  //       "permission" => "{$this->fullName}/Api/Get",
+  //       "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //         "id" => '$' . ($varsInUrl + 1),
+  //       ])
+  //     ],
 
-      // Api/Get:<column>=<value>
-      '/^Api\/' . $urlBase . '\/Get:(.+)=(.+)$/i' => [
-        "permission" => "{$this->fullName}/Api/Get",
-        "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
-        "params" => array_merge($urlParams, [
-          "model" => $this->fullName,
-          "column" => '$' . ($varsInUrl + 1),
-          "value" => '$' . ($varsInUrl + 2),
-        ])
-      ],
+  //     // Api/Get:<column>=<value>
+  //     '/^Api\/' . $urlBase . '\/Get:(.+)=(.+)$/i' => [
+  //       "permission" => "{$this->fullName}/Api/Get",
+  //       "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
+  //       "params" => array_merge($urlParams, [
+  //         "model" => $this->fullName,
+  //         "column" => '$' . ($varsInUrl + 1),
+  //         "value" => '$' . ($varsInUrl + 2),
+  //       ])
+  //     ],
 
-    ];
+  //   ];
 
-    return $routing;
-  }
+  //   return $routing;
+  // }
 
   //////////////////////////////////////////////////////////////////
   // definition of columns

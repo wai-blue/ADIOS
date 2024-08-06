@@ -968,34 +968,34 @@ class DoctrineDBAL extends \ADIOS\Core\DB
   }
 
 
-  public function createSqlForeignKeys($table)
-  {
-    $sql = '';
-    foreach ($this->tables[$table] as $column => $columnDefinition) {
-      if (
-        !$columnDefinition['disableForeignKey']
-        && 'lookup' == $columnDefinition['type']
-      ) {
-        $lookupModel = $this->app->getModel($columnDefinition['model']);
-        $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?: "id";
-        $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?: "RESTRICT";
-        $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?: "RESTRICT";
+  // public function createSqlForeignKeys($table)
+  // {
+  //   $sql = '';
+  //   foreach ($this->tables[$table] as $column => $columnDefinition) {
+  //     if (
+  //       !$columnDefinition['disableForeignKey']
+  //       && 'lookup' == $columnDefinition['type']
+  //     ) {
+  //       $lookupModel = $this->app->getModel($columnDefinition['model']);
+  //       $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?: "id";
+  //       $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?: "RESTRICT";
+  //       $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?: "RESTRICT";
 
-        $sql .= "
-          ALTER TABLE `{$table}`
-          ADD CONSTRAINT `fk_" . md5($table . '_' . $column) . "`
-          FOREIGN KEY (`{$column}`)
-          REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`)
-          ON DELETE {$foreignKeyOnDelete}
-          ON UPDATE {$foreignKeyOnUpdate};;
-        ";
-      }
-    }
+  //       $sql .= "
+  //         ALTER TABLE `{$table}`
+  //         ADD CONSTRAINT `fk_" . md5($table . '_' . $column) . "`
+  //         FOREIGN KEY (`{$column}`)
+  //         REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`)
+  //         ON DELETE {$foreignKeyOnDelete}
+  //         ON UPDATE {$foreignKeyOnUpdate};;
+  //       ";
+  //     }
+  //   }
 
-    if (!empty($sql)) {
-      $this->multiQuery($sql);
-    }
-  }
+  //   if (!empty($sql)) {
+  //     $this->multiQuery($sql);
+  //   }
+  // }
 
 
 

@@ -58,7 +58,6 @@ class User extends \ADIOS\Core\Model {
       'login' => [
         'type' => 'varchar',
         'title' => $this->translate('Login'),
-        'show' => true,
       ],
       'password' => [
         'type' => 'password',
@@ -71,22 +70,18 @@ class User extends \ADIOS\Core\Model {
       'last_login_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last login'),
-        'readonly' => TRUE,
       ],
       'last_login_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last login IP'),
-        'readonly' => TRUE,
       ],
       'last_access_time' => [
         'type' => 'datetime',
         'title' => $this->translate('Time of last access'),
-        'readonly' => TRUE,
       ],
       'last_access_ip' => [
         'type' => 'varchar',
         'title' => $this->translate('Last access IP'),
-        'readonly' => TRUE,
       ],
       //'id_token_reset_password' => [
       //  'type' => 'lookup',
@@ -111,37 +106,37 @@ class User extends \ADIOS\Core\Model {
   //   ];
   // }
 
-  public function upgrades() : array {
-    // Upgrade nebude fungovať pretože sa mení logika prihlásenia a upgrade sa vykoná až po prihlásení.
-    // Upgrade je možné realizovať nanovo vytvorením tabuľky users napríklad pomocou funkcie $model->install()
-    // Pri tomto riešení je potrebné manuálne zálohovať používateľov a následne ich importovať.
-    return [
-      0 => [], // upgrade to version 0 is the same as installation
-      1 => [
-        "ALTER TABLE `{$this->getFullTableSqlName()}` CHANGE  `active` `is_active` tinyint(1);",
-        "
-          ALTER TABLE `{$this->getFullTableSqlName()}`
-          ADD column `phone_number` varchar(255) DEFAULT '' after `email`
-        ",
-        "
-          ALTER TABLE `{$this->getFullTableSqlName()}`
-          ADD column `last_login_time` varchar(255) DEFAULT '' after `is_active`
-        ",
-        "
-          ALTER TABLE `{$this->getFullTableSqlName()}`
-          ADD column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
-        ",
-        "
-          ALTER TABLE `{$this->getFullTableSqlName()}`
-          ADD column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
-        ",
-        "
-          ALTER TABLE `{$this->getFullTableSqlName()}`
-          ADD column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
-        ",
-      ],
-    ];
-  }
+  // public function upgrades() : array {
+  //   // Upgrade nebude fungovať pretože sa mení logika prihlásenia a upgrade sa vykoná až po prihlásení.
+  //   // Upgrade je možné realizovať nanovo vytvorením tabuľky users napríklad pomocou funkcie $model->install()
+  //   // Pri tomto riešení je potrebné manuálne zálohovať používateľov a následne ich importovať.
+  //   return [
+  //     0 => [], // upgrade to version 0 is the same as installation
+  //     1 => [
+  //       "ALTER TABLE `{$this->getFullTableSqlName()}` CHANGE  `active` `is_active` tinyint(1);",
+  //       "
+  //         ALTER TABLE `{$this->getFullTableSqlName()}`
+  //         ADD column `phone_number` varchar(255) DEFAULT '' after `email`
+  //       ",
+  //       "
+  //         ALTER TABLE `{$this->getFullTableSqlName()}`
+  //         ADD column `last_login_time` varchar(255) DEFAULT '' after `is_active`
+  //       ",
+  //       "
+  //         ALTER TABLE `{$this->getFullTableSqlName()}`
+  //         ADD column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
+  //       ",
+  //       "
+  //         ALTER TABLE `{$this->getFullTableSqlName()}`
+  //         ADD column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
+  //       ",
+  //       "
+  //         ALTER TABLE `{$this->getFullTableSqlName()}`
+  //         ADD column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
+  //       ",
+  //     ],
+  //   ];
+  // }
 
   public function indexes(array $indexes = []) {
     return parent::indexes([
@@ -156,18 +151,18 @@ class User extends \ADIOS\Core\Model {
     ]);
   }
 
-  public function routing(array $routing = []) {
-    return parent::routing([
-      '/^MyProfile$/' => [
-        "controller" => "Components/Form",
-        "params" => [
-          "model" => "ADIOS/Models/User",
-          "myProfileView" => TRUE,
-          "id" => $this->app->userProfile['id'] ?? 0,
-        ]
-      ],
-    ]);
-  }
+  // public function routing(array $routing = []) {
+  //   return parent::routing([
+  //     '/^MyProfile$/' => [
+  //       "controller" => "Components/Form",
+  //       "params" => [
+  //         "model" => "ADIOS/Models/User",
+  //         "myProfileView" => TRUE,
+  //         "id" => $this->app->userProfile['id'] ?? 0,
+  //       ]
+  //     ],
+  //   ]);
+  // }
 
   // public function getById($id) {
   //   $id = (int) $id;
@@ -175,25 +170,25 @@ class User extends \ADIOS\Core\Model {
   //   return ($user === NULL ? [] : $user->toArray());
   // }
 
-  public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject, array $params): array
-  {
+  // public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject, array $params): array
+  // {
 
-    if ($params["myProfileView"]) {
-      $params['show_delete_button'] = FALSE;
-      $params['template'] = [
-        "columns" => [
-          [
-            "rows" => [
-              "login",
-              "password",
-            ],
-          ],
-        ],
-      ];
-    }
+  //   if ($params["myProfileView"]) {
+  //     $params['show_delete_button'] = FALSE;
+  //     $params['template'] = [
+  //       "columns" => [
+  //         [
+  //           "rows" => [
+  //             "login",
+  //             "password",
+  //           ],
+  //         ],
+  //       ],
+  //     ];
+  //   }
 
-    return (array) $params;
-  }
+  //   return (array) $params;
+  // }
 
 
   public function getClientIpAddress() {
@@ -400,24 +395,24 @@ class User extends \ADIOS\Core\Model {
 
   // Eloquent relations
 
-  public function relationships(): array {
-    $relationships = parent::relationships();
-    $relationships[] = 'roles';
+  // public function relationships(): array {
+  //   $relationships = parent::relationships();
+  //   $relationships[] = 'roles';
 
-    return $relationships;
-  }
+  //   return $relationships;
+  // }
 
-  public function roles() {
-    return $this->belongsToMany(
-      \ADIOS\Models\UserRole::class,
-      '_user_has_roles',
-      'id_user',
-      'id_role'
-    );
-  }
+  // public function roles() {
+  //   return $this->belongsToMany(
+  //     \ADIOS\Models\UserRole::class,
+  //     '_user_has_roles',
+  //     'id_user',
+  //     'id_role'
+  //   );
+  // }
 
-  public function id_token_reset_password(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
-    return $this->BelongsTo(\ADIOS\Models\Token::class, 'id_token_reset_password');
-  }
+  // public function id_token_reset_password(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
+  //   return $this->BelongsTo(\ADIOS\Models\Token::class, 'id_token_reset_password');
+  // }
 
 }

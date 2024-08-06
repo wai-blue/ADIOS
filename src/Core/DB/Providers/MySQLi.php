@@ -1043,36 +1043,37 @@ class MySQLi extends \ADIOS\Core\DB
   }
 
 
-  public function createSqlForeignKeys($table, $onlyColumn = '')
-  {
-    $sql = '';
-    foreach ($this->tables[$table] as $column => $columnDefinition) {
-      if (!empty($onlyColumn) && $onlyColumn != $column) continue;
+  // public function createSqlForeignKeys($table, $onlyColumn = '')
+  // {
+  //   $sql = '';
+  //   foreach ($this->tables[$table] as $column => $columnDefinition) {
+  //     if (!empty($onlyColumn) && $onlyColumn != $column) continue;
 
-      if (
-        !($columnDefinition['disableForeignKey'] ?? false)
-        && 'lookup' == $columnDefinition['type']
-      ) {
-        $lookupModel = $this->app->getModel($columnDefinition['model']);
-        $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?? "id";
-        $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?? "RESTRICT";
-        $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?? "RESTRICT";
+  //     if (
+  //       !($columnDefinition['disableForeignKey'] ?? false)
+  //       && 'lookup' == $columnDefinition['type']
+  //     ) {
+  //       $lookupModel = $this->app->getModel($columnDefinition['model']);
+  //       $foreignKeyColumn = $columnDefinition['foreignKeyColumn'] ?? "id";
+  //       $foreignKeyOnDelete = $columnDefinition['foreignKeyOnDelete'] ?? "RESTRICT";
+  //       $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?? "RESTRICT";
 
-        $sql .= "
-          ALTER TABLE `{$table}`
-          ADD CONSTRAINT `fk_" . md5($table . '_' . $column) . "`
-          FOREIGN KEY (`{$column}`)
-          REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`)
-          ON DELETE {$foreignKeyOnDelete}
-          ON UPDATE {$foreignKeyOnUpdate};;
-        ";
-      }
-    }
+  //       $sql .= "
+  //         ALTER TABLE `{$table}`
+  //         ADD CONSTRAINT `fk_" . md5($table . '_' . $column) . "`
+  //         FOREIGN KEY (`{$column}`)
+  //         REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`)
+  //         ON DELETE {$foreignKeyOnDelete}
+  //         ON UPDATE {$foreignKeyOnUpdate};;
+  //       ";
+  //     }
+  //   }
 
-    if (!empty($sql)) {
-      $this->multiQuery($sql);
-    }
-  }
+  //   if (!empty($sql)) {
+  //   echo $sql;
+  //     $this->multiQuery($sql);
+  //   }
+  // }
 
 
 

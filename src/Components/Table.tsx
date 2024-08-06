@@ -354,6 +354,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   getFormModalParams(): any {
     return {
       uid: this.props.uid + '_form',
+      type: this.state.formId == -1 ? 'centered' : 'right',
       // model: this.props.model,
       hideHeader: true,
       isOpen: Number.isInteger(this.state.formId),
@@ -376,7 +377,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
         onClick={() => this.onAddClick()}
       >
         <span className="icon"><i className="fas fa-plus"/></span>
-        <span className="text">{this.state.addButtonText}</span>
+        {this.state.addButtonText ? <span className="text">{this.state.addButtonText}</span> : null}
       </button>
     );
   }
@@ -387,11 +388,11 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
   renderHeader(): JSX.Element {
     return <div className="table-header">
+      {this.state.title ? <div className="table-header-title">{this.state.title}</div> : null}
+
       <div className="table-header-left">
         {this.renderHeaderButtons()}
       </div>
-
-      {this.state.title ? <div className="table-header-title">{this.state.title}</div> : null}
 
       <div className="table-header-right">
         <input 
