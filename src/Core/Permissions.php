@@ -4,10 +4,10 @@ namespace ADIOS\Core;
 
 /**
  * Core implementation of ADIOS Action
- * 
+ *
  * 'Action' is fundamendal class for generating HTML content of each ADIOS call. Actions can
  * be rendered using Twig template or using custom render() method.
- * 
+ *
  */
 class Permissions {
   /**
@@ -16,7 +16,7 @@ class Permissions {
   protected \ADIOS\Core\Loader $app;
 
   protected array $permissions = [];
-    
+
   function __construct(\ADIOS\Core\Loader $app)
   {
     $this->app = $app;
@@ -122,5 +122,5 @@ class Permissions {
 
     return $granted;
   }
-  
+
 }

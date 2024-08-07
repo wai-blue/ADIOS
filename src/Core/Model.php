@@ -152,7 +152,7 @@ class Model
       $this->pdo = $this->eloquent->getConnection()->getPdo();
     } catch (Exception $e) {
       $this->pdo = null;
-    } 
+    }
 
     // During the installation no SQL tables exist. If child's init()
     // method uses data from DB, $this->init() call would fail.
@@ -168,7 +168,7 @@ class Model
       $this->columns(),
       $this->isJunctionTable
     );
-    
+
     $currentVersion = (int)$this->getCurrentInstalledVersion();
     $lastVersion = $this->getLastAvailableVersion();
 
@@ -1192,9 +1192,15 @@ class Model
   public function tableParams(array $params = []): array {
     $columns = $this->columns();
     unset($columns['id']);
-    return [
-      'columns' => $columns,
-    ];
+    $params['columns'] = $columns;
+
+    $params['canRead'] = $this->app->permissions->granted($params['model'] . ':Read');
+    $params['canCreate'] = $this->app->permissions->granted($params['model'] . ':Create');
+    $params['canUpdate'] = $this->app->permissions->granted($params['model'] . ':Update');
+    $params['canDelete'] = $this->app->permissions->granted($params['model'] . ':Delete');
+    $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
+
+    return $params;
   }
 
   /**

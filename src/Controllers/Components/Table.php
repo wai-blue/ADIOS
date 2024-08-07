@@ -45,32 +45,13 @@ class Table extends \ADIOS\Core\Controller {
 
   public function getParams() {
     try {
-      // $params = $this->params;
-
-      // $params = \ADIOS\Core\Helper::arrayMergeRecursively($params, $this->model->tableParams ?? []);
-
-      // $params['columns'] = \ADIOS\Core\Helper::arrayMergeRecursively($params['columns'] ?? [], $this->model->columns());
-      // $params['columns'] = array_filter($params['columns'], function($column) {
-      //   return ($column['show'] ?? FALSE);
-      // });
-
-      $params = $this->model->tableParams($this->params);
-
-      $params['canRead'] = $this->app->permissions->granted($this->params['model'] . ':Read');
-      $params['canCreate'] = $this->app->permissions->granted($this->params['model'] . ':Create');
-      $params['canUpdate'] = $this->app->permissions->granted($this->params['model'] . ':Update');
-      $params['canDelete'] = $this->app->permissions->granted($this->params['model'] . ':Delete');
-      $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
-
-      // $params['folderUrl'] = $this->model->getFolderUrl();
-
-      return $params;
+      return $this->model->tableParams($this->params);
     } catch (\Exception $e) {
       http_response_code(400);
 
       return [
         'status' => 'error',
-        'message' => $e->getMessage() 
+        'message' => $e->getMessage()
       ];
     }
   }
@@ -181,14 +162,14 @@ class Table extends \ADIOS\Core\Controller {
 
       return [
         'status' => 'error',
-        'message' => $e->getMessage() 
+        'message' => $e->getMessage()
       ];
     } catch (\Exception $e) {
       http_response_code(400);
 
       return [
         'status' => 'error',
-        'message' => $e->getMessage() 
+        'message' => $e->getMessage()
       ];
     }
   }
