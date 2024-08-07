@@ -123,11 +123,6 @@ class Loader
 
     $this->config['requestUri'] = $_SERVER['REQUEST_URI'] ?? "";
 
-    // load available languages
-    if (empty($this->config['availableLanguages'] ?? [])) {
-      $this->config['availableLanguages'] = ["en"];
-    }
-
     // pouziva sa ako vseobecny prefix niektorych session premennych,
     // novy ADIOS ma zatial natvrdo hodnotu, lebo sa sessions riesia cez session name
     if (!defined('_ADIOS_ID')) {
@@ -249,27 +244,6 @@ class Loader
       // }
 
       \ADIOS\Core\Helper::addSpeedLogTag("#3");
-
-      if ($mode == self::ADIOS_MODE_FULL) {
-
-        // set language
-        if (!empty($_SESSION[_ADIOS_ID]['language'])) {
-          $this->config['language'] = $_SESSION[_ADIOS_ID]['language'];
-        }
-
-        if (empty($this->config['language'])) $this->config['language'] = 'en';
-
-        if (is_array($this->config['availableLanguages'])) {
-          if (!in_array($this->config['language'], $this->config['availableLanguages'])) {
-            $this->config['language'] = reset($this->config['availableLanguages']);
-          }
-        }
-
-        if (empty($this->config['language'])) {
-          $this->config['language'] = "en";
-        }
-      }
-
 
       // finalizacia konfiguracie - aj pre FULL aj pre LITE mode
       $this->finalizeConfig();
@@ -761,39 +735,33 @@ class Loader
   //////////////////////////////////////////////////////////////////////////////
   // TRANSLATIONS
 
-  public function loadDictionary($object, $toLanguage = "") {
+  public function getDictionaryFilename(string $language = ''): string
+  {
+    $dictionaryFile = '';
+
+    if (empty($language)) $language = $this->config['language'] ?? 'en';
+    if (strlen($language) == 2) {
+      $dictionaryFile = "{$this->config['srcDir']}/Lang/{$language}.json";
+    }
+
+    return $dictionaryFile;
+  }
+
+  public function loadDictionary(string $language = ""): array
+  {
     $dictionary = [];
-    $dictionaryFolder = $object->dictionaryFolder ?? "";
+    $dictionaryFile = $this->getDictionaryFilename($language);
 
-    if (empty($toLanguage)) {
-      $toLanguage = $this->config['language'] ?? "";
-    }
-
-    if (empty($dictionaryFolder)) {
-      $dictionaryFolder = "{$this->config['srcDir']}/Lang";
-    }
-
-    if (strlen($toLanguage) == 2) {
-      if (empty($object->dictionaryFilename)) {
-        $dictionaryFilename = strtr(get_class($object), "./\\", "---");
-      } else {
-        $dictionaryFilename = $object->dictionaryFilename;
-      }
-
-      $dictionaryFile = "{$dictionaryFolder}/{$toLanguage}/{$dictionaryFilename}.php";
-
-      if (file_exists($dictionaryFile)) {
-        include($dictionaryFile);
-      } else {
-        // echo("{$dictionaryFile} does not exist ({$object->name})\n");
-      }
+    if (!empty($dictionaryFile) && file_exists($dictionaryFile)) {
+      $dictionary = @json_decode(file_get_contents($dictionaryFile), true);
     }
 
     return $dictionary;
   }
 
-  public function translate(string $string, array $vars = [], $object = NULL, $toLanguage = ""): string {
-    if ($object === NULL) $object = $this;
+  public function translate(string $string, array $vars = [], $contextObject = NULL, $toLanguage = ""): string
+  {
+    if ($contextObject === NULL) $contextObject = $this;
     if (empty($toLanguage)) {
       $toLanguage = $this->config['language'] ?? "en";
     }
@@ -802,37 +770,26 @@ class Loader
       $translated = $string;
     } else {
       if (empty($this->dictionary[$toLanguage])) {
-        $this->dictionary[$toLanguage] = [];
-
-        $dictionaryFiles = \ADIOS\Core\Helper::scanDirRecursively("{$this->config['srcDir']}/Lang");
-
-        foreach ($dictionaryFiles as $file) {
-          include("{$this->config['srcDir']}/Lang/{$file}");
-
-          $this->dictionary[$toLanguage] =  \ADIOS\Core\Helper::arrayMergeRecursively(
-            $this->dictionary[$toLanguage],
-            $dictionary
-          );
-        }
+        $this->dictionary[$toLanguage] = $this->loadDictionary($toLanguage);
       }
 
       $dictionary = $this->dictionary[$toLanguage] ?? [];
-      $objectClassName = get_class($object);
-      foreach (explode("\\", $objectClassName) as $namespaceItem) {
-        if (is_array($dictionary[$namespaceItem])) {
-          $dictionary = $dictionary[$namespaceItem];
-        } else {
-          break;
-        }
-      }
+      $context = str_replace('\\', ':', get_class($contextObject));
 
-      if (!isset($dictionary[$string])) {
+      if (empty($dictionary[$context][$string])) {
         $translated = $string;
-        if ($this->getConfig('debugTranslations', FALSE)) {
-          $translated .= ' ' . get_class($object);
-        }
+        $dictionaryFile = $this->getDictionaryFilename($toLanguage);
+        $this->dictionary[$toLanguage][$context][$string] = '';
+
+        file_put_contents(
+          $dictionaryFile,
+          json_encode(
+            $this->dictionary[$toLanguage],
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+          )
+        );
       } else {
-        $translated = $dictionary[$string];
+        $translated = $dictionary[$context][$string];
       }
     }
 
