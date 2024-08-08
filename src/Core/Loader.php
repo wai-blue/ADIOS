@@ -36,7 +36,7 @@ class Loader
 
   public string $gtp = "";
   public string $requestedUri = "";
-  public string $requestedController = "";
+  // public string $requestedController = "";
   public string $controller = "";
   public string $permission = "";
   public string $uid = "";
@@ -107,7 +107,8 @@ class Loader
     $this->widgetsDir = $config['widgetsDir'] ?? "";
 
     $this->gtp = $this->config['global_table_prefix'] ?? "";
-    $this->requestedController = $_REQUEST['controller'] ?? "";
+    // $this->requestedController = $_REQUEST['controller'] ?? "";
+    $this->params = $this->extractParamsFromRequest();
 
     if (empty($this->config['dir'])) $this->config['dir'] = "";
     if (empty($this->config['url'])) $this->config['url'] = "";
@@ -740,6 +741,8 @@ class Loader
     $dictionaryFile = '';
 
     if (empty($language)) $language = $this->config['language'] ?? 'en';
+    if (empty($language)) $language = 'en';
+
     if (strlen($language) == 2) {
       $dictionaryFile = "{$this->config['srcDir']}/Lang/{$language}.json";
     }
@@ -985,7 +988,7 @@ class Loader
     $this->console->info("Core installation done in ".round((microtime(true) - $installationStart), 2)." seconds.");
   }
 
-  public function extractRouteParamsFromRequest() {
+  public function extractParamsFromRequest(): array {
     $route = '';
     $params = [];
 
@@ -996,15 +999,26 @@ class Loader
       }
       $route = $_SERVER['argv'][1] ?? "";
     } else {
-      $route = $_REQUEST['route'] ?? ($_REQUEST['controller'] ?? '');
       $params = \ADIOS\Core\Helper::arrayMergeRecursively(
         array_merge($_GET, $_POST),
         json_decode(file_get_contents("php://input"), true) ?? []
       );
-      unset($params['controller']);
+      unset($params['route']);
     }
 
-    return [$route, $params];
+    return $params;
+  }
+
+  public function extractRouteFromRequest(): string {
+    $route = '';
+
+    if (php_sapi_name() === 'cli') {
+      $route = $_SERVER['argv'][1] ?? "";
+    } else {
+      $route = $_REQUEST['route'] ?? '';
+    }
+
+    return $route;
   }
 
   /**
@@ -1026,9 +1040,8 @@ class Loader
 
       // Find-out which route is used for rendering
 
-      if (empty($routeUrl)) {
-        list($routeUrl, $params) = $this->extractRouteParamsFromRequest();
-      }
+      if (empty($routeUrl)) $routeUrl = $this->extractRouteFromRequest();
+      if (count($params) == 0) $params = $this->extractParamsFromRequest();
 
       $this->routeUrl = $routeUrl;
       $this->params = $params;
