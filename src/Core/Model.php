@@ -1428,6 +1428,7 @@ class Model
         unset($data[$colName]);
       } else {
         $data[$colName] = $this->columnNormalize($colName, $data[$colName]);
+        if ($data[$colName] === null) unset($data[$colName]);
       }
     }
 

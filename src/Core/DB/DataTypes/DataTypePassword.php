@@ -44,15 +44,23 @@ class DataTypePassword extends \ADIOS\Core\DB\DataType
 
   public function validate(\ADIOS\Core\Model $model, $value): bool
   {
-    return $value[0] == $value[1];
+    if (is_array($value)) {
+      return $value[0] == $value[1];
+    } else {
+      return true;
+    }
   }
   
   public function normalize(\ADIOS\Core\Model $model, $value)
   {
-    if (method_exists($model, 'hashPassword')) {
-      return $model->hashPassword((string) $value[0]);
+    if (is_array($value)) {
+      if (method_exists($model, 'hashPassword')) {
+        return $model->hashPassword((string) $value[0]);
+      } else {
+        return password_hash($value[0], PASSWORD_DEFAULT);
+      }
     } else {
-      return password_hash($value[0], PASSWORD_DEFAULT);
+      return null;
     }
   }
   

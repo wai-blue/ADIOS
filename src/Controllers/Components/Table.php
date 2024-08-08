@@ -62,7 +62,6 @@ class Table extends \ADIOS\Core\Controller {
 
   public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
     $params = $this->params;
-    $this->itemsPerPage = (int) $params['itemsPerPage'] ?? 15;
 
     $search = null;
     if (isset($params['search'])) {
@@ -119,6 +118,8 @@ class Table extends \ADIOS\Core\Controller {
 
   public function loadData(): array {
     $this->query = $this->prepareLoadRecordQuery();
+
+    $this->itemsPerPage = (int) $this->params['itemsPerPage'] ?? 15;
 
     // Laravel pagination
     $data = $this->query->paginate(
