@@ -51,7 +51,7 @@ class DataTypePassword extends \ADIOS\Core\DB\DataType
     }
   }
   
-  public function normalize(\ADIOS\Core\Model $model, $value)
+  public function normalize(\ADIOS\Core\Model $model, string $colName, $value)
   {
     if (is_array($value)) {
       if (method_exists($model, 'hashPassword')) {

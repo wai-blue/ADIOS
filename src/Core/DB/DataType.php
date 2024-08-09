@@ -112,7 +112,7 @@ class DataType {
     return $colDef;
   }
 
-  public function normalize(\ADIOS\Core\Model $model, $value)
+  public function normalize(\ADIOS\Core\Model $model, string $colName, $value)
   {
     return $value;
   }

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import AsyncSelect from 'react-select/async'
+import AsyncCreatable from 'react-select/async-creatable'
 import { Input, InputProps, InputState } from '../Input'
 import request from '../Request'
 import * as uuid from 'uuid';
@@ -75,30 +76,20 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   }
 
   renderInputElement() {
-    if (!this.state.isInitialized) {
-      // return <ProgressBar mode="indeterminate" style={{ height: '3px' }}></ProgressBar>;
-      return (
-        <AsyncSelect
-          isDisabled={true}
-          placeholder="..."
-        />
-      )
-    }
-
     return (
-      <AsyncSelect
+      <AsyncCreatable
+        isClearable={true}
+        isDisabled={this.state.readonly || !this.state.isInitialized}
         loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
         defaultOptions={Object.values(this.state.data ?? {})}
-        value={{
-          id: this.state.value,
-          text: this.state.data ? (this.state.data[this.state.value] ? this.state.data[this.state.value].text : '') : '',
-        }}
-        getOptionLabel={(option: any) => { return option.text }}
+        getOptionLabel={(option: any) => { return option._lookupText_ }}
         getOptionValue={(option: any) => { return option.id }}
-        onChange={(item: any) => { this.onChange(item.id); }}
-        isDisabled={this.state.readonly}
+        onChange={(item: any) => { this.onChange(item?.id ?? 0); }}
         placeholder={this.props.params?.placeholder}
         classNamePrefix="adios-lookup"
+        allowCreateWhileLoading={true}
+        formatCreateLabel={(inputValue: string) => <span className="create-new">{globalThis.app.translate('Create') + ': ' + inputValue}</span>}
+        getNewOptionData={(value, label) => { console.log(value, label); return { id: {_isNew_: true, _lookupText_: label}, _lookupText_: label }; }}
       />
     )
   }

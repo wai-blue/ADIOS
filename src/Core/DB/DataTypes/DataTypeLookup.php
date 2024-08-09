@@ -78,11 +78,6 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     }
   }
 
-  public function normalize(\ADIOS\Core\Model $model, $value)
-  {
-    return ((int) $value) <= 0 ? 0 : (int) $value;
-  }
-  
   private function _toHtmlOrCsv($value, $params = [])
   {
     $html = $params['row']["{$params['col_name']}:LOOKUP"] ?? "";
@@ -106,6 +101,25 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
 
   public function validate(\ADIOS\Core\Model $model, $value): bool
   {
-    return empty($value) || is_numeric($value);
+    if (is_numeric($value)) {
+      return true;
+    } else if ($value['_isNew_'] ?? false) {
+      return !empty($value['text']);
+    } else {
+      return false;
+    }
+  }
+
+  public function normalize(\ADIOS\Core\Model $model, string $colName, $value)
+  {
+    if (is_numeric($value)) {
+      return ((int) $value) <= 0 ? 0 : (int) $value;
+    } else if ($value['_isNew_'] ?? false) {
+    // var_dump($model->columns()[$colName]['model']);
+      $lookupModel = $model->app->getModel($model->columns()[$colName]['model']);
+      return $lookupModel->eloquent->create($lookupModel->getNewRecordDataFromString($value['_lookupText_'] ?? ''))->id;
+    } else {
+      return null;
+    }
   }
 }

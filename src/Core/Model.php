@@ -1332,7 +1332,7 @@ class Model
     $colType = $colDefinition['type'];
 
     if ($this->app->db->isRegisteredColumnType($colType)) {
-      $value = $this->app->db->columnTypes[$colType]->normalize($this, $value);
+      $value = $this->app->db->columnTypes[$colType]->normalize($this, $column, $value);
     }
 
     return $value;
@@ -2128,6 +2128,10 @@ class Model
     }
 
     return $dependentRecords;
+  }
+
+  public function getNewRecordDataFromString(string $text): array {
+    // to be overriden
   }
 
 }
