@@ -2131,7 +2131,7 @@ class Model
   }
 
   public function getNewRecordDataFromString(string $text): array {
-    // to be overriden
+    return [];
   }
 
 }
