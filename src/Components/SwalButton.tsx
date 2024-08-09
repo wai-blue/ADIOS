@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import Swal, { SweetAlertOptions } from "sweetalert2";
 import Notification from "./Notification";
 import request from "./Request";

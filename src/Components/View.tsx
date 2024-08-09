@@ -1,5 +1,5 @@
 import request from "./Request";
-import React, { Component, RefObject, useRef, useEffect } from "react";
+import React, { Component, RefObject, useRef, useEffect } from 'react';
 import { ProgressBar } from 'primereact/progressbar';
 
 interface ViewProps {

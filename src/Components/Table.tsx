@@ -1,4 +1,4 @@
-import React, { Component, ChangeEvent, createRef } from "react";
+import React, { Component, ChangeEvent, createRef } from 'react';
 
 import Modal, { ModalProps } from "./Modal";
 import ModalSimple from "./ModalSimple";
@@ -24,7 +24,6 @@ import { dateToEUFormat, datetimeToEUFormat } from "./Inputs/DateTime";
 
 import { adiosError, deepObjectMerge } from "./Helper";
 import request from "./Request";
-import { setDefaultHighWaterMark } from "stream";
 
 export interface OrderBy {
   field: string,

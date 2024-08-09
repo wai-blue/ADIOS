@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import Notification, { NotificationOptions } from "./Notification";
 import * as uuid from 'uuid';
 import { jsPDF } from "jspdf";

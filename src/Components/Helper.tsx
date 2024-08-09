@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import Notification from "./Notification";
 
 export function deepObjectMerge(target: any, source: any): Object {

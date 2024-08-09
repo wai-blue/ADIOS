@@ -1,4 +1,4 @@
-import React, {Component} from "react";
+import React, { Component } from 'react';
 import * as uuid from 'uuid';
 
 import Notification from "./Notification";

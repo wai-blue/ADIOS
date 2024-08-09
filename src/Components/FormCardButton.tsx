@@ -1,5 +1,5 @@
 
-import React, { Component } from "react";
+import React, { Component } from 'react';
 import Modal, { ModalProps } from "./Modal";
 import Form, { FormProps } from "./Form";
 

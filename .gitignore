@@ -1,4 +1,3 @@
 node_modules
 package-lock.json
-src/Assets/Js/react-bundle.js
-src/Assets/Js/React/*
+tsconfig.json
