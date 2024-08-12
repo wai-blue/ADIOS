@@ -51,6 +51,7 @@ export interface FormProps {
   endpoint?: string,
   tag?: string,
   context?: any,
+  children?: any,
 }
 
 export interface FormState {
@@ -467,7 +468,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
    * Render different input types
    */
   input(columnName: string, customInputParams?: any, onChange?: any): JSX.Element {
-    let inputToRender: JSX.Element = <></>;
+    // let inputToRender: JSX.Element = <></>;
 
     // if (!colDef) {
     //   return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);

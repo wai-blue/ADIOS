@@ -20,6 +20,7 @@ export interface InputProps {
   onInlineEditSave?: () => void,
   context?: any,
   parentForm?: Form<any, any>,
+  children?: any,
 }
 
 export interface InputState {
@@ -223,18 +224,6 @@ export class Input<P extends InputProps, S extends InputState> extends Component
               }
           </>
           : <>
-            {/* {this.state.readonly ? null :
-              <div className="inline-editing-buttons">
-                <button
-                  className="btn btn-transparent"
-                  onClick={() => {
-                    this.switchToInlineEditMode();
-                  }}
-                >
-                  <span className="icon !py-0"><i className="fas fa-pencil-alt"></i></span>
-                </button>
-              </div>
-            } */}
             <div
               className="value-element"
               onClick={() => {
@@ -245,6 +234,18 @@ export class Input<P extends InputProps, S extends InputState> extends Component
                 {this.props.params?.unit}
               </div>
             </div>
+            {this.state.readonly ? null :
+              <div className="inline-editing-buttons">
+                <button
+                  className="btn btn-transparent"
+                  onClick={() => {
+                    this.switchToInlineEditMode();
+                  }}
+                >
+                  <span className="icon !py-0"><i className="fas fa-pencil-alt"></i></span>
+                </button>
+              </div>
+            }
           </>
         }
       </div></div>

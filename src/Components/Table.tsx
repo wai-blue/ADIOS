@@ -54,7 +54,6 @@ export interface TableProps {
   model: string,
   parentFormId?: number,
   parentFormModel?: string,
-  rowHeight: number,
   showHeader?: boolean,
   tag?: string,
   title?: string,
@@ -67,9 +66,9 @@ export interface TableProps {
   inlineEditingEnabled?: boolean,
   isInlineEditing?: boolean,
   selectionMode?: 'single' | 'multiple' | undefined,
-  loadData?: (table: Table) => void,
-  loadParams?: (table: Table) => void,
   onChange?: (table: Table) => void,
+  data?: TableData,
+  async?: boolean,
 
   //TODO
   //showPaging?: boolean,
@@ -107,7 +106,7 @@ export interface TableState {
   canRead?: boolean,
   canUpdate?: boolean,
   columns?: any, //Array<GridColDef>,
-  data?: TableData,
+  data?: TableData | null,
   filterBy?: any,
   formId?: number|null,
   formPrevId?: number|null,
@@ -125,6 +124,7 @@ export interface TableState {
   isInlineEditing: boolean,
   selection: any,
   idToDelete: number,
+  async: boolean,
 }
 
 export default class Table extends Component<TableProps, TableState> {
@@ -142,7 +142,11 @@ export default class Table extends Component<TableProps, TableState> {
 
     globalThis.app.reactElements[this.props.uid] = this;
 
-    this.state = {
+    this.state = this.getStateFromProps(props);
+  }
+
+  getStateFromProps(props: TableProps) {
+    return {
       endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultTableEndpoint ?? 'components/table'),
       canCreate: props.canCreate ?? true,
       canDelete: props.canDelete ?? true,
@@ -163,23 +167,36 @@ export default class Table extends Component<TableProps, TableState> {
       isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
       selection: [],
       idToDelete: 0,
+      data: props.data ? props.data : null,
+      columns: props.columns ? props.columns : null,
+      async: props.async ?? true,
     };
   }
 
   componentDidMount() {
-    this.loadParams();
-    this.loadData();
+    if (this.state.async) {
+      this.loadParams();
+      this.loadData();
+    }
   }
 
-  componentDidUpdate(prevProps: TableProps, prevState: TableState) {
-
+  componentDidUpdate(prevProps: TableProps) {
     if (
       (prevProps.formParams?.id != this.props.formParams?.id)
       || (prevProps.parentFormId != this.props.parentFormId)
     ) {
       this.state.formParams = this.props.formParams;
-      this.loadParams();
-      this.loadData();
+      if (this.state.async) {
+        this.loadParams();
+        this.loadData();
+      }
+    }
+
+    if (
+      prevProps.data != this.props.data
+      || prevProps.columns != this.props.columns
+    ) {
+      this.setState(this.getStateFromProps(this.props))
     }
   }
 
@@ -248,73 +265,63 @@ export default class Table extends Component<TableProps, TableState> {
   }
 
   loadParams(successCallback?: (params: any) => void) {
-    if (this.props.loadParams) {
-      this.props.loadParams(this);
-    } else {
-      let propsColumns = this.props.columns ?? {};
+    request.get(
+      this.getEndpointUrl(),
+      {
+        ...this.getEndpointParams(),
+        action: 'getParams',
+      },
+      (data: any) => {
+        try {
+          if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
+        
+          let params: any = deepObjectMerge(data, this.props);
+          if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
+          if (successCallback) successCallback(params);
 
-      request.get(
-        this.getEndpointUrl(),
-        {
-          ...this.getEndpointParams(),
-          action: 'getParams',
-        },
-        (data: any) => {
-          try {
-            if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
-          
-            let params: any = deepObjectMerge(data, this.props);
-            if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
-            if (successCallback) successCallback(params);
+          params = this.onAfterLoadParams(params);
 
-            params = this.onAfterLoadParams(params);
-
-            this.setState({
-              addButtonText: this.props.addButtonText ?? params.addButtonText,
-              canCreate: params.canCreate ?? true,
-              canDelete: params.canDelete ?? true,
-              canRead: params.canRead ?? true,
-              canUpdate: params.canUpdate ?? true,
-              columns: params.columns,
-              showHeader: params.showHeader ?? true,
-              title: this.props.title ?? params.title,
-            });
-          } catch (err) {
-            Notification.error(err.message);
-          }
+          this.setState({
+            addButtonText: this.props.addButtonText ?? params.addButtonText,
+            canCreate: params.canCreate ?? true,
+            canDelete: params.canDelete ?? true,
+            canRead: params.canRead ?? true,
+            canUpdate: params.canUpdate ?? true,
+            columns: params.columns,
+            showHeader: params.showHeader ?? true,
+            title: this.props.title ?? params.title,
+          });
+        } catch (err) {
+          Notification.error(err.message);
         }
-      );
-    }
+      }
+    );
   }
 
   loadData() {
-    if (this.props.loadData) {
-      this.props.loadData(this);
-    } else {
-      request.get(
-        this.getEndpointUrl(),
-        {
-          ...this.getEndpointParams(),
-          action: 'loadData',
-          filterBy: this.state.filterBy,
-          model: this.props.model,
-          orderBy: this.state.orderBy,
-          page: this.state.page ?? 0,
-          itemsPerPage: this.state.itemsPerPage ?? 15,
-          parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
-          parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
-          search: this.state.search,
-          tag: this.props.tag,
-          where: this.props.where,
-          __IS_AJAX__: '1',
-        },
-        (data: any) => {
-          this.setState({
-            data: data,
-          });
-        }
-      );
-    }
+    request.get(
+      this.getEndpointUrl(),
+      {
+        ...this.getEndpointParams(),
+        action: 'loadData',
+        filterBy: this.state.filterBy,
+        model: this.props.model,
+        orderBy: this.state.orderBy,
+        page: this.state.page ?? 0,
+        itemsPerPage: this.state.itemsPerPage ?? 15,
+        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
+        search: this.state.search,
+        tag: this.props.tag,
+        where: this.props.where,
+        __IS_AJAX__: '1',
+      },
+      (data: any) => {
+        this.setState({
+          data: data,
+        });
+      }
+    );
   }
 
   getFormParams(): any {

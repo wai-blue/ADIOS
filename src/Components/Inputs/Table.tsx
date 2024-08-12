@@ -31,22 +31,15 @@ export default class Table extends Input<TableInputProps, TableInputState> {
   }
 
   renderInputElement() {
-    console.log(this.state);
     return (
       <BigTable
+        async={false}
         uid={this.props.uid + '_table'}
         model={this.props.model}
-        rowHeight={30}
         showHeader={false}
+        data={{data: this.state.value}}
+        columns={this.state.columns}
         isInlineEditing={this.state.isInlineEditing}
-        loadParams={(table: BigTable) => {
-          table.setState({
-            columns: this.state.columns,
-          });
-        }}
-        loadData={(table: BigTable) => {
-          table.setState({data: {data: this.state.value}});
-        }}
         onChange={(table: BigTable) => {
           this.onChange(table.state.data?.data);
         }}
