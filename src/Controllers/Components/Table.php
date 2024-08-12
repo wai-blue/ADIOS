@@ -136,8 +136,8 @@ class Table extends \ADIOS\Core\Controller {
     return $data;
   }
 
-  public function deleteRecord() {
-    return $this->model->deleteRecord((int) $this->params['id']);
+  public function recordDelete() {
+    return $this->model->recordDelete((int) $this->params['id']);
   }
 
 
@@ -150,7 +150,7 @@ class Table extends \ADIOS\Core\Controller {
       switch ($this->params['action']) {
         case 'getParams': $return = $this->getParams(); break;
         case 'loadData': $return = $this->loadData(); break;
-        case 'deleteRecord': $return = $this->deleteRecord(); break;
+        case 'deleteRecord': $return = $this->recordDelete(); break;
       }
 
       if (!is_array($return)) {

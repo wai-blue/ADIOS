@@ -17,15 +17,11 @@ namespace ADIOS\Core;
 
 class Widget {
   public \ADIOS\Core\Loader $app;
-  public string $gtp = "";
-  // public $languageDictionary = [];
 
   public string $name = ""; // $name and $fullName are the same, $name is deprecated
   public string $fullName = ""; // $name and $fullName are the same, $name is deprecated
   public string $shortName = "";
-  public string $myRootFolder = "";
 
-  public array $params = [];
   public array $models = [];
 
   function __construct(\ADIOS\Core\Loader $app, array $params = []) {
@@ -35,17 +31,6 @@ class Widget {
     $this->shortName = end(explode("/", $this->name));
 
     $this->app = $app;
-    $this->params = $params;
-    $this->gtp = $this->app->gtp;
-
-    $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
-
-    if (!is_array($this->params)) {
-      $this->params = [];
-    }
-
-    // preklady
-    // $this->languageDictionary = $this->app->loadLanguageDictionary($this);
 
     // inicializacia widgetu
     $this->init();

@@ -389,9 +389,6 @@ class DB
                   break;
                 }
 
-                if ($col_name == 'record_info') {
-                  $random_val = json_encode($model->getNewRecordInfo());
-                }
               break;
               case "varchar":
               case "password":

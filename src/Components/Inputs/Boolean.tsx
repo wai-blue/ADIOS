@@ -22,6 +22,14 @@ export default class Boolean extends Input<InputProps, InputState & BooleanInput
     };
   }
 
+  renderValueElement() {
+    if (this.state.isChecked) {
+      return <span className="text-green-600" style={{fontSize: '1.2em'}}>✓</span>;
+    } else {
+      return <span className="text-red-600" style={{fontSize: '1.2em'}}>✕</span>;
+    }
+  }
+
   renderInputElement() {
     return <>
       <InputSwitch

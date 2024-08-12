@@ -29,11 +29,11 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
     this.state = {
       ...this.state, // Parent state
       endpoint:
-        props.endpoint
+      props.endpoint
           ? props.endpoint
           : (props.params && props.params.endpoint
             ? props.params.endpoint
-            : (globalThis.app.config.defaultLookupEndpoint ?? 'components/inputs/lookup')
+            : (globalThis.app.config.defaultLookupEndpoint ?? 'api/record/lookup')
           )
       ,
       model: props.model ? props.model : (props.params && props.params.model ? props.params.model : ''),
@@ -45,33 +45,45 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
     this.loadData();
   }
 
+  getEndpointUrl() {
+    return this.state.endpoint;
+  }
+
   getEndpointParams(): object {
     return {
       model: this.state.model,
       context: this.props.context,
-      formData: this.props.parentForm?.state?.data,
+      formRecord: this.props.parentForm?.state?.record,
       __IS_AJAX__: '1',
     };
   }
 
   loadData(inputValue: string|null = null, callback: ((option: Array<any>) => void)|null = null) {
-    request.get(
-      this.state.endpoint,
+    request.post(
+      this.getEndpointUrl(),
       {...this.getEndpointParams(), search: inputValue},
+      {},
       (data: any) => {
         this.setState({
           isInitialized: true,
-          //@ts-ignore
-          data: data.data
+          data: data
         });
 
-        if (callback) callback(Object.values(data.data ?? {}));
+        if (callback) callback(Object.values(data ?? {}));
       }
     );
   }
 
   renderValueElement() {
-    return this.state.data[this.state.value]?._lookupText_ ?? <span className='no-value'></span>;
+    if (this.state.data && this.state.data[this.state.value]?._lookupText_) {
+      return (
+        <a role="button" className="text-primary">
+          {this.state.data[this.state.value]?._lookupText_}
+        </a>
+      );
+    } else {
+      return <span className='no-value'></span>;
+    }
     // return this.state.value;
   }
 

@@ -12,7 +12,7 @@ export function deepObjectMerge(target: any, source: any): Object {
         result[key] = deepObjectMerge(result[key], source[key]);
       }
     } else {
-      result[key] = source[key]; // result will be overwritten by source
+      result[key] = source[key]; // target will be overwritten by source
     }
   }
 

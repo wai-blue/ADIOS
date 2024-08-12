@@ -146,7 +146,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
       formId: props.formId,
-      formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? 'components/form'),
+      formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? ''),
       formParams: {
         model: props.model,
         uid: props.uid,
@@ -558,10 +558,9 @@ export default class Table<P, S extends TableState = TableState> extends Compone
           const enumValues = column.enumValues;
           if (enumValues) cellValueElement = enumValues[columnValue];
         break;
-        case 'bool':
         case 'boolean':
-          if (columnValue) cellValueElement = <span className="text-success" style={{fontSize: '1.2em'}}>✓</span>
-          else cellValueElement = <span className="text-danger" style={{fontSize: '1.2em'}}>✕</span>
+          if (columnValue) cellValueElement = <span className="text-green-600" style={{fontSize: '1.2em'}}>✓</span>
+          else cellValueElement = <span className="text-red-600" style={{fontSize: '1.2em'}}>✕</span>
         break;
         case 'date':
           cellValueElement = <span>{dateToEUFormat(columnValue)}</span>;

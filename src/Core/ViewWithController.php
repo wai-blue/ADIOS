@@ -430,7 +430,6 @@ class ViewWithController {
         "gtp" => $this->app->gtp,
         "config" => $this->app->config,
         "user" => $this->app->userProfile,
-        "locale" => $this->app->locale->getAll(),
         "dictionary" => $this->app->dictionary,
         "view" => $this->params,
         "params" => $this->getTwigParams(),

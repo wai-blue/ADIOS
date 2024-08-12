@@ -8,7 +8,6 @@ import InputVarchar from "./Inputs/Varchar";
 import InputPassword from "./Inputs/Password";
 import InputTextarea from "./Inputs/Textarea";
 import InputInt from "./Inputs/Int";
-import InputBool from "./Inputs/Bool";
 import InputBoolean from "./Inputs/Boolean";
 import InputColor from "./Inputs/Color";
 import InputImage from "./Inputs/Image";
@@ -29,7 +28,6 @@ export function InputFactory(inputProps: any): JSX.Element {
         case 'password': inputToRender = <InputPassword {...inputProps} />; break;
         case 'text': inputToRender = <InputTextarea {...inputProps} />; break;
         case 'float': case 'int': inputToRender = <InputInt {...inputProps} />; break;
-        case 'bool': inputToRender = <InputBool {...inputProps} />; break;
         case 'boolean': inputToRender = <InputBoolean {...inputProps} />; break;
         case 'lookup': inputToRender = <InputLookup {...inputProps} />; break;
         case 'color': inputToRender = <InputColor {...inputProps} />; break;

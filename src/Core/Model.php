@@ -28,6 +28,9 @@ use ReflectionClass;
  */
 class Model
 {
+  const HAS_ONE = 'hasOne';
+  const HAS_MANY = 'hasMany';
+  const BELONGS_TO = 'belongsTo';
 
   /**
    * Full name of the model. Useful for getModel() function
@@ -57,15 +60,6 @@ class Model
   public string $sqlName = '';
 
   /**
-   * URL base for management of the content of the table. If not empty, ADIOS
-   * automatically creates URL addresses for listing the content, adding and
-   * editing the content.
-   */
-  public string $urlBase = "";
-
-  // public ?array $crud = [];
-
-  /**
    * SQL-compatible string used to render displayed value of the record when used
    * as a lookup.
    */
@@ -76,34 +70,18 @@ class Model
    */
   public bool $isJunctionTable = FALSE;
 
-
-  public ?array $tableParams = NULL;
-  public ?array $formParams = NULL;
-
-  public string $tableEndpoint;
-  public string $formEndpoint;
-
-
-  /**
-   * If set to TRUE, the SQL table will contain the `record_info` column of type JSON
-   */
-  public bool $storeRecordInfo = FALSE;
-
   var $pdo;
-  var $searchController;
 
   /**
    * Property used to store original data when recordSave() method is calledmodel
    *
    * @var mixed
    */
-  var $recordSaveOriginalData = NULL;
+  // var $recordSaveOriginalData = NULL;
   protected string $fullTableSqlName = "";
   public string $table = '';
-  public string $myRootFolder = '';
-  public string $eloquentClass = ''; //\ADIOS\Core\Model\Eloquent::class;
-
-  private static ?array $allItemsCache = NULL;
+  public string $eloquentClass = '';
+  public array $relations = [];
 
   public ?array $junctions = [];
   public ?\Illuminate\Database\Eloquent\Model $eloquent = null;
@@ -138,15 +116,6 @@ class Model
     $this->shortName = end($tmp);
 
     $this->app = $app;
-
-    $this->myRootFolder = str_replace("\\", "/", dirname((new ReflectionClass(get_class($this)))->getFileName()));
-
-    // if ($eloquentQuery === NULL) {
-    //   $this->eloquentQuery = $this->select('id');
-    // } else {
-    //   $this->eloquentQuery = $eloquentQuery;
-    //   $this->eloquentQuery->pdoCrossTables = [];
-    // }
 
     try {
       $this->pdo = $this->eloquent->getConnection()->getPdo();
@@ -467,26 +436,6 @@ class Model
     return $this->fullTableSqlName;
   }
 
-  /**
-   * Returns full relative URL path for model. Used when generating URL
-   * paths for tables, forms, etc...
-   *
-   * @param mixed $params
-   * @return void
-   */
-  public function getFullUrlBase($params)
-  {
-    $urlBase = $this->urlBase;
-    if (is_array($params)) {
-      foreach ($params as $key => $value) {
-        if (is_array($value)) continue;
-        $urlBase = str_replace("{{ {$key} }}", (string)$value, $urlBase);
-      }
-    }
-
-    return $urlBase;
-  }
-
   //////////////////////////////////////////////////////////////////
   // misc helper methods
 
@@ -521,244 +470,6 @@ class Model
 
     return $enumValues;
   }
-
-  public function sqlQuery($query)
-  {
-    return $this->app->db->query($query, $this);
-  }
-
-
-
-  //////////////////////////////////////////////////////////////////
-  // routing
-
-  // public function routing(array $routing = [])
-  // {
-  //   // return $this->app->dispatchEventToPlugins("onModelAfterRouting", [
-  //   //   "model" => $this,
-  //   //   "routing" => $this->addStandardCRUDRouting($routing),
-  //   // ])["routing"];
-  // }
-
-  // public function addStandardCRUDRouting($routing = [], $params = [])
-  // {
-  //   if (empty($params['urlBase'])) {
-  //     $urlBase = str_replace('/', '\/', $this->urlBase);
-  //   } else {
-  //     $urlBase = $params['urlBase'];
-  //   }
-
-  //   $urlParams = (empty($params['urlParams']) ? [] : $params['urlParams']);
-
-  //   $varsInUrl = preg_match_all('/{{ (\w+) }}/', $urlBase, $m);
-  //   foreach ($m[0] as $k => $v) {
-  //     $urlBase = str_replace($v, '([\w\.-]+)', $urlBase);
-  //     $urlParams[$m[1][$k]] = '$' . ($k + 1);
-  //   }
-
-  //   if (!is_array($routing)) {
-  //     $routing = [];
-  //   }
-
-  //   $routing = array_merge(
-  //     $routing,
-  //     $this->getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
-  //   );
-
-  //   foreach ($this->columns() as $colName => $colDefinition) {
-  //     if ($colDefinition['type'] == 'lookup') {
-  //       $tmpModel = $this->app->getModel($colDefinition['model']);
-  //       $routing = array_merge(
-  //         $routing,
-  //         $this->getStandardCRUDRoutes(
-  //           str_replace("/", "\\/", $tmpModel->urlBase) . '\/(\d+)\/' . $urlBase,
-  //           $urlParams,
-  //           $varsInUrl + 1
-  //         )
-  //       );
-  //     }
-  //   }
-
-  //   return $routing;
-  // }
-
-  // public function getStandardCRUDRoutes($urlBase, $urlParams, $varsInUrl)
-  // {
-  //   if (empty($urlBase)) return [];
-
-  //   $routing = [
-
-  //     // Default
-  //     '/^' . $urlBase . '$/i' => [
-  //       "permission" => "{$this->fullName}/Browse",
-  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Browse
-  //     '/^' . $urlBase . '\/browse$/i' => [
-  //       "permission" => "{$this->fullName}/Browse",
-  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Edit
-  //     '/^' . $urlBase . '\/(\d+)\/edit$/i' => [
-  //       "permission" => "{$this->fullName}/Edit",
-  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-  //       "params" => array_merge($urlParams, [
-  //         "displayMode" => "window",
-  //         "windowParams" => [
-  //           "uid" => Helper::str2uid($this->fullName) . '_edit',
-  //         ],
-  //         "model" => $this->fullName,
-  //         "id" => '$' . ($varsInUrl + 1),
-  //       ])
-  //     ],
-
-  //     // Add
-  //     '/^' . $urlBase . '\/add$/i' => [
-  //       "permission" => "{$this->fullName}/Add",
-  //       "controller" => $this->crud['browse']['controller'] ?? "Components/Table",
-  //       "params" => array_merge($urlParams, [
-  //         "displayMode" => "window",
-  //         "windowParams" => [
-  //           "uid" => Helper::str2uid($this->fullName) . '_add',
-  //           "modal" => TRUE,
-  //         ],
-  //         "model" => $this->fullName,
-  //         "id" => -1,
-  //       ])
-  //     ],
-
-  //     // Save
-  //     '/^' . $urlBase . '\/save$/i' => [
-  //       "permission" => "{$this->fullName}/Save",
-  //       "controller" => $this->crud['save']['controller'] ?? "Components/Form/Save",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Delete
-  //     '/^' . $urlBase . '\/delete$/' => [
-  //       "permission" => "{$this->fullName}/Delete",
-  //       "controller" => $this->crud['delete']['controller'] ?? "Components/Form/Delete",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Copy
-  //     '/^' . $urlBase . '\/copy$/i' => [
-  //       "permission" => "{$this->fullName}/Copy",
-  //       "controller" => $this->crud['copy']['controller'] ?? "Components/Form/Copy",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Print
-  //     '/^' . $urlBase . '\/(\d+)\/print$/i' => [
-  //       "permission" => "{$this->fullName}/Edit",
-  //       "controller" => "Printer",
-  //       "params" => array_merge($urlParams, [
-  //         "contentController" => $this->crud['print']['controller'] ?? "Components/Form",
-  //         "params" => [
-  //           "model" => $this->fullName,
-  //           "id" => '$' . ($varsInUrl + 1),
-  //         ]
-  //       ])
-  //     ],
-
-  //     // Search
-  //     '/^' . $urlBase . '\/search$/i' => [
-  //       "permission" => "{$this->fullName}/Search",
-  //       "controller" => $this->crud['search']['controller'] ?? "Components/Table/Search",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //         "searchGroup" => $this->tableParams['title'] ?? $urlBase,
-  //         "displayMode" => "window",
-  //         "windowParams" => [
-  //           "modal" => TRUE,
-  //         ],
-  //       ])
-  //     ],
-
-  //     // Export/CSV
-  //     '/^' . $urlBase . '\/Export\/CSV$/' => [
-  //       "permission" => "{$this->fullName}/Export/CSV",
-  //       "controller" => "Components/Table/Export/CSV",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Import/CSV
-  //     '/^' . $urlBase . '\/Import\/CSV$/i' => [
-  //       "permission" => "{$this->fullName}/Export/CSV",
-  //       "controller" => "Components/Table/Import/CSV",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Import/CSV/Import
-  //     '/^' . $urlBase . '\/Import\/CSV\/Import$/i' => [
-  //       "permission" => "{$this->fullName}/Import/CSV",
-  //       "controller" => "Components/Table/Import/CSV/Import",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Import/CSV/DownloadTemplate
-  //     '/^' . $urlBase . '\/Import\/CSV\/DownloadTemplate$/i' => [
-  //       "permission" => "{$this->fullName}/Import/CSV",
-  //       "controller" => "Components/Table/Import/CSV/DownloadTemplate",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Import/CSV/Preview
-  //     '/^' . $urlBase . '\/Import\/CSV\/Preview$/i' => [
-  //       "permission" => "{$this->fullName}/Import/CSV",
-  //       "controller" => "Components/Table/Import/CSV/Preview",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //       ])
-  //     ],
-
-  //     // Api/Get/<ID>
-  //     '/^Api\/' . $urlBase . '\/Get\/(\d+)$/i' => [
-  //       "permission" => "{$this->fullName}/Api/Get",
-  //       "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //         "id" => '$' . ($varsInUrl + 1),
-  //       ])
-  //     ],
-
-  //     // Api/Get:<column>=<value>
-  //     '/^Api\/' . $urlBase . '\/Get:(.+)=(.+)$/i' => [
-  //       "permission" => "{$this->fullName}/Api/Get",
-  //       "controller" => ($this->crud['api']['controller'] ?? "Api") . "/Get",
-  //       "params" => array_merge($urlParams, [
-  //         "model" => $this->fullName,
-  //         "column" => '$' . ($varsInUrl + 1),
-  //         "value" => '$' . ($varsInUrl + 2),
-  //       ])
-  //     ],
-
-  //   ];
-
-  //   return $routing;
-  // }
 
   //////////////////////////////////////////////////////////////////
   // definition of columns
@@ -804,13 +515,6 @@ class Model
       }
     }
 
-    if ($this->storeRecordInfo) {
-      $newColumns['record_info'] = [
-        'type' => 'json',
-        'title' => 'Record Information',
-      ];
-    }
-
     foreach ($newColumns as $colName => $colDef) {
       $colObject = $this->app->db->columnTypes[$colDef['type']] ?? null;
 
@@ -827,40 +531,6 @@ class Model
     $this->eloquent->fillable = array_keys($newColumns);
 
     return $newColumns;
-  }
-
-  public function getColumnsToShow(): array
-  {
-    $columnsToShow = [];
-    foreach ($this->columns() as $columnName => $columnValue) {
-      if (isset($columnValue['show']) && $columnValue['show'] === false) continue;
-      $columnsToShow[$columnName] = $columnValue;
-    }
-
-    return $columnsToShow;
-  }
-
-  public function getColumnsToShowInView(string $view, array|null $columns = NULL): array
-  {
-    if ($columns === NULL) {
-      $columns = $this->columns();
-    }
-
-    $columnsToShow = [];
-
-    foreach ($columns as $columnName => $columnValue) {
-      if (
-        (isset($columnValue['show']) && $columnValue['show'] === true)
-        || (
-          isset($columnValue['viewParams'][$view]['show'])
-          && $columnValue['viewParams'][$view]['show'] === true
-        )
-      ) {
-        $columnsToShow[$columnName] = $columnValue;
-      }
-    }
-
-    return $columnsToShow;
   }
 
   public function columnNames()
@@ -881,75 +551,12 @@ class Model
     return array_keys($this->indexNames());
   }
 
-  // /**
-  //  * Returns the configuration of various inputs used in the form.
-  //  *
-  //  * @return array
-  //  */
-  // public function inputs(): array
-  // {
-  //   return [];
-  // }
-
-  /**
-   * Parses the $data containing strings as a result of DB fetch operation
-   * and converts the value of each column to the appropriate PHP type.
-   * E.g. columns of type 'int' or 'lookup' will have integer values.
-   *
-   * @param array $data
-   * @param string $lookupKeyPrefix
-   *
-   * @return [type]
-   */
-  public function normalizeRowData(array $data, string $lookupKeyPrefix = "")
-  {
-    foreach ($this->columns() as $column => $columnDefinition) {
-      $columnType = $columnDefinition['type'];
-      if (isset($this->app->db->columnTypes[$columnType])) {
-        $data[$lookupKeyPrefix . $column] = $this->app->db->columnTypes[$columnType]->fromString($data[$lookupKeyPrefix . $column]);
-      } else {
-        $data[$lookupKeyPrefix . $column] = NULL;
-      }
-
-      if ($columnType == 'lookup' && empty($lookupKeyPrefix)) {
-        $lookupModel = $this->app->getModel($columnDefinition['model']);
-        $data = array_merge($data,
-          $lookupModel->normalizeRowData($data, $column . ':LOOKUP:')
-        );
-      }
-    }
-
-    return $data;
-  }
-
   //////////////////////////////////////////////////////////////////
   // CRUD methods
 
-  public function getRelationships()
-  {
-    return $this; // to be overriden, should return chained Eloquent's ->with() method calls
-  }
-
-  public function getExtendedData($item)
-  {
-    return NULL; // to be overriden, should return $item with extended information
-    // the NULL return is for optimization in getAll() method
-  }
-
   public function getById(int $id)
   {
-    // $item = reset($this->prepareLoadRecordQuery(function($q) use ($id) { $q->where('id', $id); })->get()->toArray());
-    $item = $this->loadRecord(function($q) use ($id) { $q->where('id', $id); });
-
-    // if ($this->getExtendedData([]) !== NULL) {
-    //   $item = $this->getExtendedData($item);
-    // }
-
-    // $item = $this->app->dispatchEventToPlugins("onModelAfterGetExtendedData", [
-    //   "model" => $this,
-    //   "item" => $item,
-    // ])["item"];
-
+    $item = $this->recordGet(function($q) use ($id) { $q->where('id', $id); });
     return $item;
   }
 
@@ -963,53 +570,6 @@ class Model
       ->fetch();
 
     return $row[0]['lookup_value'] ?? '';
-  }
-
-  public function getAll(string $keyBy = "id", $withLookups = FALSE, $processLookups = FALSE)
-  {
-    if ($withLookups) {
-      $items = $this->getWithLookups(NULL, $keyBy, $processLookups);
-    } else {
-      $items = $this->pdoPrepareExecuteAndFetch("select * from :table", [], $keyBy);
-    }
-
-    if ($this->getExtendedData([]) !== NULL) {
-      foreach ($items as $key => $item) {
-        $items[$key] = $this->getExtendedData($item);
-      }
-    }
-
-    return $items;
-  }
-
-  public function getAllCached()
-  {
-    if (static::$allItemsCache === NULL) {
-      static::$allItemsCache = $this->getAll();
-    }
-
-    return static::$allItemsCache;
-  }
-
-  public function getQueryWithLookups($callback = NULL)
-  {
-    $query = $this->getQuery();
-    $this->addLookupsToQuery($query);
-
-    if ($callback !== NULL && $callback instanceof Closure) {
-      $query = $callback($this, $query);
-    }
-
-    return $query;
-  }
-
-  public function getWithLookups($callback = NULL, $keyBy = 'id', $processLookups = FALSE)
-  {
-    $query = $this->getQueryWithLookups($callback);
-    return $this->processLookupsInQueryResult(
-      $this->fetchRows($query, $keyBy, FALSE),
-      $processLookups
-    );
   }
 
   public function insertRow($data)
@@ -1076,32 +636,8 @@ class Model
     return $this->insertRow($row);
   }
 
-
   public function search($q)
   {
-  }
-
-  public function pdoPrepareAndExecute(string $query, array $variables)
-  {
-    $q = $this->pdo->prepare(str_replace(":table", $this->fullTableSqlName, $query));
-    return $q->execute($variables);
-  }
-
-  public function pdoPrepareExecuteAndFetch(string $query, array $variables, string $keyBy = "")
-  {
-    $q = $this->pdo->prepare(str_replace(":table", $this->fullTableSqlName, $query));
-    $q->execute($variables);
-
-    $rows = [];
-    while ($row = $q->fetch(\PDO::FETCH_ASSOC)) {
-      if (empty($keyBy)) {
-        $rows[] = $row;
-      } else {
-        $rows[$row[$keyBy]] = $row;
-      }
-    }
-
-    return $rows;
   }
 
   //////////////////////////////////////////////////////////////////
@@ -1179,9 +715,7 @@ class Model
 
   public function lookupSqlValue($tableAlias = NULL): string
   {
-    // $this->lookupSqlValue = ""
     $value = $this->lookupSqlValue ?? "concat('{$this->fullName}, id = ', {%TABLE%}.id)";
-    // echo(get_class($this)." - ".$value."<br/>");
 
     return ($tableAlias !== NULL
       ? str_replace('{%TABLE%}', "`{$tableAlias}`", $value)
@@ -1203,114 +737,9 @@ class Model
     return $params;
   }
 
-  /**
-   * onTableParams
-   *
-   * @param Table $tableObject
-   *
-   * @return array Modified table params
-   */
-  public function onTableParams(Table $tableObject, array $params): array
-  {
-    return (array)$this->app->dispatchEventToPlugins("onModelAfterTableParams", [
-      "tableObject" => $tableObject,
-      "params" => $params,
-    ])["params"];
-  }
-
-  /**
-   * onTableRowParams
-   *
-   * @param Table $tableObject
-   *
-   * @return array Modified row params
-   */
-  public function onTableRowParams(Table $tableObject, array $params, array $data): array
-  {
-    return (array)$this->app->dispatchEventToPlugins("onModelAfterTableRowParams", [
-      "tableObject" => $tableObject,
-      "params" => $params,
-      "data" => $data
-    ])["params"];
-  }
-
-
-  public function onTableRowCssFormatter(Table $tableObject, array $data): string
-  {
-    return (string)$this->app->dispatchEventToPlugins("onModelAfterTableRowCssFormatter", [
-      "tableObject" => $tableObject,
-      "data" => $data,
-    ])["data"]["css"];
-  }
-
-  public function onTableCellCssFormatter(Table $tableObject, array $data): string
-  {
-    return (string)$this->app->dispatchEventToPlugins("onModelAfterTableCellCssFormatter", [
-      "tableObject" => $tableObject,
-      "data" => $data,
-    ])["data"]["css"];
-  }
-
-  public function onTableCellHtmlFormatter(Table $tableObject, array $data): string
-  {
-    return (string)$this->app->dispatchEventToPlugins("onModelAfterTableCellHtmlFormatter", [
-      "tableObject" => $tableObject,
-      "data" => $data,
-    ])["data"]["html"];
-  }
-
-  public function onTableCellCsvFormatter(Table $tableObject, array $data): string
-  {
-    return (string)$this->app->dispatchEventToPlugins("onModelAfterTableCellCsvFormatter", [
-      "tableObject" => $tableObject,
-      "data" => $data,
-    ])["data"]["csv"];
-  }
-
-  /**
-   * onTableBeforeInit
-   *
-   * @param Table $tableObject
-   *
-   * @return void
-   */
-  public function onTableBeforeInit(Table $tableObject): void
-  {
-    $this->app->dispatchEventToPlugins("onModelAfterTableBeforeInit", [
-      "tableObject" => $tableObject,
-    ]);
-  }
-
-  /**
-   * onTableAfterInit
-   *
-   * @param Table $tableObject
-   *
-   * @return void
-   */
-  public function onTableAfterInit(Table $tableObject): void
-  {
-    $this->app->dispatchEventToPlugins("onModelAfterTableAfterInit", [
-      "tableObject" => $tableObject,
-    ]);
-  }
-
-  /**
-   * onTableAfterDataLoaded
-   *
-   * @param Table $tableObject
-   *
-   * @return void
-   */
-  public function onTableAfterDataLoaded(Table $tableObject): void
-  {
-    $this->app->dispatchEventToPlugins("onModelAfterTableAfterDataLoaded", [
-      "tableObject" => $tableObject,
-    ]);
-  }
 
   //////////////////////////////////////////////////////////////////
-  // Components/Form methods
+  // Column-related methods
 
   public function columnValidate(string $column, $value): bool
   {
@@ -1338,49 +767,16 @@ class Model
     return $value;
   }
 
-  /**
-   * onFormBeforeInit
-   *
-   * @param mixed $formObject
-   *
-   * @return void
-   */
-  public function onFormBeforeInit($formObject): void
-  {
-  }
+  //////////////////////////////////////////////////////////////////
+  // Record-related methods
 
-  /**
-   * onFormAfterInit
-   *
-   * @param mixed $formObject
-   *
-   * @return void
-   */
-  public function onFormAfterInit($formObject): void
-  {
-  }
-
-  public function onFormParams(Form $formObject, array $params): array
-  {
-    return (array)$this->app->dispatchEventToPlugins("onModelAfterFormParams", [
-      "formObject" => $formObject,
-      "params" => $params,
-    ])["params"];
-  }
-
-  public function onFormChange(string $column, string $formUid, array $data): array
-  {
-    return [];
-
-    // example return:
-    // return [
-    //   'column_1' => ['value' => 'newColumnValue'],
-    //   'column_2' => ['inputHtml' => 'newInputHtml', 'inputCssClass' => 'newInputCssClass'],
-    //   'column_3' => ['alert' => 'This is just an alert.'],
-    //   'column_4' => ['warning' => 'Something is not correct.'],
-    //   'column_4' => ['fatal' => 'Ouch. Fatal error!'],
-    // ];
-  }
+  // public function recordDescribe() {
+  //   $description = [
+  //     'columns' => $this->columns(),
+  //     'defaultValues' => $this->recordDefaultValues(),
+  //   ];
+  //   return $description;
+  // }
 
   public function recordValidate($data)
   {
@@ -1415,7 +811,7 @@ class Model
     ])['params'];
   }
 
-  public function normalizeRecordData(array $data): array {
+  public function recordNormalize(array $data): array {
     $columns = $this->columns();
 
     // Vyhodene, pretoze to v recordSave() sposobovalo mazanie udajov
@@ -1474,94 +870,99 @@ class Model
   public function recordSave(array $data)
   {
     $id = (int) $data['id'];
-    $isInsert = ($id <= 0);
+    $isCreate = ($id <= 0);
 
-    $this->recordSaveOriginalData = $data;
+    if ($isCreate) {
+      $this->app->router->checkPermission($this->fullName . ':Create');
+    } else {
+      $this->app->router->checkPermission($this->fullName . ':Update');
+    }
+
+    // $this->recordSaveOriginalData = $data;
 
     // extract data for this model and data for lookup models
-    $dataForThisModel = [];
-    $dataForLookupModels = [];
-    foreach ($data as $key => $value) {
-      if (strpos($key, ":LOOKUP:") === FALSE) {
-        $dataForThisModel[$key] = $value;
-      } else {
-        [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
-        $dataForLookupModels[$columnName][$lookupColumnName] = $value;
-      }
+    // $dataForThisModel = [];
+    // $dataForLookupModels = [];
+    // foreach ($data as $key => $value) {
+    //   if (strpos($key, ":LOOKUP:") === FALSE) {
+    //     $dataForThisModel[$key] = $value;
+    //   } else {
+    //     [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
+    //     $dataForLookupModels[$columnName][$lookupColumnName] = $value;
+    //   }
 
-      // Upload image
-      if ($this->columns()[$key]['type'] == 'image') {
-        // If is not base64 (new image, skip)
-        if ($this->___validateBase64Image((string)$data[$key]['fileData']) == 0) {
-          unset($dataForThisModel[$key]);
-          continue;
-        }
+    //   // Upload image
+    //   if ($this->columns()[$key]['type'] == 'image') {
+    //     // If is not base64 (new image, skip)
+    //     if ($this->___validateBase64Image((string)$data[$key]['fileData']) == 0) {
+    //       unset($dataForThisModel[$key]);
+    //       continue;
+    //     }
 
-        $folderPath = $this->getFolderPath();
-        $fileName = bin2hex(random_bytes(10)) . '-' . $data[$key]['fileName'];
+    //     $folderPath = $this->getFolderPath();
+    //     $fileName = bin2hex(random_bytes(10)) . '-' . $data[$key]['fileName'];
 
-        // Replace just with filePath to save in DB
-        $dataForThisModel[$key] = $fileName;
+    //     // Replace just with filePath to save in DB
+    //     $dataForThisModel[$key] = $fileName;
 
-        if (!is_dir($folderPath)) mkdir($folderPath);
+    //     if (!is_dir($folderPath)) mkdir($folderPath);
 
-        $imageData = preg_replace('/^data:image\/[^;]+;base64,/', '', $data[$key]['fileData']);
-        $image = base64_decode($imageData);
+    //     $imageData = preg_replace('/^data:image\/[^;]+;base64,/', '', $data[$key]['fileData']);
+    //     $image = base64_decode($imageData);
 
-        if (file_put_contents($folderPath . "/{$fileName}", $image) === false) {
-          throw new Exception($this->translate("Upload file error"));
-        }
-      }
-    }
+    //     if (file_put_contents($folderPath . "/{$fileName}", $image) === false) {
+    //       throw new Exception($this->translate("Upload file error"));
+    //     }
+    //   }
+    // }
+
+    $dataForThisModel = $data;
 
     $this->recordValidate($dataForThisModel);
 
-    if ($isInsert) {
-      $dataForThisModel = $this->onBeforeInsert($dataForThisModel);
+    if ($isCreate) {
+      $dataForThisModel = $this->onBeforeCreate($dataForThisModel);
     } else {
       $dataForThisModel = $this->onBeforeUpdate($dataForThisModel);
     }
 
-    $dataForThisModel = $this->onBeforeSave($dataForThisModel);
-    $dataForThisModel = $this->normalizeRecordData($dataForThisModel);
+    $dataForThisModel = $this->recordNormalize($dataForThisModel);
 
-    if ($id <= 0) {
-      $this->app->router->checkPermission($this->fullName . ':Create');
+    if ($isCreate) {
       unset($dataForThisModel['id']);
       $returnValue = $this->recordCreate($dataForThisModel);
       $data['id'] = (int) $returnValue;
       $id = (int) $returnValue;
     } else {
-      $this->app->router->checkPermission($this->fullName . ':Update');
       $returnValue = $this->recordUpdate($id, $dataForThisModel);
     }
 
-    // save data for lookup models first (and create records, if necessary)
-    foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
-      $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? NULL;
+    // // save data for lookup models first (and create records, if necessary)
+    // foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
+    //   $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? NULL;
 
-      if ($lookupColumnName == NULL) continue;
+    //   if ($lookupColumnName == NULL) continue;
 
-      $lookupModel = $this->app->getModel($lookupModelName);
-      $lookupData = $this->___getInsertedIdForLookupColumn($lookupModel->columns(), $lookupData, $data['id']);
-      $lookupModel->recordValidate($lookupData);
+    //   $lookupModel = $this->app->getModel($lookupModelName);
+    //   $lookupData = $this->___getInsertedIdForLookupColumn($lookupModel->columns(), $lookupData, $data['id']);
+    //   $lookupModel->recordValidate($lookupData);
 
-      if ($data[$lookupColumnName] <= 0) {
-        $lookupData = $lookupModel->onBeforeInsert($lookupData);
-      } else {
-        $lookupData = $lookupModel->onBeforeUpdate($lookupData);
-      }
+    //   if ($data[$lookupColumnName] <= 0) {
+    //     $lookupData = $lookupModel->onBeforeInsert($lookupData);
+    //   } else {
+    //     $lookupData = $lookupModel->onBeforeUpdate($lookupData);
+    //   }
 
-      $lookupData = $this->onBeforeSave($lookupData);
+    //   $lookupData = $this->onBeforeSave($lookupData);
 
-      if ($data[$lookupColumnName] <= 0) {
-        $this->app->router->checkPermission($lookupModel->fullName . ':Create');
-        $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
-      } else {
-        $this->app->router->checkPermission($lookupModel->fullName . ':Update');
-        $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
-      }
-    }
+    //   if ($data[$lookupColumnName] <= 0) {
+    //     $this->app->router->checkPermission($lookupModel->fullName . ':Create');
+    //     $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
+    //   } else {
+    //     $this->app->router->checkPermission($lookupModel->fullName . ':Update');
+    //     $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
+    //   }
+    // }
 
     // save cross-table-alignments
     foreach ($this->junctions as $jName => $jParams) {
@@ -1594,199 +995,35 @@ class Model
       }
     }
 
-    if ($isInsert) {
-      $returnValue = $this->onAfterInsert($data, $returnValue);
+    if ($isCreate) {
+      $returnValue = $this->onAfterCreate($data, $returnValue);
     } else {
       $returnValue = $this->onAfterUpdate($data, $returnValue);
     }
 
-    $returnValue = $this->onAfterSave($data, $returnValue);
-
     return $returnValue;
   }
 
-  public function recordDelete(int $id)
+  public function recordDelete(int $id): bool
   {
-    $id = (int)$id;
-
-    try {
-      $this->onBeforeDelete($id);
-      $returnValue = $this->deleteRow($id);
-      $returnValue = $this->onAfterDelete($id);
-      return $returnValue;
-    } catch (RecordDeleteException $e) {
-      return $this->app->renderHtmlWarning($e->getMessage());
-    }
+    return $this->eloquent->where('id', $id)->delete();
   }
 
-  //////////////////////////////////////////////////////////////////
-  // Components/Cards methods
-
-  public function cards(array $cards = [])
+  public function recordDefaultValues(): array
   {
-    return $this->app->dispatchEventToPlugins("onModelAfterCards", [
-      "model" => $this,
-      "cards" => $cards,
-    ])["cards"];
+    return [];
   }
 
-  public function cardsParams($params)
+  public function recordRelations(): array
   {
-    return $this->app->dispatchEventToPlugins("onModelAfterCardsParams", [
-      "model" => $this,
-      "params" => $params,
-    ])["params"];
-  }
+    $relations = [];
 
-  public function cardsCardHtmlFormatter($cardsObject, $data)
-  {
-    return $this->app->dispatchEventToPlugins("onModelAfterCardsCardHtmlFormatter", [
-      "model" => $this,
-      "cardsObject" => $cardsObject,
-      "data" => $data,
-    ])["html"];
-  }
-
-  //////////////////////////////////////////////////////////////////
-  // Components/Tree methods
-
-  public function treeParams($params)
-  {
-    return $this->app->dispatchEventToPlugins("onModelAfterTreeParams", [
-      "model" => $this,
-      "params" => $params,
-    ])["params"];
-  }
-
-
-  //////////////////////////////////////////////////////////////////
-  // save/delete events
-
-  /**
-   * onBeforeInsert
-   *
-   * @param mixed $data
-   *
-   * @return array
-   */
-  public function onBeforeInsert(array $data): array
-  {
-    if ($this->storeRecordInfo) {
-      // REVIEW DD: Tato uprava nie je podla toho, ako sme si to vysvetlili.
-      // Mixujes dohromady $data a $columns.
-      // T.j. do $data['record_info'] nemoze ist konfiguracia inputov - su to $data.
-      $data['record_info'] = $this->getNewRecordInfo();
-      $data['record_info'] = $this->setRecordInfoCreated($data['record_info']);
+    foreach ($this->relations as $relName => $relDefinition) {
+      $relations[$relName]['type'] = $relDefinition[0];
+      $relations[$relName]['template'] = [$relDefinition[2] => ['_useMasterRecordId_' => true]];
     }
 
-    return $this->app->dispatchEventToPlugins("onModelBeforeInsert", [
-      "model" => $this,
-      "data" => $data,
-    ])["data"];
-  }
-
-  /**
-   * onModelBeforeUpdate
-   *
-   * @param mixed $data
-   *
-   * @return array
-   */
-  public function onBeforeUpdate(array $data): array
-  {
-    if ($this->storeRecordInfo) {
-      $data['record_info'] = $this->setRecordInfoUpdated($data);
-    }
-
-    return $this->app->dispatchEventToPlugins("onModelBeforeUpdate", [
-      "model" => $this,
-      "data" => $data,
-    ])["data"];
-  }
-
-  /**
-   * onBeforeSave
-   *
-   * @param mixed $data
-   *
-   * @return [type]
-   */
-  public function onBeforeSave(array $data): array
-  {
-    if ($this->storeRecordInfo) $data['record_info'] = json_encode($data['record_info']);
-
-    return $this->app->dispatchEventToPlugins("onModelBeforeSave", [
-      "model" => $this,
-      "data" => $data,
-    ])["data"];
-  }
-
-  /**
-   * onAfterInsert
-   *
-   * @param mixed $data
-   * @param mixed $returnValue
-   *
-   * @return [type]
-   */
-  public function onAfterInsert(array $data, $returnValue)
-  {
-    return $this->app->dispatchEventToPlugins("onModelAfterInsert", [
-      "model" => $this,
-      "data" => $data,
-      "returnValue" => $returnValue,
-    ])["returnValue"];
-  }
-
-  /**
-   * onModelAfterUpdate
-   *
-   * mixed $data
-   * @param mixed $returnValue
-   *
-   * @return [type]
-   */
-  public function onAfterUpdate(array $data, $returnValue)
-  {
-    return $this->app->dispatchEventToPlugins("onModelAfterUpdate", [
-      "model" => $this,
-      "data" => $data,
-      "returnValue" => $returnValue,
-    ])["returnValue"];
-  }
-
-  /**
-   * onAfterSave
-   *
-   * @param mixed $data
-   * @param mixed $returnValue
-   *
-   * @return [type]
-   */
-  public function onAfterSave(array $data, $returnValue)
-  {
-    return $this->app->dispatchEventToPlugins("onModelAfterSave", [
-      "model" => $this,
-      "data" => $data,
-      "returnValue" => $returnValue,
-    ])["returnValue"];
-  }
-
-
-  public function onBeforeDelete(int $id): int
-  {
-    return $this->app->dispatchEventToPlugins('onModelBeforeDelete', [
-      'model' => $this,
-      'id' => $id,
-    ])['id'];
-  }
-
-  public function onAfterDelete(int $id): int
-  {
-    return $this->app->dispatchEventToPlugins('onModelAfterDelete', [
-      'model' => $this,
-      'id' => $id,
-    ])['id'];
+    return $relations;
   }
 
   public function loadRecords(callable|null $queryModifierCallback = null): array {
@@ -1804,12 +1041,11 @@ class Model
     return $data;
   }
 
-  public function loadRecord(callable|null $queryModifierCallback = null): array {
-    $data = reset($this->loadRecords($queryModifierCallback));
-    if (!is_array($data)) $data = [];
-    return $data;
+  public function recordGet(callable|null $queryModifierCallback = null): array {
+    $record = reset($this->loadRecords($queryModifierCallback));
+    if (!is_array($record)) $record = [];
+    return $record;
   }
-
 
   public function prepareLoadRecordQuery(bool $addLookups = false): \Illuminate\Database\Eloquent\Builder {
     $tmpColumns = $this->columns();
@@ -1866,251 +1102,14 @@ class Model
 
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
     $query = $this->eloquent->selectRaw(join(',', $selectRaw))->with($withs);
+    foreach ($this->relations as $relName => $relDefinition) {
+      $query->with($relName);
+    }
     foreach ($joins as $join) {
       $query->leftJoin($join[0], $join[1], $join[2], $join[3]);
     }
 
     return $query;
-  }
-
-  public function onAfterLoadRecord(array $data): array {
-    return $data;
-  }
-
-  public function deleteRecord(int $id): bool {
-    return $this->eloquent->where('id', $id)->delete();
-  }
-
-  //////////////////////////////////////////////////////////////////
-  // own implementation of lookups and pivots
-
-  // getQuery
-  public function getQuery($columns = NULL)
-  {
-    if ($columns === NULL) $columns = $this->fullTableSqlName . ".id";
-    return $this->select($columns);
-  }
-
-  // addLookupsToQuery
-  public function addLookupsToQuery($query, $lookupsToAdd = NULL)
-  {
-    if (empty($query->addedLookups)) {
-      $query->addedLookups = [];
-    }
-
-    if ($lookupsToAdd === NULL) {
-      $lookupsToAdd = [];
-      foreach ($this->columns() as $colName => $colDef) {
-        if (!empty($colDef['model'])) {
-          $tmpModel = $this->app->getModel($colDef['model']);
-          $lookupsToAdd[$colName] = $tmpModel->shortName;
-        }
-      }
-    }
-
-    foreach ($query->addedLookups as $colName => $lookupName) {
-      unset($lookupsToAdd[$colName]);
-    }
-
-    $selects = [$this->fullTableSqlName . ".*"];
-    $joins = [];
-
-    foreach ($lookupsToAdd as $colName => $lookupName) {
-      $lookupedModel = $this->app->getModel($this->columns()[$colName]['model']);
-
-      $selects[] = $lookupedModel->getFullTableSqlName() . ".id as {$lookupName}___LOOKUP___id";
-
-      $lookupedModelColumns = $lookupedModel->columns();
-
-      foreach ($lookupedModel->columnNames() as $lookupedColName) {
-        if (!$lookupedModelColumns[$lookupedColName]['virtual'] ?? FALSE) {
-          $selects[] = $lookupedModel->getFullTableSqlName() . ".{$lookupedColName} as {$lookupName}___LOOKUP___{$lookupedColName}";
-        }
-      }
-
-      $joins[] = [
-        $lookupedModel->getFullTableSqlName(),
-        $lookupedModel->getFullTableSqlName() . ".id",
-        '=',
-        $this->fullTableSqlName . ".{$colName}"
-      ];
-
-      $query->addedLookups[$colName] = $lookupName;
-    }
-
-    $query = $query->addSelect($selects);
-    foreach ($joins as $join) {
-      $query = $query->leftJoin($join[0], $join[1], $join[2], $join[3]);
-    }
-
-    return $this;
-  }
-
-  // addCrossTableToQuery
-  public function addCrossTableToQuery($query, $crossTableModelName, $resultKey = '')
-  {
-    $crossTableModel = $this->app->getModel($crossTableModelName);
-    if (empty($resultKey)) {
-      $resultKey = $crossTableModel->shortName;
-    }
-
-    $foreignKey = "";
-    foreach ($crossTableModel->columns() as $crossTableColName => $crossTableColDef) {
-      if ($crossTableColDef['model'] == $this->fullName) {
-        $foreignKey = $crossTableColName;
-      }
-    }
-
-    if (empty($query->pdoCrossTables)) {
-      $query->pdoCrossTables = [];
-    }
-
-    $query->pdoCrossTables[] = [$crossTableModel, $foreignKey, $resultKey];
-
-    return $this;
-  }
-
-  public function processLookupsInQueryResult($rows)
-  {
-    $processedRows = [];
-    foreach ($rows as $rowKey => $row) {
-      foreach ($row as $colName => $colValue) {
-        $strpos = strpos($colName, "___LOOKUP___");
-        if ($strpos !== FALSE) {
-          $tmp1 = strtoupper(substr($colName, 0, $strpos));
-          $tmp2 = substr($colName, $strpos + strlen("___LOOKUP___"));
-          $row[$tmp1][$tmp2] = $colValue;
-          unset($row[$colName]);
-        }
-      }
-      $processedRows[$rowKey] = $row;
-    }
-    return $processedRows;
-  }
-
-  // fetchRows
-  // public function fetchRows($eloquentQuery, $keyBy = 'id', $processLookups = TRUE)
-  // {
-  //   $query = $this->pdo->prepare($eloquentQuery->toSql());
-  //   $query->execute($eloquentQuery->getBindings());
-
-  //   $rows = Helper::keyBy('id', $query->fetchAll(\PDO::FETCH_ASSOC));
-
-  //   if ($processLookups) {
-  //     $rows = $this->processLookupsInQueryResult($rows);
-  //   }
-
-  //   if (!empty($eloquentQuery->pdoCrossTables)) {
-  //     foreach ($eloquentQuery->pdoCrossTables as $crossTable) {
-  //       list($tmpCrossTableModel, $tmpForeignKey, $tmpCrossTableResultKey) = $crossTable;
-
-  //       $tmpCrossQuery = $tmpCrossTableModel->getQuery();
-  //       $tmpCrossTableModel->addLookupsToQuery($tmpCrossQuery);
-  //       $tmpCrossQuery->whereIn($tmpForeignKey, array_keys($rows));
-
-  //       $tmpCrossTableValues = $this->fetchRows($tmpCrossQuery, 'id', FALSE);
-
-  //       foreach ($tmpCrossTableValues as $tmpCrossTableValue) {
-  //         $rows[$tmpCrossTableValue[$tmpForeignKey]][$tmpCrossTableResultKey][] = $tmpCrossTableValue;
-  //       }
-  //     }
-  //   }
-
-  //   if (empty($keyBy) || $keyBy === NULL || $keyBy === FALSE || $keyBy == 'id') {
-  //     return $rows;
-  //   } else {
-  //     return Helper::keyBy($keyBy, $rows);
-  //   }
-  // }
-
-  // countRowsInQuery
-  // public function countRowsInQuery($eloquentQuery)
-  // {
-  //   $query = $this->pdo->prepare($eloquentQuery->toSql());
-  //   $query->execute($eloquentQuery->getBindings());
-
-  //   $rows = $query->fetchAll(\PDO::FETCH_COLUMN, 0);
-
-  //   return count($rows);
-  // }
-
-  public function getNewRecordInfo(): array
-  {
-    return [
-      'id_created_by' => [
-        'type' => 'lookup',
-        'title' => 'Created By',
-        'model' => 'ADIOS/Models/User',
-        'foreignKeyOnUpdate' => 'CASCADE',
-        'foreignKeyOnDelete' => 'CASCADE',
-        'value' => null,
-        'readonly' => true
-      ],
-      'created_at' => [
-        'title' => 'Created At',
-        'type' => 'datetime',
-        'value' => null,
-        'readonly' => true,
-      ],
-      'id_updated_by' => [
-        'type' => 'lookup',
-        'title' => 'Updated By',
-        'model' => 'ADIOS/Models/User',
-        'foreignKeyOnUpdate' => 'CASCADE',
-        'foreignKeyOnDelete' => 'CASCADE',
-        'value' => null,
-        'readonly' => true
-      ],
-      'updated_at' => [
-        'title' => 'Updated At',
-        'type' => 'datetime',
-        'value' => null,
-        'readonly' => true
-      ]
-    ];
-  }
-
-  public function setRecordInfoCreated(array $recordInfo): array
-  {
-    $recordInfo['id_created_by']['value'] = $this->app->userProfile['id'];
-    $recordInfo['created_at']['value'] = date('Y-m-d H:i:s');
-
-    return $recordInfo;
-  }
-
-  public function setRecordInfoUpdated(array $data): array
-  {
-    $tmpData = $this->eloquent->find($data['id']);
-    $recordInfo = json_decode($tmpData->record_info, true);
-
-    $recordInfo['id_updated_by']['value'] = $this->app->userProfile['id'];
-    $recordInfo['updated_at']['value'] = date('Y-m-d H:i:s');
-
-    return $recordInfo;
-  }
-
-  public function getFolderUrl(): string
-  {
-    return "{$this->app->config['uploadUrl']}/" . str_replace('/', '-', $this->fullName);
-  }
-
-  public function getFolderPath(): string
-  {
-    return "{$this->app->config['uploadDir']}/" . str_replace('/', '-', $this->fullName);
-  }
-
-
-  public function relationships(): array
-  {
-    $relationships = [];
-
-    foreach ($this->columns() as $columnName => $columnDefinition) {
-      if ($columnDefinition['type'] == 'lookup') {
-        $relationships[] = $columnName;
-      }
-    }
-
-    return $relationships;
   }
 
   public function getDependentRecords(int $parentId): array {
@@ -2132,6 +1131,89 @@ class Model
 
   public function getNewRecordDataFromString(string $text): array {
     return [];
+  }
+
+  //////////////////////////////////////////////////////////////////
+  // callbacks
+
+  /**
+   * onBeforeCreate
+   *
+   * @param mixed $data
+   *
+   * @return array
+   */
+  public function onBeforeCreate(array $data): array
+  {
+    return $data;
+  }
+
+  /**
+   * onModelBeforeUpdate
+   *
+   * @param mixed $data
+   *
+   * @return array
+   */
+  public function onBeforeUpdate(array $data): array
+  {
+    return $data;
+  }
+
+  /**
+   * onAfterCreate
+   *
+   * @param mixed $data
+   * @param mixed $returnValue
+   *
+   * @return [type]
+   */
+  public function onAfterCreate(array $data, $returnValue)
+  {
+    return $this->app->dispatchEventToPlugins("onModelAfterCreate", [
+      "model" => $this,
+      "data" => $data,
+      "returnValue" => $returnValue,
+    ])["returnValue"];
+  }
+
+  /**
+   * onModelAfterUpdate
+   *
+   * mixed $data
+   * @param mixed $returnValue
+   *
+   * @return [type]
+   */
+  public function onAfterUpdate(array $data, $returnValue)
+  {
+    return $this->app->dispatchEventToPlugins("onModelAfterUpdate", [
+      "model" => $this,
+      "data" => $data,
+      "returnValue" => $returnValue,
+    ])["returnValue"];
+  }
+
+
+  public function onBeforeDelete(int $id): int
+  {
+    return $this->app->dispatchEventToPlugins('onModelBeforeDelete', [
+      'model' => $this,
+      'id' => $id,
+    ])['id'];
+  }
+
+  public function onAfterDelete(int $id): int
+  {
+    return $this->app->dispatchEventToPlugins('onModelAfterDelete', [
+      'model' => $this,
+      'id' => $id,
+    ])['id'];
+  }
+
+
+  public function onAfterLoadRecord(array $data): array {
+    return $data;
   }
 
 }

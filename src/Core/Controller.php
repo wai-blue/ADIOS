@@ -58,7 +58,6 @@ class Controller {
   public string $permission = "";
   public string $uid = "";
   public string $controller = "";
-  public string $myRootFolder = "";
   public string $twigTemplate = "";
   public string $view = "";
 
@@ -75,8 +74,6 @@ class Controller {
     $this->shortName = str_replace('Controllers/', '', $this->shortName);
 
     $this->permission = $this->shortName;
-
-    $this->myRootFolder = str_replace("\\", "/", dirname((new \ReflectionClass(get_class($this)))->getFileName()));
 
     if (!is_array($this->params)) {
       $this->params = [];
@@ -160,7 +157,6 @@ class Controller {
     $twigParams["config"] = $this->app->config;
     $twigParams["requestedUri"] = $this->app->requestedUri;
     $twigParams["user"] = $this->app->userProfile;
-    $twigParams["locale"] = $this->app->locale->getAll();
     $twigParams["dictionary"] = $this->dictionary;
     $twigParams['userNotifications'] = $this->app->userNotifications->getAsHtml();
 

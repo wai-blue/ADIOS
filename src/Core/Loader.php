@@ -442,6 +442,21 @@ class Loader
         }
         $this->router->addRouting($tmpRouting);
 
+        $this->router->addRouting([
+          '/^api\/form\/describe\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Form/Describe',
+          ],
+          '/^api\/record\/get\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Record/Get',
+          ],
+          '/^api\/record\/lookup\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Record/Lookup',
+          ],
+          '/^api\/record\/save\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Record/Save',
+          ],
+        ]);
+
         // inicializacia twigu
         $twigLoader = new ($this->getCoreClass('Core\\TwigLoader'))($this);
         $this->twig = new \Twig\Environment($twigLoader, array(

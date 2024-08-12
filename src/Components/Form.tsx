@@ -33,8 +33,8 @@ export interface FormProps {
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
-  onChange?: () => void;
-  onClose?: () => void;
+  onChange?: () => void,
+  onClose?: () => void,
   onSaveCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
   onDeleteCallback?: () => void,
   hideOverlay?: boolean,
@@ -47,7 +47,7 @@ export interface FormProps {
   titleForEditing?: string,
   saveButtonText?: string,
   addButtonText?: string,
-  defaultValues?: Object,
+  defaultValues?: any,
   endpoint?: string,
   tag?: string,
   context?: any,
@@ -65,8 +65,9 @@ export interface FormState {
   canDelete?: boolean,
   content?: Content,
   columns?: FormColumns,
-  data?: FormInputs,
-  isEdit: boolean,
+  record?: FormInputs,
+  creatingRecord: boolean,
+  updatingRecord: boolean,
   isInlineEditing: boolean,
   invalidInputs: Object,
   tabs?: any,
@@ -79,6 +80,7 @@ export interface FormState {
   layout?: string,
   endpoint: string,
   params: any,
+  defaultValues?: any,
 }
 
 export interface FormColumns {
@@ -111,7 +113,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
     this.state = {
       isInitialized: false,
-      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? 'components/form'),
+      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? ''),
       id: props.id,
       prevId: props.prevId,
       nextId: props.nextId,
@@ -122,11 +124,13 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       canDelete: props.readonly,
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
-      isEdit: props.id ? props.id > 0 : false,
+      creatingRecord: props.id ? props.id <= 0 : false,
+      updatingRecord: props.id ? props.id > 0 : false,
       isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
       invalidInputs: {},
-      data: {},
+      record: {},
       params: null,
+      defaultValues: props.defaultValues ? props.defaultValues : {},
     };
   }
 
@@ -144,19 +148,21 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     }
 
     if (prevProps.id !== this.props.id) {
-      this.checkIfIsEdit();
-      this.loadParams();
-      
+      newState.id = this.props.id;
+
+      // this.checkIfIsEdit();
+      this.loadFormDescription();
+
       newState.invalidInputs = {};
-      newState.isEdit = this.props.id ? this.props.id > 0 : false;
+      newState.creatingRecord = this.props.id ? this.props.id <= 0 : false;
+      newState.updatingRecord = this.props.id ? this.props.id > 0 : false;
       setNewState = true;
     }
 
-    if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
-      newState.data = this.getDataState(this.state.columns ?? {}, this.props.defaultValues);
-      newState.data = this.onAfterDataLoaded(newState.data);
-      setNewState = true;
-    }
+    // if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
+    //   newState.record = this.onAfterRecordLoaded(this.props.defaultValues);
+    //   setNewState = true;
+    // }
 
     if (setNewState) {
       this.setState(newState);
@@ -164,29 +170,25 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
   componentDidMount() {
-    this.checkIfIsEdit();
+    // this.checkIfIsEdit();
     this.initTabs();
 
-    this.loadParams();
+    this.loadFormDescription();
   }
 
-  loadParams() {
-    //@ts-ignore
-    request.get(
-      this.state.endpoint,
-      { action: 'getParams', ...this.getEndpointParams() },
-      (data: any) => {
-        let newState: any = deepObjectMerge({ ...data }, this.props);
-        newState.params = { ...data };
-        if (newState.layout) {
-          newState.layout = this.convertLayoutToString(newState.layout);
-        }
-
-        this.setState(newState, () => {
-          this.loadRecord();
-        });
+  getEndpointUrl(action: string) {
+    let endpoint = '';
+    if (this.state.endpoint == '') {
+      switch (action) {
+        case 'describeForm': endpoint = 'api/form/describe'; break;
+        case 'saveRecord': endpoint = 'api/record/save'; break;
+        case 'loadRecord': endpoint = 'api/record/get'; break;
       }
-    );
+    } else {
+      endpoint = this.state.endpoint;
+    }
+
+    return endpoint;
   }
 
   getEndpointParams(): object {
@@ -198,23 +200,44 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     };
   }
 
-  loadRecord() {
-    request.get(
-      this.state.endpoint,
-      { action: 'loadRecord', ...this.getEndpointParams() },
+  loadFormDescription() {
+    request.post(
+      this.getEndpointUrl('describeForm'),
+      this.getEndpointParams(),
+      {},
       (data: any) => {
-        let newData = this.getDataState(this.state.columns ?? {}, data);
-        newData = this.onAfterDataLoaded(newData);
-        this.setState({isInitialized: true, data: newData}, () => {
+        this.setState({
+          columns: data.columns,
+          defaultValues: data.defaultValues,
+          canCreate: data.permissions?.canCreate,
+          canRead: data.permissions?.canRead,
+          canUpdate: data.permissions?.canUpdate,
+          canDelete: data.permissions?.canDelete,
+          readonly: !(data.permissions?.canUpdate || data.permissions?.canCreate),
+        }, () => {
+          this.loadRecord();
+        });
+      }
+    );
+  }
+
+  loadRecord() {
+    request.post(
+      this.getEndpointUrl('loadRecord'),
+      this.getEndpointParams(),
+      {},
+      (record: any) => {
+        record = this.onAfterRecordLoaded(record);
+        this.setState({isInitialized: true, record: record}, () => {
           this.onAfterFormInitialized();
         });
       }
     );
   }
 
-  onBeforeSaveRecord(data) {
+  onBeforeSaveRecord(record) {
     // to be overriden
-    return data;
+    return record;
   }
 
   onAfterSaveRecord(saveResponse) {
@@ -226,27 +249,19 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       invalidInputs: {}
     });
 
-    let formattedInputs = JSON.parse(JSON.stringify(this.state.data));
-    let data = { ...formattedInputs, id: this.state.id };
+    let record = { ...this.state.record, id: this.state.id };
 
-    data = this.onBeforeSaveRecord(data);
+    record = this.onBeforeSaveRecord(record);
 
-    //@ts-ignore
     request.post(
-      this.state.endpoint,
+      this.getEndpointUrl('saveRecord'),
       {
-        action: 'saveRecord',
         ...this.getEndpointParams(),
-        data: data
+        record: record
       },
-      {
-        model: this.props.model,
-        __IS_AJAX__: '1',
-      },
+      {},
       (saveResponse: any) => {
-        this.setState({data: saveResponse.savedData ?? {}}, () => {
-          this.onAfterSaveRecord(saveResponse);
-        });
+        this.onAfterSaveRecord(saveResponse);
       },
       (err: any) => {
         if (err.status == 422) {
@@ -258,134 +273,24 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
-  // deleteRecord(id: number) {
-  //   //@ts-ignore
-  //   Swal.fire({
-  //     title: 'Ste si istý?',
-  //     html: 'Ste si istý, že chcete vymazať tento záznam?',
-  //     icon: 'question',
-  //     showCancelButton: true,
-  //     cancelButtonText: 'Nie',
-  //     confirmButtonText: 'Áno',
-  //     confirmButtonColor: '#dc4c64',
-  //     reverseButtons: false,
-  //   } as SweetAlertOptions).then((result) => {
-  //     if (result.isConfirmed) {
-  //       request.delete(
-  //         'components/form/ondelete',
-  //         {
-  //           model: this.props.model,
-  //           id: id,
-  //           __IS_AJAX__: '1',
-  //         },
-  //         () => {
-  //           Notification.success("Záznam zmazaný");
-  //           if (this.props.onDeleteCallback) this.props.onDeleteCallback();
-  //         }
-  //       );
-  //     }
-  //   })
-  // }
+  updateRecord(changedValues: any) {
+    this.setState({record: deepObjectMerge(this.state.record, changedValues)});
+  }
 
   /**
    * Check if is id = undefined or id is > 0
    */
-  checkIfIsEdit() {
-    this.setState({
-      isEdit: this.state.id && this.state.id > 0 ? true : false,
-    });
-  }
+  // checkIfIsEdit() {
+  //   this.setState({
+  //     isEdit: this.state.id && this.state.id > 0 ? true : false,
+  //   });
+  // }
 
-  /**
-   * Input onChange with event parameter
-   */
-  inputOnChange(columnName: string, event: React.FormEvent<HTMLInputElement>) {
-    let inputValue: string | number = event?.currentTarget?.value ?? null;
-
-    this.inputOnChangeRaw(columnName, inputValue);
-  }
-
-  /**
-   * Input onChange with raw input value, change inputs (React state)
-   */
-  inputOnChangeRaw(columnName: string, inputValue: any) {
-    let changedInput: any = {};
-    changedInput[columnName] = inputValue;
-
-    this.setState((prevState: FormState) => {
-      return {
-        data: {
-          ...prevState.data,
-          [columnName]: inputValue
-        }
-      }
-    }, () => {
-      if (this.props.onChange) this.props.onChange();
-    });
-  }
-
-  /**
-   * Dynamically initialize inputs (React state) from model columns
-   */
-  getDataState(columns: FormColumns, inputsValues: Object = {}) {
-    let data: any = {};
-
-    // If is new form and defaultValues props is set
-    if (Object.keys(inputsValues).length == 0 && this.props.defaultValues) {
-      inputsValues = this.props.defaultValues;
-    }
-
-    Object.keys(inputsValues).map((columnName: string) => {
-      if (!columns[columnName]) {
-        data[columnName] = inputsValues[columnName];
-      } else {
-        switch (columns[columnName]['type']) {
-          case 'image':
-            data[columnName] = {
-              fileName: inputsValues[columnName] ?? inputsValues[columnName],
-              fileData: inputsValues[columnName] != undefined && inputsValues[columnName] != ""
-                ? this.state.folderUrl + '/' + inputsValues[columnName]
-                : null
-            };
-          break;
-          case 'bool':
-          case 'boolean':
-            data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, 0);
-          break;
-          default:
-            data[columnName] = inputsValues[columnName] ?? this.getDefaultValueForInput(columnName, null);
-        }
-      }
-    });
-
-    return data;
-  }
-
-  onAfterDataLoaded(data: any) {
-    return data;
+  onAfterRecordLoaded(record: any) {
+    return record;
   }
 
   onAfterFormInitialized() {
-  }
-
-
-  fetchColumnData(columnName: string) {
-    request.get(
-      this.state.endpoint,
-      { action: 'loadRecord', ...this.getEndpointParams() },
-      (data: any) => {
-        const input = data.data[columnName];
-        this.inputOnChangeRaw(columnName, input);
-      }
-    );
-  }
-
-  /**
-   * Get default value form Model definition
-   */
-  getDefaultValueForInput(columnName: string, otherValue: any): any {
-    if (!this.state.columns) return;
-    return this.state.columns[columnName].defaultValue ?? otherValue
   }
 
   changeTab(changeTabName: string) {
@@ -468,7 +373,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
             ? Object.keys(content).map((contentArea: string) => {
               return this._renderContentItem(key++, contentArea, content[contentArea]);
             })
-            : this.state.data != null ? (
+            : this.state.record != null ? (
               Object.keys(this.state.columns ?? {}).map((columnName: string) => {
                 return this.inputWrapper(columnName);
               })
@@ -542,6 +447,22 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     return {...customInputParams, ...{readonly: this.state.readonly}};
   }
 
+  getDefaultInputProps() {
+    return {
+      uid: this.props.uid + '_' + uuid.v4(),//columnName,
+      parentForm: this,
+      context: this.props.context ? this.props.context : this.props.uid,
+      isInitialized: false,
+      isInlineEditing: this.state.isInlineEditing,
+      showInlineEditingButtons: !this.state.isInlineEditing,
+      onInlineEditCancel: () => {
+      },
+      onInlineEditSave: () => {
+        this.saveRecord();
+      }
+    };
+  }
+
   /**
    * Render different input types
    */
@@ -552,29 +473,25 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     //   return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);
     // }
 
-    if (!onChange) onChange = (value: any) => this.inputOnChangeRaw(columnName, value);
+    // if (!onChange) onChange = (value: any) => this.onChange(columnName, value);
 
     const inputParams = this.buildInputParams(columnName, customInputParams);
-    const data = this.state.data ?? {};
+    const record = this.state.record ?? {};
     const columns = this.state.columns ?? {};
     const inputProps: InputProps = {
-      uid: this.props.uid + '_' + columnName,
-      columnName: columnName,
-      parentForm: this,
-      context: this.props.context ? this.props.context : this.props.uid,
+      ...this.getDefaultInputProps(),
       params: inputParams,
-      value: data[columnName] ?? '',
+      value: record[columnName] ?? '',
+      columnName: columnName,
       invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName]?.readonly || columns[columnName]?.disabled,
       cssClass: inputParams.cssClass ?? '',
-      onChange: onChange,
-      isInitialized: false,
-      isInlineEditing: this.state.isInlineEditing,
-      showInlineEditingButtons: !this.state.isInlineEditing,
-      onInlineEditCancel: () => {
-      },
-      onInlineEditSave: () => {
-        this.saveRecord();
+      onChange: (value: any) => {
+        let record = {...this.state.record};
+        record[columnName] = value;
+        this.setState({record: record}, () => {
+          if (this.props.onChange) this.props.onChange();
+        });
       }
     };
 
@@ -626,7 +543,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
         }
       >
-        {this.state.isEdit
+        {this.state.updatingRecord
           ? (
             <>
               <span className="icon"><i className="fas fa-save"></i></span>
@@ -719,15 +636,15 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     let title = 
       this.state.title
         ? this.state.title
-        : this.state.isEdit
-          ? this.state.params?.titleForEditing ?? (this.state.data?._lookupText_ ?? '')
+        : this.state.updatingRecord
+          ? this.state.params?.titleForEditing ?? (this.state.record?._lookupText_ ?? '')
           : this.state.params?.titleForInserting
     ;
 
     return <>
       <h2>{title}</h2>
       <small>{
-        this.state.isEdit
+        this.state.updatingRecord
           ? globalThis.app.translate('Editing record') + ' #' + this.state.id
           : globalThis.app.translate('Adding new record')
       }</small>
@@ -736,7 +653,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   render() {
 
-    if (!this.state.isInitialized) {
+    if (!this.state.isInitialized || !this.state.record) {
       return (
         <div className="p-4 h-full flex items-center">
           <ProgressBar mode="indeterminate" style={{ flex: 1, height: '30px' }}></ProgressBar>
