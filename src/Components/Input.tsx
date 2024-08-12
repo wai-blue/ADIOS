@@ -223,7 +223,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
               }
           </>
           : <>
-            {this.state.readonly ? null :
+            {/* {this.state.readonly ? null :
               <div className="inline-editing-buttons">
                 <button
                   className="btn btn-transparent"
@@ -234,7 +234,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
                   <span className="icon !py-0"><i className="fas fa-pencil-alt"></i></span>
                 </button>
               </div>
-            }
+            } */}
             <div
               className="value-element"
               onClick={() => {

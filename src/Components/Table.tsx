@@ -65,7 +65,11 @@ export interface TableProps {
   itemsPerPage: number,
   orderBy?: OrderBy,
   inlineEditingEnabled?: boolean,
+  isInlineEditing?: boolean,
   selectionMode?: 'single' | 'multiple' | undefined,
+  loadData?: (table: Table) => void,
+  loadParams?: (table: Table) => void,
+  onChange?: (table: Table) => void,
 
   //TODO
   //showPaging?: boolean,
@@ -80,19 +84,19 @@ export interface TableProps {
 
 // Laravel pagination
 interface TableData {
-  current_page: number,
+  current_page?: number,
   data: Array<any>,
-  first_page_url: string,
-  from: number,
-  last_page_url: string,
-  last_page: number,
-  links: Array<any>,
-  next_page_url: string|null,
-  path: string,
-  per_page: number,
-  prev_page_url: string|null,
-  to: number,
-  total: number
+  first_page_url?: string,
+  from?: number,
+  last_page_url?: string,
+  last_page?: number,
+  links?: Array<any>,
+  next_page_url?: string|null,
+  path?: string,
+  per_page?: number,
+  prev_page_url?: string|null,
+  to?: number,
+  total?: number
 }
 
 export interface TableState {
@@ -116,21 +120,20 @@ export interface TableState {
   search?: string,
   showHeader?: boolean,
   title?: string,
-  folderUrl?: string,
-  loadingInProgress: boolean,
   renderForm?: boolean,
   inlineEditingEnabled: boolean,
+  isInlineEditing: boolean,
   selection: any,
   idToDelete: number,
 }
 
-export default class Table<P, S extends TableState = TableState> extends Component<TableProps, TableState> {
+export default class Table extends Component<TableProps, TableState> {
   static defaultProps = {
     itemsPerPage: 100,
     formUseModalSimple: true,
   }
 
-  state: S;
+  state: TableState;
 
   dt = createRef<DataTable<any[]>>();
 
@@ -155,12 +158,12 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       page: 1,
       itemsPerPage: this.props.itemsPerPage,
       showHeader: props.showHeader ?? true,
-      loadingInProgress: false,
       orderBy: this.props.orderBy,
       inlineEditingEnabled: props.inlineEditingEnabled ? props.inlineEditingEnabled : false,
+      isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
       selection: [],
       idToDelete: 0,
-    } as S;
+    };
   }
 
   componentDidMount() {
@@ -245,70 +248,73 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   loadParams(successCallback?: (params: any) => void) {
-    let propsColumns = this.props.columns ?? {};
+    if (this.props.loadParams) {
+      this.props.loadParams(this);
+    } else {
+      let propsColumns = this.props.columns ?? {};
 
-    request.get(
-      this.getEndpointUrl(),
-      {
-        ...this.getEndpointParams(),
-        action: 'getParams',
-      },
-      (data: any) => {
-        try {
-          if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
-        
-          let params: any = deepObjectMerge(data, this.props);
-          if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
-          if (successCallback) successCallback(params);
+      request.get(
+        this.getEndpointUrl(),
+        {
+          ...this.getEndpointParams(),
+          action: 'getParams',
+        },
+        (data: any) => {
+          try {
+            if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
+          
+            let params: any = deepObjectMerge(data, this.props);
+            if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
+            if (successCallback) successCallback(params);
 
-          params = this.onAfterLoadParams(params);
+            params = this.onAfterLoadParams(params);
 
-          this.setState({
-            addButtonText: this.props.addButtonText ?? params.addButtonText,
-            canCreate: params.canCreate ?? true,
-            canDelete: params.canDelete ?? true,
-            canRead: params.canRead ?? true,
-            canUpdate: params.canUpdate ?? true,
-            columns: params.columns,
-            showHeader: params.showHeader ?? true,
-            title: this.props.title ?? params.title,
-            folderUrl: params.folderUrl,
-          });
-        } catch (err) {
-          Notification.error(err.message);
+            this.setState({
+              addButtonText: this.props.addButtonText ?? params.addButtonText,
+              canCreate: params.canCreate ?? true,
+              canDelete: params.canDelete ?? true,
+              canRead: params.canRead ?? true,
+              canUpdate: params.canUpdate ?? true,
+              columns: params.columns,
+              showHeader: params.showHeader ?? true,
+              title: this.props.title ?? params.title,
+            });
+          } catch (err) {
+            Notification.error(err.message);
+          }
         }
-      }
-    );
+      );
+    }
   }
 
-  loadData(page: number = 1, itemsPerPage = 100) {
-    this.setState({loadingInProgress: true});
-    request.get(
-      this.getEndpointUrl(),
-      {
-        ...this.getEndpointParams(),
-        action: 'loadData',
-        filterBy: this.state.filterBy,
-        model: this.props.model,
-        orderBy: this.state.orderBy,
-        page: page,
-        itemsPerPage: itemsPerPage,
-        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
-        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
-        search: this.state.search,
-        tag: this.props.tag,
-        where: this.props.where,
-        __IS_AJAX__: '1',
-      },
-      (data: any) => {
-        this.setState({
-          loadingInProgress: false,
-          data: data,
-          page: page,
-          itemsPerPage: itemsPerPage
-        });
-      }
-    );
+  loadData() {
+    if (this.props.loadData) {
+      this.props.loadData(this);
+    } else {
+      request.get(
+        this.getEndpointUrl(),
+        {
+          ...this.getEndpointParams(),
+          action: 'loadData',
+          filterBy: this.state.filterBy,
+          model: this.props.model,
+          orderBy: this.state.orderBy,
+          page: this.state.page ?? 0,
+          itemsPerPage: this.state.itemsPerPage ?? 15,
+          parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+          parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
+          search: this.state.search,
+          tag: this.props.tag,
+          where: this.props.where,
+          __IS_AJAX__: '1',
+        },
+        (data: any) => {
+          this.setState({
+            data: data,
+          });
+        }
+      );
+    }
   }
 
   getFormParams(): any {
@@ -512,6 +518,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
       value: columnValue,
       showInlineEditingButtons: true,
     };
+    const rowIndex = options.rowIndex;
 
     if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
 
@@ -539,15 +546,15 @@ export default class Table<P, S extends TableState = TableState> extends Compone
             className="rounded"
           />;
         break;
-        case 'image':
-          if (!columnValue) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
-          else {
-            cellValueElement = <img 
-              style={{ width: '30px', height: '30px' }}
-              src={this.state.folderUrl + "/" + columnValue}
-              className="rounded"
-            />;
-          }
+        // case 'image':
+        //   if (!columnValue) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+        //   else {
+        //     cellValueElement = <img 
+        //       style={{ width: '30px', height: '30px' }}
+        //       src={this.state.folderUrl + "/" + columnValue}
+        //       className="rounded"
+        //     />;
+        //   }
         break;
         case 'lookup':
           cellValueElement = <span style={{
@@ -588,24 +595,45 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
     let op = createRef<OverlayPanel>();
 
-    let cellEditorElement: JSX.Element = InputFactory({
-      ...inputProps,
-      isInlineEditing: true,
-      onInlineEditCancel: () => { op.current?.hide(); }
-    });
+    if (this.props.isInlineEditing) {
+      return InputFactory({
+        ...inputProps,
+        isInlineEditing: this.props.isInlineEditing,
+        showInlineEditingButtons: false,
+        onInlineEditCancel: () => { op.current?.hide(); },
+        onChange: (value: any) => {
+          if (this.state.data) {
+            let data: TableData = this.state.data;
+            data.data[rowIndex][columnName] = value;
+            this.setState({data: data});
+            if (this.props.onChange) {
+              this.props.onChange(this);
+            }
+          }
+        }
+      });
+    } else {
+      return cellValueElement;
+    }
 
-    return <>
-      {cellValueElement}
-      {this.state.inlineEditingEnabled ? <>
-        <i
-          className="inline-edit-icon fas fa-pencil-alt text-xs"
-          onClick={(e) => { e.stopPropagation(); op.current?.toggle(e); }}
-        ></i>
-        <OverlayPanel ref={op} onClick={(e) => { e.stopPropagation(); }}>
-          {cellEditorElement}
-        </OverlayPanel>
-      </> : null}
-    </>;
+    // let cellEditorElement: JSX.Element = InputFactory({
+    //   ...inputProps,
+    //   isInlineEditing: true,
+    //   onInlineEditCancel: () => { op.current?.hide(); }
+    // });
+
+    // return <>
+    //   {cellValueElement}
+    //   {this.state.inlineEditingEnabled ? <>
+    //     <i
+    //       className="inline-edit-icon fas fa-pencil-alt text-xs"
+    //       onClick={(e) => { e.stopPropagation(); op.current?.toggle(e); }}
+    //     ></i>
+    //     <OverlayPanel ref={op} onClick={(e) => { e.stopPropagation(); }}>
+    //       {cellEditorElement}
+    //     </OverlayPanel>
+    //   </> : null}
+    // </>;
   }
 
   renderColumns(): JSX.Element[] {
@@ -672,7 +700,7 @@ export default class Table<P, S extends TableState = TableState> extends Compone
 
         <div
           id={"adios-table-" + this.props.uid}
-          className={"adios component table " + (this.state.loadingInProgress ? "loading" : "")}
+          className={"adios component table"}
         >
           {this.state.showHeader ? this.renderHeader() : ''}
 
@@ -774,7 +802,9 @@ export default class Table<P, S extends TableState = TableState> extends Compone
   }
 
   onPaginationChange(page: number, itemsPerPage: number) {
-    this.loadData(page, itemsPerPage);
+    this.setState({page: page, itemsPerPage: itemsPerPage}, () => {
+      this.loadData();
+    });
   }
 
   onFilterChange(data: any) {
