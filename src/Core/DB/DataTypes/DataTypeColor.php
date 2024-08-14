@@ -18,7 +18,8 @@ class DataTypeColor extends \ADIOS\Core\DB\DataType
 {
     public function sqlCreateString($table_name, $col_name, $params = [])
     {
-      $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : " default '' ";
+      $sqlDef = $params['sql_definitions'] ?? '';
+      $params['sql_definitions'] = '' != trim($sqlDef) ? $sqlDef : " default " . (int) $this->getDefaultValue($params);
 
       return "`{$col_name}` char(10) {$params['sql_definitions']}";
     }

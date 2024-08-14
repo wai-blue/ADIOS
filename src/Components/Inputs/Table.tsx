@@ -40,6 +40,7 @@ export default class Table extends Input<TableInputProps, TableInputState> {
         data={{data: this.state.value}}
         columns={this.state.columns}
         isInlineEditing={this.state.isInlineEditing}
+        readonly={!this.state.isInlineEditing}
         onChange={(table: BigTable) => {
           this.onChange(table.state.data?.data);
         }}

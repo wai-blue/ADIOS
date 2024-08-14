@@ -102,7 +102,8 @@ export class ADIOS {
         let attributeValue: any = domElement.attributes[i].value;
 
         if (!attributesDoNotConvert.includes(attributeName)) {
-          if (isValidJson(attributeValue)) {
+          if (attributeName.startsWith('json:')) {
+            attributeName = attributeName.replace('json:', '');
             attributeValue = JSON.parse(attributeValue);
           } else if (attributeName.startsWith('string:')) {
             attributeName = attributeName.replace('string:', '');
@@ -120,6 +121,8 @@ export class ADIOS {
             attributeValue = true;
           } else if (attributeValue === 'false') {
             attributeValue = false;
+          } else if (isValidJson(attributeValue)) {
+            attributeValue = JSON.parse(attributeValue);
           }
         }
 

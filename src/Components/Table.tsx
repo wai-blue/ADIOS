@@ -69,6 +69,7 @@ export interface TableProps {
   onChange?: (table: Table) => void,
   data?: TableData,
   async?: boolean,
+  readonly?: boolean,
 
   //TODO
   //showPaging?: boolean,
@@ -125,6 +126,7 @@ export interface TableState {
   selection: any,
   idToDelete: number,
   async: boolean,
+  readonly: boolean,
 }
 
 export default class Table extends Component<TableProps, TableState> {
@@ -170,6 +172,7 @@ export default class Table extends Component<TableProps, TableState> {
       data: props.data ? props.data : null,
       columns: props.columns ? props.columns : null,
       async: props.async ?? true,
+      readonly: props.readonly ?? false,
     };
   }
 
@@ -395,7 +398,7 @@ export default class Table extends Component<TableProps, TableState> {
   }
 
   renderHeaderButtons(): JSX.Element {
-    return this.state.canCreate ? this.renderAddButton() : <></>;
+    return !this.state.readonly && this.state.canCreate ? this.renderAddButton() : <></>;
   }
 
   renderHeader(): JSX.Element {
@@ -677,7 +680,7 @@ export default class Table extends Component<TableProps, TableState> {
       header=''
       body={(data: any, options: any) => {
         return <>
-          {this.state.canDelete ? <button
+          {!this.state.readonly && this.state.canDelete ? <button
             className="btn btn-list-item btn-danger"
             title={globalThis.app.translate('Delete')}
             onClick={(e) => {

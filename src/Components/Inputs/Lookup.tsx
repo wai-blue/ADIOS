@@ -76,11 +76,16 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
   renderValueElement() {
     if (this.state.data && this.state.data[this.state.value]?._lookupText_) {
-      return (
-        <a role="button" className="text-primary">
+      return <>
+        <a
+          role="button"
+          className="text-primary"
+          data-pr-tooltip={JSON.stringify(this.state.data[this.state.value] ?? {})}
+          data-pr-position="bottom"
+        >
           {this.state.data[this.state.value]?._lookupText_}
         </a>
-      );
+      </>;
     } else {
       return <span className='no-value'></span>;
     }
@@ -90,6 +95,10 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   renderInputElement() {
     return (
       <AsyncCreatable
+        value={{
+          id: this.state.data[this.state.value].id,
+          _lookupText_: this.state.data[this.state.value]._lookupText_,
+        }}
         isClearable={true}
         isDisabled={this.state.readonly || !this.state.isInitialized}
         loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
@@ -101,7 +110,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
         classNamePrefix="adios-lookup"
         allowCreateWhileLoading={true}
         formatCreateLabel={(inputValue: string) => <span className="create-new">{globalThis.app.translate('Create') + ': ' + inputValue}</span>}
-        getNewOptionData={(value, label) => { console.log(value, label); return { id: {_isNew_: true, _lookupText_: label}, _lookupText_: label }; }}
+        getNewOptionData={(value, label) => { return { id: {_isNew_: true, _lookupText_: label}, _lookupText_: label }; }}
       />
     )
   }

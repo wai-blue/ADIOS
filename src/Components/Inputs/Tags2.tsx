@@ -10,6 +10,7 @@ interface Tags2InputProps extends InputProps {
   endpoint?: string,
   targetColumn: string,
   sourceColumn: string,
+  colorColumn?: string,
 }
 
 interface Tags2InputState extends InputState {
@@ -18,6 +19,7 @@ interface Tags2InputState extends InputState {
   endpoint: string,
   targetColumn: string,
   sourceColumn: string,
+  colorColumn: string,
 }
 
 export default class Lookup extends Input<Tags2InputProps, Tags2InputState> {
@@ -29,7 +31,11 @@ export default class Lookup extends Input<Tags2InputProps, Tags2InputState> {
   constructor(props: Tags2InputProps) {
     super(props);
 
-    this.state = {
+    this.state = this.getStateFromProps(props);
+  }
+
+  getStateFromProps(props: Tags2InputProps) {
+    return {
       ...this.state, // Parent state
       endpoint:
       props.endpoint
@@ -74,6 +80,7 @@ export default class Lookup extends Input<Tags2InputProps, Tags2InputState> {
           options[data[i].id] = {
             value: data[i].id,
             label: data[i]._lookupText_,
+            color: data[i][this.props.colorColumn ?? ''] ?? '',
           };
         }
 
@@ -91,10 +98,13 @@ export default class Lookup extends Input<Tags2InputProps, Tags2InputState> {
       optionList = value.map((item) => {
         const optionId = item.id;
         const optionValue = item[this.props.sourceColumn];
+        const optionData = this.state.options[optionValue];
+
         return {
-          id: item.id,
+          id: optionId,
           value: optionValue,
-          label: this.state.options[optionValue]?.label ?? '[' + optionValue + ']'
+          label: optionData?.label ?? '[' + optionValue + ']',
+          color: optionData?.color ?? '',
         }
       });
     }
@@ -109,7 +119,17 @@ export default class Lookup extends Input<Tags2InputProps, Tags2InputState> {
     if (options) {
       let items: Array<any> = [];
       for (let i in options) {
-        items.push(<span className="tag">{options[i].label}</span>);
+        items.push(
+          <button
+            className="btn btn-transparent btn-small mr-1"
+            style={{ borderColor: (options[i].color ? options[i].color : '') }}
+          >
+            <span
+              className="text"
+              style={{ color: (options[i].color ? options[i].color : '') }}
+            >{options[i].label}</span>
+          </button>
+        );
       }
       return items;
     } else {

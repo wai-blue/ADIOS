@@ -112,7 +112,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       globalThis.app.reactElements[this.props.uid] = this;
     }
 
-    this.state = {
+    this.state = this.getStateFromProps(props);
+  }
+
+  getStateFromProps(props: FormProps) {
+    return {
       isInitialized: false,
       endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? ''),
       id: props.id,
@@ -149,6 +153,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     }
 
     if (prevProps.id !== this.props.id) {
+      newState = this.getStateFromProps(this.props);
       newState.id = this.props.id;
 
       // this.checkIfIsEdit();

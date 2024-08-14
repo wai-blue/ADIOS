@@ -9,7 +9,7 @@ export default class ModalSimple extends Modal {
       return <>
         <div
           id={"adios-modal-" + this.props.uid}
-          className={"modal " + this.state.type}
+          className={"modal " + this.props.type}
         >
           {this.props.children}
         </div>

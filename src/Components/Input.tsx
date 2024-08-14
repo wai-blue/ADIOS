@@ -136,11 +136,15 @@ export class Input<P extends InputProps, S extends InputState> extends Component
     return this.state.value ? this.state.value.toString() : '';
   }
 
-  switchToInlineEditMode() {
+  inlineEditEnable() {
     if (!this.state.readonly) {
       this.setState({
         origValue: this.state.value,
         isInlineEditing: true,
+      }, () => {
+        if (this.props.parentForm) {
+          this.props.parentForm.setState({isInlineEditing: true});
+        }
       });
     }
   }
@@ -227,7 +231,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
             <div
               className="value-element"
               onClick={() => {
-                this.switchToInlineEditMode();
+                this.inlineEditEnable();
               }}>
               {this.renderValueElement()}
               <div className="input-unit">
@@ -239,7 +243,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
                 <button
                   className="btn btn-transparent"
                   onClick={() => {
-                    this.switchToInlineEditMode();
+                    this.inlineEditEnable();
                   }}
                 >
                   <span className="icon !py-0"><i className="fas fa-pencil-alt"></i></span>
