@@ -239,7 +239,7 @@ export default class Table extends Component<TableProps, TableState> {
       rowsPerPageOptions: [5, 15, 30, 50, 100, 200, 300],
       paginatorTemplate: "FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown",
       currentPageReportTemplate: "{first}-{last} / {totalRecords}",
-      onRowClick: (data: DataTableRowClickEvent) => this.onRowClick(data.data.id as number),
+      onRowClick: (data: DataTableRowClickEvent) => this.onRowClick(data.data),
       onRowSelect: (event: DataTableSelectEvent) => this.onRowSelect(event),
       onRowUnselect: (event: DataTableUnselectEvent) => this.onRowUnselect(event),
       onPage: (event: DataTablePageEvent) => this.onPaginationChangeCustom(event),
@@ -277,7 +277,7 @@ export default class Table extends Component<TableProps, TableState> {
       (data: any) => {
         try {
           if (data.status == 'error') throw new Error('Error while loading table params: ' + data.message);
-        
+
           let params: any = deepObjectMerge(data, this.props);
           if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
           if (successCallback) successCallback(params);
@@ -410,7 +410,7 @@ export default class Table extends Component<TableProps, TableState> {
       </div>
 
       <div className="table-header-right">
-        <input 
+        <input
           className="table-header-search"
           type="search"
           placeholder="Start typing to search..."
@@ -552,14 +552,14 @@ export default class Table extends Component<TableProps, TableState> {
         break;
         case 'color':
           cellValueElement = <div
-            style={{ width: '20px', height: '20px', background: columnValue }} 
+            style={{ width: '20px', height: '20px', background: columnValue }}
             className="rounded"
           />;
         break;
         // case 'image':
         //   if (!columnValue) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
         //   else {
-        //     cellValueElement = <img 
+        //     cellValueElement = <img
         //       style={{ width: '30px', height: '30px' }}
         //       src={this.state.folderUrl + "/" + columnValue}
         //       className="rounded"
@@ -652,7 +652,7 @@ export default class Table extends Component<TableProps, TableState> {
     if (this.props.selectionMode) {
       columns.push(<Column selectionMode={this.props.selectionMode}></Column>);
     }
-    
+
     Object.keys(this.state.columns).map((columnName: string) => {
       const column: any = this.state.columns[columnName];
       columns.push(<Column
@@ -803,11 +803,11 @@ export default class Table extends Component<TableProps, TableState> {
     }
   }
 
-  onRowClick(id: number, prevId?: number, nextId?: number) {
+  onRowClick(row: any) {
     if (this.props.externalCallbacks && this.props.externalCallbacks.onRowClick) {
-      window[this.props.externalCallbacks.onRowClick](this, id);
+      window[this.props.externalCallbacks.onRowClick](this, row.id ?? 0);
     } else {
-      this.openForm(id);
+      this.openForm(row.id ?? 0);
     }
   }
 
