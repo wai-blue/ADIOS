@@ -96,8 +96,8 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
     return (
       <AsyncCreatable
         value={{
-          id: this.state.data[this.state.value].id,
-          _lookupText_: this.state.data[this.state.value]._lookupText_,
+          id: this.state.data[this.state.value]?.id ?? 0,
+          _lookupText_: this.state.data[this.state.value]?._lookupText_ ?? '',
         }}
         isClearable={true}
         isDisabled={this.state.readonly || !this.state.isInitialized}

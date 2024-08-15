@@ -279,8 +279,13 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
+  normalizeRecord(record: any): any {
+    return record;
+  }
+
   updateRecord(changedValues: any) {
-    this.setState({record: deepObjectMerge(this.state.record, changedValues)});
+    const record = this.normalizeRecord(this.state.record);
+    this.setState({record: deepObjectMerge(record, changedValues)});
   }
 
   /**
