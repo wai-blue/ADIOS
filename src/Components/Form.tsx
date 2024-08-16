@@ -22,6 +22,12 @@ interface ContentCard {
   title: string
 }
 
+export interface FormEndpoint {
+  describeForm: string,
+  getRecord: string,
+  saveRecord: string,
+}
+
 export interface FormProps {
   parentTable?: any,
   isInitialized?: boolean,
@@ -48,7 +54,7 @@ export interface FormProps {
   saveButtonText?: string,
   addButtonText?: string,
   defaultValues?: any,
-  endpoint?: string,
+  endpoint?: FormEndpoint,
   tag?: string,
   context?: any,
   children?: any,
@@ -79,7 +85,7 @@ export interface FormState {
   titleForEditing?: string,
   titleForInserting?: string,
   layout?: string,
-  endpoint: string,
+  endpoint: FormEndpoint,
   params: any,
   defaultValues?: any,
 }
@@ -118,7 +124,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   getStateFromProps(props: FormProps) {
     return {
       isInitialized: false,
-      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? ''),
+      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? {
+        describeForm: 'api/form/describe',
+        saveRecord: 'api/record/save',
+        loadRecord: 'api/record/get',
+      }),
       id: props.id,
       prevId: props.prevId,
       nextId: props.nextId,
@@ -183,18 +193,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
   getEndpointUrl(action: string) {
-    let endpoint = '';
-    if (this.state.endpoint == '') {
-      switch (action) {
-        case 'describeForm': endpoint = 'api/form/describe'; break;
-        case 'saveRecord': endpoint = 'api/record/save'; break;
-        case 'loadRecord': endpoint = 'api/record/get'; break;
-      }
-    } else {
-      endpoint = this.state.endpoint;
-    }
-
-    return endpoint;
+    return this.state.endpoint[action] ?? '';
   }
 
   getEndpointParams(): object {
