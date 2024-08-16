@@ -127,7 +127,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? {
         describeForm: 'api/form/describe',
         saveRecord: 'api/record/save',
-        loadRecord: 'api/record/get',
+        getRecord: 'api/record/get',
       }),
       id: props.id,
       prevId: props.prevId,
@@ -228,7 +228,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   loadRecord() {
     request.post(
-      this.getEndpointUrl('loadRecord'),
+      this.getEndpointUrl('getRecord'),
       this.getEndpointParams(),
       {},
       (record: any) => {
