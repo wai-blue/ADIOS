@@ -44,6 +44,7 @@ export default class Table extends Input<TableInputProps, TableInputState> {
         onChange={(table: BigTable) => {
           this.onChange(table.state.data?.data);
         }}
+        onRowClick=
       ></BigTable>
     );
   }
