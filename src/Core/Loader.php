@@ -196,7 +196,7 @@ class Loader
 
       // inicializacia core modelov
       $this->registerModel($this->getCoreClass('Models\\Config'));
-      $this->registerModel($this->getCoreClass('Models\\Translate'));
+      // $this->registerModel($this->getCoreClass('Models\\Translate'));
       $this->registerModel($this->getCoreClass('Models\\User'));
       $this->registerModel($this->getCoreClass('Models\\UserRole'));
       $this->registerModel($this->getCoreClass('Models\\UserHasRole'));
@@ -799,13 +799,15 @@ class Loader
         $dictionaryFile = $this->getDictionaryFilename($toLanguage);
         $this->dictionary[$toLanguage][$context][$string] = '';
 
-        file_put_contents(
-          $dictionaryFile,
-          json_encode(
-            $this->dictionary[$toLanguage],
-            JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
-          )
-        );
+        if (is_file($dictionaryFile)) {
+          file_put_contents(
+            $dictionaryFile,
+            json_encode(
+              $this->dictionary[$toLanguage],
+              JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+            )
+          );
+        }
       } else {
         $translated = $dictionary[$context][$string];
       }
@@ -1542,12 +1544,12 @@ class Loader
             $this->saveConfig($value, $tmpPath.'/');
           } else if ($value === NULL) {
             $this->db->query("
-              delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
+              delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
               where `path` like '".$this->db->escape($tmpPath)."%'
             ");
           } else {
             $this->db->query("
-              insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config` set
+              insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
                 `path` = '".$this->db->escape($tmpPath)."',
                 `value` = '".$this->db->escape($value)."'
               on duplicate key update
@@ -1566,7 +1568,7 @@ class Loader
     try {
       if (!empty($path)) {
         $this->db->query("
-          insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config` set
+          insert into `".(empty($this->gtp) ? '' : $this->gtp . '_')."config` set
             `path` = '".$this->db->escape($path)."',
             `value` = '".$this->db->escape($value)."'
           on duplicate key update
@@ -1583,7 +1585,7 @@ class Loader
     try {
       if (!empty($path)) {
         $this->db->query("
-          delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
+          delete from `".(empty($this->gtp) ? '' : $this->gtp . '_')."config`
           where `path` like '".$this->db->escape($path)."%'
         ");
       }
@@ -1597,7 +1599,7 @@ class Loader
   //     $queryOk = $this->db->query("
   //       select
   //         *
-  //       from `".(empty($this->gtp) ? '' : $this->gtp . '_')."_config`
+  //       from `".(empty($this->gtp) ? '' : $this->gtp . '_')._config`
   //       order by id asc
   //     ");
 

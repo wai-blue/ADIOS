@@ -29,7 +29,7 @@ class Config extends \ADIOS\Core\Model {
   ];
 
   public function __construct(\ADIOS\Core\Loader $app) {
-    $this->sqlName = "_config";
+    $this->sqlName = "config";
     parent::__construct($app);
   }
 

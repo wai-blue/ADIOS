@@ -16,10 +16,13 @@ class Get extends \ADIOS\Core\ApiController {
 
   public function response(): array
   {
-    if ($this->params['id'] <= 0) {
+    $idEncrypted = $this->params['id'] ?? '';
+    $id = (int) openssl_decrypt(base64_decode($idEncrypted), 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID);
+
+    if ($id <= 0) {
       $record = $this->model->recordDefaultValues();
     } else {
-      $record = $this->model->recordGet(function($q) { $q->where('id', $this->params['id']); });
+      $record = $this->model->recordGet(function($q) use ($id) { $q->where('id', $id); });
     }
 
     return $record;

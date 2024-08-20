@@ -7,6 +7,7 @@ interface TableInputProps extends InputProps {
   model: string,
   children?: any,
   columns?: any,
+  onRowClick?: (table: BigTable, row: any) => void,
 }
 
 interface TableInputState extends InputState {
@@ -44,7 +45,11 @@ export default class Table extends Input<TableInputProps, TableInputState> {
         onChange={(table: BigTable) => {
           this.onChange(table.state.data?.data);
         }}
-        onRowClick=
+        onRowClick={(table: BigTable, row: any) => {
+          if (this.props.onRowClick) {
+            this.props.onRowClick(table, row);
+          }
+        }}
       ></BigTable>
     );
   }

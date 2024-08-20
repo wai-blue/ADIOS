@@ -113,6 +113,14 @@ class Table extends \ADIOS\Core\Controller {
   }
 
   public function postprocessData(array $data): array {
+    if (is_array($data['data'])) {
+      foreach ($data['data'] as $key => $value) {
+        if (isset($value['id'])) {
+          $data['data'][$key]['id'] = base64_encode(openssl_encrypt($value['id'], 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID));
+        }
+      }
+    }
+
     return $data;
   }
 

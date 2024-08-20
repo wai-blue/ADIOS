@@ -34,7 +34,17 @@ class Lookup extends \ADIOS\Core\ApiController {
 
   public function response(): array
   {
-    return \ADIOS\Core\Helper::keyBy('id', $this->prepareLoadRecordQuery()->get()->toArray());
+    $data = $this->prepareLoadRecordQuery()->get()->toArray();
+
+    if (is_array($data)) {
+      foreach ($data as $key => $value) {
+        if (isset($value['id'])) {
+          $data[$key]['id'] = base64_encode(openssl_encrypt($value['id'], 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID));
+        }
+      }
+    }
+
+    return \ADIOS\Core\Helper::keyBy('id', $data);
   }
 
 }

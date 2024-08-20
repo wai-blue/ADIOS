@@ -42,7 +42,7 @@ class User extends \ADIOS\Core\Model {
 
   public function __construct(\ADIOS\Core\Loader $app)
   {
-    $this->sqlName = "_users";
+    $this->sqlName = "users";
     parent::__construct($app);
 
     $tokenModel = $app->getModel("ADIOS/Models/Token");
@@ -405,7 +405,7 @@ class User extends \ADIOS\Core\Model {
   // public function roles() {
   //   return $this->belongsToMany(
   //     \ADIOS\Models\UserRole::class,
-  //     '_user_has_roles',
+  //     'user_has_roles',
   //     'id_user',
   //     'id_role'
   //   );

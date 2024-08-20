@@ -33,9 +33,9 @@ export interface FormProps {
   isInitialized?: boolean,
   uid?: string,
   model: string,
-  id?: number,
-  prevId?: number,
-  nextId?: number,
+  id?: any,
+  prevId?: any,
+  nextId?: any,
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
@@ -62,9 +62,9 @@ export interface FormProps {
 
 export interface FormState {
   isInitialized: boolean,
-  id?: number,
-  prevId?: number,
-  nextId?: number,
+  id?: any,
+  prevId?: any,
+  nextId?: any,
   readonly?: boolean,
   canCreate?: boolean,
   canRead?: boolean,
@@ -139,8 +139,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       canDelete: props.readonly,
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
-      creatingRecord: props.id ? props.id <= 0 : false,
-      updatingRecord: props.id ? props.id > 0 : false,
+      creatingRecord: props.id ? props.id == -1 : false,
+      updatingRecord: props.id ? props.id != -1 : false,
       isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
       invalidInputs: {},
       record: {},
@@ -607,24 +607,24 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const nextId = this.state?.nextId ?? 0;
 
     return <>
-      {prevId > 0 || nextId > 0 ? <>
+      {prevId || nextId ? <>
         <button
           onClick={() => {
-            if (prevId > 0 && this.props.parentTable) {
+            if (prevId && this.props.parentTable) {
               this.props.parentTable.openForm(prevId);
             }
           }}
-          className={"btn btn-transparent" + (prevId > 0 ? "" : " btn-disabled")}
+          className={"btn btn-transparent" + (prevId ? "" : " btn-disabled")}
         >
           <span className="icon"><i className="fas fa-angle-left"></i></span>
         </button>
         <button
           onClick={() => {
-            if (nextId > 0 && this.props.parentTable) {
+            if (nextId && this.props.parentTable) {
               this.props.parentTable.openForm(nextId);
             }
           }}
-          className={"btn btn-transparent" + (nextId > 0 ? "" : " btn-disabled")}
+          className={"btn btn-transparent" + (nextId ? "" : " btn-disabled")}
         >
           <span className="icon"><i className="fas fa-angle-right"></i></span>
         </button>
@@ -655,7 +655,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       <h2>{title}</h2>
       <small>{
         this.state.updatingRecord
-          ? globalThis.app.translate('Editing record') + ' #' + this.state.id
+          ? globalThis.app.translate('Editing record') + ' #' + (this.state.record?.id ?? '-')
           : globalThis.app.translate('Adding new record')
       }</small>
     </>

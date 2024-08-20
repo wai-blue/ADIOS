@@ -7,6 +7,6 @@ use \Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Config extends \ADIOS\Core\Model\Eloquent {
   public static $snakeAttributes = false;
-  public $table = '_config';
+  public $table = 'config';
 
 }

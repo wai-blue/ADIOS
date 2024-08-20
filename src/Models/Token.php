@@ -23,7 +23,7 @@ class Token extends \ADIOS\Core\Model {
   public string $eloquentClass = \ADIOS\Models\Eloquent\Token::class;
 
   public function __construct(\ADIOS\Core\Loader $app) {
-    $this->sqlName = "_tokens";
+    $this->sqlName = "tokens";
     parent::__construct($app);
   }
 

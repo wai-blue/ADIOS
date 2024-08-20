@@ -44,7 +44,7 @@ export interface TableProps {
   canUpdate?: boolean,
   columns?: FormColumns,
   renderForm?: boolean,
-  formId?: number|null,
+  formId?: any,
   formEndpoint?: string,
   formModal?: ModalProps,
   formUseModalSimple?: boolean,
@@ -52,7 +52,7 @@ export interface TableProps {
   endpoint?: string
   modal?: ModalProps,
   model: string,
-  parentFormId?: number,
+  parentFormId?: any,
   parentFormModel?: string,
   showHeader?: boolean,
   tag?: string,
@@ -67,6 +67,7 @@ export interface TableProps {
   isInlineEditing?: boolean,
   selectionMode?: 'single' | 'multiple' | undefined,
   onChange?: (table: Table) => void,
+  onRowClick?: (table: Table, row: any) => void,
   data?: TableData,
   async?: boolean,
   readonly?: boolean,
@@ -109,9 +110,9 @@ export interface TableState {
   columns?: any, //Array<GridColDef>,
   data?: TableData | null,
   filterBy?: any,
-  formId?: number|null,
-  formPrevId?: number|null,
-  formNextId?: number|null,
+  formId?: any,
+  formPrevId?: any,
+  formNextId?: any,
   formEndpoint?: string,
   formParams?: FormProps,
   orderBy?: OrderBy,
@@ -333,11 +334,11 @@ export default class Table extends Component<TableProps, TableState> {
       uid: this.props.uid + '_form',
       model: this.props.model,
       tag: this.props.tag,
-      id: this.state.formId ?? 0,
+      id: this.state.formId ?? null,
       prevId: this.state?.formPrevId ?? 0,
       nextId: this.state?.formNextId ?? 0,
       endpoint: this.state.formEndpoint ?? '',
-      isInlineEditing: (this.state.formId ?? 0) == -1,
+      isInlineEditing: (this.state.formId ?? null) === -1,
       showInModal: true,
       showInModalSimple: this.props.formUseModalSimple,
       columns: this.props.formParams?.columns ?? {},
@@ -372,7 +373,7 @@ export default class Table extends Component<TableProps, TableState> {
       type: this.state.formId == -1 ? 'centered' : 'right',
       // model: this.props.model,
       hideHeader: true,
-      isOpen: Number.isInteger(this.state.formId),
+      isOpen: this.state.formId !== null,
       ...this.props.modal
     }
   }
@@ -496,7 +497,8 @@ export default class Table extends Component<TableProps, TableState> {
   }
 
   renderFormModal(): JSX.Element {
-    if (this.state.renderForm && Number.isInteger(this.state.formId)) {
+    if (this.state.renderForm && this.state.formId) {
+    console.log(this.getFormModalParams());
       if (this.props.formUseModalSimple) {
         return <ModalSimple {...this.getFormModalParams()}>{this.renderForm()}</ModalSimple>;
       } else {
@@ -764,9 +766,9 @@ export default class Table extends Component<TableProps, TableState> {
     // to be overriden
   }
 
-  openForm(id: number) {
-    let prevId: number = 0;
-    let nextId: number = 0;
+  openForm(id: any) {
+    let prevId: any = null;
+    let nextId: any = null;
     let prevRow: any = {};
     let saveNextId: boolean = false;
 
@@ -777,7 +779,7 @@ export default class Table extends Component<TableProps, TableState> {
           nextId = row.id;
           saveNextId = false;
         } else if (row.id == id) {
-          prevId = prevRow.id ?? 0;
+          prevId = prevRow.id ?? null;
           saveNextId = true;
         }
       }
@@ -806,6 +808,8 @@ export default class Table extends Component<TableProps, TableState> {
   onRowClick(row: any) {
     if (this.props.externalCallbacks && this.props.externalCallbacks.onRowClick) {
       window[this.props.externalCallbacks.onRowClick](this, row.id ?? 0);
+    } if (this.props.onRowClick) {
+      this.props.onRowClick(this, row);
     } else {
       this.openForm(row.id ?? 0);
     }

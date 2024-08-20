@@ -7,6 +7,6 @@ use \Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserRole extends \ADIOS\Core\Model\Eloquent {
   public static $snakeAttributes = false;
-  public $table = '_user_roles';
+  public $table = 'user_roles';
 
 }

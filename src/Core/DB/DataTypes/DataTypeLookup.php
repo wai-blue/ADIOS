@@ -101,13 +101,14 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
 
   public function validate(\ADIOS\Core\Model $model, $value): bool
   {
-    if (is_numeric($value)) {
-      return true;
-    } else if ($value['_isNew_'] ?? false) {
-      return !empty($value['text']);
-    } else {
-      return false;
-    }
+    // if (is_numeric($value)) {
+    //   return true;
+    // } else if ($value['_isNew_'] ?? false) {
+    //   return !empty($value['text']);
+    // } else {
+    //   return false;
+    // }
+    return true;
   }
 
   public function normalize(\ADIOS\Core\Model $model, string $colName, $value)
@@ -118,8 +119,10 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     // var_dump($model->columns()[$colName]['model']);
       $lookupModel = $model->app->getModel($model->columns()[$colName]['model']);
       return $lookupModel->eloquent->create($lookupModel->getNewRecordDataFromString($value['_lookupText_'] ?? ''))->id;
-    } else {
+    } else if (empty($value)) {
       return null;
+    } else {
+      return (int) openssl_decrypt(base64_decode($value), 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID);
     }
   }
 }

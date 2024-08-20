@@ -30,7 +30,7 @@ class UserHasRole extends \ADIOS\Core\Model {
 
   public function __construct(\ADIOS\Core\Loader $app)
   {
-    $this->sqlName = "_user_has_roles";
+    $this->sqlName = "user_has_roles";
     parent::__construct($app);
   }
 

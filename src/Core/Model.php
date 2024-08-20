@@ -878,44 +878,6 @@ class Model
       $this->app->router->checkPermission($this->fullName . ':Update');
     }
 
-    // $this->recordSaveOriginalData = $data;
-
-    // extract data for this model and data for lookup models
-    // $dataForThisModel = [];
-    // $dataForLookupModels = [];
-    // foreach ($data as $key => $value) {
-    //   if (strpos($key, ":LOOKUP:") === FALSE) {
-    //     $dataForThisModel[$key] = $value;
-    //   } else {
-    //     [$columnName, $lookupColumnName] = explode(":LOOKUP:", $key);
-    //     $dataForLookupModels[$columnName][$lookupColumnName] = $value;
-    //   }
-
-    //   // Upload image
-    //   if ($this->columns()[$key]['type'] == 'image') {
-    //     // If is not base64 (new image, skip)
-    //     if ($this->___validateBase64Image((string)$data[$key]['fileData']) == 0) {
-    //       unset($dataForThisModel[$key]);
-    //       continue;
-    //     }
-
-    //     $folderPath = $this->getFolderPath();
-    //     $fileName = bin2hex(random_bytes(10)) . '-' . $data[$key]['fileName'];
-
-    //     // Replace just with filePath to save in DB
-    //     $dataForThisModel[$key] = $fileName;
-
-    //     if (!is_dir($folderPath)) mkdir($folderPath);
-
-    //     $imageData = preg_replace('/^data:image\/[^;]+;base64,/', '', $data[$key]['fileData']);
-    //     $image = base64_decode($imageData);
-
-    //     if (file_put_contents($folderPath . "/{$fileName}", $image) === false) {
-    //       throw new Exception($this->translate("Upload file error"));
-    //     }
-    //   }
-    // }
-
     $dataForThisModel = $data;
 
     $this->recordValidate($dataForThisModel);
@@ -936,33 +898,6 @@ class Model
     } else {
       $returnValue = $this->recordUpdate($id, $dataForThisModel);
     }
-
-    // // save data for lookup models first (and create records, if necessary)
-    // foreach ($dataForLookupModels as $lookupColumnName => $lookupData) {
-    //   $lookupModelName = $this->columns()[$lookupColumnName]['model'] ?? NULL;
-
-    //   if ($lookupColumnName == NULL) continue;
-
-    //   $lookupModel = $this->app->getModel($lookupModelName);
-    //   $lookupData = $this->___getInsertedIdForLookupColumn($lookupModel->columns(), $lookupData, $data['id']);
-    //   $lookupModel->recordValidate($lookupData);
-
-    //   if ($data[$lookupColumnName] <= 0) {
-    //     $lookupData = $lookupModel->onBeforeInsert($lookupData);
-    //   } else {
-    //     $lookupData = $lookupModel->onBeforeUpdate($lookupData);
-    //   }
-
-    //   $lookupData = $this->onBeforeSave($lookupData);
-
-    //   if ($data[$lookupColumnName] <= 0) {
-    //     $this->app->router->checkPermission($lookupModel->fullName . ':Create');
-    //     $data[$lookupColumnName] = (int) $lookupModel->insertRow($lookupData);
-    //   } else {
-    //     $this->app->router->checkPermission($lookupModel->fullName . ':Update');
-    //     $lookupModel->updateRow($lookupData, $data[$lookupColumnName]);
-    //   }
-    // }
 
     // save cross-table-alignments
     foreach ($this->junctions as $jName => $jParams) {
@@ -1034,6 +969,14 @@ class Model
 
     if (!is_array($data)) $data = [];
 
+    foreach ($this->columns() as $colName => $colDefinition) {
+      if ($colName == 'id' || $colDefinition['type'] == 'lookup') {
+        foreach ($data as $key => $value) {
+          $data[$key][$colName] = base64_encode(openssl_encrypt($value[$colName], 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID));
+        }
+      }
+    }
+
     foreach ($data as $key => $value) {
       $data[$key] = $this->onAfterLoadRecord($data[$key]);
     }
@@ -1077,10 +1020,10 @@ class Model
             str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
             . ") as lookupSqlValue";
 
-          $selectRaw[] = "(" .
-            str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
-            . ") as `{$columnName}:LOOKUP`"
-          ;
+          // $selectRaw[] = "(" .
+          //   str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
+          //   . ") as `{$columnName}:LOOKUP`"
+          // ;
 
           $joins[] = [
             $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,

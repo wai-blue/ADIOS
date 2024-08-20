@@ -193,39 +193,39 @@ export class Input<P extends InputProps, S extends InputState> extends Component
       <div className={this.getClassName() + (this.state.isInlineEditing ? ' editing' : '')}><div className="inner">
         {this.state.isInlineEditing
           ? <>
-              <input
-                id={this.props.uid}
-                name={this.props.uid}
-                type="hidden"
-                value={this.serialize()}
-                style={{width: "100%", fontSize: "0.4em"}}
-                className="value bg-light"
-                readOnly={true}
-              ></input>
-              <div className="input-element">
-                {this.renderInputElement()}
+            <input
+              id={this.props.uid}
+              name={this.props.uid}
+              type="hidden"
+              value={this.serialize()}
+              style={{width: "100%", fontSize: "0.4em"}}
+              className="value bg-light"
+              readOnly={true}
+            ></input>
+            <div className="input-element">
+              {this.renderInputElement()}
+            </div>
+            {this.state.showInlineEditingButtons ? 
+              <div className="inline-editing-buttons always-visible">
+                <button
+                  className={"btn btn-success-outline"}
+                  onClick={() => {
+                    this.inlineEditSave();
+                  }}
+                >
+                  <span className="icon !py-0"><i className="fas fa-check"></i></span>
+                </button>
+                <button
+                  className={"btn btn-cancel-outline"}
+                  onClick={() => {
+                    this.inlineEditCancel();
+                  }}
+                >
+                  <span className="icon !py-0"><i className="fas fa-times"></i></span>
+                </button>
               </div>
-              {this.state.showInlineEditingButtons ? 
-                <div className="inline-editing-buttons always-visible">
-                  <button
-                    className={"btn btn-success-outline"}
-                    onClick={() => {
-                      this.inlineEditSave();
-                    }}
-                  >
-                    <span className="icon !py-0"><i className="fas fa-check"></i></span>
-                  </button>
-                  <button
-                    className={"btn btn-cancel-outline"}
-                    onClick={() => {
-                      this.inlineEditCancel();
-                    }}
-                  >
-                    <span className="icon !py-0"><i className="fas fa-times"></i></span>
-                  </button>
-                </div>
-                : null
-              }
+              : null
+            }
           </>
           : <>
             <div
