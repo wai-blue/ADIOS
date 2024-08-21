@@ -368,10 +368,16 @@ class Loader
             if ($userData) {
               $userModel->updatePassword($userData["id"], $newPassword);
 
-              $userModel->authUser(
+              $authResult = $userModel->authUser(
                 $userData['login'] ?? '',
                 $newPassword ?? ''
               );
+
+              if (is_array($authResult)) {
+                $userModel->persistUser($authResult);
+              } else {
+                $userModel->signOut();
+              }
 
               header('Location: ' . $this->config['accountUrl']);
               exit();
@@ -381,31 +387,85 @@ class Loader
 
         // user authentication
 
-        if ((int) ($_SESSION[_ADIOS_ID]['userProfile']['id'] ?? 0) > 0) {
-          $user = $userModel->loadUser((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
+        if (is_array($this->config['oauth'] ?? null)) {
+          $oauth = new ($this->getCoreClass('Core\\OAuthClient'))($this);
 
-          if (!$userModel->isUserActive($user)) {
-            $userModel->signOut();
-          } else {
-            $user = $userModel->loadUserFromSession();
+          $accessTokenIsValid = false;
+          for ($i = 0; $i < 5; $i++) {
+            $accessToken = $_SESSION[_ADIOS_ID]['accessToken'] ?? '';
+            $accessTokenIsValid = $oauth->verifyAccessToken($accessToken);
 
-            if (is_array($user)) {
-              $userModel->updateAccessInformation((int) $user['id']);
-              $this->userProfile = $user;
-              $this->userLogged = TRUE;
+            if ($accessTokenIsValid) {
+              $oauth->signOut();
+              break;
             } else {
-              $this->userProfile = NULL;
-              $this->userLogged = FALSE;
+              $clientId = $_POST['login'] ?? '';
+              $clientSecret = $_POST['password'] ?? '';
+
+              if (empty($clientId) || empty($clientSecret)) {
+                $oauth->signOut();
+                break;
+              }
+
+              $ch = curl_init($this->config['oauth']['endpoints']['accessToken']);
+
+              curl_setopt($ch, CURLOPT_POSTFIELDS, [
+                "grant_type" => "client_credentials",
+                "client_id" => $clientId,
+                "client_secret" => $clientSecret,
+                // "scope" => "basic email",
+              ]);
+              curl_setopt($ch, CURLOPT_HEADER, false);
+
+              ob_start();
+              curl_exec($ch);
+              $response = ob_get_clean();
+              $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+              curl_close($ch);
+
+              if ($httpcode == 401) {
+                echo 'Error: ' . $response;
+              } else {
+                $responseData = json_decode($response, true);
+                $_SESSION[_ADIOS_ID]['accessToken'] = $responseData['access_token'];
+              }
             }
           }
-        } else if (!empty($_POST['login']) && !empty($_POST['password'])) {
-          $userModel->authUser(
-            $_POST['login'],
-            $_POST['password'],
-            ((int) $_POST['keep_logged_in']) == 1
-          );
 
-          $userModel->updateLoginAndAccessInformation((int) ($this->userProfile['id'] ?? 0));
+          if (!$accessTokenIsValid) {
+            $oauth->signOut();
+          }
+        } else {
+          if ((int) ($_SESSION[_ADIOS_ID]['userProfile']['id'] ?? 0) > 0) {
+            $user = $userModel->loadUser((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
+
+            if (!$userModel->isUserActive($user)) {
+              $userModel->signOut();
+            } else {
+              $user = $userModel->loadUserFromSession();
+
+              if (is_array($user)) {
+                $userModel->updateAccessInformation((int) $user['id']);
+                $userModel->persistUser($user);
+              } else {
+                $userModel->signOut();
+              }
+            }
+          } else if (!empty($_POST['login']) && !empty($_POST['password'])) {
+            $authResult = $userModel->authUser(
+              $_POST['login'],
+              $_POST['password'],
+              ((int) $_POST['keep_logged_in']) == 1
+            );
+
+            if (is_array($authResult)) {
+              $userModel->persistUser($authResult);
+            } else {
+              $userModel->signOut();
+            }
+
+            $userModel->updateLoginAndAccessInformation((int) ($this->userProfile['id'] ?? 0));
+          }
         }
 
         // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba

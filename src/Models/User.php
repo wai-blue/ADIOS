@@ -233,7 +233,7 @@ class User extends \ADIOS\Core\Model {
     return md5($login.".".$password).",".$login;
   }
 
-  public function authUser(string $login, string $password, $rememberLogin = FALSE, $authColumns = ['login']): void {
+  public function authUser(string $login, string $password, $rememberLogin = FALSE, $authColumns = ['login']): ?array {
     $authResult = FALSE;
 
     $login = trim($login);
@@ -290,13 +290,7 @@ class User extends \ADIOS\Core\Model {
       }
     }
 
-    if (is_array($authResult)) {
-      $this->app->userProfile = $authResult;
-      $this->app->userLogged = TRUE;
-      $_SESSION[_ADIOS_ID]['userProfile'] = $authResult;
-    } else {
-      $this->signOut();
-    }
+    return is_array($authResult) ? $authResult : null;
   }
 
   public function generateToken($idUser, $tokenSalt, $tokenType) {
@@ -340,6 +334,12 @@ class User extends \ADIOS\Core\Model {
     }
 
     return $userData;
+  }
+
+  public function persistUser(array $user) {
+    $this->app->userProfile = $user;
+    $this->app->userLogged = TRUE;
+    $_SESSION[_ADIOS_ID]['userProfile'] = $user;
   }
 
   public function signOut() {
