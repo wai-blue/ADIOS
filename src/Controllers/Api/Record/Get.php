@@ -17,7 +17,7 @@ class Get extends \ADIOS\Core\ApiController {
   public function response(): array
   {
     $idEncrypted = $this->params['id'] ?? '';
-    $id = (int) openssl_decrypt(base64_decode($idEncrypted), 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID);
+    $id = (int) \ADIOS\Core\Helper::decrypt($idEncrypted);
 
     if ($id <= 0) {
       $record = $this->model->recordDefaultValues();

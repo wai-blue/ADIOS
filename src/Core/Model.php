@@ -965,23 +965,74 @@ class Model
     $query = $this->prepareLoadRecordQuery();
     if ($queryModifierCallback !== null) $queryModifierCallback($query);
 
-    $data = $query->get()?->toArray();
+    $records = $query->get()?->toArray();
 
-    if (!is_array($data)) $data = [];
+    if (!is_array($records)) $records = [];
 
+    foreach ($records as $key => $record) {
+      $records[$key] = $this->recordEncryptIds($records[$key]);
+      $records[$key] = $this->onAfterLoadRecord($records[$key]);
+    }
+
+    return $records;
+  }
+
+  public function recordEncryptIds(array $record) {
     foreach ($this->columns() as $colName => $colDefinition) {
       if ($colName == 'id' || $colDefinition['type'] == 'lookup') {
-        foreach ($data as $key => $value) {
-          $data[$key][$colName] = base64_encode(openssl_encrypt($value[$colName], 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID));
+        if ($record[$colName] !== null) {
+          $record[$colName] = \ADIOS\Core\Helper::encrypt($record[$colName]);
         }
       }
     }
 
-    foreach ($data as $key => $value) {
-      $data[$key] = $this->onAfterLoadRecord($data[$key]);
+    foreach ($this->relations as $relName => $relDefinition) {
+      if (!is_array($record[$relName])) continue;
+
+      list($relType, $relModelClass) = $relDefinition;
+      $relModel = new $relModelClass($this->app);
+
+      switch ($relType) {
+        case \ADIOS\Core\Model::HAS_MANY:
+          foreach ($record[$relName] as $subKey => $subRecord) {
+            $record[$relName][$subKey] = $relModel->recordEncryptIds($record[$relName][$subKey]);
+          }
+        break;
+        case \ADIOS\Core\Model::HAS_ONE:
+          $record[$relName] = $relModel->recordEncryptIds($record[$relName]);
+        break;
+      }
+  }
+
+    return $record;
+  }
+
+  public function recordDecryptIds(array $record) {
+    foreach ($this->columns() as $colName => $colDefinition) {
+      if ($colName == 'id' || $colDefinition['type'] == 'lookup') {
+        $record[$colName] = \ADIOS\Core\Helper::decrypt($record[$colName]);
+      }
     }
 
-    return $data;
+    foreach ($this->relations as $relName => $relDefinition) {
+      if (!is_array($record[$relName])) continue;
+
+      list($relType, $relModelClass) = $relDefinition;
+      $relModel = new $relModelClass($this->app);
+
+      switch ($relType) {
+        case \ADIOS\Core\Model::HAS_MANY:
+          foreach ($record[$relName] as $subKey => $subRecord) {
+            $record[$relName][$subKey] = $relModel->recordDecryptIds($record[$relName][$subKey]);
+          }
+        break;
+        case \ADIOS\Core\Model::HAS_ONE:
+          $record[$relName] = $relModel->recordDecryptIds($record[$relName]);
+        break;
+      }
+  }
+
+    return $record;
   }
 
   public function recordGet(callable|null $queryModifierCallback = null): array {

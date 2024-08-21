@@ -22,7 +22,7 @@ interface Tags2InputState extends InputState {
   colorColumn: string,
 }
 
-export default class Lookup extends Input<Tags2InputProps, Tags2InputState> {
+export default class Tags2 extends Input<Tags2InputProps, Tags2InputState> {
   static defaultProps = {
     inputClassName: 'tags',
     id: uuid.v4(),

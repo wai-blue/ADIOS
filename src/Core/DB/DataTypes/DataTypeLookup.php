@@ -121,8 +121,6 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
       return $lookupModel->eloquent->create($lookupModel->getNewRecordDataFromString($value['_lookupText_'] ?? ''))->id;
     } else if (empty($value)) {
       return null;
-    } else {
-      return (int) openssl_decrypt(base64_decode($value), 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID);
     }
   }
 }

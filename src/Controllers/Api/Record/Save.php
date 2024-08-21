@@ -72,9 +72,9 @@ class Save extends \ADIOS\Core\ApiController {
     $originalRecord = $this->params['record'] ?? [];
     $model = $this->params['model'] ?? '';
 
-    $originalRecord['id'] = (int) openssl_decrypt(base64_decode($originalRecord['id']), 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID);
+    $decryptedRecord = $this->model->recordDecryptIds($originalRecord);
 
-    $savedRecord = $this->recordSave($model, $originalRecord);
+    $savedRecord = $this->recordSave($model, $decryptedRecord);
 
     return [
       'status' => 'success',

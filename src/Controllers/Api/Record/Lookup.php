@@ -39,7 +39,7 @@ class Lookup extends \ADIOS\Core\ApiController {
     if (is_array($data)) {
       foreach ($data as $key => $value) {
         if (isset($value['id'])) {
-          $data[$key]['id'] = base64_encode(openssl_encrypt($value['id'], 'AES-256-CBC', _ADIOS_ID, 0, _ADIOS_ID));
+          $data[$key]['id'] = \ADIOS\Core\Helper::encrypt($value['id']);
         }
       }
     }

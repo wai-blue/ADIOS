@@ -89,8 +89,7 @@ class Loader
 
   public function __construct($config = NULL, $mode = NULL) {
 
-    global $___ADIOSObject;
-    $___ADIOSObject = $this;
+    \ADIOS\Core\Helper::setGlobalApp($this);
 
     if ($mode === NULL) {
       $mode = self::ADIOS_MODE_FULL;
@@ -1246,7 +1245,7 @@ class Loader
         // In some cases the result of the view will be used as-is ...
         if (($this->params['__IS_AJAX__'] ?? FALSE)|| $this->controllerObject->hideDefaultDesktop) {
           $html = $contentHtml;
-        
+
         // ... But in most cases it will be "encapsulated" in the desktop.
         } else {
           $desktopControllerObject = $this->getDesktopController();

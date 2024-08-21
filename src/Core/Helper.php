@@ -16,7 +16,12 @@ namespace ADIOS\Core;
 class Helper {
   static $loadUrlError = '';
   static array $speedLogTags = [];
-  
+
+  public static function setGlobalApp(\ADIOS\Core\Loader $app) {
+    global $__APP__;
+    $__APP__ = $app;
+  }
+
   /**
    * Minifies HTML
    *
@@ -35,7 +40,7 @@ class Helper {
 
     return preg_replace($search, $replace, $html);
   }
-  
+
   /**
    * Load content of remote URL using PHP's CURL library.
    *
@@ -73,7 +78,7 @@ class Helper {
 
     return '' == $error ? $html : false;
   }
-  
+
   /**
    * Removes special characters from string
    *
@@ -101,7 +106,7 @@ class Helper {
 
     return str_replace($from, $to, $string);
   }
-  
+
   /**
    * Convert string with to URL-compatible string
    *
@@ -131,7 +136,7 @@ class Helper {
   public static function str2uid($string, $replaceSlashes = TRUE) {
     return str_replace("-", "_", self::str2url($string, $replaceSlashes));
   }
-  
+
   /**
    * Generates random password
    *
@@ -207,7 +212,7 @@ class Helper {
   }
 
 
-  public static function capitalizeFirstLetter(string $s) { 
+  public static function capitalizeFirstLetter(string $s) {
     return \strtoupper(substr($s, 0, 1)) . substr($s, 1);
   }
 
@@ -220,7 +225,7 @@ class Helper {
   public static function kebabToPascal(string $s) {
     return self::capitalizeFirstLetter(self::kebabToCamel($s));
   }
-  
+
   public static function camelToKebab(string $s) {
     return strtolower(preg_replace("/[A-Z]/", "-$0", $s));
   }
@@ -269,6 +274,27 @@ class Helper {
       if ($lastMicrotime !== NULL) $microtimeDiff = ($microtime - $lastMicrotime) * 1000;
       _var_dump("{$tag} {$microtime} {$microtimeDiff}");
       $lastMicrotime = $microtime;
+    }
+  }
+
+  public static function encrypt(string $value, string $seed = '') {
+    global $__APP__;
+    if ($__APP__->config['develMode']) {
+      return $value;
+    } else {
+      if (empty($seed)) $seed = _ADIOS_ID;
+      return base64_encode(openssl_encrypt($value, 'AES-256-CBC', $seed, 0, $seed));
+    }
+  }
+
+  public static function decrypt(string $value, string $seed = '') {
+    global $__APP__;
+    if ($__APP__->config['develMode']) {
+      return $value;
+    } else {
+      if (empty($seed)) $seed = _ADIOS_ID;
+      if (empty($seed)) $seed = _ADIOS_ID;
+      return openssl_decrypt(base64_decode($value), 'AES-256-CBC', $seed, 0, $seed);
     }
   }
 
