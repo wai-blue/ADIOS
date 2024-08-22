@@ -93,6 +93,13 @@ class User extends \ADIOS\Core\Model {
     ]));
   }
 
+  public function tableParams(array $params = []): array
+  {
+    $params = parent::tableParams($params);
+    unset($params['columns']['password']);
+    return $params;
+  }
+
   // public function inputs(): array {
   //   return [
   //     'roles' => [

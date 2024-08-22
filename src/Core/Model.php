@@ -512,6 +512,9 @@ class Model
         case "password":
           $newColumns[$colName]["byte_size"] = $colDefinition["byte_size"] ?? 255;
           break;
+        case "lookup":
+          $newColumns[$colName]["model"] = trim(str_replace("\\", "/", $newColumns[$colName]["model"]), "/");
+          break;
       }
     }
 
@@ -978,6 +981,7 @@ class Model
   }
 
   public function recordEncryptIds(array $record) {
+
     foreach ($this->columns() as $colName => $colDefinition) {
       if ($colName == 'id' || $colDefinition['type'] == 'lookup') {
         if ($record[$colName] !== null) {
@@ -986,23 +990,25 @@ class Model
       }
     }
 
-    foreach ($this->relations as $relName => $relDefinition) {
-      if (!is_array($record[$relName])) continue;
+    $record['_idHash_'] =  \ADIOS\Core\Helper::encrypt($record['id'], '', true);
 
-      list($relType, $relModelClass) = $relDefinition;
-      $relModel = new $relModelClass($this->app);
+    // foreach ($this->relations as $relName => $relDefinition) {
+    //   if (!is_array($record[$relName])) continue;
 
-      switch ($relType) {
-        case \ADIOS\Core\Model::HAS_MANY:
-          foreach ($record[$relName] as $subKey => $subRecord) {
-            $record[$relName][$subKey] = $relModel->recordEncryptIds($record[$relName][$subKey]);
-          }
-        break;
-        case \ADIOS\Core\Model::HAS_ONE:
-          $record[$relName] = $relModel->recordEncryptIds($record[$relName]);
-        break;
-      }
-  }
+    //   list($relType, $relModelClass) = $relDefinition;
+    //   $relModel = new $relModelClass($this->app);
+
+    //   switch ($relType) {
+    //     case \ADIOS\Core\Model::HAS_MANY:
+    //       foreach ($record[$relName] as $subKey => $subRecord) {
+    //         $record[$relName][$subKey] = $relModel->recordEncryptIds($record[$relName][$subKey]);
+    //       }
+    //     break;
+    //     case \ADIOS\Core\Model::HAS_ONE:
+    //       $record[$relName] = $relModel->recordEncryptIds($record[$relName]);
+    //     break;
+    //   }
+    // }
 
     return $record;
   }
@@ -1010,7 +1016,9 @@ class Model
   public function recordDecryptIds(array $record) {
     foreach ($this->columns() as $colName => $colDefinition) {
       if ($colName == 'id' || $colDefinition['type'] == 'lookup') {
-        $record[$colName] = \ADIOS\Core\Helper::decrypt($record[$colName]);
+        if ($record[$colName] !== null) {
+          $record[$colName] = \ADIOS\Core\Helper::decrypt($record[$colName]);
+        }
       }
     }
 
@@ -1030,7 +1038,7 @@ class Model
           $record[$relName] = $relModel->recordDecryptIds($record[$relName]);
         break;
       }
-  }
+    }
 
     return $record;
   }
@@ -1098,6 +1106,16 @@ class Model
     $query = $this->eloquent->selectRaw(join(',', $selectRaw))->with($withs);
     foreach ($this->relations as $relName => $relDefinition) {
       $query->with($relName);
+  
+      list($relType, $relModelClass) = $relDefinition;
+      $relModel = new $relModelClass($this->app);
+
+      if (is_array($relModel->relations)) {
+        foreach ($relModel->relations as $subRelName => $subRelDefinition) {
+          $query->with($relName . "." . $subRelName);
+        }
+      }
+
     }
     foreach ($joins as $join) {
       $query->leftJoin($join[0], $join[1], $join[2], $join[3]);

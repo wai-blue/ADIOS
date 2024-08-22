@@ -277,24 +277,23 @@ class Helper {
     }
   }
 
-  public static function encrypt(string $value, string $seed = '') {
+  public static function encrypt(string $value, string $seed = '', $force = false) {
     global $__APP__;
-    if ($__APP__->config['develMode']) {
-      return $value;
-    } else {
+    if ($force || ($__APP__->config['encryptRecordIds'] ?? false)) {
       if (empty($seed)) $seed = _ADIOS_ID;
       return base64_encode(openssl_encrypt($value, 'AES-256-CBC', $seed, 0, $seed));
+    } else {
+      return $value;
     }
   }
 
-  public static function decrypt(string $value, string $seed = '') {
+  public static function decrypt(string $value, string $seed = '', $force = false) {
     global $__APP__;
-    if ($__APP__->config['develMode']) {
-      return $value;
-    } else {
-      if (empty($seed)) $seed = _ADIOS_ID;
+    if ($force || ($__APP__->config['encryptRecordIds'] ?? false)) {
       if (empty($seed)) $seed = _ADIOS_ID;
       return openssl_decrypt(base64_decode($value), 'AES-256-CBC', $seed, 0, $seed);
+    } else {
+      return $value;
     }
   }
 

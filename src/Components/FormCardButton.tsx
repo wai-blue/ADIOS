@@ -11,7 +11,7 @@ interface FormCardButtonProps {
   icon: string,
   subtitle?: string,
   cssClass?: string,
-  formId?: number,
+  recordId?: number,
   form?: FormProps
 }
 
@@ -44,7 +44,7 @@ export default class FormCardButton extends Component<FormCardButtonProps> {
             uid={this.props.form?.uid ?? this.props.uid}
             model={this.props.form?.model ?? ''}
             showInModal={true}
-            id={this.props.formId}
+            id={this.props.recordId}
             {...this.props.form}
           />
         </Modal>

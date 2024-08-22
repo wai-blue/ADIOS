@@ -2,7 +2,7 @@ import React, { Component, ChangeEvent, createRef } from 'react';
 
 import Modal, { ModalProps } from "./Modal";
 import ModalSimple from "./ModalSimple";
-import Form, { FormProps, FormState, FormColumns } from "./Form";
+import Form, { FormEndpoint, FormProps, FormState, FormColumns } from "./Form";
 import Notification from "./Notification";
 
 import {
@@ -17,13 +17,18 @@ import {
 import { Column } from 'primereact/column';
 import { ProgressBar } from 'primereact/progressbar';
 import { OverlayPanel } from 'primereact/overlaypanel';
-import { InputProps } from "./Input";
 import { InputFactory } from "./InputFactory";
 import { dateToEUFormat, datetimeToEUFormat } from "./Inputs/DateTime";
 
 
 import { adiosError, deepObjectMerge } from "./Helper";
 import request from "./Request";
+
+export interface TableEndpoint {
+  describeTable: string,
+  getRecords: string,
+  deleteRecord: string,
+}
 
 export interface OrderBy {
   field: string,
@@ -44,15 +49,16 @@ export interface TableProps {
   canUpdate?: boolean,
   columns?: FormColumns,
   renderForm?: boolean,
-  formId?: any,
-  formEndpoint?: string,
+  recordId?: any,
+  formEndpoint?: FormEndpoint,
   formModal?: ModalProps,
   formUseModalSimple?: boolean,
   formParams?: FormProps,
-  endpoint?: string
+  endpoint?: TableEndpoint,
   modal?: ModalProps,
   model: string,
-  parentFormId?: any,
+  parentRecordId?: any,
+  parentForm?: Form<FormProps, FormState>,
   parentFormModel?: string,
   showHeader?: boolean,
   tag?: string,
@@ -71,6 +77,7 @@ export interface TableProps {
   data?: TableData,
   async?: boolean,
   readonly?: boolean,
+  closeFormAfterSave?: boolean,
 
   //TODO
   //showPaging?: boolean,
@@ -101,7 +108,7 @@ interface TableData {
 }
 
 export interface TableState {
-  endpoint: string,
+  endpoint: TableEndpoint,
   addButtonText?: string,
   canCreate?: boolean,
   canDelete?: boolean,
@@ -110,10 +117,10 @@ export interface TableState {
   columns?: any, //Array<GridColDef>,
   data?: TableData | null,
   filterBy?: any,
-  formId?: any,
-  formPrevId?: any,
-  formNextId?: any,
-  formEndpoint?: string,
+  recordId?: any,
+  recordPrevId?: any,
+  recordNextId?: any,
+  formEndpoint?: FormEndpoint,
   formParams?: FormProps,
   orderBy?: OrderBy,
   page: number,
@@ -150,13 +157,17 @@ export default class Table extends Component<TableProps, TableState> {
 
   getStateFromProps(props: TableProps) {
     return {
-      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultTableEndpoint ?? 'components/table'),
+      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? {
+        describeTable: 'api/table/describe',
+        getRecords: 'api/record/get-list',
+        deleteRecord: 'api/record/delete',
+      }),
       canCreate: props.canCreate ?? true,
       canDelete: props.canDelete ?? true,
       canRead: props.canRead ?? true,
       canUpdate: props.canUpdate ?? true,
-      formId: props.formId,
-      formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? ''),
+      recordId: props.recordId,
+      formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? null),
       formParams: {
         model: props.model,
         uid: props.uid,
@@ -179,7 +190,7 @@ export default class Table extends Component<TableProps, TableState> {
 
   componentDidMount() {
     if (this.state.async) {
-      this.loadParams();
+      this.loadTableDescription();
       this.loadData();
     }
   }
@@ -187,11 +198,11 @@ export default class Table extends Component<TableProps, TableState> {
   componentDidUpdate(prevProps: TableProps) {
     if (
       (prevProps.formParams?.id != this.props.formParams?.id)
-      || (prevProps.parentFormId != this.props.parentFormId)
+      || (prevProps.parentRecordId != this.props.parentRecordId)
     ) {
       this.state.formParams = this.props.formParams;
       if (this.state.async) {
-        this.loadParams();
+        this.loadTableDescription();
         this.loadData();
       }
     }
@@ -204,18 +215,22 @@ export default class Table extends Component<TableProps, TableState> {
     }
   }
 
-  onAfterLoadParams(params: any): any {
+  onAfterLoadTableDescription(params: any): any {
     return params;
   }
 
-  getEndpointUrl(): string {
-    return this.state.endpoint;
+  // getEndpointUrl(): string {
+  //   return this.state.endpoint;
+  // }
+
+  getEndpointUrl(action: string) {
+    return this.state.endpoint[action] ?? '';
   }
 
   getEndpointParams(): any {
     return {
       model: this.props.model,
-      parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+      parentRecordId: this.props.parentRecordId ? this.props.parentRecordId : 0,
       parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
       tag: this.props.tag,
       __IS_AJAX__: '1',
@@ -268,12 +283,11 @@ export default class Table extends Component<TableProps, TableState> {
     };
   }
 
-  loadParams(successCallback?: (params: any) => void) {
+  loadTableDescription(successCallback?: (params: any) => void) {
     request.get(
-      this.getEndpointUrl(),
+      this.getEndpointUrl('describeTable'),
       {
         ...this.getEndpointParams(),
-        action: 'getParams',
       },
       (data: any) => {
         try {
@@ -283,7 +297,7 @@ export default class Table extends Component<TableProps, TableState> {
           if (params.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
           if (successCallback) successCallback(params);
 
-          params = this.onAfterLoadParams(params);
+          params = this.onAfterLoadTableDescription(params);
 
           this.setState({
             addButtonText: this.props.addButtonText ?? params.addButtonText,
@@ -291,7 +305,7 @@ export default class Table extends Component<TableProps, TableState> {
             canDelete: params.canDelete ?? true,
             canRead: params.canRead ?? true,
             canUpdate: params.canUpdate ?? true,
-            columns: params.columns,
+            columns: this.getColumns(params.columns),
             showHeader: params.showHeader ?? true,
             title: this.props.title ?? params.title,
           });
@@ -304,16 +318,15 @@ export default class Table extends Component<TableProps, TableState> {
 
   loadData() {
     request.get(
-      this.getEndpointUrl(),
+      this.getEndpointUrl('getRecords'),
       {
         ...this.getEndpointParams(),
-        action: 'loadData',
         filterBy: this.state.filterBy,
         model: this.props.model,
         orderBy: this.state.orderBy,
         page: this.state.page ?? 0,
         itemsPerPage: this.state.itemsPerPage ?? 15,
-        parentFormId: this.props.parentFormId ? this.props.parentFormId : 0,
+        parentRecordId: this.props.parentRecordId ? this.props.parentRecordId : 0,
         parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
         search: this.state.search,
         tag: this.props.tag,
@@ -328,17 +341,21 @@ export default class Table extends Component<TableProps, TableState> {
     );
   }
 
+  getColumns(columnsFromEndpoint: any): any {
+    return columnsFromEndpoint;
+  }
+
   getFormParams(): any {
     return {
       parentTable: this,
       uid: this.props.uid + '_form',
       model: this.props.model,
       tag: this.props.tag,
-      id: this.state.formId ?? null,
-      prevId: this.state?.formPrevId ?? 0,
-      nextId: this.state?.formNextId ?? 0,
+      id: this.state.recordId ?? null,
+      prevId: this.state?.recordPrevId ?? 0,
+      nextId: this.state?.recordNextId ?? 0,
       endpoint: this.state.formEndpoint ?? '',
-      isInlineEditing: (this.state.formId ?? null) === -1,
+      isInlineEditing: (this.state.recordId ?? null) === -1,
       showInModal: true,
       showInModalSimple: this.props.formUseModalSimple,
       columns: this.props.formParams?.columns ?? {},
@@ -351,17 +368,21 @@ export default class Table extends Component<TableProps, TableState> {
       canRead: this.state.canRead,
       canUpdate: this.state.canUpdate,
       onClose: () => {
-        this.setState({ formId: null });
+        this.setState({ recordId: null });
       },
       onSaveCallback: (form: Form<FormProps, FormState>, saveResponse: any) => {
         this.loadData();
-        if (form.state.isInlineEditing) {
-          this.setState({ formId: null });
+        if (this.props.closeFormAfterSave ?? false) {
+          this.setState({ recordId: null });
+        } else {
+          if (saveResponse && saveResponse.savedRecord.id) {
+            this.openForm(saveResponse.savedRecord.id);
+          }
         }
       },
       onDeleteCallback: () => {
         this.loadData();
-        this.setState({ formId: null });
+        this.setState({ recordId: null });
       },
       isInitialized: false,
     }
@@ -370,10 +391,10 @@ export default class Table extends Component<TableProps, TableState> {
   getFormModalParams(): any {
     return {
       uid: this.props.uid + '_form',
-      type: this.state.formId == -1 ? 'centered' : 'right',
+      type: this.state.recordId == -1 ? 'centered' : 'right',
       // model: this.props.model,
       hideHeader: true,
-      isOpen: this.state.formId !== null,
+      isOpen: this.state.recordId !== null,
       ...this.props.modal
     }
   }
@@ -383,7 +404,7 @@ export default class Table extends Component<TableProps, TableState> {
   }
 
   rowClassName(rowData: any): string {
-    return rowData.id === this.state.formId ? 'highlighted' : '';
+    return rowData.id === this.state.recordId ? 'highlighted' : '';
   }
 
   renderAddButton(): JSX.Element {
@@ -411,18 +432,20 @@ export default class Table extends Component<TableProps, TableState> {
       </div>
 
       <div className="table-header-right">
-        <input
-          className="table-header-search"
-          type="search"
-          placeholder="Start typing to search..."
-          value={this.state.search}
-          onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
-        />
+        {(this.state.data?.total ?? 0) <= this.state.itemsPerPage ? null :
+          <input
+            className="table-header-search"
+            type="search"
+            placeholder="Start typing to search..."
+            value={this.state.search}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
+          />
+        }
       </div>
     </div>
   }
 
-  findDataById(id: number): any {
+  findRecordById(id: number): any {
     let data: any = {};
 
     for (let i in this.state.data?.data) {
@@ -435,24 +458,29 @@ export default class Table extends Component<TableProps, TableState> {
   }
 
   deleteRecord() {
+    const recordToDelete = this.findRecordById(this.state.idToDelete);
     request.get(
-      this.getEndpointUrl(),
+      this.getEndpointUrl('deleteRecord'),
       {
         model: this.props.model,
-        id: this.state.idToDelete,
-        action: 'deleteRecord',
+        id: recordToDelete.id,
+        hash: recordToDelete._idHash_,
       },
-      (data: any) => {
-        this.setState({idToDelete: 0}, () => {
-          this.loadData();
-        });
+      (response: any) => {
+        if (response.error) {
+          Notification.error(response.error);
+        } else {
+          this.setState({idToDelete: 0}, () => {
+            this.loadData();
+          });
+        }
       }
     );
   }
 
   renderDeleteConfirmModal(): JSX.Element {
     if (this.state.idToDelete > 0) {
-      const data: any = this.findDataById(this.state.idToDelete);
+      const data: any = this.findRecordById(this.state.idToDelete);
       return (
         <ModalSimple
           uid={this.props.uid + '_delete_confirm'}
@@ -497,8 +525,7 @@ export default class Table extends Component<TableProps, TableState> {
   }
 
   renderFormModal(): JSX.Element {
-    if (this.state.renderForm && this.state.formId) {
-    console.log(this.getFormModalParams());
+    if (this.state.renderForm && this.state.recordId) {
       if (this.props.formUseModalSimple) {
         return <ModalSimple {...this.getFormModalParams()}>{this.renderForm()}</ModalSimple>;
       } else {
@@ -789,10 +816,18 @@ export default class Table extends Component<TableProps, TableState> {
     if (this.props.externalCallbacks && this.props.externalCallbacks.openForm) {
       window[this.props.externalCallbacks.openForm](this, id);
     } else {
+      if (!this.props.parentForm) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const recordTitle = this.findRecordById(id)._lookupText_ ?? null;
+        urlParams.set('recordId', id);
+        if (recordTitle) urlParams.set('recordTitle', recordTitle);
+        window.history.pushState({},"", '?' + urlParams.toString());
+      }
+      
       this.setState({
-        formId: id,
-        formPrevId: prevId,
-        formNextId: nextId,
+        recordId: id,
+        recordPrevId: prevId,
+        recordNextId: nextId,
       })
     }
   }

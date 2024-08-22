@@ -505,14 +505,23 @@ class Loader
           '/^api\/form\/describe\/?$/' => [
             'controller' => 'ADIOS/Controllers/Api/Form/Describe',
           ],
+          '/^api\/table\/describe\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Table/Describe',
+          ],
           '/^api\/record\/get\/?$/' => [
             'controller' => 'ADIOS/Controllers/Api/Record/Get',
+          ],
+          '/^api\/record\/get-list\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Record/GetList',
           ],
           '/^api\/record\/lookup\/?$/' => [
             'controller' => 'ADIOS/Controllers/Api/Record/Lookup',
           ],
           '/^api\/record\/save\/?$/' => [
             'controller' => 'ADIOS/Controllers/Api/Record/Save',
+          ],
+          '/^api\/record\/delete\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Record/Delete',
           ],
         ]);
 
@@ -1229,6 +1238,7 @@ class Loader
           'user' => $this->userProfile,
           'config' => $this->config,
           'routeUrl' => $this->routeUrl,
+          'routeParams' => $this->params,
           'route' => $this->route,
           'session' => $_SESSION[_ADIOS_ID] ?? [],
           'viewParams' => $this->controllerObject->viewParams,

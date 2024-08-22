@@ -31,7 +31,7 @@ export function InputFactory(inputProps: any): JSX.Element {
         case 'boolean': inputToRender = <InputBoolean {...inputProps} />; break;
         case 'lookup': inputToRender = <InputLookup {...inputProps} />; break;
         case 'color': inputToRender = <InputColor {...inputProps} />; break;
-        case 'tags': inputToRender = <InputTags {...inputProps} model={this.props.model} formId={this.state.id} />; break;
+        case 'tags': inputToRender = <InputTags {...inputProps} model={this.props.model} recordId={this.state.id} />; break;
         case 'image': inputToRender = <InputImage {...inputProps} />; break;
         case 'datetime': case 'date': case 'time': inputToRender = <InputDateTime {...inputProps} type={inputProps.params.type} />; break;
         case 'editor':

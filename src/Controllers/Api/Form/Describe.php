@@ -3,8 +3,6 @@
 namespace ADIOS\Controllers\Api\Form;
 
 class Describe extends \ADIOS\Core\ApiController {
-  protected ?\Illuminate\Database\Eloquent\Builder $query = null;
-
   public \ADIOS\Core\Model $model;
 
   function __construct(\ADIOS\Core\Loader $app, array $params = [])

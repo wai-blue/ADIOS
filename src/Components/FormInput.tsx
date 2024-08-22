@@ -6,14 +6,14 @@ import { Tooltip } from 'primereact/tooltip';
 
 export interface FormInputProps {
   children: any,
-  title?: string,
+  title?: string|JSX.Element,
   description?: string,
   required?: boolean,
 }
 
 interface FormInputState {
   uid: string,
-  title?: string,
+  title?: string|JSX.Element,
   description: string,
   required: boolean,
 }

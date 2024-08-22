@@ -20,7 +20,7 @@ interface TagBadge {
 interface TagsInputProps extends InputProps {
   dataKey?: string,
   model?: string,
-  formId?: number,
+  recordId?: number,
   enableDelete?: boolean,
   enableAdd?: boolean,
 }
@@ -58,7 +58,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
   }
 
   componentDidUpdate(prevProps: TagsInputProps) {
-    if (prevProps.formId != this.props.formId) {
+    if (prevProps.recordId != this.props.recordId) {
       this.loadData();
     }
   }
@@ -70,7 +70,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
         model: this.props.model,
         junction: this.props.params.junction,
         __IS_AJAX__: '1',
-        id: this.props.formId
+        id: this.props.recordId
       },
       (data: any) => {
         const tmpTags: Array<any> = data.data;
@@ -120,7 +120,7 @@ export default class Tags extends Input<TagsInputProps, TagsInputState> {
       postData,
       {
         model: this.props.model,
-        id: this.props.formId,
+        id: this.props.recordId,
         junction: this.props.params.junction,
         __IS_AJAX__: '1',
       },

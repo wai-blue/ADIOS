@@ -88,6 +88,7 @@ export interface FormState {
   endpoint: FormEndpoint,
   params: any,
   defaultValues?: any,
+  invalidRecordId: boolean,
 }
 
 export interface FormColumns {
@@ -146,6 +147,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       record: {},
       params: null,
       defaultValues: props.defaultValues ? props.defaultValues : {},
+      invalidRecordId: false,
     };
   }
 
@@ -211,16 +213,22 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       this.getEndpointParams(),
       {},
       (data: any) => {
+        const defaultValues = deepObjectMerge(this.state.defaultValues ?? {}, data.defaultValues);
+
         this.setState({
-          columns: data.columns,
-          defaultValues: data.defaultValues,
+          columns: deepObjectMerge(this.state.columns ?? {}, data.columns),
+          defaultValues: defaultValues,
           canCreate: data.permissions?.canCreate,
           canRead: data.permissions?.canRead,
           canUpdate: data.permissions?.canUpdate,
           canDelete: data.permissions?.canDelete,
           readonly: !(data.permissions?.canUpdate || data.permissions?.canCreate),
         }, () => {
-          this.loadRecord();
+          if (this.state.id !== -1) {
+            this.loadRecord();
+          } else {
+            this.setRecord(defaultValues);
+          }
         });
       }
     );
@@ -232,12 +240,20 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       this.getEndpointParams(),
       {},
       (record: any) => {
-        record = this.onAfterRecordLoaded(record);
-        this.setState({isInitialized: true, record: record}, () => {
-          this.onAfterFormInitialized();
-        });
+        if (this.state.id != -1 && !record.id) {
+          this.setState({isInitialized: true, invalidRecordId: true});
+        } else {
+          this.setRecord(record);
+        }
       }
     );
+  }
+
+  setRecord(record: any) {
+    record = this.onAfterRecordLoaded(record);
+    this.setState({isInitialized: true, record: record}, () => {
+      this.onAfterFormInitialized();
+    });
   }
 
   onBeforeSaveRecord(record) {
@@ -429,7 +445,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           {
             ...contentItemParams[contentItemName],
             ...{
-              parentFormId: this.state.id,
+              parentRecordId: this.state.id,
               parentFormModel: this.props.model,
             }
           }
@@ -484,10 +500,10 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     // }
 
     // if (!onChange) onChange = (value: any) => this.onChange(columnName, value);
-
     const inputParams = this.buildInputParams(columnName, customInputParams);
     const record = this.state.record ?? {};
     const columns = this.state.columns ?? {};
+
     const inputProps: InputProps = {
       ...this.getDefaultInputProps(),
       params: inputParams,
@@ -669,6 +685,14 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           <ProgressBar mode="indeterminate" style={{ flex: 1, height: '30px' }}></ProgressBar>
         </div>
       );
+    }
+
+    if (this.state.invalidRecordId) {
+      return <>
+        <div className="alert alert-danger m-1">
+          Unable to load record.
+        </div>
+      </>
     }
 
     let formTitle = this.renderTitle();
