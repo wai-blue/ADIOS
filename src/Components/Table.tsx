@@ -399,8 +399,28 @@ export default class Table extends Component<TableProps, TableState> {
     }
   }
 
-  cellClassName(columnName: string, rowData: any) {
-    return ''; // rowData.id % 2 === 0 ? '' : 'bg-light';
+  cellClassName(columnName: string, column: any, rowData: any) {
+    let cellClassName = '';
+    
+    if (column.enumValues) {
+      cellClassName = 'badge badge-small';
+    } else {
+      switch (column.type) {
+        case 'int':
+        case 'float':
+          cellClassName = 'text-right font-semibold';
+        break;
+        case 'date':
+        case 'datetime':
+          cellClassName = 'text-right';
+        break;
+        case 'lookup':
+          cellClassName = 'text-primary';
+        break;
+      }
+    }
+
+    return cellClassName;
   }
 
   rowClassName(rowData: any): string {
@@ -559,76 +579,74 @@ export default class Table extends Component<TableProps, TableState> {
     };
     const rowIndex = options.rowIndex;
 
-    if (enumValues) return <span style={{fontSize: '10px'}}>{enumValues[columnValue]}</span>;
+    const cellContent = enumValues ? enumValues[columnValue] : columnValue;
 
     let cellValueElement: JSX.Element|null = null;
 
-    if (columnValue === null) {
+    if (cellContent === null) {
       cellValueElement = null;
     } else {
       switch (column.type) {
         case 'int':
-          cellValueElement = <div className="text-right">
-            {columnValue}
+          cellValueElement = <>
+            {cellContent}
             {column.unit ? ' ' + column.unit : ''}
-          </div>;
+          </>;
         break;
         case 'float':
-          cellValueElement = <div className="text-right">
-            {columnValue}
+          cellValueElement = <>
+            {cellContent}
             {column.unit ? ' ' + column.unit : ''}
-          </div>;
+          </>;
         break;
         case 'color':
           cellValueElement = <div
-            style={{ width: '20px', height: '20px', background: columnValue }}
+            style={{ width: '20px', height: '20px', background: cellContent }}
             className="rounded"
           />;
         break;
         // case 'image':
-        //   if (!columnValue) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+        //   if (!cellContent) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
         //   else {
         //     cellValueElement = <img
         //       style={{ width: '30px', height: '30px' }}
-        //       src={this.state.folderUrl + "/" + columnValue}
+        //       src={this.state.folderUrl + "/" + cellContent}
         //       className="rounded"
         //     />;
         //   }
         break;
         case 'lookup':
-          cellValueElement = <span style={{
-            color: '#2d4a8a'
-          }}>{columnValue?.lookupSqlValue}</span>;
+          cellValueElement = cellContent?.lookupSqlValue;
         break;
         case 'enum':
           const enumValues = column.enumValues;
-          if (enumValues) cellValueElement = enumValues[columnValue];
+          if (enumValues) cellValueElement = enumValues[cellContent];
         break;
         case 'boolean':
-          if (columnValue) cellValueElement = <span className="text-green-600" style={{fontSize: '1.2em'}}>✓</span>
+          if (cellContent) cellValueElement = <span className="text-green-600" style={{fontSize: '1.2em'}}>✓</span>
           else cellValueElement = <span className="text-red-600" style={{fontSize: '1.2em'}}>✕</span>
         break;
         case 'date':
-          cellValueElement = <span>{dateToEUFormat(columnValue)}</span>;
+          cellValueElement = <span>{dateToEUFormat(cellContent)}</span>;
         break;
         case 'datetime':
-          cellValueElement = <span>{datetimeToEUFormat(columnValue)}</span>;
+          cellValueElement = <span>{datetimeToEUFormat(cellContent)}</span>;
         break;
         case 'tags':
           cellValueElement = <>
-            {columnValue.map((item: any) => {
+            {cellContent.map((item: any) => {
               if (!column.dataKey) return <></>;
               return <span className="badge badge-info mx-1" key={item.id}>{item[column.dataKey]}</span>;
             })}
           </>
         break;
         default:
-          cellValueElement = columnValue;
+          cellValueElement = cellContent;
         break;
       }
 
       if (cellValueElement === <></>) {
-        cellValueElement = columnValue;
+        cellValueElement = cellContent;
       }
     }
 
@@ -691,7 +709,12 @@ export default class Table extends Component<TableProps, TableState> {
         body={(data: any, options: any) => {
           return (
             <div
-              className={(column.cssClass ?? '') + (data.id == this.state.idToDelete ? ' bg-red-50' : '') + ' ' + this.cellClassName(columnName, data)}
+              className={
+              (column.cssClass ?? '')
+              + (data.id == this.state.idToDelete ? ' bg-red-50' : '')
+              + ' '
+              + this.cellClassName(columnName, column, data)
+            }
               style={column.cssStyle}
             >
               {this.renderCell(columnName, column, data, options)}
