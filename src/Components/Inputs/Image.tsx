@@ -37,6 +37,12 @@ export default class Image extends Input<InputProps, ImageInputState> {
     })
   };
 
+  renderValueElement() {
+    return <>
+      <img src={globalThis.app.config.url + '/uploads/' + this.state.value} style={{"height": "3em"}} />
+    </>
+  }
+
   renderInputElement() {
     return (
       <ImageUploading

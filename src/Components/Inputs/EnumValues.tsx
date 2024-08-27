@@ -4,6 +4,7 @@ import * as uuid from 'uuid';
 
 interface EnumValuesInputProps extends InputProps {
   enumValues?: {};
+  enumCssClasses?: {};
 }
 
 export default class EnumValues extends Input<EnumValuesInputProps, InputState> {
@@ -19,11 +20,18 @@ export default class EnumValues extends Input<EnumValuesInputProps, InputState> 
 
   renderValueElement() {
     let value = this.props.enumValues ? this.props.enumValues[this.state.value] : null;
+    let cssClass = this.props.enumCssClasses ? this.props.enumCssClasses[this.state.value] : null;
+
     if (!value) {
       if (this.props.enumValues) value = this.props.enumValues[Object.keys(this.props.enumValues)[0]];
       else value = '-';
     }
-    return value;
+
+    return <>
+      <div className={"badge " + cssClass ?? ''}>
+        {value}
+      </div>
+    </>;
   }
 
   renderInputElement() {

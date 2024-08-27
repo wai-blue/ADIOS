@@ -28,7 +28,6 @@ class Notification extends Notyf {
   }
 
   error(payload: string | Partial<INotyfNotificationOptions>): NotyfNotification {
-    console.error(payload);
     return super.error(payload);
   }
 

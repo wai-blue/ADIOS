@@ -115,14 +115,15 @@ class Request {
   }
 
   private fatalErrorNotification(errorText: string) {
-    Swal.fire({
-      text: errorText,
-      width: 600,
-      padding: "3em",
-      color: "#ad372a",
-      background: "white",
-      backdrop: `rgba(123,12,0,0.2)`
-    });
+    alert(errorText);
+    // Swal.fire({
+    //   text: errorText,
+    //   width: 600,
+    //   padding: "3em",
+    //   color: "#ad372a",
+    //   background: "white",
+    //   backdrop: `rgba(123,12,0,0.2)`
+    // });
   }
 
 }

@@ -18,7 +18,7 @@ import InputEnumValues from "./Inputs/EnumValues";
 export function InputFactory(inputProps: any): JSX.Element {
   let inputToRender: JSX.Element = <></>;
   if (inputProps.params.enumValues) {
-    inputToRender = <InputEnumValues {...inputProps} enumValues={inputProps.params.enumValues}/>
+    inputToRender = <InputEnumValues {...inputProps} enumValues={inputProps.params.enumValues} enumCssClasses={inputProps.params.enumCssClasses}/>
   } else {
     if (typeof inputProps.params.inputJSX === 'string' && inputProps.params.inputJSX !== '') {
       inputToRender = globalThis.app.renderReactElement(inputProps.params.inputJSX, inputProps) ?? <></>;

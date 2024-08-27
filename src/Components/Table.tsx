@@ -403,7 +403,7 @@ export default class Table extends Component<TableProps, TableState> {
     let cellClassName = '';
     
     if (column.enumValues) {
-      cellClassName = 'badge badge-small';
+      cellClassName = 'badge ' + (column.enumCssClasses[rowData[columnName]] ?? '');
     } else {
       switch (column.type) {
         case 'int':
@@ -439,8 +439,10 @@ export default class Table extends Component<TableProps, TableState> {
     );
   }
 
-  renderHeaderButtons(): JSX.Element {
-    return !this.state.readonly && this.state.canCreate ? this.renderAddButton() : <></>;
+  renderHeaderButtons(): Array<JSX.Element> {
+    let buttons: Array<JSX.Element> = [];
+    if (!this.state.readonly && this.state.canCreate) buttons.push(this.renderAddButton());
+    return buttons;
   }
 
   renderHeader(): JSX.Element {
@@ -847,11 +849,9 @@ export default class Table extends Component<TableProps, TableState> {
         window.history.pushState({},"", '?' + urlParams.toString());
       }
       
-      this.setState({
-        recordId: id,
-        recordPrevId: prevId,
-        recordNextId: nextId,
-      })
+      this.setState({ recordId: null }, () => {
+        this.setState({ recordId: id, recordPrevId: prevId, recordNextId: nextId });
+      });
     }
   }
 
