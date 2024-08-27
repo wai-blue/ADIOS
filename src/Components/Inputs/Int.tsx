@@ -28,7 +28,7 @@ export default class Int extends Input<IntInputProps, InputState> {
         disabled={this.state.readonly}
       />
       <div className="input-unit">
-        {this.props.params.unit}
+        {this.props.params?.unit}
       </div>
     </>;
   }
