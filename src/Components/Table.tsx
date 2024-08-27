@@ -368,6 +368,15 @@ export default class Table extends Component<TableProps, TableState> {
       canRead: this.state.canRead,
       canUpdate: this.state.canUpdate,
       onClose: () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.delete('recordId');
+        urlParams.delete('recordTitle');
+        if (Array.from(urlParams).length == 0) {
+          window.history.pushState({}, '', window.location.protocol + "//" + window.location.host + window.location.pathname);
+        } else {
+          window.history.pushState({}, "", '?' + urlParams.toString());
+        }
+
         this.setState({ recordId: null });
       },
       onSaveCallback: (form: Form<FormProps, FormState>, saveResponse: any) => {
@@ -629,10 +638,10 @@ export default class Table extends Component<TableProps, TableState> {
           else cellValueElement = <span className="text-red-600" style={{fontSize: '1.2em'}}>✕</span>
         break;
         case 'date':
-          cellValueElement = <span>{dateToEUFormat(cellContent)}</span>;
+          cellValueElement = <>{cellContent == '0000-00-00' ? '' : dateToEUFormat(cellContent)}</>;
         break;
         case 'datetime':
-          cellValueElement = <span>{datetimeToEUFormat(cellContent)}</span>;
+          cellValueElement = <>{cellContent == '0000-00-00' ? '' : datetimeToEUFormat(cellContent)}</>;
         break;
         case 'tags':
           cellValueElement = <>
@@ -846,7 +855,7 @@ export default class Table extends Component<TableProps, TableState> {
         const recordTitle = this.findRecordById(id)._lookupText_ ?? null;
         urlParams.set('recordId', id);
         if (recordTitle) urlParams.set('recordTitle', recordTitle);
-        window.history.pushState({},"", '?' + urlParams.toString());
+        window.history.pushState({}, "", '?' + urlParams.toString());
       }
       
       this.setState({ recordId: null }, () => {

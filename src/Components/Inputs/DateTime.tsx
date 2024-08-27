@@ -102,6 +102,21 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
     super.onChange(value);
   }
 
+  renderValueElement() {
+    let value = this.state.value;
+
+    switch (this.props.type) {
+      case 'datetime':
+        value = (value == '0000-00-00' ? '' : datetimeToEUFormat(value));
+      break;
+      case 'date':
+        value = (value == '0000-00-00' ? '' : dateToEUFormat(value));
+      break;
+    }
+
+    return value;
+  }
+
   renderInputElement() {
     let value = this.state.value;
 
