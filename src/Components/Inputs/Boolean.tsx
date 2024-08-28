@@ -22,6 +22,8 @@ export default class Boolean extends Input<InputProps, InputState> {
     else if (value == 'N') return 'Y';
     else if (value == 'false') return 'true';
     else if (value === false) return true;
+    else if (value == null) return true;
+    else if (value == '') return true;
   }
 
   isChecked(value: any): boolean {
