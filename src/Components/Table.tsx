@@ -415,9 +415,9 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   cellClassName(columnName: string, column: any, rowData: any) {
     let cellClassName = '';
-    
+
     if (column.enumValues) {
-      cellClassName = 'badge ' + (column.enumCssClasses[rowData[columnName]] ?? '');
+      cellClassName = 'badge ' + (column.enumCssClasses ? (column.enumCssClasses[rowData[columnName]] ?? '') : '');
     } else {
       switch (column.type) {
         case 'int':
@@ -878,7 +878,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         if (recordTitle) urlParams.set('recordTitle', recordTitle);
         window.history.pushState({}, "", '?' + urlParams.toString());
       }
-      
+
       this.setState({ recordId: null }, () => {
         this.setState({ recordId: id, recordPrevId: prevId, recordNextId: nextId });
       });
