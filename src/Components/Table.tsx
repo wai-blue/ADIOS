@@ -282,7 +282,8 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
             this.onSelectionChange(event);
           }
         )
-      }
+      },
+      footer: this.renderFooter(),
     };
   }
 
@@ -479,6 +480,10 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   renderFilter(): JSX.Element {
+    return <></>;
+  }
+
+  renderFooter(): JSX.Element {
     return <></>;
   }
 
