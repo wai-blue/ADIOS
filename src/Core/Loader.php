@@ -849,7 +849,7 @@ class Loader
   {
     if ($contextObject === NULL) $contextObject = $this;
     if (empty($toLanguage)) {
-      $toLanguage = $this->config['language'] ?? "en";
+      $toLanguage = $this->config['language'] ?: "en";
     }
 
     if ($toLanguage == "en") {
