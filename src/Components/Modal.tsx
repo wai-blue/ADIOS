@@ -28,44 +28,31 @@ export default class Modal extends Component<ModalProps> {
   constructor(props: ModalProps) {
     super(props);
 
-    // console.log('modal construct ' + this.props.uid + ' ' + this.props.model);
     if (this.props.uid) {
       globalThis.app.reactElements[this.props.uid] = this;
     }
 
-    this.state = {
+    this.state = this.getStateFromProps(props);
+  }
+
+  getStateFromProps(props: ModalProps) {
+    return {
       uid: props.uid ?? uuid.v4(),
       type: props.type ?? "right",
       isOpen: props.isOpen ?? false,
       title: props.title
     };
-
-    // this.modalRoot = document.createElement('div');
-    // document.body.appendChild(this.modalRoot);
   };
-
-  componentWillUnmount() {
-    // document.body.removeChild(this.modalRoot);
-  }
-
-  componentDidMount() {
-    //console.log('modal did mount ' + this.props.uid + ' ' + this.props.model);
-    // if (this.props.isOpen === true) {
-    //   //@ts-ignore
-    //   ADIOS.modalToggle(this.state.uid);
-    // }
-  }
 
   /**
    * This function trigger if something change, for Form id of record
    */
   componentDidUpdate(prevProps: any) {
-    // console.log('modal did update ' + this.props.uid + ' ' + this.props.model);
-
-    if (prevProps.title != this.props.title) {
-      this.setState({
-        title: this.props.title
-      });
+    if (
+      prevProps.title != this.props.title
+      || prevProps.isOpen != this.props.isOpen
+    ) {
+      this.setState(this.getStateFromProps(this.props));
     }
   }
 
