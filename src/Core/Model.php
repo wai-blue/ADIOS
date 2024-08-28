@@ -770,6 +770,18 @@ class Model
     return $value;
   }
 
+  public function columnGetNullValue(string $column)
+  {
+    $colDefinition = $this->columns()[$column] ?? [];
+    $colType = $colDefinition['type'];
+
+    if ($this->app->db->isRegisteredColumnType($colType)) {
+      $value = $this->app->db->columnTypes[$colType]->getNullValue($this, $column);
+    }
+
+    return $value;
+  }
+
   //////////////////////////////////////////////////////////////////
   // Record-related methods
 
@@ -832,7 +844,7 @@ class Model
     }
 
     foreach ($columns as $colName => $colDef) {
-      if (!isset($data[$colName])) $data[$colName] = null;
+      if (!isset($data[$colName])) $data[$colName] = $this->columnGetNullValue($colName);
     }
 
     return $data;
@@ -1016,7 +1028,7 @@ class Model
   public function recordDecryptIds(array $record) {
     foreach ($this->columns() as $colName => $colDefinition) {
       if ($colName == 'id' || $colDefinition['type'] == 'lookup') {
-        if ($record[$colName] !== null) {
+        if ($record[$colName] !== null && is_string($record[$colName])) {
           $record[$colName] = \ADIOS\Core\Helper::decrypt($record[$colName]);
         }
       }
@@ -1056,10 +1068,11 @@ class Model
     $withs = [];
     $joins = [];
 
-    foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-      $selectRaw[] = $this->fullTableSqlName . '.' . $tmpColumnName;
-    }
+    // foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
+    //   $selectRaw[] = $this->fullTableSqlName . '.' . $tmpColumnName;
+    // }
 
+    $selectRaw[] = $this->fullTableSqlName . '.*';
     $selectRaw[] = '(' .
       str_replace('{%TABLE%}', $this->fullTableSqlName, $this->lookupSqlValue())
       . ') as _lookupText_'
@@ -1075,14 +1088,11 @@ class Model
           $lookupDatabase = $lookupModel->eloquent->getConnection()->getDatabaseName();
           $lookupTableName = $lookupModel->getFullTableSqlName();
           $joinAlias = 'join_' . $columnName;
-          $lookupSqlValue = "(" .
-            str_replace("{%TABLE%}.", '', $lookupModel->lookupSqlValue())
-            . ") as lookupSqlValue";
 
-          // $selectRaw[] = "(" .
-          //   str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
-          //   . ") as `{$columnName}:LOOKUP`"
-          // ;
+          $selectRaw[] = "(" .
+            str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
+            . ") as `{$columnName}_lookupText_`"
+          ;
 
           $joins[] = [
             $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,
@@ -1090,23 +1100,14 @@ class Model
             '=',
             $this->fullTableSqlName.'.'.$columnName
           ];
-
-          $withs[$columnName] = function ($query) use ($lookupDatabase, $lookupTableName, $lookupSqlValue) {
-            $query
-              ->from($lookupDatabase . '.' . $lookupTableName)
-              ->selectRaw('*, ' . $lookupSqlValue)
-            ;
-          };
         }
       }
 
     }
 
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-    $query = $this->eloquent->selectRaw(join(',', $selectRaw))->with($withs);
+    $query = $this->eloquent->selectRaw(join(',', $selectRaw)); //->with($withs);
     foreach ($this->relations as $relName => $relDefinition) {
-      $query->with($relName);
-  
       list($relType, $relModelClass) = $relDefinition;
       $relModel = new $relModelClass($this->app);
 
@@ -1115,6 +1116,19 @@ class Model
           $query->with($relName . "." . $subRelName);
         }
       }
+
+      $query->with([$relName => function($query) use($relModel) {
+        return
+          $query
+            ->selectRaw('
+              *,
+              (' .
+                str_replace('{%TABLE%}', $relModel->fullTableSqlName, $relModel->lookupSqlValue())
+              . ') as _lookupText_
+            ')
+          ;
+      }]);
+  
 
     }
     foreach ($joins as $join) {

@@ -101,13 +101,6 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
 
   public function validate(\ADIOS\Core\Model $model, $value): bool
   {
-    // if (is_numeric($value)) {
-    //   return true;
-    // } else if ($value['_isNew_'] ?? false) {
-    //   return !empty($value['text']);
-    // } else {
-    //   return false;
-    // }
     return true;
   }
 

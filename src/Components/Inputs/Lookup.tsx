@@ -9,12 +9,14 @@ import { ProgressBar } from 'primereact/progressbar';
 interface LookupInputProps extends InputProps {
   model?: string
   endpoint?: string,
+  customEndpointParams?: any,
 }
 
 interface LookupInputState extends InputState {
   data: Array<any>,
   model: string
   endpoint: string,
+  customEndpointParams: any,
 }
 
 export default class Lookup extends Input<LookupInputProps, LookupInputState> {
@@ -38,11 +40,22 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
       ,
       model: props.model ? props.model : (props.params && props.params.model ? props.params.model : ''),
       data: [],
+      customEndpointParams: this.props.customEndpointParams ?? {},
     };
   }
 
   componentDidMount() {
     this.loadData();
+  }
+
+  componentDidUpdate(prevProps: LookupInputProps) {
+    if (
+      JSON.stringify(this.props.customEndpointParams) !== JSON.stringify(prevProps.customEndpointParams)
+      || this.props.model !== prevProps.model
+      || this.props.context !== prevProps.context
+    ) {
+      this.loadData();
+    }
   }
 
   getEndpointUrl() {
@@ -55,6 +68,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
       context: this.props.context,
       formRecord: this.props.parentForm?.state?.record,
       __IS_AJAX__: '1',
+      ...this.props.customEndpointParams,
     };
   }
 

@@ -117,6 +117,11 @@ class DataType {
     return $value;
   }
   
+  public function getNullValue(\ADIOS\Core\Model $model, string $colName)
+  {
+    return null;
+  }
+  
   public function validate(\ADIOS\Core\Model $model, $value): bool
   {
     return TRUE;

@@ -26,8 +26,9 @@ class GetList extends \ADIOS\Core\ApiController {
     }
 
     $columns = $this->model->columns();
+    $relations = $this->model->relations;
 
-    $query = $this->model->prepareLoadRecordQuery(true);
+    $query = $this->model->prepareLoadRecordQuery($search !== null);
 
     // FILTER BY
     if (isset($params['filterBy'])) {
@@ -53,7 +54,7 @@ class GetList extends \ADIOS\Core\ApiController {
         }
 
         if ($column['type'] == 'lookup') {
-          $query->orHaving($columnName.':LOOKUP', 'like', "%{$search}%");
+          $query->orHaving($columnName.'_lookupText_', 'like', "%{$search}%");
         } else {
           $query->orHaving($columnName, 'like', "%{$search}%");
         }

@@ -1,6 +1,17 @@
 import React from 'react';
 import Notification from "./Notification";
 
+export function setUrlParam(paramName, paramValue) {
+  const urlParams = new URLSearchParams(window.location.search);
+  urlParams.set(paramName, paramValue);
+  window.history.pushState({}, "", '?' + urlParams.toString());
+}
+
+export function getUrlParam(paramName): any {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has(paramName) ? urlParams.get(paramName) : null;
+}
+
 export function deepObjectMerge(target: any, source: any): Object {
   let result: any = target;
   

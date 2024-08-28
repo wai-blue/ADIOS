@@ -49,8 +49,8 @@ export class Input<P extends InputProps, S extends InputState> extends Component
     globalThis.app.reactElements[this.props.uid] = this;
 
     const isInitialized: boolean = props.isInitialized ?? false;
-    const isInlineEditing: boolean = props.isInlineEditing ?? false;
-    const showInlineEditingButtons: boolean = props.showInlineEditingButtons ?? true;
+    const isInlineEditing: boolean = props.isInlineEditing ?? true;
+    const showInlineEditingButtons: boolean = props.showInlineEditingButtons ?? false;
     const readonly: boolean = props.readonly ?? false;
     const invalid: boolean = props.invalid ?? false;
     const value: any = props.value;

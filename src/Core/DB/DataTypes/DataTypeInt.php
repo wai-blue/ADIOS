@@ -92,6 +92,11 @@ class DataTypeInt extends DataType
     return (int) $value;
   }
   
+  public function getNullValue(\ADIOS\Core\Model $model, string $colName)
+  {
+    return 0;
+  }
+  
   public function toCsv($value, $params = [])
   {
     return $this->_toHtmlOrCsv($value, $params);

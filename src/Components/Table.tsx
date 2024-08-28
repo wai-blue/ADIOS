@@ -61,6 +61,7 @@ export interface TableProps {
   parentForm?: Form<FormProps, FormState>,
   parentFormModel?: string,
   showHeader?: boolean,
+  showFilter?: boolean,
   tag?: string,
   title?: string,
   uid: string,
@@ -72,8 +73,8 @@ export interface TableProps {
   inlineEditingEnabled?: boolean,
   isInlineEditing?: boolean,
   selectionMode?: 'single' | 'multiple' | undefined,
-  onChange?: (table: Table) => void,
-  onRowClick?: (table: Table, row: any) => void,
+  onChange?: (table: Table<TableProps, TableState>) => void,
+  onRowClick?: (table: Table<TableProps, TableState>, row: any) => void,
   data?: TableData,
   async?: boolean,
   readonly?: boolean,
@@ -127,6 +128,7 @@ export interface TableState {
   itemsPerPage: number,
   search?: string,
   showHeader?: boolean,
+  showFilter?: boolean,
   title?: string,
   renderForm?: boolean,
   inlineEditingEnabled: boolean,
@@ -137,7 +139,7 @@ export interface TableState {
   readonly: boolean,
 }
 
-export default class Table extends Component<TableProps, TableState> {
+export default class Table<P, S> extends Component<TableProps, TableState> {
   static defaultProps = {
     itemsPerPage: 100,
     formUseModalSimple: true,
@@ -176,6 +178,7 @@ export default class Table extends Component<TableProps, TableState> {
       page: 1,
       itemsPerPage: this.props.itemsPerPage,
       showHeader: props.showHeader ?? true,
+      showFilter: props.showFilter ?? true,
       orderBy: this.props.orderBy,
       inlineEditingEnabled: props.inlineEditingEnabled ? props.inlineEditingEnabled : false,
       isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
@@ -307,6 +310,7 @@ export default class Table extends Component<TableProps, TableState> {
             canUpdate: params.canUpdate ?? true,
             columns: this.getColumns(params.columns),
             showHeader: params.showHeader ?? true,
+            showFilter: params.showFilter ?? true,
             title: this.props.title ?? params.title,
           });
         } catch (err) {
@@ -463,17 +467,19 @@ export default class Table extends Component<TableProps, TableState> {
       </div>
 
       <div className="table-header-right">
-        {(this.state.data?.total ?? 0) <= this.state.itemsPerPage ? null :
-          <input
-            className="table-header-search"
-            type="search"
-            placeholder="Start typing to search..."
-            value={this.state.search}
-            onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
-          />
-        }
+        <input
+          className="table-header-search"
+          type="search"
+          placeholder="Start typing to search..."
+          value={this.state.search}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => this.onSearchChange(event.target.value)}
+        />
       </div>
     </div>
+  }
+
+  renderFilter(): JSX.Element {
+    return <></>;
   }
 
   findRecordById(id: number): any {
@@ -575,11 +581,20 @@ export default class Table extends Component<TableProps, TableState> {
     }
   }
 
+  getColumnValue(columnName: string, column: any, data: any) {
+    if (column['type'] == 'lookup') {
+      let relation = column.relation ?? columnName.substring(3).toUpperCase();
+      return data[relation]?._lookupText_ ?? '';
+    } else {
+      return data[columnName];
+    }
+  }
+
   /*
    * Render body for Column (PrimeReact column)
    */
   renderCell(columnName: string, column: any, data: any, options: any) {
-    const columnValue: any = data[columnName];
+    const columnValue: any = this.getColumnValue(columnName, column, data);
     const enumValues = column.enumValues;
     const inputProps = {
       uid: this.props.uid + '_' + columnName,
@@ -627,7 +642,7 @@ export default class Table extends Component<TableProps, TableState> {
         //   }
         break;
         case 'lookup':
-          cellValueElement = cellContent?.lookupSqlValue;
+          cellValueElement = cellContent;
         break;
         case 'enum':
           const enumValues = column.enumValues;
@@ -776,6 +791,7 @@ export default class Table extends Component<TableProps, TableState> {
           className={"adios component table"}
         >
           {this.state.showHeader ? this.renderHeader() : ''}
+          {this.state.showFilter ? this.renderFilter() : ''}
 
           <div className="table-body" id={"adios-table-body-" + this.props.uid}>
             <DataTable {...this.getTableProps()}>
