@@ -87,7 +87,7 @@ class DataTypeInt extends DataType
     return $html;
   }
 
-  public function normalize(\ADIOS\Core\Model $model, string $colName, $value)
+  public function normalize(\ADIOS\Core\Model $model, string $colName, $value, $colDefinition)
   {
     return (int) $value;
   }

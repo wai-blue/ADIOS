@@ -3,11 +3,7 @@ import { Input, InputProps, InputState } from '../Input'
 import { InputSwitch } from 'primereact/inputswitch';
 import * as uuid from 'uuid';
 
-interface BooleanInputState extends InputState {
-  isChecked: boolean
-}
-
-export default class Boolean extends Input<InputProps, InputState & BooleanInputState> {
+export default class Boolean extends Input<InputProps, InputState> {
   static defaultProps = {
     inputClassName: 'boolean',
     id: uuid.v4(),
@@ -15,15 +11,31 @@ export default class Boolean extends Input<InputProps, InputState & BooleanInput
 
   constructor(props: InputProps) {
     super(props);
+  }
 
-    this.state = {
-      ...this.state, // Parent state
-      isChecked: this.props.value == '1' || this.props.value > 0 || this.props.value == 'true',
-    };
+  toggleValue(value: any): any {
+    if (value == '1') return '0';
+    else if (value == 'Y') return 'N';
+    else if (value == 'true') return 'false';
+    else if (value === true) return false;
+    else if (value == '0') return '1';
+    else if (value == 'N') return 'Y';
+    else if (value == 'false') return 'true';
+    else if (value === false) return true;
+  }
+
+  isChecked(value: any): boolean {
+    return (
+      this.props.value == '1'
+      || this.props.value == 'Y'
+      || this.props.value > 0
+      || this.props.value == 'true'
+      || this.props.value === true
+    );
   }
 
   renderValueElement() {
-    if (this.state.isChecked) {
+    if (this.isChecked(this.state.value)) {
       return <span className="text-green-600" style={{fontSize: '1.2em'}}>✓</span>;
     } else {
       return <span className="text-red-600" style={{fontSize: '1.2em'}}>✕</span>;
@@ -34,10 +46,9 @@ export default class Boolean extends Input<InputProps, InputState & BooleanInput
     return <>
       <InputSwitch
         disabled={this.state.readonly}
-        checked={this.state.isChecked}
+        checked={this.isChecked(this.state.value)}
         onChange={(e) => {
-          this.setState({isChecked: !this.state.isChecked});
-          this.onChange(!this.state.isChecked);
+          this.onChange(this.toggleValue(this.state.value));
         }}
       />
     </>;

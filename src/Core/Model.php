@@ -764,7 +764,7 @@ class Model
     $colType = $colDefinition['type'];
 
     if ($this->app->db->isRegisteredColumnType($colType)) {
-      $value = $this->app->db->columnTypes[$colType]->normalize($this, $column, $value);
+      $value = $this->app->db->columnTypes[$colType]->normalize($this, $column, $value, $colDefinition);
     }
 
     return $value;

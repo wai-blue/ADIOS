@@ -65,12 +65,12 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
     return "<div style='text-align:center'>{$html}</div>";
   }
 
-  public function normalize(\ADIOS\Core\Model $model, string $colName, $value)
+  public function normalize(\ADIOS\Core\Model $model, string $colName, $value, $colDefinition)
   {
-    if (empty($value) || !((bool) $value)) {
-      return 0;
+    if (empty($value) || !((bool) $value) || $value === $colDefinition['noValue'] ?? 0) {
+      return $colDefinition['noValue'] ?? 0;
     } else {
-      return 1;
+      return $colDefinition['yesValue'] ?? 1;
     }
   }
   

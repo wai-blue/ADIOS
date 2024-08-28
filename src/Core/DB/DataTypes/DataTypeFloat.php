@@ -78,7 +78,7 @@ class DataTypeFloat extends \ADIOS\Core\DB\DataType
     return $html;
   }
 
-  public function normalize(\ADIOS\Core\Model $model, string $colName, $value)
+  public function normalize(\ADIOS\Core\Model $model, string $colName, $value, $colDefinition)
   {
     return (float) $value;
   }
