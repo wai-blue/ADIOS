@@ -159,7 +159,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   getStateFromProps(props: TableProps) {
     return {
-      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? {
+      endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultTableEndpoint ?? {
         describeTable: 'api/table/describe',
         getRecords: 'api/record/get-list',
         deleteRecord: 'api/record/delete',
