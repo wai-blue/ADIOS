@@ -12,6 +12,17 @@ export function getUrlParam(paramName): any {
   return urlParams.has(paramName) ? urlParams.get(paramName) : null;
 }
 
+export function deleteUrlParam(paramName): any {
+  const urlParams = new URLSearchParams(window.location.search);
+  urlParams.delete(paramName);
+  if (Array.from(urlParams).length == 0) {
+    console.log('delete')
+    history.pushState({}, '', location.protocol + "//" + location.host + location.pathname);
+  } else {
+    window.history.pushState({}, "", '?' + urlParams.toString())
+  }
+}
+
 export function deepObjectMerge(target: any, source: any): Object {
   let result: any = target;
   

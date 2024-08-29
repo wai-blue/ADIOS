@@ -125,8 +125,10 @@ export class Input<P extends InputProps, S extends InputState> extends Component
   }
 
   onChange(value: any) {
+    console.log('inp onch', value);
     this.setState({value: value}, () => {
       if (typeof this.props.onChange == 'function') {
+        console.log('this.props.onChange(value);', value);
         this.props.onChange(value);
       }
     });

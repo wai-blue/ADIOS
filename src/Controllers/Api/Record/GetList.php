@@ -70,18 +70,18 @@ class GetList extends \ADIOS\Core\ApiController {
     return $query;
   }
 
-  public function postprocessData(array $data): array {
-    if (is_array($data['data'])) {
-      foreach ($data['data'] as $key => $value) {
-        if (isset($value['id'])) {
-          $data['data'][$key]['id'] = \ADIOS\Core\Helper::encrypt($value['id']);
-          $data['data'][$key]['_idHash_'] = \ADIOS\Core\Helper::encrypt($value['id'], '', true);
-        }
-      }
-    }
+  // public function postprocessData(array $data): array {
+  //   if (is_array($data['data'])) {
+  //     foreach ($data['data'] as $key => $value) {
+  //       if (isset($value['id'])) {
+  //         $data['data'][$key]['id'] = \ADIOS\Core\Helper::encrypt($value['id']);
+  //         $data['data'][$key]['_idHash_'] = \ADIOS\Core\Helper::encrypt($value['id'], '', true);
+  //       }
+  //     }
+  //   }
 
-    return $data;
-  }
+  //   return $data;
+  // }
 
   public function response(): array
   {
@@ -94,12 +94,16 @@ class GetList extends \ADIOS\Core\ApiController {
       $this->itemsPerPage,
       ['*'],
       'page',
-      $this->params['page'])->toArray()
-    ;
-
-    $data = $this->postprocessData($data);
+      $this->params['page']
+    )->toArray();
 
     if (!is_array($data)) $data = [];
+    if (!is_array($data['data'])) $data['data'] = [];
+
+    foreach ($data['data'] as $key => $record) {
+      $data['data'][$key] = $this->model->recordEncryptIds($record);
+      $data['data'][$key] = $this->model->recordAddCustomData($record);
+    }
 
     return $data;
   }

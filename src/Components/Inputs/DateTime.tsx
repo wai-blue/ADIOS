@@ -29,7 +29,7 @@ export const datetimeToEUFormat = (dateString: string): string => {
 }
 
 interface DateTimeInputProps extends InputProps {
-  type: string
+  type: 'date' | 'time' | 'datetime',
 }
 
 export default class DateTime extends Input<DateTimeInputProps, InputState> {
@@ -37,6 +37,8 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
     inputClassName: 'datetime',
     id: uuid.v4(),
   }
+
+  fp: any
 
   options: any = {
     dateFormat: 'd.m.Y',
@@ -57,12 +59,14 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
   constructor(props: DateTimeInputProps) {
     super(props);
 
+    this.fp = React.createRef();
+
     switch (props.type) {
       case 'datetime':
         this.options = {...this.options, ...{ dateFormat: 'd.m.Y H:i' }};
       break;
       case 'date':
-        this.options = {...this.options, ...{ dateFormat: 'd.m.Y' }};
+        this.options = {...this.options, ...{ weekNumbers: true, dateFormat: 'd.m.Y' }};
       break;
       case 'time':
         this.options = {
@@ -87,16 +91,20 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
   }
 
   onChange(value: any) {
-    switch (this.props.type) {
-      case 'datetime':
-        value = moment(value, 'DD.MM.YYYY H:i:s').format('YYYY-MM-DD H:i:s');
-      break;
-      case 'date':
-        value = moment(value, 'DD.MM.YYYY').format('YYYY-MM-DD');
-      break;
-      case 'time':
-        value = moment(value).format('HH:mm');
-      break;
+    if (value === null) {
+      value = '';
+    } else if (value != '') {
+      switch (this.props.type) {
+        case 'datetime':
+          value = moment(value, 'DD.MM.YYYY H:i:s').format('YYYY-MM-DD H:i:s');
+        break;
+        case 'date':
+          value = moment(value, 'DD.MM.YYYY').format('YYYY-MM-DD');
+        break;
+        case 'time':
+          value = moment(value).format('HH:mm');
+        break;
+      }
     }
 
     super.onChange(value);
@@ -118,7 +126,7 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
   }
 
   renderInputElement() {
-    let value = this.state.value;
+    let value: any = this.state.value;
 
     switch (this.props.type) {
       case 'datetime':
@@ -144,8 +152,11 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
     return (
       <>
         <Flatpickr
+          ref={this.fp}
           value={value}
-          onChange={(data: Date[]) => this.onChange(data[0] ?? null)}
+          onChange={(data: Date[]) => {
+            this.onChange(data[0] ?? null)
+          }}
           className={
             (this.state.invalid ? 'is-invalid' : '')
             + " " + (this.props.cssClass ?? "")
@@ -155,9 +166,16 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
           disabled={this.state.readonly}
           options={this.options}
         />
-        <div className="input-after">
-          {this._renderIcon()}
-        </div>
+        {this._renderIcon()}
+        <button
+          className="btn btn-small btn-transparent"
+          onClick={() => {
+            if (!this.fp?.current?.flatpickr) return;
+            this.fp.current.flatpickr.clear();
+          }}
+        >
+          <span className="icon"><i className="fas fa-times"></i></span>
+        </button>
       </>
     );
   }

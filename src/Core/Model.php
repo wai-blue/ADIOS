@@ -986,7 +986,7 @@ class Model
 
     foreach ($records as $key => $record) {
       $records[$key] = $this->recordEncryptIds($records[$key]);
-      $records[$key] = $this->onAfterLoadRecord($records[$key]);
+      $records[$key] = $this->recordAddCustomData($records[$key]);
     }
 
     return $records;
@@ -1004,24 +1004,7 @@ class Model
 
     $record['_idHash_'] =  \ADIOS\Core\Helper::encrypt($record['id'], '', true);
 
-    // foreach ($this->relations as $relName => $relDefinition) {
-    //   if (!is_array($record[$relName])) continue;
-
-    //   list($relType, $relModelClass) = $relDefinition;
-    //   $relModel = new $relModelClass($this->app);
-
-    //   switch ($relType) {
-    //     case \ADIOS\Core\Model::HAS_MANY:
-    //       foreach ($record[$relName] as $subKey => $subRecord) {
-    //         $record[$relName][$subKey] = $relModel->recordEncryptIds($record[$relName][$subKey]);
-    //       }
-    //     break;
-    //     case \ADIOS\Core\Model::HAS_ONE:
-    //       $record[$relName] = $relModel->recordEncryptIds($record[$relName]);
-    //     break;
-    //   }
-    // }
-
+    // foreach ($this->rela
     return $record;
   }
 
@@ -1238,8 +1221,8 @@ class Model
   }
 
 
-  public function onAfterLoadRecord(array $data): array {
-    return $data;
+  public function recordAddCustomData(array $record): array {
+    return $record;
   }
 
 }
