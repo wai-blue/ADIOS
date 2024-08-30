@@ -255,7 +255,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       lazy: true,
       rows: this.state.itemsPerPage,
       totalRecords: totalRecords,
-      rowsPerPageOptions: [5, 15, 30, 50, 100, 200, 300],
+      rowsPerPageOptions: [5, 15, 30, 50, 100, 200, 300, 500, 750, 1000, 1500, 2000],
       paginatorTemplate: "FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown",
       currentPageReportTemplate: "{first}-{last} / {totalRecords}",
       onRowClick: (data: DataTableRowClickEvent) => this.onRowClick(data.data),

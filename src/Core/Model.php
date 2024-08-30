@@ -1152,9 +1152,9 @@ class Model
    *
    * @return array
    */
-  public function onBeforeCreate(array $data): array
+  public function onBeforeCreate(array $record): array
   {
-    return $data;
+    return $record;
   }
 
   /**
@@ -1164,9 +1164,9 @@ class Model
    *
    * @return array
    */
-  public function onBeforeUpdate(array $data): array
+  public function onBeforeUpdate(array $record): array
   {
-    return $data;
+    return $record;
   }
 
   /**
@@ -1177,11 +1177,11 @@ class Model
    *
    * @return [type]
    */
-  public function onAfterCreate(array $data, $returnValue)
+  public function onAfterCreate(array $record, $returnValue)
   {
     return $this->app->dispatchEventToPlugins("onModelAfterCreate", [
       "model" => $this,
-      "data" => $data,
+      "data" => $record,
       "returnValue" => $returnValue,
     ])["returnValue"];
   }
@@ -1194,11 +1194,11 @@ class Model
    *
    * @return [type]
    */
-  public function onAfterUpdate(array $data, $returnValue)
+  public function onAfterUpdate(array $record, $returnValue)
   {
     return $this->app->dispatchEventToPlugins("onModelAfterUpdate", [
       "model" => $this,
-      "data" => $data,
+      "data" => $record,
       "returnValue" => $returnValue,
     ])["returnValue"];
   }
