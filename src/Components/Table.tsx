@@ -626,7 +626,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         break;
         case 'float':
           cellValueElement = <>
-            {cellContent}
+            {cellContent.toFixed(column.decimals ?? 2)}
             {column.unit ? ' ' + column.unit : ''}
           </>;
         break;
@@ -741,11 +741,11 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           return (
             <div
               className={
-              (column.cssClass ?? '')
-              + (data.id == this.state.idToDelete ? ' bg-red-50' : '')
-              + ' '
-              + this.cellClassName(columnName, column, data)
-            }
+                (column.cssClass ?? '')
+                + (data.id == this.state.idToDelete ? ' bg-red-50' : '')
+                + ' '
+                + this.cellClassName(columnName, column, data)
+              }
               style={column.cssStyle}
             >
               {this.renderCell(columnName, column, data, options)}

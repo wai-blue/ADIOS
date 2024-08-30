@@ -9,6 +9,14 @@ class User extends \ADIOS\Core\Model\Eloquent {
   public static $snakeAttributes = false;
   public $table = 'users';
 
+  protected $hidden = [
+    'password',
+    'last_access_time',
+    'last_access_ip',
+    'last_login_time',
+    'last_login_ip',
+  ];
+
   public function roles() {
     return $this->belongsToMany(
       \ADIOS\Models\Eloquent\UserRole::class,

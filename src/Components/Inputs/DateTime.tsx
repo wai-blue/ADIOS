@@ -151,21 +151,23 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
 
     return (
       <>
-        <Flatpickr
-          ref={this.fp}
-          value={value}
-          onChange={(data: Date[]) => {
-            this.onChange(data[0] ?? null)
-          }}
-          className={
-            (this.state.invalid ? 'is-invalid' : '')
-            + " " + (this.props.cssClass ?? "")
-            + " " + (this.state.readonly ? "bg-muted" : "")
-          }
-          placeholder={this.props.params?.placeholder}
-          disabled={this.state.readonly}
-          options={this.options}
-        />
+        <div style={{minWidth: "8em"}}>
+          <Flatpickr
+            ref={this.fp}
+            value={value}
+            onChange={(data: Date[]) => {
+              this.onChange(data[0] ?? null)
+            }}
+            className={
+              (this.state.invalid ? 'is-invalid' : '')
+              + " " + (this.props.cssClass ?? "")
+              + " " + (this.state.readonly ? "bg-muted" : "")
+            }
+            placeholder={this.props.params?.placeholder}
+            disabled={this.state.readonly}
+            options={this.options}
+          />
+        </div>
         {this._renderIcon()}
         <button
           className="btn btn-small btn-transparent"
