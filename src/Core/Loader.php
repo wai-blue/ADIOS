@@ -239,9 +239,9 @@ class Loader
 
       $this->onBeforeConfigLoaded();
 
-      // if ($mode == self::ADIOS_MODE_FULL) {
-      //   $this->loadConfigFromDB();
-      // }
+      if ($mode == self::ADIOS_MODE_FULL) {
+        $this->loadConfigFromDB();
+      }
 
       \ADIOS\Core\Helper::addSpeedLogTag("#3");
 
@@ -522,6 +522,9 @@ class Loader
           ],
           '/^api\/record\/delete\/?$/' => [
             'controller' => 'ADIOS/Controllers/Api/Record/Delete',
+          ],
+          '/^api\/config\/set\/?$/' => [
+            'controller' => 'ADIOS/Controllers/Api/Config/Set',
           ],
         ]);
 
@@ -1663,31 +1666,25 @@ class Loader
     }
   }
 
-  // public function loadConfigFromDB() {
-  //   try {
-  //     $queryOk = $this->db->query("
-  //       select
-  //         *
-  //       from `".(empty($this->gtp) ? '' : $this->gtp . '_')._config`
-  //       order by id asc
-  //     ");
+  public function loadConfigFromDB() {
+    try {
+      $mConfig = $this->getModel($this->getCoreClass('Models\\Config'));
+      $cfgs = $mConfig->eloquent->get()->toArray();
 
-  //     if ($queryOk) {
-  //       while ($row = $this->db->fetchArray()) {
-  //         $tmp = &$this->config;
-  //         foreach (explode("/", $row['path']) as $tmp_path) {
-  //           if (!isset($tmp[$tmp_path])) {
-  //             $tmp[$tmp_path] = [];
-  //           }
-  //           $tmp = &$tmp[$tmp_path];
-  //         }
-  //         $tmp = $row['value'];
-  //       }
-  //     }
-  //   } catch (\Exception $e) {
-  //     // do nothing
-  //   }
-  // }
+      foreach ($cfgs as $cfg) {
+        $tmp = &$this->config;
+        foreach (explode("/", $cfg['path']) as $tmp_path) {
+          if (!isset($tmp[$tmp_path])) {
+            $tmp[$tmp_path] = [];
+          }
+          $tmp = &$tmp[$tmp_path];
+        }
+        $tmp = $cfg['value'];
+      }
+    } catch (\Exception $e) {
+      // do nothing
+    }
+  }
 
   public function finalizeConfig() {
     // various default values
