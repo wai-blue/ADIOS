@@ -39,6 +39,7 @@ export interface ExternalCallbacks {
   openForm?: string,
   onAddClick?: string,
   onRowClick?: string,
+  onDeleteRecord?: string,
 }
 
 export interface TableProps {
@@ -75,6 +76,7 @@ export interface TableProps {
   selectionMode?: 'single' | 'multiple' | undefined,
   onChange?: (table: Table<TableProps, TableState>) => void,
   onRowClick?: (table: Table<TableProps, TableState>, row: any) => void,
+  onDeleteRecord?: (table: Table<TableProps, TableState>, record: any) => void,
   data?: TableData,
   async?: boolean,
   readonly?: boolean,
@@ -501,23 +503,30 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   deleteRecord() {
     const recordToDelete = this.findRecordById(this.state.idToDelete);
-    request.get(
-      this.getEndpointUrl('deleteRecord'),
-      {
-        model: this.props.model,
-        id: recordToDelete.id,
-        hash: recordToDelete._idHash_,
-      },
-      (response: any) => {
-        if (response.error) {
-          Notification.error(response.error);
-        } else {
-          this.setState({idToDelete: 0}, () => {
-            this.loadData();
-          });
+
+    if (this.props.externalCallbacks && this.props.externalCallbacks.onDeleteRecord) {
+      window[this.props.externalCallbacks.onDeleteRecord](this, recordToDelete);
+    } if (this.props.onDeleteRecord) {
+      this.props.onDeleteRecord(this, recordToDelete);
+    } else {
+      request.get(
+        this.getEndpointUrl('deleteRecord'),
+        {
+          model: this.props.model,
+          id: recordToDelete.id,
+          hash: recordToDelete._idHash_,
+        },
+        (response: any) => {
+          if (response.error) {
+            Notification.error(response.error);
+          } else {
+            this.setState({idToDelete: 0}, () => {
+              this.loadData();
+            });
+          }
         }
-      }
-    );
+      );
+    }
   }
 
   renderDeleteConfirmModal(): JSX.Element {
