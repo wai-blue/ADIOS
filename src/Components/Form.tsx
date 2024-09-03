@@ -234,6 +234,12 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
+  reload() {
+    this.setState({isInitialized: false}, () => {
+      this.loadFormDescription();
+    });
+  }
+
   loadRecord() {
     request.post(
       this.getEndpointUrl('getRecord'),
