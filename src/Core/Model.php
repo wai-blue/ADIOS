@@ -987,6 +987,7 @@ class Model
     foreach ($records as $key => $record) {
       $records[$key] = $this->recordEncryptIds($records[$key]);
       $records[$key] = $this->recordAddCustomData($records[$key]);
+      $records[$key] = $this->onAfterLoadRecord($records[$key]);
     }
 
     return $records;
@@ -1220,6 +1221,10 @@ class Model
     ])['id'];
   }
 
+
+  public function onAfterLoadRecord(array $record): array {
+    return $record;
+  }
 
   public function recordAddCustomData(array $record): array {
     return $record;

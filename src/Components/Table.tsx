@@ -635,7 +635,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         break;
         case 'float':
           cellValueElement = <>
-            {cellContent.toFixed(column.decimals ?? 2)}
+            {cellContent ? cellContent.toFixed(column.decimals ?? 2) : null}
             {column.unit ? ' ' + column.unit : ''}
           </>;
         break;

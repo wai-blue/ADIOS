@@ -103,6 +103,7 @@ class GetList extends \ADIOS\Core\ApiController {
     foreach ($data['data'] as $key => $record) {
       $data['data'][$key] = $this->model->recordEncryptIds($record);
       $data['data'][$key] = $this->model->recordAddCustomData($record);
+      $data['data'][$key] = $this->model->onAfterLoadRecord($record);
     }
 
     return $data;
