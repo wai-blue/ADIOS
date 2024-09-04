@@ -15,11 +15,7 @@ class Lookup extends \ADIOS\Core\ApiController {
 
   public function prepareLoadRecordQuery(): \Illuminate\Database\Eloquent\Builder {
 
-    $lookupSqlValue = "(" .
-      str_replace("{%TABLE%}.", '', $this->model->lookupSqlValue())
-      . ") as text";
-
-    $query = $this->model->prepareLoadRecordQuery()->selectRaw('id, ' . $lookupSqlValue);
+    $query = $this->model->prepareLoadRecordQuery();
 
     if ($this->params['search']) {
       $query->where(function($q) {
