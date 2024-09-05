@@ -180,6 +180,7 @@ export class ADIOS {
       if (element.tagName.substring(0, 4) != 'APP-') return;
       if (element.attributes['adios-react-rendered']) return;
 
+      //@ts-ignore
       $(rootElement).addClass('react-elements-rendering');
 
       let elementRoot = createRoot(element);
@@ -194,6 +195,7 @@ export class ADIOS {
         this.reactElementsWaitingForRender--;
 
         if (this.reactElementsWaitingForRender <= 0) {
+          //@ts-ignore
           $(rootElement)
             .removeClass('react-elements-rendering')
             .addClass('react-elements-rendered')

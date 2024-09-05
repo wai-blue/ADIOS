@@ -78,7 +78,7 @@ class Model
    * @var mixed
    */
   // var $recordSaveOriginalData = NULL;
-  protected string $fullTableSqlName = "";
+  // protected string $fullTableSqlName = "";
   public string $table = '';
   public string $eloquentClass = '';
   public array $relations = [];
@@ -97,9 +97,9 @@ class Model
   {
     $this->gtp = $app->config['gtp'] ?? '';
 
-    if (empty($this->fullTableSqlName)) {
-      $this->fullTableSqlName = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;
-    }
+    // if (empty($this->table)) {
+    //   $this->table = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName;
+    // }
 
     if (empty($this->table)) {
       $this->table = (empty($this->gtp) ? '' : $this->gtp . '_') . $this->sqlName; // toto je kvoli Eloquentu
@@ -133,7 +133,7 @@ class Model
     }
 
     $this->app->db->addTable(
-      $this->fullTableSqlName,
+      $this->table,
       $this->columns(),
       $this->isJunctionTable
     );
@@ -233,7 +233,7 @@ class Model
 
   public function hasSqlTable()
   {
-    return in_array($this->fullTableSqlName, $this->app->db->existingSqlTables);
+    return in_array($this->table, $this->app->db->existingSqlTables);
   }
 
   /**
@@ -280,8 +280,8 @@ class Model
    */
   public function install()
   {
-    if (!empty($this->fullTableSqlName)) {
-      $this->app->db->createSqlTable($this->fullTableSqlName);
+    if (!empty($this->table)) {
+      $this->app->db->createSqlTable($this->table);
 
       foreach ($this->indexes() as $indexOrConstraintName => $indexDef) {
         if (empty($indexOrConstraintName) || is_numeric($indexOrConstraintName)) {
@@ -312,13 +312,13 @@ class Model
         switch ($indexDef["type"]) {
           case "index":
             $this->app->db->query("
-              alter table `" . $this->fullTableSqlName . "`
+              alter table `" . $this->table . "`
               add index `{$indexOrConstraintName}` ({$tmpColumns})
             ");
             break;
           case "unique":
             $this->app->db->query("
-              alter table `" . $this->fullTableSqlName . "`
+              alter table `" . $this->table . "`
               add constraint `{$indexOrConstraintName}` unique ({$tmpColumns})
             ");
             break;
@@ -380,7 +380,7 @@ class Model
   public function dropTableIfExists(): \ADIOS\Core\Model
   {
     $this->app->db->query("set foreign_key_checks = 0");
-    $this->app->db->query("drop table if exists `" . $this->fullTableSqlName . "`");
+    $this->app->db->query("drop table if exists `" . $this->table . "`");
     $this->app->db->query("set foreign_key_checks = 1");
     return $this;
   }
@@ -407,8 +407,8 @@ class Model
         $foreignKeyOnUpdate = $columnDefinition['foreignKeyOnUpdate'] ?? "RESTRICT";
 
         $sql .= "
-          ALTER TABLE `{$this->fullTableSqlName}`
-          ADD CONSTRAINT `fk_" . md5($this->fullTableSqlName . '_' . $column) . "`
+          ALTER TABLE `{$this->table}`
+          ADD CONSTRAINT `fk_" . md5($this->table . '_' . $column) . "`
           FOREIGN KEY (`{$column}`)
           REFERENCES `" . $lookupModel->getFullTableSqlName() . "` (`{$foreignKeyColumn}`)
           ON DELETE {$foreignKeyOnDelete}
@@ -421,8 +421,8 @@ class Model
       $this->app->db->multiQuery($sql);
     }
 
-    // if (!empty($this->fullTableSqlName)) {
-    //   $this->app->db->createSqlForeignKeys($this->fullTableSqlName);
+    // if (!empty($this->table)) {
+    //   $this->app->db->createSqlForeignKeys($this->table);
     // }
   }
 
@@ -433,7 +433,7 @@ class Model
    */
   public function getFullTableSqlName()
   {
-    return $this->fullTableSqlName;
+    return $this->table;
   }
 
   //////////////////////////////////////////////////////////////////
@@ -457,8 +457,8 @@ class Model
   public function getEnumValues()
   {
     $tmp = $this->eloquent
-      ->selectRaw("{$this->fullTableSqlName}.id")
-      ->selectRaw("(" . str_replace("{%TABLE%}", $this->fullTableSqlName, $this->lookupSqlValue()) . ") as ___lookupSqlValue")
+      ->selectRaw("{$this->table}.id")
+      ->selectRaw("(" . str_replace("{%TABLE%}", $this->table, $this->lookupSqlValue()) . ") as ___lookupSqlValue")
       ->orderBy("___lookupSqlValue", "asc")
       ->get()
       ->toArray();
@@ -567,7 +567,7 @@ class Model
   {
     $row = $this->app->db->select($this)
       ->columns([
-        [$this->lookupSqlValue($this->fullTableSqlName), 'lookup_value']
+        [$this->lookupSqlValue($this->table), 'lookup_value']
       ])
       ->where([['id', '=', $id]])
       ->fetch();
@@ -689,7 +689,7 @@ class Model
     return $this->app->db->select($this)
       ->columns([
         ['id', 'id'],
-        [$this->lookupSqlValue($this->fullTableSqlName), 'input_lookup_value']
+        [$this->lookupSqlValue($this->table), 'input_lookup_value']
       ])
       ->where($where)
       ->havingRaw($having)
@@ -1053,12 +1053,12 @@ class Model
     $joins = [];
 
     // foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-    //   $selectRaw[] = $this->fullTableSqlName . '.' . $tmpColumnName;
+    //   $selectRaw[] = $this->table . '.' . $tmpColumnName;
     // }
 
-    $selectRaw[] = $this->fullTableSqlName . '.*';
+    $selectRaw[] = $this->table . '.*';
     $selectRaw[] = '(' .
-      str_replace('{%TABLE%}', $this->fullTableSqlName, $this->lookupSqlValue())
+      str_replace('{%TABLE%}', $this->table, $this->lookupSqlValue())
       . ') as _lookupText_'
     ;
 
@@ -1082,7 +1082,7 @@ class Model
             $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,
             $joinAlias.'.id',
             '=',
-            $this->fullTableSqlName.'.'.$columnName
+            $this->table.'.'.$columnName
           ];
         }
       }
@@ -1107,7 +1107,7 @@ class Model
             ->selectRaw('
               *,
               (' .
-                str_replace('{%TABLE%}', $relModel->fullTableSqlName, $relModel->lookupSqlValue())
+                str_replace('{%TABLE%}', $relModel->table, $relModel->lookupSqlValue())
               . ') as _lookupText_
             ')
           ;

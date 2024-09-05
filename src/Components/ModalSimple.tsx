@@ -4,6 +4,10 @@ import * as uuid from 'uuid';
 import Modal, { ModalProps } from "./Modal";
 
 export default class ModalSimple extends Modal {
+  static defaultProps = {
+    type: 'centered',
+  }
+
   render(): JSX.Element {
     if (this.state.isOpen) {
       return <>

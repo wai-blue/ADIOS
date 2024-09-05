@@ -1,20 +1,7 @@
 <?php
 
-/*
-  This file is part of ADIOS Framework.
-
-  This file is published under the terms of the license described
-  in the license.md file which is located in the root folder of
-  ADIOS Framework package.
-*/
-
 namespace ADIOS\Models;
 
-/**
- * Model for storing user profiles. Stored in 'users' SQL table.
- *
- * @package DefaultModels
- */
 class User extends \ADIOS\Core\Model {
   const TOKEN_TYPE_USER_FORGOT_PASSWORD = 551155;
 
@@ -100,51 +87,6 @@ class User extends \ADIOS\Core\Model {
     return $params;
   }
 
-  // public function inputs(): array {
-  //   return [
-  //     'roles' => [
-  //       'type' => 'tags',
-  //       'junction' => 'roles',
-  //       //'model' => 'ADIOS/Models/UserRole',
-  //       'title' => 'Pridelené role',
-  //       'dataKey' => 'name',
-  //       'show' => TRUE,
-  //     ],
-  //   ];
-  // }
-
-  // public function upgrades() : array {
-  //   // Upgrade nebude fungovať pretože sa mení logika prihlásenia a upgrade sa vykoná až po prihlásení.
-  //   // Upgrade je možné realizovať nanovo vytvorením tabuľky users napríklad pomocou funkcie $model->install()
-  //   // Pri tomto riešení je potrebné manuálne zálohovať používateľov a následne ich importovať.
-  //   return [
-  //     0 => [], // upgrade to version 0 is the same as installation
-  //     1 => [
-  //       "ALTER TABLE `{$this->getFullTableSqlName()}` CHANGE  `active` `is_active` tinyint(1);",
-  //       "
-  //         ALTER TABLE `{$this->getFullTableSqlName()}`
-  //         ADD column `phone_number` varchar(255) DEFAULT '' after `email`
-  //       ",
-  //       "
-  //         ALTER TABLE `{$this->getFullTableSqlName()}`
-  //         ADD column `last_login_time` varchar(255) DEFAULT '' after `is_active`
-  //       ",
-  //       "
-  //         ALTER TABLE `{$this->getFullTableSqlName()}`
-  //         ADD column `last_login_ip` varchar(255) DEFAULT '' after `last_login_time`
-  //       ",
-  //       "
-  //         ALTER TABLE `{$this->getFullTableSqlName()}`
-  //         ADD column `last_access_time` varchar(255) DEFAULT '' after `last_login_ip`
-  //       ",
-  //       "
-  //         ALTER TABLE `{$this->getFullTableSqlName()}`
-  //         ADD column `last_access_ip` varchar(255) DEFAULT '' after `last_access_time`
-  //       ",
-  //     ],
-  //   ];
-  // }
-
   public function indexes(array $indexes = []) {
     return parent::indexes([
       "login" => [
@@ -157,46 +99,6 @@ class User extends \ADIOS\Core\Model {
       ],
     ]);
   }
-
-  // public function routing(array $routing = []) {
-  //   return parent::routing([
-  //     '/^MyProfile$/' => [
-  //       "controller" => "Components/Form",
-  //       "params" => [
-  //         "model" => "ADIOS/Models/User",
-  //         "myProfileView" => TRUE,
-  //         "id" => $this->app->userProfile['id'] ?? 0,
-  //       ]
-  //     ],
-  //   ]);
-  // }
-
-  // public function getById($id) {
-  //   $id = (int) $id;
-  //   $user = self::find($id);
-  //   return ($user === NULL ? [] : $user->toArray());
-  // }
-
-  // public function onFormParams(\ADIOS\Core\ViewsWithController\Form $formObject, array $params): array
-  // {
-
-  //   if ($params["myProfileView"]) {
-  //     $params['show_delete_button'] = FALSE;
-  //     $params['template'] = [
-  //       "columns" => [
-  //         [
-  //           "rows" => [
-  //             "login",
-  //             "password",
-  //           ],
-  //         ],
-  //       ],
-  //     ];
-  //   }
-
-  //   return (array) $params;
-  // }
-
 
   public function getClientIpAddress() {
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
@@ -397,29 +299,5 @@ class User extends \ADIOS\Core\Model {
       )
     ;
   }
-
-
-
-  // Eloquent relations
-
-  // public function relationships(): array {
-  //   $relationships = parent::relationships();
-  //   $relationships[] = 'roles';
-
-  //   return $relationships;
-  // }
-
-  // public function roles() {
-  //   return $this->belongsToMany(
-  //     \ADIOS\Models\UserRole::class,
-  //     'user_has_roles',
-  //     'id_user',
-  //     'id_role'
-  //   );
-  // }
-
-  // public function id_token_reset_password(): \Illuminate\Database\Eloquent\Relations\BelongsTo {
-  //   return $this->BelongsTo(\ADIOS\Models\Token::class, 'id_token_reset_password');
-  // }
 
 }

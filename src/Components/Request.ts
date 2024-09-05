@@ -103,7 +103,7 @@ class Request {
       if (err.response.status == 500) {
         this.fatalErrorNotification(err.response.data.message);
       } else {
-        Notification.error(err.response.data);
+        this.fatalErrorNotification(err.response.data.message ?? 'Unknown error.');
         console.error('ADIOS: ' + err.code, err.config?.url, err.config?.params, err.response.data);
         if (errorCallback) errorCallback(err.response);
       }
@@ -115,15 +115,16 @@ class Request {
   }
 
   private fatalErrorNotification(errorText: string) {
-    alert(errorText);
-    // Swal.fire({
-    //   text: errorText,
-    //   width: 600,
-    //   padding: "3em",
-    //   color: "#ad372a",
-    //   background: "white",
-    //   backdrop: `rgba(123,12,0,0.2)`
-    // });
+    // alert(errorText);
+    Swal.fire({
+      title: '<div style="text-align:left">🥴 Ooops</div>',
+      html: '<pre style="font-size:8pt;text-align:left">' + errorText + '</pre>',
+      width: '80vw',
+      padding: '1em',
+      color: "#ad372a",
+      background: "white",
+      backdrop: `rgba(123,12,0,0.2)`
+    });
   }
 
 }
