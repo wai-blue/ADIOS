@@ -726,18 +726,32 @@ class Model
     );
   }
 
-  public function tableParams(array $params = []): array {
+  public function tableDescribe(array $description = []): array {
     $columns = $this->columns();
     unset($columns['id']);
-    $params['columns'] = $columns;
+    $description['columns'] = $columns;
 
-    $params['canRead'] = $this->app->permissions->granted($params['model'] . ':Read');
-    $params['canCreate'] = $this->app->permissions->granted($params['model'] . ':Create');
-    $params['canUpdate'] = $this->app->permissions->granted($params['model'] . ':Update');
-    $params['canDelete'] = $this->app->permissions->granted($params['model'] . ':Delete');
-    $params['readonly'] = !($params['canUpdate'] || $params['canCreate']);
+    $description['canRead'] = $this->app->permissions->granted($description['model'] . ':Read');
+    $description['canCreate'] = $this->app->permissions->granted($description['model'] . ':Create');
+    $description['canUpdate'] = $this->app->permissions->granted($description['model'] . ':Update');
+    $description['canDelete'] = $this->app->permissions->granted($description['model'] . ':Delete');
+    $description['readonly'] = !($description['canUpdate'] || $description['canCreate']);
 
-    return $params;
+    return $description;
+  }
+
+  public function formDescribe(array $description = []): array {
+    $columns = $this->columns();
+    unset($columns['id']);
+    $description['columns'] = $columns;
+
+    $description['canRead'] = $this->app->permissions->granted($description['model'] . ':Read');
+    $description['canCreate'] = $this->app->permissions->granted($description['model'] . ':Create');
+    $description['canUpdate'] = $this->app->permissions->granted($description['model'] . ':Update');
+    $description['canDelete'] = $this->app->permissions->granted($description['model'] . ':Delete');
+    $description['readonly'] = !($description['canUpdate'] || $description['canCreate']);
+
+    return $description;
   }
 
 

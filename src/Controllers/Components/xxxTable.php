@@ -45,7 +45,7 @@ class Table extends \ADIOS\Core\Controller {
 
   public function getParams() {
     try {
-      return $this->model->tableParams($this->params);
+      return $this->model->tableDescribe($this->params);
     } catch (\Exception $e) {
       http_response_code(400);
 

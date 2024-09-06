@@ -22,24 +22,9 @@ class UserRole extends \ADIOS\Core\Model {
     self::ADMINISTRATOR => 'ADMINISTRATOR',
   ];
 
-  public string $eloquentClass = \ADIOS\Models\Eloquent\UserRole::class;
-
-  public string $urlBase = "user-roles";
+  public string $eloquentClass = Eloquent\UserRole::class;
+  public string $table = 'user_roles';
   public ?string $lookupSqlValue = "{%TABLE%}.name";
-
-  public ?array $tableParams = [
-    "title" => "Users -Roles",
-  ];
-  public ?array $formParams = [
-   "titleForInserting" => "New user role",
-   "titleForEditing" => "User role",
-  ];
-
-  public function __construct(\ADIOS\Core\Loader $app)
-  {
-    $this->sqlName = "user_roles";
-    parent::__construct($app);
-  }
 
   public function columns(array $columns = []): array
   {
@@ -51,15 +36,4 @@ class UserRole extends \ADIOS\Core\Model {
       ],
     ]);
   }
-
-  // public function routing(array $routing = []) {
-  //   return parent::routing([
-  //     '/^Administrator\/Permissions\/(\d+)$/' => [
-  //       "controller" => "Administrator/Permissions",
-  //       "params" => [
-  //         "idUserRole" => '$1',
-  //       ]
-  //     ],
-  //   ]);
-  // }
 }

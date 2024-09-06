@@ -19,9 +19,9 @@ class CSV extends \ADIOS\Core\Controller {
   public function render() {
     $model = $this->app->getModel($this->params['model']);
     $columns = $model->columns();
-    $tableParams = json_decode(base64_decode($this->params['tableParams']), TRUE);
+    $tableDescription = json_decode(base64_decode($this->params['tableDescription']), TRUE);
 
-    $uiTable = new \ADIOS\Core\ViewsWithController\Table($this->app, $tableParams);
+    $uiTable = new \ADIOS\Core\ViewsWithController\Table($this->app, $tableDescription);
     $data = $uiTable->data;
     $firstRow = reset($data);
 

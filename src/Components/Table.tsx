@@ -54,7 +54,7 @@ export interface TableProps {
   formEndpoint?: FormEndpoint,
   formModal?: ModalProps,
   formUseModalSimple?: boolean,
-  formParams?: FormProps,
+  formDescription?: FormProps,
   endpoint?: TableEndpoint,
   modal?: ModalProps,
   model: string,
@@ -124,7 +124,7 @@ export interface TableState {
   recordPrevId?: any,
   recordNextId?: any,
   formEndpoint?: FormEndpoint,
-  formParams?: FormProps,
+  formDescription?: FormProps,
   orderBy?: OrderBy,
   page: number,
   itemsPerPage: number,
@@ -172,7 +172,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       canUpdate: props.canUpdate ?? true,
       recordId: props.recordId,
       formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? null),
-      formParams: {
+      formDescription: {
         model: props.model,
         uid: props.uid,
       },
@@ -202,10 +202,10 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   componentDidUpdate(prevProps: TableProps) {
     if (
-      (prevProps.formParams?.id != this.props.formParams?.id)
+      (prevProps.formDescription?.id != this.props.formDescription?.id)
       || (prevProps.parentRecordId != this.props.parentRecordId)
     ) {
-      this.state.formParams = this.props.formParams;
+      this.state.formDescription = this.props.formDescription;
       if (this.state.async) {
         this.loadTableDescription();
         this.loadData();
@@ -352,7 +352,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     return columnsFromEndpoint;
   }
 
-  getFormParams(): any {
+  getFormDescription(): any {
     return {
       parentTable: this,
       uid: this.props.uid + '_form',
@@ -365,11 +365,11 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       isInlineEditing: (this.state.recordId ?? null) === -1,
       showInModal: true,
       showInModalSimple: this.props.formUseModalSimple,
-      columns: this.props.formParams?.columns ?? {},
-      titleForInserting: this.props.formParams?.titleForInserting,
-      titleForEditing: this.props.formParams?.titleForEditing,
-      saveButtonText: this.props.formParams?.saveButtonText,
-      addButtonText: this.props.formParams?.addButtonText,
+      columns: this.props.formDescription?.columns ?? {},
+      titleForInserting: this.props.formDescription?.titleForInserting,
+      titleForEditing: this.props.formDescription?.titleForEditing,
+      saveButtonText: this.props.formDescription?.saveButtonText,
+      addButtonText: this.props.formDescription?.addButtonText,
       canCreate: this.state.canCreate,
       canDelete: this.state.canDelete,
       canRead: this.state.canRead,
@@ -589,7 +589,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   renderForm(): JSX.Element {
     if (this.state.renderForm) {
-      return <Form {...this.getFormParams()} />;
+      return <Form {...this.getFormDescription()} />;
     } else {
       return <></>;
     }

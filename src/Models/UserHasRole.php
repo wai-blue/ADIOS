@@ -1,32 +1,11 @@
 <?php
 
-/*
-  This file is part of ADIOS Framework.
-
-  This file is published under the terms of the license described
-  in the license.md file which is located in the root folder of
-  ADIOS Framework package.
-*/
-
 namespace ADIOS\Models;
 
-/**
- * Model for storing list of user roles. Stored in 'roles' SQL table.
- *
- * @package DefaultModels
- */
 class UserHasRole extends \ADIOS\Core\Model {
-  public string $eloquentClass = \ADIOS\Models\Eloquent\UserHasRole::class;
+  public string $eloquentClass = Eloquent\UserHasRole::class;
 
   public bool $isJunctionTable = FALSE;
-
-  public ?array $tableParams = [
-    "title" => "Users - Roles",
-  ];
-  public ?array $formParams = [
-   "titleForInserting" => "New assignment of role to user",
-   "titleForEditing" => "Assignment of role to role",
-  ];
 
   public function __construct(\ADIOS\Core\Loader $app)
   {

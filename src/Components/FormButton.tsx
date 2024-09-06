@@ -7,7 +7,7 @@ interface FormButtonProps {
   css?: string,
   icon?: string,
   text: string,
-  formParams?: FormProps
+  formDescription?: FormProps
 }
 
 interface FormButtonState {
@@ -38,7 +38,7 @@ export default class FormButton extends Component<FormButtonProps> {
           <Form 
             uid={this.props.uid}
             showInModal={true}
-            {...this.props.formParams}
+            {...this.props.formDescription}
           />
         </Modal>
         <div

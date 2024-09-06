@@ -80,11 +80,11 @@ class User extends \ADIOS\Core\Model {
     ]));
   }
 
-  public function tableParams(array $params = []): array
+  public function tableDescribe(array $description = []): array
   {
-    $params = parent::tableParams($params);
-    unset($params['columns']['password']);
-    return $params;
+    $description = parent::tableDescribe($description);
+    unset($description['columns']['password']);
+    return $description;
   }
 
   public function indexes(array $indexes = []) {
