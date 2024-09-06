@@ -45,8 +45,7 @@ export interface FormRecord {
 
 export interface FormUi {
   title?: string,
-  titleForInserting?: string,
-  titleForEditing?: string,
+  subTitle?: string,
   saveButtonText?: string,
   addButtonText?: string,
 }
@@ -677,21 +676,17 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
   renderTitle(): JSX.Element {
-    let title = 
-      this.state.description?.ui?.title
-        ? this.state.description?.ui?.title
-        : this.state.updatingRecord
-          ? this.state.params?.titleForEditing ?? (this.state.record?._lookupText_ ?? '')
-          : this.state.params?.titleForInserting
+    let title = this.state.description?.ui?.title ??
+      (this.state.updatingRecord
+          ? globalThis.app.translate('Update record') + ' #' + (this.state.record?.id ?? '-')
+          : globalThis.app.translate('Adding new record')
+      )
     ;
+    let subTitle = this.state.description?.ui?.subTitle ?? '';
 
     return <>
       <h2>{title}</h2>
-      <small>{
-        this.state.updatingRecord
-          ? globalThis.app.translate('Editing record') + ' #' + (this.state.record?.id ?? '-')
-          : globalThis.app.translate('Adding new record')
-      }</small>
+      <small>{subTitle}</small>
     </>
   }
 

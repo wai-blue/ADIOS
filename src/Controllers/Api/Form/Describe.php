@@ -14,18 +14,6 @@ class Describe extends \ADIOS\Core\ApiController {
 
   public function response(): array
   {
-    $description = [
-      'columns' => $this->model->columns(),
-      'defaultValues' => $this->model->recordDefaultValues(),
-      // 'relations' => $this->model->recordRelations(),
-    ];
-
-    $description['permissions']['canRead'] = $this->app->permissions->granted($this->params['model'] . ':Read');
-    $description['permissions']['canCreate'] = $this->app->permissions->granted($this->params['model'] . ':Create');
-    $description['permissions']['canUpdate'] = $this->app->permissions->granted($this->params['model'] . ':Update');
-    $description['permissions']['canDelete'] = $this->app->permissions->granted($this->params['model'] . ':Delete');
-
-    return $description;
-
+    return $this->model->formDescribe($this->params);
   }
 }

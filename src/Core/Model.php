@@ -729,13 +729,16 @@ class Model
   public function tableDescribe(array $description = []): array {
     $columns = $this->columns();
     unset($columns['id']);
-    $description['columns'] = $columns;
 
-    $description['canRead'] = $this->app->permissions->granted($description['model'] . ':Read');
-    $description['canCreate'] = $this->app->permissions->granted($description['model'] . ':Create');
-    $description['canUpdate'] = $this->app->permissions->granted($description['model'] . ':Update');
-    $description['canDelete'] = $this->app->permissions->granted($description['model'] . ':Delete');
-    $description['readonly'] = !($description['canUpdate'] || $description['canCreate']);
+    $description = [
+      'columns' => $columns,
+      'permissions' => [
+        'canRead' => $this->app->permissions->granted($description['model'] . ':Read'),
+        'canCreate' => $this->app->permissions->granted($description['model'] . ':Create'),
+        'canUpdate' => $this->app->permissions->granted($description['model'] . ':Update'),
+        'canDelete' => $this->app->permissions->granted($description['model'] . ':Delete'),
+      ],
+    ];
 
     return $description;
   }
@@ -743,13 +746,17 @@ class Model
   public function formDescribe(array $description = []): array {
     $columns = $this->columns();
     unset($columns['id']);
-    $description['columns'] = $columns;
 
-    $description['canRead'] = $this->app->permissions->granted($description['model'] . ':Read');
-    $description['canCreate'] = $this->app->permissions->granted($description['model'] . ':Create');
-    $description['canUpdate'] = $this->app->permissions->granted($description['model'] . ':Update');
-    $description['canDelete'] = $this->app->permissions->granted($description['model'] . ':Delete');
-    $description['readonly'] = !($description['canUpdate'] || $description['canCreate']);
+    $description = [
+      'columns' => $columns,
+      'defaultValues' => $this->recordDefaultValues(),
+      'permissions' => [
+        'canRead' => $this->app->permissions->granted($description['model'] . ':Read'),
+        'canCreate' => $this->app->permissions->granted($description['model'] . ':Create'),
+        'canUpdate' => $this->app->permissions->granted($description['model'] . ':Update'),
+        'canDelete' => $this->app->permissions->granted($description['model'] . ':Delete'),
+      ],
+    ];
 
     return $description;
   }
