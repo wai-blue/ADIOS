@@ -28,9 +28,39 @@ export interface FormEndpoint {
   saveRecord: string,
 }
 
+export interface FormPermissions {
+  canCreate?: boolean,
+  canRead?: boolean,
+  canUpdate?: boolean,
+  canDelete?: boolean,
+}
+
+export interface FormColumns {
+  [key: string]: any;
+}
+
+export interface FormRecord {
+  [key: string]: any;
+}
+
+export interface FormUi {
+  title?: string,
+  titleForInserting?: string,
+  titleForEditing?: string,
+  saveButtonText?: string,
+  addButtonText?: string,
+}
+
+export interface FormDescription {
+  columns?: FormColumns,
+  defaultValues?: FormRecord,
+  permissions?: FormPermissions,
+  ui?: FormUi,
+}
+
 export interface FormProps {
-  parentTable?: any,
   isInitialized?: boolean,
+  parentTable?: any,
   uid?: string,
   model: string,
   id?: any,
@@ -39,25 +69,22 @@ export interface FormProps {
   readonly?: boolean,
   content?: Content,
   layout?: Array<Array<string>>,
-  onChange?: () => void,
-  onClose?: () => void,
-  onSaveCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
-  onDeleteCallback?: () => void,
   hideOverlay?: boolean,
   showInModal?: boolean,
   showInModalSimple?: boolean,
   isInlineEditing?: boolean,
-  columns?: FormColumns,
-  title?: string,
-  titleForInserting?: string,
-  titleForEditing?: string,
-  saveButtonText?: string,
-  addButtonText?: string,
-  defaultValues?: any,
-  endpoint?: FormEndpoint,
+
   tag?: string,
   context?: any,
   children?: any,
+
+  description?: FormDescription,
+  endpoint?: FormEndpoint,
+
+  onChange?: () => void,
+  onClose?: () => void,
+  onSaveCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
+  onDeleteCallback?: () => void,
 }
 
 export interface FormState {
@@ -66,37 +93,21 @@ export interface FormState {
   prevId?: any,
   nextId?: any,
   readonly?: boolean,
-  canCreate?: boolean,
-  canRead?: boolean,
-  canUpdate?: boolean,
-  canDelete?: boolean,
   content?: Content,
-  columns?: FormColumns,
-  record?: FormInputs,
+
+  description: FormDescription,
+  record: FormRecord,
+  endpoint: FormEndpoint,
+
   creatingRecord: boolean,
   updatingRecord: boolean,
   isInlineEditing: boolean,
   invalidInputs: Object,
   tabs?: any,
   folderUrl?: string,
-  addButtonText?: string,
-  saveButtonText?: string,
-  title?: string,
-  titleForEditing?: string,
-  titleForInserting?: string,
   layout?: string,
-  endpoint: FormEndpoint,
   params: any,
-  defaultValues?: any,
   invalidRecordId: boolean,
-}
-
-export interface FormColumns {
-  [key: string]: any;
-}
-
-interface FormInputs {
-  [key: string]: any;
 }
 
 export default class Form<P, S> extends Component<FormProps, FormState> {
@@ -134,10 +145,17 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       prevId: props.prevId,
       nextId: props.nextId,
       readonly: props.readonly,
-      canCreate: props.readonly,
-      canRead: props.readonly,
-      canUpdate: props.readonly,
-      canDelete: props.readonly,
+      description: deepObjectMerge(props.description ?? {}, {
+        columns: {},
+        defaultValues: {},
+        permissions: {
+          canCreate: false,
+          canRead: false,
+          canUpdate: false,
+          canDelete: false,
+        },
+        ui: {},
+      }),
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
       creatingRecord: props.id ? props.id == -1 : false,
@@ -146,7 +164,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       invalidInputs: {},
       record: {},
       params: null,
-      defaultValues: props.defaultValues ? props.defaultValues : {},
       invalidRecordId: false,
     };
   }
@@ -212,17 +229,12 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       this.getEndpointUrl('describeForm'),
       this.getEndpointParams(),
       {},
-      (data: any) => {
-        const defaultValues = deepObjectMerge(this.state.defaultValues ?? {}, data.defaultValues);
+      (description: any) => {
+        const defaultValues = deepObjectMerge(this.state.description.defaultValues ?? {}, description.defaultValues);
 
         this.setState({
-          columns: deepObjectMerge(this.state.columns ?? {}, data.columns),
-          defaultValues: defaultValues,
-          canCreate: data.permissions?.canCreate,
-          canRead: data.permissions?.canRead,
-          canUpdate: data.permissions?.canUpdate,
-          canDelete: data.permissions?.canDelete,
-          readonly: !(data.permissions?.canUpdate || data.permissions?.canCreate),
+          description: description,
+          readonly: !(description.permissions?.canUpdate || description.permissions?.canCreate),
         }, () => {
           if (this.state.id !== -1) {
             this.loadRecord();
@@ -370,7 +382,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
    * Render tab
    */
   renderContent(): JSX.Element {
-    if (this.state.columns == null) {
+    if (this.state.description?.columns == null) {
       return adiosError(`No columns specified for ${this.props.model}. Did the controller return definition of columns?`);
     }
 
@@ -406,7 +418,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
               return this._renderContentItem(key++, contentArea, content[contentArea]);
             })
             : this.state.record != null ? (
-              Object.keys(this.state.columns ?? {}).map((columnName: string) => {
+              Object.keys(this.state.description?.columns ?? {}).map((columnName: string) => {
                 return this.inputWrapper(columnName);
               })
             ) : ''
@@ -473,7 +485,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   buildInputParams(columnName: string, customInputParams?: any) {
     if (!customInputParams) customInputParams = {};
-    let stateColDef = (this.state.columns ? this.state.columns[columnName] ?? {} : {});
+    let stateColDef = (this.state.description?.columns ? this.state.description?.columns[columnName] ?? {} : {});
     customInputParams = {...stateColDef, ...customInputParams};
 
     return {...customInputParams, ...{readonly: this.state.readonly}};
@@ -508,7 +520,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     // if (!onChange) onChange = (value: any) => this.onChange(columnName, value);
     const inputParams = this.buildInputParams(columnName, customInputParams);
     const record = this.state.record ?? {};
-    const columns = this.state.columns ?? {};
+    const columns = this.state.description?.columns ?? {};
 
     const inputProps: InputProps = {
       ...this.getDefaultInputProps(),
@@ -568,24 +580,24 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     let id = this.state.id ? this.state.id : 0;
 
     return <>
-      {this.state.canUpdate ? <button
+      {this.state.description?.permissions?.canUpdate ? <button
         onClick={() => this.saveRecord()}
         className={
           "btn btn-success"
-          + (id <= 0 && this.state.canCreate || id > 0 && this.state.canUpdate ? "d-block" : "d-none")
+          + (id <= 0 && this.state.description?.permissions?.canCreate || id > 0 && this.state.description?.permissions?.canUpdate ? "d-block" : "d-none")
         }
       >
         {this.state.updatingRecord
           ? (
             <>
               <span className="icon"><i className="fas fa-save"></i></span>
-              <span className="text"> {this.state.saveButtonText ?? globalThis.app.translate("Save")}</span>
+              <span className="text"> {this.state.description?.ui?.saveButtonText ?? globalThis.app.translate("Save")}</span>
             </>
           )
           : (
             <>
               <span className="icon"><i className="fas fa-plus"></i></span>
-              <span className="text"> {this.state.addButtonText ?? globalThis.app.translate("Add")}</span>
+              <span className="text"> {this.state.description?.ui?.addButtonText ?? globalThis.app.translate("Add")}</span>
             </>
           )
         }
@@ -595,7 +607,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   renderEditButton(): JSX.Element {
     return <>
-      {this.state.canUpdate ? <button
+      {this.state.description?.permissions?.canUpdate ? <button
         onClick={() => this.setState({ isInlineEditing: true })}
         className="btn btn-transparent"
       >
@@ -654,7 +666,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       {/* {this.state.isEdit ?
         <button
           onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
-          className={"btn btn-danger btn-icon-split ml-2 " + (this.state.canDelete ? "d-block" : "d-none")}
+          className={"btn btn-danger btn-icon-split ml-2 " + (this.state.permissions.canDelete ? "d-block" : "d-none")}
         >
           <span className="icon"><i className="fas fa-trash"></i></span>
           <span className="text">{globalThis.app.translate('Delete')}</span>
@@ -666,8 +678,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   renderTitle(): JSX.Element {
     let title = 
-      this.state.title
-        ? this.state.title
+      this.state.description?.ui?.title
+        ? this.state.description?.ui?.title
         : this.state.updatingRecord
           ? this.state.params?.titleForEditing ?? (this.state.record?._lookupText_ ?? '')
           : this.state.params?.titleForInserting

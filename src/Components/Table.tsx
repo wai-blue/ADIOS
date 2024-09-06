@@ -2,7 +2,7 @@ import React, { Component, ChangeEvent, createRef } from 'react';
 
 import Modal, { ModalProps } from "./Modal";
 import ModalSimple from "./ModalSimple";
-import Form, { FormEndpoint, FormProps, FormState, FormColumns } from "./Form";
+import Form, { FormEndpoint, FormProps, FormState } from "./Form";
 import Notification from "./Notification";
 
 import {
@@ -30,9 +30,13 @@ export interface TableEndpoint {
   deleteRecord: string,
 }
 
-export interface OrderBy {
+export interface TableOrderBy {
   field: string,
   direction?: string | null
+}
+
+export interface TableColumns {
+  [key: string]: any;
 }
 
 export interface ExternalCallbacks {
@@ -48,13 +52,13 @@ export interface TableProps {
   canDelete?: boolean,
   canRead?: boolean,
   canUpdate?: boolean,
-  columns?: FormColumns,
+  columns?: TableColumns,
   renderForm?: boolean,
   recordId?: any,
   formEndpoint?: FormEndpoint,
   formModal?: ModalProps,
   formUseModalSimple?: boolean,
-  formDescription?: FormProps,
+  formProps?: FormProps,
   endpoint?: TableEndpoint,
   modal?: ModalProps,
   model: string,
@@ -70,7 +74,7 @@ export interface TableProps {
   params?: any,
   externalCallbacks?: ExternalCallbacks,
   itemsPerPage: number,
-  orderBy?: OrderBy,
+  orderBy?: TableOrderBy,
   inlineEditingEnabled?: boolean,
   isInlineEditing?: boolean,
   selectionMode?: 'single' | 'multiple' | undefined,
@@ -124,8 +128,8 @@ export interface TableState {
   recordPrevId?: any,
   recordNextId?: any,
   formEndpoint?: FormEndpoint,
-  formDescription?: FormProps,
-  orderBy?: OrderBy,
+  formProps?: FormProps,
+  orderBy?: TableOrderBy,
   page: number,
   itemsPerPage: number,
   search?: string,
@@ -172,7 +176,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       canUpdate: props.canUpdate ?? true,
       recordId: props.recordId,
       formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? null),
-      formDescription: {
+      formProps: {
         model: props.model,
         uid: props.uid,
       },
@@ -202,10 +206,10 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   componentDidUpdate(prevProps: TableProps) {
     if (
-      (prevProps.formDescription?.id != this.props.formDescription?.id)
+      (prevProps.formProps?.id != this.props.formProps?.id)
       || (prevProps.parentRecordId != this.props.parentRecordId)
     ) {
-      this.state.formDescription = this.props.formDescription;
+      this.state.formProps = this.props.formProps;
       if (this.state.async) {
         this.loadTableDescription();
         this.loadData();
@@ -352,7 +356,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     return columnsFromEndpoint;
   }
 
-  getFormDescription(): any {
+  getFormProps(): any {
     return {
       parentTable: this,
       uid: this.props.uid + '_form',
@@ -365,15 +369,21 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       isInlineEditing: (this.state.recordId ?? null) === -1,
       showInModal: true,
       showInModalSimple: this.props.formUseModalSimple,
-      columns: this.props.formDescription?.columns ?? {},
-      titleForInserting: this.props.formDescription?.titleForInserting,
-      titleForEditing: this.props.formDescription?.titleForEditing,
-      saveButtonText: this.props.formDescription?.saveButtonText,
-      addButtonText: this.props.formDescription?.addButtonText,
-      canCreate: this.state.canCreate,
-      canDelete: this.state.canDelete,
-      canRead: this.state.canRead,
-      canUpdate: this.state.canUpdate,
+      description: {
+        columns: this.props.formProps?.description?.columns ?? {},
+        ui: {
+          titleForInserting: this.props.formProps?.description?.ui?.titleForInserting,
+          titleForEditing: this.props.formProps?.description?.ui?.titleForEditing,
+          saveButtonText: this.props.formProps?.description?.ui?.saveButtonText,
+          addButtonText: this.props.formProps?.description?.ui?.addButtonText,
+        },
+        permissions: {
+          canCreate: this.state.canCreate,
+          canDelete: this.state.canDelete,
+          canRead: this.state.canRead,
+          canUpdate: this.state.canUpdate,
+        },
+      },
       onClose: () => {
         const urlParams = new URLSearchParams(window.location.search);
         urlParams.delete('recordId');
@@ -589,7 +599,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   renderForm(): JSX.Element {
     if (this.state.renderForm) {
-      return <Form {...this.getFormDescription()} />;
+      return <Form {...this.getFormProps()} />;
     } else {
       return <></>;
     }
@@ -828,7 +838,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   onOrderByChangeCustom(event: DataTableSortEvent) {
-    let orderBy: OrderBy | null = null;
+    let orderBy: TableOrderBy | null = null;
 
     // Icons in PrimeTable changing
     // 1 == ASC
@@ -924,7 +934,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     }, () => this.loadData());
   }
 
-  onOrderByChange(orderBy?: OrderBy | null, stateParams?: any) {
+  onOrderByChange(orderBy?: TableOrderBy | null, stateParams?: any) {
     this.setState({
       ...stateParams,
       orderBy: orderBy,
