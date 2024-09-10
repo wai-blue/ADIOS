@@ -24,7 +24,7 @@ class DataTypeEnum extends \ADIOS\Core\DB\DataType
       foreach ($enumValues as $key => $value) {
           $sql .= "'".trim(str_replace('$%^@$%#$^%^$%#$^%$%@#$', ',', $value))."', ";
       }
-      $sql = substr($sql, 0, -2).") {$params['sql_definitions']}";
+      $sql = substr($sql, 0, -2).") " . $this->getSqlDefinitions($params);
 
       return $sql;
     }

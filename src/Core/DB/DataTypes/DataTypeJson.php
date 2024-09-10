@@ -23,7 +23,7 @@ namespace ADIOS\Core\DB\DataTypes;
 class DataTypeJson extends \ADIOS\Core\DB\DataType
 {
   public function sqlCreateString($table_name, $col_name, $params = []) {
-    return "`{$col_name}` json ".($params['sql_definitions'] ?? "");
+    return "`{$col_name}` json ".($params['rawSqlDefinitions'] ?? "");
   }
 
   public function sqlValueString($table_name, $col_name, $value, $params = []) {

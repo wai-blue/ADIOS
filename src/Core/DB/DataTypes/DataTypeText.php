@@ -30,10 +30,7 @@ class DataTypeText extends \ADIOS\Core\DB\DataType
       $sqlDataType = "text";
     }
 
-    $sqlDef = $params['sql_definitions'] ?? '';
-    $params['sql_definitions'] = '' != trim($sqlDef) ? $sqlDef : "default '" . (string) $this->getDefaultValue($params) . "'";
-
-    return "`$col_name` {$sqlDataType} {$params['sql_definitions']}";
+    return "`$col_name` {$sqlDataType} " . $this->getSqlDefinitions($params);
   }
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])

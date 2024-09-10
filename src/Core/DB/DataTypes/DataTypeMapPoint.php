@@ -19,11 +19,7 @@ class DataTypeMapPoint extends \ADIOS\Core\DB\DataType
   protected $defaultValue = '{"latitude": 0,"longitude": 0}';
 
   public function get_sql_create_string($table_name, $col_name, $params = []) {
-    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) 
-      ? $params['sql_definitions'] 
-      : "default '" . (string) $this->getDefaultValue($params) . "' ";
-
-    return "`$col_name` json {$params['sql_definitions']}";
+    return "`$col_name` json " . $this->getSqlDefinitions($params);
   }
 
   public function columnDefinitionPostProcess(array $colDef): array

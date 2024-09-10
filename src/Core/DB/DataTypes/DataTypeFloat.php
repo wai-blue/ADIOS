@@ -16,8 +16,6 @@ namespace ADIOS\Core\DB\DataTypes;
 class DataTypeFloat extends \ADIOS\Core\DB\DataType
 {
   public function sqlCreateString($table_name, $col_name, $params = []) {
-    $sqlDef = $params['sql_definitions'] ?? '';
-    $params['sql_definitions'] = '' != trim($sqlDef) ? $sqlDef : "default " . (int) $this->getDefaultValue($params);
     $float_decimals = max((int) $params['decimals'], 1);
     $float_width = (int) $params['byte_size'];
 
@@ -27,7 +25,7 @@ class DataTypeFloat extends \ADIOS\Core\DB\DataType
       $sqlDataType = "double";
     }
 
-    return "`{$col_name}` {$sqlDataType}($float_width, $float_decimals) {$params['sql_definitions']}";
+    return "`{$col_name}` {$sqlDataType}($float_width, $float_decimals) " . $this->getSqlDefinitions($params);
   }
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])

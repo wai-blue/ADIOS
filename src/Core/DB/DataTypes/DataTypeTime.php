@@ -19,9 +19,7 @@ class DataTypeTime extends DataType
 {
   public function sqlCreateString($table_name, $col_name, $params = [])
   {
-    $params['sql_definitions'] = '' != trim((string)$params['sql_definitions']) || $params['required'] ? $params['sql_definitions'] : ' default null ';
-    $params['sql_definitions'] ??= '';
-    return "`$col_name` time {$params['sql_definitions']}";
+    return "`$col_name` time " . $this->getSqlDefinitions($params);
   }
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])

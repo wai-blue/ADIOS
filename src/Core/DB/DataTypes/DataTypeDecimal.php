@@ -20,9 +20,6 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
 
   public function sqlCreateString($table_name, $col_name, $params = [])
   {
-    $params['sql_definitions'] = '' != trim((string) $params['sql_definitions']) ? $params['sql_definitions'] : 'default ' . (float) $this->getDefaultValue($params) . ' ';
-    $params['sql_definitions'] ??= '';
-
     $width = min(max((int) $params['byte_size'], 10), 35);
     $decimals = min(min(max((int) $params['decimals'], 2), 10), $width);
 
@@ -32,7 +29,7 @@ class DataTypeDecimal extends \ADIOS\Core\DB\DataType
       $sqlDataType = "decimal";
     }
 
-    return "`{$col_name}` {$sqlDataType}($width, $decimals) {$params['sql_definitions']}";
+    return "`{$col_name}` {$sqlDataType}($width, $decimals) " . $this->getSqlDefinitions($params);
   }
 
   public function sqlValueString($table_name, $col_name, $value, $params = [])

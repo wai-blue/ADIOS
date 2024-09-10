@@ -482,7 +482,7 @@ class Model
       $newColumns['id'] = [
         'type' => 'int',
         'byte_size' => '8',
-        'sql_definitions' => 'primary key auto_increment',
+        'rawSqlDefinitions' => 'primary key auto_increment',
         'title' => 'ID',
         'readonly' => 'yes',
         'viewParams' => [

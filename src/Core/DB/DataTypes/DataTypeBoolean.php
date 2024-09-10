@@ -33,9 +33,7 @@ class DataTypeBoolean extends \ADIOS\Core\DB\DataType {
   protected $defaultValue = 0;
 
   public function sqlCreateString($table_name, $col_name, $params = []) {
-    $sqlDef = $params['sql_definitions'] ?? '';
-    $params['sql_definitions'] = '' != trim($sqlDef) ? $sqlDef : " default " . (int) $this->getDefaultValue($params);
-    return "`$col_name` int(1) {$params['sql_definitions']} NOT NULL";
+    return "`$col_name` int(1) " . $this->getSqlDefinitions($params);
   }
 
   public function sqlValueString($tableName, $colName, $value, $params = []) {

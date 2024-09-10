@@ -25,7 +25,17 @@ class DataType {
   {
     $this->app = $app;
   }
-  
+
+  public function getSqlDefinitions(array $params): string
+  {
+    $sqlDef = trim($params['rawSqlDefinitions'] ?? '');
+    if (empty($sqlDef)) {
+      $defVal = $this->getDefaultValue($params);
+      $sqlDef = "default ".($defVal === null ? 'null' : "'" . (string) $defVal . "'");
+    }
+    return $sqlDef;
+  }
+
   /**
    * Returns the SQL-formatted string used in CREATE TABLE queries.
    *
@@ -129,6 +139,6 @@ class DataType {
   
   public function getDefaultValue(array $params) {
     return $params['defaultValue'] ?? $this->defaultValue;
-  }  
+  }
 }
 

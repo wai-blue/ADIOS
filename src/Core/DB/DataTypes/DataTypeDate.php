@@ -17,9 +17,7 @@ class DataTypeDate extends \ADIOS\Core\DB\DataType
 {
 
   public function sqlCreateString($table_name, $col_name, $params = []) {
-    $sqlDef = $params['sql_definitions'] ?? '';
-    $params['sql_definitions'] = '' != trim($sqlDef) ? $sqlDef : "default " . (int) $this->getDefaultValue($params);
-    return "`{$col_name}` date {$params['sql_definitions']}";
+    return "`{$col_name}` date " . $this->getSqlDefinitions($params);
   }
 
   public function sqlValueString($table_name, $col_name, $value, $params = []) {
