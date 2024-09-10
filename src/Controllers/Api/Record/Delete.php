@@ -17,14 +17,25 @@ class Delete extends \ADIOS\Core\ApiController {
   public function response(): array
   {
     $hash = $this->params['hash'] ?? '';
-    $id = (int) $this->params['id'] ?? '';
-    if ($hash == \ADIOS\Core\Helper::encrypt($id, '', true)) {
+    $id = $this->params['id'] ?? '';
+
+    $ok = false;
+    if ($this->app->config['encryptRecordIds'] ?? false) {
+      $ok = $hash == \ADIOS\Core\Helper::encrypt($id, '', true);
+    } else {
+      $id = (int) $id;
+      $ok = $id > 0;
+    }
+
+    if ($ok) {
 
       $error = '';
+      $errorHtml = '';
       try {
         $status = $this->model->recordDelete($id);
       } catch (\Throwable $e) {
         $error = $e->getMessage();
+        $errorHtml = $this->app->renderExceptionHtml($e);
       }
 
       $return = [
@@ -33,6 +44,7 @@ class Delete extends \ADIOS\Core\ApiController {
       ];
 
       if ($error) $return['error'] = $error;
+      if ($errorHtml) $return['errorHtml'] = $errorHtml;
 
       return $return;
     } else {

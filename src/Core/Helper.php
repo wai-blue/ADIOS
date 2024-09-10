@@ -311,5 +311,4 @@ class Helper {
   //   return $params;
   // }
 
-
 }

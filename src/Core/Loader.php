@@ -630,8 +630,6 @@ class Loader
           }
         ));
 
-        // inicializacia view
-        $this->view = new ($this->getCoreClass('Core\\ViewWithController'))($this);
       }
 
       $this->dispatchEventToPlugins("onADIOSAfterInit", ["app" => $this]);
@@ -1433,13 +1431,15 @@ class Loader
     $errorMessage = $exception->getMessage();
     $errorHash = md5(date("YmdHis").$errorMessage);
 
-    $errorDebugInfoHtml = "
-        Error hash: {$errorHash} (see error log file for more information)<br/>
-        ".get_class($exception)."<br/>
-        Stack trace:<br/>
-        <div class='trace-log'>{$traceLog}</div>
-      </div>
-    ";
+    $errorDebugInfoHtml =
+      "Error hash: {$errorHash}<br/>"
+      . "<br/>"
+      . "<div style='color:#888888'>"
+        . get_class($exception) . "<br/>"
+        . "Stack trace:<br/>"
+        . "<div class='trace-log'>{$traceLog}</div>"
+      . "</div>"
+    ;
 
     $this->console->error("{$errorHash}\t{$errorMessage}");
 
@@ -1488,29 +1488,29 @@ class Loader
         switch ($errorNo) {
           case 1216:
           case 1451:
-            $errorMessage = "You are trying to delete a record that is linked with another record(s).";
-            break;
+            $errorMessage = "You cannot delete record that is linked with another records. Delete the linked records first.";
+          break;
           case 1062:
           case 1217:
           case 1452:
             $errorMessage = "You are trying to save a record that is already existing.";
-            break;
+          break;
+          default:
+            $errorMessage = $dbError;
+          break;
         }
 
         $html = "
-          <div class='adios exception emoji'>🥴</div>
           <div class='adios exception message'>
             ".$this->translate($errorMessage, [], $this)."<br/>
             <br/>
             <b>".join(", ", $invalidColumns)."</b>
           </div>
-          {$dbError}
-          {$errorDebugInfoHtml}
+          <pre style='font-size:9px;text-align:left'>{$errorDebugInfoHtml}</pre>
         ";
       break;
       default:
         $html = "
-          <div class='adios exception emoji'>🥴</div>
           <div class='adios exception message'>
             Oops! Something went wrong.
           </div>

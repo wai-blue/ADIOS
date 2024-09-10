@@ -4,6 +4,7 @@ import Modal, { ModalProps } from "./Modal";
 import ModalSimple from "./ModalSimple";
 import Form, { FormEndpoint, FormProps, FormState } from "./Form";
 import Notification from "./Notification";
+import Swal from "sweetalert2";
 
 import {
   DataTable,
@@ -372,8 +373,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       description: {
         columns: this.props.formProps?.description?.columns ?? {},
         ui: {
-          titleForInserting: this.props.formProps?.description?.ui?.titleForInserting,
-          titleForEditing: this.props.formProps?.description?.ui?.titleForEditing,
+          titleForInserting: this.props.formProps?.description?.ui?.title,
           saveButtonText: this.props.formProps?.description?.ui?.saveButtonText,
           addButtonText: this.props.formProps?.description?.ui?.addButtonText,
         },
@@ -527,8 +527,17 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           hash: recordToDelete._idHash_,
         },
         (response: any) => {
-          if (response.error) {
-            Notification.error(response.error);
+          if (response.errorHtml) {
+            Swal.fire({
+              title: '<div style="text-align:left">🥴 Ooops</div>',
+              html: response.errorHtml,
+              width: '80vw',
+              padding: '1em',
+              color: "#ad372a",
+              background: "white",
+              backdrop: `rgba(123,12,0,0.2)`
+            });
+            // Notification.error(response.error);
           } else {
             this.setState({idToDelete: 0}, () => {
               this.loadData();
