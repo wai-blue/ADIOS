@@ -497,7 +497,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       context: this.props.context ? this.props.context : this.props.uid,
       isInitialized: false,
       isInlineEditing: this.state.isInlineEditing,
-      showInlineEditingButtons: !this.state.isInlineEditing,
+      showInlineEditingButtons: false, // !this.state.isInlineEditing,
       onInlineEditCancel: () => {
       },
       onInlineEditSave: () => {
@@ -510,13 +510,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
    * Render different input types
    */
   input(columnName: string, customInputParams?: any, onChange?: any): JSX.Element {
-    // let inputToRender: JSX.Element = <></>;
-
-    // if (!colDef) {
-    //   return adiosError(`Column '${columnName}' is not available for the Form component. Check definiton of columns in the model '${this.props.model}'.`);
-    // }
-
-    // if (!onChange) onChange = (value: any) => this.onChange(columnName, value);
     const inputParams = this.buildInputParams(columnName, customInputParams);
     const record = this.state.record ?? {};
     const columns = this.state.description?.columns ?? {};
@@ -545,34 +538,45 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
     const inputParams = this.buildInputParams(columnName, customInputParams);
 
-    return columnName == 'id' ? <></>: (
+    return columnName == 'id' ? <></>: this.inputWrapperCustom(
+      columnName,
+      inputParams,
+      inputParams.title,
+      <>
+        {this.input(columnName, inputParams)}
+
+        {inputParams.description
+          ? <>
+            <Tooltip target={'#' + this.props.uid + '_' + columnName + ' .input-description'} />
+            <i
+              className="input-description fas fa-info"
+              data-pr-tooltip={inputParams.description}
+              data-pr-position="top"
+            ></i>
+          </>
+          : null
+        }
+      </>
+    );
+  }
+
+  inputWrapperCustom(columnName: string, params: any, label: string|JSX.Element, body: string|JSX.Element): JSX.Element {
+    return <>
       <div
         id={this.props.uid + '_' + columnName}
-        className={"input-wrapper" + (inputParams.required == true ? " required" : "")}
+        className={"input-wrapper" + (params.required == true ? " required" : "")}
         key={columnName}
       >
         <label className="input-label" htmlFor={this.props.uid + '_' + columnName}>
-          {inputParams.title}
+          {label}
         </label>
 
         <div className="input-body" key={columnName}>
-          {this.input(columnName, inputParams)}
-
-          {inputParams.description
-            ? <>
-              <Tooltip target={'#' + this.props.uid + '_' + columnName + ' .input-description'} />
-              <i
-                className="input-description fas fa-info"
-                data-pr-tooltip={inputParams.description}
-                data-pr-position="top"
-              ></i>
-            </>
-            : null
-          }
+          {body}
         </div>
 
       </div>
-    );
+    </>;
   }
 
   renderSaveButton(): JSX.Element {

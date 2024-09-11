@@ -49,6 +49,8 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   }
 
   componentDidUpdate(prevProps: LookupInputProps) {
+    super.componentDidUpdate(prevProps);
+
     if (
       JSON.stringify(this.props.customEndpointParams) !== JSON.stringify(prevProps.customEndpointParams)
       || this.props.model !== prevProps.model

@@ -125,10 +125,8 @@ export class Input<P extends InputProps, S extends InputState> extends Component
   }
 
   onChange(value: any) {
-    console.log('inp onch', value);
     this.setState({value: value}, () => {
       if (typeof this.props.onChange == 'function') {
-        console.log('this.props.onChange(value);', value);
         this.props.onChange(value);
       }
     });
@@ -207,6 +205,7 @@ export class Input<P extends InputProps, S extends InputState> extends Component
             <div className="input-element">
               {this.renderInputElement()}
             </div>
+            {this.props.params?.unit ? <div className="input-unit">{this.props.params?.unit}</div> : null}
             {this.state.showInlineEditingButtons ? 
               <div className="inline-editing-buttons always-visible">
                 <button
@@ -230,15 +229,9 @@ export class Input<P extends InputProps, S extends InputState> extends Component
             }
           </>
           : <>
-            <div
-              className="value-element"
-              onClick={() => {
-                this.inlineEditEnable();
-              }}>
+            <div className="value-element" onClick={() => { this.inlineEditEnable(); }}>
               {this.renderValueElement()}
-              <div className="input-unit">
-                {this.props.params?.unit}
-              </div>
+              {this.props.params?.unit ? <div className="input-unit">{this.props.params?.unit}</div> : null}
             </div>
             {this.state.readonly ? null :
               <div className="inline-editing-buttons">
