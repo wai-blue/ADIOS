@@ -340,28 +340,32 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   loadData() {
-    request.get(
-      this.getEndpointUrl('getRecords'),
-      {
-        ...this.getEndpointParams(),
-        filterBy: this.state.filterBy,
-        model: this.props.model,
-        orderBy: this.state.orderBy,
-        page: this.state.page ?? 0,
-        itemsPerPage: this.state.itemsPerPage ?? 15,
-        parentRecordId: this.props.parentRecordId ? this.props.parentRecordId : 0,
-        parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
-        search: this.state.search,
-        tag: this.props.tag,
-        where: this.props.where,
-        __IS_AJAX__: '1',
-      },
-      (data: any) => {
-        this.setState({
-          data: data,
-        });
-      }
-    );
+    if (this.props.data) {
+      this.setState({data: this.props.data});
+    } else {
+      request.get(
+        this.getEndpointUrl('getRecords'),
+        {
+          ...this.getEndpointParams(),
+          filterBy: this.state.filterBy,
+          model: this.props.model,
+          orderBy: this.state.orderBy,
+          page: this.state.page ?? 0,
+          itemsPerPage: this.state.itemsPerPage ?? 15,
+          parentRecordId: this.props.parentRecordId ? this.props.parentRecordId : 0,
+          parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
+          search: this.state.search,
+          tag: this.props.tag,
+          where: this.props.where,
+          __IS_AJAX__: '1',
+        },
+        (data: any) => {
+          this.setState({
+            data: data,
+          });
+        }
+      );
+    }
   }
 
   getColumns(columnsFromEndpoint: any): any {
