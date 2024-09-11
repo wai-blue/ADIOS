@@ -357,7 +357,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     return columnsFromEndpoint;
   }
 
-  getFormProps(): any {
+  getFormProps(): FormProps {
     return {
       parentTable: this,
       uid: this.props.uid + '_form',
@@ -366,14 +366,14 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       id: this.state.recordId ?? null,
       prevId: this.state?.recordPrevId ?? 0,
       nextId: this.state?.recordNextId ?? 0,
-      endpoint: this.state.formEndpoint ?? '',
+      endpoint: this.state.formEndpoint,
       isInlineEditing: (this.state.recordId ?? null) === -1,
       showInModal: true,
       showInModalSimple: this.props.formUseModalSimple,
       description: {
         columns: this.props.formProps?.description?.columns ?? {},
         ui: {
-          titleForInserting: this.props.formProps?.description?.ui?.title,
+          title: this.props.formProps?.description?.ui?.title,
           saveButtonText: this.props.formProps?.description?.ui?.saveButtonText,
           addButtonText: this.props.formProps?.description?.ui?.addButtonText,
         },
