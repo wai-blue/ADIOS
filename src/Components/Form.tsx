@@ -316,6 +316,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
   updateRecord(changedValues: any) {
+    console.log('upd rec', changedValues);
     const record = this.normalizeRecord(this.state.record);
     this.setState({record: deepObjectMerge(record, changedValues)});
   }
