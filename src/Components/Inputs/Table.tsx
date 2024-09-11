@@ -45,6 +45,19 @@ export default class Table extends Input<TableInputProps, TableInputState> {
         onChange={(table: BigTable) => {
           this.onChange(table.state.data?.data);
         }}
+        onDeleteRecord={(table: BigTable, record: any) => {
+          // let currentState = {...this.state};
+          // console.log(currentState);
+
+          let newData = table.state.data?.data.filter(obj =>
+            !(obj.id === record.id)
+          )
+          console.log(newData);
+          this.onChange(newData);
+
+          // currentState = {...this.state};
+          // console.log(currentState);
+        }}
         onRowClick={(table: BigTable, row: any) => {
           if (this.props.onRowClick) {
             this.props.onRowClick(table, row);
