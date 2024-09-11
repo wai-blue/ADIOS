@@ -7,7 +7,7 @@ interface TableInputProps extends InputProps {
   model: string,
   children?: any,
   columns?: any,
-  onRowClick?: (table: BigTable, row: any) => void,
+  onRowClick?: (table: BigTable<TableProps, TableState>, row: any) => void,
 }
 
 interface TableInputState extends InputState {
@@ -40,25 +40,16 @@ export default class Table extends Input<TableInputProps, TableInputState> {
         showHeader={false}
         data={{data: this.state.value}}
         columns={this.state.columns}
+        isUsedAsInput={true}
         isInlineEditing={this.state.isInlineEditing}
         readonly={!this.state.isInlineEditing}
-        onChange={(table: BigTable) => {
+        onChange={(table: BigTable<TableProps, TableState>) => {
           this.onChange(table.state.data?.data);
         }}
-        onDeleteRecord={(table: BigTable, record: any) => {
-          // let currentState = {...this.state};
-          // console.log(currentState);
-
-          let newData = table.state.data?.data.filter(obj =>
-            !(obj.id === record.id)
-          )
-          console.log(newData);
-          this.onChange(newData);
-
-          // currentState = {...this.state};
-          // console.log(currentState);
+        onDeleteSelectionChange={(table: BigTable<TableProps, TableState>) => {
+          this.onChange(table.state.data?.data ?? []);
         }}
-        onRowClick={(table: BigTable, row: any) => {
+        onRowClick={(table: BigTable<TableProps, TableState>, row: any) => {
           if (this.props.onRowClick) {
             this.props.onRowClick(table, row);
           }

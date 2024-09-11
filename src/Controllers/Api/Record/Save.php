@@ -32,12 +32,17 @@ class Save extends \ADIOS\Core\ApiController {
       }
     }
 
-    $idMasterRecord = $model->recordSave($dataToSave);
+    if ($dataToSave['_toBeDeleted_']) {
+      $model->recordDelete((int) $dataToSave['id']);
+      $savedData = [];
+    } else {
+      $idMasterRecord = $model->recordSave($dataToSave);
 
-    if ($idMasterRecord > 0) {
-      $savedData = $model->recordGet(function($q) use ($idMasterRecord) {
-        $q->where('id', $idMasterRecord);
-      });
+      if ($idMasterRecord > 0) {
+        $savedData = $model->recordGet(function($q) use ($idMasterRecord) {
+          $q->where('id', $idMasterRecord);
+        });
+      }
     }
 
     foreach ($this->model->relations as $relName => $relDefinition) {

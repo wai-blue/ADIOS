@@ -316,19 +316,9 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   }
 
   updateRecord(changedValues: any) {
-    console.log('upd rec', changedValues);
     const record = this.normalizeRecord(this.state.record);
     this.setState({record: deepObjectMerge(record, changedValues)});
   }
-
-  /**
-   * Check if is id = undefined or id is > 0
-   */
-  // checkIfIsEdit() {
-  //   this.setState({
-  //     isEdit: this.state.id && this.state.id > 0 ? true : false,
-  //   });
-  // }
 
   onAfterRecordLoaded(record: any) {
     return record;

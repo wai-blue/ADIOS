@@ -67,6 +67,7 @@ export interface TableProps {
   parentForm?: Form<FormProps, FormState>,
   parentFormModel?: string,
   showHeader?: boolean,
+  showFooter?: boolean,
   showFilter?: boolean,
   tag?: string,
   title?: string,
@@ -78,10 +79,12 @@ export interface TableProps {
   orderBy?: TableOrderBy,
   inlineEditingEnabled?: boolean,
   isInlineEditing?: boolean,
+  isUsedAsInput?: boolean,
   selectionMode?: 'single' | 'multiple' | undefined,
   onChange?: (table: Table<TableProps, TableState>) => void,
   onRowClick?: (table: Table<TableProps, TableState>, row: any) => void,
-  onDeleteRecord?: (table: Table<TableProps, TableState>, record: any) => void,
+  onDeleteRecord?: (table: Table<TableProps, TableState>) => void,
+  onDeleteSelectionChange?: (table: Table<TableProps, TableState>) => void,
   data?: TableData,
   async?: boolean,
   readonly?: boolean,
@@ -134,14 +137,16 @@ export interface TableState {
   page: number,
   itemsPerPage: number,
   search?: string,
-  showHeader?: boolean,
-  showFilter?: boolean,
+  showHeader: boolean,
+  showFooter: boolean,
+  showFilter: boolean,
   title?: string,
   renderForm?: boolean,
   inlineEditingEnabled: boolean,
   isInlineEditing: boolean,
+  isUsedAsInput: boolean,
   selection: any,
-  idToDelete: number,
+  // idsToDelete: Array<any>,
   async: boolean,
   readonly: boolean,
 }
@@ -185,12 +190,14 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       page: 1,
       itemsPerPage: this.props.itemsPerPage,
       showHeader: props.showHeader ?? true,
+      showFooter: props.showFooter ?? true,
       showFilter: props.showFilter ?? true,
       orderBy: this.props.orderBy,
       inlineEditingEnabled: props.inlineEditingEnabled ? props.inlineEditingEnabled : false,
       isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
+      isUsedAsInput: props.isUsedAsInput ? props.isUsedAsInput : false,
       selection: [],
-      idToDelete: 0,
+      // idsToDelete: [],
       data: props.data ? props.data : null,
       columns: props.columns ? props.columns : null,
       async: props.async ?? true,
@@ -251,7 +258,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     const sortOrders = {'asc': 1, 'desc': -1};
     const totalRecords = this.state.data?.total ?? 0;
 
-    return {
+    let tableProps: any = {
       ref: this.dt,
       value: this.state.data?.data,
       // editMode: 'row',
@@ -290,8 +297,11 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           }
         )
       },
-      footer: this.renderFooter(),
     };
+
+    if (this.state.showFooter) tableProps.footer = this.renderFooter();
+
+    return tableProps;
   }
 
   loadTableDescription(successCallback?: (params: any) => void) {
@@ -318,6 +328,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
             canUpdate: params.canUpdate ?? true,
             columns: this.getColumns(params.columns),
             showHeader: params.showHeader ?? true,
+            showFooter: params.showFooter ?? true,
             showFilter: params.showFilter ?? true,
             title: this.props.title ?? params.title,
           });
@@ -512,45 +523,62 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   deleteRecord() {
-    const recordToDelete = this.findRecordById(this.state.idToDelete);
-
     if (this.props.externalCallbacks && this.props.externalCallbacks.onDeleteRecord) {
-      window[this.props.externalCallbacks.onDeleteRecord](this, recordToDelete);
+      window[this.props.externalCallbacks.onDeleteRecord](this);
     } if (this.props.onDeleteRecord) {
-      this.props.onDeleteRecord(this, recordToDelete);
+      this.props.onDeleteRecord(this);
     } else {
-      request.get(
-        this.getEndpointUrl('deleteRecord'),
-        {
-          model: this.props.model,
-          id: recordToDelete.id,
-          hash: recordToDelete._idHash_,
-        },
-        (response: any) => {
-          if (response.errorHtml) {
-            Swal.fire({
-              title: '<div style="text-align:left">🥴 Ooops</div>',
-              html: response.errorHtml,
-              width: '80vw',
-              padding: '1em',
-              color: "#ad372a",
-              background: "white",
-              backdrop: `rgba(123,12,0,0.2)`
-            });
-            // Notification.error(response.error);
-          } else {
-            this.setState({idToDelete: 0}, () => {
-              this.loadData();
-            });
-          }
+
+      let recordToDelete: any = null;
+
+      for (let i in this.state.data?.data) {
+        if (this.state.data?.data[i]._toBeDeleted_) {
+          recordToDelete = this.state.data?.data[i];
+          break;
         }
-      );
+      }
+
+      // this.findRecordById(this.state.idsToDelete[0]);
+
+      if (recordToDelete) {
+        request.get(
+          this.getEndpointUrl('deleteRecord'),
+          {
+            model: this.props.model,
+            id: recordToDelete.id ?? 0,
+            hash: recordToDelete._idHash_ ?? '',
+          },
+          (response: any) => {
+            if (response.errorHtml) {
+              Swal.fire({
+                title: '<div style="text-align:left">🥴 Ooops</div>',
+                html: response.errorHtml,
+                width: '80vw',
+                padding: '1em',
+                color: "#ad372a",
+                background: "white",
+                backdrop: `rgba(123,12,0,0.2)`
+              });
+              // Notification.error(response.error);
+            } else {
+              this.loadData();
+            }
+          }
+        );
+      }
     }
   }
 
   renderDeleteConfirmModal(): JSX.Element {
-    if (this.state.idToDelete > 0) {
-      const data: any = this.findRecordById(this.state.idToDelete);
+    let hasRecordsToDelete: boolean = false;
+    for (let i in this.state.data?.data) {
+      if (this.state.data?.data[i]._toBeDeleted_) {
+        hasRecordsToDelete = true;
+        break;
+      }
+    }
+
+    if (hasRecordsToDelete) {
       return (
         <ModalSimple
           uid={this.props.uid + '_delete_confirm'}
@@ -558,8 +586,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         >
           <div className='modal-header'>
             <div>
-              <div>{globalThis.app.translate('Delete record') + ' #' + this.state.idToDelete}</div>
-              <small>{data?._lookupText_ ?? ''}</small>
+              <div>{globalThis.app.translate('Delete record')}</div>
             </div>
           </div>
           <div className='modal-body'>
@@ -579,7 +606,11 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
               <button
                 className='btn btn-cancel'
                 onClick={() => {
-                  this.setState({idToDelete: 0});
+                  if (this.state.data) {
+                    let newData: TableData = this.state.data;
+                    for (let i in newData.data) delete newData.data[i]._toBeDeleted_;
+                    this.setState({data: newData});
+                  }
                 }}
               >
                 <span className='icon'><i className='fas fa-times'></i></span>
@@ -615,12 +646,12 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   getColumnValue(columnName: string, column: any, data: any) {
-    if (column['type'] == 'lookup') {
-      let relation = column.relation ?? columnName.substring(3).toUpperCase();
-      return data[relation]?._lookupText_ ?? '';
-    } else {
-      return data[columnName];
-    }
+    // if (column['type'] == 'lookup') {
+    //   let relation = column.relation ?? columnName.substring(3).toUpperCase();
+    //   return data[relation]?._lookupText_ ?? '';
+    // } else {
+    return data[columnName];
+    // }
   }
 
   /*
@@ -637,119 +668,104 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       showInlineEditingButtons: true,
     };
     const rowIndex = options.rowIndex;
-
     const cellContent = enumValues ? enumValues[columnValue] : columnValue;
 
-    let cellValueElement: JSX.Element|null = null;
-
-    if (cellContent === null) {
-      cellValueElement = null;
+    if (typeof column.cellRenderer == 'function') {
+      return column.cellRenderer(this, data, options);
     } else {
-      switch (column.type) {
-        case 'int':
-          cellValueElement = <>
-            {cellContent}
-            {column.unit ? ' ' + column.unit : ''}
-          </>;
-        break;
-        case 'float':
-          cellValueElement = <>
-            {cellContent ? cellContent.toFixed(column.decimals ?? 2) : null}
-            {column.unit ? ' ' + column.unit : ''}
-          </>;
-        break;
-        case 'color':
-          cellValueElement = <div
-            style={{ width: '20px', height: '20px', background: cellContent }}
-            className="rounded"
-          />;
-        break;
-        // case 'image':
-        //   if (!cellContent) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
-        //   else {
-        //     cellValueElement = <img
-        //       style={{ width: '30px', height: '30px' }}
-        //       src={this.state.folderUrl + "/" + cellContent}
-        //       className="rounded"
-        //     />;
-        //   }
-        break;
-        case 'lookup':
+
+      let cellValueElement: JSX.Element|null = null;
+
+      if (cellContent === null) {
+        cellValueElement = null;
+      } else {
+        switch (column.type) {
+          case 'int':
+            cellValueElement = <>
+              {cellContent}
+              {column.unit ? ' ' + column.unit : ''}
+            </>;
+          break;
+          case 'float':
+            cellValueElement = <>
+              {cellContent ? cellContent.toFixed(column.decimals ?? 2) : null}
+              {column.unit ? ' ' + column.unit : ''}
+            </>;
+          break;
+          case 'color':
+            cellValueElement = <div
+              style={{ width: '20px', height: '20px', background: cellContent }}
+              className="rounded"
+            />;
+          break;
+          // case 'image':
+          //   if (!cellContent) cellValueElement = <i className="fas fa-image" style={{color: '#e3e6f0'}}></i>
+          //   else {
+          //     cellValueElement = <img
+          //       style={{ width: '30px', height: '30px' }}
+          //       src={this.state.folderUrl + "/" + cellContent}
+          //       className="rounded"
+          //     />;
+          //   }
+          break;
+          case 'lookup':
+            cellValueElement = cellContent;
+          break;
+          case 'enum':
+            const enumValues = column.enumValues;
+            if (enumValues) cellValueElement = enumValues[cellContent];
+          break;
+          case 'boolean':
+            if (cellContent) cellValueElement = <span className="text-green-600" style={{fontSize: '1.2em'}}>✓</span>
+            else cellValueElement = <span className="text-red-600" style={{fontSize: '1.2em'}}>✕</span>
+          break;
+          case 'date':
+            cellValueElement = <>{cellContent == '0000-00-00' ? '' : dateToEUFormat(cellContent)}</>;
+          break;
+          case 'datetime':
+            cellValueElement = <>{cellContent == '0000-00-00' ? '' : datetimeToEUFormat(cellContent)}</>;
+          break;
+          case 'tags':
+            cellValueElement = <>
+              {cellContent.map((item: any) => {
+                if (!column.dataKey) return <></>;
+                return <span className="badge badge-info mx-1" key={item.id}>{item[column.dataKey]}</span>;
+              })}
+            </>
+          break;
+          default:
+            cellValueElement = cellContent;
+          break;
+        }
+
+        if (cellValueElement === <></>) {
           cellValueElement = cellContent;
-        break;
-        case 'enum':
-          const enumValues = column.enumValues;
-          if (enumValues) cellValueElement = enumValues[cellContent];
-        break;
-        case 'boolean':
-          if (cellContent) cellValueElement = <span className="text-green-600" style={{fontSize: '1.2em'}}>✓</span>
-          else cellValueElement = <span className="text-red-600" style={{fontSize: '1.2em'}}>✕</span>
-        break;
-        case 'date':
-          cellValueElement = <>{cellContent == '0000-00-00' ? '' : dateToEUFormat(cellContent)}</>;
-        break;
-        case 'datetime':
-          cellValueElement = <>{cellContent == '0000-00-00' ? '' : datetimeToEUFormat(cellContent)}</>;
-        break;
-        case 'tags':
-          cellValueElement = <>
-            {cellContent.map((item: any) => {
-              if (!column.dataKey) return <></>;
-              return <span className="badge badge-info mx-1" key={item.id}>{item[column.dataKey]}</span>;
-            })}
-          </>
-        break;
-        default:
-          cellValueElement = cellContent;
-        break;
+        }
       }
 
-      if (cellValueElement === <></>) {
-        cellValueElement = cellContent;
-      }
-    }
+      let op = createRef<OverlayPanel>();
 
-    let op = createRef<OverlayPanel>();
-
-    if (this.props.isInlineEditing) {
-      return InputFactory({
-        ...inputProps,
-        isInlineEditing: this.props.isInlineEditing,
-        showInlineEditingButtons: false,
-        onInlineEditCancel: () => { op.current?.hide(); },
-        onChange: (value: any) => {
-          if (this.state.data) {
-            let data: TableData = this.state.data;
-            data.data[rowIndex][columnName] = value;
-            this.setState({data: data});
-            if (this.props.onChange) {
-              this.props.onChange(this);
+      if (this.props.isInlineEditing) {
+        return InputFactory({
+          ...inputProps,
+          isInlineEditing: this.props.isInlineEditing,
+          showInlineEditingButtons: false,
+          onInlineEditCancel: () => { op.current?.hide(); },
+          onChange: (value: any) => {
+            if (this.state.data) {
+              let data: TableData = this.state.data;
+              data.data[rowIndex][columnName] = value;
+              this.setState({data: data});
+              if (this.props.onChange) {
+                this.props.onChange(this);
+              }
             }
           }
-        }
-      });
-    } else {
-      return cellValueElement;
+        });
+      } else {
+        return cellValueElement;
+      }
     }
-
-    // let cellEditorElement: JSX.Element = InputFactory({
-    //   ...inputProps,
-    //   isInlineEditing: true,
-    //   onInlineEditCancel: () => { op.current?.hide(); }
-    // });
-
-    // return <>
-    //   {cellValueElement}
-    //   {this.state.inlineEditingEnabled ? <>
-    //     <i
-    //       className="inline-edit-icon fas fa-pencil-alt text-xs"
-    //       onClick={(e) => { e.stopPropagation(); op.current?.toggle(e); }}
-    //     ></i>
-    //     <OverlayPanel ref={op} onClick={(e) => { e.stopPropagation(); }}>
-    //       {cellEditorElement}
-    //     </OverlayPanel>
-    //   </> : null}
-    // </>;
   }
 
   renderColumns(): JSX.Element[] {
@@ -770,7 +786,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
             <div
               className={
                 (column.cssClass ?? '')
-                + (data.id == this.state.idToDelete ? ' bg-red-50' : '')
+                + (data._toBeDeleted_ ? ' to-be-deleted' : '')
                 + ' '
                 + this.cellClassName(columnName, column, data)
               }
@@ -791,16 +807,38 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       header=''
       body={(data: any, options: any) => {
         return <>
-          {!this.state.readonly && this.state.canDelete ? <button
-            className="btn btn-list-item btn-danger"
-            title={globalThis.app.translate('Delete')}
-            onClick={(e) => {
-              e.preventDefault();
-              this.setState({idToDelete: data.id});
-            }}
-          >
-            <span className="icon"><i className="fas fa-trash-alt"></i></span>
-          </button> : null}
+          {!this.state.readonly && this.state.canDelete ?
+            data._toBeDeleted_
+            ? <button
+              className="btn btn-list-item btn-cancel"
+              onClick={(e) => {
+                e.preventDefault();
+                delete this.findRecordById(data.id)._toBeDeleted_;
+                this.setState({data: this.state.data}, () => {
+                  if (this.props.onDeleteSelectionChange) {
+                    this.props.onDeleteSelectionChange(this);
+                  }
+                });
+              }}
+            >
+              <span className="icon"><i className="fas fa-times"></i></span>
+            </button>
+            : <button
+              className="btn btn-list-item btn-danger"
+              title={globalThis.app.translate('Delete')}
+              onClick={(e) => {
+                e.preventDefault();
+                this.findRecordById(data.id)._toBeDeleted_ = true;
+                this.setState({data: this.state.data}, () => {
+                  if (this.props.onDeleteSelectionChange) {
+                    this.props.onDeleteSelectionChange(this);
+                  }
+                });
+              }}
+            >
+              <span className="icon"><i className="fas fa-trash-alt"></i></span>
+            </button>
+          : null}
         </>;
       }}
       style={{ width: 'auto' }}
@@ -817,14 +855,14 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     return (
       <>
         {this.renderFormModal()}
-        {this.renderDeleteConfirmModal()}
+        {this.state.isUsedAsInput ? null : this.renderDeleteConfirmModal()}
 
         <div
           id={"adios-table-" + this.props.uid}
           className={"adios component table"}
         >
-          {this.state.showHeader ? this.renderHeader() : ''}
-          {this.state.showFilter ? this.renderFilter() : ''}
+          {this.state.showHeader ? this.renderHeader() : null}
+          {this.state.showFilter ? this.renderFilter() : null}
 
           <div className="table-body" id={"adios-table-body-" + this.props.uid}>
             <DataTable {...this.getTableProps()}>
