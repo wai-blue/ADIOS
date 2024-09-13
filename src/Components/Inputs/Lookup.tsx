@@ -71,6 +71,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
       formRecord: this.props.parentForm?.state?.record,
       __IS_AJAX__: '1',
       ...this.props.customEndpointParams,
+      ...this.props.parentForm?.state.customEndpointParams ?? {},
     };
   }
 
@@ -91,7 +92,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   }
 
   renderValueElement() {
-    if (this.state.data && this.state.data[this.state.value]?._lookupText_) {
+    if (this.state.data && this.state.data[this.state.value]?._LOOKUP) {
       return <>
         <a
           role="button"
@@ -99,7 +100,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
           data-pr-tooltip={JSON.stringify(this.state.data[this.state.value] ?? {})}
           data-pr-position="bottom"
         >
-          {this.state.data[this.state.value]?._lookupText_}
+          {this.state.data[this.state.value]?._LOOKUP}
         </a>
       </>;
     } else {
@@ -113,20 +114,20 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
       <AsyncCreatable
         value={{
           id: this.state.data[this.state.value]?.id ?? 0,
-          _lookupText_: this.state.data[this.state.value]?._lookupText_ ?? '',
+          _LOOKUP: this.state.data[this.state.value]?._LOOKUP ?? '',
         }}
         isClearable={true}
         isDisabled={this.state.readonly || !this.state.isInitialized}
         loadOptions={(inputValue: string, callback: any) => this.loadData(inputValue, callback)}
         defaultOptions={Object.values(this.state.data ?? {})}
-        getOptionLabel={(option: any) => { return option._lookupText_ }}
+        getOptionLabel={(option: any) => { return option._LOOKUP }}
         getOptionValue={(option: any) => { return option.id }}
         onChange={(item: any) => { this.onChange(item?.id ?? 0); }}
         placeholder={this.props.params?.placeholder}
         classNamePrefix="adios-lookup"
         allowCreateWhileLoading={true}
         formatCreateLabel={(inputValue: string) => <span className="create-new">{globalThis.app.translate('Create') + ': ' + inputValue}</span>}
-        getNewOptionData={(value, label) => { return { id: {_isNew_: true, _lookupText_: label}, _lookupText_: label }; }}
+        getNewOptionData={(value, label) => { return { id: {_isNew_: true, _LOOKUP: label}, _LOOKUP: label }; }}
         styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
         menuPosition="fixed"
         menuPortalTarget={document.body}

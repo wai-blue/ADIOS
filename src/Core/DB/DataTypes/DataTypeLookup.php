@@ -111,7 +111,7 @@ class DataTypeLookup extends \ADIOS\Core\DB\DataType
     } else if ($value['_isNew_'] ?? false) {
     // var_dump($model->columns()[$colName]['model']);
       $lookupModel = $model->app->getModel($model->columns()[$colName]['model']);
-      return $lookupModel->eloquent->create($lookupModel->getNewRecordDataFromString($value['_lookupText_'] ?? ''))->id;
+      return $lookupModel->eloquent->create($lookupModel->getNewRecordDataFromString($value['_LOOKUP'] ?? ''))->id;
     } else if (empty($value)) {
       return null;
     }

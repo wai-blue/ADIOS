@@ -39,8 +39,8 @@ class Save extends \ADIOS\Core\ApiController {
       $idMasterRecord = $model->recordSave($dataToSave);
 
       if ($idMasterRecord > 0) {
-        $savedRecord = $model->recordGet(function($q) use ($idMasterRecord) {
-          $q->where('id', $idMasterRecord);
+        $savedRecord = $model->recordGet(function($q) use ($model, $idMasterRecord) {
+          $q->where($model->table . '.id', $idMasterRecord);
         });
       }
     }

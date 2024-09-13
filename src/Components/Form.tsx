@@ -72,6 +72,7 @@ export interface FormProps {
   showInModal?: boolean,
   showInModalSimple?: boolean,
   isInlineEditing?: boolean,
+  customEndpointParams?: any,
 
   tag?: string,
   context?: any,
@@ -97,6 +98,7 @@ export interface FormState {
   description: FormDescription,
   record: FormRecord,
   endpoint: FormEndpoint,
+  customEndpointParams: any,
 
   creatingRecord: boolean,
   updatingRecord: boolean,
@@ -144,7 +146,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       prevId: props.prevId,
       nextId: props.nextId,
       readonly: props.readonly,
-      description: deepObjectMerge(props.description ?? {}, {
+      description: props.description ?? {
         columns: {},
         defaultValues: {},
         permissions: {
@@ -154,7 +156,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           canDelete: false,
         },
         ui: {},
-      }),
+      },
       content: props.content,
       layout: this.convertLayoutToString(props.layout),
       creatingRecord: props.id ? props.id == -1 : false,
@@ -164,6 +166,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       record: {},
       params: null,
       invalidRecordId: false,
+      customEndpointParams: this.props.customEndpointParams ?? {},
     };
   }
 
@@ -193,20 +196,13 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       setNewState = true;
     }
 
-    // if (!this.state.isEdit && prevProps.defaultValues != this.props.defaultValues) {
-    //   newState.record = this.onAfterRecordLoaded(this.props.defaultValues);
-    //   setNewState = true;
-    // }
-
     if (setNewState) {
       this.setState(newState);
     }
   }
 
   componentDidMount() {
-    // this.checkIfIsEdit();
     this.initTabs();
-
     this.loadFormDescription();
   }
 
@@ -220,29 +216,44 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       id: this.state.id ? this.state.id : 0,
       tag: this.props.tag,
       __IS_AJAX__: '1',
+      ...this.state.customEndpointParams
     };
   }
 
   loadFormDescription() {
-    request.post(
-      this.getEndpointUrl('describeForm'),
-      this.getEndpointParams(),
-      {},
-      (description: any) => {
-        const defaultValues = deepObjectMerge(this.state.description.defaultValues ?? {}, description.defaultValues);
+    console.log(this.props.description);
+    if (this.props.description) {
+      this.setState({
+        description: this.props.description,
+        readonly: !(this.props.description.permissions?.canUpdate || this.props.description.permissions?.canCreate),
+      }, () => {
+        if (this.state.id !== -1) {
+          this.loadRecord();
+        } else {
+          this.setRecord(this.props.description?.defaultValues ?? {});
+        }
+      });
+    } else {
+      request.post(
+        this.getEndpointUrl('describeForm'),
+        this.getEndpointParams(),
+        {},
+        (description: any) => {
+          const defaultValues = deepObjectMerge(this.state.description.defaultValues ?? {}, description.defaultValues);
 
-        this.setState({
-          description: description,
-          readonly: !(description.permissions?.canUpdate || description.permissions?.canCreate),
-        }, () => {
-          if (this.state.id !== -1) {
-            this.loadRecord();
-          } else {
-            this.setRecord(defaultValues);
-          }
-        });
-      }
-    );
+          this.setState({
+            description: description,
+            readonly: !(description.permissions?.canUpdate || description.permissions?.canCreate),
+          }, () => {
+            if (this.state.id !== -1) {
+              this.loadRecord();
+            } else {
+              this.setRecord(defaultValues);
+            }
+          });
+        }
+      );
+    }
   }
 
   reload() {
@@ -706,7 +717,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     let formTitle = this.renderTitle();
     let formContent = this.renderContent();
 
-    if (this.props.showInModalSimple) {
+    if (this.props.showInModal) {
       return <>
         <div className="modal-header">
           <div className="modal-header-left">
@@ -726,72 +737,45 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     } else {
       return (
         <>
-          {this.props.showInModal ? (
-            <div className="modal-header">
-              <div className="row w-100 p-0 m-0 d-flex align-items-center justify-content-center">
-                <div className="col-lg-4 p-0">
-                  {this.renderHeaderLeft()}
-                </div>
-                <div className="col-lg-4 text-center">
-                  <h3
-                    id={'adios-modal-title-' + this.props.uid}
-                    className="m-0 p-0"
-                  >{formTitle}</h3>
-                </div>
-                <div className="col-lg-4 p-0 d-flex flex-row-reverse">
-                  {this.renderHeaderRight()}
-                </div>
-              </div>
-            </div>
-          ) : ''}
-
           <div
             id={"adios-form-" + this.props.uid}
             className="adios component form"
           >
-            {this.props.showInModal ? (
-              <div className="modal-body">
-                {formContent}
-              </div>
-            ) : (
-              <>
-                {formTitle}
-                <div className="card w-100">
-                  <div className="card-header">
-                    <div className="row">
-                      <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
-                        {this.renderHeaderLeft()}
-                      </div>
-
-                      {this.state.tabs != undefined ? (
-                        <div className={"col-lg-6 m-0 p-0"}>
-                          <ul className="nav nav-tabs card-header-tabs mt-3">
-                            {Object.keys(this.state.tabs).map((tabName: string) => {
-                              return (
-                                <li className="nav-item" key={tabName}>
-                                  <button
-                                    className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
-                                    onClick={() => this.changeTab(tabName)}
-                                  >{tabName}</button>
-                                </li>
-                              );
-                            })}
-                          </ul>
-                        </div>
-                      ) : ''}
-
-                      <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
-                        {this.renderHeaderRight()}
-                      </div>
-                    </div>
+            {formTitle}
+            <div className="card w-100">
+              <div className="card-header">
+                <div className="row">
+                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
+                    {this.renderHeaderLeft()}
                   </div>
 
-                  <div className="card-body">
-                    {formContent}
+                  {this.state.tabs != undefined ? (
+                    <div className={"col-lg-6 m-0 p-0"}>
+                      <ul className="nav nav-tabs card-header-tabs mt-3">
+                        {Object.keys(this.state.tabs).map((tabName: string) => {
+                          return (
+                            <li className="nav-item" key={tabName}>
+                              <button
+                                className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
+                                onClick={() => this.changeTab(tabName)}
+                              >{tabName}</button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  ) : ''}
+
+                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
+                    {this.renderHeaderRight()}
                   </div>
                 </div>
-              </>
-            )}
+              </div>
+
+              <div className="card-body">
+                {formContent}
+              </div>
+            </div>
           </div>
         </>
       );

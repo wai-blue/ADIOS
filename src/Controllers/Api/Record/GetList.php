@@ -54,7 +54,7 @@ class GetList extends \ADIOS\Core\ApiController {
         }
 
         if ($column['type'] == 'lookup') {
-          $query->orHaving($columnName.'_lookupText_', 'like', "%{$search}%");
+          $query->orHaving('_LOOKUP[' . $columnName . ']', 'like', "%{$search}%");
         } else {
           $query->orHaving($columnName, 'like', "%{$search}%");
         }

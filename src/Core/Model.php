@@ -559,7 +559,7 @@ class Model
 
   public function getById(int $id)
   {
-    $item = $this->recordGet(function($q) use ($id) { $q->where('id', $id); });
+    $item = $this->recordGet(function($q) use ($id) { $q->where($this->table . '.id', $id); });
     return $item;
   }
 
@@ -738,6 +738,7 @@ class Model
         'canUpdate' => $this->app->permissions->granted($description['model'] . ':Update'),
         'canDelete' => $this->app->permissions->granted($description['model'] . ':Delete'),
       ],
+      'ui' => [],
     ];
 
     return $description;
@@ -1073,17 +1074,10 @@ class Model
     $withs = [];
     $joins = [];
 
-    // foreach ($tmpColumns as $tmpColumnName => $tmpColumnDefinition) {
-    //   $selectRaw[] = $this->table . '.' . $tmpColumnName;
-    // }
-
     $selectRaw[] = $this->table . '.*';
-    $selectRaw[] = '(' .
-      str_replace('{%TABLE%}', $this->table, $this->lookupSqlValue())
-      . ') as _lookupText_'
-    ;
+    $selectRaw[] = '(' . str_replace('{%TABLE%}', $this->table, $this->lookupSqlValue()) . ') as _LOOKUP';
 
-    if ($addLookups) {
+    if ($addLookups || true) {
 
       // LOOKUPS and RELATIONSHIPS
       foreach ($tmpColumns as $columnName => $column) {
@@ -1096,7 +1090,7 @@ class Model
 
           $selectRaw[] = "(" .
             str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
-            . ") as `{$columnName}_lookupText_`"
+            . ") as `_LOOKUP[{$columnName}]`"
           ;
 
           $joins[] = [
@@ -1122,18 +1116,17 @@ class Model
         }
       }
 
-      $query->with([$relName => function($query) use($relModel) {
-        return
-          $query
-            ->selectRaw('
-              *,
-              (' .
-                str_replace('{%TABLE%}', $relModel->table, $relModel->lookupSqlValue())
-              . ') as _lookupText_
-            ')
-          ;
-      }]);
-  
+      $query->with($relName);
+
+      // $query->with([$relName => function($query) use($relModel) {
+      //   return
+      //     $query
+      //       ->selectRaw('
+      //         *,
+      //         (' . str_replace('{%TABLE%}', $relModel->table, $relModel->lookupSqlValue()) . ') as _lookupText_'
+      //       )
+      //     ;
+      // }]);
 
     }
     foreach ($joins as $join) {
@@ -1143,22 +1136,22 @@ class Model
     return $query;
   }
 
-  public function getDependentRecords(int $parentId): array {
-    $dependentRecords = [];
-    foreach ($this->adios->registeredModels as $modelClass) {
-      $tmpModel = $this->adios->getModel($modelClass);
-      foreach ($tmpModel->columns() as $colName => $colDef) {
-        if ($colDef['type'] == 'lookup' && $colDef['model'] == $this->fullName) {
-          $count = $tmpModel->where($colName, $parentId)->count();
-          if ($count > 0) {
-            $dependentRecords[$tmpModel->fullName . '.' . $colName] = $count;
-          }
-        }
-      }
-    }
+  // public function getDependentRecords(int $parentId): array {
+  //   $dependentRecords = [];
+  //   foreach ($this->adios->registeredModels as $modelClass) {
+  //     $tmpModel = $this->adios->getModel($modelClass);
+  //     foreach ($tmpModel->columns() as $colName => $colDef) {
+  //       if ($colDef['type'] == 'lookup' && $colDef['model'] == $this->fullName) {
+  //         $count = $tmpModel->where($colName, $parentId)->count();
+  //         if ($count > 0) {
+  //           $dependentRecords[$tmpModel->fullName . '.' . $colName] = $count;
+  //         }
+  //       }
+  //     }
+  //   }
 
-    return $dependentRecords;
-  }
+  //   return $dependentRecords;
+  // }
 
   public function getNewRecordDataFromString(string $text): array {
     return [];

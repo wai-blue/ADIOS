@@ -79,7 +79,7 @@ export default class Tags2 extends Input<Tags2InputProps, Tags2InputState> {
         for (let i in data) {
           options[data[i].id] = {
             value: data[i].id,
-            label: data[i]._lookupText_,
+            label: data[i]._LOOKUP_,
             color: data[i][this.props.colorColumn ?? ''] ?? '',
           };
         }
