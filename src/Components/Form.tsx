@@ -673,11 +673,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   renderTitle(): JSX.Element {
     let title = this.state.description?.ui?.title ??
       (this.state.updatingRecord
-          ? globalThis.app.translate('Update record') + ' #' + (this.state.record?.id ?? '-')
-          : globalThis.app.translate('Adding new record')
+          ? globalThis.app.translate('Record') + ' #' + (this.state.record?.id ?? '-')
+          : globalThis.app.translate('New record')
       )
     ;
-    let subTitle = this.state.description?.ui?.subTitle ?? '';
+    let subTitle = this.state.description?.ui?.subTitle ?? this.props.model;
 
     return <>
       <h2>{title}</h2>

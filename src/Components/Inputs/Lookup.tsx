@@ -127,6 +127,9 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
         allowCreateWhileLoading={true}
         formatCreateLabel={(inputValue: string) => <span className="create-new">{globalThis.app.translate('Create') + ': ' + inputValue}</span>}
         getNewOptionData={(value, label) => { return { id: {_isNew_: true, _lookupText_: label}, _lookupText_: label }; }}
+        styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+        menuPosition="fixed"
+        menuPortalTarget={document.body}
       />
     )
   }

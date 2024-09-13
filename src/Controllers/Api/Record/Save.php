@@ -18,7 +18,7 @@ class Save extends \ADIOS\Core\ApiController {
     array $data,
     int $idMasterRecord = 0
   ): array {
-    $savedData = [];
+    $savedRecord = [];
 
     if (empty($modelClass)) throw new \Exception("Master model is not specified.");
     $model = $this->app->getModel($modelClass);
@@ -34,12 +34,12 @@ class Save extends \ADIOS\Core\ApiController {
 
     if ($dataToSave['_toBeDeleted_']) {
       $model->recordDelete((int) $dataToSave['id']);
-      $savedData = [];
+      $savedRecord = [];
     } else {
       $idMasterRecord = $model->recordSave($dataToSave);
 
       if ($idMasterRecord > 0) {
-        $savedData = $model->recordGet(function($q) use ($idMasterRecord) {
+        $savedRecord = $model->recordGet(function($q) use ($idMasterRecord) {
           $q->where('id', $idMasterRecord);
         });
       }
@@ -51,7 +51,7 @@ class Save extends \ADIOS\Core\ApiController {
         switch ($relType) {
           case \ADIOS\Core\Model::HAS_MANY:
             foreach ($data[$relName] as $subKey => $subRecord) {
-              $savedData[$relName][$subKey] = $this->recordSave(
+              $savedRecord[$relName][$subKey] = $this->recordSave(
                 $relModel,
                 $subRecord,
                 $idMasterRecord
@@ -59,7 +59,7 @@ class Save extends \ADIOS\Core\ApiController {
             }
           break;
           case \ADIOS\Core\Model::HAS_ONE:
-            $savedData[$relName] = $this->recordSave(
+            $savedRecord[$relName] = $this->recordSave(
               $relModel,
               $data[$relName],
               $idMasterRecord
@@ -69,7 +69,7 @@ class Save extends \ADIOS\Core\ApiController {
       }
     }
 
-    return $savedData;
+    return $savedRecord;
   }
 
   public function response(): array

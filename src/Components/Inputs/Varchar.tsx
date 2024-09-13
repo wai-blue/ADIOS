@@ -55,7 +55,7 @@ export default class Varchar extends Input<InputProps, VarcharInputState> {
           </div>
         :
           <button className="mt-1 btn btn-small btn-transparent" onClick={() => { this.setState({showPredefinedValues: true}); }}>
-            <span className="text text-xs">Choose...</span>
+            <span className="text text-xs">Choose from predefined options...</span>
           </button>
       : null}
     </>;

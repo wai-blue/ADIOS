@@ -89,6 +89,7 @@ export interface TableProps {
   async?: boolean,
   readonly?: boolean,
   closeFormAfterSave?: boolean,
+  className?: string,
 
   //TODO
   //showPaging?: boolean,
@@ -650,12 +651,12 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   getColumnValue(columnName: string, column: any, data: any) {
-    // if (column['type'] == 'lookup') {
-    //   let relation = column.relation ?? columnName.substring(3).toUpperCase();
-    //   return data[relation]?._lookupText_ ?? '';
-    // } else {
-    return data[columnName];
-    // }
+    if (column['type'] == 'lookup') {
+      let relation = column.relation ?? columnName.substring(3).toUpperCase();
+      return data[relation]?._lookupText_ ?? '';
+    } else {
+      return data[columnName];
+    }
   }
 
   /*
@@ -863,7 +864,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
         <div
           id={"adios-table-" + this.props.uid}
-          className={"adios component table"}
+          className={"adios component table" + (this.props.className ? " " + this.props.className : "")}
         >
           {this.state.showHeader ? this.renderHeader() : null}
           {this.state.showFilter ? this.renderFilter() : null}
