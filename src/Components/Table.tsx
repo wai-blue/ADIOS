@@ -79,7 +79,7 @@ export interface ExternalCallbacks {
 
 export interface TableProps {
   uid: string,
-  description: TableDescription,
+  description?: TableDescription,
   recordId?: any,
   formEndpoint?: FormEndpoint,
   formModal?: ModalProps,
@@ -132,7 +132,7 @@ interface TableData {
 
 export interface TableState {
   endpoint: TableEndpoint,
-  description: TableDescription,
+  description?: TableDescription,
   data?: TableData | null,
   filterBy?: any,
   recordId?: any,
@@ -177,20 +177,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         getRecords: 'api/record/get-list',
         deleteRecord: 'api/record/delete',
       }),
-      description: props.description ?? {
-        columns: {},
-        permissions: {
-          canCreate: true,
-          canDelete: true,
-          canRead: true,
-          canUpdate: true,
-        },
-        ui: {
-          showHeader: true,
-          showFooter: true,
-          showFilter: true,
-        },
-      },
+      description: props.description,
       recordId: props.recordId,
       formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? null),
       formProps: {
@@ -307,7 +294,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       },
     };
 
-    if (this.state.description.ui?.showFooter) tableProps.footer = this.renderFooter();
+    if (this.state.description?.ui?.showFooter) tableProps.footer = this.renderFooter();
 
     return tableProps;
   }
@@ -459,20 +446,20 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         onClick={() => this.onAddClick()}
       >
         <span className="icon"><i className="fas fa-plus"/></span>
-        {this.state.description.ui?.addButtonText ? <span className="text">{this.state.description.ui?.addButtonText}</span> : null}
+        {this.state.description?.ui?.addButtonText ? <span className="text">{this.state.description?.ui?.addButtonText}</span> : null}
       </button>
     );
   }
 
   renderHeaderButtons(): Array<JSX.Element> {
     let buttons: Array<JSX.Element> = [];
-    if (!this.state.readonly && this.state.description.permissions?.canCreate) buttons.push(this.renderAddButton());
+    if (!this.state.readonly && this.state.description?.permissions?.canCreate) buttons.push(this.renderAddButton());
     return buttons;
   }
 
   renderHeader(): JSX.Element {
     return <div className="table-header">
-      {this.state.description.ui?.title ? <div className="table-header-title">{this.state.description.ui?.title}</div> : null}
+      {this.state.description?.ui?.title ? <div className="table-header-title">{this.state.description?.ui?.title}</div> : null}
 
       <div className="table-header-left">
         {this.renderHeaderButtons()}
@@ -758,8 +745,8 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       columns.push(<Column selectionMode={this.props.selectionMode}></Column>);
     }
 
-    Object.keys(this.state.description.columns ?? {}).map((columnName: string) => {
-      const column: any = this.state.description.columns[columnName] ?? {};
+    Object.keys(this.state.description?.columns ?? {}).map((columnName: string) => {
+      const column: any = this.state.description?.columns[columnName] ?? {};
       columns.push(<Column
         key={columnName}
         field={columnName}
@@ -790,7 +777,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       header=''
       body={(data: any, options: any) => {
         return <>
-          {!this.state.readonly && this.state.description.permissions?.canDelete ?
+          {!this.state.readonly && this.state.description?.permissions?.canDelete ?
             data._toBeDeleted_
             ? <button
               className="btn btn-list-item btn-cancel"
@@ -831,7 +818,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   render() {
-    if (!this.state.data || !this.state.description.columns) {
+    if (!this.state.data || !this.state.description?.columns) {
       return <ProgressBar mode="indeterminate" style={{ height: '8px' }}></ProgressBar>;
     }
 
@@ -844,8 +831,8 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           id={"adios-table-" + this.props.uid}
           className={"adios component table" + (this.props.className ? " " + this.props.className : "")}
         >
-          {this.state.description.ui?.showHeader ? this.renderHeader() : null}
-          {this.state.description.ui?.showFilter ? this.renderFilter() : null}
+          {this.state.description?.ui?.showHeader ? this.renderHeader() : null}
+          {this.state.description?.ui?.showFilter ? this.renderFilter() : null}
 
           <div className="table-body" id={"adios-table-body-" + this.props.uid}>
             <DataTable {...this.getTableProps()}>

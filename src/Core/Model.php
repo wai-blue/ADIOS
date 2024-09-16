@@ -733,6 +733,8 @@ class Model
     $description = [
       'ui' => [
         'showHeader' => true,
+        'showFooter' => true,
+        'showFilter' => true,
       ],
       'columns' => $columns,
       'permissions' => [
