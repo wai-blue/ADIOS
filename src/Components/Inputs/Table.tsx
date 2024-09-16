@@ -36,6 +36,7 @@ export default class Table extends Input<TableInputProps, TableInputState> {
       <BigTable
         async={false}
         uid={this.props.uid + '_table'}
+        context={this.props.context}
         model={this.props.model}
         description={this.state.description}
         data={{data: this.state.value}}
