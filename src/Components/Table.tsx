@@ -302,6 +302,8 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   loadTableDescription(successCallback?: (params: any) => void) {
+    if (this.state.description) return;
+
     if (this.props.description) {
       this.setState({description: this.props.description});
     } else {
@@ -822,6 +824,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   render() {
+    console.log(this.props.uid, this.state.data, this.state.description);
     if (!this.state.data || !this.state.description?.columns) {
       return <ProgressBar mode="indeterminate" style={{ height: '8px' }}></ProgressBar>;
     }
