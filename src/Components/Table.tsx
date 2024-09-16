@@ -381,7 +381,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       endpoint: this.state.formEndpoint,
       isInlineEditing: (this.state.recordId ?? null) === -1,
       showInModal: true,
-      description: this.props.formProps?.description,
+      description: this.props.formProps?.description ?? {},
       ...this.props.formCustomProps ?? {},
       customEndpointParams: this.state.customEndpointParams ?? {},
       onClose: () => {

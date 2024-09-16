@@ -731,6 +731,9 @@ class Model
     unset($columns['id']);
 
     $description = [
+      'ui' => [
+        'showHeader' => true,
+      ],
       'columns' => $columns,
       'permissions' => [
         'canRead' => $this->app->permissions->granted($description['model'] . ':Read'),
@@ -738,7 +741,6 @@ class Model
         'canUpdate' => $this->app->permissions->granted($description['model'] . ':Update'),
         'canDelete' => $this->app->permissions->granted($description['model'] . ':Delete'),
       ],
-      'ui' => [],
     ];
 
     return $description;
