@@ -20,7 +20,7 @@ class Lookup extends \ADIOS\Core\ApiController {
     if ($this->params['search']) {
       $query->where(function($q) {
         foreach ($this->model->columns() as $columnName => $column) {
-          $q->orWhere($columnName, 'LIKE', '%' . $this->params['search'] . '%');
+          $q->orWhere($this->model->table . '.' . $columnName, 'LIKE', '%' . $this->params['search'] . '%');
         }
       });
     }

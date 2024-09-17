@@ -1016,6 +1016,8 @@ class Model
       $records[$key] = $this->onAfterLoadRecord($records[$key]);
     }
 
+    $records = $this->onAfterLoadRecords($records);
+
     return $records;
   }
 
@@ -1239,13 +1241,19 @@ class Model
     ])['id'];
   }
 
-
-  public function onAfterLoadRecord(array $record): array {
+  public function onAfterLoadRecord(array $record): array
+  {
     return $record;
   }
 
-  public function recordAddCustomData(array $record): array {
+  public function recordAddCustomData(array $record): array
+  {
     return $record;
+  }
+
+  public function onAfterLoadRecords(array $records): array
+  {
+    return $records;
   }
 
 }
