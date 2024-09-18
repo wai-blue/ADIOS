@@ -61,10 +61,19 @@ export default class Tags2 extends Input<Tags2InputProps, Tags2InputState> {
   }
 
   getEndpointParams(): object {
+    let formRecord: any = null;
+
+    if (this.props.parentForm) {
+      formRecord = {};
+      for (let colName in this.props.parentForm.state.description?.columns) {
+        formRecord[colName] = this.props.parentForm.state?.record[colName] ?? null;
+      }
+    }
+
     return {
       model: this.state.model,
       context: this.props.context,
-      formRecord: this.props.parentForm?.state?.record,
+      formRecord: formRecord,
       __IS_AJAX__: '1',
     };
   }
@@ -79,7 +88,7 @@ export default class Tags2 extends Input<Tags2InputProps, Tags2InputState> {
         for (let i in data) {
           options[data[i].id] = {
             value: data[i].id,
-            label: data[i]._LOOKUP_,
+            label: data[i]._LOOKUP,
             color: data[i][this.props.colorColumn ?? ''] ?? '',
           };
         }

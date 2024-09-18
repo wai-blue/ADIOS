@@ -65,10 +65,19 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
   }
 
   getEndpointParams(): object {
+    let formRecord: any = null;
+
+    if (this.props.parentForm) {
+      formRecord = {};
+      for (let colName in this.props.parentForm.state.description?.columns) {
+        formRecord[colName] = this.props.parentForm.state?.record[colName] ?? null;
+      }
+    }
+
     return {
       model: this.state.model,
       context: this.props.context,
-      formRecord: this.props.parentForm?.state?.record,
+      formRecord: formRecord,
       __IS_AJAX__: '1',
       ...this.props.customEndpointParams,
       ...this.props.parentForm?.state.customEndpointParams ?? {},
