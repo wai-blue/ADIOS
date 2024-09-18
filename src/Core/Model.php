@@ -1073,7 +1073,7 @@ class Model
     return $record;
   }
 
-  public function prepareLoadRecordQuery(bool $addLookups = false, $query = null, $level = 0) {
+  public function prepareLoadRecordQuery(int $maxRelationLevel = 0, $query = null, int $level = 0) {
     $tmpColumns = $this->columns();
 
     $selectRaw = [];
@@ -1084,31 +1084,27 @@ class Model
     $selectRaw[] = $level . ' as _LEVEL';
     $selectRaw[] = '(' . str_replace('{%TABLE%}', $this->table, $this->lookupSqlValue()) . ') as _LOOKUP';
 
-    if ($addLookups || true) {
+    // LOOKUPS and RELATIONSHIPS
+    foreach ($tmpColumns as $columnName => $column) {
+      if ($column['type'] == 'lookup') {
+        $lookupModel = $this->app->getModel($column['model']);
+        $lookupConnection = $lookupModel->eloquent->getConnectionName();
+        $lookupDatabase = $lookupModel->eloquent->getConnection()->getDatabaseName();
+        $lookupTableName = $lookupModel->getFullTableSqlName();
+        $joinAlias = 'join_' . $columnName;
 
-      // LOOKUPS and RELATIONSHIPS
-      foreach ($tmpColumns as $columnName => $column) {
-        if ($column['type'] == 'lookup') {
-          $lookupModel = $this->app->getModel($column['model']);
-          $lookupConnection = $lookupModel->eloquent->getConnectionName();
-          $lookupDatabase = $lookupModel->eloquent->getConnection()->getDatabaseName();
-          $lookupTableName = $lookupModel->getFullTableSqlName();
-          $joinAlias = 'join_' . $columnName;
+        $selectRaw[] = "(" .
+          str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
+          . ") as `_LOOKUP[{$columnName}]`"
+        ;
 
-          $selectRaw[] = "(" .
-            str_replace("{%TABLE%}", $joinAlias, $lookupModel->lookupSqlValue())
-            . ") as `_LOOKUP[{$columnName}]`"
-          ;
-
-          $joins[] = [
-            $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,
-            $joinAlias.'.id',
-            '=',
-            $this->table.'.'.$columnName
-          ];
-        }
+        $joins[] = [
+          $lookupDatabase . '.' . $lookupTableName . ' as ' . $joinAlias,
+          $joinAlias.'.id',
+          '=',
+          $this->table.'.'.$columnName
+        ];
       }
-
     }
 
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
@@ -1124,12 +1120,11 @@ class Model
       //   }
       // }
 
-      // $query->with($relName);
-      $query->with([$relName => function($q) use($relModel, $relModelClass, $level) {
-        // echo "{$relModelClass}, {$level}\n";
-        if ($level < 3) return $relModel->prepareLoadRecordQuery(true, $q, $level + 1);
-        else return $q;
-      }]);
+      if ($level <= $maxRelationLevel) {
+        $query->with([$relName => function($q) use($relModel, $maxRelationLevel, $level) {
+          return $relModel->prepareLoadRecordQuery($maxRelationLevel, $q, $level + 1);
+        }]);
+      }
 
       // $query->with([$relName => function($query) use($relModel) {
       //   return
