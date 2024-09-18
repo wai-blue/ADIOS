@@ -1073,7 +1073,7 @@ class Model
     return $record;
   }
 
-  public function prepareLoadRecordQuery(bool $addLookups = false): \Illuminate\Database\Eloquent\Builder {
+  public function prepareLoadRecordQuery(bool $addLookups = false, $query = null, $level = 0) {
     $tmpColumns = $this->columns();
 
     $selectRaw = [];
@@ -1081,6 +1081,7 @@ class Model
     $joins = [];
 
     $selectRaw[] = $this->table . '.*';
+    $selectRaw[] = $level . ' as _LEVEL';
     $selectRaw[] = '(' . str_replace('{%TABLE%}', $this->table, $this->lookupSqlValue()) . ') as _LOOKUP';
 
     if ($addLookups || true) {
@@ -1111,18 +1112,24 @@ class Model
     }
 
     // TODO: Toto je pravdepodobne potencialna SQL injection diera. Opravit.
-    $query = $this->eloquent->selectRaw(join(',', $selectRaw)); //->with($withs);
+    if ($query === null) $query = $this->eloquent;
+    $query = $query->selectRaw(join(',', $selectRaw)); //->with($withs);
     foreach ($this->relations as $relName => $relDefinition) {
       list($relType, $relModelClass) = $relDefinition;
       $relModel = new $relModelClass($this->app);
 
-      if (is_array($relModel->relations)) {
-        foreach ($relModel->relations as $subRelName => $subRelDefinition) {
-          $query->with($relName . "." . $subRelName);
-        }
-      }
+      // if (is_array($relModel->relations)) {
+      //   foreach ($relModel->relations as $subRelName => $subRelDefinition) {
+      //     $query->with($relName . "." . $subRelName);
+      //   }
+      // }
 
-      $query->with($relName);
+      // $query->with($relName);
+      $query->with([$relName => function($q) use($relModel, $relModelClass, $level) {
+        // echo "{$relModelClass}, {$level}\n";
+        if ($level < 3) return $relModel->prepareLoadRecordQuery(true, $q, $level + 1);
+        else return $q;
+      }]);
 
       // $query->with([$relName => function($query) use($relModel) {
       //   return

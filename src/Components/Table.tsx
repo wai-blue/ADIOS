@@ -622,19 +622,19 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     }
   }
 
-  getColumnValue(columnName: string, column: any, data: any) {
-    if (column['type'] == 'lookup') {
-      return data['_LOOKUP[' + columnName + ']'] ?? '';
-    } else {
-      return data[columnName];
-    }
-  }
+  // getColumnValue(columnName: string, column: any, data: any) {
+  //   if (column['type'] == 'lookup') {
+  //     return data['_LOOKUP[' + columnName + ']'] ?? '';
+  //   } else {
+  //     return data[columnName];
+  //   }
+  // }
 
   /*
    * Render body for Column (PrimeReact column)
    */
   renderCell(columnName: string, column: any, data: any, options: any) {
-    const columnValue: any = this.getColumnValue(columnName, column, data);
+    const columnValue: any = data[columnName]; // this.getColumnValue(columnName, column, data);
     const enumValues = column.enumValues;
     const inputProps = {
       uid: this.props.uid + '_' + columnName,
@@ -685,7 +685,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           //   }
           break;
           case 'lookup':
-            cellValueElement = cellContent;
+            cellValueElement = data['_LOOKUP[' + columnName + ']'] ?? '';
           break;
           case 'enum':
             const enumValues = column.enumValues;
@@ -824,7 +824,6 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   render() {
-    console.log(this.props.uid, this.state.data, this.state.description);
     if (!this.state.data || !this.state.description?.columns) {
       return <ProgressBar mode="indeterminate" style={{ height: '8px' }}></ProgressBar>;
     }
