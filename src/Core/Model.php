@@ -1002,8 +1002,8 @@ class Model
     return $relations;
   }
 
-  public function loadRecords(callable|null $queryModifierCallback = null): array {
-    $query = $this->prepareLoadRecordQuery();
+  public function loadRecords(callable|null $queryModifierCallback = null, int $maxRelationLevel = 0): array {
+    $query = $this->prepareLoadRecordQuery($maxRelationLevel);
     if ($queryModifierCallback !== null) $queryModifierCallback($query);
 
     $records = $query->get()?->toArray();
@@ -1014,6 +1014,7 @@ class Model
       $records[$key] = $this->recordEncryptIds($records[$key]);
       $records[$key] = $this->recordAddCustomData($records[$key]);
       $records[$key] = $this->onAfterLoadRecord($records[$key]);
+      $records[$key]['_RELATIONS'] = array_keys($this->relations);
     }
 
     $records = $this->onAfterLoadRecords($records);
@@ -1067,14 +1068,16 @@ class Model
     return $record;
   }
 
-  public function recordGet(callable|null $queryModifierCallback = null): array {
-    $record = reset($this->loadRecords($queryModifierCallback));
+  public function recordGet(callable|null $queryModifierCallback = null, int $maxRelationLevel = 0): array {
+    $record = reset($this->loadRecords($queryModifierCallback, $maxRelationLevel));
     if (!is_array($record)) $record = [];
     return $record;
   }
 
   public function prepareLoadRecordQuery(int $maxRelationLevel = 0, $query = null, int $level = 0) {
     $tmpColumns = $this->columns();
+
+    if ($maxRelationLevel > 4) $maxRelationLevel = 4;
 
     $selectRaw = [];
     $withs = [];
@@ -1111,18 +1114,47 @@ class Model
     if ($query === null) $query = $this->eloquent;
     $query = $query->selectRaw(join(',', $selectRaw)); //->with($withs);
     foreach ($this->relations as $relName => $relDefinition) {
-      list($relType, $relModelClass) = $relDefinition;
-      $relModel = new $relModelClass($this->app);
+      $relModel = new $relDefinition[1]($this->app);
 
-      // if (is_array($relModel->relations)) {
-      //   foreach ($relModel->relations as $subRelName => $subRelDefinition) {
-      //     $query->with($relName . "." . $subRelName);
-      //   }
+      // switch ($maxRelationLevel) {
+      //   case 0: /* */ break;
+      //   case 1: $query->with($relName); break;
+      //   case 2:
+      //     foreach ($relModel->relations as $subRelName => $subRelDefinition) {
+      //       $query->with($relName . "." . $subRelName);
+      //     }
+      //   break;
+      //   case 3:
+      //     foreach ($relModel->relations as $subRelName => $subRelDefinition) {
+      //       $query->with($relName . "." . $subRelName);
+
+      //       $subRelModel = new $subRelDefinition[1]($this->app);
+      //       foreach ($subRelModel->relations as $subSubRelName => $subSubRelDefinition) {
+      //         $query->with($relName . "." . $subRelName . "." . $subSubRelName);
+      //       }
+      //     }
+      //   break;
+      //   case 4:
+      //   default:
+      //     foreach ($relModel->relations as $subRelName => $subRelDefinition) {
+      //       $query->with($relName . "." . $subRelName);
+
+      //       $subRelModel = new $subRelDefinition[1]($this->app);
+      //       foreach ($subRelModel->relations as $subSubRelName => $subSubRelDefinition) {
+      //         $query->with($relName . "." . $subRelName . "." . $subSubRelName);
+
+      //         $subSubRelModel = new $subSubRelDefinition[1]($this->app);
+      //         foreach ($subSubRelModel->relations as $subSubSubRelName => $subSubSubRelDefinition) {
+      //           $query->with($relName . "." . $subRelName . "." . $subSubRelName . "." . $subSubSubRelName);
+      //         }
+      //       }
+      //     }
+      //   break;
       // }
 
-      if ($level <= $maxRelationLevel) {
-        $query->with([$relName => function($q) use($relModel, $maxRelationLevel, $level) {
-          return $relModel->prepareLoadRecordQuery($maxRelationLevel, $q, $level + 1);
+      if ($maxRelationLevel > 0) {
+        $query->with([$relName => function($q) use($relModel, $maxRelationLevel) {
+          return $relModel->prepareLoadRecordQuery($maxRelationLevel - 1, $q);
         }]);
       }
 

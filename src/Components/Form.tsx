@@ -215,6 +215,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       model: this.props.model,
       id: this.state.id ? this.state.id : 0,
       tag: this.props.tag,
+      maxRelationLevel: 10,
       __IS_AJAX__: '1',
       ...this.state.customEndpointParams
     };
@@ -299,6 +300,12 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     });
 
     let record = { ...this.state.record, id: this.state.id };
+
+    console.log('_RELATIONS', this.state.record._RELATIONS);
+
+    (this.state.record._RELATIONS ?? []).map((relName) => { console.log('deleting', relName); delete record[relName]; });
+
+    console.log('record', record);
 
     record = this.onBeforeSaveRecord(record);
 
@@ -681,6 +688,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     </>;
   }
 
+  renderFooter(): JSX.Element|null { return null; }
+
   renderTitle(): JSX.Element {
     let title = this.state.description?.ui?.title ??
       (this.state.updatingRecord
@@ -716,69 +725,30 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
     let formTitle = this.renderTitle();
     let formContent = this.renderContent();
+    let formFooter = this.renderFooter();
 
     if (this.props.showInModal) {
       return <>
         <div className="modal-header">
-          <div className="modal-header-left">
-            {this.renderHeaderLeft()}
-          </div>
-          <div className="modal-header-title">
-            {formTitle}
-          </div>
-          <div className="modal-header-right">
-            {this.renderHeaderRight()}
-          </div>
+          <div className="modal-header-left">{this.renderHeaderLeft()}</div>
+          <div className="modal-header-title">{formTitle}</div>
+          <div className="modal-header-right">{this.renderHeaderRight()}</div>
         </div>
-        <div className="modal-body">
-          {formContent}
-        </div>
+        <div className="modal-body">{formContent}</div>
+        {formFooter ? <div className="modal-footer">{formFooter}</div> : null}
       </>;
     } else {
-      return (
-        <>
-          <div
-            id={"adios-form-" + this.props.uid}
-            className="adios component form"
-          >
-            {formTitle}
-            <div className="card w-100">
-              <div className="card-header">
-                <div className="row">
-                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0"}>
-                    {this.renderHeaderLeft()}
-                  </div>
-
-                  {this.state.tabs != undefined ? (
-                    <div className={"col-lg-6 m-0 p-0"}>
-                      <ul className="nav nav-tabs card-header-tabs mt-3">
-                        {Object.keys(this.state.tabs).map((tabName: string) => {
-                          return (
-                            <li className="nav-item" key={tabName}>
-                              <button
-                                className={this.state.tabs[tabName]['active'] ? 'nav-link active' : 'nav-link'}
-                                onClick={() => this.changeTab(tabName)}
-                              >{tabName}</button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </div>
-                  ) : ''}
-
-                  <div className={"col-lg-" + (this.state.tabs == undefined ? "6" : "3") + " m-0 p-0 text-right"}>
-                    {this.renderHeaderRight()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="card-body">
-                {formContent}
-              </div>
-            </div>
+      return <>
+        <div id={"adios-form-" + this.props.uid} className="adios component form">
+          <div className="form-header">
+            <div className="form-header-left">{this.renderHeaderLeft()}</div>
+            <div className="form-header-title">{formTitle}</div>
+            <div className="form-header-right">{this.renderHeaderRight()}</div>
           </div>
-        </>
-      );
+          <div className="form-body">{formContent}</div>
+          {formFooter ? <div className="form-footer">{formFooter}</div> : null}
+        </div>
+      </>;
     }
   }
 }

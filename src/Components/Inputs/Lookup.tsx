@@ -68,10 +68,10 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
     let formRecord: any = null;
 
     if (this.props.parentForm) {
-      formRecord = {};
-      for (let colName in this.props.parentForm.state.description?.columns) {
-        formRecord[colName] = this.props.parentForm.state?.record[colName] ?? null;
-      }
+      formRecord = {...this.props.parentForm.state.record};
+      (this.props.parentForm.state.record._RELATIONS ?? []).map((relName) => {
+        delete formRecord[relName];
+      })
     }
 
     return {

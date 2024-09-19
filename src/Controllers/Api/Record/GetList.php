@@ -28,7 +28,7 @@ class GetList extends \ADIOS\Core\ApiController {
     $columns = $this->model->columns();
     $relations = $this->model->relations;
 
-    $query = $this->model->prepareLoadRecordQuery($search !== null);
+    $query = $this->model->prepareLoadRecordQuery((int) ($this->app->params['maxRelationLevel'] ?? 1));
 
     // FILTER BY
     if (isset($params['filterBy'])) {
@@ -104,6 +104,7 @@ class GetList extends \ADIOS\Core\ApiController {
       $data['data'][$key] = $this->model->recordEncryptIds($record);
       $data['data'][$key] = $this->model->recordAddCustomData($record);
       $data['data'][$key] = $this->model->onAfterLoadRecord($record);
+      $data['data'][$key]['_RELATIONS'] = array_keys($this->model->relations);
     }
 
     return $data;
