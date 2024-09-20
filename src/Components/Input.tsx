@@ -204,8 +204,8 @@ export class Input<P extends InputProps, S extends InputState> extends Component
             ></input>
             <div className="input-element">
               {this.renderInputElement()}
+              {this.props.params?.unit ? <div className="input-unit">{this.props.params?.unit}</div> : null}
             </div>
-            {this.props.params?.unit ? <div className="input-unit">{this.props.params?.unit}</div> : null}
             {this.state.showInlineEditingButtons ? 
               <div className="inline-editing-buttons always-visible">
                 <button

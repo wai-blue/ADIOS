@@ -1,6 +1,7 @@
 export const dictionarySk = {
   'Add': 'Pridať',
   'Save': 'Uložiť',
+  'Copy': 'Kopírovať',
   'Delete': 'Zmazať',
   'Edit': 'Upraviť',
   'Adding record': 'Pridať záznam',

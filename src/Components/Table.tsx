@@ -399,6 +399,10 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           }
         }
       },
+      onCopyCallback: (form: Form<FormProps, FormState>, saveResponse: any) => {
+        this.loadData();
+        this.openForm(saveResponse.savedRecord.id);
+      },
       onDeleteCallback: () => {
         this.loadData();
         this.setState({ recordId: null });

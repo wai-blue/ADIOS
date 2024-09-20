@@ -69,6 +69,7 @@ export interface FormProps {
   content?: Content,
   layout?: Array<Array<string>>,
   hideOverlay?: boolean,
+  showCopyButton?: boolean;
   showInModal?: boolean,
   showInModalSimple?: boolean,
   isInlineEditing?: boolean,
@@ -84,6 +85,7 @@ export interface FormProps {
   onChange?: () => void,
   onClose?: () => void,
   onSaveCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
+  onCopyCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
   onDeleteCallback?: () => void,
 }
 
@@ -294,37 +296,40 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     if (this.props.onSaveCallback) this.props.onSaveCallback(this, saveResponse);
   }
 
+  onAfterCopyRecord(saveResponse) {
+    if (this.props.onCopyCallback) this.props.onCopyCallback(this, saveResponse);
+  }
+
   saveRecord() {
-    this.setState({
-      invalidInputs: {}
-    });
+    this.setState({invalidInputs: {}});
 
     let record = { ...this.state.record, id: this.state.id };
 
-    console.log('_RELATIONS', this.state.record._RELATIONS);
-
     (this.state.record._RELATIONS ?? []).map((relName) => { console.log('deleting', relName); delete record[relName]; });
-
-    console.log('record', record);
 
     record = this.onBeforeSaveRecord(record);
 
     request.post(
       this.getEndpointUrl('saveRecord'),
-      {
-        ...this.getEndpointParams(),
-        record: record
-      },
+      { ...this.getEndpointParams(), record: record },
       {},
-      (saveResponse: any) => {
-        this.onAfterSaveRecord(saveResponse);
-      },
+      (saveResponse: any) => { this.onAfterSaveRecord(saveResponse); },
       (err: any) => {
         if (err.status == 422) {
-          this.setState({
-            invalidInputs: err.data.invalidInputs
-          });
+          this.setState({invalidInputs: err.data.invalidInputs});
         }
+      }
+    );
+  }
+
+  copyRecord() {
+    request.post(
+      this.getEndpointUrl('saveRecord'),
+      { ...this.getEndpointParams(), record: { ...this.state.record, id: -1 } },
+      {},
+      (saveResponse: any) => { this.onAfterCopyRecord(saveResponse); },
+      (err: any) => {
+        alert('An error ocured while copying the record.');
       }
     );
   }
@@ -617,6 +622,20 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     </>;
   }
 
+  renderCopyButton(): JSX.Element {
+    let id = this.state.id ? this.state.id : 0;
+
+    return <>
+      {this.state.description?.permissions?.canCreate ? <button
+        onClick={() => this.copyRecord()}
+        className={"btn btn-transparent"}
+      >
+        <span className="icon"><i className="fas fa-save"></i></span>
+        <span className="text"> {this.state.description?.ui?.saveButtonText ?? globalThis.app.translate("Copy")}</span>
+      </button> : null}
+    </>;
+  }
+
   renderEditButton(): JSX.Element {
     return <>
       {this.state.description?.permissions?.canUpdate ? <button
@@ -653,6 +672,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const nextId = this.state?.nextId ?? 0;
 
     return <>
+      {this.props.showCopyButton ? this.renderCopyButton() : null}
       {prevId || nextId ? <>
         <button
           onClick={() => {
