@@ -5,12 +5,14 @@ import * as uuid from 'uuid';
 interface EnumValuesInputProps extends InputProps {
   enumValues?: {};
   enumCssClasses?: {};
+  uiStyle?: 'select' | 'buttons';
 }
 
 export default class EnumValues extends Input<EnumValuesInputProps, InputState> {
   static defaultProps = {
     inputClassName: 'enumValues',
     id: uuid.v4(),
+    uiStyle: 'select',
   }
 
   _renderOption(key: string|number): JSX.Element {
@@ -37,19 +39,36 @@ export default class EnumValues extends Input<EnumValuesInputProps, InputState> 
   renderInputElement() {
     if (!this.props.enumValues) return <></>;
 
-    return (
-      <select
-        value={this.state.value ?? 0}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => this.onChange(e.target.value)}
-        className={
-          (this.state.invalid ? 'is-invalid' : '')
-          + " " + (this.props.cssClass ?? "")
-          + " " + (this.state.readonly ? "bg-muted" : "")
-        }
-        disabled={this.state.readonly}
-      >
-        {Object.keys(this.props.enumValues).map((key: string|number) => this._renderOption(key))}
-      </select>
-    );
+    if (this.props.uiStyle == 'select') {
+      return (
+        <select
+          value={this.state.value ?? 0}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => this.onChange(e.target.value)}
+          className={
+            (this.state.invalid ? 'is-invalid' : '')
+            + " " + (this.props.cssClass ?? "")
+            + " " + (this.state.readonly ? "bg-muted" : "")
+          }
+          disabled={this.state.readonly}
+        >
+          {Object.keys(this.props.enumValues).map((key: string|number) => this._renderOption(key))}
+        </select>
+      );
+    } else if (this.props.uiStyle == 'buttons') {
+      return <div className="btn-group">{Object.keys(this.props.enumValues).map((key: string|number) => {
+        const enumValue = this.props.enumValues ? (this.props.enumValues[key] ?? '') : '';
+        const enumCssClass = this.props.enumCssClasses ? (this.props.enumCssClasses[key] ?? '') : '';
+        return <>
+          <button
+            className={"btn " + (this.state.value == key ? "" : "btn-light") + " " + enumCssClass}
+            onClick={() => { this.onChange((this.state.value == key ? null : key)); }}
+          >
+            <span className="text">{enumValue}</span>
+          </button>
+        </>;
+      })}</div>;
+    } else {
+      return <></>;
+    }
   }
 }

@@ -509,12 +509,9 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     );
   }
 
-  buildInputParams(columnName: string, customInputParams?: any) {
-    if (!customInputParams) customInputParams = {};
+  buildInputParams(columnName: string) {
     let stateColDef = (this.state.description?.columns ? this.state.description?.columns[columnName] ?? {} : {});
-    customInputParams = {...stateColDef, ...customInputParams};
-
-    return {...customInputParams, ...{readonly: this.state.readonly}};
+    return {...stateColDef, ...{readonly: this.state.readonly}};
   }
 
   getDefaultInputProps() {
@@ -536,41 +533,41 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
   /**
    * Render different input types
    */
-  input(columnName: string, customInputParams?: any, onChange?: any): JSX.Element {
-    const inputParams = this.buildInputParams(columnName, customInputParams);
+  input(columnName: string, customInputProps?: any, onChange?: any): JSX.Element {
     const record = this.state.record ?? {};
     const columns = this.state.description?.columns ?? {};
 
     const inputProps: InputProps = {
       ...this.getDefaultInputProps(),
-      params: inputParams,
+      params: this.buildInputParams(columnName),
       value: record[columnName] ?? '',
       columnName: columnName,
       invalid: this.state.invalidInputs[columnName] ?? false,
       readonly: this.props.readonly || columns[columnName]?.readonly || columns[columnName]?.disabled,
-      cssClass: inputParams.cssClass ?? '',
+      // cssClass: inputParams.cssClass ?? '',
       onChange: (value: any) => {
         let record = {...this.state.record};
         record[columnName] = value;
         this.setState({record: record}, () => {
           if (this.props.onChange) this.props.onChange();
         });
-      }
+      },
+      ...customInputProps
     };
 
     return InputFactory(inputProps);
   }
 
-  inputWrapper(columnName: string, customInputParams?: any) {
+  inputWrapper(columnName: string, customInputProps?: any) {
 
-    const inputParams = this.buildInputParams(columnName, customInputParams);
+    const inputParams = this.buildInputParams(columnName);
 
     return columnName == 'id' ? <></>: this.inputWrapperCustom(
       columnName,
       inputParams,
       inputParams.title,
       <>
-        {this.input(columnName, inputParams)}
+        {this.input(columnName, customInputProps)}
 
         {inputParams.description
           ? <>

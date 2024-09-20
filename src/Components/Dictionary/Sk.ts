@@ -9,4 +9,5 @@ export const dictionarySk = {
   'You are about to delete the record. Press OK to confirm.': 'Chystáte sa zmazať záznam. Potvrďte tento krok.',
   'Yes, delete': 'Áno, zmazať',
   'No, do not delete': 'Nie, zavrieť okno',
+  'Choose image': 'Vybrať obrázok',
 }

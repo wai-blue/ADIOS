@@ -67,12 +67,13 @@ export default class Image extends Input<InputProps, ImageInputState> {
                 ? ''
                 : (
                   <button
-                    className="btn btn-light btn-sm"
+                    className="btn btn-light"
                     style={isDragging ? { color: 'red' } : undefined}
                     onClick={onImageUpload}
                     {...dragProps}
                   >
-                    Vybrať obrázok
+                    <span className="icon"><i className="fas fa-image"></i></span>
+                    <span className="text">{globalThis.app.translate("Choose image")}</span>
                   </button>
                 )
               }
