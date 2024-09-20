@@ -55,6 +55,7 @@ export interface FormDescription {
   defaultValues?: FormRecord,
   permissions?: FormPermissions,
   ui?: FormUi,
+  includeRelations?: Array<string>,
 }
 
 export interface FormProps {
@@ -217,23 +218,29 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       model: this.props.model,
       id: this.state.id ? this.state.id : 0,
       tag: this.props.tag,
+      includeRelations: this.state.description?.includeRelations,
       maxRelationLevel: 10,
       __IS_AJAX__: '1',
       ...this.state.customEndpointParams
     };
   }
 
+  customizeDescription(description: FormDescription): FormDescription {
+    return description;
+  }
+
   loadFormDescription() {
-    console.log(this.props.description);
+
     if (this.props.description) {
+      let description = this.customizeDescription(this.props.description);
       this.setState({
-        description: this.props.description,
-        readonly: !(this.props.description.permissions?.canUpdate || this.props.description.permissions?.canCreate),
+        description: description,
+        readonly: !(description.permissions?.canUpdate || description.permissions?.canCreate),
       }, () => {
         if (this.state.id !== -1) {
           this.loadRecord();
         } else {
-          this.setRecord(this.props.description?.defaultValues ?? {});
+          this.setRecord(description?.defaultValues ?? {});
         }
       });
     } else {
@@ -243,6 +250,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         {},
         (description: any) => {
           const defaultValues = deepObjectMerge(this.state.description.defaultValues ?? {}, description.defaultValues);
+
+          description = this.customizeDescription(description);
 
           this.setState({
             description: description,
@@ -305,7 +314,11 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
     let record = { ...this.state.record, id: this.state.id };
 
-    (this.state.record._RELATIONS ?? []).map((relName) => { console.log('deleting', relName); delete record[relName]; });
+    (this.state.record._RELATIONS ?? []).map((relName) => {
+      if (!(this.state.description?.includeRelations ?? []).includes(relName)) {
+        delete record[relName];
+      }
+    });
 
     record = this.onBeforeSaveRecord(record);
 

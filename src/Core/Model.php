@@ -761,6 +761,7 @@ class Model
         'canUpdate' => $this->app->permissions->granted($description['model'] . ':Update'),
         'canDelete' => $this->app->permissions->granted($description['model'] . ':Delete'),
       ],
+      'includeRelations' => [],
     ];
 
     return $description;
@@ -1002,8 +1003,8 @@ class Model
     return $relations;
   }
 
-  public function loadRecords(callable|null $queryModifierCallback = null, int $maxRelationLevel = 0): array {
-    $query = $this->prepareLoadRecordQuery($maxRelationLevel);
+  public function loadRecords(callable|null $queryModifierCallback = null, array|null $includeRelations = null, int $maxRelationLevel = 0): array {
+    $query = $this->prepareLoadRecordQuery($includeRelations, $maxRelationLevel);
     if ($queryModifierCallback !== null) $queryModifierCallback($query);
 
     $records = $query->get()?->toArray();
@@ -1068,13 +1069,17 @@ class Model
     return $record;
   }
 
-  public function recordGet(callable|null $queryModifierCallback = null, int $maxRelationLevel = 0): array {
-    $record = reset($this->loadRecords($queryModifierCallback, $maxRelationLevel));
+  public function recordGet(
+    callable|null $queryModifierCallback = null,
+    array|null $includeRelations = null,
+    int $maxRelationLevel = 0
+  ): array {
+    $record = reset($this->loadRecords($queryModifierCallback, $includeRelations, $maxRelationLevel));
     if (!is_array($record)) $record = [];
     return $record;
   }
 
-  public function prepareLoadRecordQuery(int $maxRelationLevel = 0, $query = null, int $level = 0) {
+  public function prepareLoadRecordQuery(array|null $includeRelations = null, int $maxRelationLevel = 0, $query = null, int $level = 0) {
     $tmpColumns = $this->columns();
 
     if ($maxRelationLevel > 4) $maxRelationLevel = 4;
@@ -1114,6 +1119,8 @@ class Model
     if ($query === null) $query = $this->eloquent;
     $query = $query->selectRaw(join(',', $selectRaw)); //->with($withs);
     foreach ($this->relations as $relName => $relDefinition) {
+      if (is_array($includeRelations) && !in_array($relName, $includeRelations)) continue;
+
       $relModel = new $relDefinition[1]($this->app);
 
       // switch ($maxRelationLevel) {
@@ -1154,7 +1161,7 @@ class Model
 
       if ($maxRelationLevel > 0) {
         $query->with([$relName => function($q) use($relModel, $maxRelationLevel) {
-          return $relModel->prepareLoadRecordQuery($maxRelationLevel - 1, $q);
+          return $relModel->prepareLoadRecordQuery(null, $maxRelationLevel - 1, $q);
         }]);
       }
 

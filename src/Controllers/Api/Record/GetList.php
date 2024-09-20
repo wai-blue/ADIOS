@@ -28,7 +28,10 @@ class GetList extends \ADIOS\Core\ApiController {
     $columns = $this->model->columns();
     $relations = $this->model->relations;
 
-    $query = $this->model->prepareLoadRecordQuery((int) ($this->app->params['maxRelationLevel'] ?? 1));
+    $query = $this->model->prepareLoadRecordQuery(
+      $this->app->params['includeRelations'] ?? null,
+      (int) ($this->app->params['maxRelationLevel'] ?? 1)
+    );
 
     // FILTER BY
     if (isset($params['filterBy'])) {

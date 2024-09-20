@@ -40,9 +40,8 @@ class Save extends \ADIOS\Core\ApiController {
 
       if ($idMasterRecord > 0) {
         $savedRecord = $model->recordGet(
-          function($q) use ($model, $idMasterRecord) {
-            $q->where($model->table . '.id', $idMasterRecord);
-          },
+          function($q) use ($model, $idMasterRecord) { $q->where($model->table . '.id', $idMasterRecord); },
+          $this->app->params['includeRelations'] ?? null,
           (int) ($this->app->params['maxRelationLevel'] ?? 1)
         );
       }
