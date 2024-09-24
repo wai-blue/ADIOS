@@ -80,6 +80,7 @@ export interface ExternalCallbacks {
 export interface TableProps {
   uid: string,
   description?: TableDescription,
+  descriptionSource?: 'props' | 'request' | 'both',
   recordId?: any,
   formEndpoint?: FormEndpoint,
   formModal?: ModalProps,
@@ -157,6 +158,7 @@ export interface TableState {
 export default class Table<P, S> extends Component<TableProps, TableState> {
   static defaultProps = {
     itemsPerPage: 100,
+    descriptionSource: 'both',
   }
 
   state: TableState;
@@ -302,21 +304,24 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   loadTableDescription(successCallback?: (params: any) => void) {
-    if (this.state.description) return;
 
-    if (this.props.description) {
-      this.setState({description: this.props.description});
-    } else {
+    if (this.props.descriptionSource == 'props') return;
+
+    // if (this.props.description) {
+    //   this.setState({description: this.props.description});
+    // } else {
       request.get(
         this.getEndpointUrl('describeTable'),
         {
           ...this.getEndpointParams(),
         },
-        (data: any) => {
+        (description: any) => {
           try {
-            if (data.status == 'error') throw new Error('Error while loading table description: ' + data.message);
-
-            let description: any = data; //deepObjectMerge(data, this.props.description ?? {});
+            // if (description.status == 'error') throw new Error('Error while loading table description: ' + description.message);
+console.log(description, this.props.description, this.props.descriptionSource);
+            if (this.props.description && this.props.descriptionSource == 'both') description = deepObjectMerge(description, this.props.description);
+console.log(description);
+            // let description: any = data; //deepObjectMerge(data, this.props.description ?? {});
             if (description.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
             if (successCallback) successCallback(description);
 
@@ -328,7 +333,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           }
         }
       );
-    }
+    // }
   }
 
   loadData() {

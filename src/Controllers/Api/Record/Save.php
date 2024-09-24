@@ -24,51 +24,66 @@ class Save extends \ADIOS\Core\ApiController {
     $model = $this->app->getModel($modelClass);
     if (!is_object($model)) throw new \Exception("Unable to create model {$model}.");
 
+    if ($idMasterRecord == 0) $pdo = $model->eloquent->getConnection()->getPdo();
+    else $pdo = null;
+
+    if ($pdo) $pdo->beginTransaction();
+
     $dataToSave = $data;
 
-    foreach ($dataToSave as $key => $value) {
-      if ($value['_useMasterRecordId_'] ?? false) {
-        $dataToSave[$key] = $idMasterRecord;
-      }
-    }
+    try {
 
-    if ($dataToSave['_toBeDeleted_']) {
-      $model->recordDelete((int) $dataToSave['id']);
-      $savedRecord = [];
-    } else {
-      $idMasterRecord = $model->recordSave($dataToSave);
-
-      if ($idMasterRecord > 0) {
-        $savedRecord = $model->recordGet(
-          function($q) use ($model, $idMasterRecord) { $q->where($model->table . '.id', $idMasterRecord); },
-          $this->app->params['includeRelations'] ?? null,
-          (int) ($this->app->params['maxRelationLevel'] ?? 1)
-        );
-      }
-    }
-
-    foreach ($this->model->relations as $relName => $relDefinition) {
-      if (is_array($data[$relName])) {
-        list($relType, $relModel) = $relDefinition;
-        switch ($relType) {
-          case \ADIOS\Core\Model::HAS_MANY:
-            foreach ($data[$relName] as $subKey => $subRecord) {
-              $savedRecord[$relName][$subKey] = $this->recordSave(
-                $relModel,
-                $subRecord,
-                $idMasterRecord
-              );
-            }
-          break;
-          case \ADIOS\Core\Model::HAS_ONE:
-            $savedRecord[$relName] = $this->recordSave(
-              $relModel,
-              $data[$relName],
-              $idMasterRecord
-            );
-          break;
+      foreach ($dataToSave as $key => $value) {
+        if ($value['_useMasterRecordId_'] ?? false) {
+          $dataToSave[$key] = $idMasterRecord;
         }
       }
+
+      if ($dataToSave['_toBeDeleted_']) {
+        $model->recordDelete((int) $dataToSave['id']);
+        $savedRecord = [];
+      } else {
+        $idMasterRecord = $model->recordSave($dataToSave);
+
+        if ($idMasterRecord > 0) {
+          $savedRecord = $model->recordGet(
+            function($q) use ($model, $idMasterRecord) { $q->where($model->table . '.id', $idMasterRecord); },
+            $this->app->params['includeRelations'] ?? null,
+            (int) ($this->app->params['maxRelationLevel'] ?? 1)
+          );
+        }
+      }
+
+      foreach ($model->relations as $relName => $relDefinition) {
+        if (is_array($data[$relName])) {
+          list($relType, $relModel) = $relDefinition;
+          switch ($relType) {
+            case \ADIOS\Core\Model::HAS_MANY:
+              foreach ($data[$relName] as $subKey => $subRecord) {
+                $savedRecord[$relName][$subKey] = $this->recordSave(
+                  $relModel,
+                  $subRecord,
+                  $idMasterRecord
+                );
+              }
+            break;
+            case \ADIOS\Core\Model::HAS_ONE:
+              $savedRecord[$relName] = $this->recordSave(
+                $relModel,
+                $data[$relName],
+                $idMasterRecord
+              );
+            break;
+          }
+        }
+      }
+
+      if ($pdo) $pdo->commit();
+    } catch (\Exception $e) {
+      $exceptionClass = get_class($e);
+      if ($pdo) $pdo->rollBack();
+
+      throw new $exceptionClass($e->getMessage(), $e->getCode(), $e);
     }
 
     return $savedRecord;

@@ -152,7 +152,7 @@ export default class Tags2 extends Input<Tags2InputProps, Tags2InputState> {
         defaultValue={this.convertValueToOptionList(this.state.value)}
         isMulti
         options={this.state.options}
-        classNamePrefix="adios-lookup"
+        className="adios-lookup"
         onChange={(selectedOptions: any) => {
           const value: Array<any> = [];
           for (let i in selectedOptions) {

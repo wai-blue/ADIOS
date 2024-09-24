@@ -81,6 +81,7 @@ export interface FormProps {
   children?: any,
 
   description?: FormDescription,
+  descriptionSource?: 'props' | 'request' | 'both',
   endpoint?: FormEndpoint,
 
   onChange?: () => void,
@@ -117,6 +118,7 @@ export interface FormState {
 export default class Form<P, S> extends Component<FormProps, FormState> {
   static defaultProps = {
     uid: '_form_' + uuid.v4().replace('-', '_'),
+    descriptionSource: 'both',
   }
 
   newState: any;
@@ -231,25 +233,28 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
 
   loadFormDescription() {
 
-    if (this.props.description) {
-      let description = this.customizeDescription(this.props.description);
-      this.setState({
-        description: description,
-        readonly: !(description.permissions?.canUpdate || description.permissions?.canCreate),
-      }, () => {
-        if (this.state.id !== -1) {
-          this.loadRecord();
-        } else {
-          this.setRecord(description?.defaultValues ?? {});
-        }
-      });
-    } else {
+    // if (this.props.description) {
+    //   let description = this.customizeDescription(this.props.description);
+    //   this.setState({
+    //     description: description,
+    //     readonly: !(description.permissions?.canUpdate || description.permissions?.canCreate),
+    //   }, () => {
+    //     if (this.state.id !== -1) {
+    //       this.loadRecord();
+    //     } else {
+    //       this.setRecord(description?.defaultValues ?? {});
+    //     }
+    //   });
+    // } else {
       request.post(
         this.getEndpointUrl('describeForm'),
         this.getEndpointParams(),
         {},
         (description: any) => {
-          const defaultValues = deepObjectMerge(this.state.description.defaultValues ?? {}, description.defaultValues);
+
+          if (this.props.description && this.props.descriptionSource == 'both') description = deepObjectMerge(description, this.props.description);
+
+          // const defaultValues = deepObjectMerge(this.state.description.defaultValues ?? {}, description.defaultValues);
 
           description = this.customizeDescription(description);
 
@@ -260,12 +265,12 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
             if (this.state.id !== -1) {
               this.loadRecord();
             } else {
-              this.setRecord(defaultValues);
+              this.setRecord(description.defaultValues);
             }
           });
         }
       );
-    }
+    // }
   }
 
   reload() {

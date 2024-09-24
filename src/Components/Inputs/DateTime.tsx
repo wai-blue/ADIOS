@@ -83,13 +83,6 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
     }
   }
 
-  _renderIcon(): JSX.Element {
-    switch (this.props.type) {
-      case 'time': return <i className="fas fa-clock"></i>;
-      default: return <i className="fas fa-calendar"></i>;
-    }
-  }
-
   onChange(value: any) {
     if (value === null) {
       value = '';
@@ -168,9 +161,8 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
             options={this.options}
           />
         </div>
-        {this._renderIcon()}
         <button
-          className="btn btn-small btn-transparent"
+          className="btn btn-small btn-transparent ml-2"
           onClick={() => {
             if (!this.fp?.current?.flatpickr) return;
             this.fp.current.flatpickr.clear();

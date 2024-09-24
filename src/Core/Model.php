@@ -1016,6 +1016,7 @@ class Model
       $records[$key] = $this->recordAddCustomData($records[$key]);
       $records[$key] = $this->onAfterLoadRecord($records[$key]);
       $records[$key]['_RELATIONS'] = array_keys($this->relations);
+      if (is_array($includeRelations)) $records[$key]['_RELATIONS'] = array_values(array_intersect($records[$key]['_RELATIONS'], $includeRelations));
     }
 
     $records = $this->onAfterLoadRecords($records);

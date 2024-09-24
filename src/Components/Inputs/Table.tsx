@@ -41,6 +41,5 @@ export default class Table extends Input<TableInputProps, TableInputState> {
     return CHILDREN;
   };
 
-
   renderValueElement() { return this.renderInputElement(); }
 }
