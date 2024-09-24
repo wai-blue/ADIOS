@@ -317,10 +317,9 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         },
         (description: any) => {
           try {
-            // if (description.status == 'error') throw new Error('Error while loading table description: ' + description.message);
-console.log(description, this.props.description, this.props.descriptionSource);
+
             if (this.props.description && this.props.descriptionSource == 'both') description = deepObjectMerge(description, this.props.description);
-console.log(description);
+
             // let description: any = data; //deepObjectMerge(data, this.props.description ?? {});
             if (description.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
             if (successCallback) successCallback(description);
@@ -439,7 +438,7 @@ console.log(description);
         break;
         case 'date':
         case 'datetime':
-          cellClassName = 'text-right';
+          cellClassName = 'text-left';
         break;
         case 'lookup':
           cellClassName = 'text-primary';
