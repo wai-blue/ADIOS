@@ -162,6 +162,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   }
 
   state: TableState;
+  model: string;
 
   dt = createRef<DataTable<any[]>>();
 
@@ -169,6 +170,8 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     super(props);
 
     globalThis.app.reactElements[this.props.uid] = this;
+
+    this.model = this.props.model ?? '';
 
     this.state = this.getStateFromProps(props);
   }
@@ -184,7 +187,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
       recordId: props.recordId,
       formEndpoint: props.formEndpoint ? props.formEndpoint : (globalThis.app.config.defaultFormEndpoint ?? null),
       formProps: {
-        model: props.model,
+        model: this.model,
         uid: props.uid,
       },
       page: 1,
@@ -243,7 +246,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
 
   getEndpointParams(): any {
     return {
-      model: this.props.model,
+      model: this.model,
       parentRecordId: this.props.parentRecordId ? this.props.parentRecordId : 0,
       parentFormModel: this.props.parentFormModel ? this.props.parentFormModel : '',
       tag: this.props.tag,
@@ -321,7 +324,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
             if (this.props.description && this.props.descriptionSource == 'both') description = deepObjectMerge(description, this.props.description);
 
             // let description: any = data; //deepObjectMerge(data, this.props.description ?? {});
-            if (description.columns.length == 0) adiosError(`No columns to show in table for '${this.props.model}'.`);
+            if (description.columns.length == 0) adiosError(`No columns to show in table for '${this.model}'.`);
             if (successCallback) successCallback(description);
 
             description = this.onAfterLoadTableDescription(description);
@@ -344,7 +347,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         {
           ...this.getEndpointParams(),
           filterBy: this.state.filterBy,
-          model: this.props.model,
+          model: this.model,
           orderBy: this.state.orderBy,
           page: this.state.page ?? 0,
           itemsPerPage: this.state.itemsPerPage ?? 15,
@@ -369,7 +372,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
     return {
       parentTable: this,
       uid: this.props.uid + '_form',
-      model: this.props.model,
+      model: this.model,
       tag: this.props.tag,
       context: this.props.context,
       id: this.state.recordId ?? null,
@@ -533,7 +536,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
         request.get(
           this.getEndpointUrl('deleteRecord'),
           {
-            model: this.props.model,
+            model: this.model,
             id: recordToDelete.id ?? 0,
             hash: recordToDelete._idHash_ ?? '',
           },
@@ -794,7 +797,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
           {!this.state.readonly && this.state.description?.permissions?.canDelete ?
             data._toBeDeleted_
             ? <button
-              className="btn btn-list-item btn-cancel"
+              className="btn btn-small btn-cancel"
               onClick={(e) => {
                 e.preventDefault();
                 delete this.findRecordById(data.id)._toBeDeleted_;
@@ -808,7 +811,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
               <span className="icon"><i className="fas fa-times"></i></span>
             </button>
             : <button
-              className="btn btn-list-item btn-danger"
+              className="btn btn-small btn-danger"
               title={globalThis.app.translate('Delete')}
               onClick={(e) => {
                 e.preventDefault();
