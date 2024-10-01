@@ -68,7 +68,6 @@ export interface FormProps {
   nextId?: any,
   readonly?: boolean,
   content?: Content,
-  layout?: Array<Array<string>>,
   hideOverlay?: boolean,
   showCopyButton?: boolean;
   showInModal?: boolean,
@@ -110,7 +109,6 @@ export interface FormState {
   invalidInputs: Object,
   tabs?: any,
   folderUrl?: string,
-  layout?: string,
   params: any,
   invalidRecordId: boolean,
 }
@@ -163,7 +161,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         ui: {},
       },
       content: props.content,
-      layout: this.convertLayoutToString(props.layout),
       creatingRecord: props.id ? props.id == -1 : false,
       updatingRecord: props.id ? props.id != -1 : false,
       isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
@@ -402,11 +399,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     this.setState({
       tabs: tabs
     });
-  }
-
-  convertLayoutToString(layout?: Array<Array<string>>): string {
-    //@ts-ignore
-    return layout?.map(row => `"${row}"`).join('\n');
   }
 
   /**

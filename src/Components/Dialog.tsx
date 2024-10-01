@@ -25,8 +25,8 @@ export default class Dialog extends Component {
   render() {
     const props = {...this.props};
     props.resizable = false;
-    props.headerClassName = 'dialog-handle';
-    props.contentClassName = 'p-0';
+    props.headerClassName = 'dialog-handle ' + (this.props.headerClassName ?? '');
+    props.contentClassName = 'p-0 ' + (this.props.contentClassName ?? '');
     props.onHide = () => { this.hide(); };
 
     if (this.state) props.visible = this.state.containerVisible;
