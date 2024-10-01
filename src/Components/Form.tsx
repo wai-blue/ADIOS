@@ -607,7 +607,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       {this.state.description?.permissions?.canUpdate ? <button
         onClick={() => this.saveRecord()}
         className={
-          "btn btn-success"
+          "btn btn-add "
           + (id <= 0 && this.state.description?.permissions?.canCreate || id > 0 && this.state.description?.permissions?.canUpdate ? "d-block" : "d-none")
         }
       >
