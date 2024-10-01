@@ -121,7 +121,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
 
   renderInputElement() {
     return (
-      <AsyncCreatable
+      <AsyncSelect
         value={{
           id: this.state.data[this.state.value]?.id ?? 0,
           _LOOKUP: this.state.data[this.state.value]?._LOOKUP ?? '',
@@ -135,7 +135,7 @@ export default class Lookup extends Input<LookupInputProps, LookupInputState> {
         onChange={(item: any) => { this.onChange(item?.id ?? 0); }}
         placeholder={this.props.params?.placeholder}
         className="adios-lookup"
-        allowCreateWhileLoading={true}
+        // allowCreateWhileLoading={false}
         formatCreateLabel={(inputValue: string) => <span className="create-new">{globalThis.app.translate('Create') + ': ' + inputValue}</span>}
         getNewOptionData={(value, label) => { return { id: {_isNew_: true, _LOOKUP: label}, _LOOKUP: label }; }}
         styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}

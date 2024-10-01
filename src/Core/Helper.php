@@ -22,6 +22,11 @@ class Helper {
     $__APP__ = $app;
   }
 
+  public static function getGlobalApp() {
+    global $__APP__;
+    return $__APP__;
+  }
+
   /**
    * Minifies HTML
    *

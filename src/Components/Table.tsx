@@ -459,7 +459,7 @@ export default class Table<P, S> extends Component<TableProps, TableState> {
   renderAddButton(): JSX.Element {
     return (
       <button
-        className="btn btn-primary"
+        className="btn btn-add"
         onClick={() => this.onAddClick()}
       >
         <span className="icon"><i className="fas fa-plus"/></span>
