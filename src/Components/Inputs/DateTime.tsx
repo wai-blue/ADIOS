@@ -120,13 +120,16 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
 
   renderInputElement() {
     let value: any = this.state.value;
+    let defaultPlaceholder;
 
     switch (this.props.type) {
       case 'datetime':
         value = datetimeToEUFormat(this.state.value);
+        defaultPlaceholder = 'Year-Month-Day Hour:Min:Sec';
       break;
       case 'date':
         value = dateToEUFormat(this.state.value);
+        defaultPlaceholder = 'Year-Month-Day';
       break;
       case 'time':
         this.options = {
@@ -139,6 +142,7 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
             minuteIncrement: 15
           }
         };
+        defaultPlaceholder = 'Hour:Min:Sec';
       break;
     }
 
@@ -156,7 +160,7 @@ export default class DateTime extends Input<DateTimeInputProps, InputState> {
               + " " + (this.props.cssClass ?? "")
               + " " + (this.state.readonly ? "bg-muted" : "")
             }
-            placeholder={this.props.params?.placeholder}
+            placeholder={this.props.params?.placeholder ?? defaultPlaceholder}
             disabled={this.state.readonly}
             options={this.options}
           />

@@ -67,7 +67,7 @@ export default class Image extends Input<InputProps, ImageInputState> {
                 ? ''
                 : (
                   <button
-                    className="btn btn-light"
+                    className="btn btn-extra-small btn-transparent"
                     style={isDragging ? { color: 'red' } : undefined}
                     onClick={onImageUpload}
                     {...dragProps}

@@ -18,7 +18,7 @@ export default class Int extends Input<IntInputProps, InputState> {
         type="number"
         value={this.state.value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => this.onChange(e.currentTarget.value)}
-        placeholder={this.props.params?.placeholder}
+        placeholder={this.props.params?.placeholder ?? '0' + (this.props.params?.decimals > 0 ? '.' + '0'.repeat(this.props.params?.decimals ?? 0) : '')}
         className={
           "form-control"
           + " " + (this.state.invalid ? 'is-invalid' : '')

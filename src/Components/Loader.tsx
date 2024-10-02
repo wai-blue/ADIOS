@@ -1,7 +1,9 @@
 import { createRoot } from "react-dom/client";
 import React, { useRef } from 'react';
+import ReactDOM from 'react-dom';
 import * as uuid from 'uuid';
 import { isValidJson, kebabToPascal, camelToKebab } from './Helper';
+import Dialog from "./Dialog";
 
 import 'primereact/resources/primereact.css';
 import 'primereact/resources/themes/lara-light-indigo/theme.css';
@@ -22,6 +24,7 @@ export class ADIOS {
 
   language: string = '';
   dictionary: any = {};
+  lastShownDialogRef: any;
 
   /**
   * Define attributes which will not removed
@@ -40,6 +43,68 @@ export class ADIOS {
       translated = this.dictionary[this.language][orig];
     }
     return translated;
+  }
+
+  makeErrorResultReadable(error: any): JSX.Element {
+    console.log('makeErrorResultReadable', error, error.code, error.data);
+    if (error.code && error.data) {
+      switch (error.code) {
+        case 87335:
+          return <>
+            <b>Some inputs need your attention</b><br/>
+            <br/>
+            {error.data.map((item) => <div>{item}</div>)}
+          </>;
+        break;
+        default:
+          return <>
+            <div>Error #{error.code}</div>
+            <pre style={{fontSize: '8pt', textAlign: 'left'}}>{JSON.stringify(error.data)}</pre>
+          </>;
+        break;
+      }
+    } else if (typeof error == 'object') {
+      return <>
+        <pre style={{fontSize: '8pt', textAlign: 'left'}}>{JSON.stringify(error)}</pre>
+      </>;
+    } else {
+      return error;
+    }
+  }
+
+  showDialog(content: JSX.Element, props?: any) {
+    const root = ReactDOM.createRoot(document.getElementById('app-dialogs'));
+
+    this.lastShownDialogRef = React.createRef();
+
+    root.render(<>
+      <Dialog
+        ref={this.lastShownDialogRef}
+        uid={'app_dialog_' + uuid.v4().replace('-', '_')}
+        visible
+        style={{minWidth: '50vw'}}
+        {...props}
+      >{content}</Dialog>
+    </>);
+  }
+
+  showDialogDanger(content: JSX.Element, props?: any) {
+    this.showDialog(
+      <>
+        <div className="dialog-header"><h1>🥴 Ooops</h1></div>
+        <div className="dialog-body">{content}</div>
+        <div className="dialog-footer">
+          <button
+            className="btn btn-light"
+            onClick={() => { this.lastShownDialogRef.current.hide() }}
+          >
+            <span className="icon"><i className="fas fa-check"></i></span>
+            <span className="text">OK, I understand</span>
+          </button>
+        </div>
+      </>,
+      { headerClassName: 'dialog-danger-header', contentClassName: 'dialog-danger-content', ...props}
+    );
   }
 
   registerReactComponent(elementName: string, elementObject: any) {

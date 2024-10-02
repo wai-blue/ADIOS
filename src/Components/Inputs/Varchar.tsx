@@ -27,7 +27,7 @@ export default class Varchar extends Input<InputProps, VarcharInputState> {
   }
 
   renderInputElement() {
-    return <>
+    return <><div className="w-full">
       <input
         type='text'
         value={this.state.value}
@@ -54,10 +54,10 @@ export default class Varchar extends Input<InputProps, VarcharInputState> {
             </select>
           </div>
         :
-          <button className="mt-1 btn btn-small btn-transparent" onClick={() => { this.setState({showPredefinedValues: true}); }}>
+          <button className="mt-1 btn btn-extra-small btn-transparent" onClick={() => { this.setState({showPredefinedValues: true}); }}>
             <span className="text text-xs">Choose from predefined options...</span>
           </button>
       : null}
-    </>;
+    </div></>;
   }
 }

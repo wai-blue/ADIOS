@@ -1,5 +1,5 @@
+import React, { Component } from 'react';
 import axios, { AxiosError, AxiosResponse } from "axios";
-import Notification from "./Notification";
 
 import Swal from "sweetalert2";
 
@@ -114,17 +114,16 @@ class Request {
     }
   }
 
-  private fatalErrorNotification(errorText: string) {
-    // alert(errorText);
-    Swal.fire({
-      title: '<div style="text-align:left">🥴 Ooops</div>',
-      html: '<pre style="font-size:8pt;text-align:left">' + errorText + '</pre>',
-      width: '80vw',
-      padding: '1em',
-      color: "#ad372a",
-      background: "white",
-      backdrop: `rgba(123,12,0,0.2)`
-    });
+  private fatalErrorNotification(error: any) {
+    if (typeof error == 'string') {
+      try {
+        error = JSON.parse(error);
+      } catch (ex) {
+        //
+      }
+    }
+
+    globalThis.app.showDialogDanger(globalThis.app.makeErrorResultReadable(error));
   }
 
 }

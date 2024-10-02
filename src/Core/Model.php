@@ -829,12 +829,12 @@ class Model
         $colDefinition['required']
         && ($data[$column] == NULL || $data[$column] == '')
       ) {
-        $invalidInputs[$column] = $this->app->translate(
+        $invalidInputs[] = $this->app->translate(
           "`{{ colTitle }}` is required.",
           ['colTitle' => $colDefinition['title']]
         );
       } else if (!$this->columnValidate($column, $data[$column])) {
-        $invalidInputs[$column] = $this->app->translate(
+        $invalidInputs[] = $this->app->translate(
           "`{{ colTitle }}` contains invalid value.",
           ['colTitle' => $colDefinition['title']]
         );
@@ -843,7 +843,7 @@ class Model
 
     if (!empty($invalidInputs)) {
       throw new RecordSaveException(
-        json_encode($invalidInputs)
+        json_encode(['code' => 87335, 'data' => $invalidInputs])
       );
     }
 
