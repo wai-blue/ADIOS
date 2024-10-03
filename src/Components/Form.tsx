@@ -26,6 +26,7 @@ export interface FormEndpoint {
   describeForm: string,
   getRecord: string,
   saveRecord: string,
+  deleteRecord: string,
 }
 
 export interface FormPermissions {
@@ -48,6 +49,8 @@ export interface FormUi {
   subTitle?: string,
   saveButtonText?: string,
   addButtonText?: string,
+  copyButtonText?: string,
+  deleteButtonText?: string,
 }
 
 export interface FormDescription {
@@ -87,7 +90,7 @@ export interface FormProps {
   onClose?: () => void,
   onSaveCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
   onCopyCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
-  onDeleteCallback?: () => void,
+  onDeleteCallback?: (form: Form<FormProps, FormState>, saveResponse: any) => void,
 }
 
 export interface FormState {
@@ -105,12 +108,17 @@ export interface FormState {
 
   creatingRecord: boolean,
   updatingRecord: boolean,
+  deletingRecord: boolean,
+  recordDeleted: boolean,
+  deleteButtonDisabled: boolean,
   isInlineEditing: boolean,
   invalidInputs: Object,
   tabs?: any,
   folderUrl?: string,
   params: any,
   invalidRecordId: boolean,
+
+  recordChanged: boolean,
 }
 
 export default class Form<P, S> extends Component<FormProps, FormState> {
@@ -143,6 +151,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       endpoint: props.endpoint ? props.endpoint : (globalThis.app.config.defaultFormEndpoint ?? {
         describeForm: 'api/form/describe',
         saveRecord: 'api/record/save',
+        deleteRecord: 'api/record/delete',
         getRecord: 'api/record/get',
       }),
       id: props.id,
@@ -163,12 +172,16 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       content: props.content,
       creatingRecord: props.id ? props.id == -1 : false,
       updatingRecord: props.id ? props.id != -1 : false,
+      deletingRecord: false,
+      recordDeleted: false,
       isInlineEditing: props.isInlineEditing ? props.isInlineEditing : false,
       invalidInputs: {},
       record: {},
       params: null,
       invalidRecordId: false,
       customEndpointParams: this.props.customEndpointParams ?? {},
+      recordChanged: false,
+      deleteButtonDisabled: false,
     };
   }
 
@@ -307,8 +320,12 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     if (this.props.onSaveCallback) this.props.onSaveCallback(this, saveResponse);
   }
 
-  onAfterCopyRecord(saveResponse) {
-    if (this.props.onCopyCallback) this.props.onCopyCallback(this, saveResponse);
+  onAfterCopyRecord(copyResponse) {
+    if (this.props.onCopyCallback) this.props.onCopyCallback(this, copyResponse);
+  }
+
+  onAfterDeleteRecord(deleteResponse) {
+    if (this.props.onDeleteCallback) this.props.onDeleteCallback(this, deleteResponse);
   }
 
   saveRecord() {
@@ -328,7 +345,16 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       this.getEndpointUrl('saveRecord'),
       { ...this.getEndpointParams(), record: record },
       {},
-      (saveResponse: any) => { this.onAfterSaveRecord(saveResponse); },
+      (saveResponse: any) => {
+        this.setState({
+          record: saveResponse.savedRecord,
+          id: saveResponse.savedRecord.id,
+          recordChanged: false,
+          updatingRecord: true,
+          creatingRecord: false,
+        });
+        this.onAfterSaveRecord(saveResponse);
+      },
       (err: any) => {
         if (err.status == 422) {
           this.setState({invalidInputs: err.data.invalidInputs});
@@ -345,6 +371,24 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       (saveResponse: any) => { this.onAfterCopyRecord(saveResponse); },
       (err: any) => {
         alert('An error ocured while copying the record.');
+      }
+    );
+  }
+
+  deleteRecord() {
+    request.post(
+      this.getEndpointUrl('deleteRecord'),
+      {
+        ...this.getEndpointParams(),
+        hash: this.state.record._idHash_ ?? '',
+      },
+      {},
+      (saveResponse: any) => {
+        this.setState({deletingRecord: false, recordDeleted: true});
+        this.onAfterDeleteRecord(saveResponse);
+      },
+      (err: any) => {
+        alert('An error ocured while deleting the record.');
       }
     );
   }
@@ -545,7 +589,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       onChange: (value: any) => {
         let record = {...this.state.record};
         record[columnName] = value;
-        this.setState({record: record}, () => {
+        this.setState({record: record, recordChanged: true}, () => {
           if (this.props.onChange) this.props.onChange();
         });
       },
@@ -615,13 +659,16 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           ? (
             <>
               <span className="icon"><i className="fas fa-save"></i></span>
-              <span className="text"> {this.state.description?.ui?.saveButtonText ?? globalThis.app.translate("Save")}</span>
+              <span className="text">
+                {this.state.description?.ui?.saveButtonText ?? globalThis.app.translate("Save")}
+                {this.state.recordChanged ? ' *' : ''}
+              </span>
             </>
           )
           : (
             <>
               <span className="icon"><i className="fas fa-plus"></i></span>
-              <span className="text"> {this.state.description?.ui?.addButtonText ?? globalThis.app.translate("Add")}</span>
+              <span className="text">{this.state.description?.ui?.addButtonText ?? globalThis.app.translate("Add")}</span>
             </>
           )
         }
@@ -633,12 +680,36 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     let id = this.state.id ? this.state.id : 0;
 
     return <>
-      {this.state.description?.permissions?.canCreate ? <button
+      {this.props.showCopyButton && this.state.description?.permissions?.canCreate ? <button
         onClick={() => this.copyRecord()}
         className={"btn btn-transparent"}
       >
         <span className="icon"><i className="fas fa-save"></i></span>
-        <span className="text"> {this.state.description?.ui?.saveButtonText ?? globalThis.app.translate("Copy")}</span>
+        <span className="text"> {this.state.description?.ui?.copyButtonText ?? globalThis.app.translate("Copy")}</span>
+      </button> : null}
+    </>;
+  }
+
+  renderDeleteButton(): JSX.Element {
+    let id = this.state.id ? this.state.id : 0;
+
+    return <>
+      {this.state.updatingRecord && this.state.description?.permissions?.canDelete ? <button
+        onClick={() => {
+          if (!this.state.deleteButtonDisabled) {
+            if (this.state.deletingRecord) this.deleteRecord();
+            else {
+              this.setState({deletingRecord: true, deleteButtonDisabled: true});
+              setTimeout(() => this.setState({deleteButtonDisabled: false}), 1000);
+            }
+          }
+        }}
+        className={"btn " + (this.state.deletingRecord ? "font-bold" : "") + " " + (this.state.deleteButtonDisabled ? "btn-light" : "btn-delete")}
+      >
+        <span className="icon"><i className="fas fa-trash-alt"></i></span>
+        <span className="text">
+          {this.state.deletingRecord ? globalThis.app.translate("Confirm delete") : this.state.description?.ui?.deleteButtonText ?? globalThis.app.translate("Delete")}
+        </span>
       </button> : null}
     </>;
   }
@@ -679,7 +750,8 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     const nextId = this.state?.nextId ?? 0;
 
     return <>
-      {this.props.showCopyButton ? this.renderCopyButton() : null}
+      {this.renderCopyButton()}
+      {this.renderDeleteButton()}
       {prevId || nextId ? <>
         <button
           onClick={() => {
@@ -702,16 +774,6 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           <span className="icon"><i className="fas fa-angle-right"></i></span>
         </button>
       </> : null}
-      {/* {this.state.isEdit ?
-        <button
-          onClick={() => this.deleteRecord(this.state.id ? this.state.id : 0)}
-          className={"btn btn-danger btn-icon-split ml-2 " + (this.state.permissions.canDelete ? "d-block" : "d-none")}
-        >
-          <span className="icon"><i className="fas fa-trash"></i></span>
-          <span className="text">{globalThis.app.translate('Delete')}</span>
-        </button>
-        : ''
-      } */}
     </>;
   }
 
@@ -732,7 +794,14 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     </>
   }
 
-  render() {
+  renderWarningsOrErrors() {
+    if (this.state.recordDeleted) {
+      return <>
+        <div className="alert alert-danger m-1">
+          Record has been deleted.
+        </div>
+      </>
+    }
 
     if (!this.state.isInitialized || !this.state.record) {
       return (
@@ -749,33 +818,41 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
         </div>
       </>
     }
+  }
 
-    let formTitle = this.renderTitle();
-    let formContent = this.renderContent();
-    let formFooter = this.renderFooter();
+  render() {
+    let warningsOrErrors = this.renderWarningsOrErrors();
 
-    if (this.props.showInModal) {
-      return <>
-        <div className="modal-header">
-          <div className="modal-header-left">{this.renderHeaderLeft()}</div>
-          <div className="modal-header-title">{formTitle}</div>
-          <div className="modal-header-right">{this.renderHeaderRight()}</div>
-        </div>
-        <div className="modal-body">{formContent}</div>
-        {formFooter ? <div className="modal-footer">{formFooter}</div> : null}
-      </>;
-    } else {
-      return <>
-        <div id={"adios-form-" + this.props.uid} className="adios component form">
-          <div className="form-header">
-            <div className="form-header-left">{this.renderHeaderLeft()}</div>
-            <div className="form-header-title">{formTitle}</div>
-            <div className="form-header-right">{this.renderHeaderRight()}</div>
+    if (warningsOrErrors) return warningsOrErrors;
+    else {
+
+      let formTitle = this.renderTitle();
+      let formContent = this.renderContent();
+      let formFooter = this.renderFooter();
+
+      if (this.props.showInModal) {
+        return <>
+          <div className="modal-header">
+            <div className="modal-header-left">{this.renderHeaderLeft()}</div>
+            <div className="modal-header-title">{formTitle}</div>
+            <div className="modal-header-right">{this.renderHeaderRight()}</div>
           </div>
-          <div className="form-body">{formContent}</div>
-          {formFooter ? <div className="form-footer">{formFooter}</div> : null}
-        </div>
-      </>;
+          <div className="modal-body">{formContent}</div>
+          {formFooter ? <div className="modal-footer">{formFooter}</div> : null}
+        </>;
+      } else {
+        return <>
+          <div id={"adios-form-" + this.props.uid} className="adios component form">
+            <div className="form-header">
+              <div className="form-header-left">{this.renderHeaderLeft()}</div>
+              <div className="form-header-title">{formTitle}</div>
+              <div className="form-header-right">{this.renderHeaderRight()}</div>
+            </div>
+            <div className="form-body">{formContent}</div>
+            {formFooter ? <div className="form-footer">{formFooter}</div> : null}
+          </div>
+        </>;
+      }
     }
   }
 }

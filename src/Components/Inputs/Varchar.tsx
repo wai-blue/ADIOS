@@ -45,9 +45,10 @@ export default class Varchar extends Input<InputProps, VarcharInputState> {
           <div className="mt-1">
             <select
               onChange={(e) => {
-                this.setState({value: e.currentTarget.value});
+                this.onChange(e.currentTarget.value);
               }}
             >
+              <option value=''></option>
               {this.props.params?.predefinedValues.map((item: string) => {
                 return <option value={item}>{item}</option>
               })}
