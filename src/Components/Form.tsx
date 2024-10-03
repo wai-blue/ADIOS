@@ -111,6 +111,8 @@ export interface FormState {
   folderUrl?: string,
   params: any,
   invalidRecordId: boolean,
+
+  recordChanged: boolean,
 }
 
 export default class Form<P, S> extends Component<FormProps, FormState> {
@@ -169,6 +171,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       params: null,
       invalidRecordId: false,
       customEndpointParams: this.props.customEndpointParams ?? {},
+      recordChanged: false,
     };
   }
 
@@ -328,7 +331,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       this.getEndpointUrl('saveRecord'),
       { ...this.getEndpointParams(), record: record },
       {},
-      (saveResponse: any) => { this.onAfterSaveRecord(saveResponse); },
+      (saveResponse: any) => { this.setState({recordChanged: false}); this.onAfterSaveRecord(saveResponse); },
       (err: any) => {
         if (err.status == 422) {
           this.setState({invalidInputs: err.data.invalidInputs});
@@ -545,7 +548,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       onChange: (value: any) => {
         let record = {...this.state.record};
         record[columnName] = value;
-        this.setState({record: record}, () => {
+        this.setState({record: record, recordChanged: true}, () => {
           if (this.props.onChange) this.props.onChange();
         });
       },
@@ -615,13 +618,16 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
           ? (
             <>
               <span className="icon"><i className="fas fa-save"></i></span>
-              <span className="text"> {this.state.description?.ui?.saveButtonText ?? globalThis.app.translate("Save")}</span>
+              <span className="text">
+                {this.state.description?.ui?.saveButtonText ?? globalThis.app.translate("Save")}
+                {this.state.recordChanged ? ' *' : ''}
+              </span>
             </>
           )
           : (
             <>
               <span className="icon"><i className="fas fa-plus"></i></span>
-              <span className="text"> {this.state.description?.ui?.addButtonText ?? globalThis.app.translate("Add")}</span>
+              <span className="text">{this.state.description?.ui?.addButtonText ?? globalThis.app.translate("Add")}</span>
             </>
           )
         }
