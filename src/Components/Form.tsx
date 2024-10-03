@@ -110,6 +110,7 @@ export interface FormState {
   updatingRecord: boolean,
   deletingRecord: boolean,
   recordDeleted: boolean,
+  deleteButtonDisabled: boolean,
   isInlineEditing: boolean,
   invalidInputs: Object,
   tabs?: any,
@@ -180,6 +181,7 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
       invalidRecordId: false,
       customEndpointParams: this.props.customEndpointParams ?? {},
       recordChanged: false,
+      deleteButtonDisabled: false,
     };
   }
 
@@ -694,13 +696,15 @@ export default class Form<P, S> extends Component<FormProps, FormState> {
     return <>
       {this.state.updatingRecord && this.state.description?.permissions?.canDelete ? <button
         onClick={() => {
-          if (this.state.deletingRecord) {
-            this.deleteRecord();
-          } else {
-            this.setState({deletingRecord: true});
+          if (!this.state.deleteButtonDisabled) {
+            if (this.state.deletingRecord) this.deleteRecord();
+            else {
+              this.setState({deletingRecord: true, deleteButtonDisabled: true});
+              setTimeout(() => this.setState({deleteButtonDisabled: false}), 1000);
+            }
           }
         }}
-        className={"btn btn-delete " + (this.state.deletingRecord ? "font-bold" : "")}
+        className={"btn " + (this.state.deletingRecord ? "font-bold" : "") + " " + (this.state.deleteButtonDisabled ? "btn-light" : "btn-delete")}
       >
         <span className="icon"><i className="fas fa-trash-alt"></i></span>
         <span className="text">
