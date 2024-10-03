@@ -60,7 +60,7 @@ export default class EnumValues extends Input<EnumValuesInputProps, InputState> 
         const enumCssClass = this.props.enumCssClasses ? (this.props.enumCssClasses[key] ?? '') : '';
         return <>
           <button
-            className={"btn " + (this.state.value == key ? (this.state.readonly ? "btn-disabled" : "btn-primary") : "btn-light") + " " + enumCssClass}
+            className={"btn " + (this.state.readonly ? "btn-disabled" : "") + " " + (this.state.value == key ? "btn-primary" : "btn-light") + " " + enumCssClass}
             onClick={() => { if (!this.state.readonly) this.onChange((this.state.value == key ? null : key)); }}
           >
             <span className="text">{enumValue}</span>
