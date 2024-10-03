@@ -2,7 +2,7 @@ import { createRoot } from "react-dom/client";
 import React, { useRef } from 'react';
 import ReactDOM from 'react-dom';
 import * as uuid from 'uuid';
-import { isValidJson, kebabToPascal, camelToKebab } from './Helper';
+import {isValidJson, kebabToPascal, camelToKebab, deepObjectMerge} from './Helper';
 import Dialog from "./Dialog";
 
 import 'primereact/resources/primereact.css';
@@ -91,19 +91,41 @@ export class ADIOS {
   showDialogDanger(content: JSX.Element, props?: any) {
     this.showDialog(
       <>
-        <div className="dialog-header"><h1>🥴 Ooops</h1></div>
         <div className="dialog-body">{content}</div>
-        <div className="dialog-footer">
+      </>,
+      deepObjectMerge({
+        headerClassName: 'dialog-danger-header', contentClassName: 'dialog-danger-content',
+        header: "🥴 Ooops",
+        footer: <div className={"flex w-full justify-start"}><button
+          className="btn btn-transparent"
+          onClick={() => { this.lastShownDialogRef.current.hide() }}
+        >
+          <span className="icon"><i className="fas fa-check"></i></span>
+          <span className="text">OK, I understand</span>
+        </button></div>
+      }, props)
+    );
+  }
+  showDialogWarning(content: JSX.Element, props?: any) {
+    this.showDialog(
+      <>
+        <div className="dialog-body">{content}</div>
+      </>,
+      deepObjectMerge({
+        headerClassName: 'dialog-warning-header', contentClassName: 'dialog-warning-content',
+        header: "🥴 Ooops",
+        footer: <div className={"flex w-full justify-start"}>
           <button
-            className="btn btn-light"
-            onClick={() => { this.lastShownDialogRef.current.hide() }}
+            className="btn btn-transparent"
+            onClick={() => {
+              this.lastShownDialogRef.current.hide()
+            }}
           >
             <span className="icon"><i className="fas fa-check"></i></span>
             <span className="text">OK, I understand</span>
           </button>
         </div>
-      </>,
-      { headerClassName: 'dialog-danger-header', contentClassName: 'dialog-danger-content', ...props}
+      }, props)
     );
   }
 
@@ -112,8 +134,8 @@ export class ADIOS {
   }
 
   /**
-  * Get specific ADIOS component with destructed params 
-  */
+   * Get specific ADIOS component with destructed params
+   */
   renderReactElement(componentName: string, props: Object, children: any) {
     if (!componentName) return null;
 
