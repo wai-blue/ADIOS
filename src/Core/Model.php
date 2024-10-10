@@ -915,9 +915,9 @@ class Model
     $isCreate = ($id <= 0);
 
     if ($isCreate) {
-      $this->app->router->checkPermission($this->fullName . ':Create');
+      $this->app->permissions->check($this->fullName . ':Create');
     } else {
-      $this->app->router->checkPermission($this->fullName . ':Update');
+      $this->app->permissions->check($this->fullName . ':Update');
     }
 
     $dataForThisModel = $data;
