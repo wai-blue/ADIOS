@@ -73,7 +73,7 @@ class Permissions {
 
   public function hasRole(int|string $role) {
     if (is_string($role)) {
-      $userRoleModel = $this->app->getCoreClass('Models\\UserRole');
+      $userRoleModel = \ADIOS\Core\Factory::create('Models/UserRole', [$this->app]);
       $idUserRoleByRoleName = array_flip($userRoleModel::USER_ROLES);
       $idRole = (int) $idUserRoleByRoleName[$role];
     } else {

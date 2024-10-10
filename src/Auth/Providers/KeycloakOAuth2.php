@@ -8,7 +8,7 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Auth;
+namespace ADIOS\Auth\Providers;
 
 class KeycloakOAuth2 extends \ADIOS\Core\Auth {
   public $provider;

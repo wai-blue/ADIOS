@@ -25,6 +25,7 @@ class MySQLi extends \ADIOS\Core\DB
    */
   public function connect(): void
   {
+
     $dbHost = $this->app->getConfig('db_host', '');
     $dbPort = $this->app->getConfig('db_port', '');
     $dbUser = $this->app->getConfig('db_user', '');

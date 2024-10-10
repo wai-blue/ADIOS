@@ -8,9 +8,9 @@
   ADIOS Framework package.
 */
 
-namespace ADIOS\Auth;
+namespace ADIOS\Auth\Providers;
 
-class ModelUser extends \ADIOS\Core\Auth {
+class DefaultProvider extends \ADIOS\Core\Auth {
   public $loginAttribute = 'login';
   public $passwordAttribute = 'password';
   public $activeAttribute = 'is_active';
@@ -18,7 +18,7 @@ class ModelUser extends \ADIOS\Core\Auth {
 
   public function auth() {
 
-    $userModel = new ($this->app->getCoreClass('Models\\User'))($this->app);
+    $userModel = \ADIOS\Core\Factory::create('Models/User', [$this->app]);
 
     if ($this->isUserInSession()) {
       $this->loadUserFromSession();

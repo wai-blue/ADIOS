@@ -11,7 +11,7 @@ class Set extends \ADIOS\Core\ApiController {
   {
     parent::__construct($app, $params);
 
-    $modelClass = $this->app->getCoreClass('Models\\Config');
+    $modelClass = \ADIOS\Core\Factory::create('Models/Config', [$this->app]);
     $this->permission = $modelClass . ':Update';
     $this->model = $this->app->getModel($modelClass);
   }

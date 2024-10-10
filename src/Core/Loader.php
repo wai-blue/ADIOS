@@ -174,7 +174,7 @@ class Loader
     try {
 
       // inicializacia debug konzoly
-      $this->console = new ($this->getCoreClass('Core\\Console'))($this);
+      $this->console = \ADIOS\Core\Factory::create('Core/Console', [$this]);
       $this->console->clearLog("timestamps", "info");
 
       // global $gtp; - pouziva sa v basic_functions.php
@@ -195,12 +195,12 @@ class Loader
       \ADIOS\Core\Helper::addSpeedLogTag("#2.1");
 
       // inicializacia core modelov
-      $this->registerModel($this->getCoreClass('Models\\Config'));
-      // $this->registerModel($this->getCoreClass('Models\\Translate'));
-      $this->registerModel($this->getCoreClass('Models\\User'));
-      $this->registerModel($this->getCoreClass('Models\\UserRole'));
-      $this->registerModel($this->getCoreClass('Models\\UserHasRole'));
-      $this->registerModel($this->getCoreClass('Models\\Token'));
+      // $this->registerModel($this->getCoreClass('Models\\Config'));
+      // // $this->registerModel($this->getCoreClass('Models\\Translate'));
+      // $this->registerModel($this->getCoreClass('Models\\User'));
+      // $this->registerModel($this->getCoreClass('Models\\UserRole'));
+      // $this->registerModel($this->getCoreClass('Models\\UserHasRole'));
+      // $this->registerModel($this->getCoreClass('Models\\Token'));
 
       // inicializacia pluginov - aj pre FULL aj pre LITE mod
 
@@ -228,13 +228,13 @@ class Loader
       \ADIOS\Core\Helper::addSpeedLogTag("#2.2");
 
       // inicializacia routera
-      $this->router = new ($this->getCoreClass('Core\\Router'))($this);
+      $this->router = \ADIOS\Core\Factory::create('Core/Router', [$this]);
 
       // inicializacia locale objektu
-      $this->locale = new ($this->getCoreClass('Core\\Locale'))($this);
+      $this->locale = \ADIOS\Core\Factory::create('Core/Locale', [$this]);
 
       // inicializacia objektu notifikacii
-      $this->userNotifications = new ($this->getCoreClass('Core\\UserNotifications'))($this);
+      $this->userNotifications = \ADIOS\Core\Factory::create('Core/UserNotifications', [$this]);
 
       // inicializacia DB - aj pre FULL aj pre LITE mod
 
@@ -254,14 +254,14 @@ class Loader
       \ADIOS\Core\Helper::addSpeedLogTag("#3.2");
 
       // object pre kontrolu permissions
-      $this->permissions = new ($this->getCoreClass('Core\\Permissions'))($this);
+      $this->permissions = \ADIOS\Core\Factory::create('Core/Permissions', [$this]);
 
       // auth provider
       $this->auth = $this->getAuthProvider();
 
       // inicializacia web renderera (byvala CASCADA)
       if (isset($this->config['web']) && is_array($this->config['web'])) {
-        $this->web = new ($this->getCoreClass('Core\\Web\\Loader'))($this, $this->config['web']);
+        $this->web = \ADIOS\Core\Factory::create('Core/Web/Loader', [$this, $this->config['web']]);
       }
 
       // timezone
@@ -331,7 +331,7 @@ class Loader
         ]);
 
         // inicializacia twigu
-        $twigLoader = new ($this->getCoreClass('Core\\TwigLoader'))($this);
+        $twigLoader = \ADIOS\Core\Factory::create('Core/TwigLoader', [$this]);
         $this->twig = new \Twig\Environment($twigLoader, array(
           'cache' => FALSE,
           'debug' => TRUE,
@@ -453,9 +453,9 @@ class Loader
     return isset($_REQUEST['__IS_WINDOW__']) && $_REQUEST['__IS_WINDOW__'] == "1";
   }
 
-  public function getCoreClass($class): string {
-    return $this->config['coreClasses'][$class] ?? ('\\ADIOS\\' . $class);
-  }
+  // public function getCoreClass($class): string {
+  //   return $this->config['coreClasses'][$class] ?? ('\\ADIOS\\' . $class);
+  // }
 
   public function getDefaultConnectionConfig(): ?array {
     if (isset($this->config['db']['defaultConnection']) && is_array($this->config['db']['defaultConnection'])) {
@@ -485,10 +485,8 @@ class Loader
       $this->eloquent->addConnection($dbConnectionConfig, 'default');
     }
 
-    $dbProvider = $this->getConfig('db/provider', '');
-    $dbProviderClass = $this->getCoreClass('Core\\DB' . (empty($dbProvider) ? '' : '\\Providers\\') . $dbProvider);
+    $dbProviderClass = $this->getConfig('db/provider', '');
     $this->db = new $dbProviderClass($this);
-
     $this->pdo = new \ADIOS\Core\PDO($this);
     $this->pdo->connect();
   }
@@ -988,7 +986,7 @@ class Loader
       if ($this->controllerObject->requiresUserAuthentication) {
         $this->auth->auth();
         if (!$this->auth->isUserInSession()) {
-          $this->controllerObject = new ($this->getCoreClass('Controllers\\SignIn'))($this);
+          $this->controllerObject = \ADIOS\Core\Factory::create('Controllers/SignIn', [$this]);
           $this->permission = $this->controllerObject->permission;
         }
         $this->permissions->check($this->permission);
@@ -1133,7 +1131,7 @@ class Loader
 
   public function getDesktopController(): \ADIOS\Core\Controller {
     try {
-      return new ($this->getCoreClass('Controllers\\Desktop'))($this);
+      return \ADIOS\Core\Factory::create('Controllers/Desktop', [$this]);
     } catch (\Throwable $e) {
       exit("Unable to initialize desktop controller. Check your config.");
     }
@@ -1476,7 +1474,7 @@ class Loader
 
   public function loadConfigFromDB() {
     try {
-      $mConfig = $this->getModel($this->getCoreClass('Models\\Config'));
+      $mConfig = \ADIOS\Core\Factory::create('Models/Config', [$this]);
       $cfgs = $mConfig->eloquent->get()->toArray();
 
       foreach ($cfgs as $cfg) {
