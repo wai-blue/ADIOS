@@ -73,6 +73,7 @@ class Loader
   public ?\ADIOS\Core\Test $test = NULL;
   public ?\ADIOS\Core\Web\Loader $web = NULL;
   public ?\Illuminate\Database\Capsule\Manager $eloquent = NULL;
+  public ?\ADIOS\Core\Auth $auth = NULL;
 
   public ?\Twig\Environment $twig = NULL;
 
@@ -255,6 +256,9 @@ class Loader
       // object pre kontrolu permissions
       $this->permissions = new ($this->getCoreClass('Core\\Permissions'))($this);
 
+      // auth provider
+      $this->auth = $this->getAuthProvider();
+
       // inicializacia web renderera (byvala CASCADA)
       if (isset($this->config['web']) && is_array($this->config['web'])) {
         $this->web = new ($this->getCoreClass('Core\\Web\\Loader'))($this, $this->config['web']);
@@ -264,213 +268,6 @@ class Loader
       date_default_timezone_set($this->config['timezone']);
 
       if ($mode == self::ADIOS_MODE_FULL) {
-        $userModel = new ($this->getCoreClass('Models\\User'))($this);
-
-        if (isset($_POST['passwordReset'])) {
-          $email = isset($_POST["email"]) ? $_POST["email"] : "";
-
-          if ($email != "") {
-            $userData = $userModel->getByEmail($email);
-
-            if (!empty($userData)) {
-              $passwordResetToken =
-                $userModel->generatePasswordResetToken(
-                  $userData["id"], $email
-                )
-              ;
-
-              try {
-                $this->email = new \ADIOS\Core\Lib\Email(
-                  $config["smtp"]["host"],
-                  $config["smtp"]["port"]
-                );
-
-                $this->email
-                  ->setLogin($config["smtp"]["login"], $config["smtp"]["password"])
-                  ->setFrom($config["smtp"]["from"])
-                ;
-
-                if ($config["smtp"]["protocol"] == 'ssl') {
-                  $this->email->setProtocol(\ADIOS\Core\Lib\Email::SSL);
-                }
-
-                if ($config["smtp"]["protocol"] == 'tls') {
-                  $this->email->setProtocol(\ADIOS\Core\Lib\Email::TLS);
-                }
-
-                $this->email->addTo($email);
-                $this->email->setSubject(
-                  $config["brand"]["title"].
-                  " - ".$this->translate("password reset", [], $this)
-                );
-                $this->email->setHtmlMessage("
-                  <h4>
-                    {$config["brand"]["title"]}
-                    - ". $this->translate("password reset", [], $this)."
-                  </h4>
-                  <p>"
-                    .$this->translate("To recover a forgotten password, click on the link below.", [], $this).
-                  "</p>
-                  <a href='{$config['accountUrl']}/PasswordReset?token={$passwordResetToken}'>
-                    {$config['accountUrl']}/PasswordReset?token={$passwordResetToken}
-                  </a>
-                ");
-                $this->email->send();
-              } catch (\Exception $e) {
-                var_dump($e->getMessage());
-                exit();
-              }
-
-              $this->userPasswordReset["success"] = TRUE;
-            } else {
-              $this->userPasswordReset["error"] = TRUE;
-              $this->userPasswordReset["errorMessage"] =
-                $this->translate("The entered e-mail address does not exist.", [], $this)
-              ;
-            }
-          } else {
-            $this->userPasswordReset["error"] = TRUE;
-            $this->userPasswordReset["errorMessage"] =
-              $this->translate("Email cannot be empty. Fill the email field.", [], $this)
-            ;
-          }
-        }
-
-        if (isset($_POST['passwordResetNewPassword'])) {
-          $newPassword = isset($_POST["new_password"]) ? $_POST["new_password"] : "";
-          $newPassword2 = isset($_POST["new_password_2"]) ? $_POST["new_password_2"] : "";
-
-          // set error to true
-          $this->userPasswordReset["error"] = TRUE;
-
-          if ($newPassword == "") {
-            $this->userPasswordReset["errorMessage"] =
-              $this->translate("New password cannot be empty.", [], $this)
-            ;
-          } else if ($newPassword2 == "") {
-            $this->userPasswordReset["errorMessage"] =
-              $this->translate("Repeated new password cannot be empty.", [], $this)
-            ;
-          } else if ($newPassword != $newPassword2) {
-            $this->userPasswordReset["errorMessage"] =
-              $this->translate("Entered passwords do not match.", [], $this)
-            ;
-          } else if (strlen($newPassword) < 8) {
-            $this->userPasswordReset["errorMessage"] =
-              $this->translate("Minimum password length is 8 characters.", [], $this)
-            ;
-          } else {
-            $this->userPasswordReset["error"] = FALSE;
-
-            $userData = $userModel->validateToken($_GET["token"], true);
-
-            if ($userData) {
-              $userModel->updatePassword($userData["id"], $newPassword);
-
-              $authResult = $userModel->authUser(
-                $userData['login'] ?? '',
-                $newPassword ?? ''
-              );
-
-              if (is_array($authResult)) {
-                $userModel->persistUser($authResult);
-              } else {
-                $userModel->signOut();
-              }
-
-              header('Location: ' . $this->config['accountUrl']);
-              exit();
-            }
-          }
-        }
-
-        // user authentication
-
-        if (is_array($this->config['oauth'] ?? null)) {
-          $oauth = new ($this->getCoreClass('Core\\OAuthClient'))($this);
-
-          $accessTokenIsValid = false;
-          for ($i = 0; $i < 5; $i++) {
-            $accessToken = $_SESSION[_ADIOS_ID]['accessToken'] ?? '';
-            $accessTokenIsValid = $oauth->verifyAccessToken($accessToken);
-
-            if ($accessTokenIsValid) {
-              $oauth->signOut();
-              break;
-            } else {
-              $clientId = $_POST['login'] ?? '';
-              $clientSecret = $_POST['password'] ?? '';
-
-              if (empty($clientId) || empty($clientSecret)) {
-                $oauth->signOut();
-                break;
-              }
-
-              $ch = curl_init($this->config['oauth']['endpoints']['accessToken']);
-
-              curl_setopt($ch, CURLOPT_POSTFIELDS, [
-                "grant_type" => "client_credentials",
-                "client_id" => $clientId,
-                "client_secret" => $clientSecret,
-                // "scope" => "basic email",
-              ]);
-              curl_setopt($ch, CURLOPT_HEADER, false);
-
-              ob_start();
-              curl_exec($ch);
-              $response = ob_get_clean();
-              $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-              curl_close($ch);
-
-              if ($httpcode == 401) {
-                echo 'Error: ' . $response;
-              } else {
-                $responseData = json_decode($response, true);
-                $_SESSION[_ADIOS_ID]['accessToken'] = $responseData['access_token'];
-              }
-            }
-          }
-
-          if (!$accessTokenIsValid) {
-            $oauth->signOut();
-          }
-        } else {
-          if ((int) ($_SESSION[_ADIOS_ID]['userProfile']['id'] ?? 0) > 0) {
-            $user = $userModel->loadUser((int) $_SESSION[_ADIOS_ID]['userProfile']['id']);
-
-            if (!$userModel->isUserActive($user)) {
-              $userModel->signOut();
-            } else {
-              $user = $userModel->loadUserFromSession();
-
-              if (is_array($user)) {
-                $userModel->updateAccessInformation((int) $user['id']);
-                $userModel->persistUser($user);
-              } else {
-                $userModel->signOut();
-              }
-            }
-          } else if (!empty($_POST['login']) && !empty($_POST['password'])) {
-            $authResult = $userModel->authUser(
-              $_POST['login'],
-              $_POST['password'],
-              ((int) $_POST['keep_logged_in']) == 1
-            );
-
-            if (is_array($authResult)) {
-              $userModel->persistUser($authResult);
-            } else {
-              $userModel->signOut();
-            }
-
-            $userModel->updateLoginAndAccessInformation((int) ($this->userProfile['id'] ?? 0));
-          }
-        }
-
-        // v tomto callbacku mozu widgety zamietnut autorizaciu, ak treba
-        $this->onUserAuthorised();
-
-
         \ADIOS\Core\Helper::addSpeedLogTag("#4");
 
 
@@ -502,6 +299,11 @@ class Loader
         $this->router->addRouting($tmpRouting);
 
         $this->router->addRouting([
+          // '/^auth/oauth2\/?$/' => [
+          //   'controller' => 'ADIOS/Controllers/Auth/OAuth2',
+          //   'view' => ($this->config['appNamespace'] ?? 'App') . '/Views/Auth/OAuth2',
+          // ],
+
           '/^api\/form\/describe\/?$/' => [
             'controller' => 'ADIOS/Controllers/Api/Form/Describe',
           ],
@@ -1144,16 +946,15 @@ class Loader
       $this->onAfterRouting();
 
       if (isset($this->params['sign-out'])) {
-        unset($_SESSION[_ADIOS_ID]);
-
-        setcookie(_ADIOS_ID.'-user', '', 0);
-        setcookie(_ADIOS_ID.'-language', '', 0);
-
-        header("Location: {$this->config['accountUrl']}?");
-        exit();
+        $this->auth->signOut();
       }
 
-      // Check if controller exists or if it can be used
+      if (isset($this->params['signed-out'])) {
+        $this->router->redirectTo('');
+        exit;
+      }
+
+      // Check if controller exists and if it can be used
       if (empty($this->controller)) {
         $controllerClassName = \ADIOS\Core\Controller::class;
       } else if (!$this->controllerExists($this->controller)) {
@@ -1184,19 +985,13 @@ class Loader
 
       \ADIOS\Core\Helper::addSpeedLogTag("render3");
 
-      if (
-        !$this->userLogged
-        && $this->controllerObject->requiresUserAuthentication
-      ) {
-        $this->controllerObject = new \ADIOS\Controllers\Login($this);
-        $this->view = ($this->config['appNamespace'] ?? 'App') . '/Views/Login';
-        $this->permission = "";
-      }
-
-      // Kontrola permissions
-
       if ($this->controllerObject->requiresUserAuthentication) {
-        $this->router->checkPermission($this->permission);
+        $this->auth->auth();
+        if (!$this->auth->isUserInSession()) {
+          $this->controllerObject = new ($this->getCoreClass('Controllers\\SignIn'))($this);
+          $this->permission = $this->controllerObject->permission;
+        }
+        $this->permissions->check($this->permission);
       }
 
       // All OK, rendering content...
@@ -1231,12 +1026,12 @@ class Loader
       // ... Or a view must be applied.
       } else {
 
-        $view = $this->view;
         $this->controllerObject->prepareViewParams();
+        $view = empty($this->controllerObject->view) ? $this->view : $this->controllerObject->view;
 
         $contentParams = [
           'uid' => $this->uid,
-          'user' => $this->userProfile,
+          'user' => $this->auth->user,
           'config' => $this->config,
           'routeUrl' => $this->routeUrl,
           'routeParams' => $this->params,
@@ -1337,11 +1132,24 @@ class Loader
   }
 
   public function getDesktopController(): \ADIOS\Core\Controller {
-    return new ($this->getCoreClass('Controllers\\Desktop'))($this);
+    try {
+      return new ($this->getCoreClass('Controllers\\Desktop'))($this);
+    } catch (\Throwable $e) {
+      exit("Unable to initialize desktop controller. Check your config.");
+    }
+  }
+
+  public function getAuthProvider(): \ADIOS\Core\Auth {
+    try {
+      return new ($this->config['auth']['provider'])($this, $this->config['auth']['options'] ?? []);
+    } catch (\Throwable $e) {
+      echo("Unable to initialize auth provider. Check your config.");
+      exit($e->getMessage());
+    }
   }
 
   public function getControllerClassName(string $controller) : string {
-    return '\\' . str_replace('/', '\\', $controller);
+    return '\\' . trim(str_replace('/', '\\', $controller), '\\');
 
     // $controllerPathParts = [];
     // foreach (explode("/", $controller) as $controllerPathPart) {

@@ -80,13 +80,6 @@ class Router {
     return [$route, $params];
   }
 
-  public function checkPermission(string $permission) {
-    if (!$this->app->permissions->granted($permission)
-    ) {
-      throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permission}).");
-    }
-  }
-
   public function redirectTo(string $url, int $code = 302) {
     header("Location: {$this->app->config['accountUrl']}/".trim($url, "/"), true, $code);
     exit;

@@ -137,44 +137,9 @@ class Controller {
   {
     return $this->app->translate($string, $vars, $this);
   }
-  
-  /**
-   * Renders the content of requested controller using Twig template.
-   * In most cases is this method overriden.
-   *
-   * @return string Rendered HTML content of the controller.
-   * @return array Key-value pair of output values. Will be converted to JSON.
-   * 
-   * @throws \Twig\Error\RuntimeError
-   * @throws \Twig\Error\LoaderError
-   */
-  public function render()
-  {
-    $twigParams = $this->params;
 
-    $twigParams["uid"] = $this->app->uid;
-    $twigParams["gtp"] = $this->app->gtp;
-    $twigParams["config"] = $this->app->config;
-    $twigParams["requestedUri"] = $this->app->requestedUri;
-    $twigParams["user"] = $this->app->userProfile;
-    $twigParams["dictionary"] = $this->dictionary;
-    $twigParams['userNotifications'] = $this->app->userNotifications->getAsHtml();
-
-    try {
-      $tmpTemplate = empty($this->twigTemplate)
-        ? str_replace("\\Controllers\\", "\\Templates\\", static::class)
-        : $this->twigTemplate
-      ;
-
-      return $this->app->twig->render(
-        $tmpTemplate,
-        $twigParams
-      );
-    } catch (\Twig\Error\RuntimeError $e) {
-      throw ($e->getPrevious());
-    } catch (\Twig\Error\LoaderError $e) {
-      return $e->getMessage();
-    }
+  public function setView(string $view) {
+    $this->view = $view;
   }
 
 }

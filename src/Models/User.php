@@ -142,65 +142,176 @@ class User extends \ADIOS\Core\Model {
     return md5($login.".".$password).",".$login;
   }
 
-  public function authUser(string $login, string $password, $rememberLogin = FALSE, $authColumns = ['login']): ?array {
-    $authResult = FALSE;
+//   public function authUser(): ?array {
+//     switch ($this->app->config['auth']['method'] ?? '') {
+//       case 'database':
+//       default:
+//         return $this->authUserUsingDb();
+//       break;
+//       case 'oauth2':
+//         $provider = new \League\OAuth2\Client\Provider\GenericProvider([
+//           'clientId'                => $this->app->config['auth']['clientId'],    // The client ID assigned to you by the provider
+//           'clientSecret'            => $this->app->config['auth']['clientSecret'],    // The client password assigned to you by the provider
+//           'redirectUri'             => $this->app->config['url'],
+//           'urlAuthorize'            => $this->app->config['auth']['urlAuthorize'],
+//           'urlAccessToken'          => $this->app->config['auth']['urlAccessToken'],
+//           'urlResourceOwnerDetails' => $this->app->config['auth']['urlResourceOwnerDetails'],
+//         ], [
+//           'httpClient' => new \GuzzleHttp\Client([\GuzzleHttp\RequestOptions::VERIFY => false]),
+//         ]);
 
-    $login = trim($login);
+//         // $provider->setHttpClient(new \GuzzleHttp\Client([
+//         //   // 'defaults' => [
+//         //   //   \GuzzleHttp\RequestOptions::CONNECT_TIMEOUT => 5,
+//         //   //   \GuzzleHttp\RequestOptions::ALLOW_REDIRECTS => true
+//         //   // ],
+//         //   \GuzzleHttp\RequestOptions::VERIFY => false,
+//         // ]));
 
-    if (empty($login) && !empty($_COOKIE[_ADIOS_ID.'-user'])) {
-      $login = $this->authCookieGetLogin();
-    }
+//         $authCode = $this->app->params['code'] ?? '';
+//         $authState = $this->app->params['state'] ?? '';
 
-    if (!empty($login)) {
-      $users = $this->eloquent
-        ->where(function($q) use ($authColumns, $login) {
-          foreach ($authColumns as $column) {
-            $q->orWhere($column, '=', $login);
-          }
-        })
-        ->where('is_active', '<>', 0)
-        ->get()
-        ->makeVisible(['password'])
-        ->toArray()
-      ;
+//         // If we don't have an authorization code then get one
+//         if (empty($authCode)) {
 
-      foreach ($users as $user) {
-        $passwordMatch = FALSE;
+//           // Fetch the authorization URL from the provider; this returns the
+//           // urlAuthorize option and generates and applies any necessary parameters
+//           // (e.g. state).
+//           $authorizationUrl = $provider->getAuthorizationUrl(['scope' => ['openid']]);
 
-        if (!empty($password) && password_verify($password, $user['password'] ?? "")) {
-          // plain text
-          $passwordMatch = TRUE;
-        } else {
-          foreach ($authColumns as $column) {
-            if (
-              isset($_COOKIE[_ADIOS_ID.'-user'])
-              && $_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($user[$column], $user['password'])
-            ) {
-              $passwordMatch = TRUE;
-              break;
-            }
-          }
-        }
+//           // Get the state generated for you and store it to the session.
+//           $_SESSION[_ADIOS_ID]['oauth2state'] = $provider->getState();
 
-        if ($passwordMatch) {
-          $authResult = $this->loadUser($user['id']);
+//           // Optional, only required when PKCE is enabled.
+//           // Get the PKCE code generated for you and store it to the session.
+//           $_SESSION[_ADIOS_ID]['oauth2pkceCode'] = $provider->getPkceCode();
 
-          if ($rememberLogin) {
-            setcookie(
-              _ADIOS_ID.'-user',
-              $this->authCookieSerialize($user['login'], $user['password']),
-              time() + (3600 * 24 * 30)
-            );
-          }
+//           // Redirect the user to the authorization URL.
+//           header('Location: ' . $authorizationUrl);
+//           exit;
 
-          break;
+//         // Check given state against previously stored one to mitigate CSRF attack
+//         } elseif (empty($authState) || empty($_SESSION[_ADIOS_ID]['oauth2state']) || $authState !== $_SESSION[_ADIOS_ID]['oauth2state']) {
+//           if (isset($_SESSION[_ADIOS_ID]['oauth2state'])) {
+//             unset($_SESSION[_ADIOS_ID]['oauth2state']);
+//           }
 
-        }
-      }
-    }
+//           exit('Invalid state');
+//         } else {
 
-    return is_array($authResult) ? $authResult : null;
-  }
+//           try {
+
+//             // Optional, only required when PKCE is enabled.
+//             // Restore the PKCE code stored in the session.
+//             $provider->setPkceCode($_SESSION[_ADIOS_ID]['oauth2pkceCode']);
+
+//             // Try to get an access token using the authorization code grant.
+//             $accessToken = $provider->getAccessToken('authorization_code', [
+//               'code' => $authCode
+//             ]);
+// // var_dump($accessToken);exit;
+
+//             $_SESSION[_ADIOS_ID]['oauthAccessToken'] = $accessToken;
+//             // // We have an access token, which we may use in authenticated
+//             // // requests against the service provider's API.
+//             // echo 'Access Token: ' . $accessToken->getToken() . "<br>";
+//             // echo 'Refresh Token: ' . $accessToken->getRefreshToken() . "<br>";
+//             // echo 'Expired in: ' . $accessToken->getExpires() . "<br>";
+//             // echo 'Already expired? ' . ($accessToken->hasExpired() ? 'expired' : 'not expired') . "<br>";
+
+//             // Using the access token, we may look up details about the
+//             // resource owner.
+//             $resourceOwner = $provider->getResourceOwner($accessToken);
+
+//             $authResult = $resourceOwner->toArray();
+
+//             // var_export($resourceOwner->toArray());
+
+//             // // The provider provides a way to get an authenticated API request for
+//             // // the service, using the access token; it returns an object conforming
+//             // // to Psr\Http\Message\RequestInterface.
+//             // $request = $provider->getAuthenticatedRequest(
+//             //   'GET',
+//             //   'https://service.example.com/resource',
+//             //   $accessToken
+//             // );
+
+//           } catch (\GuzzleHttp\RequestException $e) {
+//             echo 'G RequestExc' . $e->getMessage();
+//             exit;
+//           } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+
+//             if ($e->getMessage() == 'invalid_grant') {
+//             }
+
+//             // Failed to get the access token or user details.
+//             exit($e->getMessage());
+
+//           }
+//         }
+
+//         return is_array($authResult) ? $authResult : null;
+//       break;
+//     }
+//   }
+
+  // public function authUserUsingDb(): ?array {
+  //   $login = $this->app->params['login'] ?? '';
+  //   $password = $this->app->params['password'] ?? '';
+  //   $rememberLogin = $this->app->params['rememberLogin'] ?? false;
+
+  //   $authResult = FALSE;
+
+  //   $login = trim($login);
+
+  //   if (empty($login) && !empty($_COOKIE[_ADIOS_ID.'-user'])) {
+  //     $login = $this->authCookieGetLogin();
+  //   }
+
+  //   if (!empty($login)) {
+  //     $users = $this->eloquent
+  //       ->where('login', $login)
+  //       ->where('is_active', '<>', 0)
+  //       ->get()
+  //       ->makeVisible(['password'])
+  //       ->toArray()
+  //     ;
+
+  //     foreach ($users as $user) {
+  //       $passwordMatch = FALSE;
+
+  //       if (!empty($password) && password_verify($password, $user['password'] ?? "")) {
+  //         // plain text
+  //         $passwordMatch = TRUE;
+  //       } else {
+  //         if (
+  //           isset($_COOKIE[_ADIOS_ID.'-user'])
+  //           && $_COOKIE[_ADIOS_ID.'-user'] == $this->authCookieSerialize($user['login'], $user['password'])
+  //         ) {
+  //           $passwordMatch = TRUE;
+  //           break;
+  //         }
+  //       }
+
+  //       if ($passwordMatch) {
+  //         $authResult = $this->loadUser($user['id']);
+
+  //         if ($rememberLogin) {
+  //           setcookie(
+  //             _ADIOS_ID.'-user',
+  //             $this->authCookieSerialize($user['login'], $user['password']),
+  //             time() + (3600 * 24 * 30)
+  //           );
+  //         }
+
+  //         break;
+
+  //       }
+  //     }
+  //   }
+
+  //   return is_array($authResult) ? $authResult : null;
+  // }
 
   public function generateToken($idUser, $tokenSalt, $tokenType) {
     $tokenModel = $this->app->getModel("ADIOS/Models/Token");
@@ -243,18 +354,6 @@ class User extends \ADIOS\Core\Model {
     }
 
     return $userData;
-  }
-
-  public function persistUser(array $user) {
-    $this->app->userProfile = $user;
-    $this->app->userLogged = TRUE;
-    $_SESSION[_ADIOS_ID]['userProfile'] = $user;
-  }
-
-  public function signOut() {
-    unset($_SESSION[_ADIOS_ID]);
-    $this->app->userProfile = [];
-    $this->app->userLogged = FALSE;
   }
 
   public function getQueryForUser(int $idUser) {

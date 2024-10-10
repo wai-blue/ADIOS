@@ -429,7 +429,7 @@ class ViewWithController {
         "uid" => $this->uid,
         "gtp" => $this->app->gtp,
         "config" => $this->app->config,
-        "user" => $this->app->userProfile,
+        "user" => $this->app->auth->user,
         "dictionary" => $this->app->dictionary,
         "view" => $this->params,
         "params" => $this->getTwigParams(),

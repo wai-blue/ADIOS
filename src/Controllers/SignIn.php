@@ -15,7 +15,7 @@ namespace ADIOS\Controllers;
  *
  * @package Components\Controllers
  */
-class Login extends \ADIOS\Core\Controller {
+class SignIn extends \ADIOS\Core\Controller {
   public bool $requiresUserAuthentication = FALSE;
   public bool $hideDefaultDesktop = TRUE;
 
@@ -23,6 +23,8 @@ class Login extends \ADIOS\Core\Controller {
     parent::__construct($app, $params);
 
     $this->permission = "";
+
+    $this->setView($this->app->config['appNamespace'] . '/Views/SignIn');
   }
 
   public function prepareViewParams() {

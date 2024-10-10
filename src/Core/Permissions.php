@@ -16,6 +16,7 @@ class Permissions {
   protected \ADIOS\Core\Loader $app;
 
   protected array $permissions = [];
+  public array $administratorRoles = [];
 
   function __construct(\ADIOS\Core\Loader $app)
   {
@@ -80,16 +81,16 @@ class Permissions {
     }
 
     return 
-      in_array($idRole, $this->app->userProfile['roles'] ?? [])
-      || in_array($idRole, $this->app->userProfile['ROLES'] ?? [])
+      in_array($idRole, $this->app->auth->user['roles'] ?? [])
+      || in_array($idRole, $this->app->auth->user['ROLES'] ?? [])
     ;
   }
 
-  public function grantedForRole(string $permission, int $idUserRole) : bool
+  public function grantedForRole(string $permission, int|string $userRole) : bool
   {
     if (empty($permission)) return TRUE;
 
-    $granted = (bool) in_array($permission, (array) ($this->permissions[$idUserRole] ?? []));
+    $granted = (bool) in_array($permission, (array) ($this->permissions[$userRole] ?? []));
 
     if (!$granted) {
     }
@@ -97,20 +98,20 @@ class Permissions {
     return $granted;
   }
 
-  public function granted(string $permission, array $idUserRoles = []) : bool
+  public function granted(string $permission, array $userRoles = []) : bool
   {
     if (empty($permission)) return TRUE;
-    if (count($idUserRoles) == 0) $idUserRoles = $this->app->userProfile['roles'] ?? [];
-    if (count($idUserRoles) == 0) $idUserRoles = $this->app->userProfile['ROLES'] ?? [];
+    if (count($userRoles) == 0) $userRoles = $this->app->auth->user['roles'] ?? [];
+    if (count($userRoles) == 0) $userRoles = $this->app->auth->user['ROLES'] ?? [];
 
-    $granted = FALSE;
+    $granted = false;
 
-    if (in_array(\ADIOS\Models\UserRole::ADMINISTRATOR, $idUserRoles)) $granted = TRUE;
+    if (count(array_intersect($this->administratorRoles, $userRoles)) > 0) $granted = true;
 
     // check if the premission is granted for one of the roles of the user
     if (!$granted) {
-      foreach ($idUserRoles as $idUserRole) {
-        $granted = $this->grantedForRole($permission, $idUserRole);
+      foreach ($userRoles as $userRole) {
+        $granted = $this->grantedForRole($permission, $userRole);
         if ($granted) break;
       }
     }
@@ -121,6 +122,12 @@ class Permissions {
     }
 
     return $granted;
+  }
+
+  public function check(string $permission) {
+    if (!$this->granted($permission)) {
+      throw new \ADIOS\Core\Exceptions\NotEnoughPermissionsException("Not enough permissions ({$permission}).");
+    }
   }
 
 }
