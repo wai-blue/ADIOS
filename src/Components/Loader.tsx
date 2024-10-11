@@ -89,44 +89,53 @@ export class ADIOS {
   }
 
   showDialogDanger(content: JSX.Element, props?: any) {
-    this.showDialog(
-      <>
-        <div className="dialog-body">{content}</div>
-      </>,
-      deepObjectMerge({
-        headerClassName: 'dialog-danger-header', contentClassName: 'dialog-danger-content',
-        header: "🥴 Ooops",
-        footer: <div className={"flex w-full justify-start"}><button
+    let defaultProps: any = {
+      headerClassName: 'dialog-danger-header',
+      contentClassName: 'dialog-danger-content',
+      header: "🥴 Ooops",
+      footer: <div className={"flex w-full justify-start"}>
+        <button
           className="btn btn-transparent"
-          onClick={() => { this.lastShownDialogRef.current.hide() }}
+          onClick={() => { this.lastShownDialogRef.current.hide(); }}
         >
           <span className="icon"><i className="fas fa-check"></i></span>
           <span className="text">OK, I understand</span>
-        </button></div>
-      }, props)
-    );
+        </button>
+      </div>
+    };
+
+    if (!props.headerClassName) props.headerClassName = defaultProps.headerClassName;
+    if (!props.contentClassName) props.contentClassName = defaultProps.contentClassName;
+    if (!props.header) props.footer = defaultProps.header;
+    if (!props.footer) props.footer = defaultProps.footer;
+
+    this.showDialog(content, props);
   }
+
   showDialogWarning(content: JSX.Element, props?: any) {
-    this.showDialog(
-      <>
-        <div className="dialog-body">{content}</div>
-      </>,
-      deepObjectMerge({
-        headerClassName: 'dialog-warning-header', contentClassName: 'dialog-warning-content',
-        header: "🥴 Ooops",
-        footer: <div className={"flex w-full justify-start"}>
-          <button
-            className="btn btn-transparent"
-            onClick={() => {
-              this.lastShownDialogRef.current.hide()
-            }}
-          >
-            <span className="icon"><i className="fas fa-check"></i></span>
-            <span className="text">OK, I understand</span>
-          </button>
-        </div>
-      }, props)
-    );
+    let defaultProps = {
+      headerClassName: 'dialog-warning-header',
+      contentClassName: 'dialog-warning-content',
+      header: "🥴 Ooops",
+      footer: <div className={"flex w-full justify-start"}>
+        <button
+          className="btn btn-transparent"
+          onClick={() => {
+            this.lastShownDialogRef.current.hide()
+          }}
+        >
+          <span className="icon"><i className="fas fa-check"></i></span>
+          <span className="text">OK, I understand</span>
+        </button>
+      </div>
+    };
+
+    if (!props.headerClassName) props.headerClassName = defaultProps.headerClassName;
+    if (!props.contentClassName) props.contentClassName = defaultProps.contentClassName;
+    if (!props.header) props.footer = defaultProps.header;
+    if (!props.footer) props.footer = defaultProps.footer;
+
+    this.showDialog(content, props);
   }
 
   registerReactComponent(elementName: string, elementObject: any) {
