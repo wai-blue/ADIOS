@@ -104,10 +104,10 @@ export class ADIOS {
       </div>
     };
 
-    if (!props.headerClassName) props.headerClassName = defaultProps.headerClassName;
-    if (!props.contentClassName) props.contentClassName = defaultProps.contentClassName;
-    if (!props.header) props.footer = defaultProps.header;
-    if (!props.footer) props.footer = defaultProps.footer;
+    if (!props || !props.headerClassName) props.headerClassName = defaultProps.headerClassName;
+    if (!props || !props.contentClassName) props.contentClassName = defaultProps.contentClassName;
+    if (!props || !props.header) props.footer = defaultProps.header;
+    if (!props || !props.footer) props.footer = defaultProps.footer;
 
     this.showDialog(content, props);
   }
