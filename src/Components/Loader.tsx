@@ -108,7 +108,7 @@ export class ADIOS {
 
     if (!props.headerClassName) props.headerClassName = defaultProps.headerClassName;
     if (!props.contentClassName) props.contentClassName = defaultProps.contentClassName;
-    if (!props.header) props.footer = defaultProps.header;
+    if (!props.header) props.header = defaultProps.header;
     if (!props.footer) props.footer = defaultProps.footer;
 
     this.showDialog(content, props);
