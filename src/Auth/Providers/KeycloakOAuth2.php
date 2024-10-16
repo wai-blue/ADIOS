@@ -31,7 +31,7 @@ class KeycloakOAuth2 extends \ADIOS\Core\Auth {
   }
 
   public function signOut() {
-    $accessToken = $_SESSION[_ADIOS_ID]['oauthAccessToken'];
+    $accessToken = $this->getAccessToken();
 // var_dump($accessToken->getToken());echo"<br/>";
 //     $options = [
 //       'form_params' => [
@@ -96,9 +96,17 @@ class KeycloakOAuth2 extends \ADIOS\Core\Auth {
     // }
   }
 
+  public function getAccessToken() {
+    return $_SESSION[_ADIOS_ID]['oauthAccessToken'];
+  }
+
+  public function setAccessToken($accessToken) {
+    $_SESSION[_ADIOS_ID]['oauthAccessToken'] = $accessToken;
+  }
+
   public function auth()
   {
-    $accessToken = $_SESSION[_ADIOS_ID]['oauthAccessToken'];
+    $accessToken = $this->getAccessToken();
 
     if ($accessToken) {
       try {
@@ -106,7 +114,7 @@ class KeycloakOAuth2 extends \ADIOS\Core\Auth {
           'refresh_token' => $accessToken->getRefreshToken()
         ]);
 
-        $_SESSION[_ADIOS_ID]['oauthAccessToken'] = $accessToken;
+        $this->setAccessToken($accessToken);
 
         $resourceOwner = $this->provider->getResourceOwner($accessToken);
 
@@ -160,7 +168,7 @@ class KeycloakOAuth2 extends \ADIOS\Core\Auth {
             'code' => $authCode
           ]);
 
-          $_SESSION[_ADIOS_ID]['oauthAccessToken'] = $accessToken;
+          $this->setAccessToken($accessToken);
 
           // Using the access token, we may look up details about the
           // resource owner.
